@@ -1,0 +1,3 @@
+[submodule "3rd/QtSsh"]
+	path = 3rd/QtSsh
+	url = https://github.com/amnezia-vpn/QtSsh.git
