@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/close.png</file>
+        <file>images/listitembg.png</file>
+        <file>images/settings.png</file>
+        <file>images/underline.png</file>
+        <file>images/min.png</file>
+        <file>images/favorites_disabled.png</file>
+        <file>images/favorites_enabled.png</file>
+        <file>images/favorites_hover.png</file>
+        <file>images/controls/check_off.png</file>
+        <file>images/controls/check_on.png</file>
+        <file>images/controls/radio_off.png</file>
+        <file>images/controls/radio_on.png</file>
+        <file>images/connected_line.png</file>
+        <file>images/download.png</file>
+        <file>images/upload.png</file>
+        <file>images/controls/checkbox_hover.png</file>
+        <file>images/controls/checkbox_unchecked.png</file>
+        <file>images/tray/active.png</file>
+        <file>images/tray/default.png</file>
+        <file>images/tray/error.png</file>
+        <file>images/arrow_left.png</file>
+        <file>images/connect_button_connected.png</file>
+        <file>images/connect_button_disconnected.png</file>
+        <file>fonts/Lato-Black.ttf</file>
+        <file>fonts/Lato-BlackItalic.ttf</file>
+        <file>fonts/Lato-Bold.ttf</file>
+        <file>fonts/Lato-BoldItalic.ttf</file>
+        <file>fonts/Lato-Italic.ttf</file>
+        <file>fonts/Lato-Light.ttf</file>
+        <file>fonts/Lato-LightItalic.ttf</file>
+        <file>fonts/Lato-Regular.ttf</file>
+        <file>fonts/Lato-Thin.ttf</file>
+        <file>fonts/Lato-ThinItalic.ttf</file>
+        <file>images/Line.png</file>
+        <file>images/AmneziaVPN.png</file>
+    </qresource>
+</RCC>

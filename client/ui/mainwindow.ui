@@ -1,0 +1,1293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>390</width>
+    <height>685</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	font: 16px &quot;Lato&quot;;	
+	outline: none;
+	font-style: normal;
+	font-weight: normal;
+}
+
+/*----------------------*/
+
+QPushButton {
+	border: none;
+    color: rgb(216, 216, 216);
+}
+QPushButton:disabled {
+	border: none;
+    color: rgb(127, 127, 127);
+}
+
+/*----------------------*/
+
+QLabel {
+    color: #181922;
+}
+QLabel:disabled {
+	color: #A7A7A7;
+}
+
+/*----------------------*/
+
+QMessageBox {
+    background-color: #333333;
+}
+QMessageBox QLabel {
+    color: #aaa;
+}
+
+/*----------------------*/
+
+QLineEdit {
+    border: none;
+    border-bottom:2px solid rgb(120, 120, 120);
+
+	color: rgb(140, 140, 140);
+
+	/*font: 13pt &quot;JMH Cthulhumbus&quot;;*/
+
+	background:transparent;
+
+    selection-background-color: darkgray;
+}
+
+QLineEdit:focus {
+	border-bottom:2px solid rgb(200, 200, 200);
+}
+QLineEdit[error] {
+    border-bottom:2px solid  rgb(213, 40, 60);
+	color: rgb(213, 40, 60);
+}
+QLineEdit:disabled {
+    border-bottom:2px solid  rgb(127, 127, 127);
+    color: rgb(127, 127, 127);
+}
+
+
+QCheckBox {
+    color: rgb(200, 200, 200);
+
+	font: 63 11pt &quot;Open Sans&quot;;
+	/*font: 11pt &quot;JMH Cthulhumbus&quot;;*/
+    background: transparent;
+
+ 
+}
+
+QCheckBox::indicator {
+min-height: 20px;
+min-width: 20px;
+
+border-image: url(:/images/controls/checkbox_unchecked.png) 0 0 0 0 stretch stretch;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/images/controls/checkbox_unchecked.png) 0 0 0 0 stretch stretch;
+}
+QCheckBox::indicator:unchecked:hover {
+border-image: url(:/images/controls/checkbox_hover.png);
+}
+
+QCheckBox::indicator:checked {
+border-image: url(:/images/controls/checkbox_checked.png);
+
+}
+
+
+
+QScrollBar:vertical { /* The area behind the scrollbar covering entire height.   */  
+    background-color: black;
+    opacity: 100;
+    width: 7px; /* set width to zero to hide scrollbar entirely. Can look quite clean and scrolling still works with mousewheel.  */
+    margin: 0px 0px; /* Takes the height of the buttons + 3 extra pixels to leave some free space between handle and buttons */
+
+}
+
+QScrollBar::handle:vertical { /* The handle you scroll with */
+    image-position: center; /* image is used as a small gripper in the center of the scrollbar.. You can also use background-image to use two images  */
+    background-color: rgb(200, 200, 200);
+    border-radius: 1px;
+    min-height: 10px;
+}
+QScrollBar::handle:vertical:hover { /* state when you hover over the handle */
+    background-color: rgb(160, 160, 160);
+}
+QScrollBar::handle:vertical:pressed { /* state when you hover over the handle */
+    background-color: rgb(120, 120, 120);
+}
+QScrollBar::sub-line:vertical { /* button to scroll up */
+    background-color: rgb(240,240,240);
+    height: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical:hover { /* hover state of button to scroll up */
+    background-color: rgb(200, 200, 200);
+}
+
+QScrollBar::up-arrow:vertical { /* arrow to scroll up with */
+    top: 2px;
+}
+
+QScrollBar::add-line:vertical  { /* Button to scroll down */
+    background-color: rgb(240,240,240);
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::add-line:vertical:hover { /* hover state of button to scroll down */
+    background-color: rgb(200, 200, 200);
+}
+
+QScrollBar::down-arrow:vertical { /* arrow to scroll down with */
+    bottom: 3px; 
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background-color: black;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <widget class="QWidget" name="widget_main" native="true">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>5</y>
+      <width>380</width>
+      <height>670</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QWidget #widget_main {
+	background: white;
+}
+</string>
+    </property>
+    <widget class="QWidget" name="widget_tittlebar" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>380</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: #F5F5F5;
+</string>
+     </property>
+     <widget class="QPushButton" name="pushButton_hide">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>10</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">image: url(:/images/listitembg.png);
+image-position: right;
+</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_close">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>8</y>
+        <width>13</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">
+
+QPushButton {
+image-position: right;
+image: url(:/images/close.png);
+
+	padding:1px;
+}
+QPushButton:hover {
+	padding:0px;
+}
+</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </widget>
+    <widget class="SlidingStackedWidget" name="stackedWidget_main">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>30</y>
+       <width>380</width>
+       <height>640</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QStackedWidget#stackedWidget_main{
+	background: transparent;
+}
+
+QStackedWidget QWidget {
+	background: transparent;
+}
+</string>
+     </property>
+     <widget class="QWidget" name="page_new_server">
+      <widget class="QPushButton" name="pushButton_amnezia_logo_2">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>20</y>
+         <width>121</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/tray/active.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_amnezia_logo_3">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>40</y>
+         <width>131</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>361</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+line-height: 25px;</string>
+       </property>
+       <property name="text">
+        <string>Подключите ваш сервер,
+ чтобы использовать VPN</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>290</y>
+         <width>171</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+/* or 24px */
+
+/* text */
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>IP-адрес сервера</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>370</y>
+         <width>261</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+/* or 24px */
+
+/* text */
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>Логин для подключения по SSH</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>450</y>
+         <width>171</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+/* or 24px */
+
+/* text */
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>Пароль</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_new_server_ip">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>320</y>
+         <width>301</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #F4F4F4;
+
+/* grey */
+border: 1px solid #A7A7A7;
+box-sizing: border-box;
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>51.83.180.158</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_new_server_login">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>400</y>
+         <width>301</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #F4F4F4;
+
+/* grey */
+border: 1px solid #A7A7A7;
+box-sizing: border-box;
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>root</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_new_server_password">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>480</y>
+         <width>301</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #F4F4F4;
+
+/* grey */
+border: 1px solid #A7A7A7;
+box-sizing: border-box;
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>qazqazwsxwsx</string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_new_server">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>550</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Подключить</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>230</y>
+         <width>281</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 20px;
+
+/* or 125% */
+display: flex;
+align-items: center;
+text-align: center;
+
+/* акцент */
+color: #15CDCB;</string>
+       </property>
+       <property name="text">
+        <string>Где взять данные для подключения →</string>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>550</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #181922;
+border-radius: 4px;</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Подключение...</string>
+       </property>
+      </widget>
+      <zorder>progressBar</zorder>
+      <zorder>pushButton_amnezia_logo_2</zorder>
+      <zorder>pushButton_amnezia_logo_3</zorder>
+      <zorder>label_2</zorder>
+      <zorder>label_4</zorder>
+      <zorder>label_5</zorder>
+      <zorder>label_6</zorder>
+      <zorder>lineEdit_new_server_ip</zorder>
+      <zorder>lineEdit_new_server_login</zorder>
+      <zorder>lineEdit_new_server_password</zorder>
+      <zorder>pushButton_new_server</zorder>
+      <zorder>pushButton</zorder>
+     </widget>
+     <widget class="QWidget" name="page_init">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>200</y>
+         <width>380</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Discovering network...</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_init_animation">
+       <property name="geometry">
+        <rect>
+         <x>119</x>
+         <y>30</y>
+         <width>142</width>
+         <height>122</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_init_message_1">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>225</y>
+         <width>380</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_init_message_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>250</y>
+         <width>380</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_init_message_3">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>230</y>
+         <width>380</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_version">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>670</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">/*font: 8pt &quot;JMH Cthulhumbus&quot;;*/
+font-size: 10px;
+
+color: rgb(62, 62, 62);
+</string>
+       </property>
+       <property name="text">
+        <string>Build v. 1.1
+ 07 Oct 2020</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_amnezia">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <widget class="QPushButton" name="pushButton_amnezia_logo">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>380</width>
+         <height>200</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/tray/active.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>370</y>
+         <width>380</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <widget class="QLabel" name="label_9">
+        <property name="geometry">
+         <rect>
+          <x>53</x>
+          <y>10</y>
+          <width>15</width>
+          <height>15</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">image: url(:/images/download.png);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_18">
+        <property name="geometry">
+         <rect>
+          <x>311</x>
+          <y>10</y>
+          <width>15</width>
+          <height>15</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">image: url(:/images/upload.png);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_speed_upload_2">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>20</y>
+          <width>118</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Lato</family>
+          <pointsize>12</pointsize>
+          <weight>7</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(66, 209, 133);
+font: 63 12pt &quot;Lato&quot;;</string>
+        </property>
+        <property name="text">
+         <string>0 Mbps</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_speed_download_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>20</y>
+          <width>127</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Lato</family>
+          <pointsize>12</pointsize>
+          <weight>7</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(65, 113, 214);
+font: 63 12pt &quot;Lato&quot;;</string>
+        </property>
+        <property name="text">
+         <string>0 Mbps</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="pushButton_blocked_list">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>550</y>
+         <width>341</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Добавить сайт</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_settings">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>10</y>
+         <width>31</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/settings.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_connect">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>200</y>
+         <width>80</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton:!checked {
+image: url(:/images/connect_button_disconnected.png);
+}
+
+QPushButton:checked {
+image: url(:/images/connect_button_connected.png);
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_status_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>250</y>
+         <width>380</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: &quot;Lato&quot;;
+
+font-style: normal;
+font-weight: 600;
+font-size: 15px;
+
+color: #181922;
+</string>
+       </property>
+       <property name="text">
+        <string>Подключено</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>424</y>
+         <width>341</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-image: url(:/images/Line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_status_3">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>450</y>
+         <width>281</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: &quot;Lato&quot;;
+
+font-style: normal;
+font-weight: 600;
+font-size: 15px;
+
+color: #181922;
+
+</string>
+       </property>
+       <property name="text">
+        <string>Как использовать VPN</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>490</y>
+         <width>341</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Для всех соеднинений</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_2">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>520</y>
+         <width>341</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Для определённых сайтов</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_sites">
+      <property name="styleSheet">
+       <string notr="true">
+QListView {
+    outline: 0;
+    background: transparent;
+    border: none;
+
+	gridline-color: darkgray;
+}
+
+QListView::item
+{
+  padding-left: 5px;
+    border: none;
+color: #181922;
+
+}
+
+QListView::item:disabled
+{
+  padding-left: 5px;
+    border: none;
+color: #181922;
+}
+
+QListView::item:selected {
+    border: none;
+background: rgba(167, 167, 167, 0.1);
+color: #181922;
+}</string>
+      </property>
+      <widget class="QListView" name="listView_sites">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>381</width>
+         <height>0</height>
+        </rect>
+       </property>
+       <property name="cursor" stdset="0">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_sites">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>0</y>
+         <width>381</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string>        Back</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_20">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>0</y>
+         <width>360</width>
+         <height>0</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>List of most popular prohibited sites</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_sites_add_custom">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>19</x>
+         <y>50</y>
+         <width>341</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+
+/* or 125% */
+
+/* black */
+color: #181922;</string>
+       </property>
+       <property name="text">
+        <string>Эти сайты будут открываться через VPN</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QListView" name="listView_sites_custom">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>200</y>
+         <width>341</width>
+         <height>361</height>
+        </rect>
+       </property>
+       <property name="cursor" stdset="0">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_sites_add_custom">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>150</y>
+         <width>281</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Lato</family>
+         <pointsize>-1</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #FFFFFF;
+
+/* grey */
+border: 1px solid #A7A7A7;
+box-sizing: border-box;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Например, rutor.org или 17.21.111.8</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_sites_add_custom">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>150</y>
+         <width>51</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">/* black */
+background: #181922;
+border-radius: 4px;
+font-size: 18pt;</string>
+       </property>
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_sites_delete_custom">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>584</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #181922;</string>
+       </property>
+       <property name="text">
+        <string>Удалить выбранный</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>115</y>
+         <width>311</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+/* identical to box height, or 24px */
+
+/* text */
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>Адрес сайта или ip-адрес</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>SlidingStackedWidget</class>
+   <extends>QStackedWidget</extends>
+   <header>ui/Controls/SlidingStackedWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
