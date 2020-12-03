@@ -76,6 +76,7 @@ ICON   = images/main.icns
 }
 
 SOURCES  += main.cpp\
+            core/router.cpp \
             publib/debug.cpp \
             publib/runguard.cpp \
             publib/winhelp.cpp \
@@ -84,6 +85,7 @@ SOURCES  += main.cpp\
             ui/customshadoweffect.cpp
 
 HEADERS  += ui/mainwindow.h \
+   core/router.h \
    publib/debug.h \
    publib/runguard.h \
    publib/winhelp.h \
