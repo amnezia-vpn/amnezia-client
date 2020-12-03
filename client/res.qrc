@@ -29,5 +29,8 @@
         <file>fonts/Lato-Thin.ttf</file>
         <file>fonts/Lato-ThinItalic.ttf</file>
         <file>images/AmneziaVPN.png</file>
+        <file>images/line.png</file>
+        <file>images/server_settings.png</file>
+        <file>images/share.png</file>
     </qresource>
 </RCC>

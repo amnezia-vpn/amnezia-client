@@ -1360,6 +1360,328 @@ color: #333333;</string>
        </property>
       </widget>
      </widget>
+     <widget class="QWidget" name="page_settings">
+      <widget class="QPushButton" name="pushButton_back_from_settings">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>360</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>60</y>
+         <width>330</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+/* identical to box height, or 125% */
+display: flex;
+align-items: center;
+Text-align:left;
+padding-left: 30px;
+
+
+/* black */
+color: #100A44;
+
+background-image: url(:/images/server_settings.png);
+background-repeat: no-repeat;
+ background-position: left center;</string>
+       </property>
+       <property name="text">
+        <string>Server settings</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>110</y>
+         <width>360</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>130</y>
+         <width>330</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+/* identical to box height, or 125% */
+display: flex;
+align-items: center;
+Text-align:left;
+padding-left: 30px;
+
+
+/* black */
+color: #100A44;
+
+background-image: url(:/images/share.png);
+background-repeat: no-repeat;
+ background-position: left center;</string>
+       </property>
+       <property name="text">
+        <string>Share connection</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>360</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_share">
+      <widget class="QPushButton" name="pushButton_back_from_share">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_sites_add_custom_2">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>341</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+
+/* or 125% */
+
+/* black */
+color: #181922;</string>
+       </property>
+       <property name="text">
+        <string>Connection string</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>100</y>
+         <width>320</width>
+         <height>151</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #F5F5F5;
+border-radius: 10px;
+
+
+font-family: Consolas;
+font-style: normal;
+font-weight: bold;
+font-size: 22px;
+line-height: 110%;
+/* or 35px */
+text-align: center;
+
+color: #15CDCB;
+</string>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::FixedColumnWidth</enum>
+       </property>
+       <property name="lineWrapColumnOrWidth">
+        <number>20</number>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Consolas'; font-size:22px; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;vpn:\\aosdiufhafafsuhgqejghuserhglaidhgauhgalgadg&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_blocked_list_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>280</y>
+         <width>341</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Copy</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>350</y>
+         <width>321</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+/* or 24px */
+
+/* grey */
+color: #A7A7A7;
+</string>
+       </property>
+       <property name="text">
+        <string>Тот, кто зайдёт с этим кодом, будет иметь те же права на испольтование VPN, что и вы. Чтобы создать новый код смените логин и/или пароль для подлючения в настройках вашего сервера.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </widget>
   </widget>
