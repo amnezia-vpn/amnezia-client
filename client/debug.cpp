@@ -95,10 +95,6 @@ bool Debug::init(QDir& appDir)
 #endif
 #endif
 
-#ifndef Q_OS_WIN
-    if (!fixOvpnLogPermissions())
-        qWarning() << "Debug: permissions for ovpn.log were not fixed";
-#endif
     return true;
 }
 

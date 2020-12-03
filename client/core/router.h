@@ -52,7 +52,9 @@ private:
     Router(Router const &) = delete;
     Router& operator= (Router const&) = delete;
 
+#ifdef Q_OS_WIN
     QList<MIB_IPFORWARDROW> ipForwardRows;
+#endif
 };
 
 #endif // ROUTER_H

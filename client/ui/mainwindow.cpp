@@ -1,32 +1,13 @@
-#include <QMetaEnum>
-#include <QMovie>
-#include <QMessageBox>
-#include <QMouseEvent>
-#include <QScroller>
-#include <QScrollBar>
-#include <QDesktopWidget>
-#include <QDesktopServices>
-#include <QGridLayout>
-#include <QTime>
-
 #include "mainwindow.h"
-
-
-#ifdef Q_OS_WIN
 #include "ui_mainwindow.h"
-#endif
 
-#ifdef Q_OS_MAC
-#include "ui_mainwindow_mac.h"
-#include "publib/macos_functions.h"
-#endif
-
-
-MainWindow::MainWindow(bool useForceUseBrightIcons, QWidget *parent) : QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    forceUseBrightIcons(useForceUseBrightIcons)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+   // Post initialization
+    ui->widget_tittlebar->hide();
+    ui->stackedWidget_main->setCurrentIndex(2);
 }
 
 MainWindow::~MainWindow()

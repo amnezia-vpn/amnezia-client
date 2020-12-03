@@ -3,7 +3,6 @@
 #include <QProcess>
 
 
-
 Router &Router::Instance()
 {
     static Router s;
@@ -12,6 +11,8 @@ Router &Router::Instance()
 
 bool Router::routeAdd(const QString &ip, const QString &gw, QString mask)
 {
+#ifdef Q_OS_WIN
+
     qDebug().noquote() << QString("ROUTE ADD: IP:%1 %2 GW %3")
                           .arg(ip)
                           .arg(mask)
@@ -107,6 +108,8 @@ bool Router::routeAdd(const QString &ip, const QString &gw, QString mask)
         free(pIpForwardTable);
 
     return (dwStatus == NO_ERROR);
+
+#endif
 }
 
 int Router::routeAddList(const QString &gw, const QStringList &ips)
@@ -117,6 +120,8 @@ int Router::routeAddList(const QString &gw, const QStringList &ips)
 
     qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
                           .arg(ips.join("\n"));
+
+#ifdef Q_OS_WIN
 
     PMIB_IPFORWARDTABLE pIpForwardTable = NULL;
     DWORD dwSize = 0;
@@ -224,10 +229,14 @@ int Router::routeAddList(const QString &gw, const QStringList &ips)
 
      qDebug() << "Router::routeAddList finished, success: " << success_count << "/" << ips.size();
     return success_count;
+
+#endif
 }
 
 bool Router::clearSavedRoutes()
 {
+#ifdef Q_OS_WIN
+
     if (ipForwardRows.isEmpty()) return true;
 
     qDebug() << "forward rows size:" << ipForwardRows.size();
@@ -274,6 +283,8 @@ bool Router::clearSavedRoutes()
     ipForwardRows.clear();
 
     return true;
+
+#endif
 }
 
 bool Router::routeDelete(const QString &ip)

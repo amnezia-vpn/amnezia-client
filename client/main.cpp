@@ -2,28 +2,19 @@
 #include <QFontDatabase>
 #include <QCommandLineParser>
 #include <QMessageBox>
-#include <QFile>
 #include <QTranslator>
-#include <QLibraryInfo>
 
-#include "publib/runguard.h"
-#include "publib/debug.h"
+#include "debug.h"
+#include "defines.h"
+#include "runguard.h"
 
 #include "ui/mainwindow.h"
-
-#ifdef Q_OS_WIN
-#include <Windows.h>
-#endif
-
-#define ApplicationName "AmneziaVPN"
 
 
 int main(int argc, char *argv[])
 {
-    Q_INIT_RESOURCE(res);
-
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    RunGuard::instance(ApplicationName).activate();
+    RunGuard::instance(APPLICATION_NAME).activate();
 
     QApplication app(argc, argv);
 
@@ -44,12 +35,11 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont(":/fonts/Lato-Thin.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-ThinItalic.ttf");
 
-
     {
         QTranslator *translator = new QTranslator;
         QLocale ru(QLocale("ru_RU"));
         QLocale::setDefault(ru);
-        if (translator->load(QLocale(), "amnezia-client", ".", QLatin1String(":/translations"))) {
+        if (translator->load(QLocale(), "amneziavpn", ".", QLatin1String(":/translations"))) {
             bool ok = qApp->installTranslator(translator);
             qDebug().noquote() << "Main: Installing translator for locale" << ru.name() << ok;
         }
@@ -58,38 +48,23 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    app.setOrganizationName("AmneziaVPN");
-    app.setOrganizationDomain("AmneziaVPN.ORG");
-    app.setApplicationName(ApplicationName);
-    app.setApplicationDisplayName(ApplicationName);
+    app.setApplicationName(APPLICATION_NAME);
+    app.setOrganizationName(ORGANIZATION_NAME);
+    app.setApplicationDisplayName(APPLICATION_NAME);
     app.setApplicationVersion("1.0.0.0");
 
     //app.setQuitOnLastWindowClosed(false);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("AmneziaVPN");
+    parser.setApplicationDescription(APPLICATION_NAME);
     parser.addHelpOption();
     parser.addVersionOption();
 
     QCommandLineOption debugToConsoleOption("d", QCoreApplication::translate("main", "Output to console instead log file"));
     parser.addOption(debugToConsoleOption);
-
-#ifdef Q_OS_MAC
-    QCommandLineOption forceUseBrightIconsOption("b", QCoreApplication::translate("main", "Force use bright icons"));
-    parser.addOption(forceUseBrightIconsOption);
-#endif
-
-    // Process the actual command line arguments given by the user
-    parser.process(app);
+    parser.process(app);     // Process the actual command line arguments given by the user
 
     bool debugToConsole = parser.isSet(debugToConsoleOption);
-    bool forceUseBrightIcons = false;
-
-#ifdef Q_OS_MAC
-    forceUseBrightIcons = parser.isSet(forceUseBrightIconsOption);
-#endif
-
 
     qDebug() << "Set output to console: " << debugToConsole;
     if (!debugToConsole) {
@@ -102,7 +77,7 @@ int main(int argc, char *argv[])
     f.setStyleStrategy(QFont::PreferAntialias);
     app.setFont(f);
 
-    MainWindow mainWindow(forceUseBrightIcons);
+    MainWindow mainWindow;
     mainWindow.show();
 
     return app.exec();
