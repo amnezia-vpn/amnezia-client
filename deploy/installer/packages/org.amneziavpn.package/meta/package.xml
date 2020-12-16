@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>AmneziaVPN</DisplayName>
+    <Description>Installation package for AmneziaVPN</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>1970-01-01</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <RequiresAdminRights>true</RequiresAdminRights>
+    <Script>componentscript.js</Script>
+</Package>
+

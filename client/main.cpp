@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
     app.setApplicationName(APPLICATION_NAME);
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
-    app.setApplicationVersion("1.0.0.0");
 
     //app.setQuitOnLastWindowClosed(false);
 
@@ -60,17 +59,8 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption debugToConsoleOption("d", QCoreApplication::translate("main", "Output to console instead log file"));
-    parser.addOption(debugToConsoleOption);
-    parser.process(app);     // Process the actual command line arguments given by the user
-
-    bool debugToConsole = parser.isSet(debugToConsoleOption);
-
-    qDebug() << "Set output to console: " << debugToConsole;
-    if (!debugToConsole) {
-        if (!Debug::init()) {
-            qCritical() << "Initialization of debug subsystem failed";
-        }
+    if (!Debug::init()) {
+        qCritical() << "Initialization of debug subsystem failed";
     }
 
     QFont f("Lato Regular", 10);

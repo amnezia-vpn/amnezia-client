@@ -22,8 +22,19 @@ public slots:
 
 
 private slots:
+    void onPushButtonBlockedListClicked(bool clicked);
+    void onPushButtonConnectClicked(bool clicked);
+    void onPushButtonSettingsClicked(bool clicked);
+
+    void onPushButtonBackFromSettingsClicked(bool clicked);
+    void onPushButtonBackFromSitesClicked(bool clicked);
+
+protected:
+    void keyPressEvent(QKeyEvent* event);
 
 private:
+    void goToIndex(int index);
+
     Ui::MainWindow *ui;
 };
 

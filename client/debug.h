@@ -9,19 +9,16 @@
 class Debug
 {
 public:
+    static QString logsDir();
     static bool init();
-    static QString getPathToClientLog();
-    static QString getPathToLogsDir();
+    static bool openLogsFolder();
 
 private:
-    static bool init(QDir& appDir);
+    static QFile m_file;
+    static QTextStream m_textStream;
+    static QString m_logFileName;
 
-private:
-    static QFile m_clientLog;
-    static QTextStream m_clientLogTextStream;
-    static QString m_clientLogName;
-
-    friend void debugMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    friend void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 };
 
 #endif // DEBUG_H

@@ -3,15 +3,19 @@
 macOSPackage/
 
 # C++ objects and libs
-*.slo
-*.lo
-*.o
 *.a
+*.dll
+*.dmg
+*.dylib
+*.exe
+*.exp
 *.la
 *.lai
+*.lib
+*.lo
+*.o
+*.slo
 *.so
-*.dll
-*.dylib
 
 # Qt-es
 /.qmake.cache
@@ -48,3 +52,4 @@ CMakeLists.txt.user*
 
 # Certificates
 *.p12
+
