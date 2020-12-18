@@ -1,0 +1,148 @@
+Licence
+-------
+
+mksh/Win32 is a derived work of The MirBSD Korn Shell and
+recognised by The MirOS Project but realised by an independent
+developer with support and legal permit by Scalaris AG.
+
+
+The shell itself comes under The MirOS Licence:
+
+Copyright (c) 2002-2013
+	The MirOS Project
+Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+	Thorsten Glaser <tg@mirbsd.org>
+Copyright (c) 2010, 2011, 2012, 2013
+	Michael Langguth <lan@scalaris.com>
+
+Provided that these terms and disclaimer and all copyright notices
+are retained or reproduced in an accompanying document, permission
+is granted to deal in this work without restriction, including un-
+limited rights to use, publicly perform, distribute, sell, modify,
+merge, give away, or sublicence.
+
+This work is provided "AS IS" and WITHOUT WARRANTY of any kind, to
+the utmost extent permitted by applicable law, neither express nor
+implied; without malicious intent or gross negligence. In no event
+may a licensor, author or contributor be held liable for indirect,
+direct, other damage, loss, or other issues arising in any way out
+of dealing in the work, even if advised of the possibility of such
+damage or existence of a defect, except proven that it results out
+of said person's immediate fault when using the work as intended.
+
+
+The shell contains strlcpy() under the ISC licence:
+
+Copyright (c) 2006, 2008, 2009
+	Thorsten Glaser <tg@mirbsd.org>
+Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+This version of the shell contains setmode() under the UCB BSD licence:
+
+Copyright (c) 1989, 1993, 1994
+	The Regents of the University of California.  All rights reserved.
+
+This code is derived from software contributed to Berkeley by
+Dave Borman at Cray Research, Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the University nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+
+The shell includes nedmalloc under the Boost Software License which,
+in turn, includes dlmalloc under CC0 (eventually) in its binary.
+
+
+The "liblan" portability library is covered by The MirOS Licence:
+
+Copyright (c) 1996, 1998, 2003, 2004, 2005, 2010, 2011, 2012, 2013
+	Scalaris AG, Author: Michael Langguth <lan@scalaris.com>
+
+Provided that these terms and disclaimer and all copyright notices
+are retained or reproduced in an accompanying document, permission
+is granted to deal in this work without restriction, including un-
+limited rights to use, publicly perform, distribute, sell, modify,
+merge, give away, or sublicence.
+
+This work is provided "AS IS" and WITHOUT WARRANTY of any kind, to
+the utmost extent permitted by applicable law, neither express nor
+implied; without malicious intent or gross negligence. In no event
+may a licensor, author or contributor be held liable for indirect,
+direct, other damage, loss, or other issues arising in any way out
+of dealing in the work, even if advised of the possibility of such
+damage or existence of a defect, except proven that it results out
+of said person's immediate fault when using the work as intended.
+
+
+It includes an implementation of POSIX directory browsing functions
+and types for Win32 under a Historical Permission Notice variant:
+
+Copyright Kevlin Henney, 1997, 2003. All rights reserved.
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose is hereby granted without fee, provided
+that this copyright and permissions notice appear in all copies and
+derivatives.
+
+This software is supplied "as is" without express or implied warranty.
+
+But that said, if there are any problems please get in touch.
+
+
+The program shortcut (mkshicon1.ico) is an unregistered trademark:
+
+Copyright (c) 2013 Michael Langguth
+Copyright (c) 2006 Benny Siegert
+Copyright (c) 2005 Thorsten Glaser
+
+This icon may be used to refer to The MirBSD Korn Shell and
+its Win32 port. Distribution patches are acceptable as long
+as they modify $KSH_VERSION according to the guidelines that
+are published on the website; forks and works that are not
+derivates are not allowed to use it.
+
+The BSD daemon is Copyright (c) 1988 by Marshall Kirk McKusick.
+All Rights Reserved.  Individuals may use the daemon for their
+personal use within the bounds of good taste.  When reasonably
+possible, the text shown above is to be included.
+
+The Shilouette daemon is Copyright (c) 2003 by Rick Collette.
+The MirOS Project may freely use the former ekkoBSD Logo,
+the shilouette Daemon, for MirBSD, on anything the project
+leader sees fit, so long as it pertains to MirBSD in some
+way and the leader gives credit for the original daemon to
+Marshall Kirk McKusick.
