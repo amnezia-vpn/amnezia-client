@@ -2,21 +2,6 @@
 *.user
 macOSPackage/
 
-# C++ objects and libs
-*.a
-*.dll
-*.dmg
-*.dylib
-*.exe
-*.exp
-*.la
-*.lai
-*.lib
-*.lo
-*.o
-*.slo
-*.so
-
 # Qt-es
 /.qmake.cache
 /.qmake.stash
