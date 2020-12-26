@@ -5,7 +5,7 @@
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
-
+    VpnProtocol::initializeCommunicator(parent);
 }
 
 VpnConnection::~VpnConnection()
@@ -23,7 +23,16 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     emit connectionStateChanged(state);
 }
 
-void VpnConnection::connectToVpn(Protocol protocol)
+QString VpnConnection::lastError() const
+{
+    if (!m_vpnProtocol.data()) {
+        return "Unnown protocol";
+    }
+
+    return m_vpnProtocol.data()->lastError();
+}
+
+bool VpnConnection::connectToVpn(Protocol protocol)
 {
     qDebug() << "Connect to VPN";
 
@@ -34,19 +43,19 @@ void VpnConnection::connectToVpn(Protocol protocol)
         ;
     default:
         // TODO, add later
-        return;
+        return false;
         ;
     }
 
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
-    m_vpnProtocol.data()->start();
+    return m_vpnProtocol.data()->start();
 }
 
 QString VpnConnection::bytesToText(quint64 bytes)
 {
-    return QString("%1 %2").arg((bytes * 8) / 1024).arg(tr("Mbps"));
+    return QString("%1 %2").arg(bytes / 1000000).arg(tr("Mbps"));
 }
 
 void VpnConnection::disconnectFromVpn()

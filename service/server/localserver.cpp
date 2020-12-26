@@ -6,27 +6,29 @@
 #include "localserver.h"
 #include "utils.h"
 
-LocalServer::LocalServer(const QString& name, QObject *parent) : QObject(parent),
-    m_clientConnected(false),
-    m_clientConnection(nullptr)
+LocalServer::LocalServer(QObject *parent) : QObject(parent),
+    m_clientConnection(nullptr),
+    m_clientConnected(false)
 {
     m_server = new QLocalServer(this);
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
-    if (!m_server->listen(name)) {
+    if (!m_server->listen(Utils::serverName())) {
         qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
         return;
     }
 
     connect(m_server, &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
 
-    qDebug() << "Local server started";
+    qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
 }
 
 LocalServer::~LocalServer()
 {
     m_clientConnected = false;
     m_server->disconnect();
+
+    QFile::remove(Utils::serverName());
 
     qDebug() << "Local server stopped";
 }
@@ -46,7 +48,7 @@ void LocalServer::onNewConnection()
     connect(m_clientConnection, &QLocalSocket::disconnected, this, &LocalServer::onDisconnected);
     m_clientConnected = true;
 
-    qDebug() << "On new connection";
+    qDebug() << "New connection";
 
     for(;;) {
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -69,7 +71,7 @@ void LocalServer::onNewConnection()
 
                 switch (icomingMessage.state()) {
                 case Message::State::Initialize:
-                    sendMessage(Message(Message::State::Initialize, QStringList({"Pong"})));
+                    sendMessage(Message(Message::State::Initialize, QStringList({"Server"})));
                     break;
                 case Message::State::StartRequest:
                     startProcess(icomingMessage.args());
@@ -161,7 +163,7 @@ void LocalServer::sendMessage(const Message& message)
     }
 
     const QString data = message.toString();
-    bool status = m_clientConnection->write(QString(data + "\n").toLocal8Bit());
+    bool status = m_clientConnection->write(QString(data + "\n").toUtf8());
 
     qDebug().noquote() << QString("Send message '%1', status '%2'").arg(data).arg(Utils::toString(status));
 }

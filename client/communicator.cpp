@@ -20,18 +20,17 @@ void Communicator::connectToServer()
         delete m_localClient;
     }
 
-    qDebug().noquote() << QString("Connect to local server '%1'").arg(SERVICE_NAME);
-
     m_localClient = new LocalClient(this);
     connect(m_localClient, &LocalClient::connected, this, &Communicator::onConnected);
     connect(m_localClient, &LocalClient::lineAvailable, this, &Communicator::onLineAvailable);
-    m_localClient->connectToServer(SERVICE_NAME);
+
+    m_localClient->connectToServer(Utils::serverName());
 }
 
 void Communicator::onConnected()
 {
      qDebug().noquote() << QString("Connected to local server '%1'").arg(m_localClient->serverName());
-     Message message(Message::State::Initialize, QStringList({"Ping"}));
+     Message message(Message::State::Initialize, QStringList({"Client"}));
      sendMessage(message);
 }
 
@@ -62,7 +61,7 @@ QString Communicator::readData()
 
 bool Communicator::writeData(const QString& data)
 {
-    return m_localClient->write(data.toLocal8Bit());
+    return m_localClient->write(data.toUtf8());
 }
 
 void Communicator::sendMessage(const Message& message)

@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
 #include <QProcess>
 #include <QStandardPaths>
@@ -11,39 +12,55 @@ QString Utils::toString(bool value)
     return value ? "true" : "false";
 }
 
-QString Utils::systemLogPath()
+QString Utils::serverName()
 {
-    return systemDataLocationPath() + "/log";
+#ifdef Q_OS_WIN
+    return SERVICE_NAME;
+#else
+    return QString("/tmp/%1").arg(SERVICE_NAME);
+#endif
 }
 
-QString Utils::systemConfigPath()
+QString Utils::defaultVpnConfigFileName()
 {
-    return systemDataLocationPath() + "/config";
+    return configPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
+}
+
+QString Utils::systemLogPath()
+{
+#ifdef Q_OS_WIN
+    QStringList locationList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+    QString primaryLocation = "ProgramData";
+    foreach (const QString& location, locationList) {
+        if (location.contains(primaryLocation)) {
+            return QString("%1/%2/log").arg(location).arg(APPLICATION_NAME);
+        }
+    }
+    return QString();
+#else
+    return QString("/var/log/%1").arg(APPLICATION_NAME);
+#endif
+}
+
+bool Utils::initializePath(const QString& path)
+{
+    QDir dir;
+    if (!dir.mkpath(path)) {
+        qWarning().noquote() << QString("Cannot initialize path: '%1'").arg(path);
+        return false;
+    }
+    return true;
+}
+
+QString Utils::configPath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config";
 }
 
 bool Utils::createEmptyFile(const QString& path)
 {
     QFile f(path);
     return f.open(QIODevice::WriteOnly | QIODevice::Truncate);
-}
-
-QString Utils::systemDataLocationPath()
-{
-    QStringList locationList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
-    QString primaryLocation;
-#ifdef Q_OS_WIN
-    primaryLocation = "ProgramData";
-#elif defined Q_OS_MAC
-    primaryLocation = "Users";
-#endif
-
-    foreach (const QString& location, locationList) {
-        if (location.contains(primaryLocation)) {
-            return QString("%1/%2").arg(location).arg(APPLICATION_NAME);
-        }
-    }
-
-    return QString();
 }
 
 QString Utils::executable(const QString& baseName, bool absPath)

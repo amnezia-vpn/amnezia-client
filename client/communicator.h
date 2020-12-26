@@ -16,6 +16,7 @@ public:
     explicit Communicator(QObject* parent = nullptr);
     ~Communicator();
 
+    bool connected() const;
     void sendMessage(const Message& message);
 
 signals:
@@ -30,7 +31,6 @@ protected slots:
 
 protected:
     QString readData();
-    bool connected() const;
     bool writeData(const QString& data);
     void connectToServer();
 

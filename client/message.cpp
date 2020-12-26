@@ -1,9 +1,9 @@
 #include "message.h"
 
 Message::Message(State state, const QStringList& args) :
+    m_valid(true),
     m_state(state),
-    m_args(args),
-    m_valid(true)
+    m_args(args)
 {
 
 }

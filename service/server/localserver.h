@@ -17,7 +17,7 @@ class LocalServer : public QObject
     Q_OBJECT
 
 public:
-    explicit LocalServer(const QString& name, QObject* parent = nullptr);
+    explicit LocalServer(QObject* parent = nullptr);
     ~LocalServer();
 
     bool isRunning() const;

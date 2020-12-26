@@ -1,7 +1,8 @@
 # User settings
 *.user
 macOSPackage/
-*.dmg
+AmneziaVPN.dmg
+AmneziaVPN.exe
 
 # Qt-es
 /.qmake.cache

@@ -10,12 +10,13 @@
 class Debug
 {
 public:
-    static QString logsDir();
     static bool init();
     static bool openLogsFolder();
     static QString appLogFileNamePath();
 
 private:
+    static QString userLogsDir();
+
     static QFile m_file;
     static QTextStream m_textStream;
     static QString m_logFileName;

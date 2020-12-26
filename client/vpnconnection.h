@@ -16,13 +16,13 @@ public:
     ~VpnConnection();
 
     enum class Protocol{OpenVpn};
-    void connectToVpn(Protocol protocol = Protocol::OpenVpn);
+    static QString bytesToText(quint64 bytes);
 
+    QString lastError() const;
+    bool connectToVpn(Protocol protocol = Protocol::OpenVpn);
     bool connected() const;
     bool disconnected() const;
     void disconnectFromVpn();
-
-    static QString bytesToText(quint64 bytes);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

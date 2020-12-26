@@ -11,6 +11,8 @@
 #include "utils.h"
 #include "vpnconnection.h"
 
+#include <QStandardPaths>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -34,24 +36,19 @@ MainWindow::MainWindow(QWidget *parent) :
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
 
+    Utils::initializePath(Utils::configPath());
 
-    QDir dir;
-    QString configPath = Utils::systemConfigPath();
-    if (!dir.mkpath(configPath)) {
-        qWarning() << "Cannot initialize config path:" << configPath;
-    }
-
-    m_vpnConnection = new VpnConnection;
+    m_vpnConnection = new VpnConnection(this);
     connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
 
     onConnectionStateChanged(VpnProtocol::ConnectionState::Disconnected);
+
+    qDebug().noquote() << QString("Default config: %1").arg(Utils::defaultVpnConfigFileName());
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-
     hide();
 
     m_vpnConnection->disconnectFromVpn();
@@ -62,7 +59,11 @@ MainWindow::~MainWindow()
             break;
         }
     }
-    qDebug() << "Closed";
+
+    delete m_vpnConnection;
+    delete ui;
+
+    qDebug() << "Application closed";
 }
 
 void MainWindow::goToIndex(int index)
@@ -150,7 +151,11 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 void MainWindow::onPushButtonConnectToggled(bool checked)
 {
     if (checked) {
-        m_vpnConnection->connectToVpn();
+        if (!m_vpnConnection->connectToVpn()) {
+            ui->pushButton_connect->setChecked(false);
+            QMessageBox::critical(this, APPLICATION_NAME, m_vpnConnection->lastError());
+            return;
+        }
         ui->pushButton_connect->setEnabled(false);
     } else {
         m_vpnConnection->disconnectFromVpn();

@@ -16,14 +16,21 @@ public:
     ~VpnProtocol();
 
     enum class ConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, TunnelReconnecting, Error};
-    static QString textConnectionState(ConnectionState connectionState);
 
-    ConnectionState connectionState() const;
-    QString textConnectionState() const;
+    static Communicator* communicator();
+    static QString textConnectionState(ConnectionState connectionState);
+    static void initializeCommunicator(QObject* parent = nullptr);
+
+
     virtual bool connected() const;
     virtual bool disconnected() const;
     virtual bool start() = 0;
     virtual void stop() = 0;
+
+    ConnectionState connectionState() const;
+    QString lastError() const;
+    QString textConnectionState() const;
+    void setLastError(const QString& error);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -40,9 +47,15 @@ protected:
     virtual void setBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     virtual void setConnectionState(VpnProtocol::ConnectionState state);
 
-    Communicator* m_communicator;
+    static Communicator* m_communicator;
+
     ConnectionState m_connectionState;
+
+private:
     QTimer* m_timeoutTimer;
+    QString m_lastError;
+    quint64 m_receivedBytes;
+    quint64 m_sentBytes;
 };
 
 #endif // VPNPROTOCOL_H

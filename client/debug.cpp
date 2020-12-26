@@ -19,8 +19,8 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
         return;
     }
 
-    // Temporally disabled
-    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap")) {
+    // Skip annoying messages from Qt
+    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font")) {
         return;
     }
 
@@ -31,7 +31,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
 
 bool Debug::init()
 {
-    QString path = logsDir();
+    QString path = userLogsDir();
     QDir appDir(path);
     if (!appDir.mkpath(path)) {
         return false;
@@ -53,14 +53,14 @@ bool Debug::init()
     return true;
 }
 
-QString Debug::logsDir()
+QString Debug::userLogsDir()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
 }
 
 bool Debug::openLogsFolder()
 {
-    QString path = logsDir();
+    QString path = userLogsDir();
 #ifdef Q_OS_WIN
     path = "file:///" + path;
 #endif

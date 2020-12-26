@@ -43,8 +43,6 @@ quint64 LocalClient::write(const QByteArray& data)
 
 void LocalClient::onReadyRead()
 {
-    qDebug() << "On ready read";
-
     if (m_socket->canReadLine()) {
         char buf[1024];
         qint64 lineLength = m_socket->readLine(buf, sizeof(buf));
@@ -60,5 +58,5 @@ void LocalClient::onReadyRead()
 void LocalClient::displayError(QLocalSocket::LocalSocketError socketError)
 {
     Q_UNUSED(socketError)
-    qDebug() << QString("The following error occurred: %1.").arg(m_socket->errorString());
+    qDebug().noquote() << QString("The following error occurred: %1.").arg(m_socket->errorString());
 }

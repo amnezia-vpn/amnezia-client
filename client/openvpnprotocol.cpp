@@ -29,16 +29,16 @@ void OpenVpnProtocol::onMessageReceived(const Message& message)
     }
 
     switch (message.state()) {
-        case Message::State::Started:
-            qDebug().noquote() << QString("OpenVPN process started");
-            break;
-        case Message::State::Finished:
-            qDebug().noquote() << QString("OpenVPN process finished with status %1").arg(message.argAtIndex(1));
-            onOpenVpnProcessFinished(message.argAtIndex(1).toInt());
-            break;
-        default:
-            qDebug().noquote() << QString("Message received: '%1'").arg(message.toString());
-            ;
+    case Message::State::Started:
+        qDebug() << "OpenVPN process started";
+        break;
+    case Message::State::Finished:
+        qDebug().noquote() << QString("OpenVPN process finished with status %1").arg(message.argAtIndex(1));
+        onOpenVpnProcessFinished(message.argAtIndex(1).toInt());
+        break;
+    default:
+        qDebug().noquote() << QString("Message received: '%1'").arg(message.toString());
+        ;
     }
 }
 
@@ -56,7 +56,7 @@ void OpenVpnProtocol::stop()
 
 void OpenVpnProtocol::killOpenVpnProcess()
 {
-    // send command to kill openvpn process.
+    // send command to kill openvpn process (if any).
 }
 
 bool OpenVpnProtocol::setConfigFile(const QString& configFileNamePath)
@@ -65,14 +65,14 @@ bool OpenVpnProtocol::setConfigFile(const QString& configFileNamePath)
     QFileInfo file(m_configFileName);
 
     if (file.fileName().isEmpty()) {
-        m_configFileName = Utils::systemConfigPath() + "/" + QCoreApplication::applicationName() + ".ovpn";
+        m_configFileName = Utils::defaultVpnConfigFileName();
     }
 
     if (m_configFileName.isEmpty()) {
         return false;
     }
 
-    qDebug() << "Set config file:" << configPath();
+    qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
 
     return false;
 }
@@ -109,19 +109,24 @@ QString OpenVpnProtocol::openVpnExecPath() const
 
 bool OpenVpnProtocol::start()
 {
-    qDebug() << "Start OpenVPN connection" << openVpnExecPath();
+    qDebug() << "Start OpenVPN connection";
 
     m_requestFromUserToStop = false;
     m_openVpnStateSigTermHandlerTimer.stop();
     stop();
 
+    if (communicator() && !communicator()->connected()) {
+        setLastError("Communicator is not connected!");
+        return false;
+    }
+
     if (!QFileInfo::exists(openVpnExecPath())) {
-        qCritical() << "OpeVPN executable does not exist!";
+        setLastError("OpeVPN executable does not exist!");
         return false;
     }
 
     if (!QFileInfo::exists(configPath())) {
-        qCritical() << "OpeVPN config file does not exist!";
+        setLastError("OpeVPN config file does not exist!");
         return false;
     }
 
@@ -140,10 +145,7 @@ bool OpenVpnProtocol::start()
     }
 
     setConnectionState(ConnectionState::Connecting);
-
-    qDebug().noquote() << "Start OpenVPN process with args: " << args;
     m_communicator->sendMessage(Message(Message::State::StartRequest, args));
-
     startTimeoutTimer();
 
     return true;

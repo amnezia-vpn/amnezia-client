@@ -11,7 +11,7 @@ SystemService::SystemService(int argc, char **argv)
 void SystemService::start()
 {
     QCoreApplication* app = application();
-    m_localServer  = new LocalServer(SERVICE_NAME);
+    m_localServer  = new LocalServer();
 
     if (!m_localServer->isRunning()) {
         app->quit();
