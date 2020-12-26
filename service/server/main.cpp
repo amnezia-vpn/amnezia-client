@@ -1,7 +1,10 @@
 #include <QSettings>
 #include <QDir>
 
-#include "server.h"
+#include "systemservice.h"
+#include "log.h"
+#include "defines.h"
+#include "localserver.h"
 
 int main(int argc, char **argv)
 {
@@ -11,6 +14,20 @@ int main(int argc, char **argv)
     QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, QDir::tempPath());
     qWarning("(Example uses dummy settings file: %s/QtSoftware.conf)", QDir::tempPath().toLatin1().constData());
 #endif
-    HttpService service(argc, argv);
-    return service.exec();
+
+    Log::initialize();
+
+    if (argc == 2) {
+        qInfo() << "Started as console application";
+        QCoreApplication app(argc,argv);
+        LocalServer localServer(SERVICE_NAME);
+        if (!localServer.isRunning()) {
+            return -1;
+        }
+        return app.exec();
+    } else {
+        qInfo() << "Started as system service";
+        SystemService systemService(argc, argv);
+        return systemService.exec();
+    }
 }

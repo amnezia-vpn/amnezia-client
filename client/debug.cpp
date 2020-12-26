@@ -4,6 +4,8 @@
 #include <QStandardPaths>
 #include <QUrl>
 
+#include <iostream>
+
 #include "debug.h"
 #include "defines.h"
 
@@ -23,6 +25,8 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
     }
 
     Debug::m_textStream << qFormatLogMessage(type, context, msg) << endl << flush;
+
+    std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
 }
 
 bool Debug::init()
@@ -35,7 +39,7 @@ bool Debug::init()
 
     m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 
-    qSetMessagePattern("[%{time}|%{type}] %{message}");
+    qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
 
     m_file.setFileName(appDir.filePath(m_logFileName));
     if (!m_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -65,4 +69,9 @@ bool Debug::openLogsFolder()
         return false;
     }
     return true;
+}
+
+QString Debug::appLogFileNamePath()
+{
+    return m_file.fileName();
 }

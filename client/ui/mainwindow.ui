@@ -861,7 +861,7 @@ QPushButton:hover {
          <string/>
         </property>
        </widget>
-       <widget class="QLabel" name="label_speed_upload_2">
+       <widget class="QLabel" name="label_speed_sent">
         <property name="geometry">
          <rect>
           <x>260</x>
@@ -890,7 +890,7 @@ font: 63 12pt &quot;Lato&quot;;</string>
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_speed_download_2">
+       <widget class="QLabel" name="label_speed_received">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -951,7 +951,7 @@ line-height: 21px;
 </string>
        </property>
        <property name="text">
-        <string>Добавить сайт</string>
+        <string>Add site</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_settings">
@@ -1001,7 +1001,7 @@ image: url(:/images/connect_button_connected.png);
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="label_status_2">
+      <widget class="QLabel" name="label_state">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -1021,7 +1021,7 @@ color: #181922;
 </string>
        </property>
        <property name="text">
-        <string>Подключено</string>
+        <string>Connected</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -1043,7 +1043,7 @@ color: #181922;
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_status_3">
+      <widget class="QLabel" name="label_description">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -1064,7 +1064,7 @@ color: #181922;
 </string>
        </property>
        <property name="text">
-        <string>Как использовать VPN</string>
+        <string>How to use VPN</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1083,7 +1083,7 @@ color: #181922;
         </rect>
        </property>
        <property name="text">
-        <string>Для всех соеднинений</string>
+        <string>For all connections</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_2">
@@ -1099,7 +1099,7 @@ color: #181922;
         </rect>
        </property>
        <property name="text">
-        <string>Для определённых сайтов</string>
+        <string>For selected sites</string>
        </property>
        <property name="checked">
         <bool>true</bool>

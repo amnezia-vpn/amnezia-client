@@ -10,6 +10,13 @@
 
 #include "ui/mainwindow.h"
 
+static void loadTranslator()
+{
+    QTranslator* translator = new QTranslator;
+    if (translator->load(QLocale(), QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/translations"))) {
+        qApp->installTranslator(translator);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +24,7 @@ int main(int argc, char *argv[])
     RunGuard::instance(APPLICATION_NAME).activate();
 
     QApplication app(argc, argv);
+    loadTranslator();
 
     if (! RunGuard::instance().tryToRun()) {
         qDebug() << "Tried to run second instance. Exiting...";
@@ -35,24 +43,9 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont(":/fonts/Lato-Thin.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-ThinItalic.ttf");
 
-    {
-        QTranslator *translator = new QTranslator;
-        QLocale ru(QLocale("ru_RU"));
-        QLocale::setDefault(ru);
-        if (translator->load(QLocale(), "amneziavpn", ".", QLatin1String(":/translations"))) {
-            bool ok = qApp->installTranslator(translator);
-            qDebug().noquote() << "Main: Installing translator for locale" << ru.name() << ok;
-        }
-        else {
-            qDebug().noquote() << "Main: Failed to install translator for locale" << ru.name();
-        }
-    }
-
     app.setApplicationName(APPLICATION_NAME);
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
-
-    //app.setQuitOnLastWindowClosed(false);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(APPLICATION_NAME);
@@ -60,7 +53,7 @@ int main(int argc, char *argv[])
     parser.addVersionOption();
 
     if (!Debug::init()) {
-        qCritical() << "Initialization of debug subsystem failed";
+        qWarning() << "Initialization of debug subsystem failed";
     }
 
     QFont f("Lato Regular", 10);

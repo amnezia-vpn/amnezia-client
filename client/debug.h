@@ -1,10 +1,11 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <QFile>
-#include <QTextStream>
-#include <QString>
+#include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QString>
+#include <QTextStream>
 
 class Debug
 {
@@ -12,6 +13,7 @@ public:
     static QString logsDir();
     static bool init();
     static bool openLogsFolder();
+    static QString appLogFileNamePath();
 
 private:
     static QFile m_file;

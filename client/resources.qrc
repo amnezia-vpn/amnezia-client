@@ -1,4 +1,8 @@
 <RCC>
+	<qresource prefix="/">
+		<file>translations/amneziavpn_ru.qm</file>
+	</qresource>
+
     <qresource prefix="/">
         <file>images/close.png</file>
         <file>images/settings.png</file>

@@ -1,13 +1,22 @@
 TARGET   = AmneziaVPN-service
 TEMPLATE = app
-CONFIG   += console qt
-QT = core network 
+CONFIG   += console qt no_batch
+QT += core network
 
 HEADERS = \
-        server.h
+        ../../client/message.h \
+        ../../client/utils.h \
+        localserver.h \
+        log.h \
+        systemservice.h
+
 SOURCES = \
-        server.cpp \
-        main.cpp
+        ../../client/message.cpp \
+        ../../client/utils.cpp \
+        localserver.cpp \
+        log.cpp \
+        main.cpp \
+        systemservice.cpp
 
 include(../src/qtservice.pri)
 
@@ -17,3 +26,5 @@ CONFIG(release, debug|release) {
     OBJECTS_DIR = $$DESTDIR
     RCC_DIR = $$DESTDIR
 }
+
+INCLUDEPATH += "$$PWD/../../client"

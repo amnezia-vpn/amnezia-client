@@ -7,21 +7,36 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS  += \
+            communicator.h \
             core/router.h \
             debug.h \
             defines.h \
+            localclient.h \
+            managementserver.h \
+            message.h \
+            openvpnprotocol.h \
             runguard.h \
             ui/Controls/SlidingStackedWidget.h \
             ui/mainwindow.h \
+            utils.h \
+            vpnconnection.h \
+            vpnprotocol.h \
 
 SOURCES  += \
+            communicator.cpp \
             core/router.cpp \
             debug.cpp \
+            localclient.cpp \
             main.cpp \
+            managementserver.cpp \
+            message.cpp \
+            openvpnprotocol.cpp \
             runguard.cpp \
             ui/Controls/SlidingStackedWidget.cpp \
             ui/mainwindow.cpp \
-
+            utils.cpp \
+            vpnconnection.cpp \
+            vpnprotocol.cpp \
 
 FORMS    += ui/mainwindow.ui
 
@@ -29,8 +44,7 @@ RESOURCES += \
             resources.qrc
 
 TRANSLATIONS = \
-            translations/amneziavpn.en.ts \
-            translations/amneziavpn.ru.ts
+            translations/amneziavpn_ru.ts
 
 CONFIG(release, debug|release) {
     DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
@@ -46,7 +60,7 @@ win32 {
     HEADERS +=
     SOURCES +=
 
-    VERSION = 1.1.1.1
+    VERSION = 1.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 

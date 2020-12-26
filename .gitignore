@@ -1,6 +1,7 @@
 # User settings
 *.user
 macOSPackage/
+*.dmg
 
 # Qt-es
 /.qmake.cache
