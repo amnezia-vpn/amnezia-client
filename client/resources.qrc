@@ -1,9 +1,6 @@
 <RCC>
-	<qresource prefix="/">
-		<file>translations/amneziavpn_ru.qm</file>
-	</qresource>
-
     <qresource prefix="/">
+        <file>translations/amneziavpn_ru.qm</file>
         <file>images/close.png</file>
         <file>images/settings.png</file>
         <file>images/min.png</file>
@@ -36,5 +33,9 @@
         <file>images/line.png</file>
         <file>images/server_settings.png</file>
         <file>images/share.png</file>
+        <file>server_scripts/prepare_openvpn_client.sh</file>
+        <file>server_scripts/remove_openvpn_server.sh</file>
+        <file>server_scripts/setup_openvpn_server.sh</file>
+        <file>server_scripts/template.ovpn</file>
     </qresource>
 </RCC>

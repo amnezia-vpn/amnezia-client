@@ -6,9 +6,14 @@ TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
+include("3rd/QtSsh/src/ssh/ssh.pri")
+include("3rd/QtSsh/src/botan/botan.pri")
+
 HEADERS  += \
             communicator.h \
+            core/openvpnconfigurator.h \
             core/router.h \
+            core/servercontroller.h \
             debug.h \
             defines.h \
             localclient.h \
@@ -24,7 +29,9 @@ HEADERS  += \
 
 SOURCES  += \
             communicator.cpp \
+            core/openvpnconfigurator.cpp \
             core/router.cpp \
+            core/servercontroller.cpp \
             debug.cpp \
             localclient.cpp \
             main.cpp \
