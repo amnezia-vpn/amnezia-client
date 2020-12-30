@@ -2,7 +2,7 @@ QT += widgets core gui network xml
 
 TARGET = AmneziaVPN
 TEMPLATE = app
-#CONFIG += console
+CONFIG += console
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
@@ -21,6 +21,7 @@ HEADERS  += \
             message.h \
             openvpnprotocol.h \
             runguard.h \
+            settings.h \
             ui/Controls/SlidingStackedWidget.h \
             ui/mainwindow.h \
             utils.h \
@@ -39,6 +40,7 @@ SOURCES  += \
             message.cpp \
             openvpnprotocol.cpp \
             runguard.cpp \
+            settings.cpp \
             ui/Controls/SlidingStackedWidget.cpp \
             ui/mainwindow.cpp \
             utils.cpp \

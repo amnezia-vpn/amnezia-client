@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     loadTranslator();
 
-    if (! RunGuard::instance().tryToRun()) {
+    if (!RunGuard::instance().tryToRun()) {
         qDebug() << "Tried to run second instance. Exiting...";
-        QMessageBox::information(NULL, QObject::tr("Notify"), QObject::tr("AmneziaVPN is already running."));
+        QMessageBox::information(NULL, QObject::tr("Notification"), QObject::tr("AmneziaVPN is already running."));
         return 0;
     }
 

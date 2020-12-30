@@ -5,6 +5,7 @@
 
 #include "vpnprotocol.h"
 
+class Settings;
 class VpnConnection;
 
 namespace Ui {
@@ -22,28 +23,30 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-public slots:
-
+    enum class Page {Initialization = 0, NewServer = 1, Vpn = 2, Sites = 3, SomeSettings = 4, Share = 5};
 
 private slots:
-    void onPushButtonBlockedListClicked(bool clicked);
-    void onPushButtonConnectToggled(bool checked);
-    void onPushButtonSettingsClicked(bool clicked);
-
-    void onPushButtonBackFromSettingsClicked(bool clicked);
-    void onPushButtonBackFromSitesClicked(bool clicked);
-
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
+    void onPushButtonBackFromNewServerClicked(bool clicked);
+    void onPushButtonBackFromSettingsClicked(bool clicked);
+    void onPushButtonBackFromSitesClicked(bool clicked);
+    void onPushButtonBlockedListClicked(bool clicked);
+    void onPushButtonConnectToggled(bool checked);
+    void onPushButtonNewServerConnectWithNewData(bool clicked);
+    void onPushButtonNewServerSetup(bool clicked);
+    void onPushButtonSettingsClicked(bool clicked);
 
 protected:
     void keyPressEvent(QKeyEvent* event);
+    bool requestOvpnConfig(const QString& hostName, const QString& userName, const QString& password, int port = 22, int timeout = 30);
 
 private:
-    void goToIndex(int index);
+    void goToPage(Page page);
 
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
+    Settings* m_settings;
 };
 
 #endif // MAINWINDOW_H

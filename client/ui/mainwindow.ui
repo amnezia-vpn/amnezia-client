@@ -269,7 +269,7 @@ QStackedWidget QWidget {
 </string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page_connect_server">
       <widget class="QLabel" name="label_23">
@@ -291,11 +291,13 @@ color: #100A44;
 </string>
        </property>
        <property name="text">
-        <string>Подключиться к уже
- созданному серверу VPN</string>
+        <string>Connect to the already created VPN server</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QLabel" name="label_24">
@@ -320,7 +322,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Код для подключения</string>
+        <string>Connection code</string>
        </property>
       </widget>
       <widget class="QProgressBar" name="progressBar_new_server_connection_3">
@@ -346,7 +348,7 @@ border-radius: 4px;</string>
         <bool>true</bool>
        </property>
        <property name="format">
-        <string>Подключение...</string>
+        <string>Connecting...</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_25">
@@ -386,7 +388,7 @@ color: #333333;</string>
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_new_server_3">
+      <widget class="QPushButton" name="pushButton_new_server_connect">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -418,10 +420,10 @@ border-radius: 4px;
 </string>
        </property>
        <property name="text">
-        <string>Подключиться</string>
+        <string>Connect</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_new_server_4">
+      <widget class="QPushButton" name="pushButton_new_server_setup">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -455,7 +457,7 @@ border-radius: 4px;
 </string>
        </property>
        <property name="text">
-        <string>Настроить собственный сервер</string>
+        <string>Set up your own server</string>
        </property>
       </widget>
      </widget>
@@ -493,11 +495,13 @@ color: #100A44;
 </string>
        </property>
        <property name="text">
-        <string>Подключите ваш сервер,
- чтобы использовать VPN</string>
+        <string>Connect your server to use VPN</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QLabel" name="label_4">
@@ -522,7 +526,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>IP-адрес сервера</string>
+        <string>Server IP address</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_5">
@@ -547,7 +551,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Логин для подключения по SSH</string>
+        <string>Login to connect via SSH</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_6">
@@ -572,7 +576,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Пароль</string>
+        <string>Password</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_new_server_ip">
@@ -593,7 +597,7 @@ box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>51.83.180.158</string>
+        <string/>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_new_server_login">
@@ -614,7 +618,7 @@ box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>root</string>
+        <string/>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_new_server_password">
@@ -635,13 +639,13 @@ box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>qazqazwsxwsx</string>
+        <string/>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_new_server">
+      <widget class="QPushButton" name="pushButton_new_server_connect_with_new_data">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -673,7 +677,7 @@ border-radius: 4px;
 </string>
        </property>
        <property name="text">
-        <string>Подключиться</string>
+        <string>Connect</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton">
@@ -701,7 +705,7 @@ text-align: center;
 color: #15CDCB;</string>
        </property>
        <property name="text">
-        <string>Где взять данные для подключения →</string>
+        <string>Where to get connection data →</string>
        </property>
       </widget>
       <widget class="QProgressBar" name="progressBar_new_server_connection">
@@ -727,7 +731,7 @@ border-radius: 4px;</string>
         <bool>true</bool>
        </property>
        <property name="format">
-        <string>Подключение...</string>
+        <string>Connecting...</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_back_from_new_server">
@@ -786,7 +790,7 @@ QPushButton:hover {
       <zorder>lineEdit_new_server_ip</zorder>
       <zorder>lineEdit_new_server_login</zorder>
       <zorder>lineEdit_new_server_password</zorder>
-      <zorder>pushButton_new_server</zorder>
+      <zorder>pushButton_new_server_connect_with_new_data</zorder>
       <zorder>pushButton</zorder>
       <zorder>pushButton_back_from_new_server</zorder>
       <zorder>label_7</zorder>
@@ -1196,7 +1200,7 @@ QPushButton:hover {
         </rect>
        </property>
        <property name="text">
-        <string>List of most popular prohibited sites</string>
+        <string>List of the most popular prohibited sites</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -1230,7 +1234,7 @@ line-height: 25px;
 color: #181922;</string>
        </property>
        <property name="text">
-        <string>Эти сайты будут открываться через VPN</string>
+        <string>These sites will open via VPN</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1287,7 +1291,7 @@ box-sizing: border-box;</string>
         <set>Qt::AlignCenter</set>
        </property>
        <property name="placeholderText">
-        <string>Например, rutor.org или 17.21.111.8</string>
+        <string>For example, rutor.org or 17.21.111.8</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_sites_add_custom">
@@ -1334,7 +1338,7 @@ font-size: 18pt;</string>
         <string notr="true">color: #181922;</string>
        </property>
        <property name="text">
-        <string>Удалить выбранный</string>
+        <string>Delete selected item</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
@@ -1359,7 +1363,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Адрес сайта или ip-адрес</string>
+        <string>Hostname or IP address</string>
        </property>
       </widget>
      </widget>
@@ -1675,7 +1679,7 @@ color: #A7A7A7;
 </string>
        </property>
        <property name="text">
-        <string>Тот, кто зайдёт с этим кодом, будет иметь те же права на испольтование VPN, что и вы. Чтобы создать новый код смените логин и/или пароль для подлючения в настройках вашего сервера.</string>
+        <string>Anyone who logs in with this code will have the same rights to use the VPN as you. To create a new code, change your login and / or password for connection in your server settings.</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignJustify|Qt::AlignVCenter</set>

@@ -4,25 +4,32 @@
 #include <QThread>
 
 #include "communicator.h"
+#include "core/openvpnconfigurator.h"
+#include "core/servercontroller.h"
 #include "debug.h"
 #include "defines.h"
 #include "mainwindow.h"
+#include "settings.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
 #include "vpnconnection.h"
 
-#include <QStandardPaths>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    m_settings(new Settings),
     m_vpnConnection(nullptr)
 {
     ui->setupUi(this);
 
     // Post initialization
     ui->widget_tittlebar->hide();
-    ui->stackedWidget_main->setCurrentIndex(2);
+
+    if (m_settings->haveAuthData()) {
+        goToPage(Page::Vpn);
+    } else {
+        goToPage(Page::Initialization);
+    }
 
     connect(ui->pushButton_blocked_list, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBlockedListClicked(bool)));
     connect(ui->pushButton_connect, SIGNAL(toggled(bool)), this, SLOT(onPushButtonConnectToggled(bool)));
@@ -30,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->pushButton_back_from_sites, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBackFromSitesClicked(bool)));
     connect(ui->pushButton_back_from_settings, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBackFromSettingsClicked(bool)));
+    connect(ui->pushButton_new_server_setup, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerSetup(bool)));
+    connect(ui->pushButton_back_from_new_server, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBackFromNewServerClicked(bool)));
+    connect(ui->pushButton_new_server_connect_with_new_data, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerConnectWithNewData(bool)));
 
     setFixedSize(width(),height());
 
@@ -66,9 +76,9 @@ MainWindow::~MainWindow()
     qDebug() << "Application closed";
 }
 
-void MainWindow::goToIndex(int index)
+void MainWindow::goToPage(Page page)
 {
-    ui->stackedWidget_main->setCurrentIndex(index);
+    ui->stackedWidget_main->setCurrentIndex(static_cast<int>(page));
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -84,30 +94,60 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void MainWindow::onPushButtonNewServerConnectWithNewData(bool clicked)
+{
+    if (ui->lineEdit_new_server_ip->text().isEmpty() ||
+            ui->lineEdit_new_server_login->text().isEmpty() ||
+            ui->lineEdit_new_server_password->text().isEmpty() ) {
+        QMessageBox::warning(this, APPLICATION_NAME, tr("Please fill in all fields"));
+        return;
+    } else {
+        qDebug() << "Start connection with new data";
+        m_settings->setServerName(ui->lineEdit_new_server_ip->text());
+        m_settings->setLogin(ui->lineEdit_new_server_login->text());
+        m_settings->setPassword(ui->lineEdit_new_server_password->text());
+        m_settings->save();
+
+        if (requestOvpnConfig(m_settings->serverName(), m_settings->login(), m_settings->password())) {
+            goToPage(Page::Vpn);
+        }
+    }
+}
+
 void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
 {
     ui->label_speed_received->setText(VpnConnection::bytesToText(receivedData));
     ui->label_speed_sent->setText(VpnConnection::bytesToText(sentData));
 }
 
+void MainWindow::onPushButtonBackFromNewServerClicked(bool)
+{
+    goToPage(Page::Initialization);
+}
+
+void MainWindow::onPushButtonNewServerSetup(bool)
+{
+    goToPage(Page::NewServer);
+}
+
 void MainWindow::onPushButtonBackFromSettingsClicked(bool)
 {
-    goToIndex(2);
+    goToPage(Page::Vpn);
 }
 
 void MainWindow::onPushButtonBackFromSitesClicked(bool)
 {
-    goToIndex(2);
+    goToPage(Page::Vpn);
 }
 
 void MainWindow::onPushButtonBlockedListClicked(bool)
 {
-    goToIndex(3);
+    goToPage(Page::Sites);
 }
 
 void MainWindow::onPushButtonSettingsClicked(bool)
 {
-    goToIndex(4);
+    goToPage(Page::SomeSettings);
 }
 
 void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
@@ -162,4 +202,32 @@ void MainWindow::onPushButtonConnectToggled(bool checked)
     }
 }
 
+bool MainWindow::requestOvpnConfig(const QString& hostName, const QString& userName, const QString& password, int port, int timeout)
+{
+    QSsh::SshConnectionParameters sshParams;
+    sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
+    sshParams.host = hostName;
+    sshParams.userName = userName;
+    sshParams.password = password;
+    sshParams.timeout = timeout;
+    sshParams.port = port;
+    sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
 
+    if (!ServerController::setupServer(sshParams, ServerController::OpenVPN)) {
+        return false;
+    }
+
+    QString configData = OpenVpnConfigurator::genOpenVpnConfig(sshParams);
+    if (configData.isEmpty()) {
+        return false;
+    }
+
+    QFile file(Utils::defaultVpnConfigFileName());
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+        QTextStream stream(&file);
+        stream << configData << endl;
+        return true;
+    }
+
+    return false;
+}

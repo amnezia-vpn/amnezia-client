@@ -56,7 +56,7 @@ void LocalServer::onNewConnection()
             break;
         }
 
-        if (m_clientConnection->waitForReadyRead() && m_clientConnection->canReadLine()) {
+        if (m_clientConnection->waitForReadyRead(1000) && m_clientConnection->canReadLine()) {
             char buf[1024];
             qint64 lineLength = m_clientConnection->readLine(buf, sizeof(buf));
             if (lineLength != -1) {
