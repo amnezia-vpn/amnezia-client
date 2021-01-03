@@ -16,7 +16,12 @@ class MainWindow;
 /**
  * @brief The MainWindow class - Main application window
  */
+#ifdef Q_OS_WIN
 class MainWindow : public CFramelessWindow
+#else
+class MainWindow : public QMainWindow
+#endif
+
 {
     Q_OBJECT
 

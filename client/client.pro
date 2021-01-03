@@ -23,7 +23,6 @@ HEADERS  += \
             runguard.h \
             settings.h \
             ui/Controls/SlidingStackedWidget.h \
-            ui/framelesswindow.h \
             ui/mainwindow.h \
             utils.h \
             vpnconnection.h \
@@ -67,7 +66,9 @@ win32 {
     OTHER_FILES += platform_win/vpnclient.rc
     RC_FILE = platform_win/vpnclient.rc
 
-    HEADERS +=
+    HEADERS += \
+       ui/framelesswindow.h \
+
     SOURCES += \
        ui/framelesswindow.cpp
 
@@ -92,8 +93,8 @@ win32 {
 macx {
     ICON   = $$PWD/images/app.icns
 
-   HEADERS +=
-   SOURCES += \
-      ui/framelesswindow.mm
+    HEADERS  += ui/macos_util.h
+    SOURCES  += ui/macos_util.mm
 
+    LIBS += -framework Cocoa
 }

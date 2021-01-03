@@ -14,8 +14,16 @@
 #include "utils.h"
 #include "vpnconnection.h"
 
+#ifdef Q_OS_MAC
+#include "ui/macos_util.h"
+#endif
+
 MainWindow::MainWindow(QWidget *parent) :
+#ifdef Q_OS_WIN
     CFramelessWindow(parent),
+#else
+    QMainWindow(parent),
+#endif
     ui(new Ui::MainWindow),
     m_settings(new Settings),
     m_vpnConnection(nullptr)
@@ -25,6 +33,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
+
+#ifdef Q_OS_MAC
+    ui->widget_tittlebar->hide();
+    ui->stackedWidget_main->move(0,0);
+    fixWidget(this);
+#endif
 
     // Post initialization
 
