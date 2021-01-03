@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+#include "framelesswindow.h"
 #include "vpnprotocol.h"
 
 class Settings;
@@ -15,7 +16,7 @@ class MainWindow;
 /**
  * @brief The MainWindow class - Main application window
  */
-class MainWindow : public QMainWindow
+class MainWindow : public CFramelessWindow
 {
     Q_OBJECT
 

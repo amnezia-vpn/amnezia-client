@@ -15,16 +15,13 @@
 #include "vpnconnection.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
+    CFramelessWindow(parent),
     ui(new Ui::MainWindow),
     m_settings(new Settings),
     m_vpnConnection(nullptr)
 {
     ui->setupUi(this);
     ui->widget_tittlebar->installEventFilter(this);
-
-    setWindowFlags(Qt:: ToolTip | Qt::CustomizeWindowHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    setAttribute(Qt::WA_TranslucentBackground);
 
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);

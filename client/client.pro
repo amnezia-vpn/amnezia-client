@@ -23,6 +23,7 @@ HEADERS  += \
             runguard.h \
             settings.h \
             ui/Controls/SlidingStackedWidget.h \
+            ui/framelesswindow.h \
             ui/mainwindow.h \
             utils.h \
             vpnconnection.h \
@@ -67,11 +68,14 @@ win32 {
     RC_FILE = platform_win/vpnclient.rc
 
     HEADERS +=
-    SOURCES +=
+    SOURCES += \
+       ui/framelesswindow.cpp
 
     VERSION = 1.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
+
+
 
     LIBS += \
         -luser32 \
@@ -87,4 +91,9 @@ win32 {
 
 macx {
     ICON   = $$PWD/images/app.icns
+
+   HEADERS +=
+   SOURCES += \
+      ui/framelesswindow.mm
+
 }
