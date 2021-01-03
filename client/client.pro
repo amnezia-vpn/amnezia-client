@@ -66,12 +66,17 @@ win32 {
     OTHER_FILES += platform_win/vpnclient.rc
     RC_FILE = platform_win/vpnclient.rc
 
-    HEADERS +=
-    SOURCES +=
+    HEADERS += \
+       ui/framelesswindow.h \
+
+    SOURCES += \
+       ui/framelesswindow.cpp
 
     VERSION = 1.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
+
+
 
     LIBS += \
         -luser32 \
@@ -87,4 +92,9 @@ win32 {
 
 macx {
     ICON   = $$PWD/images/app.icns
+
+    HEADERS  += ui/macos_util.h
+    SOURCES  += ui/macos_util.mm
+
+    LIBS += -framework Cocoa
 }
