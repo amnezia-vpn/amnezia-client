@@ -37,8 +37,9 @@ private slots:
     void onPushButtonNewServerSetup(bool clicked);
     void onPushButtonSettingsClicked(bool clicked);
 
+    void on_pushButton_close_clicked();
+
 protected:
-    void keyPressEvent(QKeyEvent* event);
     bool requestOvpnConfig(const QString& hostName, const QString& userName, const QString& password, int port = 22, int timeout = 30);
 
 private:
@@ -47,6 +48,11 @@ private:
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
     Settings* m_settings;
+
+    bool canMove = false;
+    QPoint offset;
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

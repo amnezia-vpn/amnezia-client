@@ -36,5 +36,6 @@
         <file>server_scripts/remove_openvpn_server.sh</file>
         <file>server_scripts/setup_openvpn_server.sh</file>
         <file>server_scripts/template.ovpn</file>
+        <file>images/background_connected.png</file>
     </qresource>
 </RCC>

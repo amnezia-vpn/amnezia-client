@@ -21,9 +21,15 @@ MainWindow::MainWindow(QWidget *parent) :
     m_vpnConnection(nullptr)
 {
     ui->setupUi(this);
+    ui->widget_tittlebar->installEventFilter(this);
+
+    setWindowFlags(Qt:: ToolTip | Qt::CustomizeWindowHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    setAttribute(Qt::WA_TranslucentBackground);
+
+    ui->stackedWidget_main->setSpeed(200);
+    ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
 
     // Post initialization
-    ui->widget_tittlebar->hide();
 
     if (m_settings->haveAuthData()) {
         goToPage(Page::Vpn);
@@ -78,7 +84,37 @@ MainWindow::~MainWindow()
 
 void MainWindow::goToPage(Page page)
 {
-    ui->stackedWidget_main->setCurrentIndex(static_cast<int>(page));
+    ui->stackedWidget_main->slideInIdx(static_cast<int>(page));
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->widget_tittlebar) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+
+        if (!mouseEvent)
+            return false;
+
+        if(event->type() == QEvent::MouseButtonPress) {
+            offset = mouseEvent->pos();
+            canMove = true;
+        }
+
+        if(event->type() == QEvent::MouseButtonRelease) {
+            canMove = false;
+        }
+
+        if (event->type() == QEvent::MouseMove) {
+            if(canMove && (mouseEvent->buttons() & Qt::LeftButton)) {
+                move(mapToParent(mouseEvent->pos() - offset));
+            }
+
+            event->ignore();
+            return false;
+        }
+    }
+
+    return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -108,8 +144,19 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool clicked)
         m_settings->setPassword(ui->lineEdit_new_server_password->text());
         m_settings->save();
 
+        //goToPage(Page::Vpn);
+
         if (requestOvpnConfig(m_settings->serverName(), m_settings->login(), m_settings->password())) {
             goToPage(Page::Vpn);
+
+            ui->pushButton_connect->setDown(true);
+
+            if (!m_vpnConnection->connectToVpn()) {
+                ui->pushButton_connect->setChecked(false);
+                QMessageBox::critical(this, APPLICATION_NAME, m_vpnConnection->lastError());
+                return;
+            }
+
         }
     }
 }
@@ -230,4 +277,9 @@ bool MainWindow::requestOvpnConfig(const QString& hostName, const QString& userN
     }
 
     return false;
+}
+
+void MainWindow::on_pushButton_close_clicked()
+{
+    qApp->exit();
 }

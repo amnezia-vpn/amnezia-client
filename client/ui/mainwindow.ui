@@ -231,9 +231,7 @@ image-position: right;
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
       <property name="styleSheet">
-       <string notr="true">
-
-QPushButton {
+       <string notr="true">QPushButton {
 image-position: right;
 image: url(:/images/close.png);
 
@@ -381,7 +379,6 @@ border-radius: 4px;</string>
 
 /* grey */
 border: 1px solid #A7A7A7;
-box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
@@ -593,7 +590,6 @@ color: #333333;</string>
 
 /* grey */
 border: 1px solid #A7A7A7;
-box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
@@ -614,11 +610,10 @@ color: #333333;</string>
 
 /* grey */
 border: 1px solid #A7A7A7;
-box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string/>
+        <string>root</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_new_server_password">
@@ -635,7 +630,6 @@ color: #333333;</string>
 
 /* grey */
 border: 1px solid #A7A7A7;
-box-sizing: border-box;
 color: #333333;</string>
        </property>
        <property name="text">
@@ -684,9 +678,9 @@ border-radius: 4px;
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>120</y>
+         <y>115</y>
          <width>281</width>
-         <height>16</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -695,10 +689,6 @@ font-style: normal;
 font-weight: normal;
 font-size: 16px;
 line-height: 20px;
-
-/* or 125% */
-display: flex;
-align-items: center;
 text-align: center;
 
 /* акцент */
@@ -805,14 +795,14 @@ QPushButton:hover {
          <x>0</x>
          <y>0</y>
          <width>380</width>
-         <height>200</height>
+         <height>325</height>
         </rect>
        </property>
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">image: url(:/images/tray/active.png);</string>
+        <string notr="true">border-image: url(:/images/background_connected.png);</string>
        </property>
        <property name="text">
         <string/>
@@ -955,7 +945,7 @@ line-height: 21px;
 </string>
        </property>
        <property name="text">
-        <string>Add site</string>
+        <string>+ Add site</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_settings">
@@ -1282,7 +1272,7 @@ color: #181922;</string>
 
 /* grey */
 border: 1px solid #A7A7A7;
-box-sizing: border-box;</string>
+</string>
        </property>
        <property name="text">
         <string/>
@@ -1431,9 +1421,6 @@ font-style: normal;
 font-weight: bold;
 font-size: 20px;
 line-height: 25px;
-/* identical to box height, or 125% */
-display: flex;
-align-items: center;
 Text-align:left;
 padding-left: 30px;
 
@@ -1480,9 +1467,6 @@ font-style: normal;
 font-weight: bold;
 font-size: 20px;
 line-height: 25px;
-/* identical to box height, or 125% */
-display: flex;
-align-items: center;
 Text-align:left;
 padding-left: 30px;
 
