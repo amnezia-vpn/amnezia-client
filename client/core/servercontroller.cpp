@@ -51,11 +51,17 @@ bool ServerController::runScript(const SshConnectionParameters &sshParams, QStri
         });
 
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-            qDebug().noquote() << proc->readAllStandardOutput();
+            QString s = proc->readAllStandardOutput();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
         });
 
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-            qDebug().noquote() << proc->readAllStandardError();
+            QString s = proc->readAllStandardError();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
         });
 
         proc->start();
@@ -64,7 +70,7 @@ bool ServerController::runScript(const SshConnectionParameters &sshParams, QStri
         }
     }
 
-    qDebug() << "ServerController::runScript finished";
+    qDebug() << "ServerController::runScript finished\n";
 
 //    client->disconnectFromHost();
 
@@ -117,6 +123,8 @@ QString ServerController::getTextFileFromContainer(const SshConnectionParameters
 {
     QString script = QString("docker exec -i amneziavpn sh -c \"cat \'%1\'\"").
             arg(path);
+
+    qDebug().noquote() << "Copy file from container\n" << script;
 
     SshConnection *client = connectToHost(sshParams);
     QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(script.toUtf8());
