@@ -121,12 +121,12 @@ bool OpenVpnProtocol::start()
     }
 
     if (!QFileInfo::exists(openVpnExecPath())) {
-        setLastError("OpeVPN executable does not exist!");
+        setLastError("OpenVPN executable does not exist!\n" + openVpnExecPath());
         return false;
     }
 
     if (!QFileInfo::exists(configPath())) {
-        setLastError("OpeVPN config file does not exist!");
+        setLastError("OpenVPN config file does not exist!\n" + configPath());
         return false;
     }
 
