@@ -19,11 +19,6 @@ VpnProtocol::VpnProtocol(const QString& args, QObject* parent)
     Q_UNUSED(args)
 }
 
-VpnProtocol::~VpnProtocol()
-{
-
-}
-
 void VpnProtocol::initializeCommunicator(QObject* parent)
 {
     if (!m_communicator) {
@@ -36,13 +31,13 @@ Communicator* VpnProtocol::communicator()
     return m_communicator;
 }
 
-void VpnProtocol::setLastError(const QString& error)
+void VpnProtocol::setLastError(ErrorCode lastError)
 {
-    m_lastError = error;
+    m_lastError = lastError;
     qCritical().noquote() << m_lastError;
 }
 
-QString VpnProtocol::lastError() const
+ErrorCode VpnProtocol::lastError() const
 {
     return m_lastError;
 }

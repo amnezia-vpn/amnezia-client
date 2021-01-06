@@ -653,10 +653,7 @@ color: #333333;</string>
        </property>
        <property name="styleSheet">
         <string notr="true">QPushButton {
-	font-size: 13pt;
-	font: &quot;Open Sans Semibold&quot;;
-	color:rgb(212, 212, 212);
-	
+color:rgb(212, 212, 212);
 border-radius: 4px;
 
 font-family: Lato;
@@ -708,8 +705,26 @@ color: #15CDCB;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #181922;
-border-radius: 4px;</string>
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
        </property>
        <property name="value">
         <number>24</number>
@@ -721,7 +736,7 @@ border-radius: 4px;</string>
         <bool>true</bool>
        </property>
        <property name="format">
-        <string>Connecting...</string>
+        <string>Configuring...</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_back_from_new_server">
@@ -772,6 +787,25 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
+      <widget class="QLabel" name="label_new_server_wait_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>490</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Please wait, configuring process may take up to 5 minutes</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
       <zorder>progressBar_new_server_connection</zorder>
       <zorder>label_2</zorder>
       <zorder>label_4</zorder>
@@ -784,6 +818,7 @@ QPushButton:hover {
       <zorder>pushButton</zorder>
       <zorder>pushButton_back_from_new_server</zorder>
       <zorder>label_7</zorder>
+      <zorder>label_new_server_wait_info</zorder>
      </widget>
      <widget class="QWidget" name="page_amnezia">
       <property name="styleSheet">

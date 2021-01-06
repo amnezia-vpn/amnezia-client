@@ -12,30 +12,31 @@ Settings::Settings(QObject* parent) : QObject(parent)
 void Settings::read()
 {
     m_settings->beginGroup("Server");
-    m_login = m_settings->value("login", QString()).toString();
+    m_userName = m_settings->value("userName", QString()).toString();
     m_password = m_settings->value("password", QString()).toString();
     m_serverName = m_settings->value("serverName", QString()).toString();
+    m_serverPort = m_settings->value("serverPort", 22).toInt();
     m_settings->endGroup();
 }
-
 
 void Settings::save()
 {
     m_settings->beginGroup("Server");
-    m_settings->setValue("login", m_login);
+    m_settings->setValue("userName", m_userName);
     m_settings->setValue("password", m_password);
     m_settings->setValue("serverName", m_serverName);
+    m_settings->setValue("serverPort", m_serverPort);
     m_settings->endGroup();
 }
 
 bool Settings::haveAuthData() const
 {
-    return (!serverName().isEmpty() && !login().isEmpty() && !password().isEmpty());
+    return (!serverName().isEmpty() && !userName().isEmpty() && !password().isEmpty());
 }
 
-void Settings::setLogin(const QString& login)
+void Settings::setUserName(const QString& login)
 {
-    m_login = login;
+    m_userName = login;
 }
 
 void Settings::setPassword(const QString& password)
@@ -48,17 +49,26 @@ void Settings::setServerName(const QString& serverName)
     m_serverName = serverName;
 }
 
-QString Settings::login() const
+void Settings::setServerPort(int serverPort)
 {
-    return m_login;
+    m_serverPort = serverPort;
 }
 
-QString Settings::password() const
+void Settings::setServerCredentials(const ServerCredentials &credentials)
 {
-    return m_password;
+    setServerName(credentials.hostName);
+    setServerPort(credentials.port);
+    setUserName(credentials.userName);
+    setPassword(credentials.password);
 }
 
-QString Settings::serverName() const
+ServerCredentials Settings::serverCredentials()
 {
-    return m_serverName;
+    ServerCredentials credentials;
+    credentials.hostName = serverName();
+    credentials.userName = userName();
+    credentials.password = password();
+    credentials.port = serverPort();
+
+    return credentials;
 }

@@ -107,7 +107,7 @@ QString OpenVpnProtocol::openVpnExecPath() const
 #endif
 }
 
-bool OpenVpnProtocol::start()
+ErrorCode OpenVpnProtocol::start()
 {
     qDebug() << "Start OpenVPN connection";
 
@@ -116,18 +116,18 @@ bool OpenVpnProtocol::start()
     stop();
 
     if (communicator() && !communicator()->connected()) {
-        setLastError("Communicator is not connected!");
-        return false;
+        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
+        return lastError();
     }
 
     if (!QFileInfo::exists(openVpnExecPath())) {
-        setLastError("OpenVPN executable does not exist!\n" + openVpnExecPath());
-        return false;
+        setLastError(ErrorCode::OpenVpnExecutableMissing);
+        return lastError();
     }
 
     if (!QFileInfo::exists(configPath())) {
-        setLastError("OpenVPN config file does not exist!\n" + configPath());
-        return false;
+        setLastError(ErrorCode::OpenVpnConfigMissing);
+        return lastError();
     }
 
     QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
@@ -141,14 +141,15 @@ bool OpenVpnProtocol::start()
                      });
 
     if (!m_managementServer.start(m_managementHost, m_managementPort)) {
-        return false;
+        setLastError(ErrorCode::OpenVpnManagementServerError);
+        return lastError();
     }
 
     setConnectionState(ConnectionState::Connecting);
     m_communicator->sendMessage(Message(Message::State::StartRequest, args));
     startTimeoutTimer();
 
-    return true;
+    return ErrorCode::NoError;
 }
 
 void OpenVpnProtocol::openVpnStateSigTermHandlerTimerEvent()

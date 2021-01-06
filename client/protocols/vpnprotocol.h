@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QString>
 
+#include "core/defs.h"
+using namespace amnezia;
+
 class QTimer;
 class Communicator;
 
@@ -13,7 +16,7 @@ class VpnProtocol : public QObject
 
 public:
     explicit VpnProtocol(const QString& args = QString(), QObject* parent = nullptr);
-    ~VpnProtocol();
+    virtual ~VpnProtocol() override = default;
 
     enum class ConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, TunnelReconnecting, Error};
 
@@ -24,13 +27,13 @@ public:
 
     virtual bool connected() const;
     virtual bool disconnected() const;
-    virtual bool start() = 0;
+    virtual ErrorCode start() = 0;
     virtual void stop() = 0;
 
     ConnectionState connectionState() const;
-    QString lastError() const;
+    ErrorCode lastError() const;
     QString textConnectionState() const;
-    void setLastError(const QString& error);
+    void setLastError(ErrorCode lastError);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -53,7 +56,7 @@ protected:
 
 private:
     QTimer* m_timeoutTimer;
-    QString m_lastError;
+    ErrorCode m_lastError;
     quint64 m_receivedBytes;
     quint64 m_sentBytes;
 };
