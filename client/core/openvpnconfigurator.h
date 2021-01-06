@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QProcessEnvironment>
+
+#include "defs.h"
 #include "servercontroller.h"
 
 
@@ -20,7 +22,7 @@ public:
         QString host; // host ip
     };
 
-    static QString genOpenVpnConfig(const QSsh::SshConnectionParameters &sshParams);
+    static QString genOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
 private:
     static QString getRandomString(int len);
@@ -32,7 +34,7 @@ private:
 
     static ConnectionData createCertRequest();
 
-    static ConnectionData prepareOpenVpnConfig(const QSsh::SshConnectionParameters &sshParams);
+    static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
 };
 

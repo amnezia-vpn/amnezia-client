@@ -37,5 +37,6 @@
         <file>server_scripts/setup_openvpn_server.sh</file>
         <file>server_scripts/template.ovpn</file>
         <file>images/background_connected.png</file>
+        <file>server_scripts/setup_shadowsocks_server.sh</file>
     </qresource>
 </RCC>

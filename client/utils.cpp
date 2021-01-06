@@ -81,7 +81,7 @@ bool Utils::processIsRunning(const QString& fileName)
 #ifdef Q_OS_WIN
     QProcess process;
     process.setReadChannel(QProcess::StandardOutput);
-    process.setReadChannelMode(QProcess::MergedChannels);
+    process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(QString("wmic.exe /OUTPUT:STDOUT PROCESS get %1").arg("Caption"));
     process.waitForStarted();
     process.waitForFinished();

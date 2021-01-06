@@ -17,7 +17,7 @@ public:
     explicit OpenVpnProtocol(const QString& args = QString(), QObject* parent = nullptr);
     ~OpenVpnProtocol();
 
-    bool start() override;
+    ErrorCode start() override;
     void stop() override;
 
 protected slots:

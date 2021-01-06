@@ -121,31 +121,39 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     return connData;
 }
 
-OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const QSsh::SshConnectionParameters &sshParams)
+OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
-    connData.host = sshParams.host;
+    connData.host = credentials.hostName;
 
     QString reqFileName = QString("/opt/amneziavpn_data/clients/%1.req").arg(connData.clientId);
-    ServerController::uploadTextFileToContainer(sshParams, connData.request, reqFileName);
+    ErrorCode e = ServerController::uploadTextFileToContainer(credentials, connData.request, reqFileName);
+    if (e) {
+        *errorCode = e;
+        return connData;
+    }
 
-    ServerController::signCert(sshParams, connData.clientId);
+    ServerController::signCert(credentials, connData.clientId);
 
-    connData.caCert = ServerController::getTextFileFromContainer(sshParams, QString("/opt/amneziavpn_data/pki/ca.crt"));
-    connData.clientCert = ServerController::getTextFileFromContainer(sshParams, QString("/opt/amneziavpn_data/pki/issued/%1.crt").arg(connData.clientId));
-    connData.taKey = ServerController::getTextFileFromContainer(sshParams, QString("/opt/amneziavpn_data/ta.key"));
+    connData.caCert = ServerController::getTextFileFromContainer(credentials, ServerController::caCertPath(), &e);
+    connData.clientCert = ServerController::getTextFileFromContainer(credentials, ServerController::clientCertPath() + QString("%1.crt").arg(connData.clientId), &e);
+    if (e) {
+        *errorCode = e;
+        return connData;
+    }
 
+    connData.taKey = ServerController::getTextFileFromContainer(credentials, ServerController::taKeyPath(), &e);
 
     return connData;
 }
 
-QString OpenVpnConfigurator::genOpenVpnConfig(const QSsh::SshConnectionParameters &sshParams)
+QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode)
 {
     QFile configTemplFile(":/server_scripts/template.ovpn");
     configTemplFile.open(QIODevice::ReadOnly);
     QString config = configTemplFile.readAll();
 
-    ConnectionData connData = prepareOpenVpnConfig(sshParams);
+    ConnectionData connData = prepareOpenVpnConfig(credentials, errorCode);
 
     config.replace("$PROTO", "udp");
     config.replace("$REMOTE_HOST", connData.host);

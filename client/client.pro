@@ -11,6 +11,8 @@ include("3rd/QtSsh/src/botan/botan.pri")
 
 HEADERS  += \
             communicator.h \
+   core/defs.h \
+   core/errorstrings.h \
             core/openvpnconfigurator.h \
             core/router.h \
             core/servercontroller.h \
@@ -19,14 +21,14 @@ HEADERS  += \
             localclient.h \
             managementserver.h \
             message.h \
-            openvpnprotocol.h \
             runguard.h \
             settings.h \
             ui/Controls/SlidingStackedWidget.h \
             ui/mainwindow.h \
             utils.h \
             vpnconnection.h \
-            vpnprotocol.h \
+            protocols/vpnprotocol.h \
+            protocols/openvpnprotocol.h \
 
 SOURCES  += \
             communicator.cpp \
@@ -38,14 +40,14 @@ SOURCES  += \
             main.cpp \
             managementserver.cpp \
             message.cpp \
-            openvpnprotocol.cpp \
             runguard.cpp \
             settings.cpp \
             ui/Controls/SlidingStackedWidget.cpp \
             ui/mainwindow.cpp \
             utils.cpp \
             vpnconnection.cpp \
-            vpnprotocol.cpp \
+            protocols/vpnprotocol.cpp \
+            protocols/openvpnprotocol.cpp \
 
 FORMS    += ui/mainwindow.ui
 

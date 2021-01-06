@@ -5,7 +5,10 @@
 #include <QString>
 #include <QScopedPointer>
 
-#include "vpnprotocol.h"
+#include "protocols/vpnprotocol.h"
+#include "core/defs.h"
+
+using namespace amnezia;
 
 class VpnConnection : public QObject
 {
@@ -13,13 +16,13 @@ class VpnConnection : public QObject
 
 public:
     explicit VpnConnection(QObject* parent = nullptr);
-    ~VpnConnection();
+    ~VpnConnection() override = default;
 
-    enum class Protocol{OpenVpn};
     static QString bytesToText(quint64 bytes);
 
-    QString lastError() const;
-    bool connectToVpn(Protocol protocol = Protocol::OpenVpn);
+    ErrorCode lastError() const;
+    ErrorCode requestVpnConfig(const ServerCredentials &credentials, Protocol protocol);
+    ErrorCode connectToVpn(const ServerCredentials &credentials, Protocol protocol = Protocol::Any);
     bool connected() const;
     bool disconnected() const;
     void disconnectFromVpn();

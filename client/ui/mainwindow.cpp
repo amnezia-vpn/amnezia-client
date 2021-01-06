@@ -2,10 +2,14 @@
 #include <QMessageBox>
 #include <QSysInfo>
 #include <QThread>
+#include <QTimer>
 
 #include "communicator.h"
+
+#include "core/errorstrings.h"
 #include "core/openvpnconfigurator.h"
 #include "core/servercontroller.h"
+
 #include "debug.h"
 #include "defines.h"
 #include "mainwindow.h"
@@ -34,6 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
 
+    ui->label_new_server_wait_info->setVisible(false);
+    ui->progressBar_new_server_connection->setMinimum(0);
+    ui->progressBar_new_server_connection->setMaximum(300);
+
 #ifdef Q_OS_MAC
     ui->widget_tittlebar->hide();
     ui->stackedWidget_main->move(0,0);
@@ -47,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         goToPage(Page::Initialization);
     }
+
+    //goToPage(Page::Initialization);
 
     connect(ui->pushButton_blocked_list, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBlockedListClicked(bool)));
     connect(ui->pushButton_connect, SIGNAL(toggled(bool)), this, SLOT(onPushButtonConnectToggled(bool)));
@@ -148,28 +158,71 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool clicked)
             ui->lineEdit_new_server_password->text().isEmpty() ) {
         QMessageBox::warning(this, APPLICATION_NAME, tr("Please fill in all fields"));
         return;
-    } else {
-        qDebug() << "Start connection with new data";
-        m_settings->setServerName(ui->lineEdit_new_server_ip->text());
-        m_settings->setLogin(ui->lineEdit_new_server_login->text());
-        m_settings->setPassword(ui->lineEdit_new_server_password->text());
-        m_settings->save();
-
-        //goToPage(Page::Vpn);
-
-        if (requestOvpnConfig(m_settings->serverName(), m_settings->login(), m_settings->password())) {
-            goToPage(Page::Vpn);
-
-            ui->pushButton_connect->setDown(true);
-
-            if (!m_vpnConnection->connectToVpn()) {
-                ui->pushButton_connect->setChecked(false);
-                QMessageBox::critical(this, APPLICATION_NAME, m_vpnConnection->lastError());
-                return;
-            }
-
-        }
     }
+
+    qDebug() << "Start connection with new data";
+
+    ServerCredentials serverCredentials;
+    serverCredentials.hostName = ui->lineEdit_new_server_ip->text();
+    if (serverCredentials.hostName.contains(":")) {
+        serverCredentials.port = serverCredentials.hostName.split(":").at(1).toInt();
+        serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
+    }
+    serverCredentials.userName = ui->lineEdit_new_server_login->text();
+    serverCredentials.password = ui->lineEdit_new_server_password->text();
+
+    m_settings->setServerCredentials(serverCredentials);
+    m_settings->save();
+
+    ui->page_new_server->setEnabled(false);
+    ui->pushButton_new_server_connect_with_new_data->setVisible(false);
+    ui->label_new_server_wait_info->setVisible(true);
+
+    QTimer timer;
+    connect(&timer, &QTimer::timeout, [&](){
+        ui->progressBar_new_server_connection->setValue(ui->progressBar_new_server_connection->value() + 1);
+    });
+
+    ui->progressBar_new_server_connection->setValue(0);
+    timer.start(1000);
+
+
+    ErrorCode e = ServerController::setupServer(serverCredentials, Protocol::Any);
+    if (e) {
+        ui->page_new_server->setEnabled(true);
+        ui->pushButton_new_server_connect_with_new_data->setVisible(true);
+        ui->label_new_server_wait_info->setVisible(false);
+
+        QMessageBox::warning(this, APPLICATION_NAME,
+                             tr("Error occurred while configuring server.") + "\n" +
+                             errorString(e) + "\n" +
+                             tr("See logs for details."));
+
+        return;
+    }
+
+    // just ui progressbar tweak
+    timer.stop();
+
+    int remaining_val = ui->progressBar_new_server_connection->maximum() - ui->progressBar_new_server_connection->value();
+
+    if (remaining_val > 0) {
+        QTimer timer1;
+        QEventLoop loop1;
+
+        connect(&timer1, &QTimer::timeout, [&](){
+            ui->progressBar_new_server_connection->setValue(ui->progressBar_new_server_connection->value() + 1);
+            if (ui->progressBar_new_server_connection->value() >= ui->progressBar_new_server_connection->maximum()) {
+                loop1.quit();
+            }
+        });
+
+        timer1.start(5);
+        loop1.exec();
+    }
+
+    goToPage(Page::Vpn);
+    ui->pushButton_connect->setChecked(true);
 }
 
 void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
@@ -249,45 +302,19 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 void MainWindow::onPushButtonConnectToggled(bool checked)
 {
     if (checked) {
-        if (!m_vpnConnection->connectToVpn()) {
+        // TODO: Call connectToVpn with restricted server account
+        ServerCredentials credentials = m_settings->serverCredentials();
+
+        ErrorCode errorCode = m_vpnConnection->connectToVpn(credentials);
+        if (errorCode) {
             ui->pushButton_connect->setChecked(false);
-            QMessageBox::critical(this, APPLICATION_NAME, m_vpnConnection->lastError());
+            QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
             return;
         }
         ui->pushButton_connect->setEnabled(false);
     } else {
         m_vpnConnection->disconnectFromVpn();
     }
-}
-
-bool MainWindow::requestOvpnConfig(const QString& hostName, const QString& userName, const QString& password, int port, int timeout)
-{
-    QSsh::SshConnectionParameters sshParams;
-    sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
-    sshParams.host = hostName;
-    sshParams.userName = userName;
-    sshParams.password = password;
-    sshParams.timeout = timeout;
-    sshParams.port = port;
-    sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
-
-    if (!ServerController::setupServer(sshParams, ServerController::OpenVPN)) {
-        return false;
-    }
-
-    QString configData = OpenVpnConfigurator::genOpenVpnConfig(sshParams);
-    if (configData.isEmpty()) {
-        return false;
-    }
-
-    QFile file(Utils::defaultVpnConfigFileName());
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
-        QTextStream stream(&file);
-        stream << configData << endl;
-        return true;
-    }
-
-    return false;
 }
 
 void MainWindow::on_pushButton_close_clicked()

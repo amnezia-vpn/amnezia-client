@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "framelesswindow.h"
-#include "vpnprotocol.h"
+#include "protocols/vpnprotocol.h"
 
 class Settings;
 class VpnConnection;
@@ -44,9 +44,6 @@ private slots:
     void onPushButtonSettingsClicked(bool clicked);
 
     void on_pushButton_close_clicked();
-
-protected:
-    bool requestOvpnConfig(const QString& hostName, const QString& userName, const QString& password, int port = 22, int timeout = 30);
 
 private:
     void goToPage(Page page);
