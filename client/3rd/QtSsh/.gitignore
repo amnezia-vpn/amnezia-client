@@ -1,8 +1,17 @@
 # User settings
 *.user
 macOSPackage/
-AmneziaVPN.dmg
-AmneziaVPN.exe
+
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
 
 # Qt-es
 /.qmake.cache
@@ -39,4 +48,3 @@ CMakeLists.txt.user*
 
 # Certificates
 *.p12
-

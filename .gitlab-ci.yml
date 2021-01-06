@@ -1,0 +1,27 @@
+variables:
+    GIT_STRATEGY: clone
+
+stages:
+  - build
+
+build-windows:
+  stage: build
+  tags:
+    - windows
+  script:
+    - cmd.exe /k "deploy\windows-env.bat && cd deploy && windows.bat"
+  artifacts:
+    name: artifacts-windows
+    paths:
+    - AmneziaVPN.exe
+
+build-macos:
+  stage: build
+  tags:
+    - macos
+  script:
+    - cd deploy && ./macos.sh
+  artifacts:
+    name: artifacts-macos
+    paths:
+    - AmneziaVPN.dmg
