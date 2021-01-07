@@ -44,12 +44,12 @@ void ManagementServer::onNewConnection()
 {
     qDebug() << "New incoming connection";
 
-    m_socket = m_tcpServer->nextPendingConnection();
+    m_socket = QPointer<QTcpSocket>(m_tcpServer->nextPendingConnection());
     m_tcpServer->close();
 
-    QObject::connect(m_socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
-    QObject::connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-    QObject::connect(m_socket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    QObject::connect(m_socket.data(), SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
+    QObject::connect(m_socket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
+    QObject::connect(m_socket.data(), SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 }
 
 void ManagementServer::onSocketError(QAbstractSocket::SocketError socketError)
@@ -61,10 +61,10 @@ void ManagementServer::onSocketError(QAbstractSocket::SocketError socketError)
 
 void ManagementServer::onSocketDisconnected()
 {
-    m_socket->deleteLater();
+    if (m_socket) m_socket->deleteLater();
 }
 
-QTcpSocket* ManagementServer::socket() const
+QPointer<QTcpSocket> ManagementServer::socket() const
 {
     if (!isOpen()) {
         return nullptr;
@@ -80,14 +80,16 @@ void ManagementServer::onReadyRead()
 bool ManagementServer::start(const QString& host, unsigned int port)
 {
     if (m_tcpServer) {
-        delete m_tcpServer;
+        m_tcpServer->deleteLater();
     }
 
-    m_tcpServer = new QTcpServer(this);
+    m_tcpServer =  QSharedPointer<QTcpServer>(new QTcpServer(this), [](QTcpServer *s){
+        if (s) s->deleteLater();
+    });
     m_tcpServer->setMaxPendingConnections(1);
 
-    connect(m_tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onAcceptError(QAbstractSocket::SocketError)));
-    connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+    connect(m_tcpServer.data(), SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onAcceptError(QAbstractSocket::SocketError)));
+    connect(m_tcpServer.data(), SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 
     if (m_tcpServer->listen(QHostAddress(host), port)) {
         emit serverStarted();

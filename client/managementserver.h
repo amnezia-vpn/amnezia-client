@@ -2,6 +2,8 @@
 #define MANAGEMENTSERVER_H
 
 #include <QAbstractSocket>
+#include <QPointer>
+#include <QSharedPointer>
 #include <QString>
 
 class QTcpServer;
@@ -22,7 +24,7 @@ public:
     QString readLine();
     qint64 writeCommand(const QString& message);
 
-    QTcpSocket* socket() const;
+    QPointer<QTcpSocket> socket() const;
 
 signals:
     void readyRead();
@@ -36,8 +38,8 @@ protected slots:
     void onSocketError(QAbstractSocket::SocketError socketError);
 
 protected:
-    QTcpServer* m_tcpServer;
-    QTcpSocket* m_socket;
+    QSharedPointer<QTcpServer> m_tcpServer;
+    QPointer<QTcpSocket> m_socket;
 };
 
 #endif // MANAGEMENTSERVER_H
