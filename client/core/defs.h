@@ -44,6 +44,7 @@ enum ErrorCode
     FailedToSaveConfigData,
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
+    EasyRsaError,
 
     // Distro errors
     AmneziaServiceConnectionFailed,

@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QTcpSocket>
 
 #include "communicator.h"
 #include "debug.h"
@@ -94,8 +95,11 @@ QString OpenVpnProtocol::configPath() const
 
 void OpenVpnProtocol::writeCommand(const QString& command)
 {
-    QTextStream stream(reinterpret_cast<QIODevice*>(m_managementServer.socket()));
-    stream << command << endl;
+    QIODevice *device = dynamic_cast<QIODevice*>(m_managementServer.socket().data());
+    if (device) {
+        QTextStream stream(device);
+        stream << command << endl;
+    }
 }
 
 QString OpenVpnProtocol::openVpnExecPath() const
