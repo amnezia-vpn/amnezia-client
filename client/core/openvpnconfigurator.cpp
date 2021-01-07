@@ -41,6 +41,8 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString pathEnvVar = env.value("PATH");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\bin;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\i386;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\x64;");
 
     env.insert("PATH", pathEnvVar);
     return env;

@@ -267,7 +267,7 @@ QStackedWidget QWidget {
 </string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_connect_server">
       <widget class="QLabel" name="label_23">
@@ -833,9 +833,6 @@ QPushButton:hover {
          <height>325</height>
         </rect>
        </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
        <property name="styleSheet">
         <string notr="true">border-image: url(:/images/background_connected.png);</string>
        </property>
@@ -1114,6 +1111,9 @@ color: #181922;
        <property name="text">
         <string>For all connections</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_2">
        <property name="enabled">
@@ -1131,7 +1131,7 @@ color: #181922;
         <string>For selected sites</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </widget>

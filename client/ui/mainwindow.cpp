@@ -51,12 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Post initialization
 
     if (m_settings->haveAuthData()) {
-        goToPage(Page::Vpn);
+        ui->stackedWidget_main->setCurrentWidget(ui->page_amnezia);
     } else {
-        goToPage(Page::Initialization);
+        ui->stackedWidget_main->setCurrentWidget(ui->page_new_server);
     }
-
-    //goToPage(Page::Initialization);
 
     connect(ui->pushButton_blocked_list, SIGNAL(clicked(bool)), this, SLOT(onPushButtonBlockedListClicked(bool)));
     connect(ui->pushButton_connect, SIGNAL(toggled(bool)), this, SLOT(onPushButtonConnectToggled(bool)));
