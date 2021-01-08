@@ -29,8 +29,8 @@ private:
     static QString getEasyRsaShPath();
 
     static QProcessEnvironment prepareEnv();
-    static void initPKI(const QString &path);
-    static QString genReq(const QString &path, const QString &clientId);
+    static ErrorCode initPKI(const QString &path);
+    static ErrorCode genReq(const QString &path, const QString &clientId);
 
     static ConnectionData createCertRequest();
 
