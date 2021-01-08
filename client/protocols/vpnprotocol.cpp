@@ -93,14 +93,14 @@ void VpnProtocol::setConnectionState(VpnProtocol::ConnectionState state)
 QString VpnProtocol::textConnectionState(ConnectionState connectionState)
 {
     switch (connectionState) {
-    case ConnectionState::Unknown: return "Unknown";
-    case ConnectionState::Disconnected: return "Disconnected";
-    case ConnectionState::Preparing: return "Preparing";
-    case ConnectionState::Connecting: return "Connecting";
-    case ConnectionState::Connected: return "Connected";
-    case ConnectionState::Disconnecting: return "Disconnecting";
-    case ConnectionState::TunnelReconnecting: return "TunnelReconnecting";
-    case ConnectionState::Error: return "Error";
+    case ConnectionState::Unknown: return tr("Unknown");
+    case ConnectionState::Disconnected: return tr("Disconnected");
+    case ConnectionState::Preparing: return tr("Preparing");
+    case ConnectionState::Connecting: return tr("Connecting");
+    case ConnectionState::Connected: return tr("Connected");
+    case ConnectionState::Disconnecting: return tr("Disconnecting");
+    case ConnectionState::TunnelReconnecting: return tr("TunnelReconnecting");
+    case ConnectionState::Error: return tr("Error");
     default:
         ;
     }
@@ -113,12 +113,12 @@ QString VpnProtocol::textConnectionState() const
     return textConnectionState(m_connectionState);
 }
 
-bool VpnProtocol::connected() const
+bool VpnProtocol::onConnected() const
 {
     return m_connectionState == ConnectionState::Connected;
 }
 
-bool VpnProtocol::disconnected() const
+bool VpnProtocol::onDisconnected() const
 {
     return m_connectionState == ConnectionState::Disconnected;
 }

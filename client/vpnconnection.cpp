@@ -69,7 +69,11 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
         if (e) {
             return e;
         }
+        if (m_vpnProtocol) {
+            disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        }
         m_vpnProtocol.reset(new OpenVpnProtocol());
+        connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     }
     else if (protocol == Protocol::ShadowSocks) {
         return ErrorCode::NotImplementedError;
@@ -96,20 +100,20 @@ void VpnConnection::disconnectFromVpn()
     m_vpnProtocol.data()->stop();
 }
 
-bool VpnConnection::connected() const
+bool VpnConnection::onConnected() const
 {
     if (!m_vpnProtocol.data()) {
         return false;
     }
 
-    return m_vpnProtocol.data()->connected();
+    return m_vpnProtocol.data()->onConnected();
 }
 
-bool VpnConnection::disconnected() const
+bool VpnConnection::onDisconnected() const
 {
     if (!m_vpnProtocol.data()) {
         return true;
     }
 
-    return m_vpnProtocol.data()->disconnected();
+    return m_vpnProtocol.data()->onDisconnected();
 }

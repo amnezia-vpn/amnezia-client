@@ -25,8 +25,8 @@ public:
     static void initializeCommunicator(QObject* parent = nullptr);
 
 
-    virtual bool connected() const;
-    virtual bool disconnected() const;
+    virtual bool onConnected() const;
+    virtual bool onDisconnected() const;
     virtual ErrorCode start() = 0;
     virtual void stop() = 0;
 
@@ -39,6 +39,7 @@ signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
     void timeoutTimerEvent();
+    void protocolError(amnezia::ErrorCode e);
 
 protected slots:
     virtual void onTimeout();

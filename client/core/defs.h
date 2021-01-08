@@ -47,9 +47,13 @@ enum ErrorCode
     EasyRsaError,
 
     // Distro errors
-    AmneziaServiceConnectionFailed,
     OpenVpnExecutableMissing,
-    EasyRsaExecutableMissing
+    EasyRsaExecutableMissing,
+    AmneziaServiceConnectionFailed,
+
+    // VPN errors
+    OpenVpnAdaptersInUseError,
+    OpenVpnUnknownError
 };
 
 } // namespace amnezia

@@ -119,7 +119,7 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnStateSigTermHandlerTimer.stop();
     stop();
 
-    if (communicator() && !communicator()->connected()) {
+    if (communicator() && !communicator()->isConnected()) {
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return lastError();
     }
@@ -212,6 +212,16 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                 continue;
             }
         }
+
+        if (line.contains("FATAL")) {
+            if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")) {
+                emit protocolError(ErrorCode::OpenVpnAdaptersInUseError);
+            }
+            else {
+                emit protocolError(ErrorCode::OpenVpnUnknownError);
+            }
+        }
+
 
         QByteArray data(line.toStdString().c_str());
         if (data.contains(">BYTECOUNT:")) {

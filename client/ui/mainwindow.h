@@ -34,6 +34,8 @@ public:
 private slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
+    void onVpnProtocolError(amnezia::ErrorCode errorCode);
+
     void onPushButtonBackFromNewServerClicked(bool clicked);
     void onPushButtonBackFromSettingsClicked(bool clicked);
     void onPushButtonBackFromSitesClicked(bool clicked);

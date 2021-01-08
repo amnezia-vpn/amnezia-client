@@ -31,11 +31,16 @@ QString errorString(ErrorCode code){
     // Local errors
     case (FailedToSaveConfigData): return QObject::tr("Failed to save config to disk");
     case (OpenVpnConfigMissing): return QObject::tr("OpenVPN config missing");
-    case (OpenVpnManagementServerError): return QObject::tr("OpenVpn management server error");
+    case (OpenVpnManagementServerError): return QObject::tr("OpenVPN management server error");
+    case (EasyRsaError): return QObject::tr("EasyRSA runtime error");
 
+    // Distro errors
     case (OpenVpnExecutableMissing): return QObject::tr("OpenVPN executable missing");
     case (EasyRsaExecutableMissing): return QObject::tr("EasyRsa executable missing");
     case (AmneziaServiceConnectionFailed): return QObject::tr("Amnezia helper service error");
+
+    // VPN errors
+    case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");
 
     case(InternalError):
     default:

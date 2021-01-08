@@ -76,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_vpnConnection = new VpnConnection(this);
     connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
+    connect(m_vpnConnection, SIGNAL(vpnProtocolError(amnezia::ErrorCode)), this, SLOT(onVpnProtocolError(amnezia::ErrorCode)));
 
     onConnectionStateChanged(VpnProtocol::ConnectionState::Disconnected);
 
@@ -90,7 +91,7 @@ MainWindow::~MainWindow()
     for (int i = 0; i < 50; i++) {
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(100);
-        if (m_vpnConnection->disconnected()) {
+        if (m_vpnConnection->onDisconnected()) {
             break;
         }
     }
@@ -295,6 +296,11 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     }
 
     ui->pushButton_connect->setEnabled(pushButtonConnectEnabled);
+}
+
+void MainWindow::onVpnProtocolError(ErrorCode errorCode)
+{
+    QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
 }
 
 void MainWindow::onPushButtonConnectToggled(bool checked)
