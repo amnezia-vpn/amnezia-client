@@ -36,7 +36,7 @@ make -j `sysctl -n hw.ncpu`
 
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite
 cp -av $RELEASE_DIR/server/release/$APP_NAME-service.app/Contents/macOS/$APP_NAME-service	$BUNDLE_DIR/Contents/macOS
-cp -av $LAUNCH_DIR/data/macos/openvpn 								$BUNDLE_DIR/Contents/macOS
+cp -Rv $LAUNCH_DIR/data/macos/* 								$BUNDLE_DIR/Contents/macOS
 
 mkdir -p $INSTALLER_DATA_DIR
 cp -av $LAUNCH_DIR/installer 									$RELEASE_DIR
