@@ -448,6 +448,9 @@ void MainWindow::setupUiConnections()
         else hide();
     });
     connect(ui->pushButton_general_settings_exit, &QPushButton::clicked, this, [&](){ qApp->quit(); });
+    connect(ui->pushButton_new_server_get_info, &QPushButton::clicked, this, [&](){
+        QDesktopServices::openUrl(QUrl("https://amnezia.org"));
+    });
 
     connect(ui->pushButton_connect, SIGNAL(clicked(bool)), this, SLOT(onPushButtonConnectClicked(bool)));
     connect(ui->pushButton_new_server_setup, &QPushButton::clicked, this, [this](){ goToPage(Page::NewServer); });

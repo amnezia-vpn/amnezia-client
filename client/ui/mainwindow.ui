@@ -267,7 +267,7 @@ QStackedWidget QWidget {
 </string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -679,6 +679,9 @@ border-radius: 4px;
          <width>281</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
         <string notr="true">font-family: Lato;
