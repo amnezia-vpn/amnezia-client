@@ -3,6 +3,7 @@
 
 #include "communicator.h"
 #include "vpnprotocol.h"
+#include "core/errorstrings.h"
 
 Communicator* VpnProtocol::m_communicator = nullptr;
 
@@ -34,7 +35,10 @@ Communicator* VpnProtocol::communicator()
 void VpnProtocol::setLastError(ErrorCode lastError)
 {
     m_lastError = lastError;
-    qCritical().noquote() << m_lastError;
+    if (lastError){
+        setConnectionState(ConnectionState::Disconnected);
+    }
+    qCritical().noquote() << "VpnProtocol error, code" << m_lastError << errorString(m_lastError);
 }
 
 ErrorCode VpnProtocol::lastError() const
@@ -96,10 +100,10 @@ QString VpnProtocol::textConnectionState(ConnectionState connectionState)
     case ConnectionState::Unknown: return tr("Unknown");
     case ConnectionState::Disconnected: return tr("Disconnected");
     case ConnectionState::Preparing: return tr("Preparing");
-    case ConnectionState::Connecting: return tr("Connecting");
+    case ConnectionState::Connecting: return tr("Connecting...");
     case ConnectionState::Connected: return tr("Connected");
-    case ConnectionState::Disconnecting: return tr("Disconnecting");
-    case ConnectionState::TunnelReconnecting: return tr("TunnelReconnecting");
+    case ConnectionState::Disconnecting: return tr("Disconnecting...");
+    case ConnectionState::TunnelReconnecting: return tr("Reconnecting...");
     case ConnectionState::Error: return tr("Error");
     default:
         ;

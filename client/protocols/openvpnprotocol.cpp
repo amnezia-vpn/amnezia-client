@@ -45,9 +45,12 @@ void OpenVpnProtocol::onMessageReceived(const Message& message)
 
 void OpenVpnProtocol::stop()
 {
+    // TODO: need refactoring
+    // sendTermSignal() will evet return true while server connected
     if ((m_connectionState == VpnProtocol::ConnectionState::Preparing) ||
             (m_connectionState == VpnProtocol::ConnectionState::Connecting) ||
-            (m_connectionState == VpnProtocol::ConnectionState::Connected)) {
+            (m_connectionState == VpnProtocol::ConnectionState::Connected) ||
+            (m_connectionState == VpnProtocol::ConnectionState::TunnelReconnecting)) {
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
@@ -210,6 +213,9 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             } else if (line.contains("EXITING,SIGTER")) {
                 openVpnStateSigTermHandler();
                 continue;
+            } else if (line.contains("RECONNECTING")) {
+                setConnectionState(VpnProtocol::ConnectionState::TunnelReconnecting);
+                continue;
             }
         }
 
@@ -221,7 +227,6 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                 emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
         }
-
 
         QByteArray data(line.toStdString().c_str());
         if (data.contains(">BYTECOUNT:")) {

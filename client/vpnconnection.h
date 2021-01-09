@@ -18,7 +18,7 @@ public:
     explicit VpnConnection(QObject* parent = nullptr);
     ~VpnConnection() override = default;
 
-    static QString bytesToText(quint64 bytes);
+    static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
     ErrorCode requestVpnConfig(const ServerCredentials &credentials, Protocol protocol);

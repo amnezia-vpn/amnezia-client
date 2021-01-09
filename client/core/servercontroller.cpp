@@ -55,7 +55,7 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
 //        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
 //            QString s = proc->readAllStandardOutput();
 //            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s << s.size();
+//                qDebug().noquote() << s;
 //            }
 //        });
 
@@ -239,7 +239,7 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
 {
     QString scriptFileName;
 
-    if (proto == Protocol::OpenVpn) {
+    if (proto == Protocol::OpenVpn || proto == Protocol::Any) {
         scriptFileName = ":/server_scripts/remove_openvpn_server.sh";
     }
 

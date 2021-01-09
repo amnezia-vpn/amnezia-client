@@ -4,7 +4,7 @@
 #include "defs.h"
 using namespace amnezia;
 
-QString errorString(ErrorCode code){
+static QString errorString(ErrorCode code){
     switch (code) {
 
     // General error codes
