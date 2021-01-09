@@ -49,7 +49,7 @@ void LocalClient::onReadyRead()
         if (lineLength != -1) {
             QString line = buf;
             line = line.simplified();
-            qDebug().noquote() << QString("Readed line: '%1'").arg(line);
+            qDebug().noquote() << QString("Read line: '%1'").arg(line);
             emit lineAvailable(line);
         }
     }

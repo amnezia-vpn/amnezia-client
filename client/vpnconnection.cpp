@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QDebug>
 #include <QFile>
 
@@ -64,14 +65,23 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
     // TODO: Implement some behavior in case if connection not stable
     qDebug() << "Connect to VPN";
 
+    emit connectionStateChanged(VpnProtocol::ConnectionState::Connecting);
+    qApp->processEvents();
+
     if (protocol == Protocol::Any || protocol == Protocol::OpenVpn) {
         ErrorCode e = requestVpnConfig(credentials, Protocol::OpenVpn);
         if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
             return e;
         }
+        if (m_vpnProtocol) {
+            disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        }
         m_vpnProtocol.reset(new OpenVpnProtocol());
+        connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     }
     else if (protocol == Protocol::ShadowSocks) {
+        emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
         return ErrorCode::NotImplementedError;
     }
 
@@ -81,9 +91,10 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
     return m_vpnProtocol.data()->start();
 }
 
-QString VpnConnection::bytesToText(quint64 bytes)
+QString VpnConnection::bytesPerSecToText(quint64 bytes)
 {
-    return QString("%1 %2").arg(bytes / 1000000).arg(tr("Mbps"));
+    double mbps = bytes * 8 / 1e6;
+    return QString("%1 %2").arg(QString::number(mbps, 'f', 2)).arg(tr("Mbps")); // Mbit/s
 }
 
 void VpnConnection::disconnectFromVpn()
@@ -96,20 +107,20 @@ void VpnConnection::disconnectFromVpn()
     m_vpnProtocol.data()->stop();
 }
 
-bool VpnConnection::connected() const
+bool VpnConnection::onConnected() const
 {
     if (!m_vpnProtocol.data()) {
         return false;
     }
 
-    return m_vpnProtocol.data()->connected();
+    return m_vpnProtocol.data()->onConnected();
 }
 
-bool VpnConnection::disconnected() const
+bool VpnConnection::onDisconnected() const
 {
     if (!m_vpnProtocol.data()) {
         return true;
     }
 
-    return m_vpnProtocol.data()->disconnected();
+    return m_vpnProtocol.data()->onDisconnected();
 }

@@ -269,7 +269,7 @@ QStackedWidget QWidget {
      <property name="currentIndex">
       <number>1</number>
      </property>
-     <widget class="QWidget" name="page_connect_server">
+     <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
        <property name="geometry">
         <rect>
@@ -671,7 +671,7 @@ border-radius: 4px;
         <string>Connect</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_new_server_get_info">
        <property name="geometry">
         <rect>
          <x>50</x>
@@ -679,6 +679,9 @@ border-radius: 4px;
          <width>281</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
         <string notr="true">font-family: Lato;
@@ -815,12 +818,12 @@ QPushButton:hover {
       <zorder>lineEdit_new_server_login</zorder>
       <zorder>lineEdit_new_server_password</zorder>
       <zorder>pushButton_new_server_connect_with_new_data</zorder>
-      <zorder>pushButton</zorder>
+      <zorder>pushButton_new_server_get_info</zorder>
       <zorder>pushButton_back_from_new_server</zorder>
       <zorder>label_7</zorder>
       <zorder>label_new_server_wait_info</zorder>
      </widget>
-     <widget class="QWidget" name="page_amnezia">
+     <widget class="QWidget" name="page_vpn">
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -832,9 +835,6 @@ QPushButton:hover {
          <width>380</width>
          <height>325</height>
         </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
         <string notr="true">border-image: url(:/images/background_connected.png);</string>
@@ -1011,6 +1011,9 @@ line-height: 21px;
          <height>40</height>
         </rect>
        </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="styleSheet">
         <string notr="true">QPushButton:!checked {
 image: url(:/images/connect_button_disconnected.png);
@@ -1114,6 +1117,9 @@ color: #181922;
        <property name="text">
         <string>For all connections</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_2">
        <property name="enabled">
@@ -1131,7 +1137,7 @@ color: #181922;
         <string>For selected sites</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </widget>
@@ -1392,7 +1398,7 @@ color: #333333;</string>
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="page_settings">
+     <widget class="QWidget" name="page_general_settings">
       <widget class="QPushButton" name="pushButton_back_from_settings">
        <property name="geometry">
         <rect>
@@ -1441,7 +1447,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="pushButton_server_settings">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -1449,6 +1455,9 @@ QPushButton:hover {
          <width>330</width>
          <height>30</height>
         </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
         <string notr="true">font-family: Lato;
@@ -1487,7 +1496,10 @@ background-repeat: no-repeat;
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="pushButton_share_connection">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -1495,6 +1507,9 @@ background-repeat: no-repeat;
          <width>330</width>
          <height>30</height>
         </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
         <string notr="true">font-family: Lato;
@@ -1533,8 +1548,367 @@ background-repeat: no-repeat;
         <string/>
        </property>
       </widget>
+      <widget class="QLabel" name="label_14">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>620</y>
+         <width>360</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_general_settings_exit">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>570</y>
+         <width>330</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+Text-align:left;
+padding-left: 30px;
+
+
+/* black */
+color: #100A44;
+
+background-repeat: no-repeat;
+ background-position: left center;</string>
+       </property>
+       <property name="text">
+        <string>Exit</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_15">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>550</y>
+         <width>360</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
-     <widget class="QWidget" name="page_share">
+     <widget class="QWidget" name="page_server_settings">
+      <widget class="QLabel" name="label_server_settings_wait_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>490</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Please wait, configuring process may take up to 5 minutes</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>100</y>
+         <width>171</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+/* or 24px */
+
+/* text */
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>You connected to</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_server_settings_reinstall">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>220</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Reinstall Amnezia server</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_server_settings">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>361</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+line-height: 25px;
+color: #100A44;
+</string>
+       </property>
+       <property name="text">
+        <string>Your configured server</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_server_settings_reinstall">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>220</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>590</y>
+         <width>150</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_server_settings_clear">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>280</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Clear server from Amnezia software</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_server_settings_forget">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>340</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Forget this server</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_server_settings_server">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>130</y>
+         <width>321</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 24px;
+color: #333333;</string>
+       </property>
+       <property name="text">
+        <string>root@yourserver.org</string>
+       </property>
+      </widget>
+      <zorder>label_server_settings_wait_info</zorder>
+      <zorder>label_13</zorder>
+      <zorder>pushButton_back_from_server_settings</zorder>
+      <zorder>label_16</zorder>
+      <zorder>progressBar_server_settings_reinstall</zorder>
+      <zorder>label_17</zorder>
+      <zorder>pushButton_server_settings_reinstall</zorder>
+      <zorder>pushButton_server_settings_clear</zorder>
+      <zorder>pushButton_server_settings_forget</zorder>
+      <zorder>label_server_settings_server</zorder>
+     </widget>
+     <widget class="QWidget" name="page_share_connection">
       <widget class="QPushButton" name="pushButton_back_from_share">
        <property name="geometry">
         <rect>

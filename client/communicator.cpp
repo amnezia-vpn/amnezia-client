@@ -45,7 +45,7 @@ void Communicator::onLineAvailable(const QString& line)
     emit messageReceived(message);
 }
 
-bool Communicator::connected() const
+bool Communicator::isConnected() const
 {
     if (!m_localClient) {
         return false;
@@ -66,7 +66,7 @@ bool Communicator::writeData(const QString& data)
 
 void Communicator::sendMessage(const Message& message)
 {
-    if (!connected()) {
+    if (!isConnected()) {
         return;
     }
     const QString data = message.toString();

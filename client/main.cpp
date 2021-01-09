@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     f.setStyleStrategy(QFont::PreferAntialias);
     app.setFont(f);
 
+    app.setQuitOnLastWindowClosed(false);
+
     MainWindow mainWindow;
     mainWindow.show();
 

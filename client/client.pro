@@ -2,7 +2,7 @@ QT += widgets core gui network xml
 
 TARGET = AmneziaVPN
 TEMPLATE = app
-CONFIG += console
+#CONFIG += console
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
@@ -10,52 +10,52 @@ include("3rd/QtSsh/src/ssh/ssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 
 HEADERS  += \
-            communicator.h \
-   core/defs.h \
-   core/errorstrings.h \
-            core/openvpnconfigurator.h \
-            core/router.h \
-            core/servercontroller.h \
-            debug.h \
-            defines.h \
-            localclient.h \
-            managementserver.h \
-            message.h \
-            runguard.h \
-            settings.h \
-            ui/Controls/SlidingStackedWidget.h \
-            ui/mainwindow.h \
-            utils.h \
-            vpnconnection.h \
-            protocols/vpnprotocol.h \
-            protocols/openvpnprotocol.h \
+    communicator.h \
+    core/defs.h \
+    core/errorstrings.h \
+    core/openvpnconfigurator.h \
+    core/router.h \
+    core/servercontroller.h \
+    debug.h \
+    defines.h \
+    localclient.h \
+    managementserver.h \
+    message.h \
+    runguard.h \
+    settings.h \
+    ui/Controls/SlidingStackedWidget.h \
+    ui/mainwindow.h \
+    utils.h \
+    vpnconnection.h \
+    protocols/vpnprotocol.h \
+    protocols/openvpnprotocol.h \
 
 SOURCES  += \
-            communicator.cpp \
-            core/openvpnconfigurator.cpp \
-            core/router.cpp \
-            core/servercontroller.cpp \
-            debug.cpp \
-            localclient.cpp \
-            main.cpp \
-            managementserver.cpp \
-            message.cpp \
-            runguard.cpp \
-            settings.cpp \
-            ui/Controls/SlidingStackedWidget.cpp \
-            ui/mainwindow.cpp \
-            utils.cpp \
-            vpnconnection.cpp \
-            protocols/vpnprotocol.cpp \
-            protocols/openvpnprotocol.cpp \
+    communicator.cpp \
+    core/openvpnconfigurator.cpp \
+    core/router.cpp \
+    core/servercontroller.cpp \
+    debug.cpp \
+    localclient.cpp \
+    main.cpp \
+    managementserver.cpp \
+    message.cpp \
+    runguard.cpp \
+    settings.cpp \
+    ui/Controls/SlidingStackedWidget.cpp \
+    ui/mainwindow.cpp \
+    utils.cpp \
+    vpnconnection.cpp \
+    protocols/vpnprotocol.cpp \
+    protocols/openvpnprotocol.cpp \
 
 FORMS    += ui/mainwindow.ui
 
 RESOURCES += \
-            resources.qrc
+    resources.qrc
 
 TRANSLATIONS = \
-            translations/amneziavpn_ru.ts
+    translations/amneziavpn_ru.ts
 
 CONFIG(release, debug|release) {
     DESTDIR = $$PWD/../../AmneziaVPN-build/client/release

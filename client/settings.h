@@ -23,7 +23,7 @@ public:
     void setUserName(const QString& login);
     void setPassword(const QString& password);
     void setServerName(const QString& serverName);
-    void setServerPort(int serverPort);
+    void setServerPort(int serverPort = 22);
     void setServerCredentials(const ServerCredentials &credentials);
 
     QString userName() const { return m_userName; }

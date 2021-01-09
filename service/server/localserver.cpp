@@ -62,22 +62,22 @@ void LocalServer::onNewConnection()
             if (lineLength != -1) {
                 QString line = buf;
                 line = line.simplified();
-                qDebug().noquote() << QString("Readed line: '%1'").arg(line);
-                Message icomingMessage(line);
-                if (!icomingMessage.isValid()) {
+                qDebug().noquote() << QString("Read line: '%1'").arg(line);
+                Message incomingMessage(line);
+                if (!incomingMessage.isValid()) {
                     qWarning().noquote() << "Message is not valid!";
                     continue;
                 }
 
-                switch (icomingMessage.state()) {
+                switch (incomingMessage.state()) {
                 case Message::State::Initialize:
                     sendMessage(Message(Message::State::Initialize, QStringList({"Server"})));
                     break;
                 case Message::State::StartRequest:
-                    startProcess(icomingMessage.args());
+                    startProcess(incomingMessage.args());
                     break;
                 case Message::State::FinishRequest:
-                    finishProcess(icomingMessage.args());
+                    finishProcess(incomingMessage.args());
                     break;
                 default:
                     ;

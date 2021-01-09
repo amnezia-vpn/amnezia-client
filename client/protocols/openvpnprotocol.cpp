@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QTcpSocket>
 
 #include "communicator.h"
 #include "debug.h"
@@ -44,9 +45,12 @@ void OpenVpnProtocol::onMessageReceived(const Message& message)
 
 void OpenVpnProtocol::stop()
 {
+    // TODO: need refactoring
+    // sendTermSignal() will evet return true while server connected
     if ((m_connectionState == VpnProtocol::ConnectionState::Preparing) ||
             (m_connectionState == VpnProtocol::ConnectionState::Connecting) ||
-            (m_connectionState == VpnProtocol::ConnectionState::Connected)) {
+            (m_connectionState == VpnProtocol::ConnectionState::Connected) ||
+            (m_connectionState == VpnProtocol::ConnectionState::TunnelReconnecting)) {
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
@@ -94,8 +98,11 @@ QString OpenVpnProtocol::configPath() const
 
 void OpenVpnProtocol::writeCommand(const QString& command)
 {
-    QTextStream stream(reinterpret_cast<QIODevice*>(m_managementServer.socket()));
-    stream << command << endl;
+    QIODevice *device = dynamic_cast<QIODevice*>(m_managementServer.socket().data());
+    if (device) {
+        QTextStream stream(device);
+        stream << command << endl;
+    }
 }
 
 QString OpenVpnProtocol::openVpnExecPath() const
@@ -115,7 +122,7 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnStateSigTermHandlerTimer.stop();
     stop();
 
-    if (communicator() && !communicator()->connected()) {
+    if (communicator() && !communicator()->isConnected()) {
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return lastError();
     }
@@ -206,6 +213,18 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             } else if (line.contains("EXITING,SIGTER")) {
                 openVpnStateSigTermHandler();
                 continue;
+            } else if (line.contains("RECONNECTING")) {
+                setConnectionState(VpnProtocol::ConnectionState::TunnelReconnecting);
+                continue;
+            }
+        }
+
+        if (line.contains("FATAL")) {
+            if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")) {
+                emit protocolError(ErrorCode::OpenVpnAdaptersInUseError);
+            }
+            else {
+                emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
         }
 

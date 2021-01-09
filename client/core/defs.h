@@ -44,11 +44,16 @@ enum ErrorCode
     FailedToSaveConfigData,
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
+    EasyRsaError,
 
     // Distro errors
-    AmneziaServiceConnectionFailed,
     OpenVpnExecutableMissing,
-    EasyRsaExecutableMissing
+    EasyRsaExecutableMissing,
+    AmneziaServiceConnectionFailed,
+
+    // VPN errors
+    OpenVpnAdaptersInUseError,
+    OpenVpnUnknownError
 };
 
 } // namespace amnezia

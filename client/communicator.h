@@ -16,7 +16,7 @@ public:
     explicit Communicator(QObject* parent = nullptr);
     ~Communicator();
 
-    bool connected() const;
+    bool isConnected() const;
     void sendMessage(const Message& message);
 
 signals:

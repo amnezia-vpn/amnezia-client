@@ -21,72 +21,101 @@ QString OpenVpnConfigurator::getRandomString(int len)
 
 QString OpenVpnConfigurator::getEasyRsaShPath()
 {
+#ifdef Q_OS_WIN
+    // easyrsa sh path should looks like
+    // "/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa"
     QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-    easyRsaShPath.replace(":", "");
+    easyRsaShPath.replace("C:\\", "");
     easyRsaShPath.replace("\\", "/");
     easyRsaShPath.prepend("/");
 
-    return easyRsaShPath;
+    //return "\"" + easyRsaShPath + "\"";
+    return "\"/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
+#else
+    return QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/easyrsa";
+#endif
 }
 
 QProcessEnvironment OpenVpnConfigurator::prepareEnv()
 {
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString pathEnvVar = env.value("PATH");
+
+#ifdef Q_OS_WIN
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\bin;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\i386;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\x64;");
+#else
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
+#endif
 
     env.insert("PATH", pathEnvVar);
     return env;
 }
 
-void OpenVpnConfigurator::initPKI(const QString &path)
+ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 {
-#ifdef Q_OS_WIN
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
     p.setProcessEnvironment(prepareEnv());
 
-    QString command = QString("sh.exe");
+#ifdef Q_OS_WIN
+    //p.setProgram("sh.exe");
+    //p.setNativeArguments(getEasyRsaShPath() + " init-pki");
 
-    p.setNativeArguments(getEasyRsaShPath() + " init-pki");
+    p.setProgram("cmd.exe");
+    p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " init-pki"));
+#else
+    p.setProgram(getEasyRsaShPath());
+    p.setArguments(QStringList() << "init-pki");
+#endif
 
     p.setWorkingDirectory(path);
 
-    p.start(command);
-    p.waitForFinished();
-    qDebug().noquote() << p.readAll();
+//    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
+//        qDebug().noquote() << p.readAll();
+//    });
 
-#endif
+    p.start();
+    p.waitForFinished();
+
+    if (p.exitCode() == 0) return ErrorCode::NoError;
+    else return ErrorCode::EasyRsaError;
 }
 
-QString OpenVpnConfigurator::genReq(const QString &path, const QString &clientId)
+ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &clientId)
 {
-#ifdef Q_OS_WIN
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
     p.setProcessEnvironment(prepareEnv());
 
-    QString command = QString("sh.exe");
+#ifdef Q_OS_WIN
+    //p.setProgram("sh.exe");
+    //p.setNativeArguments(getEasyRsaShPath() + " gen-req " + clientId + " nopass");
 
-    p.setNativeArguments(getEasyRsaShPath() + " gen-req " + clientId + " nopass");
+    p.setProgram("cmd.exe");
+    p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " gen-req " + clientId + " nopass"));
+#else
+    p.setArguments(QStringList() << "gen-req" << clientId << "nopass");
+    p.setProgram(getEasyRsaShPath());
+#endif
 
     p.setWorkingDirectory(path);
 
     QObject::connect(&p, &QProcess::channelReadyRead, [&](){
         QString data = p.readAll();
-        qDebug().noquote() << data;
+        //qDebug().noquote() << data;
 
         if (data.contains("Common Name (eg: your user, host, or server name)")) {
             p.write("\n");
         }
     });
 
-    p.start(command);
+    p.start();
     p.waitForFinished();
-//    qDebug().noquote() << p.readAll();
 
-    return "";
-#endif
+    if (p.exitCode() == 0) return ErrorCode::NoError;
+    else return ErrorCode::EasyRsaError;
 }
 
 
@@ -103,7 +132,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     QString path = dir.path();
 
     initPKI(path);
-    genReq(path, connData.clientId);
+    ErrorCode errorCode = genReq(path, connData.clientId);
 
 
     QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
@@ -114,9 +143,8 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     key.open(QIODevice::ReadOnly);
     connData.privKey = key.readAll();
 
-    qDebug().noquote() << connData.request;
-    qDebug().noquote() << connData.privKey;
-
+//    qDebug().noquote() << connData.request;
+//    qDebug().noquote() << connData.privKey;
 
     return connData;
 }
@@ -125,6 +153,11 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
+
+    if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
+       *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        return connData;
+    }
 
     QString reqFileName = QString("/opt/amneziavpn_data/clients/%1.req").arg(connData.clientId);
     ErrorCode e = ServerController::uploadTextFileToContainer(credentials, connData.request, reqFileName);
