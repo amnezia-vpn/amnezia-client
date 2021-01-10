@@ -72,9 +72,9 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 
     p.setWorkingDirectory(path);
 
-//    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-//        qDebug().noquote() << p.readAll();
-//    });
+    //    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
+    //        qDebug().noquote() << p.readAll();
+    //    });
 
     p.start();
     p.waitForFinished();
@@ -125,15 +125,16 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     connData.clientId = getRandomString(32);
 
     QTemporaryDir dir;
-//    if (dir.isValid()) {
-//            // dir.path() returns the unique directory path
-//    }
+    //    if (dir.isValid()) {
+    //            // dir.path() returns the unique directory path
+    //    }
 
     QString path = dir.path();
 
     initPKI(path);
     ErrorCode errorCode = genReq(path, connData.clientId);
 
+    Q_UNUSED(errorCode)
 
     QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
     req.open(QIODevice::ReadOnly);
@@ -143,8 +144,8 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     key.open(QIODevice::ReadOnly);
     connData.privKey = key.readAll();
 
-//    qDebug().noquote() << connData.request;
-//    qDebug().noquote() << connData.privKey;
+    //    qDebug().noquote() << connData.request;
+    //    qDebug().noquote() << connData.privKey;
 
     return connData;
 }
@@ -155,7 +156,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-       *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        *errorCode = ErrorCode::EasyRsaExecutableMissing;
         return connData;
     }
 

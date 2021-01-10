@@ -44,6 +44,9 @@ cp -av $DEPLOY_DATA_DIR/post_install.sh 							$INSTALLER_DATA_DIR/post_install.
 cp -av $DEPLOY_DATA_DIR/post_uninstall.sh							$INSTALLER_DATA_DIR/post_uninstall.sh
 cp -av $DEPLOY_DATA_DIR/$PLIST_NAME								$INSTALLER_DATA_DIR/$PLIST_NAME
 
+rm -f $BUNDLE_DIR/Contents/macOS/post_install.sh $BUNDLE_DIR/Contents/macOS/post_uninstall.sh
+chmod a+x $INSTALLER_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_uninstall.sh
+
 cd $BUNDLE_DIR 
 tar czf $INSTALLER_DATA_DIR/$APP_NAME.tar.gz ./
 

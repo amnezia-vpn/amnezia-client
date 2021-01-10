@@ -267,7 +267,7 @@ QStackedWidget QWidget {
 </string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -1138,6 +1138,28 @@ color: #181922;
        </property>
        <property name="checked">
         <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_error_text">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>300</y>
+         <width>381</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Error text</string>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>

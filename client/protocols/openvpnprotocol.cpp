@@ -226,6 +226,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             else {
                 emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
+            return;
         }
 
         QByteArray data(line.toStdString().c_str());

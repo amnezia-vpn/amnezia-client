@@ -27,16 +27,17 @@
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
-#ifdef Q_OS_WIN
+    #ifdef Q_OS_WIN
     CFramelessWindow(parent),
-#else
+    #else
     QMainWindow(parent),
-#endif
+    #endif
     ui(new Ui::MainWindow),
-    m_settings(new Settings),
-    m_vpnConnection(nullptr)
+    m_vpnConnection(nullptr),
+    m_settings(new Settings)
 {
     ui->setupUi(this);
+    ui->label_error_text->clear();
     ui->widget_tittlebar->installEventFilter(this);
 
     ui->stackedWidget_main->setSpeed(200);
@@ -209,10 +210,10 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
     serverCredentials.password = ui->lineEdit_new_server_password->text();
 
     bool ok = installServer(serverCredentials,
-                  ui->page_new_server,
-                  ui->progressBar_new_server_connection,
-                  ui->pushButton_new_server_connect_with_new_data,
-                  ui->label_new_server_wait_info);
+                            ui->page_new_server,
+                            ui->progressBar_new_server_connection,
+                            ui->pushButton_new_server_connect_with_new_data,
+                            ui->label_new_server_wait_info);
 
     if (ok) {
         m_settings->setServerCredentials(serverCredentials);
@@ -375,8 +376,7 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 
 void MainWindow::onVpnProtocolError(ErrorCode errorCode)
 {
-    // TODO fix crash on Windows when starting vpn and another vpn already connected
-    //QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
+    ui->label_error_text->setText(errorString(errorCode));
 }
 
 void MainWindow::onPushButtonConnectClicked(bool checked)
@@ -507,13 +507,13 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
     }
 
-//#ifdef Q_OS_MAC
-//    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
-//    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
-//    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
-//    resourcesPath = ":/images_mac/tray_icon/%1";
-//    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
-//#endif
+    //#ifdef Q_OS_MAC
+    //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
+    //    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
+    //    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
+    //    resourcesPath = ":/images_mac/tray_icon/%1";
+    //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
+    //#endif
 
 }
 
@@ -528,6 +528,7 @@ void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::onConnect()
 {
+    ui->label_error_text->clear();
     ui->pushButton_connect->setChecked(true);
     qApp->processEvents();
 
