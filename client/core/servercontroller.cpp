@@ -42,9 +42,9 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
         QEventLoop wait;
         int exitStatus;
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-//            qDebug() << "Command started";
-//        });
+        //        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
+        //            qDebug() << "Command started";
+        //        });
 
         QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
             exitStatus = status;
@@ -52,19 +52,19 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
             wait.quit();
         });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//            QString s = proc->readAllStandardOutput();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        //        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+        //            QString s = proc->readAllStandardOutput();
+        //            if (s != "." && !s.isEmpty()) {
+        //                qDebug().noquote() << s;
+        //            }
+        //        });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//            QString s = proc->readAllStandardError();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        //        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+        //            QString s = proc->readAllStandardError();
+        //            if (s != "." && !s.isEmpty()) {
+        //                qDebug().noquote() << s;
+        //            }
+        //        });
 
         proc->start();
 
@@ -82,7 +82,7 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
 }
 
 ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &credentials,
-                                     QString &file, const QString &path)
+                                                      QString &file, const QString &path)
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
 
@@ -106,9 +106,9 @@ ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &c
     QEventLoop wait;
     int exitStatus = 0;
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-//        qDebug() << "Command started";
-//    });
+    //    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
+    //        qDebug() << "Command started";
+    //    });
 
     QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
         //qDebug() << "Remote process exited with status" << status;
@@ -116,13 +116,13 @@ ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &c
         wait.quit();
     });
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//        qDebug().noquote() << proc->readAllStandardOutput();
-//    });
+    //    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+    //        qDebug().noquote() << proc->readAllStandardOutput();
+    //    });
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//        qDebug().noquote() << proc->readAllStandardError();
-//    });
+    //    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+    //        qDebug().noquote() << proc->readAllStandardError();
+    //    });
 
     proc->start();
     wait.exec();
@@ -290,6 +290,8 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
 
 ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &credentials)
 {
+    Q_UNUSED(credentials)
+
     return ErrorCode::NotImplementedError;
 }
 
@@ -314,9 +316,9 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     });
 
 
-//    QObject::connect(client, &SshConnection::dataAvailable, [&](const QString &message) {
-//        qCritical() << "Ssh message:" << message;
-//    });
+    //    QObject::connect(client, &SshConnection::dataAvailable, [&](const QString &message) {
+    //        qCritical() << "Ssh message:" << message;
+    //    });
 
     //qDebug() << "Connection state" << client->state();
 
@@ -326,22 +328,22 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     }
 
 
-//    QObject::connect(&client, &SshClient::sshDataReceived, [&](){
-//        qDebug().noquote() << "Data received";
-//    });
+    //    QObject::connect(&client, &SshClient::sshDataReceived, [&](){
+    //        qDebug().noquote() << "Data received";
+    //    });
 
 
-//    if(client.sshState() != SshClient::SshState::Ready) {
-//        qCritical() << "Can't connect to server";
-//        return false;
-//    }
-//    else {
-//        qDebug() << "SSh connection established";
-//    }
+    //    if(client.sshState() != SshClient::SshState::Ready) {
+    //        qCritical() << "Can't connect to server";
+    //        return false;
+    //    }
+    //    else {
+    //        qDebug() << "SSh connection established";
+    //    }
 
 
-//    QObject::connect(proc, &SshProcess::finished, &wait, &QEventLoop::quit);
-//    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
+    //    QObject::connect(proc, &SshProcess::finished, &wait, &QEventLoop::quit);
+    //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
 }

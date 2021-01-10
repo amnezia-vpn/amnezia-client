@@ -11,13 +11,12 @@ Router &Router::Instance()
 
 bool Router::routeAdd(const QString &ip, const QString &gw, QString mask)
 {
-#ifdef Q_OS_WIN
-
     qDebug().noquote() << QString("ROUTE ADD: IP:%1 %2 GW %3")
                           .arg(ip)
                           .arg(mask)
                           .arg(gw);
 
+#ifdef Q_OS_WIN
     if (mask == "") {
         mask = "255.255.255.255";
         if (ip.endsWith(".0")) mask = "255.255.255.0";
@@ -108,7 +107,9 @@ bool Router::routeAdd(const QString &ip, const QString &gw, QString mask)
         free(pIpForwardTable);
 
     return (dwStatus == NO_ERROR);
-
+#else
+    // Not implemented yet
+    return false;
 #endif
 }
 
@@ -227,9 +228,11 @@ int Router::routeAddList(const QString &gw, const QStringList &ips)
     if (pIpForwardTable)
         free(pIpForwardTable);
 
-     qDebug() << "Router::routeAddList finished, success: " << success_count << "/" << ips.size();
+    qDebug() << "Router::routeAddList finished, success: " << success_count << "/" << ips.size();
     return success_count;
-
+#else
+    // Not implemented yet
+    return false;
 #endif
 }
 
@@ -260,7 +263,7 @@ bool Router::clearSavedRoutes()
     }
 
     if (dwStatus != ERROR_SUCCESS) {
-         qDebug() << "Router::clearSavedRoutes : getIpForwardTable failed";
+        qDebug() << "Router::clearSavedRoutes : getIpForwardTable failed";
         if (pIpForwardTable)
             free(pIpForwardTable);
         return false;
@@ -283,24 +286,31 @@ bool Router::clearSavedRoutes()
     ipForwardRows.clear();
 
     return true;
-
+#else
+    // Not implemented yet
+    return false;
 #endif
 }
 
 bool Router::routeDelete(const QString &ip)
 {
+    qDebug().noquote() << QString("ROUTE DELETE, IP: %1").arg(ip);
+
 #ifdef Q_OS_WIN
-        QProcess p;
-        p.setProcessChannelMode(QProcess::MergedChannels);
-        QString command = QString("route delete %1")
-                .arg(ip);
+    QProcess p;
+    p.setProcessChannelMode(QProcess::MergedChannels);
+    QString command = QString("route delete %1")
+            .arg(ip);
 
-        p.start(command);
-        p.waitForFinished();
-        qDebug().noquote() << "OUTPUT route delete: " + p.readAll();
+    p.start(command);
+    p.waitForFinished();
+    qDebug().noquote() << "OUTPUT route delete: " + p.readAll();
 
-        return true;
-#endif
+    return true;
+#else
+    // Not implemented yet
+    return false;
+#endif  
 }
 
 void Router::flushDns()

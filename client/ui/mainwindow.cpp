@@ -27,14 +27,14 @@
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
-#ifdef Q_OS_WIN
+    #ifdef Q_OS_WIN
     CFramelessWindow(parent),
-#else
+    #else
     QMainWindow(parent),
-#endif
+    #endif
     ui(new Ui::MainWindow),
-    m_settings(new Settings),
-    m_vpnConnection(nullptr)
+    m_vpnConnection(nullptr),
+    m_settings(new Settings)
 {
     ui->setupUi(this);
     ui->widget_tittlebar->installEventFilter(this);
@@ -209,10 +209,10 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
     serverCredentials.password = ui->lineEdit_new_server_password->text();
 
     bool ok = installServer(serverCredentials,
-                  ui->page_new_server,
-                  ui->progressBar_new_server_connection,
-                  ui->pushButton_new_server_connect_with_new_data,
-                  ui->label_new_server_wait_info);
+                            ui->page_new_server,
+                            ui->progressBar_new_server_connection,
+                            ui->pushButton_new_server_connect_with_new_data,
+                            ui->label_new_server_wait_info);
 
     if (ok) {
         m_settings->setServerCredentials(serverCredentials);
@@ -508,13 +508,13 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
     }
 
-//#ifdef Q_OS_MAC
-//    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
-//    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
-//    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
-//    resourcesPath = ":/images_mac/tray_icon/%1";
-//    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
-//#endif
+    //#ifdef Q_OS_MAC
+    //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
+    //    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
+    //    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
+    //    resourcesPath = ":/images_mac/tray_icon/%1";
+    //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
+    //#endif
 
 }
 
