@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_settings(new Settings)
 {
     ui->setupUi(this);
+    ui->label_error_text->clear();
     ui->widget_tittlebar->installEventFilter(this);
 
     ui->stackedWidget_main->setSpeed(200);
@@ -376,8 +377,7 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 
 void MainWindow::onVpnProtocolError(ErrorCode errorCode)
 {
-    // TODO fix crash on Windows when starting vpn and another vpn already connected
-    //QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
+    ui->label_error_text->setText(errorString(errorCode));
 }
 
 void MainWindow::onPushButtonConnectClicked(bool checked)
@@ -529,6 +529,7 @@ void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::onConnect()
 {
+    ui->label_error_text->clear();
     ui->pushButton_connect->setChecked(true);
     qApp->processEvents();
 
