@@ -243,7 +243,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
     timer.start(1000);
 
 
-    ErrorCode e = ServerController::setupServer(credentials, Protocol::Any);
+    ErrorCode e = ServerController::setupServer(credentials, Protocol::ShadowSocks);
     if (e) {
         page->setEnabled(true);
         button->setVisible(true);
@@ -251,8 +251,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
 
         QMessageBox::warning(this, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e) + "\n" +
-                             tr("See logs for details."));
+                             errorString(e));
 
         return false;
     }

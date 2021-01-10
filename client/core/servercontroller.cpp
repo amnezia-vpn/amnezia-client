@@ -52,19 +52,19 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
             wait.quit();
         });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//            QString s = proc->readAllStandardOutput();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+            QString s = proc->readAllStandardOutput();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//            QString s = proc->readAllStandardError();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+            QString s = proc->readAllStandardError();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
         proc->start();
 
@@ -284,13 +284,24 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
     ErrorCode e = runScript(sshParams(credentials), scriptData);
     if (e) return e;
 
-    //return ok;
     return checkOpenVpnServer(credentials);
 }
 
 ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &credentials)
 {
-    return ErrorCode::NotImplementedError;
+    QString scriptData;
+    QString scriptFileName = ":/server_scripts/setup_shadowsocks_server.sh";
+    QFile file(scriptFileName);
+    if (! file.open(QIODevice::ReadOnly)) return ErrorCode::InternalError;
+
+    scriptData = file.readAll();
+    if (scriptData.isEmpty()) return ErrorCode::InternalError;
+
+    ErrorCode e = runScript(sshParams(credentials), scriptData);
+    if (e) return e;
+
+    return ErrorCode::NoError;
+    //return checkShadowSocksServer(credentials);
 }
 
 SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
