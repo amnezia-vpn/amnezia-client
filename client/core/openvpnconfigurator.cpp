@@ -57,12 +57,9 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
-    p.setProcessEnvironment(prepareEnv());
 
 #ifdef Q_OS_WIN
-    //p.setProgram("sh.exe");
-    //p.setNativeArguments(getEasyRsaShPath() + " init-pki");
-
+    p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
     p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " init-pki"));
 #else
@@ -87,12 +84,9 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
-    p.setProcessEnvironment(prepareEnv());
 
 #ifdef Q_OS_WIN
-    //p.setProgram("sh.exe");
-    //p.setNativeArguments(getEasyRsaShPath() + " gen-req " + clientId + " nopass");
-
+    p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
     p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " gen-req " + clientId + " nopass"));
 #else
