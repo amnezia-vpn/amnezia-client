@@ -27,6 +27,8 @@ public:
     bool onDisconnected() const;
     void disconnectFromVpn();
 
+    VpnProtocol::ConnectionState connectionState();
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);

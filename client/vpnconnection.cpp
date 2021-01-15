@@ -6,6 +6,7 @@
 #include <core/servercontroller.h>
 
 #include "protocols/openvpnprotocol.h"
+#include "protocols/shadowsocksvpnprotocol.h"
 #include "utils.h"
 #include "vpnconnection.h"
 
@@ -36,8 +37,8 @@ ErrorCode VpnConnection::lastError() const
 ErrorCode VpnConnection::requestVpnConfig(const ServerCredentials &credentials, Protocol protocol)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    if (protocol == Protocol::OpenVpn) {
-        QString configData = OpenVpnConfigurator::genOpenVpnConfig(credentials, &errorCode);
+    if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocks) {
+        QString configData = OpenVpnConfigurator::genOpenVpnConfig(credentials, protocol, &errorCode);
         if (errorCode) {
             return errorCode;
         }
@@ -51,8 +52,7 @@ ErrorCode VpnConnection::requestVpnConfig(const ServerCredentials &credentials, 
 
         return ErrorCode::FailedToSaveConfigData;
     }
-    else if (protocol == Protocol::ShadowSocks) {
-        // Request OpenVPN config and ShadowSocks
+    else {
         return ErrorCode::NotImplementedError;
     }
     return ErrorCode::NotImplementedError;
@@ -61,6 +61,8 @@ ErrorCode VpnConnection::requestVpnConfig(const ServerCredentials &credentials, 
 
 ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Protocol protocol)
 {
+    // protocol = Protocol::ShadowSocks;
+
     // TODO: Try protocols one by one in case of Protocol::Any
     // TODO: Implement some behavior in case if connection not stable
     qDebug() << "Connect to VPN";
@@ -81,8 +83,18 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
         connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     }
     else if (protocol == Protocol::ShadowSocks) {
-        emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
-        return ErrorCode::NotImplementedError;
+        ErrorCode e = requestVpnConfig(credentials, Protocol::ShadowSocks);
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            return e;
+        }
+        if (m_vpnProtocol) {
+            disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        }
+
+        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(ShadowSocksVpnProtocol::genShadowSocksConfig(credentials)));
+        connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+
     }
 
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
@@ -105,6 +117,12 @@ void VpnConnection::disconnectFromVpn()
         return;
     }
     m_vpnProtocol.data()->stop();
+}
+
+VpnProtocol::ConnectionState VpnConnection::connectionState()
+{
+    if (!m_vpnProtocol) return VpnProtocol::ConnectionState::Disconnected;
+    return m_vpnProtocol->connectionState();
 }
 
 bool VpnConnection::onConnected() const

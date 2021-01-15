@@ -15,7 +15,7 @@ class OpenVpnProtocol : public VpnProtocol
 
 public:
     explicit OpenVpnProtocol(const QString& args = QString(), QObject* parent = nullptr);
-    ~OpenVpnProtocol() override;
+    virtual ~OpenVpnProtocol() override;
 
     ErrorCode start() override;
     void stop() override;

@@ -19,7 +19,8 @@ OpenVpnProtocol::OpenVpnProtocol(const QString& args, QObject* parent) :
 
 OpenVpnProtocol::~OpenVpnProtocol()
 {
-    stop();
+    qDebug() << "OpenVpnProtocol::stop()";
+    OpenVpnProtocol::stop();
 }
 
 void OpenVpnProtocol::onMessageReceived(const Message& message)
@@ -120,7 +121,7 @@ ErrorCode OpenVpnProtocol::start()
 
     m_requestFromUserToStop = false;
     m_openVpnStateSigTermHandlerTimer.stop();
-    stop();
+    OpenVpnProtocol::stop();
 
     if (communicator() && !communicator()->isConnected()) {
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);

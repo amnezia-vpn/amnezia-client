@@ -336,6 +336,8 @@ void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
 
 void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
+    qDebug() << "MainWindow::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
+
     bool pushButtonConnectEnabled = false;
     ui->label_state->setText(VpnProtocol::textConnectionState(state));
 
@@ -541,6 +543,7 @@ void MainWindow::onConnect()
         QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
         return;
     }
+
     ui->pushButton_connect->setEnabled(false);
 }
 

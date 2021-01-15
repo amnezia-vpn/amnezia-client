@@ -144,46 +144,77 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     return connData;
 }
 
-OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode)
+OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
+    Protocol proto, ErrorCode *errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-        *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        if (errorCode) *errorCode = ErrorCode::EasyRsaExecutableMissing;
         return connData;
     }
 
     QString reqFileName = QString("/opt/amneziavpn_data/clients/%1.req").arg(connData.clientId);
-    ErrorCode e = ServerController::uploadTextFileToContainer(credentials, connData.request, reqFileName);
-    if (e) {
-        *errorCode = e;
+
+    DockerContainer container;
+    if (proto == Protocol::OpenVpn) container = DockerContainer::OpenVpn;
+    else if (proto == Protocol::ShadowSocks) container = DockerContainer::ShadowSocks;
+    else {
+        if (errorCode) *errorCode = ErrorCode::InternalError;
         return connData;
     }
 
-    ServerController::signCert(credentials, connData.clientId);
-
-    connData.caCert = ServerController::getTextFileFromContainer(credentials, ServerController::caCertPath(), &e);
-    connData.clientCert = ServerController::getTextFileFromContainer(credentials, ServerController::clientCertPath() + QString("%1.crt").arg(connData.clientId), &e);
+    ErrorCode e = ServerController::uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
     if (e) {
-        *errorCode = e;
+        if (errorCode) *errorCode = e;
         return connData;
     }
 
-    connData.taKey = ServerController::getTextFileFromContainer(credentials, ServerController::taKeyPath(), &e);
+    e = ServerController::signCert(container, credentials, connData.clientId);
+    if (e) {
+        if (errorCode) *errorCode = e;
+        return connData;
+    }
+
+    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, ServerController::caCertPath(), &e);
+    connData.clientCert = ServerController::getTextFileFromContainer(container, credentials, ServerController::clientCertPath() + QString("%1.crt").arg(connData.clientId), &e);
+    if (e) {
+        if (errorCode) *errorCode = e;
+        return connData;
+    }
+
+    connData.taKey = ServerController::getTextFileFromContainer(container, credentials, ServerController::taKeyPath(), &e);
+
+    if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
+        if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
+    }
 
     return connData;
 }
 
-QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode)
+QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
+    Protocol proto, ErrorCode *errorCode)
 {
-    QFile configTemplFile(":/server_scripts/template.ovpn");
+    QFile configTemplFile;
+    if (proto == Protocol::OpenVpn)
+        configTemplFile.setFileName(":/server_scripts/template_openvpn.ovpn");
+    else if (proto == Protocol::ShadowSocks) {
+        configTemplFile.setFileName(":/server_scripts/template_shadowsocks.ovpn");
+    }
+
     configTemplFile.open(QIODevice::ReadOnly);
     QString config = configTemplFile.readAll();
 
-    ConnectionData connData = prepareOpenVpnConfig(credentials, errorCode);
+    ConnectionData connData = prepareOpenVpnConfig(credentials, proto, errorCode);
 
-    config.replace("$PROTO", "udp");
+    if (proto == Protocol::OpenVpn)
+        config.replace("$PROTO", "udp");
+    else if (proto == Protocol::ShadowSocks) {
+        config.replace("$PROTO", "tcp");
+        config.replace("$LOCAL_PROXY_PORT", QString::number(ServerController::ssContainerPort()));
+    }
+
     config.replace("$REMOTE_HOST", connData.host);
     config.replace("$REMOTE_PORT", "1194");
     config.replace("$CA_CERT", connData.caCert);
