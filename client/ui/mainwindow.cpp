@@ -244,7 +244,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
     timer.start(1000);
 
 
-    ErrorCode e = ServerController::setupServer(credentials, Protocol::ShadowSocks);
+    ErrorCode e = ServerController::setupServer(credentials, Protocol::OpenVpn);
     if (e) {
         page->setEnabled(true);
         button->setVisible(true);
