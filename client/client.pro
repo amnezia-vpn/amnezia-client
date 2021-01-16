@@ -100,5 +100,5 @@ macx {
     HEADERS  += ui/macos_util.h
     SOURCES  += ui/macos_util.mm
 
-    LIBS += -framework Cocoa
+    LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit
 }

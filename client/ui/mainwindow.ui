@@ -14,25 +14,7 @@
    <string/>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget {
-	font: 16px &quot;Lato&quot;;	
-	outline: none;
-	font-style: normal;
-	font-weight: normal;
-}
-
-/*----------------------*/
-
-QPushButton {
-	border: none;
-    color: rgb(216, 216, 216);
-}
-QPushButton:disabled {
-	border: none;
-    color: rgb(127, 127, 127);
-}
-
-/*----------------------*/
+   <string notr="true">/*----------------------*/
 
 QLabel {
     color: #181922;
@@ -41,14 +23,14 @@ QLabel:disabled {
 	color: #A7A7A7;
 }
 
-/*----------------------*/
-
-QMessageBox {
-    background-color: #333333;
-}
 QMessageBox QLabel {
-    color: #aaa;
+    font: 16px &quot;Lato&quot;;	
 }
+/*
+QMessageBox QPushButton {
+    border: 1;
+}
+*/
 
 /*----------------------*/
 
@@ -176,7 +158,25 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">QWidget #widget_main {
+     <string notr="true">QWidget {
+	font: 16px &quot;Lato&quot;;	
+	outline: none;
+	font-style: normal;
+	font-weight: normal;
+}
+
+/*----------------------*/
+
+QPushButton {
+	border: none;
+}
+QPushButton:disabled {
+	border: none;
+}
+
+/*----------------------*/
+
+QWidget #widget_main {
 	background: white;
 }
 </string>
@@ -902,15 +902,15 @@ QPushButton:hover {
         <property name="font">
          <font>
           <family>Lato</family>
-          <pointsize>12</pointsize>
-          <weight>7</weight>
+          <pointsize>-1</pointsize>
+          <weight>50</weight>
           <italic>false</italic>
           <bold>false</bold>
          </font>
         </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(66, 209, 133);
-font: 63 12pt &quot;Lato&quot;;</string>
+font: 16px &quot;Lato&quot;;	</string>
         </property>
         <property name="text">
          <string>0 Mbps</string>
@@ -931,15 +931,15 @@ font: 63 12pt &quot;Lato&quot;;</string>
         <property name="font">
          <font>
           <family>Lato</family>
-          <pointsize>12</pointsize>
-          <weight>7</weight>
+          <pointsize>-1</pointsize>
+          <weight>50</weight>
           <italic>false</italic>
           <bold>false</bold>
          </font>
         </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(65, 113, 214);
-font: 63 12pt &quot;Lato&quot;;</string>
+font: 16px &quot;Lato&quot;;	</string>
         </property>
         <property name="text">
          <string>0 Mbps</string>

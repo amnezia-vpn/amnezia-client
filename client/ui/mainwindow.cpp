@@ -196,6 +196,24 @@ void MainWindow::closeEvent(QCloseEvent *event)
     hide();
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+#ifdef Q_OS_MACX
+    if (!event->spontaneous()) {
+        setDockIconVisible(true);
+    }
+#endif
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+#ifdef Q_OS_MACX
+    if (!event->spontaneous()) {
+        setDockIconVisible(false);
+    }
+#endif
+}
+
 void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
 {
     if (ui->lineEdit_new_server_ip->text().isEmpty() ||
@@ -414,9 +432,11 @@ void MainWindow::setupTray()
     });
 
     m_menu->addAction(QIcon(":/images/tray/cancel.png"), tr("Quit") + " " + APPLICATION_NAME, this, [&](){
+//        QMessageBox::question(this, QMessageBox::question(this, tr("Exit"), tr("Do you really want to quit?"), QMessageBox::Yes | QMessageBox::No, );
+
         QMessageBox msgBox(QMessageBox::Question, tr("Exit"), tr("Do you really want to quit?"),
-                           QMessageBox::Yes | QMessageBox::No, Q_NULLPTR, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowStaysOnTopHint);
-        msgBox.setDefaultButton(QMessageBox::No);
+                           QMessageBox::Yes | QMessageBox::No, this, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowStaysOnTopHint);
+        msgBox.setDefaultButton(QMessageBox::Yes);
         msgBox.raise();
         if (msgBox.exec() == QMessageBox::Yes) {
             qApp->quit();
@@ -528,11 +548,13 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
 
 void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
+#ifndef Q_OS_MAC
     if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
         show();
         raise();
         setWindowState(Qt::WindowActive);
     }
+#endif
 }
 
 void MainWindow::onConnect()
