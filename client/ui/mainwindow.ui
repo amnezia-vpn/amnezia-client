@@ -1102,7 +1102,7 @@ color: #181922;
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton">
+      <widget class="QRadioButton" name="radioButton_mode_all_sites">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -1121,7 +1121,7 @@ color: #181922;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_2">
+      <widget class="QRadioButton" name="radioButton_mode_include_selected_sites">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -1160,6 +1160,22 @@ color: #181922;
        </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_tmp_logo">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>500</y>
+         <width>381</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>

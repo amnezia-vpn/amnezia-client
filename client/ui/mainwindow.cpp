@@ -62,6 +62,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setupTray();
     setupUiConnections();
 
+    ui->pushButton_general_settings_exit->hide();
+    ui->pushButton_share_connection->hide();
+    ui->radioButton_mode_all_sites->hide();
+    ui->radioButton_mode_include_selected_sites->hide();
+    ui->pushButton_blocked_list->hide();
+    ui->label_description->hide();
+
     setFixedSize(width(),height());
 
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
