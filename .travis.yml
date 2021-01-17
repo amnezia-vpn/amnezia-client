@@ -27,7 +27,7 @@ jobs:
       os: windows
             
       script:
-        - bash "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then bash deploy/install-qt.sh -d /C/Qt --version 5.14.2 --toolchain win32_msvc2017 qtbase; fi
+        - bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then bash deploy/install-qt.sh -d /C/Qt --version 5.14.2 --toolchain win32_msvc2017 qtbase; fi"
         
 #before_cache:
 #  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
