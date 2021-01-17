@@ -29,12 +29,19 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 TARGET_FILENAME=$PROJECT_DIR/$APP_NAME.dmg
 
 # Seacrh Qt
-if [ -f $(brew --prefix qt)/clang_64/bin ]; then QT_BIN_DIR=$(brew --prefix qt)/clang_64/bin;
+echo "Brew Qt version"
+brew --prefix qt
+
+if [ -f $(brew --prefix qt)/clang_64/bin/qmake ]; then QT_BIN_DIR=$(brew --prefix qt)/clang_64/bin;
 else QT_BIN_DIR=$HOME/Qt/5.14.2/clang_64/bin; fi
 
 #QIF_BIN_DIR=$HOME/Qt/Tools/QtInstallerFramework/4.0/bin
-ls -al $QT_BIN_DIR/../../..
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/4.0/bin
+
+echo "Using Qt in $QT_BIN_DIR"
+echo "Using Qt in $QIF_BIN_DIR"
+
+ls -al $QT_BIN_DIR/../../..
 
 
 # Checking env

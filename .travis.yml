@@ -15,7 +15,7 @@ jobs:
         homebrew:
           packages:
           - qt5
-          update: true
+#          update: true
             
       script:
         - bash deploy/build_macos.sh
