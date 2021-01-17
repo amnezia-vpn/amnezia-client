@@ -9,7 +9,8 @@ jobs:
   include:
     - name: MacOS
       os: osx
-
+      osx_image: xcode12.2
+      
       addons:
         homebrew:
           packages:
