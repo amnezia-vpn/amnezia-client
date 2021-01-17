@@ -59,12 +59,12 @@ RESOURCES += \
 TRANSLATIONS = \
     translations/amneziavpn_ru.ts
 
-CONFIG(release, debug|release) {
-    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
-    MOC_DIR = $$DESTDIR
-    OBJECTS_DIR = $$DESTDIR
-    RCC_DIR = $$DESTDIR
-}
+#CONFIG(release, debug|release) {
+#    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
+#    MOC_DIR = $$DESTDIR
+#    OBJECTS_DIR = $$DESTDIR
+#    RCC_DIR = $$DESTDIR
+#}
 
 win32 {
     OTHER_FILES += platform_win/vpnclient.rc

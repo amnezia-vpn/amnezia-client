@@ -20,11 +20,11 @@ SOURCES = \
 
 include(../src/qtservice.pri)
 
-CONFIG(release, debug|release) {
-    DESTDIR = $$PWD/../../../AmneziaVPN-build/server/release
-    MOC_DIR = $$DESTDIR
-    OBJECTS_DIR = $$DESTDIR
-    RCC_DIR = $$DESTDIR
-}
+#CONFIG(release, debug|release) {
+#    DESTDIR = $$PWD/../../../AmneziaVPN-build/server/release
+#    MOC_DIR = $$DESTDIR
+#    OBJECTS_DIR = $$DESTDIR
+#    RCC_DIR = $$DESTDIR
+#}
 
 INCLUDEPATH += "$$PWD/../../client"

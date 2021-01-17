@@ -1,0 +1,30 @@
+language: cpp
+
+branches:
+  only:
+    - master
+    - dev
+  
+jobs:
+  include:
+    - name: MacOS
+      os: osx
+
+      addons:
+        homebrew:
+          packages:
+          - qt5
+            
+      script:
+        - bash deploy/build_macos.sh
+
+before_cache:
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
+  # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
+  
+cache:
+  apt: true
+  directories:
+    - $HOME/Library/Caches/Homebrew
+    - /usr/local/Cellar/qt
