@@ -18,7 +18,7 @@ jobs:
 #          update: true
             
       script:
-        - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh --version 5.14.2 --toolchain clang_64 qtbase; fi
+        - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh -d $HOME/Qt --version 5.14.2 --toolchain clang_64 qtbase; fi
         - bash deploy/build_macos.sh
 
 #before_cache:
