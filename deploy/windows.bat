@@ -2,8 +2,8 @@
 
 CHCP 1252
 
-SET QT_BIN_DIR="c:\Devel\Qt\5.14.2\msvc2017\bin"
-SET QIF_BIN_DIR="c:\Devel\Qt\Tools\QtInstallerFramework\4.0\bin"
+SET QT_BIN_DIR="c:\Qt\5.14.2\msvc2017\bin"
+SET QIF_BIN_DIR="c:\Qt\Tools\QtInstallerFramework\4.0\bin"
 
 set APP_NAME=AmneziaVPN
 set APP_FILENAME=%APP_NAME:"=%.exe

@@ -22,12 +22,12 @@ jobs:
         - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh -d $HOME/Qt --version 5.14.2 --toolchain clang_64 qtbase; fi
         - bash deploy/build_macos.sh
 
-  include:
     - name: Windows
       os: windows
             
       script:
         - bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then bash deploy/install-qt.sh -d /C/Qt --version 5.14.2 --toolchain win32_msvc2017 qtbase; fi"
+        - cd deploy && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat" && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat" && windows.bat
         
 #before_cache:
 #  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
