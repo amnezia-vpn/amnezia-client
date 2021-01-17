@@ -11,22 +11,23 @@ jobs:
       os: osx
       osx_image: xcode12.2
       
-      addons:
-        homebrew:
-          packages:
-          - qt5
+#      addons:
+#        homebrew:
+#          packages:
+#          - qt5
 #          update: true
             
       script:
+        - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh --version 5.14.2 --toolchain clang_64 qtbase; fi
         - bash deploy/build_macos.sh
 
-before_cache:
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
-  # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
+#before_cache:
+#  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
+#  # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
+#  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
   
 cache:
-  apt: true
   directories:
-    - $HOME/Library/Caches/Homebrew
-    - /usr/local/Cellar/qt
+    - $HOME/Qt
+#    - $HOME/Library/Caches/Homebrew
+#    - /usr/local/Cellar/qt
