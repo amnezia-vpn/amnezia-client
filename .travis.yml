@@ -15,13 +15,19 @@ jobs:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
-          bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then pip3 install aqtinstall requests py7zr && python3 -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && python3 -m aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40; fi"
+          if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
+          choco install python3 && \
+          python -m pip install -U pip && \
+          pip install aqtinstall requests py7zr && \
+          python3 -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
+          python3 -m aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40; \
+          fi
         - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"' > winbuild.bat
         - echo -e "\r\n" >> winbuild.bat
-        - echo 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\Auxiliary\\Build\\vcvarsamd64_x86.bat"' > winbuild.bat
+        - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"' > winbuild.bat
         - echo -e "\r\n" >> winbuild.bat
         - echo -e "cd deploy && windows.bat" >> winbuild.bat
-        - cmd //c winbuild.bat
+        
 
         
 before_cache:
