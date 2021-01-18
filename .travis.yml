@@ -15,7 +15,7 @@ jobs:
         
       before_install:
         - choco install python --version 3.9.1
-        - pip3 install --upgrade pip
+       # - pip3 install --upgrade pip
         
       script:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
