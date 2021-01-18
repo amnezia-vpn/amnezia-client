@@ -19,12 +19,11 @@ jobs:
 #          update: true
             
       script:
-        - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh -d $HOME/Qt --version 5.14.2 --toolchain clang_64 qtbase; fi
         - |
-          if [ ! -f $HOME/Qt/Tools/QtInstallerFramework/4.0.1/bin/binarycreator ]; then \
-          curl --progress-bar -L -o QtInstallerFramework.dmg "https://download.qt.io/official_releases/qt-installer-framework/4.0.1/QtInstallerFramework-mac-x64.dmg" >&2 && \
-          hdiutil attach QtInstallerFramework.dmg && \
-          /Volumes/QtInstallerFramework-mac-x64/QtInstallerFramework-mac-x64.app/Contents/MacOS/QtInstallerFramework-mac-x64 --accept-licenses --default-answer -c install --root $HOME/Qt/Tools/QtInstallerFramework/4.0.1; \
+          if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
+          pip install aqtinstall && \
+          aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
+          aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40
           fi
         - bash deploy/build_macos.sh
 
@@ -32,15 +31,24 @@ jobs:
       os: windows
             
       script:
-        - choco install tree wget
         - dir C:\
-        - tree "C:\Program Files (x86)\Microsoft Visual Studio"
-        - tree C:\Program Files
-        - bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then bash deploy/install-qt.sh -d /C/Qt --version 5.14.2 --toolchain win32_msvc2017 qtbase; fi"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7"
+        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+        - |
+          bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
+          pip install aqtinstall && \
+          aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
+          aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40
+          fi"
         - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"
         - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"
         - windows.bat
-        - QtInstallerFramework-win-x86.exe --root c:\Qt\Tools\QtInstallerFramework\4.0.1\ --accept-licenses --default-answer -c install
+
         
 #before_cache:
 #  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
