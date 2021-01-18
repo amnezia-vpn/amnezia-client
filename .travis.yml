@@ -21,7 +21,7 @@ jobs:
       script:
         - |
           if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
-          pip install aqtinstall && \
+          pip install aqtinstall requests py7zr && \
           aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
           aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40
           fi
@@ -31,17 +31,18 @@ jobs:
       os: windows
             
       script:
-        - dir C:\
+        - dir "C:\"
         - dir "C:\Program Files (x86)\Microsoft Visual Studio"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7"
-        - dir ""C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
           bash -c "if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
-          pip install aqtinstall && \
+          pip install aqtinstall requests py7zr && \
           aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
           aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40
           fi"
