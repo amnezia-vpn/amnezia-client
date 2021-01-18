@@ -11,7 +11,7 @@ jobs:
       os: windows
       
       env:
-        - PATH=/c/Python37:/c/Python38/Scripts:$PATH
+        - PATH=/c/Python38:/c/Python38/Scripts:$PATH
         
       before_install:
         - choco install python --version 3.8.5
@@ -22,10 +22,7 @@ jobs:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
           if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
-          choco install python3 && \
-          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-          python get-pip.py && \
-          pip install aqtinstall requests py7zr && \
+          pip3 install aqtinstall requests py7zr && \
           python -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
           python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40; \
           fi
