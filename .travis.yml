@@ -11,7 +11,7 @@ jobs:
       os: windows
       
       env:
-        - PATH=/c/Python38:/c/Python39/Scripts:$PATH
+        - PATH=/c/Python39:/c/Python39/Scripts:$PATH
         
       before_install:
         - choco install python --version 3.9.1
