@@ -20,11 +20,12 @@ jobs:
             
       script:
         - if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then bash deploy/install-qt.sh -d $HOME/Qt --version 5.14.2 --toolchain clang_64 qtbase; fi
-        - if [ ! -f $HOME/Qt/Tools/QtInstallerFramework/4.0.1/bin/binarycreator ]; then \
-        curl --progress-bar -L -o QtInstallerFramework.dmg "https://download.qt.io/official_releases/qt-installer-framework/4.0.1/QtInstallerFramework-mac-x64.dmg" >&2 && \
-        hdiutil attach QtInstallerFramework.dmg && \
-        /Volumes/QtInstallerFramework-mac-x64/QtInstallerFramework-mac-x64.app/Contents/MacOS/QtInstallerFramework-mac-x64 --accept-licenses --default-answer -c install --root $HOME/Qt/Tools/QtInstallerFramework/4.0.1; \
-        fi
+        - |
+          if [ ! -f $HOME/Qt/Tools/QtInstallerFramework/4.0.1/bin/binarycreator ]; then \
+          curl --progress-bar -L -o QtInstallerFramework.dmg "https://download.qt.io/official_releases/qt-installer-framework/4.0.1/QtInstallerFramework-mac-x64.dmg" >&2 && \
+          hdiutil attach QtInstallerFramework.dmg && \
+          /Volumes/QtInstallerFramework-mac-x64/QtInstallerFramework-mac-x64.app/Contents/MacOS/QtInstallerFramework-mac-x64 --accept-licenses --default-answer -c install --root $HOME/Qt/Tools/QtInstallerFramework/4.0.1; \
+          fi
         - bash deploy/build_macos.sh
 
     - name: Windows
