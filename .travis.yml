@@ -11,11 +11,11 @@ jobs:
       os: windows
       
       env:
-        - PATH=/c/Python38:/c/Python38/Scripts:$PATH
+        - PATH=/c/Python38:/c/Python39/Scripts:$PATH
         
       before_install:
-        - choco install python --version 3.8.5
-        - pip3 install --upgrade --user pip
+        - choco install python --version 3.9.1
+        - pip3 install --upgrade pip
         
       script:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
