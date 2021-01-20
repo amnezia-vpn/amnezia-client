@@ -1,0 +1,6 @@
+#include <QtCore>
+class RpcServer
+{
+    SLOT(executeProcess(const QString &program, const QStringList &args));
+    SIGNAL(sendMessage(const QByteArray &message));
+};

@@ -1,4 +1,4 @@
-QT += widgets core gui network xml
+QT += widgets core gui network xml remoteobjects
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -102,3 +102,6 @@ macx {
 
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit
 }
+
+REPC_REPLICA += ../communicator/communicator.rep
+
