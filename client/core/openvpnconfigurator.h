@@ -37,7 +37,6 @@ private:
 
     static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
         Protocol proto, ErrorCode *errorCode = nullptr);
-
 };
 
 #endif // OPENVPNCONFIGURATOR_H

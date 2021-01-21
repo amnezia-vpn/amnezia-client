@@ -18,4 +18,4 @@ docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/dh.pem /
 docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa sign-req server MyReq << EOF3 yes EOF3"
 docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && openvpn --genkey --secret ta.key << EOF4"
 docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/ca.crt pki/issued/MyReq.crt pki/private/MyReq.key ta.key /etc/openvpn"
-docker exec -i $CONTAINER_NAME sh -c "openvpn --config /etc/openvpn/server.conf &"
+docker exec -d $CONTAINER_NAME sh -c "openvpn --config /etc/openvpn/server.conf"

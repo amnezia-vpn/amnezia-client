@@ -39,5 +39,6 @@
         <file>images/background_connected.png</file>
         <file>server_scripts/setup_shadowsocks_server.sh</file>
         <file>server_scripts/template_shadowsocks.ovpn</file>
+        <file>server_scripts/setup_firewall.sh</file>
     </qresource>
 </RCC>

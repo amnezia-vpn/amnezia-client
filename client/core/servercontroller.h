@@ -44,6 +44,7 @@ public:
     static int ssContainerPort() { return 8585; } // TODO move to ShadowSocksDefs.h
     static QString ssEncryption() { return "chacha20-ietf-poly1305"; } // TODO move to ShadowSocksDefs.h
 
+    static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
     static ErrorCode runScript(DockerContainer container,
