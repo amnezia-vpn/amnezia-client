@@ -48,7 +48,7 @@ jobs:
         - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"' > winbuild.bat
         - echo -e "\r\n" >> winbuild.bat
         - echo -e "\deploy\build_windows.bat" >> winbuild.bat
-        - cmd //c winbuild.bat
+        - cmd /c winbuild.bat
         
 
         
