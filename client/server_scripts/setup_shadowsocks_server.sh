@@ -1,6 +1,9 @@
 #CONTAINER_NAME=... this var will be set in ServerController
 
-#apt update
+apt-get update
+
+iptables -P FORWARD ACCEPT
+
 apt install -y docker.io curl
 systemctl start docker
 

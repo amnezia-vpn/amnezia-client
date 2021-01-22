@@ -1,13 +1,16 @@
 #CONTAINER_NAME=... this var will be set in ServerController
 
-#apt update
+apt-get update
+
+iptables -P FORWARD ACCEPT
+
 apt install -y docker.io curl
 systemctl start docker
 
 docker stop $CONTAINER_NAME
 docker rm -f $CONTAINER_NAME
 docker pull amneziavpn/openvpn:latest
-docker run -d --restart always --cap-add=NET_ADMIN -e HOST_ADDR=$(curl -s https://api.ipify.org) -p 1194:1194/udp --name $CONTAINER_NAME amneziavpn/openvpn:latest
+docker run -d --restart always --cap-add=NET_ADMIN -p 1194:1194/udp --name $CONTAINER_NAME amneziavpn/openvpn:latest
 
 
 docker exec -i $CONTAINER_NAME sh -c "mkdir -p /opt/amneziavpn_data/clients"
