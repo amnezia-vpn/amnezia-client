@@ -10,15 +10,11 @@ jobs:
     - name: MacOS
       os: osx
       osx_image: xcode12.2
-      
-      addons:
-        homebrew:
-          packages:
-           - p7zip
-            
+                
       script:
         - |
           if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
+          brew install p7zip && \
           pip3 install aqtinstall requests py7zr && \
           python3 -m aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
           python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40;
@@ -47,7 +43,7 @@ jobs:
         - echo -e "\r\n" >> winbuild.bat
         - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"' >> winbuild.bat
         - echo -e "\r\n" >> winbuild.bat
-        - echo -e "\\deploy\\build_windows.bat" >> winbuild.bat
+        - echo -e "deploy\\\build_windows.bat" >> winbuild.bat
         - cat winbuild.bat
         - cmd //c winbuild.bat
         
