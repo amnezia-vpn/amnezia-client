@@ -67,6 +67,9 @@ cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer 									%RELEASE_DIR:"=%\installer /s /e /y /i /f
 mkdir %INSTALLER_DATA_DIR%
 
+echo "Deploy finished, content:"
+dir %OUT_APP_DIR%
+
 cd %OUT_APP_DIR%
 echo "Compressing data..."
 "%QIF_BIN_DIR:"=%\archivegen" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z ./
