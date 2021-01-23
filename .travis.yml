@@ -32,7 +32,7 @@ jobs:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
         
       before_install:
-        - choco install python --version 3.9.1
+        - if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
         
       script:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
