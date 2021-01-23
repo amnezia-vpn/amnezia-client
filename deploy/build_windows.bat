@@ -2,9 +2,11 @@
 
 CHCP 1252
 
-REM set QT_BIN_DIR="c:\Qt\5.14.1\msvc2017\bin"
-set QT_BIN_DIR="C:\terminal\3rd\release\Qt5\bin"
+set QT_BIN_DIR="c:\Qt\5.14.2\msvc2017\bin"
 set QIF_BIN_DIR="c:\Qt\Tools\QtInstallerFramework\4.0\bin"
+
+echo "Using Qt in %QT_BIN_DIR%"
+echo "Using QIF in %QIF_BIN_DIR%"
 
 # Hold on to current directory
 set PROJECT_DIR=%cd%
@@ -41,6 +43,10 @@ echo "Cleanup..."
 Rmdir /Q /S %RELEASE_DIR%
 Del %QMAKE_STASH_FILE%
 Del %TARGET_FILENAME%
+
+# Checking env
+"%QT_BIN_DIR:"=%\qmake" -v
+nmake /?
 
 cd %PROJECT_DIR%
 "%QT_BIN_DIR:"=%\qmake" -spec win32-msvc  -o deploy\build\Makefile
