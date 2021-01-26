@@ -4,6 +4,7 @@ branches:
   only:
     - master
     - dev
+    - /\d+\.\d+/
   
 jobs:
   include:
