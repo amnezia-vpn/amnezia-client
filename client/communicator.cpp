@@ -72,5 +72,8 @@ void Communicator::sendMessage(const Message& message)
     const QString data = message.toString();
     bool status = writeData(data + "\n");
 
-    qDebug().noquote() << QString("Send message '%1', status '%2'").arg(data).arg(Utils::toString(status));
+    qDebug().noquote() << QString("Send message '%1',%2 status '%2'").
+                          arg(static_cast<int>(message.state())).
+                          arg(data).
+                          arg(Utils::toString(status));
 }

@@ -94,6 +94,16 @@ void VpnProtocol::setConnectionState(VpnProtocol::ConnectionState state)
     emit connectionStateChanged(m_connectionState);
 }
 
+QString VpnProtocol::vpnGateway() const
+{
+    return m_vpnGateway;
+}
+
+QString VpnProtocol::routeGateway() const
+{
+    return m_routeGateway;
+}
+
 QString VpnProtocol::textConnectionState(ConnectionState connectionState)
 {
     switch (connectionState) {

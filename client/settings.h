@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QSettings>
 
 #include "core/defs.h"
 
@@ -35,8 +36,18 @@ public:
 
     bool haveAuthData() const;
 
+
+    // list of sites to pass blocking added by user
+    QStringList customSites() { return m_settings.value("customSites").toStringList(); }
+    void setCustomSites(const QStringList &customSites) { m_settings.setValue("customSites", customSites); }
+
+    // list of ips to pass blocking generated from customSites
+    QStringList customIps() { return m_settings.value("customIps").toStringList(); }
+    void setCustomIps(const QStringList &customIps) { m_settings.setValue("customIps", customIps); }
+
+
 protected:
-    QSettings* m_settings;
+    QSettings m_settings;
     QString m_userName;
     QString m_password;
     QString m_serverName;

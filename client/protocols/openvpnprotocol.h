@@ -15,7 +15,7 @@ class OpenVpnProtocol : public VpnProtocol
 
 public:
     explicit OpenVpnProtocol(const QString& args = QString(), QObject* parent = nullptr);
-    ~OpenVpnProtocol() override;
+    virtual ~OpenVpnProtocol() override;
 
     ErrorCode start() override;
     void stop() override;
@@ -46,6 +46,11 @@ protected:
     QString m_configFileName;
     QTimer m_openVpnStateSigTermHandlerTimer;
     bool m_requestFromUserToStop;
+
+
+private:
+    void updateRouteGateway(QString line);
+    void updateVpnGateway();
 };
 
 #endif // OPENVPNPROTOCOL_H

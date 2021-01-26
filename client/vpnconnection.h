@@ -7,6 +7,7 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
+#include "settings.h"
 
 using namespace amnezia;
 
@@ -27,6 +28,8 @@ public:
     bool onDisconnected() const;
     void disconnectFromVpn();
 
+    VpnProtocol::ConnectionState connectionState();
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
@@ -39,6 +42,9 @@ protected slots:
 protected:
 
     QScopedPointer<VpnProtocol> m_vpnProtocol;
+
+private:
+    Settings m_settings;
 };
 
 #endif // VPNCONNECTION_H

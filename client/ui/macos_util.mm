@@ -2,6 +2,19 @@
 #include <Cocoa/Cocoa.h>
 #include "macos_util.h"
 
+
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+
+void setDockIconVisible(bool visible)
+{
+    if (!visible) {
+        [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
+    } else {
+        [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
+    }
+}
+
 //this Objective-c class is used to override the action of system close button and zoom button
 //https://stackoverflow.com/questions/27643659/setting-c-function-as-selector-for-nsbutton-produces-no-results
 @interface ButtonPasser : NSObject{

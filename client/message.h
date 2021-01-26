@@ -6,7 +6,8 @@
 class Message {
 
 public:
-    enum class State {Unknown, Initialize, StartRequest, Started, FinishRequest, Finished};
+    enum class State {Unknown, Initialize, StartRequest, Started, FinishRequest, Finished,
+        RoutesAddRequest, RouteDeleteRequest, ClearSavedRoutesRequest, FlushDnsRequest, InstallDriverRequest};
     Message(State state, const QStringList& args);
     Message(const QString& data);
 
@@ -16,6 +17,7 @@ public:
     QStringList args() const;
     State state() const;
     bool isValid() const;
+    QString rawData() const;
 
 protected:
     QString textState() const;
@@ -26,6 +28,7 @@ protected:
     bool m_valid;
     State m_state;
     QStringList m_args;
+    QString m_rawData;
 };
 
 #endif // MESSAGE_H

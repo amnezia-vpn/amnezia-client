@@ -1,5 +1,7 @@
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QProcess>
+#include <QRegularExpression>
 #include <QTcpSocket>
 
 #include "communicator.h"
@@ -19,7 +21,8 @@ OpenVpnProtocol::OpenVpnProtocol(const QString& args, QObject* parent) :
 
 OpenVpnProtocol::~OpenVpnProtocol()
 {
-    stop();
+    qDebug() << "OpenVpnProtocol::stop()";
+    OpenVpnProtocol::stop();
 }
 
 void OpenVpnProtocol::onMessageReceived(const Message& message)
@@ -105,6 +108,15 @@ void OpenVpnProtocol::writeCommand(const QString& command)
     }
 }
 
+void OpenVpnProtocol::updateRouteGateway(QString line)
+{
+    line = line.split("ROUTE_GATEWAY", QString::SkipEmptyParts).at(1);
+    if (!line.contains("/")) return;
+    m_routeGateway = line.split("/", QString::SkipEmptyParts).first();
+    m_routeGateway.replace(" ", "");
+    qDebug() << "Set VPN route gateway" << m_routeGateway;
+}
+
 QString OpenVpnProtocol::openVpnExecPath() const
 {
 #ifdef Q_OS_WIN
@@ -120,7 +132,7 @@ ErrorCode OpenVpnProtocol::start()
 
     m_requestFromUserToStop = false;
     m_openVpnStateSigTermHandlerTimer.stop();
-    stop();
+    OpenVpnProtocol::stop();
 
     if (communicator() && !communicator()->isConnected()) {
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
@@ -208,6 +220,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             if (line.contains("CONNECTED,SUCCESS")) {
                 sendByteCount();
                 stopTimeoutTimer();
+                updateVpnGateway();
                 setConnectionState(VpnProtocol::ConnectionState::Connected);
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
@@ -219,6 +232,10 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             }
         }
 
+        if (line.contains("ROUTE_GATEWAY")) {
+            updateRouteGateway(line);
+        }
+
         if (line.contains("FATAL")) {
             if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")) {
                 emit protocolError(ErrorCode::OpenVpnAdaptersInUseError);
@@ -226,6 +243,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             else {
                 emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
+            return;
         }
 
         QByteArray data(line.toStdString().c_str());
@@ -257,4 +275,46 @@ void OpenVpnProtocol::onOpenVpnProcessFinished(int exitCode)
     setConnectionState(VpnProtocol::ConnectionState::Disconnected);
 }
 
+void OpenVpnProtocol::updateVpnGateway()
+{
+    QProcess ipconfig;
+    ipconfig.start("ipconfig", QStringList() << "/all");
+    ipconfig.waitForStarted();
+    ipconfig.waitForFinished();
 
+    QString d = ipconfig.readAll();
+    d.replace("\r", "");
+    //qDebug().noquote() << d;
+
+    QStringList adapters = d.split(":\n");
+
+    bool isTapV9Present = false;
+    QString tapV9;
+    for (int i = 0; i < adapters.size(); ++i) {
+        if (adapters.at(i).contains("TAP-Windows Adapter V9")) {
+            isTapV9Present = true;
+            tapV9 = adapters.at(i);
+            break;
+        }
+    }
+    if (!isTapV9Present) {
+        m_vpnGateway = "";
+    }
+
+    QStringList lines = tapV9.split("\n");
+    for (int i = 0; i < lines.size(); ++i) {
+        if (!lines.at(i).contains("DHCP")) continue;
+
+        QRegularExpression re("(: )([\\d\\.]+)($)");
+        QRegularExpressionMatch match = re.match(lines.at(i));
+
+        if (match.hasMatch()) {
+            qDebug().noquote() << "Current VPN Gateway IP Address: " << match.captured(0);
+            m_vpnGateway = match.captured(2);
+            return;
+        }
+        else continue;
+    }
+
+    m_vpnGateway = "";
+}

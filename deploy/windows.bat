@@ -2,8 +2,8 @@
 
 CHCP 1252
 
-SET QT_BIN_DIR="c:\Devel\Qt\5.14.2\msvc2017\bin"
-SET QIF_BIN_DIR="c:\Devel\Qt\Tools\QtInstallerFramework\4.0\bin"
+SET QT_BIN_DIR="c:\Qt\5.14.2\msvc2017\bin"
+SET QIF_BIN_DIR="c:\Qt\Tools\QtInstallerFramework\4.0\bin"
 
 set APP_NAME=AmneziaVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
@@ -45,6 +45,7 @@ del "%OUT_APP_DIR:"=%\*.cpp"
 del "%OUT_APP_DIR:"=%\*.h"
 del "%OUT_APP_DIR:"=%\*.res"
 del "%OUT_APP_DIR:"=%\*.o"
+del "%OUT_APP_DIR:"=%\*.moc"
 del "%OUT_APP_DIR:"=%\*.lib"
 del "%OUT_APP_DIR:"=%\*.exp"
 echo "Deploying..."

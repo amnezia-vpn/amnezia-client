@@ -111,3 +111,71 @@ bool Utils::processIsRunning(const QString& fileName)
 #endif
 }
 
+QString Utils::getIPAddress(const QString& host)
+{
+    //TODO rewrite to api calls
+    qDebug().noquote() << "GetIPAddress: checking " + host;
+    if(host.isEmpty()) {
+        qDebug().noquote() << "GetIPAddress: host is empty.";
+        return QString();
+    }
+
+    if(checkIPFormat(host)) {
+        qDebug().noquote() << "GetIPAddress host is ip:" << host << host;
+        return host;    // it is a ip address.
+    }
+    QProcess ping;
+
+#ifdef Q_OS_MACX
+    ping.start("ping", QStringList() << "-c1" << host);
+#endif
+#ifdef Q_OS_WIN
+    ping.start("ping", QStringList() << QString("/n") << "1" << QString("/w") << "1" << host);
+#endif
+    ping.waitForStarted();
+
+    QEventLoop loop;
+    loop.connect(&ping, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    loop.exec();
+
+    QString d = ping.readAll();
+    if(d.size() == 0)
+        return QString();
+    qDebug().noquote() << d;
+
+    QString ip;
+#ifdef Q_OS_MACX
+    ip = getStringBetween(d, "(", ")");
+#endif
+#ifdef Q_OS_WIN
+    ip = getStringBetween(d, "[", "]");
+#endif
+    qDebug().noquote() << "GetIPAddress:" << host << ip;
+    return ip;
+}
+
+QString Utils::getStringBetween(const QString& s, const QString& a, const QString& b)
+{
+    int ap = s.indexOf(a), bp = s.indexOf(b, ap + a.length());
+    if(ap < 0 || bp < 0)
+        return QString();
+    ap += a.length();
+    if(bp - ap <= 0)
+        return QString();
+    return s.mid(ap, bp - ap).trimmed();
+}
+
+bool Utils::checkIPFormat(const QString& ip)
+{
+    int count = ip.count(".");
+    if(count != 3)
+        return false;
+
+    QStringList list = ip.trimmed().split(".");
+    foreach(QString it, list) {
+        if(it.toInt() <= 255 && it.toInt() >= 0)
+            continue;
+        return false;
+    }
+    return true;
+}

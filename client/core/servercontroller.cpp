@@ -5,13 +5,25 @@
 #include <QLoggingCategory>
 #include <QPointer>
 #include <QTimer>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 #include "sshconnectionmanager.h"
 
 
 using namespace QSsh;
 
-ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, QString script)
+QString ServerController::getContainerName(DockerContainer container)
+{
+    switch (container) {
+    case(DockerContainer::OpenVpn): return "amnezia-openvpn";
+    case(DockerContainer::ShadowSocks): return "amnezia-shadowsocks";
+    default: return "";
+    }
+}
+
+ErrorCode ServerController::runScript(DockerContainer container,
+    const SshConnectionParameters &sshParams, QString script)
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
 
@@ -26,7 +38,9 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
 
     const QStringList &lines = script.split("\n", QString::SkipEmptyParts);
     for (int i = 0; i < lines.count(); i++) {
-        const QString &line = lines.at(i);
+        QString line = lines.at(i);
+        line.replace("$CONTAINER_NAME", getContainerName(container));
+
         if (line.startsWith("#")) {
             continue;
         }
@@ -40,11 +54,11 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
         }
 
         QEventLoop wait;
-        int exitStatus;
+        int exitStatus = -1;
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-//            qDebug() << "Command started";
-//        });
+        //        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
+        //            qDebug() << "Command started";
+        //        });
 
         QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
             exitStatus = status;
@@ -52,23 +66,22 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
             wait.quit();
         });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//            QString s = proc->readAllStandardOutput();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+            QString s = proc->readAllStandardOutput();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//            QString s = proc->readAllStandardError();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+            QString s = proc->readAllStandardError();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
         proc->start();
-
-        if (i < lines.count() - 1) {
+        if (i < lines.count() && exitStatus < 0) {
             wait.exec();
         }
 
@@ -81,13 +94,13 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
     return ErrorCode::NoError;
 }
 
-ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &credentials,
-                                     QString &file, const QString &path)
+ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
+    const ServerCredentials &credentials, QString &file, const QString &path)
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
 
-    QString script = QString("docker exec -i amneziavpn sh -c \"echo \'%1\' > %2\"").
-            arg(file).arg(path);
+    QString script = QString("docker exec -i %1 sh -c \"echo \'%2\' > %3\"").
+            arg(getContainerName(container)).arg(file).arg(path);
 
     qDebug().noquote() << script;
 
@@ -104,11 +117,11 @@ ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &c
     }
 
     QEventLoop wait;
-    int exitStatus = 0;
+    int exitStatus = -1;
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-//        qDebug() << "Command started";
-//    });
+    //    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
+    //        qDebug() << "Command started";
+    //    });
 
     QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
         //qDebug() << "Remote process exited with status" << status;
@@ -116,25 +129,29 @@ ErrorCode ServerController::uploadTextFileToContainer(const ServerCredentials &c
         wait.quit();
     });
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//        qDebug().noquote() << proc->readAllStandardOutput();
-//    });
+    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+        qDebug().noquote() << proc->readAllStandardOutput();
+    });
 
-//    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//        qDebug().noquote() << proc->readAllStandardError();
-//    });
+    QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+        qDebug().noquote() << proc->readAllStandardError();
+    });
 
     proc->start();
-    wait.exec();
+    //wait.exec();
+
+    if (exitStatus < 0) {
+        wait.exec();
+    }
 
     return fromSshProcessExitStatus(exitStatus);
 }
 
-QString ServerController::getTextFileFromContainer(const ServerCredentials &credentials, const QString &path,
-                                                   ErrorCode *errorCode)
+QString ServerController::getTextFileFromContainer(DockerContainer container,
+    const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode)
 {
-    QString script = QString("docker exec -i amneziavpn sh -c \"cat \'%1\'\"").
-            arg(path);
+    QString script = QString("docker exec -i %1 sh -c \"cat \'%2\'\"").
+            arg(getContainerName(container)).arg(path);
 
     qDebug().noquote() << "Copy file from container\n" << script;
 
@@ -159,8 +176,17 @@ QString ServerController::getTextFileFromContainer(const ServerCredentials &cred
         wait.quit();
     });
 
+    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [&](){
+        qDebug() << "ServerController::getTextFileFromContainer proc started";
+        exitStatus = -1;
+    });
+
     proc->start();
     wait.exec();
+
+//    if (exitStatus < 0) {
+//        wait.exec();
+//    }
 
     if (SshRemoteProcess::ExitStatus(exitStatus) != QSsh::SshRemoteProcess::ExitStatus::NormalExit) {
         if (errorCode) *errorCode = fromSshProcessExitStatus(exitStatus);
@@ -169,25 +195,28 @@ QString ServerController::getTextFileFromContainer(const ServerCredentials &cred
     return proc->readAllStandardOutput();
 }
 
-ErrorCode ServerController::signCert(const ServerCredentials &credentials, QString clientId)
+ErrorCode ServerController::signCert(DockerContainer container,
+    const ServerCredentials &credentials, QString clientId)
 {
-    QString script_import = QString("docker exec -i amneziavpn bash -c \"cd /opt/amneziavpn_data && "
-                             "easyrsa import-req /opt/amneziavpn_data/clients/%1.req %1 &>/dev/null\"")
-            .arg(clientId);
+    QString script_import = QString("docker exec -i %1 bash -c \"cd /opt/amneziavpn_data && "
+                             "easyrsa import-req /opt/amneziavpn_data/clients/%2.req %2\"")
+            .arg(getContainerName(container)).arg(clientId);
 
-    QString script_sign = QString("docker exec -i amneziavpn bash -c \"export EASYRSA_BATCH=1; cd /opt/amneziavpn_data && "
-                                    "easyrsa sign-req client %1 &>/dev/null\"")
-            .arg(clientId);
+    QString script_sign = QString("docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amneziavpn_data && "
+                                    "easyrsa sign-req client %2\"")
+            .arg(getContainerName(container)).arg(clientId);
 
     QStringList script {script_import, script_sign};
 
-    return runScript(sshParams(credentials), script.join("\n"));
+    return runScript(container, sshParams(credentials), script.join("\n"));
 }
 
-ErrorCode ServerController::checkOpenVpnServer(const ServerCredentials &credentials)
+ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
 {
-    QString caCert = ServerController::getTextFileFromContainer(credentials, ServerController::caCertPath());
-    QString taKey = ServerController::getTextFileFromContainer(credentials, ServerController::taKeyPath());
+    QString caCert = ServerController::getTextFileFromContainer(container,
+        credentials, ServerController::caCertPath());
+    QString taKey = ServerController::getTextFileFromContainer(container,
+        credentials, ServerController::taKeyPath());
 
     if (!caCert.isEmpty() && !taKey.isEmpty()) {
         return ErrorCode::NoError;
@@ -209,15 +238,18 @@ ErrorCode ServerController::fromSshConnectionErrorCode(SshError error)
     case(QSsh::SshAuthenticationError): return ErrorCode::SshAuthenticationError;
     case(QSsh::SshClosedByServerError): return ErrorCode::SshClosedByServerError;
     case(QSsh::SshInternalError): return ErrorCode::SshInternalError;
+    default: return ErrorCode::SshInternalError;
     }
 }
 
 ErrorCode ServerController::fromSshProcessExitStatus(int exitStatus)
 {
+    qDebug() << exitStatus;
     switch (SshRemoteProcess::ExitStatus(exitStatus)) {
     case(SshRemoteProcess::ExitStatus::NormalExit): return ErrorCode::NoError;
     case(SshRemoteProcess::ExitStatus::FailedToStart): return ErrorCode::FailedToStartRemoteProcessError;
     case(SshRemoteProcess::ExitStatus::CrashExit): return ErrorCode::RemoteProcessCrashError;
+    default: return ErrorCode::SshInternalError;
     }
 }
 
@@ -238,10 +270,24 @@ SshConnectionParameters ServerController::sshParams(const ServerCredentials &cre
 ErrorCode ServerController::removeServer(const ServerCredentials &credentials, Protocol proto)
 {
     QString scriptFileName;
+    DockerContainer container;
 
-    if (proto == Protocol::OpenVpn || proto == Protocol::Any) {
-        scriptFileName = ":/server_scripts/remove_openvpn_server.sh";
+    ErrorCode errorCode;
+    if (proto == Protocol::Any) {
+        removeServer(credentials, Protocol::OpenVpn);
+        removeServer(credentials, Protocol::ShadowSocks);
+        return ErrorCode::NoError;
     }
+    else if (proto == Protocol::OpenVpn) {
+        scriptFileName = ":/server_scripts/remove_container.sh";
+        container = DockerContainer::OpenVpn;
+    }
+    else if (proto == Protocol::ShadowSocks) {
+        scriptFileName = ":/server_scripts/remove_container.sh";
+        container = DockerContainer::ShadowSocks;
+    }
+    else return ErrorCode::NotImplementedError;
+
 
     QString scriptData;
 
@@ -251,7 +297,7 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
     scriptData = file.readAll();
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
-    return runScript(sshParams(credentials), scriptData);
+    return runScript(container, sshParams(credentials), scriptData);
 }
 
 ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Protocol proto)
@@ -263,8 +309,10 @@ ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Pr
         return setupShadowSocksServer(credentials);
     }
     else if (proto == Protocol::Any) {
+        return ErrorCode::NotImplementedError;
+
         // TODO: run concurently
-        return setupOpenVpnServer(credentials);
+        // return setupOpenVpnServer(credentials);
         //setupShadowSocksServer(credentials);
     }
 
@@ -281,16 +329,49 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
     scriptData = file.readAll();
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
-    ErrorCode e = runScript(sshParams(credentials), scriptData);
+    ErrorCode e = runScript(DockerContainer::OpenVpn, sshParams(credentials), scriptData);
     if (e) return e;
 
-    //return ok;
-    return checkOpenVpnServer(credentials);
+    return checkOpenVpnServer(DockerContainer::OpenVpn, credentials);
 }
 
 ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &credentials)
 {
-    return ErrorCode::NotImplementedError;
+    // Setup openvpn part
+    QString scriptData;
+    QString scriptFileName = ":/server_scripts/setup_shadowsocks_server.sh";
+    QFile file(scriptFileName);
+    if (! file.open(QIODevice::ReadOnly)) return ErrorCode::InternalError;
+
+    scriptData = file.readAll();
+    if (scriptData.isEmpty()) return ErrorCode::InternalError;
+
+    ErrorCode e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), scriptData);
+    if (e) return e;
+
+    // Create ss config
+    QJsonObject ssConfig;
+    ssConfig.insert("server", "0.0.0.0");
+    ssConfig.insert("server_port", ssRemotePort());
+    ssConfig.insert("local_port", ssContainerPort());
+    ssConfig.insert("password", credentials.password);
+    ssConfig.insert("timeout", 60);
+    ssConfig.insert("method", ssEncryption());
+    QString configData = QJsonDocument(ssConfig).toJson();
+    QString sSConfigPath = "/opt/amneziavpn_data/ssConfig.json";
+
+    qDebug().noquote() << configData;
+    configData.replace("\"", "\\\"");
+    qDebug().noquote() << configData;
+
+    uploadTextFileToContainer(DockerContainer::ShadowSocks, credentials, configData, sSConfigPath);
+
+    // Start ss
+    QString script = QString("docker exec -i %1 sh -c \"ss-server -c %2 &\"").
+            arg(getContainerName(DockerContainer::ShadowSocks)).arg(sSConfigPath);
+
+    e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), script);
+    return e;
 }
 
 SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
@@ -314,9 +395,9 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     });
 
 
-//    QObject::connect(client, &SshConnection::dataAvailable, [&](const QString &message) {
-//        qCritical() << "Ssh message:" << message;
-//    });
+    //    QObject::connect(client, &SshConnection::dataAvailable, [&](const QString &message) {
+    //        qCritical() << "Ssh message:" << message;
+    //    });
 
     //qDebug() << "Connection state" << client->state();
 
@@ -326,22 +407,31 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     }
 
 
-//    QObject::connect(&client, &SshClient::sshDataReceived, [&](){
-//        qDebug().noquote() << "Data received";
-//    });
+    //    QObject::connect(&client, &SshClient::sshDataReceived, [&](){
+    //        qDebug().noquote() << "Data received";
+    //    });
 
 
-//    if(client.sshState() != SshClient::SshState::Ready) {
-//        qCritical() << "Can't connect to server";
-//        return false;
-//    }
-//    else {
-//        qDebug() << "SSh connection established";
-//    }
+    //    if(client.sshState() != SshClient::SshState::Ready) {
+    //        qCritical() << "Can't connect to server";
+    //        return false;
+    //    }
+    //    else {
+    //        qDebug() << "SSh connection established";
+    //    }
 
 
-//    QObject::connect(proc, &SshProcess::finished, &wait, &QEventLoop::quit);
-//    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
+    //    QObject::connect(proc, &SshProcess::finished, &wait, &QEventLoop::quit);
+    //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
+}
+
+ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
+{
+    QFile file(":/server_scripts/setup_firewall.sh");
+    file.open(QIODevice::ReadOnly);
+
+    QString script = file.readAll();
+    return runScript(DockerContainer::OpenVpn, sshParams(credentials), script);
 }

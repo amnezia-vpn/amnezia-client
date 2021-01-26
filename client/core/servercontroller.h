@@ -22,21 +22,33 @@ public:
     static QString clientCertPath() { return "/opt/amneziavpn_data/pki/issued/"; }
     static QString taKeyPath() { return "/opt/amneziavpn_data/ta.key"; }
 
+    static QString getContainerName(amnezia::DockerContainer container);
+
     static QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
 
     static ErrorCode removeServer(const ServerCredentials &credentials, Protocol proto);
     static ErrorCode setupServer(const ServerCredentials &credentials, Protocol proto);
 
-    static ErrorCode checkOpenVpnServer(const ServerCredentials &credentials);
+    static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
-    static ErrorCode uploadTextFileToContainer(const ServerCredentials &credentials, QString &file, const QString &path);
-    static QString getTextFileFromContainer(const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
+    static ErrorCode uploadTextFileToContainer(DockerContainer container,
+        const ServerCredentials &credentials, QString &file, const QString &path);
 
-    static ErrorCode signCert(const ServerCredentials &credentials, QString clientId);
+    static QString getTextFileFromContainer(DockerContainer container,
+        const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
 
+    static ErrorCode signCert(DockerContainer container,
+        const ServerCredentials &credentials, QString clientId);
+
+    static int ssRemotePort() { return 6789; } // TODO move to ShadowSocksDefs.h
+    static int ssContainerPort() { return 8585; } // TODO move to ShadowSocksDefs.h
+    static QString ssEncryption() { return "chacha20-ietf-poly1305"; } // TODO move to ShadowSocksDefs.h
+
+    static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
-    static ErrorCode runScript(const QSsh::SshConnectionParameters &sshParams, QString script);
+    static ErrorCode runScript(DockerContainer container,
+        const QSsh::SshConnectionParameters &sshParams, QString script);
 
     static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials);
     static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials);

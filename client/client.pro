@@ -14,13 +14,13 @@ HEADERS  += \
     core/defs.h \
     core/errorstrings.h \
     core/openvpnconfigurator.h \
-    core/router.h \
     core/servercontroller.h \
     debug.h \
     defines.h \
     localclient.h \
     managementserver.h \
     message.h \
+    protocols/shadowsocksvpnprotocol.h \
     runguard.h \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
@@ -33,13 +33,13 @@ HEADERS  += \
 SOURCES  += \
     communicator.cpp \
     core/openvpnconfigurator.cpp \
-    core/router.cpp \
     core/servercontroller.cpp \
     debug.cpp \
     localclient.cpp \
     main.cpp \
     managementserver.cpp \
     message.cpp \
+    protocols/shadowsocksvpnprotocol.cpp \
     runguard.cpp \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
@@ -57,12 +57,12 @@ RESOURCES += \
 TRANSLATIONS = \
     translations/amneziavpn_ru.ts
 
-CONFIG(release, debug|release) {
-    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
-    MOC_DIR = $$DESTDIR
-    OBJECTS_DIR = $$DESTDIR
-    RCC_DIR = $$DESTDIR
-}
+#CONFIG(release, debug|release) {
+#    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
+#    MOC_DIR = $$DESTDIR
+#    OBJECTS_DIR = $$DESTDIR
+#    RCC_DIR = $$DESTDIR
+#}
 
 win32 {
     OTHER_FILES += platform_win/vpnclient.rc
@@ -98,5 +98,5 @@ macx {
     HEADERS  += ui/macos_util.h
     SOURCES  += ui/macos_util.mm
 
-    LIBS += -framework Cocoa
+    LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit
 }

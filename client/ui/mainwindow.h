@@ -5,12 +5,14 @@
 #include <QMainWindow>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QStringListModel>
 #include <QSystemTrayIcon>
 
 #include "framelesswindow.h"
 #include "protocols/vpnprotocol.h"
 
-class Settings;
+#include "settings.h"
+
 class VpnConnection;
 
 namespace Ui {
@@ -43,10 +45,14 @@ private slots:
 
     void onPushButtonConnectClicked(bool checked);
     void onPushButtonNewServerConnectWithNewData(bool);
+    void onPushButtonNewServerConnectWithExistingCode(bool);
 
     void onPushButtonReinstallServer(bool);
     void onPushButtonClearServer(bool);
     void onPushButtonForgetServer(bool);
+
+    void onPushButtonAddCustomSitesClicked();
+    void onPushButtonDeleteCustomSiteClicked();
 
     void onTrayActionConnect(); // connect from context menu
     void setTrayState(VpnProtocol::ConnectionState state);
@@ -68,10 +74,14 @@ private:
     void setTrayIcon(const QString &iconPath);
 
     void setupUiConnections();
+    void initCustomSites();
+
+    void updateShareCode();
+
 
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
-    Settings* m_settings;
+    Settings m_settings;
 
     QAction* m_trayActionConnect;
     QAction* m_trayActionDisconnect;
@@ -79,11 +89,15 @@ private:
     QSystemTrayIcon m_tray;
     QMenu* m_menu;
 
+    QStringListModel *customSitesModel = nullptr;
+
     bool canMove = false;
     QPoint offset;
     bool eventFilter(QObject *obj, QEvent *event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void closeEvent(QCloseEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
     const QString ConnectedTrayIconName = "active.png";
     const QString DisconnectedTrayIconName = "default.png";

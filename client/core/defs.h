@@ -12,6 +12,12 @@ enum class Protocol {
     WireGuard
 };
 
+enum class DockerContainer {
+    OpenVpn,
+    ShadowSocks,
+    WireGuard
+};
+
 struct ServerCredentials
 {
     QString hostName;

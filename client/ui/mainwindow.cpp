@@ -1,5 +1,8 @@
 #include <QApplication>
+#include <QClipboard>
 #include <QDesktopServices>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
@@ -17,7 +20,6 @@
 #include "debug.h"
 #include "defines.h"
 #include "mainwindow.h"
-#include "settings.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
 #include "vpnconnection.h"
@@ -27,23 +29,21 @@
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
-#ifdef Q_OS_WIN
+    #ifdef Q_OS_WIN
     CFramelessWindow(parent),
-#else
+    #else
     QMainWindow(parent),
-#endif
+    #endif
     ui(new Ui::MainWindow),
-    m_settings(new Settings),
     m_vpnConnection(nullptr)
 {
     ui->setupUi(this);
+    ui->label_error_text->clear();
     ui->widget_tittlebar->installEventFilter(this);
 
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
 
-    ui->pushButton_blocked_list->setEnabled(false);
-    ui->pushButton_share_connection->setEnabled(false);
 #ifdef Q_OS_MAC
     ui->widget_tittlebar->hide();
     ui->stackedWidget_main->move(0,0);
@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Post initialization
 
-    if (m_settings->haveAuthData()) {
+    if (m_settings.haveAuthData()) {
         goToPage(Page::Vpn, true, false);
     } else {
         goToPage(Page::Start, true, false);
@@ -60,6 +60,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setupTray();
     setupUiConnections();
+
+    customSitesModel = new QStringListModel();
+    ui->listView_sites_custom->setModel(customSitesModel);
+
+    connect(ui->listView_sites_custom, &QListView::doubleClicked, [&](const QModelIndex &index){
+        QDesktopServices::openUrl("https://" + index.data().toString());
+    });
+    connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
+        ui->pushButton_sites_add_custom->click();
+    });
+
+    initCustomSites();
+
+    ui->pushButton_general_settings_exit->hide();
+    //ui->pushButton_share_connection->hide();
 
     setFixedSize(width(),height());
 
@@ -111,9 +126,9 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             ui->label_server_settings_wait_info->hide();
             ui->label_server_settings_wait_info->clear();
             ui->label_server_settings_server->setText(QString("%1@%2:%3")
-                                                      .arg(m_settings->userName())
-                                                      .arg(m_settings->serverName())
-                                                      .arg(m_settings->serverPort()));
+                                                      .arg(m_settings.userName())
+                                                      .arg(m_settings.serverName())
+                                                      .arg(m_settings.serverPort()));
         }
 
     }
@@ -188,6 +203,24 @@ void MainWindow::closeEvent(QCloseEvent *event)
     hide();
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+#ifdef Q_OS_MACX
+    if (!event->spontaneous()) {
+        setDockIconVisible(true);
+    }
+#endif
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+#ifdef Q_OS_MACX
+    if (!event->spontaneous()) {
+        setDockIconVisible(false);
+    }
+#endif
+}
+
 void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
 {
     if (ui->lineEdit_new_server_ip->text().isEmpty() ||
@@ -209,20 +242,43 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
     serverCredentials.password = ui->lineEdit_new_server_password->text();
 
     bool ok = installServer(serverCredentials,
-                  ui->page_new_server,
-                  ui->progressBar_new_server_connection,
-                  ui->pushButton_new_server_connect_with_new_data,
-                  ui->label_new_server_wait_info);
+                            ui->page_new_server,
+                            ui->progressBar_new_server_connection,
+                            ui->pushButton_new_server_connect_with_new_data,
+                            ui->label_new_server_wait_info);
 
     if (ok) {
-        m_settings->setServerCredentials(serverCredentials);
-        m_settings->save();
+        m_settings.setServerCredentials(serverCredentials);
+        m_settings.save();
 
         goToPage(Page::Vpn);
         qApp->processEvents();
 
         onConnect();
     }
+}
+
+void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
+{
+    QString s = ui->lineEdit_start_existing_code->text();
+    s.replace("vpn://", "");
+    QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8())).object();
+
+    qDebug().noquote() << QByteArray::fromBase64(s.toUtf8());
+    ServerCredentials credentials;
+    credentials.hostName = o.value("h").toString();
+    credentials.port = o.value("p").toInt();
+    credentials.userName = o.value("u").toString();
+    credentials.password = o.value("w").toString();
+
+    m_settings.setServerCredentials(credentials);
+    m_settings.save();
+
+    goToPage(Page::Vpn);
+    qDebug() << QString("Added server %3@%1:%2").
+                arg(credentials.hostName).
+                arg(credentials.port).
+                arg(credentials.userName);
 }
 
 bool MainWindow::installServer(ServerCredentials credentials,
@@ -243,7 +299,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
     timer.start(1000);
 
 
-    ErrorCode e = ServerController::setupServer(credentials, Protocol::Any);
+    ErrorCode e = ServerController::setupServer(credentials, Protocol::OpenVpn);
     if (e) {
         page->setEnabled(true);
         button->setVisible(true);
@@ -251,8 +307,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
 
         QMessageBox::warning(this, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e) + "\n" +
-                             tr("See logs for details."));
+                             errorString(e));
 
         return false;
     }
@@ -287,7 +342,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
 void MainWindow::onPushButtonReinstallServer(bool)
 {
     onDisconnect();
-    installServer(m_settings->serverCredentials(),
+    installServer(m_settings.serverCredentials(),
                   ui->page_server_settings,
                   ui->progressBar_server_settings_reinstall,
                   ui->pushButton_server_settings_reinstall,
@@ -298,7 +353,7 @@ void MainWindow::onPushButtonClearServer(bool)
 {
     onDisconnect();
 
-    ErrorCode e = ServerController::removeServer(m_settings->serverCredentials(), Protocol::Any);
+    ErrorCode e = ServerController::removeServer(m_settings.serverCredentials(), Protocol::Any);
     if (e) {
         QMessageBox::warning(this, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
@@ -317,12 +372,12 @@ void MainWindow::onPushButtonForgetServer(bool)
 {
     onDisconnect();
 
-    m_settings->setUserName("");
-    m_settings->setPassword("");
-    m_settings->setServerName("");
-    m_settings->setServerPort();
+    m_settings.setUserName("");
+    m_settings.setPassword("");
+    m_settings.setServerName("");
+    m_settings.setServerPort();
 
-    m_settings->save();
+    m_settings.save();
 
     goToPage(Page::Start);
 }
@@ -336,6 +391,8 @@ void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
 
 void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
+    qDebug() << "MainWindow::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
+
     bool pushButtonConnectEnabled = false;
     ui->label_state->setText(VpnProtocol::textConnectionState(state));
 
@@ -376,8 +433,7 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 
 void MainWindow::onVpnProtocolError(ErrorCode errorCode)
 {
-    // TODO fix crash on Windows when starting vpn and another vpn already connected
-    //QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
+    ui->label_error_text->setText(errorString(errorCode));
 }
 
 void MainWindow::onPushButtonConnectClicked(bool checked)
@@ -406,9 +462,11 @@ void MainWindow::setupTray()
     });
 
     m_menu->addAction(QIcon(":/images/tray/cancel.png"), tr("Quit") + " " + APPLICATION_NAME, this, [&](){
+//        QMessageBox::question(this, QMessageBox::question(this, tr("Exit"), tr("Do you really want to quit?"), QMessageBox::Yes | QMessageBox::No, );
+
         QMessageBox msgBox(QMessageBox::Question, tr("Exit"), tr("Do you really want to quit?"),
-                           QMessageBox::Yes | QMessageBox::No, Q_NULLPTR, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowStaysOnTopHint);
-        msgBox.setDefaultButton(QMessageBox::No);
+                           QMessageBox::Yes | QMessageBox::No, this, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowStaysOnTopHint);
+        msgBox.setDefaultButton(QMessageBox::Yes);
         msgBox.raise();
         if (msgBox.exec() == QMessageBox::Yes) {
             qApp->quit();
@@ -455,6 +513,7 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_connect, SIGNAL(clicked(bool)), this, SLOT(onPushButtonConnectClicked(bool)));
     connect(ui->pushButton_new_server_setup, &QPushButton::clicked, this, [this](){ goToPage(Page::NewServer); });
     connect(ui->pushButton_new_server_connect_with_new_data, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerConnectWithNewData(bool)));
+    connect(ui->pushButton_new_server_connect, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerConnectWithExistingCode(bool)));
 
     connect(ui->pushButton_server_settings_reinstall, SIGNAL(clicked(bool)), this, SLOT(onPushButtonReinstallServer(bool)));
     connect(ui->pushButton_server_settings_clear, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClearServer(bool)));
@@ -463,7 +522,19 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_blocked_list, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
     connect(ui->pushButton_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
     connect(ui->pushButton_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
-    connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){ goToPage(Page::ShareConnection); });
+    connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
+        goToPage(Page::ShareConnection);
+        updateShareCode();
+    });
+
+    connect(ui->pushButton_copy_sharing_code, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->textEdit_sharing_code->toPlainText());
+        ui->pushButton_copy_sharing_code->setText(tr("Copied"));
+
+        QTimer::singleShot(3000, [this]() {
+            ui->pushButton_copy_sharing_code->setText(tr("Copy"));
+        });
+    });
 
 
     connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
@@ -472,6 +543,8 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_back_from_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
     connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
 
+    connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
+    connect(ui->pushButton_sites_delete_custom, &QPushButton::clicked, this, [this](){ onPushButtonDeleteCustomSiteClicked(); });
 }
 
 void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
@@ -508,32 +581,35 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
     }
 
-//#ifdef Q_OS_MAC
-//    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
-//    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
-//    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
-//    resourcesPath = ":/images_mac/tray_icon/%1";
-//    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
-//#endif
+    //#ifdef Q_OS_MAC
+    //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
+    //    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
+    //    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
+    //    resourcesPath = ":/images_mac/tray_icon/%1";
+    //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
+    //#endif
 
 }
 
 void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
+#ifndef Q_OS_MAC
     if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
         show();
         raise();
         setWindowState(Qt::WindowActive);
     }
+#endif
 }
 
 void MainWindow::onConnect()
 {
+    ui->label_error_text->clear();
     ui->pushButton_connect->setChecked(true);
     qApp->processEvents();
 
     // TODO: Call connectToVpn with restricted server account
-    ServerCredentials credentials = m_settings->serverCredentials();
+    ServerCredentials credentials = m_settings.serverCredentials();
 
     ErrorCode errorCode = m_vpnConnection->connectToVpn(credentials);
     if (errorCode) {
@@ -541,6 +617,7 @@ void MainWindow::onConnect()
         QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
         return;
     }
+
     ui->pushButton_connect->setEnabled(false);
 }
 
@@ -559,3 +636,89 @@ void MainWindow::onTrayActionConnect()
     }
 }
 
+
+void MainWindow::onPushButtonAddCustomSitesClicked()
+{
+    QString newSite = ui->lineEdit_sites_add_custom->text();
+
+    if (newSite.isEmpty()) return;
+    if (!newSite.contains(".")) return;
+
+    // get domain name if it present
+    newSite.replace("https://", "");
+    newSite.replace("http://", "");
+    newSite.replace("ftp://", "");
+
+    newSite = newSite.split("/", QString::SkipEmptyParts).first();
+
+
+    QStringList customSites = m_settings.customSites();
+    if (!customSites.contains(newSite)) {
+        customSites.append(newSite);
+        m_settings.setCustomSites(customSites);
+
+        QString newIp = Utils::getIPAddress(newSite);
+        QStringList customIps = m_settings.customIps();
+        if (!newIp.isEmpty() && !customIps.contains(newIp)) {
+            customIps.append(newIp);
+            m_settings.setCustomIps(customIps);
+
+            // add to routes immediatelly
+//            if (vpnStatus() == VPNStatusConnected) {
+//                //Router::Instance().routeAdd(newIp, vpnGate());
+//            }
+        }
+
+        initCustomSites();
+
+        ui->lineEdit_sites_add_custom->clear();
+    }
+    else {
+        qDebug() << "customSites already contains" << newSite;
+    }
+}
+
+void MainWindow::onPushButtonDeleteCustomSiteClicked()
+{
+    QModelIndex index = ui->listView_sites_custom->currentIndex();
+    QString siteToDelete = index.data(Qt::DisplayRole).toString();
+
+    if (siteToDelete.isEmpty()) {
+        return;
+    }
+
+    QString ipToDelete = Utils::getIPAddress(siteToDelete);
+
+    QStringList customSites = m_settings.customSites();
+    customSites.removeAll(siteToDelete);
+    qDebug() << "Deleted custom site:" << siteToDelete;
+    m_settings.setCustomSites(customSites);
+
+    QStringList customIps = m_settings.customIps();
+    customIps.removeAll(ipToDelete);
+    qDebug() << "Deleted custom ip:" << ipToDelete;
+    m_settings.setCustomIps(customIps);
+
+
+    initCustomSites();
+
+    //Router::Instance().routeDelete(Utils::getIPAddress(ipToDelete));
+    //Router::Instance().flushDns();
+}
+
+void MainWindow::initCustomSites()
+{
+    customSitesModel->setStringList(m_settings.customSites());
+}
+
+void MainWindow::updateShareCode()
+{
+    QJsonObject o;
+    o.insert("h", m_settings.serverName());
+    o.insert("p", m_settings.serverPort());
+    o.insert("u", m_settings.userName());
+    o.insert("w", m_settings.password());
+
+    QByteArray ba = QJsonDocument(o).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
+}

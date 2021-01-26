@@ -33,10 +33,12 @@
         <file>images/line.png</file>
         <file>images/server_settings.png</file>
         <file>images/share.png</file>
-        <file>server_scripts/remove_openvpn_server.sh</file>
+        <file>server_scripts/remove_container.sh</file>
         <file>server_scripts/setup_openvpn_server.sh</file>
-        <file>server_scripts/template.ovpn</file>
+        <file>server_scripts/template_openvpn.ovpn</file>
         <file>images/background_connected.png</file>
         <file>server_scripts/setup_shadowsocks_server.sh</file>
+        <file>server_scripts/template_shadowsocks.ovpn</file>
+        <file>server_scripts/setup_firewall.sh</file>
     </qresource>
 </RCC>

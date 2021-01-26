@@ -1,0 +1,73 @@
+language: cpp
+
+branches:
+  only:
+    - master
+    - dev
+  
+jobs:
+  include:
+    - name: MacOS
+      os: osx
+      osx_image: xcode12.2
+                
+      script:
+        - |
+          if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
+          brew install p7zip && \
+          pip3 install aqtinstall requests py7zr && \
+          python3 -m aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
+          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40;
+          fi
+        - bash deploy/build_macos.sh  
+  
+    - name: Windows
+      os: windows
+      
+      env:
+        - PATH=/c/Python39:/c/Python39/Scripts:$PATH
+        
+      before_install:
+        - if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
+        
+      script:
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+        - |
+          if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
+          pip3 install aqtinstall requests py7zr && \
+          python -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
+          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40; \
+          fi
+        - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"' > winbuild.bat
+        - echo -e "\r\n" >> winbuild.bat
+        - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"' >> winbuild.bat
+        - echo -e "\r\n" >> winbuild.bat
+        - echo -e "deploy\\\build_windows.bat" >> winbuild.bat
+        - cat winbuild.bat
+        - cmd //c winbuild.bat
+        
+
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file:
+  - "AmneziaVPN.exe"
+  - "AmneziaVPN.dmg"
+    
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+    
+before_cache:
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
+  # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
+  
+cache:
+  directories:
+    - $HOME/Qt
+    - /C/Qt
+    - $HOME/Library/Caches/Homebrew

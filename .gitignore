@@ -3,6 +3,8 @@
 macOSPackage/
 AmneziaVPN.dmg
 AmneziaVPN.exe
+deploy/build/*
+winbuild.bat
 
 # Qt-es
 /.qmake.cache
@@ -37,6 +39,4 @@ CMakeLists.txt.user*
 # tmp files
 *.*~
 
-# Certificates
-*.p12
 

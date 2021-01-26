@@ -18,7 +18,7 @@ IDI_ICON1               ICON                    "../images/app.ico"
 #define VER_ORIGINALFILENAME_STR    "amneziavpn.exe"
 #define VER_PRODUCTNAME_STR         "AmneziaVPN"
 
-#define VER_COMPANYDOMAIN_STR       "http://amnezia.org/"
+#define VER_COMPANYDOMAIN_STR       "https://amnezia.org/"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION VER_FILEVERSION

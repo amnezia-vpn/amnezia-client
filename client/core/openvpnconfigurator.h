@@ -22,7 +22,8 @@ public:
         QString host; // host ip
     };
 
-    static QString genOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
+    static QString genOpenVpnConfig(const ServerCredentials &credentials, Protocol proto,
+        ErrorCode *errorCode = nullptr);
 
 private:
     static QString getRandomString(int len);
@@ -34,8 +35,8 @@ private:
 
     static ConnectionData createCertRequest();
 
-    static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
-
+    static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
+        Protocol proto, ErrorCode *errorCode = nullptr);
 };
 
 #endif // OPENVPNCONFIGURATOR_H
