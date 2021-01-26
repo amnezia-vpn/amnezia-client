@@ -44,7 +44,6 @@ Rmdir /Q /S %RELEASE_DIR%
 Del %QMAKE_STASH_FILE%
 Del %TARGET_FILENAME%
 
-# Checking env
 "%QT_BIN_DIR:"=%\qmake" -v
 nmake /?
 
@@ -55,6 +54,7 @@ cd %WORK_DIR%
 set CL=/MP
 nmake /A /NOLOGO
 nmake clean
+rem if not exist "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%" break
  
 echo "Deploying..."
 "%QT_BIN_DIR:"=%\windeployqt" --release --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"

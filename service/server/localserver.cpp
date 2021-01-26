@@ -6,11 +6,17 @@
 #include "localserver.h"
 #include "utils.h"
 
+#include "router.h"
+
+#ifdef Q_OS_WIN
+#include "tapcontroller_win.h"
+#endif
+
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_clientConnection(nullptr),
     m_clientConnected(false)
 {
-    m_server = new QLocalServer(this);
+    m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
     if (!m_server->listen(Utils::serverName())) {
@@ -18,7 +24,7 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         return;
     }
 
-    connect(m_server, &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
+    connect(m_server.data(), &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
 
     qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
 }
@@ -68,9 +74,16 @@ void LocalServer::onNewConnection()
                     qWarning().noquote() << "Message is not valid!";
                     continue;
                 }
+                else {
+                    qDebug().noquote() << QString("Got message id: '%1'").arg(static_cast<int>(incomingMessage.state()));
+                    //qDebug().noquote() << incomingMessage.rawData();
+                }
 
                 switch (incomingMessage.state()) {
                 case Message::State::Initialize:
+                    #ifdef Q_OS_WIN
+                        TapController::Instance().checkAndSetup();
+                    #endif
                     sendMessage(Message(Message::State::Initialize, QStringList({"Server"})));
                     break;
                 case Message::State::StartRequest:
@@ -79,6 +92,23 @@ void LocalServer::onNewConnection()
                 case Message::State::FinishRequest:
                     finishProcess(incomingMessage.args());
                     break;
+
+                case Message::State::RoutesAddRequest:
+                    routesAddRequest(incomingMessage.args());
+                    break;
+                case Message::State::RouteDeleteRequest:
+                    routeDeleteRequest(incomingMessage.args());
+                    break;
+                case Message::State::ClearSavedRoutesRequest:
+                    Router::Instance().clearSavedRoutes();
+                    break;
+                case Message::State::FlushDnsRequest:
+                    Router::Instance().flushDns();
+                    break;
+                case Message::State::InstallDriverRequest:
+                    checkAndInstallDriver(incomingMessage.args());
+                    break;
+
                 default:
                     ;
                 }
@@ -126,6 +156,21 @@ void LocalServer::startProcess(const QStringList& messageArgs)
 
     process->start(program, args);
     m_processList.append(process);
+}
+
+void LocalServer::routesAddRequest(const QStringList &messageArgs)
+{
+    Router::Instance().routeAddList(messageArgs.first(), messageArgs.mid(1));
+}
+
+void LocalServer::routeDeleteRequest(const QStringList &messageArgs)
+{
+    Router::Instance().routeDelete(messageArgs.first());
+}
+
+void LocalServer::checkAndInstallDriver(const QStringList &messageArgs)
+{
+
 }
 
 void LocalServer::onFinished(int exitCode, QProcess::ExitStatus exitStatus)

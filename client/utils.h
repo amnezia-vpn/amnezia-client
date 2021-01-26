@@ -15,6 +15,10 @@ public:
     static bool createEmptyFile(const QString& path);
     static bool initializePath(const QString& path);
     static bool processIsRunning(const QString& fileName);
+
+    static QString getIPAddress(const QString& host);
+    static QString getStringBetween(const QString& s, const QString& a, const QString& b);
+    static bool checkIPFormat(const QString& ip);
 };
 
 #endif // UTILS_H

@@ -1,32 +1,32 @@
-#include <QSettings>
 
 #include "defines.h"
 #include "settings.h"
 
-Settings::Settings(QObject* parent) : QObject(parent)
+Settings::Settings(QObject* parent) :
+    QObject(parent),
+    m_settings (ORGANIZATION_NAME, APPLICATION_NAME, this)
 {
-    m_settings = new QSettings(ORGANIZATION_NAME, APPLICATION_NAME, this);
     read();
 }
 
 void Settings::read()
 {
-    m_settings->beginGroup("Server");
-    m_userName = m_settings->value("userName", QString()).toString();
-    m_password = m_settings->value("password", QString()).toString();
-    m_serverName = m_settings->value("serverName", QString()).toString();
-    m_serverPort = m_settings->value("serverPort", 22).toInt();
-    m_settings->endGroup();
+    m_settings.beginGroup("Server");
+    m_userName = m_settings.value("userName", QString()).toString();
+    m_password = m_settings.value("password", QString()).toString();
+    m_serverName = m_settings.value("serverName", QString()).toString();
+    m_serverPort = m_settings.value("serverPort", 22).toInt();
+    m_settings.endGroup();
 }
 
 void Settings::save()
 {
-    m_settings->beginGroup("Server");
-    m_settings->setValue("userName", m_userName);
-    m_settings->setValue("password", m_password);
-    m_settings->setValue("serverName", m_serverName);
-    m_settings->setValue("serverPort", m_serverPort);
-    m_settings->endGroup();
+    m_settings.beginGroup("Server");
+    m_settings.setValue("userName", m_userName);
+    m_settings.setValue("password", m_password);
+    m_settings.setValue("serverName", m_serverName);
+    m_settings.setValue("serverPort", m_serverPort);
+    m_settings.endGroup();
 }
 
 bool Settings::haveAuthData() const

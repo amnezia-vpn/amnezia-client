@@ -7,6 +7,7 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
+#include "settings.h"
 
 using namespace amnezia;
 
@@ -41,6 +42,9 @@ protected slots:
 protected:
 
     QScopedPointer<VpnProtocol> m_vpnProtocol;
+
+private:
+    Settings m_settings;
 };
 
 #endif // VPNCONNECTION_H

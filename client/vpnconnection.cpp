@@ -9,6 +9,7 @@
 #include "protocols/shadowsocksvpnprotocol.h"
 #include "utils.h"
 #include "vpnconnection.h"
+#include "communicator.h"
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
@@ -22,6 +23,25 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
+//    if (state == VpnProtocol::ConnectionState::Connected){
+//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
+
+//        // add routes
+//        const QStringList &black_custom = m_settings.customIps();
+//        qDebug() << "onConnect :: adding custom black routes, count:" << black_custom.size();
+
+
+//        QStringList args;
+//        args << m_vpnProtocol->vpnGateway();
+//        args << black_custom;
+
+//        Message m(Message::State::RoutesAddRequest, args);
+//        m_vpnProtocol->communicator()->sendMessage(m);
+//    }
+//    else if (state == VpnProtocol::ConnectionState::Error) {
+//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::ClearSavedRoutesRequest, QStringList()));
+//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
+//    }
     emit connectionStateChanged(state);
 }
 
@@ -112,6 +132,9 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
     qDebug() << "Disconnect from VPN";
+
+//    m_vpnProtocol->communicator()->sendMessage(Message(Message::State::ClearSavedRoutesRequest, QStringList()));
+//    m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
 
     if (!m_vpnProtocol.data()) {
         return;
