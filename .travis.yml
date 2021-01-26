@@ -48,7 +48,19 @@ jobs:
         - cmd //c winbuild.bat
         
 
-        
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file:
+  - "AmneziaVPN.exe"
+  - "AmneziaVPN.dmg"
+    
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+    
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
   # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
