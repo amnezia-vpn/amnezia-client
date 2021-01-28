@@ -33,7 +33,7 @@ jobs:
       deploy:
         provider: releases
         token: $GH_TOKEN
-        cleanup: false
+        skip_cleanup: true
         file:
         - "AmneziaVPN.dmg"
         on:
@@ -71,13 +71,16 @@ jobs:
       deploy:
         provider: releases
         token: $GH_TOKEN
-        cleanup: false
+        skip_cleanup: true
         file:
         - "AmneziaVPN.exe"
         on:
           tags: true
           branch: master
-    
+
+deploy:
+  skip_cleanup: true
+  
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
   # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
