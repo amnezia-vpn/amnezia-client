@@ -11,7 +11,15 @@ jobs:
     - name: MacOS
       os: osx
       osx_image: xcode12.2
-                
+      
+      before_install:
+        - export CERTIFICATE_P12=deploy/PrivacyTechAppleCert.p12
+        - export KEYCHAIN=build.keychain
+        - security create-keychain -p $MAC_CERT_PW $KEYCHAIN
+        - security default-keychain -s $KEYCHAIN
+        - security unlock-keychain -p $MAC_CERT_PW $KEYCHAIN
+        - security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign
+  
       script:
         - |
           if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
@@ -20,7 +28,17 @@ jobs:
           python3 -m aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
           python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40;
           fi
-        - bash deploy/build_macos.sh  
+        - bash deploy/build_macos.sh 
+
+      deploy:
+        provider: releases
+        token: $GH_TOKEN
+        file:
+        - "AmneziaVPN.dmg"
+        on:
+          tags: true
+          branch: master
+    
   
     - name: Windows
       os: windows
@@ -49,19 +67,14 @@ jobs:
         - echo -e "call deploy\\\build_windows.bat" >> winbuild.bat
         - cmd //c winbuild.bat
         
-
-
-deploy:
-  provider: releases
-  api_key: $GH_TOKEN
-  file:
-  - "AmneziaVPN.exe"
-  - "AmneziaVPN.dmg"
-    
-  skip_cleanup: true
-  on:
-    tags: true
-    branch: master
+      deploy:
+        provider: releases
+        token: $GH_TOKEN
+        file:
+        - "AmneziaVPN.exe"
+        on:
+          tags: true
+          branch: master
     
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
