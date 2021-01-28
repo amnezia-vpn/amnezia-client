@@ -12,6 +12,9 @@ jobs:
       os: osx
       osx_image: xcode12.2
       
+      env:
+        - QT_VERSION=5.15.1
+        
       before_install:
         - export CERTIFICATE_P12=deploy/PrivacyTechAppleCert.p12
         - export KEYCHAIN=build.keychain
@@ -22,10 +25,10 @@ jobs:
   
       script:
         - |
-          if [ ! -f $HOME/Qt/5.14.2/clang_64/bin/qmake ]; then \
+          if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
           brew install p7zip && \
           pip3 install aqtinstall requests py7zr && \
-          python3 -m aqt install --outputdir $HOME/Qt 5.14.2 mac desktop clang_64 -m qtbase && \
+          python3 -m aqt install --outputdir $HOME/Qt $QT_VERSION mac desktop clang_64 -m qtbase && \
           python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40;
           fi
         - bash deploy/build_macos.sh 

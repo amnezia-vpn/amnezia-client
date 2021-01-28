@@ -35,7 +35,7 @@ echo "Brew Qt version $(brew --prefix qt)"
 #if [ -f $(brew --prefix qt)/clang_64/bin/qmake ]; then QT_BIN_DIR=$(brew --prefix qt)/clang_64/bin;
 #else QT_BIN_DIR=$HOME/Qt/5.14.2/clang_64/bin; fi
 
-QT_BIN_DIR=$HOME/Qt/5.14.2/clang_64/bin
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
 
 #QIF_BIN_DIR=$HOME/Qt/Tools/QtInstallerFramework/4.0/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/4.0/bin
