@@ -33,6 +33,7 @@ jobs:
       deploy:
         provider: releases
         token: $GH_TOKEN
+        cleanup: false
         file:
         - "AmneziaVPN.dmg"
         on:
@@ -70,6 +71,7 @@ jobs:
       deploy:
         provider: releases
         token: $GH_TOKEN
+        cleanup: false
         file:
         - "AmneziaVPN.exe"
         on:

@@ -99,3 +99,4 @@ cd %PROJECT_DIR%
 signtool sign /f "%SCRIPT_DIR:"=%\PrivacyTechWindowsCert.pfx" /p %WIN_CERT_PW% /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 %TARGET_FILENAME%
 
 echo "Finished, see %TARGET_FILENAME%"
+exit 0
