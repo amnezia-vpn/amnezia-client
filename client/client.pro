@@ -14,14 +14,13 @@ HEADERS  += \
     core/defs.h \
     core/errorstrings.h \
     core/openvpnconfigurator.h \
-    core/router.h \
     core/servercontroller.h \
     debug.h \
     defines.h \
     localclient.h \
     managementserver.h \
     message.h \
-   protocols/shadowsocksvpnprotocol.h \
+    protocols/shadowsocksvpnprotocol.h \
     runguard.h \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
@@ -34,14 +33,13 @@ HEADERS  += \
 SOURCES  += \
     communicator.cpp \
     core/openvpnconfigurator.cpp \
-    core/router.cpp \
     core/servercontroller.cpp \
     debug.cpp \
     localclient.cpp \
     main.cpp \
     managementserver.cpp \
     message.cpp \
-   protocols/shadowsocksvpnprotocol.cpp \
+    protocols/shadowsocksvpnprotocol.cpp \
     runguard.cpp \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \

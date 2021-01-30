@@ -14,8 +14,7 @@
    <string/>
   </property>
   <property name="styleSheet">
-   <string notr="true">/*----------------------*/
-
+   <string notr="true">
 QLabel {
     color: #181922;
 }
@@ -257,17 +256,10 @@ QPushButton:hover {
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">QStackedWidget#stackedWidget_main{
-	background: transparent;
-}
-
-QStackedWidget QWidget {
-	background: transparent;
-}
-</string>
+      <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -365,7 +357,7 @@ border-radius: 4px;</string>
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_new_server_ip_3">
+      <widget class="QLineEdit" name="lineEdit_start_existing_code">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -383,6 +375,9 @@ color: #333333;</string>
        </property>
        <property name="text">
         <string/>
+       </property>
+       <property name="placeholderText">
+        <string>vpn://...</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_new_server_connect">
@@ -1162,17 +1157,18 @@ color: #181922;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="label_tmp_logo">
+      <widget class="QLabel" name="label_19">
        <property name="geometry">
         <rect>
-         <x>0</x>
-         <y>500</y>
-         <width>381</width>
-         <height>131</height>
+         <x>10</x>
+         <y>460</y>
+         <width>361</width>
+         <height>141</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
+        <string notr="true">image: url(:/images/AmneziaVPN.png);
+background-color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string/>
@@ -1303,7 +1299,7 @@ line-height: 25px;
 color: #181922;</string>
        </property>
        <property name="text">
-        <string>These sites will open via VPN</string>
+        <string>These sites will be opened using VPN</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1360,7 +1356,7 @@ border: 1px solid #A7A7A7;
         <set>Qt::AlignCenter</set>
        </property>
        <property name="placeholderText">
-        <string>For example, rutor.org or 17.21.111.8</string>
+        <string>For example, yousite.com or 17.21.111.8</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_sites_add_custom">
@@ -1379,10 +1375,10 @@ border: 1px solid #A7A7A7;
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">/* black */
-background: #181922;
+        <string notr="true">background: #100A44;
 border-radius: 4px;
-font-size: 18pt;</string>
+font-size: 24px;
+color: white</string>
        </property>
        <property name="text">
         <string>+</string>
@@ -1407,7 +1403,7 @@ font-size: 18pt;</string>
         <string notr="true">color: #181922;</string>
        </property>
        <property name="text">
-        <string>Delete selected item</string>
+        <string>Delete selected site</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
@@ -1432,7 +1428,7 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Hostname or IP address</string>
+        <string>Web site or hostname or IP address</string>
        </property>
       </widget>
      </widget>
@@ -1947,6 +1943,9 @@ color: #333333;</string>
       <zorder>label_server_settings_server</zorder>
      </widget>
      <widget class="QWidget" name="page_share_connection">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <widget class="QPushButton" name="pushButton_back_from_share">
        <property name="geometry">
         <rect>
@@ -2013,17 +2012,19 @@ color: #181922;</string>
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QTextEdit" name="textEdit">
+      <widget class="QTextEdit" name="textEdit_sharing_code">
        <property name="geometry">
         <rect>
          <x>30</x>
          <y>100</y>
          <width>320</width>
-         <height>151</height>
+         <height>211</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F5F5F5;
+        <string notr="true">QTextEdit {
+
+background: #F5F5F5;
 border-radius: 10px;
 
 
@@ -2036,27 +2037,32 @@ line-height: 110%;
 text-align: center;
 
 color: #15CDCB;
+
+}
 </string>
        </property>
        <property name="lineWrapMode">
         <enum>QTextEdit::FixedColumnWidth</enum>
        </property>
        <property name="lineWrapColumnOrWidth">
-        <number>20</number>
+        <number>30</number>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Consolas'; font-size:22px; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;vpn:\\aosdiufhafafsuhgqejghuserhglaidhgauhgalgadg&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;vpn:\\xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_blocked_list_2">
+      <widget class="QPushButton" name="pushButton_copy_sharing_code">
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>280</y>
+         <y>340</y>
          <width>341</width>
          <height>40</height>
         </rect>
@@ -2090,7 +2096,7 @@ line-height: 21px;
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>350</y>
+         <y>400</y>
          <width>321</width>
          <height>101</height>
         </rect>

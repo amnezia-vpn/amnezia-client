@@ -2,7 +2,9 @@
 #define LOCALSERVER_H
 
 #include <QObject>
+#include <QPointer>
 #include <QProcess>
+#include <QSharedPointer>
 #include <QStringList>
 #include <QVector>
 
@@ -34,8 +36,14 @@ private:
     void sendMessage(const Message& message);
     void startProcess(const QStringList& messageArgs);
 
-    QLocalServer* m_server;
-    QLocalSocket* m_clientConnection;
+    void routesAddRequest(const QStringList& messageArgs);
+    void routeDeleteRequest(const QStringList& messageArgs);
+
+    void checkAndInstallDriver(const QStringList& messageArgs);
+
+    QSharedPointer<QLocalServer> m_server;
+    QPointer <QLocalSocket> m_clientConnection;
+
     QVector<QProcess*> m_processList;
     bool m_clientConnected;
 };

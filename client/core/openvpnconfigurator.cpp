@@ -190,6 +190,8 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
     }
 
+    ServerController::setupServerFirewall(credentials);
+
     return connData;
 }
 

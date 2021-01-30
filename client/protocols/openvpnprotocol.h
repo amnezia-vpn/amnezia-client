@@ -46,6 +46,11 @@ protected:
     QString m_configFileName;
     QTimer m_openVpnStateSigTermHandlerTimer;
     bool m_requestFromUserToStop;
+
+
+private:
+    void updateRouteGateway(QString line);
+    void updateVpnGateway();
 };
 
 #endif // OPENVPNPROTOCOL_H

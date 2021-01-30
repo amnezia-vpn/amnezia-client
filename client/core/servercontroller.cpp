@@ -54,7 +54,7 @@ ErrorCode ServerController::runScript(DockerContainer container,
         }
 
         QEventLoop wait;
-        int exitStatus;
+        int exitStatus = -1;
 
         //        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
         //            qDebug() << "Command started";
@@ -66,22 +66,22 @@ ErrorCode ServerController::runScript(DockerContainer container,
             wait.quit();
         });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
-//            QString s = proc->readAllStandardOutput();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+            QString s = proc->readAllStandardOutput();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
-//        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
-//            QString s = proc->readAllStandardError();
-//            if (s != "." && !s.isEmpty()) {
-//                qDebug().noquote() << s;
-//            }
-//        });
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+            QString s = proc->readAllStandardError();
+            if (s != "." && !s.isEmpty()) {
+                qDebug().noquote() << s;
+            }
+        });
 
         proc->start();
-        if (i < lines.count()) {
+        if (i < lines.count() && exitStatus < 0) {
             wait.exec();
         }
 
@@ -117,7 +117,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     }
 
     QEventLoop wait;
-    int exitStatus = 0;
+    int exitStatus = -1;
 
     //    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
     //        qDebug() << "Command started";
@@ -138,11 +138,11 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     });
 
     proc->start();
-    wait.exec();
+    //wait.exec();
 
-//    if (proc->isRunning()) {
-//        wait.exec();
-//    }
+    if (exitStatus < 0) {
+        wait.exec();
+    }
 
     return fromSshProcessExitStatus(exitStatus);
 }
@@ -176,10 +176,15 @@ QString ServerController::getTextFileFromContainer(DockerContainer container,
         wait.quit();
     });
 
+    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [&](){
+        qDebug() << "ServerController::getTextFileFromContainer proc started";
+        exitStatus = -1;
+    });
+
     proc->start();
     wait.exec();
 
-//    if (proc->isRunning()) {
+//    if (exitStatus < 0) {
 //        wait.exec();
 //    }
 
@@ -420,4 +425,13 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
+}
+
+ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
+{
+    QFile file(":/server_scripts/setup_firewall.sh");
+    file.open(QIODevice::ReadOnly);
+
+    QString script = file.readAll();
+    return runScript(DockerContainer::OpenVpn, sshParams(credentials), script);
 }

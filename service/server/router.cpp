@@ -322,6 +322,6 @@ void Router::flushDns()
 
     p.start(command);
     p.waitForFinished();
-    qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
+    //qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
 #endif
 }

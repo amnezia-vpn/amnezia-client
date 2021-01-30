@@ -35,6 +35,9 @@ public:
     QString textConnectionState() const;
     void setLastError(ErrorCode lastError);
 
+    QString routeGateway() const;
+    QString vpnGateway() const;
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
@@ -54,12 +57,15 @@ protected:
     static Communicator* m_communicator;
 
     ConnectionState m_connectionState;
+    QString m_routeGateway;
+    QString m_vpnGateway;
 
 private:
     QTimer* m_timeoutTimer;
     ErrorCode m_lastError;
     quint64 m_receivedBytes;
     quint64 m_sentBytes;
+
 };
 
 #endif // VPNPROTOCOL_H

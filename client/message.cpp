@@ -22,10 +22,20 @@ QString Message::textState() const
     case State::Started: return "Started";
     case State::FinishRequest: return "FinishRequest";
     case State::Finished: return "Finished";
+    case State::RoutesAddRequest: return "RoutesAddRequest";
+    case State::RouteDeleteRequest: return "RouteDeleteRequest";
+    case State::ClearSavedRoutesRequest: return "ClearSavedRoutesRequest";
+    case State::FlushDnsRequest: return "FlushDnsRequest";
+    case State::InstallDriverRequest: return "InstallDriverRequest";
     default:
         ;
     }
     return QString();
+}
+
+QString Message::rawData() const
+{
+    return m_rawData;
 }
 
 Message::State Message::state() const
@@ -66,6 +76,7 @@ QString Message::argsToString() const
 
 Message::Message(const QString& data)
 {
+    m_rawData = data;
     m_valid = false;
     if (data.isEmpty()) {
         return;
@@ -77,7 +88,7 @@ Message::Message(const QString& data)
     }
 
     bool stateFound = false;
-    for (int i = static_cast<int>(State::Unknown); i <= static_cast<int>(State::Finished); i++ ) {
+    for (int i = static_cast<int>(State::Unknown); i <= static_cast<int>(State::InstallDriverRequest); i++ ) {
         m_state = static_cast<State>(i);
         if (textState() == dataList.at(0)) {
             stateFound = true;
