@@ -1,0 +1,32 @@
+#include <QtCore>
+
+class IpcInterface
+{
+    SLOT( int createPrivilegedProcess() ); // return local pid
+    //SIGNAL(sendMessage(const QByteArray &message));
+};
+
+class IpcProcessInterface
+{
+    SLOT( start(const QString &program, const QStringList &args) );
+    SLOT( start() );
+    SLOT( close() );
+
+    SLOT( setArguments(const QStringList &arguments) );
+    SLOT( setInputChannelMode(QProcess::InputChannelMode mode) );
+    SLOT( setNativeArguments(const QString &arguments) );
+    SLOT( setProcessChannelMode(QProcess::ProcessChannelMode mode) );
+    SLOT( setProgram(const QString &program) );
+    SLOT( setWorkingDirectory(const QString &dir) );
+
+    SLOT( QByteArray readAllStandardError() );
+    SLOT( QByteArray readAllStandardOutput() );
+
+
+    SIGNAL( errorOccurred(QProcess::ProcessError error) );
+    SIGNAL( finished(int exitCode, QProcess::ExitStatus exitStatus) );
+    SIGNAL( readyReadStandardError() );
+    SIGNAL( readyReadStandardOutput() );
+    SIGNAL( started() );
+    SIGNAL( stateChanged(QProcess::ProcessState newState) );
+};

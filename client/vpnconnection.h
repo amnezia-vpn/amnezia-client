@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QScopedPointer>
+#include <QRemoteObjectNode>
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
@@ -45,6 +46,7 @@ protected:
 
 private:
     Settings m_settings;
+
 };
 
 #endif // VPNCONNECTION_H

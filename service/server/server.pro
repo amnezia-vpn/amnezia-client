@@ -1,11 +1,14 @@
 TARGET   = AmneziaVPN-service
 TEMPLATE = app
 CONFIG   += console qt no_batch
-QT += core network
+QT += core network remoteobjects
 
 HEADERS = \
         ../../client/message.h \
         ../../client/utils.h \
+        ../../ipc/ipc.h \
+        ../../ipc/ipcserver.h \
+        ../../ipc/ipcserverprocess.h \
         localserver.h \
         log.h \
         router.h \
@@ -14,6 +17,8 @@ HEADERS = \
 SOURCES = \
         ../../client/message.cpp \
         ../../client/utils.cpp \
+        ../../ipc/ipcserver.cpp \
+        ../../ipc/ipcserverprocess.cpp \
         localserver.cpp \
         log.cpp \
         main.cpp \
@@ -47,3 +52,5 @@ include(../src/qtservice.pri)
 #}
 
 INCLUDEPATH += "$$PWD/../../client"
+
+REPC_SOURCE += ../../ipc/ipcinterface.rep

@@ -11,8 +11,8 @@
 
 
 OpenVpnProtocol::OpenVpnProtocol(const QString& args, QObject* parent) :
-    VpnProtocol(args, parent),
-    m_requestFromUserToStop(false)
+    VpnProtocol(args, parent)
+    //m_requestFromUserToStop(false)
 {
     setConfigFile(args);
     connect(m_communicator, &Communicator::messageReceived, this, &OpenVpnProtocol::onMessageReceived);
@@ -130,14 +130,14 @@ ErrorCode OpenVpnProtocol::start()
 {
     qDebug() << "Start OpenVPN connection";
 
-    m_requestFromUserToStop = false;
+    //m_requestFromUserToStop = false;
     m_openVpnStateSigTermHandlerTimer.stop();
     OpenVpnProtocol::stop();
 
-    if (communicator() && !communicator()->isConnected()) {
-        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-        return lastError();
-    }
+//    if (communicator() && !communicator()->isConnected()) {
+//        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
+//        return lastError();
+//    }
 
     if (!QFileInfo::exists(openVpnExecPath())) {
         setLastError(ErrorCode::OpenVpnExecutableMissing);
@@ -165,7 +165,20 @@ ErrorCode OpenVpnProtocol::start()
     }
 
     setConnectionState(ConnectionState::Connecting);
-    m_communicator->sendMessage(Message(Message::State::StartRequest, args));
+
+    QSharedPointer<IpcProcessInterfaceReplica> process = IpcClient::createPrivilegedProcess();
+    process->waitForSource(1000);
+    if (!process->isInitialized()) {
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+    process->setProgram(openVpnExecPath());
+    process->setArguments(QStringList() << "--config" << configPath()<<
+                          "--management"<< m_managementHost<< QString::number(m_managementPort)<<
+                          "--management-client"<<
+                          "--log-append"<< vpnLogFileNamePath);
+    process->start();
+
+    //m_communicator->sendMessage(Message(Message::State::StartRequest, args));
     startTimeoutTimer();
 
     return ErrorCode::NoError;

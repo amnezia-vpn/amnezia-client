@@ -9,6 +9,8 @@
 #include "message.h"
 #include "vpnprotocol.h"
 
+#include "core/ipcclient.h"
+
 class OpenVpnProtocol : public VpnProtocol
 {
     Q_OBJECT
@@ -45,7 +47,7 @@ protected:
     ManagementServer m_managementServer;
     QString m_configFileName;
     QTimer m_openVpnStateSigTermHandlerTimer;
-    bool m_requestFromUserToStop;
+    //bool m_requestFromUserToStop;
 
 
 private:

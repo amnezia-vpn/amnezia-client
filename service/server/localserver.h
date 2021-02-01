@@ -9,6 +9,7 @@
 #include <QVector>
 
 #include "message.h"
+#include "ipcserver.h"
 
 class QLocalServer;
 class QLocalSocket;
@@ -46,6 +47,9 @@ private:
 
     QVector<QProcess*> m_processList;
     bool m_clientConnected;
+
+    IpcServer m_ipcServer;
+    QRemoteObjectHost m_serverNode;
 };
 
 #endif // LOCALSERVER_H

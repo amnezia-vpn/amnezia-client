@@ -10,9 +10,11 @@ include("3rd/QtSsh/src/ssh/ssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 
 HEADERS  += \
+    ../ipc/ipc.h \
     communicator.h \
     core/defs.h \
     core/errorstrings.h \
+    core/ipcclient.h \
     core/openvpnconfigurator.h \
     core/servercontroller.h \
     debug.h \
@@ -32,6 +34,7 @@ HEADERS  += \
 
 SOURCES  += \
     communicator.cpp \
+    core/ipcclient.cpp \
     core/openvpnconfigurator.cpp \
     core/servercontroller.cpp \
     debug.cpp \
@@ -101,5 +104,5 @@ macx {
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit
 }
 
-REPC_REPLICA += ../communicator/communicator.rep
+REPC_REPLICA += ../ipc/ipcinterface.rep
 

@@ -5,6 +5,7 @@
 #include <core/openvpnconfigurator.h>
 #include <core/servercontroller.h>
 
+#include "ipc.h"
 #include "protocols/openvpnprotocol.h"
 #include "protocols/shadowsocksvpnprotocol.h"
 #include "utils.h"

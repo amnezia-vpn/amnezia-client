@@ -3,6 +3,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 
+#include "ipc.h"
 #include "localserver.h"
 #include "utils.h"
 
@@ -14,19 +15,23 @@
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_clientConnection(nullptr),
-    m_clientConnected(false)
+    m_clientConnected(false),
+    m_ipcServer(this)
 {
     m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
-    if (!m_server->listen(Utils::serverName())) {
-        qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
-        return;
-    }
+//    if (!m_server->listen(Utils::serverName())) {
+//        qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
+//        return;
+//    }
 
-    connect(m_server.data(), &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
+//    connect(m_server.data(), &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
 
-    qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
+//    qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
+
+    m_serverNode.setHostUrl(QUrl(QStringLiteral(IPC_SERVICE_URL))); // create host node without Registry
+    m_serverNode.enableRemoting(&m_ipcServer); // enable remoting/sharing
 }
 
 LocalServer::~LocalServer()
@@ -41,7 +46,8 @@ LocalServer::~LocalServer()
 
 bool LocalServer::isRunning() const
 {
-    return m_server->isListening();
+    return true;
+    //return m_server->isListening();
 }
 
 void LocalServer::onNewConnection()
