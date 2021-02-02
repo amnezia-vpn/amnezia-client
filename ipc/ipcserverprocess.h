@@ -11,7 +11,7 @@ class IpcServerProcess : public IpcProcessInterfaceSource
 public:
     explicit IpcServerProcess(QObject *parent = nullptr);
 
-    void start(const QString &program, const QStringList &args) override;
+    void start(const QString &program, const QStringList &arguments) override;
     void start() override;
     void close() override;
 

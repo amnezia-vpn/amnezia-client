@@ -22,7 +22,7 @@ public:
 
     static Communicator* communicator();
     static QString textConnectionState(ConnectionState connectionState);
-    static void initializeCommunicator(QObject* parent = nullptr);
+    //static void initializeCommunicator(QObject* parent = nullptr);
 
 
     virtual bool onConnected() const;
@@ -54,7 +54,7 @@ protected:
     virtual void setBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     virtual void setConnectionState(VpnProtocol::ConnectionState state);
 
-    static Communicator* m_communicator;
+    //static Communicator* m_communicator;
 
     ConnectionState m_connectionState;
     QString m_routeGateway;

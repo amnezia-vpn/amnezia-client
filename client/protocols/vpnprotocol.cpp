@@ -5,7 +5,7 @@
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
 
-Communicator* VpnProtocol::m_communicator = nullptr;
+//Communicator* VpnProtocol::m_communicator = nullptr;
 
 VpnProtocol::VpnProtocol(const QString& args, QObject* parent)
     : QObject(parent),
@@ -20,17 +20,17 @@ VpnProtocol::VpnProtocol(const QString& args, QObject* parent)
     Q_UNUSED(args)
 }
 
-void VpnProtocol::initializeCommunicator(QObject* parent)
-{
-    if (!m_communicator) {
-        m_communicator = new Communicator(parent);
-    }
-}
+//void VpnProtocol::initializeCommunicator(QObject* parent)
+//{
+//    if (!m_communicator) {
+//        m_communicator = new Communicator(parent);
+//    }
+//}
 
-Communicator* VpnProtocol::communicator()
-{
-    return m_communicator;
-}
+//Communicator* VpnProtocol::communicator()
+//{
+//    return m_communicator;
+//}
 
 void VpnProtocol::setLastError(ErrorCode lastError)
 {

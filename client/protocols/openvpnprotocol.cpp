@@ -15,7 +15,7 @@ OpenVpnProtocol::OpenVpnProtocol(const QString& args, QObject* parent) :
     //m_requestFromUserToStop(false)
 {
     setConfigFile(args);
-    connect(m_communicator, &Communicator::messageReceived, this, &OpenVpnProtocol::onMessageReceived);
+    //connect(m_communicator, &Communicator::messageReceived, this, &OpenVpnProtocol::onMessageReceived);
     connect(&m_managementServer, &ManagementServer::readyRead, this, &OpenVpnProtocol::onReadyReadDataFromManagementServer);
 }
 
@@ -172,14 +172,26 @@ ErrorCode OpenVpnProtocol::start()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
     process->setProgram(openVpnExecPath());
-    process->setArguments(QStringList() << "--config" << configPath()<<
-                          "--management"<< m_managementHost<< QString::number(m_managementPort)<<
-                          "--management-client"<<
-                          "--log-append"<< vpnLogFileNamePath);
+    QStringList arguments({"--config" , configPath(),
+                      "--management", m_managementHost, QString::number(m_managementPort),
+                      "--management-client",
+                      "--log-append", vpnLogFileNamePath
+                     });
+    process->setArguments(arguments);
+
+    qDebug() << arguments.join(" ");
+    connect(process.data(), &IpcProcessInterfaceReplica::errorOccurred, [&](QProcess::ProcessError error) {
+        qDebug() << "IpcProcessInterfaceReplica errorOccurred" << error;
+    });
+
+    connect(process.data(), &IpcProcessInterfaceReplica::stateChanged, [&](QProcess::ProcessState newState) {
+        qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
+    });
+
     process->start();
 
     //m_communicator->sendMessage(Message(Message::State::StartRequest, args));
-    startTimeoutTimer();
+    //startTimeoutTimer();
 
     return ErrorCode::NoError;
 }

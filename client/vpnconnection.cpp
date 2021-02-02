@@ -14,7 +14,7 @@
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
-    VpnProtocol::initializeCommunicator(parent);
+    //VpnProtocol::initializeCommunicator(parent);
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)

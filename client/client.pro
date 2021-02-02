@@ -11,7 +11,6 @@ include("3rd/QtSsh/src/botan/botan.pri")
 
 HEADERS  += \
     ../ipc/ipc.h \
-    communicator.h \
     core/defs.h \
     core/errorstrings.h \
     core/ipcclient.h \
@@ -19,7 +18,6 @@ HEADERS  += \
     core/servercontroller.h \
     debug.h \
     defines.h \
-    localclient.h \
     managementserver.h \
     message.h \
     protocols/shadowsocksvpnprotocol.h \
@@ -33,12 +31,10 @@ HEADERS  += \
     protocols/openvpnprotocol.h \
 
 SOURCES  += \
-    communicator.cpp \
     core/ipcclient.cpp \
     core/openvpnconfigurator.cpp \
     core/servercontroller.cpp \
     debug.cpp \
-    localclient.cpp \
     main.cpp \
     managementserver.cpp \
     message.cpp \

@@ -10,9 +10,9 @@ int runApplication(int argc, char** argv)
 {
     QCoreApplication app(argc,argv);
     LocalServer localServer;
-    if (!localServer.isRunning()) {
-        return -1;
-    }
+//    if (!localServer.isRunning()) {
+//        return -1;
+//    }
     return app.exec();
 }
 int main(int argc, char **argv)

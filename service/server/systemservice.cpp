@@ -13,9 +13,9 @@ void SystemService::start()
     QCoreApplication* app = application();
     m_localServer  = new LocalServer();
 
-    if (!m_localServer->isRunning()) {
-        app->quit();
-    }
+//    if (!m_localServer->isRunning()) {
+//        app->quit();
+//    }
 }
 
 void SystemService::stop()
