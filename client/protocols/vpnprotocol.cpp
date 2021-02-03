@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "communicator.h"
+//#include "communicator.h"
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
 

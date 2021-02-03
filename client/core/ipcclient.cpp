@@ -9,29 +9,69 @@ IpcClient &IpcClient::Instance()
 
 QSharedPointer<IpcProcessInterfaceReplica> IpcClient::createPrivilegedProcess()
 {
-    if (! Instance().m_ipcClient->isReplicaValid()) return nullptr;
+    if (! Instance().m_ipcClient || ! Instance().m_ipcClient->isReplicaValid()) {
+        qWarning() << "IpcClient::createPrivilegedProcess : IpcClient IpcClient replica is not valid";
+        return nullptr;
+    }
 
     QRemoteObjectPendingReply<int> futureResult = Instance().m_ipcClient->createPrivilegedProcess();
     futureResult.waitForFinished(1000);
 
     int pid = futureResult.returnValue();
-    QSharedPointer<QRemoteObjectNode> replica(new QRemoteObjectNode);
+    QSharedPointer<QRemoteObjectNode> replicaNode(new QRemoteObjectNode);
     //Instance().m_processNodes.insert(pid, replica);
 
-    replica->connectToNode(QUrl(amnezia::getIpcProcessUrl(pid)));
-    auto ptr = QSharedPointer<IpcProcessInterfaceReplica>(replica->acquire<IpcProcessInterfaceReplica>());
-    connect(ptr.data(), &IpcProcessInterfaceReplica::destroyed, replica.data(), [replica](){
-        replica->deleteLater();
+
+    QSharedPointer<QLocalSocket> socket(new QLocalSocket(replicaNode.data()));
+    QSharedPointer<IpcProcessInterfaceReplica> ptr;
+
+    connect(socket.data(), &QLocalSocket::connected, replicaNode.data(), [socket, replicaNode, &ptr]() {
+        replicaNode->addClientSideConnection(socket.data());
+
+        ptr.reset(replicaNode->acquire<IpcProcessInterfaceReplica>());
+
+        ptr->waitForSource(1000);
+
+        if (!ptr->isReplicaValid()) {
+            qWarning() << "IpcProcessInterfaceReplica replica is not connected!";
+        }
+
+    });
+    socket->connectToServer(amnezia::getIpcProcessUrl(pid));
+    socket->waitForConnected();
+
+    auto proccessReplica = QSharedPointer<IpcProcessInterfaceReplica>(ptr);
+
+
+
+//    replica->connectToNode(QUrl(amnezia::getIpcProcessUrl(pid)));
+//    auto ptr = QSharedPointer<IpcProcessInterfaceReplica>(replica->acquire<IpcProcessInterfaceReplica>());
+    connect(proccessReplica.data(), &IpcProcessInterfaceReplica::destroyed, proccessReplica.data(), [replicaNode](){
+        replicaNode->deleteLater();
     });
 
-    return ptr;
+    return proccessReplica;
 }
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
-    m_ClientNode.connectToNode(QUrl(QStringLiteral(IPC_SERVICE_URL)));
-    m_ipcClient.reset(m_ClientNode.acquire<IpcInterfaceReplica>());
-    m_ipcClient->waitForSource(1000);
+//    m_ClientNode.connectToNode(QUrl(amnezia::getIpcServiceUrl()));
+//    qDebug() << QUrl(amnezia::getIpcServiceUrl());
+
+
+    m_localSocket.reset(new QLocalSocket(this));
+    connect(m_localSocket.data(), &QLocalSocket::connected, &m_ClientNode, [this]() {
+        m_ClientNode.addClientSideConnection(m_localSocket.data());
+
+        m_ipcClient.reset(m_ClientNode.acquire<IpcInterfaceReplica>());
+        m_ipcClient->waitForSource(1000);
+
+        if (!m_ipcClient->isReplicaValid()) {
+            qWarning() << "IpcClient replica is not connected!";
+        }
+
+    });
+    m_localSocket->connectToServer(amnezia::getIpcServiceUrl());
 
 
 

@@ -53,6 +53,8 @@ protected:
 private:
     void updateRouteGateway(QString line);
     void updateVpnGateway();
+
+    QSharedPointer<IpcProcessInterfaceReplica> m_openVpnProcess;
 };
 
 #endif // OPENVPNPROTOCOL_H

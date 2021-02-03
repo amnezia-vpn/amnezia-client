@@ -10,10 +10,16 @@
 #include "protocols/shadowsocksvpnprotocol.h"
 #include "utils.h"
 #include "vpnconnection.h"
-#include "communicator.h"
+//#include "communicator.h"
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
+    QTimer::singleShot(0, [](){
+        if (!IpcClient::init()) {
+            qWarning() << "Error occured when init IPC client";
+        }
+    });
+
     //VpnProtocol::initializeCommunicator(parent);
 }
 

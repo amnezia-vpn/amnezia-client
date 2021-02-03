@@ -18,20 +18,33 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 //    m_clientConnected(false),
     m_ipcServer(this)
 {
-//    m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
-//    m_server->setSocketOptions(QLocalServer::WorldAccessOption);
+    // Create the server and listen outside of QtRO
+    m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
+    m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
-//    if (!m_server->listen(Utils::serverName())) {
-//        qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
-//        return;
-//    }
+    if (!m_server->listen(amnezia::getIpcServiceUrl())) {
+        qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
+        return;
+    }
 
 //    connect(m_server.data(), &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
 
 //    qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
 
-    m_serverNode.setHostUrl(QUrl(QStringLiteral(IPC_SERVICE_URL))); // create host node without Registry
-    m_serverNode.enableRemoting(&m_ipcServer); // enable remoting/sharing
+//    m_serverNode.setHostUrl(QUrl(QStringLiteral(IPC_SERVICE_URL))); // create host node without Registry
+
+
+
+    // Make sure any connections are handed to QtRO
+    QObject::connect(m_server.data(), &QLocalServer::newConnection, this, [this]() {
+        qDebug() << "LocalServer new connection";
+        m_serverNode.addHostSideConnection(m_server->nextPendingConnection());
+
+        if (!m_isRemotingEnabled) {
+            m_isRemotingEnabled = true;
+            m_serverNode.enableRemoting(&m_ipcServer);
+        }
+    });
 }
 
 LocalServer::~LocalServer()

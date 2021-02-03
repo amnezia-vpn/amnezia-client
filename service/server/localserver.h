@@ -50,6 +50,7 @@ private:
 
     IpcServer m_ipcServer;
     QRemoteObjectHost m_serverNode;
+    bool m_isRemotingEnabled = false;
 };
 
 #endif // LOCALSERVER_H

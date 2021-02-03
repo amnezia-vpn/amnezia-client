@@ -8,6 +8,7 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
+#include "core/ipcclient.h"
 #include "settings.h"
 
 using namespace amnezia;

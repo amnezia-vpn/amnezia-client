@@ -4,7 +4,7 @@
 #include <QRegularExpression>
 #include <QTcpSocket>
 
-#include "communicator.h"
+//#include "communicator.h"
 #include "debug.h"
 #include "openvpnprotocol.h"
 #include "utils.h"
@@ -166,29 +166,36 @@ ErrorCode OpenVpnProtocol::start()
 
     setConnectionState(ConnectionState::Connecting);
 
-    QSharedPointer<IpcProcessInterfaceReplica> process = IpcClient::createPrivilegedProcess();
-    process->waitForSource(1000);
-    if (!process->isInitialized()) {
+    m_openVpnProcess = IpcClient::createPrivilegedProcess();
+
+    if (!m_openVpnProcess) {
+        qWarning() << "IpcProcess replica is not created!";
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
-    process->setProgram(openVpnExecPath());
+
+    m_openVpnProcess->waitForSource(1000);
+    if (!m_openVpnProcess->isInitialized()) {
+        qWarning() << "IpcProcess replica is not connected!";
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+    m_openVpnProcess->setProgram(openVpnExecPath());
     QStringList arguments({"--config" , configPath(),
                       "--management", m_managementHost, QString::number(m_managementPort),
                       "--management-client",
                       "--log-append", vpnLogFileNamePath
                      });
-    process->setArguments(arguments);
+    m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
-    connect(process.data(), &IpcProcessInterfaceReplica::errorOccurred, [&](QProcess::ProcessError error) {
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, [&](QProcess::ProcessError error) {
         qDebug() << "IpcProcessInterfaceReplica errorOccurred" << error;
     });
 
-    connect(process.data(), &IpcProcessInterfaceReplica::stateChanged, [&](QProcess::ProcessState newState) {
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::stateChanged, [&](QProcess::ProcessState newState) {
         qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
     });
 
-    process->start();
+    m_openVpnProcess->start();
 
     //m_communicator->sendMessage(Message(Message::State::StartRequest, args));
     //startTimeoutTimer();

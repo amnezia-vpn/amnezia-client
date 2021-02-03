@@ -11,7 +11,7 @@
 #include <QThread>
 #include <QTimer>
 
-#include "communicator.h"
+//#include "communicator.h"
 
 #include "core/errorstrings.h"
 #include "core/openvpnconfigurator.h"
