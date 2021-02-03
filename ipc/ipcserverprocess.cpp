@@ -67,8 +67,11 @@ void IpcServerProcess::setInputChannelMode(QProcess::InputChannelMode mode)
 
 void IpcServerProcess::setNativeArguments(const QString &arguments)
 {
+#ifdef Q_OS_WIN
     m_process->setNativeArguments(arguments);
+#endif
 }
+
 
 void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
 {
