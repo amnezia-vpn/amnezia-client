@@ -29,15 +29,9 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 TARGET_FILENAME=$PROJECT_DIR/$APP_NAME.dmg
 
 # Seacrh Qt
-echo "Brew Qt version $(brew --prefix qt)"
-
-
-#if [ -f $(brew --prefix qt)/clang_64/bin/qmake ]; then QT_BIN_DIR=$(brew --prefix qt)/clang_64/bin;
-#else QT_BIN_DIR=$HOME/Qt/5.14.2/clang_64/bin; fi
+if [ -z "${QT_VERSION+x}" ]; then export QT_VERSION=5.14.2; fi
 
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
-
-#QIF_BIN_DIR=$HOME/Qt/Tools/QtInstallerFramework/4.0/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/4.0/bin
 
 echo "Using Qt in $QT_BIN_DIR"
@@ -73,6 +67,32 @@ $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite
 cp -av $RELEASE_DIR/service/server/$APP_NAME-service.app/Contents/macOS/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
 cp -Rv $PROJECT_DIR/deploy/data/macos/* $BUNDLE_DIR/Contents/macOS
 
+if [ "${MAC_CERT_PW+x}" ]; then
+
+CERTIFICATE_P12=$SCRIPT_DIR/PrivacyTechAppleCertDeveloperId.p12
+WWDRCA=$SCRIPT_DIR/WWDRCA.cer
+KEYCHAIN=amnezia.build.keychain
+TEMP_PASS=tmp_pass
+
+security create-keychain -p $TEMP_PASS $KEYCHAIN || true
+security default-keychain -s $KEYCHAIN
+security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+
+security default-keychain
+security list-keychains
+
+security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign || true
+security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign || true
+
+security set-key-partition-list -S apple-tool:,apple: -k $TEMP_PASS $KEYCHAIN
+security find-identity -p codesigning
+
+/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $BUNDLE_DIR
+/usr/bin/codesign --verify -vvvv $BUNDLE_DIR || true
+spctl -a -vvvv $BUNDLE_DIR || true
+
+fi
+
 
 mkdir -p $INSTALLER_DATA_DIR
 cp -av $PROJECT_DIR/deploy/installer $RELEASE_DIR
@@ -90,5 +110,14 @@ cd $RELEASE_DIR/installer
 $QIF_BIN_DIR/binarycreator --offline-only -v -c config/macos.xml -p packages -f $APP_NAME
 hdiutil create -volname $APP_NAME -srcfolder $APP_NAME.app -ov -format UDZO $TARGET_FILENAME
 
+if [ "${MAC_CERT_PW+x}" ]; then
+/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $TARGET_FILENAME
+/usr/bin/codesign --verify -vvvv $TARGET_FILENAME || true
+spctl -a -vvvv $TARGET_FILENAME || true
+#xcrun altool --notarize-app -f $TARGET_FILENAME -t osx --primary-bundle-id $APP_DOMAIN
+fi
 
 echo "Finished, artifact is $PROJECT_DIR/$APP_NAME.dmg"
+
+# restore keychain
+security default-keychain -s login.keychain
