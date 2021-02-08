@@ -71,23 +71,25 @@ if [ "${MAC_CERT_PW+x}" ]; then
 
 CERTIFICATE_P12=$SCRIPT_DIR/PrivacyTechAppleCertDeveloperId.p12
 WWDRCA=$SCRIPT_DIR/WWDRCA.cer
-KEYCHAIN=build.keychain
+KEYCHAIN=amnezia.build.keychain
 TEMP_PASS=tmp_pass
 
-if [ -z "$(security list-keychains | grep $KEYCHAIN)" ]; then
-security create-keychain -p $TEMP_PASS $KEYCHAIN
-security list-keychains
+security create-keychain -p $TEMP_PASS $KEYCHAIN || true
 security default-keychain -s $KEYCHAIN
 security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign
-security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign
-fi
 
+security default-keychain
+security list-keychains
+
+security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign || true
+security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign || true
+
+security set-key-partition-list -S apple-tool:,apple: -k $TEMP_PASS $KEYCHAIN
 security find-identity -p codesigning
 
-codesign --deep --force --verbose -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $BUNDLE_DIR
-codesign --verify -vvvv $BUNDLE_DIR
-spctl -a -vvvv $BUNDLE_DIR
+/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $BUNDLE_DIR
+/usr/bin/codesign --verify -vvvv $BUNDLE_DIR || true
+spctl -a -vvvv $BUNDLE_DIR || true
 
 fi
 
@@ -109,8 +111,13 @@ $QIF_BIN_DIR/binarycreator --offline-only -v -c config/macos.xml -p packages -f 
 hdiutil create -volname $APP_NAME -srcfolder $APP_NAME.app -ov -format UDZO $TARGET_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
-codesign --deep --force --verbose --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $TARGET_FILENAME
+/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $TARGET_FILENAME
+/usr/bin/codesign --verify -vvvv $TARGET_FILENAME || true
+spctl -a -vvvv $TARGET_FILENAME || true
 #xcrun altool --notarize-app -f $TARGET_FILENAME -t osx --primary-bundle-id $APP_DOMAIN
 fi
 
 echo "Finished, artifact is $PROJECT_DIR/$APP_NAME.dmg"
+
+# restore keychain
+security default-keychain -s login.keychain
