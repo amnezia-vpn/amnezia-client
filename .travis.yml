@@ -30,7 +30,7 @@ jobs:
         token: $GH_TOKEN
         skip_cleanup: true
         file:
-        - "AmneziaVPN.dmg"
+        - "AmneziaVPN_unsigned.dmg"
         on:
           tags: true
           branch: master
