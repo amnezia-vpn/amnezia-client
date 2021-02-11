@@ -35,6 +35,7 @@ CMakeLists.txt.user*
 .DS_Store
 ._.DS_Store
 ._*
+*.dmg
 
 # tmp files
 *.*~
