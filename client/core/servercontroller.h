@@ -48,7 +48,9 @@ public:
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
     static ErrorCode runScript(DockerContainer container,
-        const QSsh::SshConnectionParameters &sshParams, QString script);
+        const QSsh::SshConnectionParameters &sshParams, QString script,
+        const std::function<void(const QString &)> &cbReadStdOut = nullptr,
+        const std::function<void(const QString &)> &cbReadStdErr = nullptr);
 
     static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials);
     static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials);

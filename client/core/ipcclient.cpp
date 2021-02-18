@@ -7,7 +7,18 @@ IpcClient &IpcClient::Instance()
     return s;
 }
 
-QSharedPointer<IpcProcessInterfaceReplica> IpcClient::createPrivilegedProcess()
+bool IpcClient::init()
+{
+    Instance().m_localSocket->waitForConnected();
+
+    if (!Instance().m_ipcClient) {
+        qDebug() << "IpcClient::init failed";
+        return false;
+    }
+    return Instance().m_ipcClient->isReplicaValid();
+}
+
+QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
 {
     if (! Instance().m_ipcClient || ! Instance().m_ipcClient->isReplicaValid()) {
         qWarning() << "IpcClient::createPrivilegedProcess : IpcClient IpcClient replica is not valid";
@@ -18,47 +29,40 @@ QSharedPointer<IpcProcessInterfaceReplica> IpcClient::createPrivilegedProcess()
     futureResult.waitForFinished(1000);
 
     int pid = futureResult.returnValue();
-    QSharedPointer<QRemoteObjectNode> replicaNode(new QRemoteObjectNode);
-    //Instance().m_processNodes.insert(pid, replica);
 
+    auto pd = QSharedPointer<ProcessDescriptor>(new ProcessDescriptor());
+    Instance().m_processNodes.insert(pid, pd);
 
-    QSharedPointer<QLocalSocket> socket(new QLocalSocket(replicaNode.data()));
-    QSharedPointer<IpcProcessInterfaceReplica> ptr;
+    pd->localSocket.reset(new QLocalSocket(pd->replicaNode.data()));
 
-    connect(socket.data(), &QLocalSocket::connected, replicaNode.data(), [socket, replicaNode, &ptr]() {
-        replicaNode->addClientSideConnection(socket.data());
+    connect(pd->localSocket.data(), &QLocalSocket::connected, pd->replicaNode.data(), [pd]() {
+        pd->replicaNode->addClientSideConnection(pd->localSocket.data());
 
-        ptr.reset(replicaNode->acquire<IpcProcessInterfaceReplica>());
+        pd->ipcProcess.reset(pd->replicaNode->acquire<IpcProcessInterfaceReplica>());
+        if (!pd->ipcProcess) {
+            qWarning() << "Acquire IpcProcessInterfaceReplica failed";
+        }
+        else {
+            pd->ipcProcess->waitForSource(1000);
+            if (!pd->ipcProcess->isReplicaValid()) {
+                qWarning() << "IpcProcessInterfaceReplica replica is not connected!";
+            }
 
-        ptr->waitForSource(1000);
-
-        if (!ptr->isReplicaValid()) {
-            qWarning() << "IpcProcessInterfaceReplica replica is not connected!";
+            connect(pd->ipcProcess.data(), &IpcProcessInterfaceReplica::destroyed, pd->ipcProcess.data(), [pd](){
+                pd->replicaNode->deleteLater();
+            });
         }
 
     });
-    socket->connectToServer(amnezia::getIpcProcessUrl(pid));
-    socket->waitForConnected();
+    pd->localSocket->connectToServer(amnezia::getIpcProcessUrl(pid));
+    pd->localSocket->waitForConnected();
 
-    auto proccessReplica = QSharedPointer<IpcProcessInterfaceReplica>(ptr);
-
-
-
-//    replica->connectToNode(QUrl(amnezia::getIpcProcessUrl(pid)));
-//    auto ptr = QSharedPointer<IpcProcessInterfaceReplica>(replica->acquire<IpcProcessInterfaceReplica>());
-    connect(proccessReplica.data(), &IpcProcessInterfaceReplica::destroyed, proccessReplica.data(), [replicaNode](){
-        replicaNode->deleteLater();
-    });
-
+    auto proccessReplica = QSharedPointer<IpcProcessInterfaceReplica>(pd->ipcProcess);
     return proccessReplica;
 }
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
-//    m_ClientNode.connectToNode(QUrl(amnezia::getIpcServiceUrl()));
-//    qDebug() << QUrl(amnezia::getIpcServiceUrl());
-
-
     m_localSocket.reset(new QLocalSocket(this));
     connect(m_localSocket.data(), &QLocalSocket::connected, &m_ClientNode, [this]() {
         m_ClientNode.addClientSideConnection(m_localSocket.data());
@@ -72,20 +76,4 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 
     });
     m_localSocket->connectToServer(amnezia::getIpcServiceUrl());
-
-
-
-//    connect(m_ipcClient.data(), &IpcInterfaceReplica::stateChanged, [&](QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState){
-
-////        qDebug() << "state" << state;
-////        for (int i = 0; i < 10; ++i) {
-////            QRemoteObjectPendingReply<qint64> future = m_ipcClient->createPrivilegedProcess("", QStringList());
-
-////            future.waitForFinished();
-////            qDebug() << "QRemoteObjectPendingReply" << QDateTime::currentMSecsSinceEpoch() - future.returnValue();
-
-////        }
-//    });
-
-
 }

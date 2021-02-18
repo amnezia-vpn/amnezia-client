@@ -11,7 +11,10 @@ static QString errorString(ErrorCode code){
     case(NoError): return QObject::tr("No error");
     case(UnknownError): return QObject::tr("Unknown Error");
     case(NotImplementedError): return QObject::tr("Function not implemented");
+
+    // Server errors
     case(ServerCheckFailed): return QObject::tr("Server check failed");
+    case(ServerPortAlreadyAllocatedError): return QObject::tr("Server port already used. Check for another software");
 
     // Ssh connection errors
     case(SshSocketError): return QObject::tr("Ssh connection error");

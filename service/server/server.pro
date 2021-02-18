@@ -4,7 +4,6 @@ CONFIG   += console qt no_batch
 QT += core network remoteobjects
 
 HEADERS = \
-        ../../client/message.h \
         ../../client/utils.h \
         ../../ipc/ipc.h \
         ../../ipc/ipcserver.h \
@@ -15,7 +14,6 @@ HEADERS = \
         systemservice.h
 
 SOURCES = \
-        ../../client/message.cpp \
         ../../client/utils.cpp \
         ../../ipc/ipcserver.cpp \
         ../../ipc/ipcserverprocess.cpp \

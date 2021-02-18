@@ -95,6 +95,10 @@ QStringList TapController::getTapList()
         else tapList.append(s);
     }
 
+    if (! tapList.isEmpty()) {
+        enableTapAdapter(tapList.first());
+    }
+
     return tapList;
 }
 

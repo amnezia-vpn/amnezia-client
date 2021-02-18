@@ -5,6 +5,7 @@
 #include <QProcessEnvironment>
 
 #include "defs.h"
+#include "settings.h"
 #include "servercontroller.h"
 
 
@@ -37,6 +38,8 @@ private:
 
     static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
         Protocol proto, ErrorCode *errorCode = nullptr);
+
+    static Settings &m_settings();
 };
 
 #endif // OPENVPNCONFIGURATOR_H

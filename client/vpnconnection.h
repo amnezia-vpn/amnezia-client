@@ -19,34 +19,40 @@ class VpnConnection : public QObject
 
 public:
     explicit VpnConnection(QObject* parent = nullptr);
-    ~VpnConnection() override = default;
+    ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
-    ErrorCode requestVpnConfig(const ServerCredentials &credentials, Protocol protocol);
+    ErrorCode createVpnConfiguration(const ServerCredentials &credentials, Protocol protocol);
+
     ErrorCode connectToVpn(const ServerCredentials &credentials, Protocol protocol = Protocol::Any);
-    bool onConnected() const;
-    bool onDisconnected() const;
     void disconnectFromVpn();
 
+    bool isConnected() const;
+    bool isDisconnected() const;
+
     VpnProtocol::ConnectionState connectionState();
+
+    QSharedPointer<VpnProtocol> vpnProtocol() const;
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
 
+    void serviceIsNotReady();
+
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
 
 protected:
-
-    QScopedPointer<VpnProtocol> m_vpnProtocol;
+    QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
     Settings m_settings;
+    QJsonObject m_vpnConfiguration;
 
 };
 

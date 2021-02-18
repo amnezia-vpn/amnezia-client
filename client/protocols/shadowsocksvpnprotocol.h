@@ -7,21 +7,22 @@
 class ShadowSocksVpnProtocol : public OpenVpnProtocol
 {
 public:
-    ShadowSocksVpnProtocol(const QString& args = QString(), QObject* parent = nullptr);
+    ShadowSocksVpnProtocol(const QJsonObject& configuration, QObject* parent = nullptr);
 
     ErrorCode start() override;
     void stop() override;
 
-    static QString genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto = Protocol::ShadowSocks);
+    static QJsonObject genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto = Protocol::ShadowSocks);
 
 protected:
+    void readShadowSocksConfiguration(const QJsonObject &configuration);
     QString shadowSocksExecPath() const;
 
 protected:
-    QString m_shadowSocksConfig;
+    QJsonObject m_shadowSocksConfig;
 
 private:
-    QProcess ssProcess;
+    QProcess m_ssProcess;
 };
 
 #endif // SHADOWSOCKSVPNPROTOCOL_H

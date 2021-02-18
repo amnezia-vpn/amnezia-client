@@ -74,7 +74,7 @@ private:
     void setTrayIcon(const QString &iconPath);
 
     void setupUiConnections();
-    void initCustomSites();
+    void updateSettings();
 
     void updateShareCode();
 

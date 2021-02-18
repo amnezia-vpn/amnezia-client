@@ -259,7 +259,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -313,32 +313,6 @@ color: #333333;</string>
        </property>
        <property name="text">
         <string>Connection code</string>
-       </property>
-      </widget>
-      <widget class="QProgressBar" name="progressBar_new_server_connection_3">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>220</y>
-         <width>301</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: #181922;
-border-radius: 4px;</string>
-       </property>
-       <property name="value">
-        <number>24</number>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="textVisible">
-        <bool>true</bool>
-       </property>
-       <property name="format">
-        <string>Connecting...</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_25">
@@ -944,7 +918,10 @@ font: 16px &quot;Lato&quot;;	</string>
         </property>
        </widget>
       </widget>
-      <widget class="QPushButton" name="pushButton_blocked_list">
+      <widget class="QPushButton" name="pushButton_vpn_add_site">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -972,7 +949,10 @@ font-size: 16px;
 line-height: 21px;
 
 }
-</string>
+
+QPushButton:!enabled {
+background: #484952;
+}</string>
        </property>
        <property name="text">
         <string>+ Add site</string>
@@ -1099,7 +1079,7 @@ color: #181922;
       </widget>
       <widget class="QRadioButton" name="radioButton_mode_all_sites">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1116,9 +1096,9 @@ color: #181922;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_mode_include_selected_sites">
+      <widget class="QRadioButton" name="radioButton_mode_selected_sites">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1155,23 +1135,6 @@ color: #181922;
        </property>
        <property name="wordWrap">
         <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_19">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>460</y>
-         <width>361</width>
-         <height>141</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">image: url(:/images/AmneziaVPN.png);
-background-color: rgb(255, 255, 255);</string>
-       </property>
-       <property name="text">
-        <string/>
        </property>
       </widget>
      </widget>

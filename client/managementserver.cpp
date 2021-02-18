@@ -54,8 +54,7 @@ void ManagementServer::onNewConnection()
 
 void ManagementServer::onSocketError(QAbstractSocket::SocketError socketError)
 {
-    Q_UNUSED(socketError);
-
+    Q_UNUSED(socketError)
     qDebug().noquote() << QString("Mananement server error: %1").arg(m_socket->errorString());
 }
 

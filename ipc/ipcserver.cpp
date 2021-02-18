@@ -1,7 +1,13 @@
 #include "ipcserver.h"
 
+#include <QObject>
 #include <QDateTime>
 #include <QLocalSocket>
+
+#include "router.h"
+#ifdef Q_OS_WIN
+#include "tapcontroller_win.h"
+#endif
 
 IpcServer::IpcServer(QObject *parent):
     IpcInterfaceSource(parent)
@@ -11,13 +17,13 @@ int IpcServer::createPrivilegedProcess()
 {
     m_localpid++;
 
-    ProcessDescriptor pd;
+    ProcessDescriptor pd(this);
 //    pd.serverNode->setHostUrl(QUrl(amnezia::getIpcProcessUrl(m_localpid)));
 //    pd.serverNode->enableRemoting(pd.ipcProcess.data());
 
 
 
-    pd.localServer = QSharedPointer<QLocalServer>(new QLocalServer(this));
+    //pd.localServer = QSharedPointer<QLocalServer>(new QLocalServer(this));
     pd.localServer->setSocketOptions(QLocalServer::WorldAccessOption);
 
     if (!pd.localServer->listen(amnezia::getIpcProcessUrl(m_localpid))) {
@@ -45,4 +51,47 @@ int IpcServer::createPrivilegedProcess()
     m_processes.insert(m_localpid, pd);
 
     return m_localpid;
+}
+
+bool IpcServer::routeAdd(const QString &ip, const QString &gw, const QString &mask)
+{
+    return Router::Instance().routeAdd(ip, gw, mask);
+}
+
+int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
+{
+    return Router::Instance().routeAddList(gw, ips);
+}
+
+bool IpcServer::clearSavedRoutes()
+{
+    return Router::Instance().clearSavedRoutes();
+}
+
+bool IpcServer::routeDelete(const QString &ip)
+{
+    return Router::Instance().routeDelete(ip);
+}
+
+void IpcServer::flushDns()
+{
+    return Router::Instance().flushDns();
+}
+
+bool IpcServer::checkAndInstallDriver()
+{
+#ifdef Q_OS_WIN
+    return TapController::checkAndSetup();
+#else
+    return true;
+#endif
+}
+
+QStringList IpcServer::getTapList()
+{
+#ifdef Q_OS_WIN
+    return TapController::getTapList();
+#else
+    return QStringList();
+#endif
 }

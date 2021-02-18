@@ -34,8 +34,9 @@ enum ErrorCode
     InternalError,
     NotImplementedError,
 
-    // Server errorz
+    // Server errors
     ServerCheckFailed,
+    ServerPortAlreadyAllocatedError,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,
@@ -61,6 +62,15 @@ enum ErrorCode
     OpenVpnAdaptersInUseError,
     OpenVpnUnknownError
 };
+
+namespace config {
+// config keys
+static QString key_openvpn_config_data() { return "openvpn_config_data"; }
+static QString key_openvpn_config_path() { return "openvpn_config_path"; }
+static QString key_shadowsocks_config_data() { return "shadowsocks_config_data"; }
+
+}
+
 
 } // namespace amnezia
 

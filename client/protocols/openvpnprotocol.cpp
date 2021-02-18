@@ -9,13 +9,10 @@
 #include "openvpnprotocol.h"
 #include "utils.h"
 
-
-OpenVpnProtocol::OpenVpnProtocol(const QString& args, QObject* parent) :
-    VpnProtocol(args, parent)
-    //m_requestFromUserToStop(false)
+OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject* parent) :
+    VpnProtocol(configuration, parent)
 {
-    setConfigFile(args);
-    //connect(m_communicator, &Communicator::messageReceived, this, &OpenVpnProtocol::onMessageReceived);
+    readOpenVpnConfiguration(configuration);
     connect(&m_managementServer, &ManagementServer::readyRead, this, &OpenVpnProtocol::onReadyReadDataFromManagementServer);
 }
 
@@ -25,35 +22,14 @@ OpenVpnProtocol::~OpenVpnProtocol()
     OpenVpnProtocol::stop();
 }
 
-void OpenVpnProtocol::onMessageReceived(const Message& message)
-{
-    if (!message.isValid()) {
-        qWarning().noquote() << QString("Message received: '%1', but it is not valid").arg(message.toString());
-        return;
-    }
-
-    switch (message.state()) {
-    case Message::State::Started:
-        qDebug() << "OpenVPN process started";
-        break;
-    case Message::State::Finished:
-        qDebug().noquote() << QString("OpenVPN process finished with status %1").arg(message.argAtIndex(1));
-        onOpenVpnProcessFinished(message.argAtIndex(1).toInt());
-        break;
-    default:
-        qDebug().noquote() << QString("Message received: '%1'").arg(message.toString());
-        ;
-    }
-}
-
 void OpenVpnProtocol::stop()
 {
     // TODO: need refactoring
-    // sendTermSignal() will evet return true while server connected
+    // sendTermSignal() will even return true while server connected ???
     if ((m_connectionState == VpnProtocol::ConnectionState::Preparing) ||
             (m_connectionState == VpnProtocol::ConnectionState::Connecting) ||
             (m_connectionState == VpnProtocol::ConnectionState::Connected) ||
-            (m_connectionState == VpnProtocol::ConnectionState::TunnelReconnecting)) {
+            (m_connectionState == VpnProtocol::ConnectionState::Reconnecting)) {
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
@@ -61,27 +37,51 @@ void OpenVpnProtocol::stop()
     }
 }
 
-void OpenVpnProtocol::killOpenVpnProcess()
+ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
 {
-    // send command to kill openvpn process (if any).
+    if (!IpcClient::Interface()) {
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+
+    QRemoteObjectPendingReply<QStringList> resultCheck = IpcClient::Interface()->getTapList();
+    resultCheck.waitForFinished();
+
+    if (resultCheck.returnValue().isEmpty()){
+        QRemoteObjectPendingReply<bool> resultInstall = IpcClient::Interface()->checkAndInstallDriver();
+        resultInstall.waitForFinished();
+
+        if (!resultInstall.returnValue()) return ErrorCode::OpenVpnUnknownError;
+    }
+    return ErrorCode::NoError;
 }
 
-bool OpenVpnProtocol::setConfigFile(const QString& configFileNamePath)
+void OpenVpnProtocol::killOpenVpnProcess()
 {
-    m_configFileName = configFileNamePath;
-    QFileInfo file(m_configFileName);
-
-    if (file.fileName().isEmpty()) {
-        m_configFileName = Utils::defaultVpnConfigFileName();
+    if (m_openVpnProcess){
+        m_openVpnProcess->close();
     }
+}
 
-    if (m_configFileName.isEmpty()) {
-        return false;
+void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
+{
+    if (configuration.contains(config::key_openvpn_config_data())) {
+        m_configFile.open();
+        m_configFile.write(configuration.value(config::key_openvpn_config_data()).toString().toUtf8());
+        m_configFile.close();
+        m_configFileName = m_configFile.fileName();
+
+        qDebug().noquote() << QString("Set config data") << m_configFileName;
     }
+    else if (configuration.contains(config::key_openvpn_config_path())) {
+        m_configFileName = configuration.value(config::key_openvpn_config_path()).toString();
+        QFileInfo file(m_configFileName);
 
-    qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
+        if (file.fileName().isEmpty()) {
+            m_configFileName = Utils::defaultVpnConfigFileName();
+        }
 
-    return false;
+        qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
+    }
 }
 
 bool OpenVpnProtocol::openVpnProcessIsRunning() const
@@ -99,7 +99,7 @@ QString OpenVpnProtocol::configPath() const
     return m_configFileName;
 }
 
-void OpenVpnProtocol::writeCommand(const QString& command)
+void OpenVpnProtocol::sendManagementCommand(const QString& command)
 {
     QIODevice *device = dynamic_cast<QIODevice*>(m_managementServer.socket().data());
     if (device) {
@@ -128,16 +128,8 @@ QString OpenVpnProtocol::openVpnExecPath() const
 
 ErrorCode OpenVpnProtocol::start()
 {
-    qDebug() << "Start OpenVPN connection";
-
-    //m_requestFromUserToStop = false;
-    m_openVpnStateSigTermHandlerTimer.stop();
+    //qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
-
-//    if (communicator() && !communicator()->isConnected()) {
-//        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-//        return lastError();
-//    }
 
     if (!QFileInfo::exists(openVpnExecPath())) {
         setLastError(ErrorCode::OpenVpnExecutableMissing);
@@ -152,13 +144,6 @@ ErrorCode OpenVpnProtocol::start()
     QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
     Utils::createEmptyFile(vpnLogFileNamePath);
 
-    QStringList args({openVpnExecPath(),
-                      "--config" , configPath(),
-                      "--management", m_managementHost, QString::number(m_managementPort),
-                      "--management-client",
-                      "--log-append", vpnLogFileNamePath
-                     });
-
     if (!m_managementServer.start(m_managementHost, m_managementPort)) {
         setLastError(ErrorCode::OpenVpnManagementServerError);
         return lastError();
@@ -166,16 +151,18 @@ ErrorCode OpenVpnProtocol::start()
 
     setConnectionState(ConnectionState::Connecting);
 
-    m_openVpnProcess = IpcClient::createPrivilegedProcess();
+    m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_openVpnProcess) {
-        qWarning() << "IpcProcess replica is not created!";
+        //qWarning() << "IpcProcess replica is not created!";
+        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
     m_openVpnProcess->waitForSource(1000);
     if (!m_openVpnProcess->isInitialized()) {
         qWarning() << "IpcProcess replica is not connected!";
+        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
     m_openVpnProcess->setProgram(openVpnExecPath());
@@ -195,26 +182,16 @@ ErrorCode OpenVpnProtocol::start()
         qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
     });
 
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::finished, this, [&]() {
+        setConnectionState(ConnectionState::Disconnected);
+    });
+
     m_openVpnProcess->start();
 
     //m_communicator->sendMessage(Message(Message::State::StartRequest, args));
     //startTimeoutTimer();
 
     return ErrorCode::NoError;
-}
-
-void OpenVpnProtocol::openVpnStateSigTermHandlerTimerEvent()
-{
-    bool processStatus = openVpnProcessIsRunning();
-    if (processStatus) {
-        killOpenVpnProcess();
-    }
-    onOpenVpnProcessFinished(0);
-}
-
-void OpenVpnProtocol::openVpnStateSigTermHandler()
-{
-    m_openVpnStateSigTermHandlerTimer.start(5000);
 }
 
 bool OpenVpnProtocol::sendTermSignal()
@@ -256,10 +233,11 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                 setConnectionState(VpnProtocol::ConnectionState::Connected);
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
-                openVpnStateSigTermHandler();
+                //openVpnStateSigTermHandler();
+                setConnectionState(VpnProtocol::ConnectionState::Disconnecting);
                 continue;
             } else if (line.contains("RECONNECTING")) {
-                setConnectionState(VpnProtocol::ConnectionState::TunnelReconnecting);
+                setConnectionState(VpnProtocol::ConnectionState::Reconnecting);
                 continue;
             }
         }
@@ -292,19 +270,6 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             setBytesChanged(r, s);
         }
     }
-}
-
-void OpenVpnProtocol::onOpenVpnProcessFinished(int exitCode)
-{
-    m_openVpnStateSigTermHandlerTimer.stop();
-    if (m_connectionState == VpnProtocol::ConnectionState::Disconnected) {
-        qDebug() << "Already in disconnected state";
-        return;
-    }
-
-    qDebug().noquote() << QString("Process finished with code: %1").arg(exitCode);
-
-    setConnectionState(VpnProtocol::ConnectionState::Disconnected);
 }
 
 void OpenVpnProtocol::updateVpnGateway()

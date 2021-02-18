@@ -18,40 +18,50 @@ class Settings : public QObject
 public:
     explicit Settings(QObject* parent = nullptr);
 
-    void read();
-    void save();
+    QString userName() const { return m_settings.value("Server/userName", QString()).toString(); }
+    void setUserName(const QString& login) { m_settings.setValue("Server/userName", login); }
 
-    void setUserName(const QString& login);
-    void setPassword(const QString& password);
-    void setServerName(const QString& serverName);
-    void setServerPort(int serverPort = 22);
-    void setServerCredentials(const ServerCredentials &credentials);
+    QString password() const { return m_settings.value("Server/password", QString()).toString(); }
+    void setPassword(const QString& password) { m_settings.setValue("Server/password", password); }
 
-    QString userName() const { return m_userName; }
-    QString password() const { return m_password; }
-    QString serverName() const { return m_serverName; }
-    int serverPort() const { return m_serverPort; }
+    QString serverName() const { return m_settings.value("Server/serverName", QString()).toString(); }
+    void setServerName(const QString& serverName) { m_settings.setValue("Server/serverName", serverName); }
+
+    int serverPort() const { return m_settings.value("Server/serverPort", 22).toInt(); }
+    void setServerPort(int serverPort = 22) { m_settings.setValue("Server/serverPort", serverPort); }
+
     ServerCredentials serverCredentials();
-
-
+    void setServerCredentials(const ServerCredentials &credentials);
     bool haveAuthData() const;
 
+    bool customRouting() const { return m_settings.value("Conf/customRouting", false).toBool(); }
+    void setCustomRouting(bool customRouting) { m_settings.setValue("Conf/customRouting", customRouting); }
 
     // list of sites to pass blocking added by user
-    QStringList customSites() { return m_settings.value("customSites").toStringList(); }
-    void setCustomSites(const QStringList &customSites) { m_settings.setValue("customSites", customSites); }
+    QStringList customSites() { return m_settings.value("Conf/customSites").toStringList(); }
+    void setCustomSites(const QStringList &customSites) { m_settings.setValue("Conf/customSites", customSites); }
 
     // list of ips to pass blocking generated from customSites
-    QStringList customIps() { return m_settings.value("customIps").toStringList(); }
-    void setCustomIps(const QStringList &customIps) { m_settings.setValue("customIps", customIps); }
+    QStringList customIps() { return m_settings.value("Conf/customIps").toStringList(); }
+    void setCustomIps(const QStringList &customIps) { m_settings.setValue("Conf/customIps", customIps); }
 
+    QString primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1()).toString(); }
+    QString secondaryDns() const { return m_settings.value("Conf/secondaryDns", cloudFlareNs2()).toString(); }
 
-protected:
+    //QString primaryDns() const { return m_primaryDns; }
+    void setPrimaryDns(const QString &primaryDns) { m_settings.setValue("Conf/primaryDns", primaryDns); }
+
+    //QString secondaryDns() const { return m_secondaryDns; }
+    void setSecondaryDns(const QString &secondaryDns) { m_settings.setValue("Conf/secondaryDns", secondaryDns); }
+
+    QString cloudFlareNs1() const { return "1.1.1.1"; }
+    QString cloudFlareNs2() const { return "1.0.0.1"; }
+
+    QString openNicNs5() const { return "94.103.153.176"; }
+    QString openNicNs13() const { return "144.76.103.143"; }
+
+private:
     QSettings m_settings;
-    QString m_userName;
-    QString m_password;
-    QString m_serverName;
-    int m_serverPort;
 };
 
 #endif // SETTINGS_H

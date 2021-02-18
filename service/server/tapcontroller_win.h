@@ -1,4 +1,4 @@
-﻿#ifndef TAPCONTROLLER_H
+#ifndef TAPCONTROLLER_H
 #define TAPCONTROLLER_H
 
 #include <QObject>
@@ -34,7 +34,6 @@ private:
     static bool setupDriver();
     static bool setupDriverCertificate();
     static bool removeDriver(const QString& tapInstanceId);
-
 
 };
 

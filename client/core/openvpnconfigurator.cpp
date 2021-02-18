@@ -195,6 +195,12 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     return connData;
 }
 
+Settings &OpenVpnConfigurator::m_settings()
+{
+    static Settings s;
+    return s;
+}
+
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
     Protocol proto, ErrorCode *errorCode)
 {
@@ -217,6 +223,13 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("$LOCAL_PROXY_PORT", QString::number(ServerController::ssContainerPort()));
     }
 
+    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
+    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+
+    if (m_settings().customRouting()) {
+        config.replace("redirect-gateway def1 bypass-dhcp", "");
+    }
+
     config.replace("$REMOTE_HOST", connData.host);
     config.replace("$REMOTE_PORT", "1194");
     config.replace("$CA_CERT", connData.caCert);
@@ -224,5 +237,6 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     config.replace("$PRIV_KEY", connData.privKey);
     config.replace("$TA_KEY", connData.taKey);
 
+    //qDebug().noquote() << config;
     return config;
 }

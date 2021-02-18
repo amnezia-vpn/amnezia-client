@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QApplication>
 
 #include "sshconnectionmanager.h"
 
@@ -23,7 +24,9 @@ QString ServerController::getContainerName(DockerContainer container)
 }
 
 ErrorCode ServerController::runScript(DockerContainer container,
-    const SshConnectionParameters &sshParams, QString script)
+    const SshConnectionParameters &sshParams, QString script,
+    const std::function<void(const QString &)> &cbReadStdOut,
+    const std::function<void(const QString &)> &cbReadStdErr)
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
 
@@ -66,18 +69,20 @@ ErrorCode ServerController::runScript(DockerContainer container,
             wait.quit();
         });
 
-        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, [proc](){
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, &wait, [proc, cbReadStdOut](){
             QString s = proc->readAllStandardOutput();
             if (s != "." && !s.isEmpty()) {
-                qDebug().noquote() << s;
+                qDebug().noquote() << "stdout" << s;
             }
+            if (cbReadStdOut) cbReadStdOut(s);
         });
 
-        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, [proc](){
+        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, &wait, [proc, cbReadStdErr](){
             QString s = proc->readAllStandardError();
             if (s != "." && !s.isEmpty()) {
-                qDebug().noquote() << s;
+                qDebug().noquote() << "stderr" << s;
             }
+            if (cbReadStdErr) cbReadStdErr(s);
         });
 
         proc->start();
@@ -272,11 +277,12 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
     QString scriptFileName;
     DockerContainer container;
 
-    ErrorCode errorCode;
     if (proto == Protocol::Any) {
-        removeServer(credentials, Protocol::OpenVpn);
-        removeServer(credentials, Protocol::ShadowSocks);
-        return ErrorCode::NoError;
+        ErrorCode e = removeServer(credentials, Protocol::OpenVpn);
+        if (e) {
+            return e;
+        }
+        return removeServer(credentials, Protocol::ShadowSocks);
     }
     else if (proto == Protocol::OpenVpn) {
         scriptFileName = ":/server_scripts/remove_container.sh";
@@ -309,14 +315,14 @@ ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Pr
         return setupShadowSocksServer(credentials);
     }
     else if (proto == Protocol::Any) {
-        return ErrorCode::NotImplementedError;
+        //return ErrorCode::NotImplementedError;
 
         // TODO: run concurently
-        // return setupOpenVpnServer(credentials);
-        //setupShadowSocksServer(credentials);
+        setupOpenVpnServer(credentials);
+        setupShadowSocksServer(credentials);
     }
 
-    return ErrorCode::NotImplementedError;
+    return ErrorCode::NoError;
 }
 
 ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credentials)
@@ -329,8 +335,20 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
     scriptData = file.readAll();
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
-    ErrorCode e = runScript(DockerContainer::OpenVpn, sshParams(credentials), scriptData);
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data) {
+        stdOut += data + "\n";
+    };
+    auto cbReadStdErr = [&](const QString &data) {
+        stdOut += data + "\n";
+    };
+
+    ErrorCode e = runScript(DockerContainer::OpenVpn, sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
     if (e) return e;
+    QApplication::processEvents();
+
+    if (stdOut.contains("port is already allocated")) return ErrorCode::ServerPortAlreadyAllocatedError;
+    if (stdOut.contains("Error response from daemon")) return ErrorCode::ServerCheckFailed;
 
     return checkOpenVpnServer(DockerContainer::OpenVpn, credentials);
 }

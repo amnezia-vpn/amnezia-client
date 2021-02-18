@@ -71,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->pushButton_sites_add_custom->click();
     });
 
-    initCustomSites();
+    updateSettings();
 
-    ui->pushButton_general_settings_exit->hide();
+    //ui->pushButton_general_settings_exit->hide();
     //ui->pushButton_share_connection->hide();
 
     setFixedSize(width(),height());
@@ -101,7 +101,7 @@ MainWindow::~MainWindow()
     for (int i = 0; i < 50; i++) {
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(100);
-        if (m_vpnConnection->onDisconnected()) {
+        if (m_vpnConnection->isDisconnected()) {
             break;
         }
     }
@@ -249,7 +249,6 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
 
     if (ok) {
         m_settings.setServerCredentials(serverCredentials);
-        m_settings.save();
 
         goToPage(Page::Vpn);
         qApp->processEvents();
@@ -272,7 +271,6 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
     credentials.password = o.value("w").toString();
 
     m_settings.setServerCredentials(credentials);
-    m_settings.save();
 
     goToPage(Page::Vpn);
     qDebug() << QString("Added server %3@%1:%2").
@@ -299,7 +297,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
     timer.start(1000);
 
 
-    ErrorCode e = ServerController::setupServer(credentials, Protocol::OpenVpn);
+    ErrorCode e = ServerController::setupServer(credentials, Protocol::Any);
     if (e) {
         page->setEnabled(true);
         button->setVisible(true);
@@ -377,14 +375,11 @@ void MainWindow::onPushButtonForgetServer(bool)
     m_settings.setServerName("");
     m_settings.setServerPort();
 
-    m_settings.save();
-
     goToPage(Page::Start);
 }
 
 void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
 {
-    qDebug() << "MainWindow::onBytesChanged" << receivedData << sentData;
     ui->label_speed_received->setText(VpnConnection::bytesPerSecToText(receivedData));
     ui->label_speed_sent->setText(VpnConnection::bytesPerSecToText(sentData));
 }
@@ -394,6 +389,7 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     qDebug() << "MainWindow::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
 
     bool pushButtonConnectEnabled = false;
+    bool radioButtonsModeEnabled = false;
     ui->label_state->setText(VpnProtocol::textConnectionState(state));
 
     setTrayState(state);
@@ -403,32 +399,41 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
         onBytesChanged(0,0);
         ui->pushButton_connect->setChecked(false);
         pushButtonConnectEnabled = true;
+        radioButtonsModeEnabled = true;
         break;
     case VpnProtocol::ConnectionState::Preparing:
         pushButtonConnectEnabled = false;
+        radioButtonsModeEnabled = false;
         break;
     case VpnProtocol::ConnectionState::Connecting:
         pushButtonConnectEnabled = false;
+        radioButtonsModeEnabled = false;
         break;
     case VpnProtocol::ConnectionState::Connected:
         pushButtonConnectEnabled = true;
+        radioButtonsModeEnabled = false;
         break;
     case VpnProtocol::ConnectionState::Disconnecting:
         pushButtonConnectEnabled = false;
+        radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::TunnelReconnecting:
+    case VpnProtocol::ConnectionState::Reconnecting:
         pushButtonConnectEnabled = true;
+        radioButtonsModeEnabled = false;
         break;
     case VpnProtocol::ConnectionState::Error:
+        ui->pushButton_connect->setChecked(false);
         pushButtonConnectEnabled = true;
+        radioButtonsModeEnabled = true;
         break;
     case VpnProtocol::ConnectionState::Unknown:
-    default:
         pushButtonConnectEnabled = true;
-        ;
+        radioButtonsModeEnabled = true;
     }
 
     ui->pushButton_connect->setEnabled(pushButtonConnectEnabled);
+    ui->radioButton_mode_all_sites->setEnabled(radioButtonsModeEnabled);
+    ui->radioButton_mode_selected_sites->setEnabled(radioButtonsModeEnabled);
 }
 
 void MainWindow::onVpnProtocolError(ErrorCode errorCode)
@@ -519,7 +524,7 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_server_settings_clear, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClearServer(bool)));
     connect(ui->pushButton_server_settings_forget, SIGNAL(clicked(bool)), this, SLOT(onPushButtonForgetServer(bool)));
 
-    connect(ui->pushButton_blocked_list, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
+    connect(ui->pushButton_vpn_add_site, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
     connect(ui->pushButton_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
     connect(ui->pushButton_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
     connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
@@ -545,6 +550,12 @@ void MainWindow::setupUiConnections()
 
     connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
     connect(ui->pushButton_sites_delete_custom, &QPushButton::clicked, this, [this](){ onPushButtonDeleteCustomSiteClicked(); });
+
+    connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, ui->pushButton_vpn_add_site, &QPushButton::setEnabled);
+
+    connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, this, [this](bool toggled) {
+        m_settings.setCustomRouting(toggled);
+    });
 }
 
 void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
@@ -570,7 +581,7 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
     case VpnProtocol::ConnectionState::Disconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::TunnelReconnecting:
+    case VpnProtocol::ConnectionState::Reconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
     case VpnProtocol::ConnectionState::Error:
@@ -663,13 +674,13 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
             customIps.append(newIp);
             m_settings.setCustomIps(customIps);
 
-            // add to routes immediatelly
-//            if (vpnStatus() == VPNStatusConnected) {
-//                //Router::Instance().routeAdd(newIp, vpnGate());
-//            }
+            if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
+                IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
+                    QStringList() << newIp);
+            }
         }
 
-        initCustomSites();
+        updateSettings();
 
         ui->lineEdit_sites_add_custom->clear();
     }
@@ -700,15 +711,19 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked()
     m_settings.setCustomIps(customIps);
 
 
-    initCustomSites();
+    updateSettings();
 
-    //Router::Instance().routeDelete(Utils::getIPAddress(ipToDelete));
-    //Router::Instance().flushDns();
+    if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
+        IpcClient::Interface()->routeDelete(ipToDelete);
+        IpcClient::Interface()->flushDns();
+    }
 }
 
-void MainWindow::initCustomSites()
+void MainWindow::updateSettings()
 {
     customSitesModel->setStringList(m_settings.customSites());
+    ui->radioButton_mode_selected_sites->setChecked(m_settings.customRouting());
+    ui->pushButton_vpn_add_site->setEnabled(m_settings.customRouting());
 }
 
 void MainWindow::updateShareCode()
@@ -721,4 +736,6 @@ void MainWindow::updateShareCode()
 
     QByteArray ba = QJsonDocument(o).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
     ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
+
+    //qDebug() << "Share code" << QJsonDocument(o).toJson();
 }

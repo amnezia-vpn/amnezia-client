@@ -8,31 +8,34 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QString &args, QObject *parent):
-    OpenVpnProtocol(args, parent)
+ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QJsonObject &configuration, QObject *parent):
+    OpenVpnProtocol(configuration, parent)
 {
-    m_shadowSocksConfig = args;
+    readShadowSocksConfiguration(configuration);
 }
 
 ErrorCode ShadowSocksVpnProtocol::start()
 {
     qDebug() << "ShadowSocksVpnProtocol::start()";
-    QJsonObject config = QJsonDocument::fromJson(m_shadowSocksConfig.toUtf8()).object();
 
-    ssProcess.setProcessChannelMode(QProcess::MergedChannels);
+    m_ssProcess.setProcessChannelMode(QProcess::MergedChannels);
 
-    ssProcess.setProgram(shadowSocksExecPath());
-    ssProcess.setArguments(QStringList() << "-s" << config.value("server").toString()
-                                 << "-p" << QString::number(config.value("server_port").toInt())
-                                 << "-l" << QString::number(config.value("local_port").toInt())
-                                 << "-m" << config.value("method").toString()
-                                 << "-k" << config.value("password").toString()
+    m_ssProcess.setProgram(shadowSocksExecPath());
+    m_ssProcess.setArguments(QStringList() << "-s" << m_shadowSocksConfig.value("server").toString()
+                                 << "-p" << QString::number(m_shadowSocksConfig.value("server_port").toInt())
+                                 << "-l" << QString::number(m_shadowSocksConfig.value("local_port").toInt())
+                                 << "-m" << m_shadowSocksConfig.value("method").toString()
+                                 << "-k" << m_shadowSocksConfig.value("password").toString()
     );
 
-    ssProcess.start();
-    ssProcess.waitForStarted();
+    connect(&m_ssProcess, &QProcess::readyRead, this, [this](){
+        qDebug().noquote() << m_ssProcess.readAll();
+    });
 
-    if (ssProcess.state() == QProcess::ProcessState::Running) {
+    m_ssProcess.start();
+    m_ssProcess.waitForStarted();
+
+    if (m_ssProcess.state() == QProcess::ProcessState::Running) {
         setConnectionState(ConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
@@ -42,8 +45,10 @@ ErrorCode ShadowSocksVpnProtocol::start()
 
 void ShadowSocksVpnProtocol::stop()
 {
+    OpenVpnProtocol::stop();
+
     qDebug() << "ShadowSocksVpnProtocol::stop()";
-    ssProcess.kill();
+    m_ssProcess.close();
 }
 
 QString ShadowSocksVpnProtocol::shadowSocksExecPath() const
@@ -55,7 +60,7 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath() const
 #endif
 }
 
-QString ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto)
+QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto)
 {
     QJsonObject ssConfig;
     ssConfig.insert("server", credentials.hostName);
@@ -64,5 +69,10 @@ QString ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials &cr
     ssConfig.insert("password", credentials.password);
     ssConfig.insert("timeout", 60);
     ssConfig.insert("method", ServerController::ssEncryption());
-    return QJsonDocument(ssConfig).toJson();
+    return ssConfig;
+}
+
+void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &configuration)
+{
+    m_shadowSocksConfig = configuration.value(config::key_shadowsocks_config_data()).toObject();
 }

@@ -1,26 +1,31 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
+#include <QJsonObject>
 
 #include <core/openvpnconfigurator.h>
 #include <core/servercontroller.h>
 
 #include "ipc.h"
+#include "core/ipcclient.h"
 #include "protocols/openvpnprotocol.h"
 #include "protocols/shadowsocksvpnprotocol.h"
 #include "utils.h"
 #include "vpnconnection.h"
-//#include "communicator.h"
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
-    QTimer::singleShot(0, [](){
+    QTimer::singleShot(0, this, [this](){
         if (!IpcClient::init()) {
             qWarning() << "Error occured when init IPC client";
+            emit serviceIsNotReady();
         }
     });
+}
 
-    //VpnProtocol::initializeCommunicator(parent);
+VpnConnection::~VpnConnection()
+{
+    m_vpnProtocol.clear();
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -30,26 +35,35 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
-//    if (state == VpnProtocol::ConnectionState::Connected){
-//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
+    if (IpcClient::Interface()) {
+        if (state == VpnProtocol::ConnectionState::Connected && IpcClient::Interface()){
+            IpcClient::Interface()->flushDns();
 
-//        // add routes
-//        const QStringList &black_custom = m_settings.customIps();
-//        qDebug() << "onConnect :: adding custom black routes, count:" << black_custom.size();
+            if (m_settings.customRouting()) {
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
+                    QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
 
+                const QStringList &black_custom = m_settings.customIps();
+                qDebug() << "onConnect :: adding custom black routes, count:" << black_custom.size();
 
-//        QStringList args;
-//        args << m_vpnProtocol->vpnGateway();
-//        args << black_custom;
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), black_custom);
+            }
+        }
+        else if (state == VpnProtocol::ConnectionState::Error || state == VpnProtocol::ConnectionState::Disconnected) {
+            IpcClient::Interface()->flushDns();
 
-//        Message m(Message::State::RoutesAddRequest, args);
-//        m_vpnProtocol->communicator()->sendMessage(m);
-//    }
-//    else if (state == VpnProtocol::ConnectionState::Error) {
-//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::ClearSavedRoutesRequest, QStringList()));
-//        m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
-//    }
+            if (m_settings.customRouting()) {
+                IpcClient::Interface()->clearSavedRoutes();
+            }
+        }
+    }
+
     emit connectionStateChanged(state);
+}
+
+QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
+{
+    return m_vpnProtocol;
 }
 
 ErrorCode VpnConnection::lastError() const
@@ -61,11 +75,12 @@ ErrorCode VpnConnection::lastError() const
     return m_vpnProtocol.data()->lastError();
 }
 
-ErrorCode VpnConnection::requestVpnConfig(const ServerCredentials &credentials, Protocol protocol)
+ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credentials, Protocol protocol)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocks) {
-        QString configData = OpenVpnConfigurator::genOpenVpnConfig(credentials, protocol, &errorCode);
+        QString openVpnConfigData = OpenVpnConfigurator::genOpenVpnConfig(credentials, protocol, &errorCode);
+        m_vpnConfiguration.insert(config::key_openvpn_config_data(), openVpnConfigData);
         if (errorCode) {
             return errorCode;
         }
@@ -73,57 +88,64 @@ ErrorCode VpnConnection::requestVpnConfig(const ServerCredentials &credentials, 
         QFile file(Utils::defaultVpnConfigFileName());
         if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
             QTextStream stream(&file);
-            stream << configData << endl;
-            return ErrorCode::NoError;
+            stream << openVpnConfigData << endl;
         }
-
-        return ErrorCode::FailedToSaveConfigData;
+        else {
+            return ErrorCode::FailedToSaveConfigData;
+        }
     }
-    else {
-        return ErrorCode::NotImplementedError;
-    }
-    return ErrorCode::NotImplementedError;
 
+    if (protocol == Protocol::ShadowSocks) {
+        QJsonObject ssConfigData = ShadowSocksVpnProtocol::genShadowSocksConfig(credentials);
+        m_vpnConfiguration.insert(config::key_shadowsocks_config_data(), ssConfigData);
+    }
+    return ErrorCode::NoError;
 }
 
 ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Protocol protocol)
 {
-    // protocol = Protocol::ShadowSocks;
+    qDebug() << "connectToVpn, CustomRouting is" << m_settings.customRouting();
+    //protocol = Protocol::ShadowSocks;
 
     // TODO: Try protocols one by one in case of Protocol::Any
     // TODO: Implement some behavior in case if connection not stable
     qDebug() << "Connect to VPN";
 
     emit connectionStateChanged(VpnProtocol::ConnectionState::Connecting);
+
+    if (m_vpnProtocol) {
+        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        m_vpnProtocol->stop();
+        m_vpnProtocol->deleteLater();
+    }
+
     qApp->processEvents();
 
     if (protocol == Protocol::Any || protocol == Protocol::OpenVpn) {
-        ErrorCode e = requestVpnConfig(credentials, Protocol::OpenVpn);
+        ErrorCode e = createVpnConfiguration(credentials, Protocol::OpenVpn);
         if (e) {
             emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
             return e;
         }
-        if (m_vpnProtocol) {
-            disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+
+        m_vpnProtocol.reset(new OpenVpnProtocol(m_vpnConfiguration));
+        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            return e;
         }
-        m_vpnProtocol.reset(new OpenVpnProtocol());
-        connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     }
     else if (protocol == Protocol::ShadowSocks) {
-        ErrorCode e = requestVpnConfig(credentials, Protocol::ShadowSocks);
+        ErrorCode e = createVpnConfiguration(credentials, Protocol::ShadowSocks);
         if (e) {
             emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
             return e;
         }
-        if (m_vpnProtocol) {
-            disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        }
 
-        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(ShadowSocksVpnProtocol::genShadowSocksConfig(credentials)));
-        connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-
+        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
     }
 
+    connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
@@ -155,20 +177,20 @@ VpnProtocol::ConnectionState VpnConnection::connectionState()
     return m_vpnProtocol->connectionState();
 }
 
-bool VpnConnection::onConnected() const
+bool VpnConnection::isConnected() const
 {
     if (!m_vpnProtocol.data()) {
         return false;
     }
 
-    return m_vpnProtocol.data()->onConnected();
+    return m_vpnProtocol.data()->isConnected();
 }
 
-bool VpnConnection::onDisconnected() const
+bool VpnConnection::isDisconnected() const
 {
     if (!m_vpnProtocol.data()) {
         return true;
     }
 
-    return m_vpnProtocol.data()->onDisconnected();
+    return m_vpnProtocol.data()->isDisconnected();
 }

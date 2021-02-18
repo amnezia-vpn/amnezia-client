@@ -1,42 +1,26 @@
 #include <QDebug>
 #include <QTimer>
 
-//#include "communicator.h"
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
 
-//Communicator* VpnProtocol::m_communicator = nullptr;
-
-VpnProtocol::VpnProtocol(const QString& args, QObject* parent)
+VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
     : QObject(parent),
       m_connectionState(ConnectionState::Unknown),
+      m_rawConfig(configuration),
       m_timeoutTimer(new QTimer(this)),
       m_receivedBytes(0),
       m_sentBytes(0)
 {
     m_timeoutTimer->setSingleShot(true);
     connect(m_timeoutTimer, &QTimer::timeout, this, &VpnProtocol::onTimeout);
-
-    Q_UNUSED(args)
 }
-
-//void VpnProtocol::initializeCommunicator(QObject* parent)
-//{
-//    if (!m_communicator) {
-//        m_communicator = new Communicator(parent);
-//    }
-//}
-
-//Communicator* VpnProtocol::communicator()
-//{
-//    return m_communicator;
-//}
 
 void VpnProtocol::setLastError(ErrorCode lastError)
 {
     m_lastError = lastError;
     if (lastError){
-        setConnectionState(ConnectionState::Disconnected);
+        setConnectionState(ConnectionState::Error);
     }
     qCritical().noquote() << "VpnProtocol error, code" << m_lastError << errorString(m_lastError);
 }
@@ -79,7 +63,12 @@ void VpnProtocol::setBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 
 void VpnProtocol::setConnectionState(VpnProtocol::ConnectionState state)
 {
+    qDebug() << "VpnProtocol::setConnectionState" << textConnectionState(state);
+
     if (m_connectionState == state) {
+        return;
+    }
+    if (m_connectionState == ConnectionState::Disconnected && state == ConnectionState::Disconnecting) {
         return;
     }
 
@@ -113,7 +102,7 @@ QString VpnProtocol::textConnectionState(ConnectionState connectionState)
     case ConnectionState::Connecting: return tr("Connecting...");
     case ConnectionState::Connected: return tr("Connected");
     case ConnectionState::Disconnecting: return tr("Disconnecting...");
-    case ConnectionState::TunnelReconnecting: return tr("Reconnecting...");
+    case ConnectionState::Reconnecting: return tr("Reconnecting...");
     case ConnectionState::Error: return tr("Error");
     default:
         ;
@@ -127,12 +116,12 @@ QString VpnProtocol::textConnectionState() const
     return textConnectionState(m_connectionState);
 }
 
-bool VpnProtocol::onConnected() const
+bool VpnProtocol::isConnected() const
 {
     return m_connectionState == ConnectionState::Connected;
 }
 
-bool VpnProtocol::onDisconnected() const
+bool VpnProtocol::isDisconnected() const
 {
     return m_connectionState == ConnectionState::Disconnected;
 }

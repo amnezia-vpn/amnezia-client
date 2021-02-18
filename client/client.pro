@@ -19,7 +19,6 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
-    message.h \
     protocols/shadowsocksvpnprotocol.h \
     runguard.h \
     settings.h \
@@ -37,7 +36,6 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
-    message.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
     runguard.cpp \
     settings.cpp \
