@@ -8,6 +8,7 @@ class ShadowSocksVpnProtocol : public OpenVpnProtocol
 {
 public:
     ShadowSocksVpnProtocol(const QJsonObject& configuration, QObject* parent = nullptr);
+    virtual ~ShadowSocksVpnProtocol() override;
 
     ErrorCode start() override;
     void stop() override;

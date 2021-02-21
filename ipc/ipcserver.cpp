@@ -55,27 +55,27 @@ int IpcServer::createPrivilegedProcess()
 
 bool IpcServer::routeAdd(const QString &ip, const QString &gw, const QString &mask)
 {
-    return Router::Instance().routeAdd(ip, gw, mask);
+    return Router::routeAdd(ip, gw, mask);
 }
 
 int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
 {
-    return Router::Instance().routeAddList(gw, ips);
+    return Router::routeAddList(gw, ips);
 }
 
 bool IpcServer::clearSavedRoutes()
 {
-    return Router::Instance().clearSavedRoutes();
+    return Router::clearSavedRoutes();
 }
 
 bool IpcServer::routeDelete(const QString &ip)
 {
-    return Router::Instance().routeDelete(ip);
+    return Router::routeDelete(ip);
 }
 
 void IpcServer::flushDns()
 {
-    return Router::Instance().flushDns();
+    return Router::flushDns();
 }
 
 bool IpcServer::checkAndInstallDriver()

@@ -56,6 +56,7 @@ enum ErrorCode
     // Distro errors
     OpenVpnExecutableMissing,
     EasyRsaExecutableMissing,
+    ShadowSocksExecutableMissing,
     AmneziaServiceConnectionFailed,
 
     // VPN errors

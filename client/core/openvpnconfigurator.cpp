@@ -237,6 +237,9 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     config.replace("$PRIV_KEY", connData.privKey);
     config.replace("$TA_KEY", connData.taKey);
 
+#ifdef Q_OS_MAC
+    config.replace("block-outside-dns", "");
+#endif
     //qDebug().noquote() << config;
     return config;
 }

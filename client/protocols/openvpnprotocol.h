@@ -47,7 +47,7 @@ private:
 
 private:
     void updateRouteGateway(QString line);
-    void updateVpnGateway();
+    void updateVpnGateway(const QString &line);
 
     QSharedPointer<IpcProcessInterfaceReplica> m_openVpnProcess;
 };

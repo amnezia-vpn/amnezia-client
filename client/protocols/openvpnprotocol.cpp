@@ -104,12 +104,13 @@ void OpenVpnProtocol::sendManagementCommand(const QString& command)
     QIODevice *device = dynamic_cast<QIODevice*>(m_managementServer.socket().data());
     if (device) {
         QTextStream stream(device);
-        stream << command << endl;
+        stream << command << Qt::endl;
     }
 }
 
 void OpenVpnProtocol::updateRouteGateway(QString line)
 {
+    // TODO: fix for macos
     line = line.split("ROUTE_GATEWAY", QString::SkipEmptyParts).at(1);
     if (!line.contains("/")) return;
     m_routeGateway = line.split("/", QString::SkipEmptyParts).first();
@@ -229,7 +230,6 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             if (line.contains("CONNECTED,SUCCESS")) {
                 sendByteCount();
                 stopTimeoutTimer();
-                updateVpnGateway();
                 setConnectionState(VpnProtocol::ConnectionState::Connected);
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
@@ -244,6 +244,10 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
 
         if (line.contains("ROUTE_GATEWAY")) {
             updateRouteGateway(line);
+        }
+
+        if (line.contains("PUSH: Received control message")) {
+            updateVpnGateway(line);
         }
 
         if (line.contains("FATAL")) {
@@ -272,46 +276,61 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
     }
 }
 
-void OpenVpnProtocol::updateVpnGateway()
+void OpenVpnProtocol::updateVpnGateway(const QString &line)
 {
-    QProcess ipconfig;
-    ipconfig.start("ipconfig", QStringList() << "/all");
-    ipconfig.waitForStarted();
-    ipconfig.waitForFinished();
+    // line looks like
+    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
 
-    QString d = ipconfig.readAll();
-    d.replace("\r", "");
-    //qDebug().noquote() << d;
+    QStringList params = line.split(",");
+    for (const QString &l : params) {
+        if (l.contains("ifconfig")) {
+            if (l.split(" ").size() == 3) {
+                m_vpnAddress = l.split(" ").at(1);
+                m_vpnGateway = l.split(" ").at(2);
 
-    QStringList adapters = d.split(":\n");
-
-    bool isTapV9Present = false;
-    QString tapV9;
-    for (int i = 0; i < adapters.size(); ++i) {
-        if (adapters.at(i).contains("TAP-Windows Adapter V9")) {
-            isTapV9Present = true;
-            tapV9 = adapters.at(i);
-            break;
+                qDebug() << QString("Set vpn address %1, gw %2").arg(m_vpnAddress).arg(vpnGateway());
+            }
         }
     }
-    if (!isTapV9Present) {
-        m_vpnGateway = "";
-    }
 
-    QStringList lines = tapV9.split("\n");
-    for (int i = 0; i < lines.size(); ++i) {
-        if (!lines.at(i).contains("DHCP")) continue;
+//    QProcess ipconfig;
+//    ipconfig.start("ipconfig", QStringList() << "/all");
+//    ipconfig.waitForStarted();
+//    ipconfig.waitForFinished();
 
-        QRegularExpression re("(: )([\\d\\.]+)($)");
-        QRegularExpressionMatch match = re.match(lines.at(i));
+//    QString d = ipconfig.readAll();
+//    d.replace("\r", "");
+//    //qDebug().noquote() << d;
 
-        if (match.hasMatch()) {
-            qDebug().noquote() << "Current VPN Gateway IP Address: " << match.captured(0);
-            m_vpnGateway = match.captured(2);
-            return;
-        }
-        else continue;
-    }
+//    QStringList adapters = d.split(":\n");
 
-    m_vpnGateway = "";
+//    bool isTapV9Present = false;
+//    QString tapV9;
+//    for (int i = 0; i < adapters.size(); ++i) {
+//        if (adapters.at(i).contains("TAP-Windows Adapter V9")) {
+//            isTapV9Present = true;
+//            tapV9 = adapters.at(i);
+//            break;
+//        }
+//    }
+//    if (!isTapV9Present) {
+//        m_vpnGateway = "";
+//    }
+
+//    QStringList lines = tapV9.split("\n");
+//    for (int i = 0; i < lines.size(); ++i) {
+//        if (!lines.at(i).contains("DHCP")) continue;
+
+//        QRegularExpression re("(: )([\\d\\.]+)($)");
+//        QRegularExpressionMatch match = re.match(lines.at(i));
+
+//        if (match.hasMatch()) {
+//            qDebug().noquote() << "Current VPN Gateway IP Address: " << match.captured(0);
+//            m_vpnGateway = match.captured(2);
+//            return;
+//        }
+//        else continue;
+//    }
+
+//    m_vpnGateway = "";
 }

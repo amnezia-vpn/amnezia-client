@@ -55,6 +55,7 @@ protected:
 
     ConnectionState m_connectionState;
     QString m_routeGateway;
+    QString m_vpnAddress;
     QString m_vpnGateway;
 
     QJsonObject m_rawConfig;

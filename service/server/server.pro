@@ -25,10 +25,12 @@ SOURCES = \
 
 win32 {
 HEADERS += \
-        tapcontroller_win.h
+        tapcontroller_win.h \
+        router_win.h
 
 SOURCES += \
-        tapcontroller_win.cpp
+        tapcontroller_win.cpp \
+        router_win.cpp
 
 LIBS += \
         -luser32 \
@@ -38,6 +40,14 @@ LIBS += \
         -lws2_32 \
         -liphlpapi \
         -lgdi32
+}
+
+macx {
+HEADERS += \
+    router_mac.h
+
+SOURCES += \
+    router_mac.cpp
 }
 
 include(../src/qtservice.pri)

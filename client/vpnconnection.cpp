@@ -105,7 +105,7 @@ ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credent
 ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Protocol protocol)
 {
     qDebug() << "connectToVpn, CustomRouting is" << m_settings.customRouting();
-    //protocol = Protocol::ShadowSocks;
+    protocol = Protocol::ShadowSocks;
 
     // TODO: Try protocols one by one in case of Protocol::Any
     // TODO: Implement some behavior in case if connection not stable

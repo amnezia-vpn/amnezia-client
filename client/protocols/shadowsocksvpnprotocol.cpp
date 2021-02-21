@@ -14,6 +14,12 @@ ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QJsonObject &configuration,
     readShadowSocksConfiguration(configuration);
 }
 
+ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
+{
+    qDebug() << "ShadowSocksVpnProtocol::stop()";
+    ShadowSocksVpnProtocol::stop();
+}
+
 ErrorCode ShadowSocksVpnProtocol::start()
 {
     qDebug() << "ShadowSocksVpnProtocol::start()";
@@ -40,7 +46,7 @@ ErrorCode ShadowSocksVpnProtocol::start()
 
         return OpenVpnProtocol::start();
     }
-    else return ErrorCode::FailedToStartRemoteProcessError;
+    else return ErrorCode::ShadowSocksExecutableMissing;
 }
 
 void ShadowSocksVpnProtocol::stop()
