@@ -65,6 +65,8 @@ cd %PROJECT_DIR%
 cd %WORK_DIR%
 set CL=/MP
 nmake /A /NOLOGO
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 nmake clean
 rem if not exist "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%" break
 

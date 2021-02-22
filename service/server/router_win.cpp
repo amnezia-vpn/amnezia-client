@@ -274,7 +274,7 @@ bool RouterWin::clearSavedRoutes()
     return true;
 }
 
-bool RouterWin:routeDelete(const QString &ip)
+bool RouterWin::routeDelete(const QString &ip)
 {
     qDebug().noquote() << QString("ROUTE DELETE, IP: %1").arg(ip);
 

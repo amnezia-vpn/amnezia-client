@@ -263,7 +263,6 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
     s.replace("vpn://", "");
     QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8())).object();
 
-    qDebug().noquote() << QByteArray::fromBase64(s.toUtf8());
     ServerCredentials credentials;
     credentials.hostName = o.value("h").toString();
     credentials.port = o.value("p").toInt();
