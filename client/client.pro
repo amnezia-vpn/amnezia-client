@@ -21,7 +21,6 @@ HEADERS  += \
     defines.h \
     managementserver.h \
     protocols/shadowsocksvpnprotocol.h \
-    runguard.h \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
     ui/mainwindow.h \
@@ -39,7 +38,6 @@ SOURCES  += \
     main.cpp \
     managementserver.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
-    runguard.cpp \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
     ui/mainwindow.cpp \

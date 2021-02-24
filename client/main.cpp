@@ -6,12 +6,9 @@
 
 #include "debug.h"
 #include "defines.h"
-#include "runguard.h"
+#include "singleapplication.h"
 
 #include "ui/mainwindow.h"
-
-#define QAPPLICATION_CLASS QApplication
-#include "singleapplication.h"
 
 #ifdef Q_OS_WIN
 #include "Windows.h"
@@ -28,7 +25,6 @@ static void loadTranslator()
 int main(int argc, char *argv[])
 {
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    //RunGuard::instance(APPLICATION_NAME).activate();
 
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(ASFW_ANY);
@@ -41,12 +37,6 @@ int main(int argc, char *argv[])
 #endif
 
     loadTranslator();
-
-//    if (!RunGuard::instance().tryToRun()) {
-//        qDebug() << "Tried to run second instance. Exiting...";
-//        QMessageBox::information(NULL, QObject::tr("Notification"), QObject::tr("AmneziaVPN is already running."));
-//        return 0;
-//    }
 
     QFontDatabase::addApplicationFont(":/fonts/Lato-Black.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-BlackItalic.ttf");
