@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef Q_OS_MAC
     ui->widget_tittlebar->hide();
+    resize(width(), height() - ui->stackedWidget_main->y());
     ui->stackedWidget_main->move(0,0);
     fixWidget(this);
 #endif
@@ -465,9 +466,11 @@ void MainWindow::onPushButtonConnectClicked(bool checked)
 void MainWindow::setupTray()
 {
     m_menu = new QMenu();
-    //m_menu->setStyleSheet(styleSheet());
 
-    m_menu->addAction(QIcon(":/images/tray/application.png"), tr("Show") + " " + APPLICATION_NAME, this, SLOT(show()));
+    m_menu->addAction(QIcon(":/images/tray/application.png"), tr("Show") + " " + APPLICATION_NAME, this, [this](){
+        show();
+        raise();
+    });
     m_menu->addSeparator();
     m_trayActionConnect = m_menu->addAction(tr("Connect"), this, SLOT(onConnect()));
     m_trayActionDisconnect = m_menu->addAction(tr("Disconnect"), this, SLOT(onDisconnect()));
