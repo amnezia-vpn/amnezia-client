@@ -8,6 +8,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/ssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
+include("3rd/SingleApplication/singleapplication.pri")
 
 HEADERS  += \
     ../ipc/ipc.h \

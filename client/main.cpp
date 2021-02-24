@@ -10,6 +10,13 @@
 
 #include "ui/mainwindow.h"
 
+#define QAPPLICATION_CLASS QApplication
+#include "singleapplication.h"
+
+#ifdef Q_OS_WIN
+#include "Windows.h"
+#endif
+
 static void loadTranslator()
 {
     QTranslator* translator = new QTranslator;
@@ -21,16 +28,25 @@ static void loadTranslator()
 int main(int argc, char *argv[])
 {
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    RunGuard::instance(APPLICATION_NAME).activate();
+    //RunGuard::instance(APPLICATION_NAME).activate();
 
-    QApplication app(argc, argv);
+#ifdef Q_OS_WIN
+    AllowSetForegroundWindow(ASFW_ANY);
+#endif
+
+    SingleApplication app(argc, argv);
+
+#ifdef Q_OS_WIN
+    AllowSetForegroundWindow(0);
+#endif
+
     loadTranslator();
 
-    if (!RunGuard::instance().tryToRun()) {
-        qDebug() << "Tried to run second instance. Exiting...";
-        QMessageBox::information(NULL, QObject::tr("Notification"), QObject::tr("AmneziaVPN is already running."));
-        return 0;
-    }
+//    if (!RunGuard::instance().tryToRun()) {
+//        qDebug() << "Tried to run second instance. Exiting...";
+//        QMessageBox::information(NULL, QObject::tr("Notification"), QObject::tr("AmneziaVPN is already running."));
+//        return 0;
+//    }
 
     QFontDatabase::addApplicationFont(":/fonts/Lato-Black.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-BlackItalic.ttf");
@@ -64,6 +80,13 @@ int main(int argc, char *argv[])
 
     MainWindow mainWindow;
     mainWindow.show();
+
+    if (app.isPrimary()) {
+        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
+            mainWindow.show();
+            mainWindow.raise();
+        });
+    }
 
     return app.exec();
 }
