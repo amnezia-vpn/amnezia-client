@@ -254,7 +254,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>8</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -1899,8 +1899,8 @@ QPushButton:hover {
       <widget class="QLabel" name="label_26">
        <property name="geometry">
         <rect>
-         <x>120</x>
-         <y>600</y>
+         <x>110</x>
+         <y>590</y>
          <width>150</width>
          <height>22</height>
         </rect>
@@ -2532,6 +2532,22 @@ Provide this code only to TRUSTED users.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_29">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>590</y>
+         <width>150</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
