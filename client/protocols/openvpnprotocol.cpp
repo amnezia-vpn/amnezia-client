@@ -4,7 +4,6 @@
 #include <QRegularExpression>
 #include <QTcpSocket>
 
-//#include "communicator.h"
 #include "debug.h"
 #include "openvpnprotocol.h"
 #include "utils.h"
@@ -189,7 +188,6 @@ ErrorCode OpenVpnProtocol::start()
 
     m_openVpnProcess->start();
 
-    //m_communicator->sendMessage(Message(Message::State::StartRequest, args));
     //startTimeoutTimer();
 
     return ErrorCode::NoError;

@@ -11,11 +11,10 @@
 #include <QThread>
 #include <QTimer>
 
-//#include "communicator.h"
-
 #include "core/errorstrings.h"
 #include "core/openvpnconfigurator.h"
 #include "core/servercontroller.h"
+#include "ui/qautostart.h"
 
 #include "debug.h"
 #include "defines.h"
@@ -74,7 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateSettings();
 
     //ui->pushButton_general_settings_exit->hide();
-    //ui->pushButton_share_connection->hide();
 
     setFixedSize(width(),height());
 
@@ -90,7 +88,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     onConnectionStateChanged(VpnProtocol::ConnectionState::Disconnected);
 
+    if (m_settings.isAutoConnect() && m_settings.haveAuthData()) {
+        QTimer::singleShot(1000, this, [this](){
+            ui->pushButton_connect->setEnabled(false);
+            onConnect();
+        });
+    }
+
     qDebug().noquote() << QString("Default config: %1").arg(Utils::defaultVpnConfigFileName());
+
+    m_ipAddressValidator.setRegExp(QRegExp("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$"));
+
+    ui->lineEdit_new_server_ip->setValidator(&m_ipAddressValidator);
+    ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
+    ui->lineEdit_network_settings_dns2->setValidator(&m_ipAddressValidator);
 }
 
 MainWindow::~MainWindow()
@@ -146,6 +157,8 @@ QWidget *MainWindow::getPageWidget(MainWindow::Page page)
     case(Page::NewServer): return ui->page_new_server;
     case(Page::Vpn): return ui->page_vpn;
     case(Page::GeneralSettings): return ui->page_general_settings;
+    case(Page::AppSettings): return ui->page_app_settings;
+    case(Page::NetworkSettings): return ui->page_network_settings;
     case(Page::ServerSettings): return ui->page_server_settings;
     case(Page::ShareConnection): return ui->page_share_connection;
     case(Page::Sites): return ui->page_sites;
@@ -525,6 +538,8 @@ void MainWindow::setupUiConnections()
 
     connect(ui->pushButton_vpn_add_site, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
     connect(ui->pushButton_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+    connect(ui->pushButton_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::AppSettings); });
+    connect(ui->pushButton_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::NetworkSettings); });
     connect(ui->pushButton_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
     connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
         goToPage(Page::ShareConnection);
@@ -535,7 +550,7 @@ void MainWindow::setupUiConnections()
         QGuiApplication::clipboard()->setText(ui->textEdit_sharing_code->toPlainText());
         ui->pushButton_copy_sharing_code->setText(tr("Copied"));
 
-        QTimer::singleShot(3000, [this]() {
+        QTimer::singleShot(3000, this, [this]() {
             ui->pushButton_copy_sharing_code->setText(tr("Copy"));
         });
     });
@@ -544,6 +559,8 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
     connect(ui->pushButton_back_from_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
     connect(ui->pushButton_back_from_new_server, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
+    connect(ui->pushButton_back_from_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+    connect(ui->pushButton_back_from_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
     connect(ui->pushButton_back_from_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
     connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
 
@@ -555,6 +572,38 @@ void MainWindow::setupUiConnections()
     connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, this, [this](bool toggled) {
         m_settings.setCustomRouting(toggled);
     });
+
+    connect(ui->checkBox_autostart, &QCheckBox::stateChanged, this, [this](int state){
+        if (state == Qt::Unchecked) {
+            ui->checkBox_autoconnect->setChecked(false);
+        }
+        Autostart::setAutostart(state == Qt::Checked);
+    });
+
+    connect(ui->checkBox_autoconnect, &QCheckBox::stateChanged, this, [this](int state){
+        m_settings.setAutoConnect(state == Qt::Checked);
+    });
+
+    connect(ui->pushButton_network_settings_resetdns1, &QPushButton::clicked, this, [this](){
+        m_settings.setPrimaryDns(m_settings.cloudFlareNs1());
+        updateSettings();
+    });
+    connect(ui->pushButton_network_settings_resetdns2, &QPushButton::clicked, this, [this](){
+        m_settings.setPrimaryDns(m_settings.cloudFlareNs2());
+        updateSettings();
+    });
+
+    connect(ui->lineEdit_network_settings_dns1, &QLineEdit::textEdited, this, [this](const QString &newText){
+         if (m_ipAddressValidator.regExp().exactMatch(newText)) {
+             m_settings.setPrimaryDns(newText);
+         }
+    });
+    connect(ui->lineEdit_network_settings_dns2, &QLineEdit::textEdited, this, [this](const QString &newText){
+         if (m_ipAddressValidator.regExp().exactMatch(newText)) {
+             m_settings.setSecondaryDns(newText);
+         }
+    });
+
 }
 
 void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
@@ -723,6 +772,12 @@ void MainWindow::updateSettings()
     customSitesModel->setStringList(m_settings.customSites());
     ui->radioButton_mode_selected_sites->setChecked(m_settings.customRouting());
     ui->pushButton_vpn_add_site->setEnabled(m_settings.customRouting());
+
+    ui->checkBox_autostart->setChecked(Autostart::isAutostart());
+    ui->checkBox_autoconnect->setChecked(m_settings.isAutoConnect());
+
+    ui->lineEdit_network_settings_dns1->setText(m_settings.primaryDns());
+    ui->lineEdit_network_settings_dns2->setText(m_settings.secondaryDns());
 }
 
 void MainWindow::updateShareCode()

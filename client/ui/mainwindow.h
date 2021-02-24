@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QRegExpValidator>
 #include <QStringListModel>
 #include <QSystemTrayIcon>
 
@@ -35,7 +36,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    enum Page {Start, NewServer, Vpn, GeneralSettings, ServerSettings, ShareConnection,  Sites};
+    enum Page {Start, NewServer, Vpn, GeneralSettings, AppSettings, NetworkSettings, ServerSettings, ShareConnection,  Sites};
     Q_ENUM(Page)
 
 private slots:
@@ -90,6 +91,7 @@ private:
     QMenu* m_menu;
 
     QStringListModel *customSitesModel = nullptr;
+    QRegExpValidator m_ipAddressValidator;
 
     bool canMove = false;
     QPoint offset;

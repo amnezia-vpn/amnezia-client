@@ -34,6 +34,9 @@ public:
     void setServerCredentials(const ServerCredentials &credentials);
     bool haveAuthData() const;
 
+    bool isAutoConnect() const { return m_settings.value("Conf/autoConnect", QString()).toBool(); }
+    void setAutoConnect(bool enabled) { m_settings.setValue("Conf/autoConnect", enabled); }
+
     bool customRouting() const { return m_settings.value("Conf/customRouting", false).toBool(); }
     void setCustomRouting(bool customRouting) { m_settings.setValue("Conf/customRouting", customRouting); }
 

@@ -49,7 +49,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), black_custom);
             }
         }
-        else if (state == VpnProtocol::ConnectionState::Error || state == VpnProtocol::ConnectionState::Disconnected) {
+        else if (state == VpnProtocol::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
             if (m_settings.customRouting()) {
@@ -162,8 +162,11 @@ void VpnConnection::disconnectFromVpn()
 {
     qDebug() << "Disconnect from VPN";
 
-//    m_vpnProtocol->communicator()->sendMessage(Message(Message::State::ClearSavedRoutesRequest, QStringList()));
-//    m_vpnProtocol->communicator()->sendMessage(Message(Message::State::FlushDnsRequest, QStringList()));
+    IpcClient::Interface()->flushDns();
+
+    if (m_settings.customRouting()) {
+        IpcClient::Interface()->clearSavedRoutes();
+    }
 
     if (!m_vpnProtocol.data()) {
         return;

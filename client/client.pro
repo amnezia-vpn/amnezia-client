@@ -24,6 +24,7 @@ HEADERS  += \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
     ui/mainwindow.h \
+   ui/qautostart.h \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
@@ -41,6 +42,7 @@ SOURCES  += \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
     ui/mainwindow.cpp \
+   ui/qautostart.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
