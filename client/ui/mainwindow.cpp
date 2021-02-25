@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug().noquote() << QString("Default config: %1").arg(Utils::defaultVpnConfigFileName());
 
-    m_ipAddressValidator.setRegExp(QRegExp("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$"));
+    m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
 
     ui->lineEdit_new_server_ip->setValidator(&m_ipAddressValidator);
     ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
@@ -311,6 +311,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
 
 
     ErrorCode e = ServerController::setupServer(credentials, Protocol::Any);
+    qDebug() << "Setup server finished with code" << e;
     if (e) {
         page->setEnabled(true);
         button->setVisible(true);
