@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QLabel>
+#include <QListWidget>
 #include <QMainWindow>
 #include <QProgressBar>
 #include <QPushButton>
@@ -53,7 +54,7 @@ private slots:
     void onPushButtonForgetServer(bool);
 
     void onPushButtonAddCustomSitesClicked();
-    void onPushButtonDeleteCustomSiteClicked();
+    void onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete);
 
     void onTrayActionConnect(); // connect from context menu
     void setTrayState(VpnProtocol::ConnectionState state);
@@ -78,7 +79,7 @@ private:
     void updateSettings();
 
     void updateShareCode();
-
+    void makeSitesListItem(QListWidget* listWidget, const QString &address);
 
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
@@ -90,7 +91,6 @@ private:
     QSystemTrayIcon m_tray;
     QMenu* m_menu;
 
-    QStringListModel *customSitesModel = nullptr;
     QRegExpValidator m_ipAddressValidator;
 
     bool canMove = false;

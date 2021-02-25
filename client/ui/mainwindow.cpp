@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
@@ -61,12 +62,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setupTray();
     setupUiConnections();
 
-    customSitesModel = new QStringListModel();
-    ui->listView_sites_custom->setModel(customSitesModel);
-
-    connect(ui->listView_sites_custom, &QListView::doubleClicked, [&](const QModelIndex &index){
-        QDesktopServices::openUrl("https://" + index.data().toString());
-    });
     connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
         ui->pushButton_sites_add_custom->click();
     });
@@ -569,7 +564,6 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
 
     connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
-    connect(ui->pushButton_sites_delete_custom, &QPushButton::clicked, this, [this](){ onPushButtonDeleteCustomSiteClicked(); });
 
     connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, ui->pushButton_vpn_add_site, &QPushButton::setEnabled);
 
@@ -741,11 +735,8 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
     }
 }
 
-void MainWindow::onPushButtonDeleteCustomSiteClicked()
+void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete)
 {
-    QModelIndex index = ui->listView_sites_custom->currentIndex();
-    QString siteToDelete = index.data(Qt::DisplayRole).toString();
-
     if (siteToDelete.isEmpty()) {
         return;
     }
@@ -762,7 +753,6 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked()
     qDebug() << "Deleted custom ip:" << ipToDelete;
     m_settings.setCustomIps(customIps);
 
-
     updateSettings();
 
     if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
@@ -773,7 +763,6 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked()
 
 void MainWindow::updateSettings()
 {
-    customSitesModel->setStringList(m_settings.customSites());
     ui->radioButton_mode_selected_sites->setChecked(m_settings.customRouting());
     ui->pushButton_vpn_add_site->setEnabled(m_settings.customRouting());
 
@@ -782,6 +771,12 @@ void MainWindow::updateSettings()
 
     ui->lineEdit_network_settings_dns1->setText(m_settings.primaryDns());
     ui->lineEdit_network_settings_dns2->setText(m_settings.secondaryDns());
+
+
+    ui->listWidget_sites->clear();
+    for(const QString &site : m_settings.customSites()) {
+        makeSitesListItem(ui->listWidget_sites, site);
+    }
 }
 
 void MainWindow::updateShareCode()
@@ -796,4 +791,33 @@ void MainWindow::updateShareCode()
     ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
 
     //qDebug() << "Share code" << QJsonDocument(o).toJson();
+}
+
+void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &address)
+{
+    QSize size(330, 25);
+    QWidget* widget = new QWidget;
+    widget->resize(size);
+
+    QLabel *label = new QLabel(address, widget);
+    label->resize(size);
+
+    QPushButton* btn = new QPushButton(widget);
+    btn->resize(size);
+
+    QPushButton* btn1 = new QPushButton(widget);
+    btn1->resize(30, 25);
+    btn1->move(300, 0);
+    btn1->setCursor(QCursor(Qt::PointingHandCursor));
+
+    connect(btn1, &QPushButton::clicked, this, [this, label]() {
+        onPushButtonDeleteCustomSiteClicked(label->text());
+        return;
+    });
+
+    QListWidgetItem* item = new QListWidgetItem(listWidget);
+    item->setSizeHint(size);
+    listWidget->setItemWidget(item, widget);
+
+    widget->setStyleSheet(styleSheet());
 }

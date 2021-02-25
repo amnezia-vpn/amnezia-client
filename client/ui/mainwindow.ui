@@ -254,7 +254,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>8</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -1175,22 +1175,6 @@ background: rgba(167, 167, 167, 0.1);
 color: #181922;
 }</string>
       </property>
-      <widget class="QListView" name="listView_sites">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>381</width>
-         <height>0</height>
-        </rect>
-       </property>
-       <property name="cursor" stdset="0">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-      </widget>
       <widget class="QPushButton" name="pushButton_back_from_sites">
        <property name="geometry">
         <rect>
@@ -1273,22 +1257,6 @@ color: #100A44;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QListView" name="listView_sites_custom">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>200</y>
-         <width>341</width>
-         <height>361</height>
-        </rect>
-       </property>
-       <property name="cursor" stdset="0">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-      </widget>
       <widget class="QLineEdit" name="lineEdit_sites_add_custom">
        <property name="geometry">
         <rect>
@@ -1354,28 +1322,6 @@ background: #211966;
         <string>+</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_sites_delete_custom">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>90</x>
-         <y>584</y>
-         <width>201</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: #181922;</string>
-       </property>
-       <property name="text">
-        <string>Delete selected site</string>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
@@ -1399,6 +1345,49 @@ color: #333333;</string>
        </property>
        <property name="text">
         <string>Web site or hostname or IP address</string>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="listWidget_sites">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>200</y>
+         <width>340</width>
+         <height>400</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget {
+	margin: 0px;
+	padding: 0px;
+}
+
+QPushButton:hover {
+	image: url(:/images/close.png);
+    image-position: right center;
+}
+
+QListView {
+    show-decoration-selected: 1; /* make the selection span the entire width of the view */
+}
+
+QListView::item:selected:!active {
+    background: transparent;
+    border: none;
+}
+
+QListView::item:selected:active {
+    background: transparent;
+    border: none;
+}
+
+QListView::item:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #FAFBFE, stop: 1 #ECEEFF);
+}</string>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
        </property>
       </widget>
      </widget>
