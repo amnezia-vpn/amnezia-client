@@ -795,7 +795,7 @@ void MainWindow::updateShareCode()
 
 void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &address)
 {
-    QSize size(330, 25);
+    QSize size(310, 25);
     QWidget* widget = new QWidget;
     widget->resize(size);
 
@@ -807,7 +807,7 @@ void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &addre
 
     QPushButton* btn1 = new QPushButton(widget);
     btn1->resize(30, 25);
-    btn1->move(300, 0);
+    btn1->move(280, 0);
     btn1->setCursor(QCursor(Qt::PointingHandCursor));
 
     connect(btn1, &QPushButton::clicked, this, [this, label]() {
