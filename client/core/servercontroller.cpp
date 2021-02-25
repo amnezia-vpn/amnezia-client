@@ -25,8 +25,8 @@ QString ServerController::getContainerName(DockerContainer container)
 
 ErrorCode ServerController::runScript(DockerContainer container,
     const SshConnectionParameters &sshParams, QString script,
-    const std::function<void(const QString &)> &cbReadStdOut,
-    const std::function<void(const QString &)> &cbReadStdErr)
+    const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
+    const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
 
@@ -74,7 +74,7 @@ ErrorCode ServerController::runScript(DockerContainer container,
             if (s != "." && !s.isEmpty()) {
                 qDebug().noquote() << "stdout" << s;
             }
-            if (cbReadStdOut) cbReadStdOut(s);
+            if (cbReadStdOut) cbReadStdOut(s, proc);
         });
 
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, &wait, [proc, cbReadStdErr](){
@@ -82,7 +82,7 @@ ErrorCode ServerController::runScript(DockerContainer container,
             if (s != "." && !s.isEmpty()) {
                 qDebug().noquote() << "stderr" << s;
             }
-            if (cbReadStdErr) cbReadStdErr(s);
+            if (cbReadStdErr) cbReadStdErr(s, proc);
         });
 
         proc->start();
@@ -124,9 +124,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     QEventLoop wait;
     int exitStatus = -1;
 
-    //    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-    //        qDebug() << "Command started";
-    //    });
+//    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
+//        qDebug() << "uploadTextFileToContainer started";
+//    });
 
     QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
         //qDebug() << "Remote process exited with status" << status;
@@ -143,7 +143,6 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     });
 
     proc->start();
-    //wait.exec();
 
     if (exitStatus < 0) {
         wait.exec();
@@ -309,7 +308,8 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
 ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Protocol proto)
 {
     if (proto == Protocol::OpenVpn) {
-        return setupOpenVpnServer(credentials);
+        return ErrorCode::NoError;
+        //return setupOpenVpnServer(credentials);
     }
     else if (proto == Protocol::ShadowSocks) {
         return setupShadowSocksServer(credentials);
@@ -318,7 +318,7 @@ ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Pr
         //return ErrorCode::NotImplementedError;
 
         // TODO: run concurently
-        setupOpenVpnServer(credentials);
+        //setupOpenVpnServer(credentials);
         setupShadowSocksServer(credentials);
     }
 
@@ -336,10 +336,14 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data) {
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
         stdOut += data + "\n";
+
+        if (data.contains("Automatically restart Docker daemon?")) {
+            proc->write("yes\n");
+        }
     };
-    auto cbReadStdErr = [&](const QString &data) {
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
         stdOut += data + "\n";
     };
 
@@ -364,7 +368,19 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     scriptData = file.readAll();
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
-    ErrorCode e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), scriptData);
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+
+        if (data.contains("Automatically restart Docker daemon?")) {
+            proc->write("yes\n");
+        }
+    };
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+
+    ErrorCode e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
     if (e) return e;
 
     // Create ss config
@@ -385,7 +401,7 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     uploadTextFileToContainer(DockerContainer::ShadowSocks, credentials, configData, sSConfigPath);
 
     // Start ss
-    QString script = QString("docker exec -i %1 sh -c \"ss-server -c %2 &\"").
+    QString script = QString("docker exec -d %1 sh -c \"ss-server -c %2\"").
             arg(getContainerName(DockerContainer::ShadowSocks)).arg(sSConfigPath);
 
     e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), script);

@@ -1,4 +1,5 @@
-#CONTAINER_NAME=... this var will be set in ServerController
+# CONTAINER_NAME=... this var will be set in ServerController
+# Don't run commands in background like sh -c "openvpn &"
 
 apt-get update
 

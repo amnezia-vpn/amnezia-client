@@ -116,10 +116,11 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
-        m_vpnProtocol->deleteLater();
+        m_vpnProtocol.reset();
+        //m_vpnProtocol->deleteLater();
     }
 
-    qApp->processEvents();
+    //qApp->processEvents();
 
     if (protocol == Protocol::Any || protocol == Protocol::OpenVpn) {
         ErrorCode e = createVpnConfiguration(credentials, Protocol::OpenVpn);
@@ -143,6 +144,11 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
         }
 
         m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
+        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            return e;
+        }
     }
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
