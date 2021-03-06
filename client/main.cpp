@@ -3,6 +3,7 @@
 #include <QCommandLineParser>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QTimer>
 
 #include "debug.h"
 #include "defines.h"
@@ -30,8 +31,14 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
-    SingleApplication app(argc, argv);
+    SingleApplication app(argc, argv, true, SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
 
+    if (!app.isPrimary()) {
+        QTimer::singleShot(1000, &app, [&](){
+            app.quit();
+        });
+        return app.exec();
+    }
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
 #endif
@@ -73,7 +80,9 @@ int main(int argc, char *argv[])
 
     if (app.isPrimary()) {
         QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
+            qDebug() << "Secondary instance started, showing this window instead";
             mainWindow.show();
+            mainWindow.showNormal();
             mainWindow.raise();
         });
     }
