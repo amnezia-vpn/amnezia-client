@@ -25,12 +25,17 @@ QString OpenVpnConfigurator::getEasyRsaShPath()
     // easyrsa sh path should looks like
     // "/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa"
     QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-    easyRsaShPath.replace("C:\\", "");
-    easyRsaShPath.replace("\\", "/");
-    easyRsaShPath.prepend("/");
+//    easyRsaShPath.replace("C:\\", "/cygdrive/c/");
+//    easyRsaShPath.replace("\\", "/");
+    easyRsaShPath = "\"" + easyRsaShPath + "\"";
 
-    //return "\"" + easyRsaShPath + "\"";
-    return "\"/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
+//    easyRsaShPath = "\"/cygdrive/c/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
+
+//    easyRsaShPath = "\"C:\\Program Files (x86)\\AmneziaVPN\\easyrsa\\easyrsa\"";
+    qDebug().noquote() << "EasyRsa sh path" << easyRsaShPath;
+
+    return easyRsaShPath;
+//    return "\"/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
 #else
     return QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/easyrsa";
 #endif
@@ -42,6 +47,7 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
     QString pathEnvVar = env.value("PATH");
 
 #ifdef Q_OS_WIN
+    pathEnvVar.clear();
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\bin;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\i386;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\x64;");
@@ -50,6 +56,7 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
 #endif
 
     env.insert("PATH", pathEnvVar);
+    //qDebug().noquote() << "ENV PATH" << pathEnvVar;
     return env;
 }
 
@@ -61,7 +68,9 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 #ifdef Q_OS_WIN
     p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " init-pki"));
+    p.setNativeArguments(QString("/C \"ash.exe %1\"").arg(getEasyRsaShPath() + " init-pki"));
+    qDebug().noquote() << "EasyRsa tmp path" << path;
+    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
 #else
     p.setProgram(getEasyRsaShPath());
     p.setArguments(QStringList() << "init-pki");
@@ -69,9 +78,9 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 
     p.setWorkingDirectory(path);
 
-    //    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-    //        qDebug().noquote() << p.readAll();
-    //    });
+    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
+        qDebug().noquote() <<  "Init PKI" << p.readAll();
+    });
 
     p.start();
     p.waitForFinished();
@@ -88,7 +97,8 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 #ifdef Q_OS_WIN
     p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"sh.exe %1\"").arg(getEasyRsaShPath() + " gen-req " + clientId + " nopass"));
+    p.setNativeArguments(QString("/C \"ash.exe %1\"").arg(getEasyRsaShPath() + " gen-req " + clientId + " nopass"));
+    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
 #else
     p.setArguments(QStringList() << "gen-req" << clientId << "nopass");
     p.setProgram(getEasyRsaShPath());
@@ -98,7 +108,7 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 
     QObject::connect(&p, &QProcess::channelReadyRead, [&](){
         QString data = p.readAll();
-        //qDebug().noquote() << data;
+        qDebug().noquote() << data;
 
         if (data.contains("Common Name (eg: your user, host, or server name)")) {
             p.write("\n");
