@@ -319,7 +319,7 @@ ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Pr
 
         // TODO: run concurently
         //setupOpenVpnServer(credentials);
-        setupShadowSocksServer(credentials);
+        return setupShadowSocksServer(credentials);
     }
 
     return ErrorCode::NoError;
@@ -394,9 +394,8 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     QString configData = QJsonDocument(ssConfig).toJson();
     QString sSConfigPath = "/opt/amneziavpn_data/ssConfig.json";
 
-    qDebug().noquote() << configData;
     configData.replace("\"", "\\\"");
-    qDebug().noquote() << configData;
+    //qDebug().noquote() << configData;
 
     uploadTextFileToContainer(DockerContainer::ShadowSocks, credentials, configData, sSConfigPath);
 
