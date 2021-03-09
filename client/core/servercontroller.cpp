@@ -267,6 +267,7 @@ SshConnectionParameters ServerController::sshParams(const ServerCredentials &cre
     sshParams.timeout = 10;
     sshParams.port = credentials.port;
     sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
+    sshParams.options = SshIgnoreDefaultProxy;
 
     return sshParams;
 }
