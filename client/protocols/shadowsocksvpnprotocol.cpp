@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "utils.h"
 
+#include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -71,7 +72,8 @@ QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials
     ssConfig.insert("server", credentials.hostName);
     ssConfig.insert("server_port", ServerController::ssRemotePort());
     ssConfig.insert("local_port", ServerController::ssContainerPort());
-    ssConfig.insert("password", credentials.password);
+    ssConfig.insert("password", QString(QCryptographicHash::hash(credentials.password.toUtf8(), QCryptographicHash::Sha256).toHex()));
+    //ssConfig.insert("password", credentials.password);
     ssConfig.insert("timeout", 60);
     ssConfig.insert("method", ServerController::ssEncryption());
     return ssConfig;

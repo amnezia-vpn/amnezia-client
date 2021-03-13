@@ -1,5 +1,6 @@
 #include "servercontroller.h"
 
+#include <QCryptographicHash>
 #include <QFile>
 #include <QEventLoop>
 #include <QLoggingCategory>
@@ -107,7 +108,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     QString script = QString("docker exec -i %1 sh -c \"echo \'%2\' > %3\"").
             arg(getContainerName(container)).arg(file).arg(path);
 
-    qDebug().noquote() << script;
+    // qDebug().noquote() << "uploadTextFileToContainer\n" << script;
 
     SshConnection *client = connectToHost(sshParams(credentials));
     if (client->state() != SshConnection::State::Connected) {
@@ -389,7 +390,8 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     ssConfig.insert("server", "0.0.0.0");
     ssConfig.insert("server_port", ssRemotePort());
     ssConfig.insert("local_port", ssContainerPort());
-    ssConfig.insert("password", credentials.password);
+    ssConfig.insert("password", QString(QCryptographicHash::hash(credentials.password.toUtf8(), QCryptographicHash::Sha256).toHex()));
+    //ssConfig.insert("password", credentials.password);
     ssConfig.insert("timeout", 60);
     ssConfig.insert("method", ssEncryption());
     QString configData = QJsonDocument(ssConfig).toJson();

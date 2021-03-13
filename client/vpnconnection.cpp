@@ -99,12 +99,16 @@ ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credent
         QJsonObject ssConfigData = ShadowSocksVpnProtocol::genShadowSocksConfig(credentials);
         m_vpnConfiguration.insert(config::key_shadowsocks_config_data(), ssConfigData);
     }
+
+    //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
     return ErrorCode::NoError;
 }
 
 ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Protocol protocol)
 {
     qDebug() << "connectToVpn, CustomRouting is" << m_settings.customRouting();
+//    qDebug() << "Cred" << m_settings.serverCredentials().hostName <<
+//                m_settings.serverCredentials().password;
     protocol = Protocol::ShadowSocks;
 
     // TODO: Try protocols one by one in case of Protocol::Any
