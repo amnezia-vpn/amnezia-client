@@ -7,6 +7,9 @@
 #include <QApplication>
 #include <QPoint>
 #include <QSize>
+#include <QSysInfo>
+#include <QOperatingSystemVersion>
+
 #ifdef Q_OS_WIN
 
 #include <windows.h>
@@ -31,9 +34,10 @@ CFramelessWindow::CFramelessWindow(QWidget *parent)
 //    setWindowFlag(Qt::WindowSystemMenuHint, true);
 //    setWindowFlag() is not avaliable before Qt v5.9, so we should use setWindowFlags instead
 
-    setWindowFlags(windowFlags() | Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
-
-    setResizeable(m_bResizeable);
+    if (QOperatingSystemVersion::current() > QOperatingSystemVersion::Windows7) {
+        setWindowFlags(windowFlags() | Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
+        setResizeable(m_bResizeable);
+    }
 }
 
 void CFramelessWindow::setResizeable(bool resizeable)
@@ -99,6 +103,10 @@ void CFramelessWindow::addIgnoreWidget(QWidget* widget)
 
 bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+        return QMainWindow::nativeEvent(eventType, message, result);
+    }
+
     //Workaround for known bug -> check Qt forum : https://forum.qt.io/topic/93141/qtablewidget-itemselectionchanged/13
     #if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
     MSG* msg = *reinterpret_cast<MSG**>(message);

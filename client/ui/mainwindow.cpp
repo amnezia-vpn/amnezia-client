@@ -44,12 +44,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
 
+    bool needToHideCustomTitlebar = false;
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+        needToHideCustomTitlebar = true;
+    }
+
 #ifdef Q_OS_MAC
-    ui->widget_tittlebar->hide();
-    resize(width(), height() - ui->stackedWidget_main->y());
-    ui->stackedWidget_main->move(0,0);
     fixWidget(this);
+    needToHideCustomTitlebar = true;
 #endif
+
+    if (needToHideCustomTitlebar) {
+        ui->widget_tittlebar->hide();
+        resize(width(), height() - ui->stackedWidget_main->y());
+        ui->stackedWidget_main->move(0,0);
+    }
 
     // Post initialization
 
@@ -270,7 +279,7 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
 {
     QString s = ui->lineEdit_start_existing_code->text();
     s.replace("vpn://", "");
-    QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8())).object();
+    QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)).object();
 
     ServerCredentials credentials;
     credentials.hostName = o.value("h").toString();
@@ -285,6 +294,8 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
                 arg(credentials.hostName).
                 arg(credentials.port).
                 arg(credentials.userName);
+
+    //qDebug() << QString("Password") << credentials.password;
 }
 
 bool MainWindow::installServer(ServerCredentials credentials,
