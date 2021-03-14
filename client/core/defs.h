@@ -24,6 +24,8 @@ struct ServerCredentials
     QString userName;
     QString password;
     int port = 22;
+
+    bool isValid() { return !hostName.isEmpty() && !userName.isEmpty() && !password.isEmpty() && port > 0; }
 };
 
 enum ErrorCode

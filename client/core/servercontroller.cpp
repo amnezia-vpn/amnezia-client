@@ -29,8 +29,6 @@ ErrorCode ServerController::runScript(DockerContainer container,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
 {
-    QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
-
     SshConnection *client = connectToHost(sshParams);
     if (client->state() != SshConnection::State::Connected) {
         return fromSshConnectionErrorCode(client->errorState());
@@ -103,9 +101,7 @@ ErrorCode ServerController::runScript(DockerContainer container,
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     const ServerCredentials &credentials, QString &file, const QString &path)
 {
-    QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
-
-    QString script = QString("docker exec -i %1 sh -c \"echo \'%2\' > %3\"").
+    QString script = QString("sudo docker exec -i %1 sh -c \"echo \'%2\' > %3\"").
             arg(getContainerName(container)).arg(file).arg(path);
 
     // qDebug().noquote() << "uploadTextFileToContainer\n" << script;
@@ -155,7 +151,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 QString ServerController::getTextFileFromContainer(DockerContainer container,
     const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode)
 {
-    QString script = QString("docker exec -i %1 sh -c \"cat \'%2\'\"").
+    QString script = QString("sudo docker exec -i %1 sh -c \"cat \'%2\'\"").
             arg(getContainerName(container)).arg(path);
 
     qDebug().noquote() << "Copy file from container\n" << script;
@@ -203,11 +199,11 @@ QString ServerController::getTextFileFromContainer(DockerContainer container,
 ErrorCode ServerController::signCert(DockerContainer container,
     const ServerCredentials &credentials, QString clientId)
 {
-    QString script_import = QString("docker exec -i %1 bash -c \"cd /opt/amneziavpn_data && "
+    QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amneziavpn_data && "
                              "easyrsa import-req /opt/amneziavpn_data/clients/%2.req %2\"")
             .arg(getContainerName(container)).arg(clientId);
 
-    QString script_sign = QString("docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amneziavpn_data && "
+    QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amneziavpn_data && "
                                     "easyrsa sign-req client %2\"")
             .arg(getContainerName(container)).arg(clientId);
 
@@ -261,10 +257,16 @@ ErrorCode ServerController::fromSshProcessExitStatus(int exitStatus)
 SshConnectionParameters ServerController::sshParams(const ServerCredentials &credentials)
 {
     QSsh::SshConnectionParameters sshParams;
-    sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
+    if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
+        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePublicKey;
+        sshParams.privateKeyFile = credentials.password;
+    }
+    else {
+        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
+        sshParams.password = credentials.password;
+    }
     sshParams.host = credentials.hostName;
     sshParams.userName = credentials.userName;
-    sshParams.password = credentials.password;
     sshParams.timeout = 10;
     sshParams.port = credentials.port;
     sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
@@ -403,7 +405,7 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     uploadTextFileToContainer(DockerContainer::ShadowSocks, credentials, configData, sSConfigPath);
 
     // Start ss
-    QString script = QString("docker exec -d %1 sh -c \"ss-server -c %2\"").
+    QString script = QString("sudo docker exec -d %1 sh -c \"ss-server -c %2\"").
             arg(getContainerName(DockerContainer::ShadowSocks)).arg(sSConfigPath);
 
     e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), script);

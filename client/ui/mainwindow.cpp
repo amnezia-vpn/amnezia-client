@@ -38,6 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_vpnConnection(nullptr)
 {
     ui->setupUi(this);
+
+    setupTray();
+    setupUiConnections();
+
     ui->label_error_text->clear();
     ui->widget_tittlebar->installEventFilter(this);
 
@@ -67,9 +71,6 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         goToPage(Page::Start, true, false);
     }
-
-    setupTray();
-    setupUiConnections();
 
     connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
         ui->pushButton_sites_add_custom->click();
@@ -147,6 +148,7 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
                                                       .arg(m_settings.serverPort()));
         }
 
+        ui->pushButton_new_server_connect_key->setChecked(false);
     }
 
     if (slide)
@@ -241,12 +243,25 @@ void MainWindow::hideEvent(QHideEvent *event)
 
 void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
 {
-    if (ui->lineEdit_new_server_ip->text().isEmpty() ||
-            ui->lineEdit_new_server_login->text().isEmpty() ||
-            ui->lineEdit_new_server_password->text().isEmpty() ) {
-        QMessageBox::warning(this, APPLICATION_NAME, tr("Please fill in all fields"));
-        return;
+    if (ui->pushButton_new_server_connect_key->isChecked()){
+        if (ui->lineEdit_new_server_ip->text().isEmpty() ||
+                ui->lineEdit_new_server_login->text().isEmpty() ||
+                ui->textEdit_new_server_ssh_key->toPlainText().isEmpty() ) {
+
+            ui->label_new_server_wait_info->setText(tr("Please fill in all fields"));
+            return;
+        }
     }
+    else {
+        if (ui->lineEdit_new_server_ip->text().isEmpty() ||
+                ui->lineEdit_new_server_login->text().isEmpty() ||
+                ui->lineEdit_new_server_password->text().isEmpty() ) {
+
+            ui->label_new_server_wait_info->setText(tr("Please fill in all fields"));
+            return;
+        }
+    }
+
 
     qDebug() << "Start connection with new data";
 
@@ -257,7 +272,18 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
         serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
     }
     serverCredentials.userName = ui->lineEdit_new_server_login->text();
-    serverCredentials.password = ui->lineEdit_new_server_password->text();
+    if (ui->pushButton_new_server_connect_key->isChecked()){
+        QString key = ui->textEdit_new_server_ssh_key->toPlainText();
+        if (key.contains("OPENSSH") && key.contains("BEGIN") && key.contains("PRIVATE KEY")) {
+            key = OpenVpnConfigurator::convertOpenSShKey(key);
+        }
+
+        serverCredentials.password = key;
+    }
+    else {
+        serverCredentials.password = ui->lineEdit_new_server_password->text();
+    }
+
 
     bool ok = installServer(serverCredentials,
                             ui->page_new_server,
@@ -287,15 +313,20 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
     credentials.userName = o.value("u").toString();
     credentials.password = o.value("w").toString();
 
-    m_settings.setServerCredentials(credentials);
-
-    goToPage(Page::Vpn);
     qDebug() << QString("Added server %3@%1:%2").
                 arg(credentials.hostName).
                 arg(credentials.port).
                 arg(credentials.userName);
 
     //qDebug() << QString("Password") << credentials.password;
+
+    if (!credentials.isValid()) {
+        return;
+    }
+
+    m_settings.setServerCredentials(credentials);
+
+    goToPage(Page::Vpn);
 }
 
 bool MainWindow::installServer(ServerCredentials credentials,
@@ -611,6 +642,13 @@ void MainWindow::setupUiConnections()
          if (m_ipAddressValidator.regExp().exactMatch(newText)) {
              m_settings.setSecondaryDns(newText);
          }
+    });
+
+    connect(ui->pushButton_new_server_connect_key, &QPushButton::toggled, this, [this](bool checked){
+        ui->label_new_server_password->setText(checked ? tr("Private key") : tr("Password"));
+        ui->pushButton_new_server_connect_key->setText(checked ? tr("Connect using SSH password") : tr("Connect using SSH key"));
+        ui->lineEdit_new_server_password->setVisible(!checked);
+        ui->textEdit_new_server_ssh_key->setVisible(checked);
     });
 
 }

@@ -5,6 +5,7 @@
 #include <QRandomGenerator>
 #include <QTemporaryDir>
 #include <QDebug>
+#include <QTemporaryFile>
 
 QString OpenVpnConfigurator::getRandomString(int len)
 {
@@ -48,9 +49,8 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
 
 #ifdef Q_OS_WIN
     pathEnvVar.clear();
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\bin;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\i386;");
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\x64;");
 #else
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
 #endif
@@ -252,4 +252,36 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 #endif
     //qDebug().noquote() << config;
     return config;
+}
+
+QString OpenVpnConfigurator::convertOpenSShKey(const QString &key)
+{
+    QProcess p;
+    p.setProcessChannelMode(QProcess::MergedChannels);
+
+    QTemporaryFile tmp;
+    tmp.setAutoRemove(false);
+    tmp.open();
+    tmp.write(key.toUtf8());
+    tmp.close();
+
+    // ssh-keygen -p -P "" -N "" -m pem -f id_ssh
+
+#ifdef Q_OS_WIN
+    p.setProcessEnvironment(prepareEnv());
+    p.setProgram("cmd.exe");
+    p.setNativeArguments(QString("/C \"ssh-keygen.exe -p -P \"\" -N \"\" -m pem -f \"%1\"\"").arg(tmp.fileName()));
+#else
+    p.setProgram("ssh-keygen");
+    p.setArguments(QStringList() << "-p" << "-P" << "\"\"" << "-N" << "\"\"" << "-m" << "pem" << "-f" << tmp.fileName());
+#endif
+
+    p.start();
+    p.waitForFinished();
+
+    qDebug().noquote() << "OpenVpnConfigurator::convertOpenSShKey" << p.exitCode() << p.exitStatus() << p.readAll();
+
+    tmp.open();
+
+    return tmp.readAll();
 }

@@ -1,25 +1,26 @@
 # CONTAINER_NAME=... this var will be set in ServerController
 # Don't run commands in background like sh -c "openvpn &"
 
-apt-get update
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; if [[ -f "/usr/bin/sudo" ]]; then $pm install -y sudo; fi
+sudo iptables -P FORWARD ACCEPT
 
-iptables -P FORWARD ACCEPT
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm update -y
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm install -y curl
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then sudo $pm_apt install -y docker.io; else sudo $pm_yum install -y docker; fi
+sudo systemctl start docker
 
-apt install -y docker.io curl
-systemctl start docker
-
-docker stop $CONTAINER_NAME
-docker rm -f $CONTAINER_NAME
-docker pull amneziavpn/shadowsocks:latest
-docker run -d --restart always --cap-add=NET_ADMIN -p 1194:1194/tcp -p 6789:6789/tcp --name $CONTAINER_NAME amneziavpn/shadowsocks:latest
+sudo docker stop $CONTAINER_NAME
+sudo docker rm -f $CONTAINER_NAME
+sudo docker pull amneziavpn/shadowsocks:latest
+sudo docker run -d --restart always --cap-add=NET_ADMIN -p 1194:1194/tcp -p 6789:6789/tcp --name $CONTAINER_NAME amneziavpn/shadowsocks:latest
 
 
-docker exec -i $CONTAINER_NAME sh -c "mkdir -p /opt/amneziavpn_data/clients"
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa init-pki"
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa gen-dh"
+sudo docker exec -i $CONTAINER_NAME sh -c "mkdir -p /opt/amneziavpn_data/clients"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa init-pki"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa gen-dh"
 
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/dh.pem /etc/openvpn && easyrsa build-ca nopass << EOF yes EOF && easyrsa gen-req MyReq nopass << EOF2 yes EOF2"
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa sign-req server MyReq << EOF3 yes EOF3"
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && openvpn --genkey --secret ta.key << EOF4"
-docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/ca.crt pki/issued/MyReq.crt pki/private/MyReq.key ta.key /etc/openvpn"
-docker exec -d $CONTAINER_NAME sh -c "openvpn --config /etc/openvpn/server.conf"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/dh.pem /etc/openvpn && easyrsa build-ca nopass << EOF yes EOF && easyrsa gen-req MyReq nopass << EOF2 yes EOF2"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa sign-req server MyReq << EOF3 yes EOF3"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && openvpn --genkey --secret ta.key << EOF4"
+sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && cp pki/ca.crt pki/issued/MyReq.crt pki/private/MyReq.key ta.key /etc/openvpn"
+sudo docker exec -d $CONTAINER_NAME sh -c "openvpn --config /etc/openvpn/server.conf"

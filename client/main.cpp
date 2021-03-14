@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QTranslator>
 #include <QTimer>
+#include <QLoggingCategory>
 
 #include "debug.h"
 #include "defines.h"
@@ -25,6 +26,8 @@ static void loadTranslator()
 
 int main(int argc, char *argv[])
 {
+    QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
+
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 
 #ifdef Q_OS_WIN

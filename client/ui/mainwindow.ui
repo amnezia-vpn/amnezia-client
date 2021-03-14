@@ -251,10 +251,12 @@ QPushButton:hover {
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">QWidget {
+	background: white;
+}</string>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -473,7 +475,7 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>170</y>
+         <y>150</y>
          <width>171</width>
          <height>21</height>
         </rect>
@@ -498,7 +500,7 @@ color: #333333;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>255</y>
+         <y>235</y>
          <width>261</width>
          <height>21</height>
         </rect>
@@ -519,11 +521,11 @@ color: #333333;</string>
         <string>Login to connect via SSH</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="label_new_server_password">
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>340</y>
+         <y>320</y>
          <width>171</width>
          <height>21</height>
         </rect>
@@ -548,7 +550,7 @@ color: #333333;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>200</y>
+         <y>180</y>
          <width>300</width>
          <height>40</height>
         </rect>
@@ -568,7 +570,7 @@ color: #333333;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>285</y>
+         <y>265</y>
          <width>300</width>
          <height>40</height>
         </rect>
@@ -588,7 +590,7 @@ color: #333333;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>370</y>
+         <y>350</y>
          <width>300</width>
          <height>40</height>
         </rect>
@@ -611,7 +613,7 @@ color: #333333;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>440</y>
+         <y>450</y>
          <width>301</width>
          <height>40</height>
         </rect>
@@ -672,7 +674,7 @@ color: #15CDCB;</string>
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>440</y>
+         <y>450</y>
          <width>301</width>
          <height>41</height>
         </rect>
@@ -767,7 +769,7 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>490</y>
+         <y>500</y>
          <width>301</width>
          <height>41</height>
         </rect>
@@ -779,11 +781,68 @@ QPushButton:hover {
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_new_server_connect_key">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>550</y>
+         <width>281</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 20px;
+text-align: center;
+
+/* акцент */
+color: #15CDCB;</string>
+       </property>
+       <property name="text">
+        <string>Connect using SSH key</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_new_server_ssh_key">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>350</y>
+         <width>300</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #F4F4F4;
+
+/* grey */
+border: 1px solid #A7A7A7;
+color: #333333;</string>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:16px; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
       <zorder>progressBar_new_server_connection</zorder>
       <zorder>label_2</zorder>
       <zorder>label_4</zorder>
       <zorder>label_5</zorder>
-      <zorder>label_6</zorder>
+      <zorder>label_new_server_password</zorder>
       <zorder>lineEdit_new_server_ip</zorder>
       <zorder>lineEdit_new_server_login</zorder>
       <zorder>lineEdit_new_server_password</zorder>
@@ -792,6 +851,8 @@ QPushButton:hover {
       <zorder>pushButton_back_from_new_server</zorder>
       <zorder>label_7</zorder>
       <zorder>label_new_server_wait_info</zorder>
+      <zorder>pushButton_new_server_connect_key</zorder>
+      <zorder>textEdit_new_server_ssh_key</zorder>
      </widget>
      <widget class="QWidget" name="page_vpn">
       <property name="styleSheet">
@@ -976,7 +1037,8 @@ background: #282932;
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">image: url(:/images/settings.png);</string>
+        <string notr="true">image: url(:/images/settings.png);
+background: transparent</string>
        </property>
        <property name="text">
         <string/>

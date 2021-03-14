@@ -823,11 +823,13 @@ void SshConnectionPrivate::createPrivateKey()
     if (m_connParams.privateKeyFile.isEmpty())
         throw SshClientException(SshKeyFileError, tr("No private key file given."));
     QFile keyFile(m_connParams.privateKeyFile);
-    if (!keyFile.open(QIODevice::ReadOnly)) {
-        throw SshClientException(SshKeyFileError,
-            tr("Private key file error: %1").arg(keyFile.errorString()));
+
+    if (keyFile.open(QIODevice::ReadOnly)) {
+        m_sendFacility.createAuthenticationKey(keyFile.readAll());
     }
-    m_sendFacility.createAuthenticationKey(keyFile.readAll());
+    else {
+        m_sendFacility.createAuthenticationKey(m_connParams.privateKeyFile.toUtf8());
+    }
 }
 
 QSharedPointer<SshRemoteProcess> SshConnectionPrivate::createRemoteProcess(const QByteArray &command)

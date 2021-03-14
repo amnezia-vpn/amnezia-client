@@ -26,6 +26,8 @@ public:
     static QString genOpenVpnConfig(const ServerCredentials &credentials, Protocol proto,
         ErrorCode *errorCode = nullptr);
 
+    static QString convertOpenSShKey(const QString &key);
+
 private:
     static QString getRandomString(int len);
     static QString getEasyRsaShPath();
