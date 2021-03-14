@@ -219,8 +219,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
-    hide();
+    if (currentPage() == Page::Start || currentPage() == Page::NewServer) qApp->quit();
+    else {
+        hide();
+        event->ignore();
+    }
 }
 
 void MainWindow::showEvent(QShowEvent *event)
