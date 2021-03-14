@@ -273,7 +273,7 @@ QString OpenVpnConfigurator::convertOpenSShKey(const QString &key)
     p.setNativeArguments(QString("/C \"ssh-keygen.exe -p -P \"\" -N \"\" -m pem -f \"%1\"\"").arg(tmp.fileName()));
 #else
     p.setProgram("ssh-keygen");
-    p.setArguments(QStringList() << "-p" << "-P" << "\"\"" << "-N" << "\"\"" << "-m" << "pem" << "-f" << tmp.fileName());
+    p.setArguments(QStringList() << "-p" << "-P" << "" << "-N" << "" << "-m" << "pem" << "-f" << tmp.fileName());
 #endif
 
     p.start();
