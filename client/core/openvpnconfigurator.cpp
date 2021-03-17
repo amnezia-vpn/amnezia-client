@@ -240,7 +240,12 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
 
-    config.replace("$REMOTE_HOST", connData.host);
+    if (proto == Protocol::ShadowSocks) {
+        config.replace("$REMOTE_HOST", "10.8.0.1");
+    }
+    else {
+        config.replace("$REMOTE_HOST", connData.host);
+    }
     config.replace("$REMOTE_PORT", "1194");
     config.replace("$CA_CERT", connData.caCert);
     config.replace("$CLIENT_CERT", connData.clientCert);
