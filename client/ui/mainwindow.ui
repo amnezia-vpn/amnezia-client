@@ -14,8 +14,30 @@
    <string/>
   </property>
   <property name="styleSheet">
-   <string notr="true">
+   <string notr="true">QWidget {
+font-family: &quot;Lato&quot;;
+}
+
+/*----------------------*/
+
+QPushButton {
+	font-size: 16px;
+	outline: none;
+	font-style: normal;
+	font-weight: normal;
+
+	border: none;
+}
+QPushButton:disabled {
+	border: none;
+}
+
 QLabel {
+	outline: none;
+	font-size: 16px;
+
+	font-style: normal;
+	font-weight: normal;
     color: #181922;
 }
 QLabel:disabled {
@@ -25,25 +47,27 @@ QLabel:disabled {
 QMessageBox QLabel {
     font: 16px &quot;Lato&quot;;	
 }
-/*
-QMessageBox QPushButton {
-    border: 1;
-}
-*/
+
 
 /*----------------------*/
 
+QTextEdit {
+background: #F4F4F4;
+
+/* grey */
+border: 1px solid #A7A7A7;
+color: #333333;
+
+}
+
 QLineEdit {
-    border: none;
-    border-bottom:2px solid rgb(120, 120, 120);
+font-size: 16px;
+selection-background-color: darkgray;
 
-	color: rgb(140, 140, 140);
+background: #F4F4F4;
 
-	/*font: 13pt &quot;JMH Cthulhumbus&quot;;*/
-
-	background:transparent;
-
-    selection-background-color: darkgray;
+border: 1px solid #A7A7A7;
+color: #333333;
 }
 
 QLineEdit:focus {
@@ -58,12 +82,15 @@ QLineEdit:disabled {
     color: rgb(127, 127, 127);
 }
 
+QRadioButton {
+    color: #181922;
+	font-size: 16px;
+    background: transparent;
+}
 
 QCheckBox {
     color: #181922;
-
-	font: 63 11pt &quot;Open Sans&quot;;
-	/*font: 11pt &quot;JMH Cthulhumbus&quot;;*/
+	font-size: 16px;
     background: transparent;
 }
 
@@ -86,7 +113,7 @@ border-image: url(:/images/controls/check_on.png);
 
 
 QScrollBar:vertical { /* The area behind the scrollbar covering entire height.   */  
-    background-color: black;
+    background-color: grey;
     opacity: 100;
     width: 7px; /* set width to zero to hide scrollbar entirely. Can look quite clean and scrolling still works with mousewheel.  */
     margin: 0px 0px; /* Takes the height of the buttons + 3 extra pixels to leave some free space between handle and buttons */
@@ -152,25 +179,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">QWidget {
-	font: 16px &quot;Lato&quot;;	
-	outline: none;
-	font-style: normal;
-	font-weight: normal;
-}
-
-/*----------------------*/
-
-QPushButton {
-	border: none;
-}
-QPushButton:disabled {
-	border: none;
-}
-
-/*----------------------*/
-
-QWidget #widget_main {
+     <string notr="true">QWidget #widget_main {
 	background: white;
 }
 </string>
@@ -251,12 +260,10 @@ QPushButton:hover {
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">QWidget {
-	background: white;
-}</string>
+      <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>8</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -338,11 +345,7 @@ color: #333333;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string/>
@@ -556,11 +559,7 @@ color: #333333;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string/>
@@ -576,11 +575,7 @@ color: #333333;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>root</string>
@@ -824,18 +819,14 @@ color: #15CDCB;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:16px; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:16px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <zorder>progressBar_new_server_connection</zorder>
@@ -1338,11 +1329,15 @@ color: #100A44;
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #FFFFFF;
+        <string notr="true">QLineEdit {
+    border: none;
 
-/* grey */
-border: 1px solid #A7A7A7;
-</string>
+    font-size: 16px;
+	background:transparent;
+
+    selection-background-color: darkgray;
+    border: 1px solid #A7A7A7;
+}</string>
        </property>
        <property name="text">
         <string/>
@@ -1882,7 +1877,7 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>220</y>
+         <y>250</y>
          <width>321</width>
          <height>41</height>
         </rect>
@@ -1911,6 +1906,19 @@ background: #211966;
        </property>
        <property name="text">
         <string>Check for updates</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>210</y>
+         <width>281</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Software version: 1.5.2 (17.03.2021)</string>
        </property>
       </widget>
      </widget>
@@ -1973,11 +1981,7 @@ QPushButton:hover {
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string/>
@@ -2018,11 +2022,7 @@ color: #100A44;
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string/>
@@ -2155,8 +2155,8 @@ padding:0px;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>220</y>
-         <width>301</width>
+         <y>150</y>
+         <width>300</width>
          <height>40</height>
         </rect>
        </property>
@@ -2249,9 +2249,9 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>220</y>
-         <width>301</width>
-         <height>41</height>
+         <y>150</y>
+         <width>300</width>
+         <height>40</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -2309,8 +2309,8 @@ border-radius: 4px 0px 0px 4px;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>280</y>
-         <width>301</width>
+         <y>210</y>
+         <width>300</width>
          <height>40</height>
         </rect>
        </property>
@@ -2343,8 +2343,8 @@ background: #211966;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>340</y>
-         <width>301</width>
+         <y>270</y>
+         <width>300</width>
          <height>40</height>
         </rect>
        </property>
@@ -2383,17 +2383,22 @@ background: #211966;
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
+        <string notr="true">QLabel {
+font-family: Lato;
 font-style: normal;
 font-weight: normal;
 font-size: 24px;
-color: #333333;</string>
+color: #333333;
+}</string>
        </property>
        <property name="text">
         <string>root@yourserver.org</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
       <zorder>label_server_settings_wait_info</zorder>
@@ -2442,48 +2447,111 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_sites_add_custom_2">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
+      <widget class="QToolBox" name="toolBox_share_connection">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>40</y>
-         <width>340</width>
-         <height>40</height>
+         <width>360</width>
+         <height>580</height>
         </rect>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <family>Lato</family>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
+        </font>
+       </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
+        <string notr="true">QToolBox {
+margins: 0px;
+}
+
+QToolBox  QFrame {
+background: transparent;
+}
+
+QToolBox &gt; QWidget {
+	font: 25px &quot;Lato&quot;;	
+
+background: transparent;
+border-radius: 5px;
+
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #F1F1F1, stop: 0.4 #FFFFFF,
+                                stop: 0.5 #F8F8F8, stop: 1.0 #FFFFFF);
+
+}
+
+QToolBox::tab {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
+border-radius: 2px;
+font-family: Lato;
 font-style: normal;
 font-weight: bold;
-font-size: 20px;
-line-height: 25px;
+font-size: 23px;
 color: #100A44;
-</string>
+image: url(:/images/share.png);
+image-position: left;
+padding-left: 10px;
+
+  border-color: #DDDDDD;
+  border-bottom: 2px solid #DDDDDD;
+}
+
+QToolBox::tab:hover {
+  border-color: #148CD2;
+  border-bottom: 2px solid #148CD2;
+}</string>
        </property>
-       <property name="text">
-        <string>Connection string</string>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
-       <property name="wordWrap">
-        <bool>true</bool>
+       <property name="currentIndex">
+        <number>1</number>
        </property>
-      </widget>
-      <widget class="QTextEdit" name="textEdit_sharing_code">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>100</y>
-         <width>320</width>
-         <height>211</height>
-        </rect>
+       <property name="tabSpacing">
+        <number>2</number>
        </property>
-       <property name="styleSheet">
-        <string notr="true">QTextEdit {
+       <widget class="QWidget" name="page_share_main">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>360</width>
+          <height>500</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <attribute name="label">
+         <string>  Full access</string>
+        </attribute>
+        <widget class="QTextEdit" name="textEdit_sharing_code">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>330</width>
+           <height>100</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QTextEdit {
 
 background: #F5F5F5;
 border-radius: 10px;
@@ -2492,47 +2560,77 @@ border-radius: 10px;
 font-family: Consolas;
 font-style: normal;
 font-weight: bold;
-font-size: 22px;
-line-height: 110%;
-/* or 35px */
+font-size: 20px;
+
 text-align: center;
 
 color: #15CDCB;
 
 }
 </string>
-       </property>
-       <property name="lineWrapMode">
-        <enum>QTextEdit::FixedColumnWidth</enum>
-       </property>
-       <property name="lineWrapColumnOrWidth">
-        <number>30</number>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+         </property>
+         <property name="lineWrapMode">
+          <enum>QTextEdit::FixedColumnWidth</enum>
+         </property>
+         <property name="lineWrapColumnOrWidth">
+          <number>30</number>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Consolas'; font-size:22px; font-weight:600; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Consolas'; font-size:20px; font-weight:600; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;vpn:\\xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_copy_sharing_code">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>340</y>
-         <width>341</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>321</width>
+           <height>111</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 150%;
+
+color: #181922;
+</string>
+         </property>
+         <property name="text">
+          <string>Anyone who logs in with this code will have the same permissions to use VPN and your server as you. 
+This code includes your server credentials!
+Provide this code only to TRUSTED users.</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_copy_sharing_code">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>331</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
 	font-size: 13pt;
 	font: &quot;Open Sans Semibold&quot;;
 	color:rgb(212, 212, 212);
@@ -2550,56 +2648,236 @@ line-height: 21px;
 QPushButton:hover {
 background: #282932;
 }</string>
-       </property>
-       <property name="text">
-        <string>Copy</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>400</y>
-         <width>321</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
+         </property>
+         <property name="text">
+          <string>Copy</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="page_share_shadowsocks">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>360</width>
+          <height>500</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <attribute name="label">
+         <string>  ShadowSocks</string>
+        </attribute>
+        <widget class="QLabel" name="label_13">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>70</y>
+           <width>100</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Password</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_30">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>100</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Server:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_31">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>100</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Encryption:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_32">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>100</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Port:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_share_ss_server">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>10</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Server:</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_share_ss_method">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>50</y>
+           <width>201</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Encryption:</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_share_ss_port">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>30</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Port:</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_share_ss_password">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>70</y>
+           <width>201</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Password:</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_33">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>191</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Connection string</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_share_ss_code">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>331</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
 font-style: normal;
 font-weight: normal;
 font-size: 16px;
-line-height: 150%;
+line-height: 21px;
 
-color: #181922;
-</string>
-       </property>
-       <property name="text">
-        <string>Anyone who logs in with this code will have the same rights to use the VPN as you. This code includes your server credentials!
-Provide this code only to TRUSTED users.</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignJustify|Qt::AlignVCenter</set>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_29">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>590</y>
-         <width>150</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">image: url(:/images/AmneziaVPN.png);</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
+}
+QPushButton:hover {
+background: #282932;
+}</string>
+         </property>
+         <property name="text">
+          <string>Copy</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_share_ss_qr_code">
+         <property name="geometry">
+          <rect>
+           <x>65</x>
+           <y>250</y>
+           <width>240</width>
+           <height>240</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_share_ss_string">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>331</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLineEdit {
+background: #F5F5F5;
+border-radius: 10px;
+
+
+font-family: Consolas;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+
+text-align: center;
+
+color: #15CDCB;
+
+}</string>
+         </property>
+        </widget>
+       </widget>
       </widget>
      </widget>
     </widget>

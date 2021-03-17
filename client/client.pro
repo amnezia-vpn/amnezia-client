@@ -9,6 +9,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 include("3rd/QtSsh/src/ssh/ssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 include("3rd/SingleApplication/singleapplication.pri")
+include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 
 HEADERS  += \
     ../ipc/ipc.h \

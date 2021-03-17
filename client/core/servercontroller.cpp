@@ -393,7 +393,6 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     ssConfig.insert("server_port", ssRemotePort());
     ssConfig.insert("local_port", ssContainerPort());
     ssConfig.insert("password", QString(QCryptographicHash::hash(credentials.password.toUtf8(), QCryptographicHash::Sha256).toHex()));
-    //ssConfig.insert("password", credentials.password);
     ssConfig.insert("timeout", 60);
     ssConfig.insert("method", ssEncryption());
     QString configData = QJsonDocument(ssConfig).toJson();

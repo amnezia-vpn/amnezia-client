@@ -10,6 +10,8 @@
 #include <QStringListModel>
 #include <QSystemTrayIcon>
 
+#include "3rd/QRCodeGenerator/QRCodeGenerator.h"
+
 #include "framelesswindow.h"
 #include "protocols/vpnprotocol.h"
 
@@ -81,6 +83,8 @@ private:
     void updateShareCode();
     void makeSitesListItem(QListWidget* listWidget, const QString &address);
 
+    void updateQRCodeImage(const QString &text, QLabel *label);
+private:
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
     Settings m_settings;
@@ -92,6 +96,9 @@ private:
     QMenu* m_menu;
 
     QRegExpValidator m_ipAddressValidator;
+    QRegExpValidator m_ipAddressPortValidator;
+
+    CQR_Encode m_qrEncode;
 
     bool canMove = false;
     QPoint offset;

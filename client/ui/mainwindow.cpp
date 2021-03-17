@@ -12,6 +12,8 @@
 #include <QThread>
 #include <QTimer>
 
+#include <protocols/shadowsocksvpnprotocol.h>
+
 #include "core/errorstrings.h"
 #include "core/openvpnconfigurator.h"
 #include "core/servercontroller.h"
@@ -104,8 +106,9 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug().noquote() << QString("Default config: %1").arg(Utils::defaultVpnConfigFileName());
 
     m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
+    m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
 
-    ui->lineEdit_new_server_ip->setValidator(&m_ipAddressValidator);
+    ui->lineEdit_new_server_ip->setValidator(&m_ipAddressPortValidator);
     ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
     ui->lineEdit_network_settings_dns2->setValidator(&m_ipAddressValidator);
 }
@@ -146,6 +149,24 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
                                                       .arg(m_settings.userName())
                                                       .arg(m_settings.serverName())
                                                       .arg(m_settings.serverPort()));
+        }
+        if (page == Page::ShareConnection) {
+            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.serverCredentials());
+
+            QString ssString = QString("%1:%2@%3:%4")
+                    .arg(ssConfig.value("method").toString())
+                    .arg(ssConfig.value("password").toString())
+                    .arg(ssConfig.value("server").toString())
+                    .arg(QString::number(ssConfig.value("server_port").toInt()));
+
+            ssString = "ss://" + ssString.toUtf8().toBase64();
+            ui->lineEdit_share_ss_string->setText(ssString);
+            updateQRCodeImage(ssString, ui->label_share_ss_qr_code);
+
+            ui->label_share_ss_server->setText(ssConfig.value("server").toString());
+            ui->label_share_ss_port->setText(QString::number(ssConfig.value("server_port").toInt()));
+            ui->label_share_ss_method->setText(ssConfig.value("method").toString());
+            ui->label_share_ss_password->setText(ssConfig.value("password").toString());
         }
 
         ui->pushButton_new_server_connect_key->setChecked(false);
@@ -632,7 +653,7 @@ void MainWindow::setupUiConnections()
         updateSettings();
     });
     connect(ui->pushButton_network_settings_resetdns2, &QPushButton::clicked, this, [this](){
-        m_settings.setPrimaryDns(m_settings.cloudFlareNs2());
+        m_settings.setSecondaryDns(m_settings.cloudFlareNs2());
         updateSettings();
     });
 
@@ -652,6 +673,10 @@ void MainWindow::setupUiConnections()
         ui->pushButton_new_server_connect_key->setText(checked ? tr("Connect using SSH password") : tr("Connect using SSH key"));
         ui->lineEdit_new_server_password->setVisible(!checked);
         ui->textEdit_new_server_ssh_key->setVisible(checked);
+    });
+
+    connect(ui->pushButton_check_for_updates, &QPushButton::clicked, this, [this](){
+        QDesktopServices::openUrl(QUrl("https://github.com/amnezia-vpn/desktop-client/releases"));
     });
 
 }
@@ -872,4 +897,28 @@ void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &addre
     listWidget->setItemWidget(item, widget);
 
     widget->setStyleSheet(styleSheet());
+}
+
+void MainWindow::updateQRCodeImage(const QString &text, QLabel *label)
+{
+    int levelIndex = 1;
+    int versionIndex = 0;
+    bool bExtent = true;
+    int maskIndex = -1;
+
+    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, text.toUtf8().data() );
+
+    int qrImageSize = m_qrEncode.m_nSymbleSize;
+
+    int encodeImageSize = qrImageSize + ( QR_MARGIN * 2 );
+    QImage encodeImage( encodeImageSize, encodeImageSize, QImage::Format_Mono );
+
+    encodeImage.fill( 1 );
+
+    for ( int i = 0; i < qrImageSize; i++ )
+        for ( int j = 0; j < qrImageSize; j++ )
+            if ( m_qrEncode.m_byModuleData[i][j] )
+                encodeImage.setPixel( i + QR_MARGIN, j + QR_MARGIN, 0 );
+
+    label->setPixmap(QPixmap::fromImage(encodeImage.scaledToWidth(label->width())));
 }
