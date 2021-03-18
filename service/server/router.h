@@ -18,7 +18,7 @@ public:
     static bool routeAdd(const QString &ip, const QString &gw, QString mask = QString());
     static int routeAddList(const QString &gw, const QStringList &ips);
     static bool clearSavedRoutes();
-    static bool routeDelete(const QString &ip);
+    static bool routeDelete(const QString &ip, const QString &gw);
     static void flushDns();
 };
 

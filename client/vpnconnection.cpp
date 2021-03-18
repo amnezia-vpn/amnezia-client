@@ -40,11 +40,13 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
             IpcClient::Interface()->flushDns();
 
             if (m_settings.customRouting()) {
+                IpcClient::Interface()->routeDelete("0.0.0.0", m_vpnProtocol->vpnGateway());
+
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
                     QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
 
                 const QStringList &black_custom = m_settings.customIps();
-                qDebug() << "onConnect :: adding custom black routes, count:" << black_custom.size();
+                qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << black_custom.size();
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), black_custom);
             }

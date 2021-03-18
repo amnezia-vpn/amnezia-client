@@ -55,7 +55,8 @@ bool RouterMac::routeDelete(const QString &ip)
     p.waitForFinished();
     qDebug().noquote() << "OUTPUT routeDelete: " + p.readAll();
 
-    return p.exitCode() == 0;}
+    return p.exitCode() == 0;
+}
 
 void RouterMac::flushDns()
 {

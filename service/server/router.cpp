@@ -34,10 +34,10 @@ bool Router::clearSavedRoutes()
 #endif
 }
 
-bool Router::routeDelete(const QString &ip)
+bool Router::routeDelete(const QString &ip, const QString &gw)
 {
 #ifdef Q_OS_WIN
-    return RouterWin::Instance().routeDelete(ip);
+    return RouterWin::Instance().routeDelete(ip, gw);
 #elif defined (Q_OS_MAC)
     return RouterMac::Instance().routeDelete(ip);
 #endif

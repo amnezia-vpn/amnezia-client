@@ -10,7 +10,7 @@ class IpcInterface
     SLOT( bool routeAdd(const QString &ip, const QString &gw, const QString &mask) );
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
-    SLOT( bool routeDelete(const QString &ip) );
+    SLOT( bool routeDelete(const QString &ip, const QString &gw) );
     SLOT( void flushDns() );
 
     SLOT( bool checkAndInstallDriver() );

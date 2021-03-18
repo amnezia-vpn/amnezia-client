@@ -68,9 +68,9 @@ bool IpcServer::clearSavedRoutes()
     return Router::clearSavedRoutes();
 }
 
-bool IpcServer::routeDelete(const QString &ip)
+bool IpcServer::routeDelete(const QString &ip, const QString &gw)
 {
-    return Router::routeDelete(ip);
+    return Router::routeDelete(ip, gw);
 }
 
 void IpcServer::flushDns()

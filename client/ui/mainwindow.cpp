@@ -298,6 +298,13 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
     serverCredentials.userName = ui->lineEdit_new_server_login->text();
     if (ui->pushButton_new_server_connect_key->isChecked()){
         QString key = ui->textEdit_new_server_ssh_key->toPlainText();
+        if (key.startsWith("ssh-rsa")) {
+            QMessageBox::warning(this, APPLICATION_NAME,
+                                 tr("It's public key. Private key required"));
+
+            return;
+        }
+
         if (key.contains("OPENSSH") && key.contains("BEGIN") && key.contains("PRIVATE KEY")) {
             key = OpenVpnConfigurator::convertOpenSShKey(key);
         }
@@ -833,7 +840,7 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete
     updateSettings();
 
     if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-        IpcClient::Interface()->routeDelete(ipToDelete);
+        IpcClient::Interface()->routeDelete(ipToDelete, "");
         IpcClient::Interface()->flushDns();
     }
 }
