@@ -16,26 +16,51 @@ ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QJsonObject &configuration,
 
 ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
 {
-    qDebug() << "ShadowSocksVpnProtocol::stop()";
+    qDebug() << "ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol";
     ShadowSocksVpnProtocol::stop();
+    QThread::msleep(200);
+    m_ssProcess.close();
 }
 
 ErrorCode ShadowSocksVpnProtocol::start()
 {
-    qDebug() << "ShadowSocksVpnProtocol::start()";
+    if (Utils::processIsRunning(Utils::executable("ss-local", false))) {
+        Utils::killProcessByName(Utils::executable("ss-local", false));
+    }
+
+#ifdef QT_DEBUG
+    m_shadowSocksCfgFile.setAutoRemove(false);
+#endif
+    m_shadowSocksCfgFile.open();
+    m_shadowSocksCfgFile.write(QJsonDocument(m_shadowSocksConfig).toJson());
+    m_shadowSocksCfgFile.close();
+
+    QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName()
+                                     << "--no-delay";
+
+    qDebug().noquote() << "ShadowSocksVpnProtocol::start()"
+                       << shadowSocksExecPath() << args.join(" ");
 
     m_ssProcess.setProcessChannelMode(QProcess::MergedChannels);
 
     m_ssProcess.setProgram(shadowSocksExecPath());
-    m_ssProcess.setArguments(QStringList() << "-s" << m_shadowSocksConfig.value("server").toString()
-                                 << "-p" << QString::number(m_shadowSocksConfig.value("server_port").toInt())
-                                 << "-l" << QString::number(m_shadowSocksConfig.value("local_port").toInt())
-                                 << "-m" << m_shadowSocksConfig.value("method").toString()
-                                 << "-k" << m_shadowSocksConfig.value("password").toString()
-    );
+    m_ssProcess.setArguments(args);
 
-    connect(&m_ssProcess, &QProcess::readyRead, this, [this](){
-        qDebug().noquote() << m_ssProcess.readAll();
+    connect(&m_ssProcess, &QProcess::readyReadStandardOutput, this, [this](){
+        qDebug().noquote() << "ss-local:" << m_ssProcess.readAllStandardOutput();
+    });
+
+    connect(&m_ssProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
+        qDebug().noquote() << "ShadowSocksVpnProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
+        setConnectionState(VpnProtocol::ConnectionState::Disconnected);
+        if (exitStatus != QProcess::NormalExit){
+            emit protocolError(amnezia::ErrorCode::ShadowSocksExecutableCrashed);
+            stop();
+        }
+        if (exitCode !=0 ){
+            emit protocolError(amnezia::ErrorCode::InternalError);
+            stop();
+        }
     });
 
     m_ssProcess.start();
@@ -54,10 +79,14 @@ void ShadowSocksVpnProtocol::stop()
     OpenVpnProtocol::stop();
 
     qDebug() << "ShadowSocksVpnProtocol::stop()";
-    m_ssProcess.close();
+    m_ssProcess.terminate();
+
+#ifdef Q_OS_WIN
+    Utils::signalCtrl(m_ssProcess.processId(), CTRL_C_EVENT);
+#endif
 }
 
-QString ShadowSocksVpnProtocol::shadowSocksExecPath() const
+QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 {
 #ifdef Q_OS_WIN
     return Utils::executable(QString("ss/ss-local"), true);

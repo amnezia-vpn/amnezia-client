@@ -22,7 +22,7 @@ bool ManagementServer::isOpen() const
 
 void ManagementServer::stop()
 {
-    m_tcpServer->close();
+    if (m_tcpServer) m_tcpServer->close();
 }
 
 void ManagementServer::onAcceptError(QAbstractSocket::SocketError socketError)
@@ -37,7 +37,9 @@ qint64 ManagementServer::writeCommand(const QString& message)
     }
 
     const QString command = message + "\n";
-    return m_socket->write(command.toStdString().c_str());
+    qint64 bytesWritten = m_socket->write(command.toStdString().c_str());
+    m_socket->flush();
+    return bytesWritten;
 }
 
 void ManagementServer::onNewConnection()
@@ -45,7 +47,7 @@ void ManagementServer::onNewConnection()
     qDebug() << "New incoming connection";
 
     m_socket = QPointer<QTcpSocket>(m_tcpServer->nextPendingConnection());
-    m_tcpServer->close();
+    if (m_tcpServer) m_tcpServer->close();
 
     QObject::connect(m_socket.data(), SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
     QObject::connect(m_socket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
@@ -78,9 +80,7 @@ void ManagementServer::onReadyRead()
 
 bool ManagementServer::start(const QString& host, unsigned int port)
 {
-    if (m_tcpServer) {
-        m_tcpServer->deleteLater();
-    }
+    if (m_tcpServer) m_tcpServer->close();
 
     m_tcpServer =  QSharedPointer<QTcpServer>(new QTcpServer(this), [](QTcpServer *s){
         if (s) s->deleteLater();

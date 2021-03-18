@@ -1,2 +1,2 @@
-docker stop $CONTAINER_NAME
-docker rm -f $CONTAINER_NAME
+sudo docker stop $CONTAINER_NAME
+sudo docker rm -f $CONTAINER_NAME

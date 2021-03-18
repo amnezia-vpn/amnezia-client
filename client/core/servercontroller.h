@@ -47,7 +47,8 @@ public:
     static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
-    static ErrorCode runScript(DockerContainer container,
+
+    static ErrorCode runScript(const QHash<QString, QString> &vars,
         const QSsh::SshConnectionParameters &sshParams, QString script,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
@@ -55,6 +56,8 @@ private:
     static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials);
     static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials);
 
+
+    static QHash<QString, QString> genVarsForScript(const ServerCredentials &credentials, DockerContainer container);
 };
 
 #endif // SERVERCONTROLLER_H

@@ -17,13 +17,16 @@ public:
 
 protected:
     void readShadowSocksConfiguration(const QJsonObject &configuration);
-    QString shadowSocksExecPath() const;
 
 protected:
     QJsonObject m_shadowSocksConfig;
 
 private:
+    static QString shadowSocksExecPath();
+
+private:
     QProcess m_ssProcess;
+    QTemporaryFile m_shadowSocksCfgFile;
 };
 
 #endif // SHADOWSOCKSVPNPROTOCOL_H

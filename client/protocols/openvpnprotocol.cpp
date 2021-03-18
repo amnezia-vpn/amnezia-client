@@ -17,12 +17,15 @@ OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject* pare
 
 OpenVpnProtocol::~OpenVpnProtocol()
 {
-    qDebug() << "OpenVpnProtocol::stop()";
+    qDebug() << "OpenVpnProtocol::~OpenVpnProtocol()";
     OpenVpnProtocol::stop();
+    QThread::msleep(200);
 }
 
 void OpenVpnProtocol::stop()
 {
+    qDebug() << "OpenVpnProtocol::stop()";
+
     // TODO: need refactoring
     // sendTermSignal() will even return true while server connected ???
     if ((m_connectionState == VpnProtocol::ConnectionState::Preparing) ||
@@ -32,6 +35,8 @@ void OpenVpnProtocol::stop()
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
+        m_managementServer.stop();
+        qApp->processEvents();
         setConnectionState(VpnProtocol::ConnectionState::Disconnecting);
     }
 }

@@ -9,19 +9,6 @@
 #include "defines.h"
 #include "utils.h"
 
-QString Utils::toString(bool value)
-{
-    return value ? "true" : "false";
-}
-
-QString Utils::serverName()
-{
-#ifdef Q_OS_WIN
-    return SERVICE_NAME;
-#else
-    return QString("/tmp/%1").arg(SERVICE_NAME);
-#endif
-}
 
 QString Utils::defaultVpnConfigFileName()
 {
@@ -153,3 +140,49 @@ bool Utils::checkIPFormat(const QString& ip)
     }
     return true;
 }
+
+void Utils::killProcessByName(const QString &name)
+{
+    qDebug().noquote() << "Kill process" << name;
+#ifdef Q_OS_WIN
+    QProcess::execute(QString("taskkill /im %1 /f").arg(name));
+#else
+    QProcess::execute(QString("pkill %1").arg(name));
+#endif
+}
+
+#ifdef Q_OS_WIN
+// Inspired from http://stackoverflow.com/a/15281070/1529139
+// and http://stackoverflow.com/q/40059902/1529139
+bool Utils::signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent)
+{
+    bool success = false;
+    DWORD thisConsoleId = GetCurrentProcessId();
+    // Leave current console if it exists
+    // (otherwise AttachConsole will return ERROR_ACCESS_DENIED)
+    bool consoleDetached = (FreeConsole() != FALSE);
+
+    if (AttachConsole(dwProcessId) != FALSE)
+    {
+        // Add a fake Ctrl-C handler for avoid instant kill is this console
+        // WARNING: do not revert it or current program will be also killed
+        SetConsoleCtrlHandler(nullptr, true);
+        success = (GenerateConsoleCtrlEvent(dwCtrlEvent, 0) != FALSE);
+        FreeConsole();
+    }
+
+    if (consoleDetached)
+    {
+        // Create a new console if previous was deleted by OS
+        if (AttachConsole(thisConsoleId) == FALSE)
+        {
+            int errorCode = GetLastError();
+            if (errorCode == 31) // 31=ERROR_GEN_FAILURE
+            {
+                AllocConsole();
+            }
+        }
+    }
+    return success;
+}
+#endif

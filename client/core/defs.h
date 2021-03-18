@@ -63,7 +63,11 @@ enum ErrorCode
 
     // VPN errors
     OpenVpnAdaptersInUseError,
-    OpenVpnUnknownError
+    OpenVpnUnknownError,
+
+    // 3rd party utils errors
+    OpenVpnExecutableCrashed,
+    ShadowSocksExecutableCrashed
 };
 
 namespace config {

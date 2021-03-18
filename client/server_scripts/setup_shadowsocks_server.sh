@@ -1,12 +1,12 @@
 # CONTAINER_NAME=... this var will be set in ServerController
 # Don't run commands in background like sh -c "openvpn &"
 
-pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; if [[ -f "/usr/bin/sudo" ]]; then $pm install -y sudo; fi
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; if [[ -f "/usr/bin/sudo" ]]; then $pm install -y -q sudo; fi
 sudo iptables -P FORWARD ACCEPT
 
-pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm update -y
-pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm install -y curl
-pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then sudo $pm_apt install -y docker.io; else sudo $pm_yum install -y docker; fi
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm update -y -q
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm install -y -q curl
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then sudo export DEBIAN_FRONTEND=noninteractive; sudo $pm_apt install -y -q docker.io; else sudo $pm_yum install -y -q docker; fi
 sudo systemctl start docker
 
 sudo docker stop $CONTAINER_NAME
@@ -14,6 +14,8 @@ sudo docker rm -f $CONTAINER_NAME
 sudo docker pull amneziavpn/shadowsocks:latest
 sudo docker run -d --restart always --cap-add=NET_ADMIN -p 1194:1194/tcp -p 6789:6789/tcp --name $CONTAINER_NAME amneziavpn/shadowsocks:latest
 
+# Prevent to route packets outside of the container in case if server behind of the NAT
+sudo docker exec -i $CONTAINER_NAME sh -c "ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up"
 
 sudo docker exec -i $CONTAINER_NAME sh -c "mkdir -p /opt/amneziavpn_data/clients"
 sudo docker exec -i $CONTAINER_NAME sh -c "cd /opt/amneziavpn_data && easyrsa init-pki"

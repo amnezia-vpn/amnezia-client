@@ -11,6 +11,7 @@
 #include <QApplication>
 
 #include "sshconnectionmanager.h"
+#include "utils.h"
 
 
 using namespace QSsh;
@@ -24,7 +25,7 @@ QString ServerController::getContainerName(DockerContainer container)
     }
 }
 
-ErrorCode ServerController::runScript(DockerContainer container,
+ErrorCode ServerController::runScript(const QHash<QString, QString> &vars,
     const SshConnectionParameters &sshParams, QString script,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
@@ -41,7 +42,11 @@ ErrorCode ServerController::runScript(DockerContainer container,
     const QStringList &lines = script.split("\n", QString::SkipEmptyParts);
     for (int i = 0; i < lines.count(); i++) {
         QString line = lines.at(i);
-        line.replace("$CONTAINER_NAME", getContainerName(container));
+
+        for (const QString &var : vars.keys()) {
+            //qDebug() << "Replacing" << var << vars.value(var);
+            line.replace(var, vars.value(var));
+        }
 
         if (line.startsWith("#")) {
             continue;
@@ -209,7 +214,7 @@ ErrorCode ServerController::signCert(DockerContainer container,
 
     QStringList script {script_import, script_sign};
 
-    return runScript(container, sshParams(credentials), script.join("\n"));
+    return runScript(genVarsForScript(credentials, container), sshParams(credentials), script.join("\n"));
 }
 
 ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
@@ -306,7 +311,7 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
     scriptData = file.readAll();
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
-    return runScript(container, sshParams(credentials), scriptData);
+    return runScript(genVarsForScript(credentials, container), sshParams(credentials), scriptData);
 }
 
 ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Protocol proto)
@@ -351,7 +356,7 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
         stdOut += data + "\n";
     };
 
-    ErrorCode e = runScript(DockerContainer::OpenVpn, sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
+    ErrorCode e = runScript(genVarsForScript(credentials, DockerContainer::OpenVpn), sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
     if (e) return e;
     QApplication::processEvents();
 
@@ -384,7 +389,7 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
         stdOut += data + "\n";
     };
 
-    ErrorCode e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
+    ErrorCode e = runScript(genVarsForScript(credentials, DockerContainer::ShadowSocks), sshParams(credentials), scriptData, cbReadStdOut, cbReadStdErr);
     if (e) return e;
 
     // Create ss config
@@ -407,8 +412,25 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
     QString script = QString("sudo docker exec -d %1 sh -c \"ss-server -c %2\"").
             arg(getContainerName(DockerContainer::ShadowSocks)).arg(sSConfigPath);
 
-    e = runScript(DockerContainer::ShadowSocks, sshParams(credentials), script);
+    e = runScript(genVarsForScript(credentials, DockerContainer::ShadowSocks), sshParams(credentials), script);
     return e;
+}
+
+QHash<QString, QString> ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container)
+{
+    QHash<QString, QString> vars;
+
+    vars.insert("$CONTAINER_NAME", getContainerName(container));
+
+    QString serverIp = Utils::getIPAddress(credentials.hostName);
+    if (!serverIp.isEmpty()) {
+        vars.insert("$SERVER_IP_ADDRESS", serverIp);
+    }
+    else {
+        qWarning() << "ServerController::genVarsForScript unable to resolve address for credentials.hostName";
+    }
+
+    return vars;
 }
 
 SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
@@ -470,5 +492,5 @@ ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credent
     file.open(QIODevice::ReadOnly);
 
     QString script = file.readAll();
-    return runScript(DockerContainer::OpenVpn, sshParams(credentials), script);
+    return runScript(genVarsForScript(credentials, DockerContainer::OpenVpn), sshParams(credentials), script);
 }
