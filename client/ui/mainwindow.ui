@@ -263,7 +263,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>8</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_23">
@@ -1918,7 +1918,7 @@ background: #211966;
         </rect>
        </property>
        <property name="text">
-        <string>Software version: 1.5.2 (17.03.2021)</string>
+        <string>Software version: 1.5.3 (19.03.2021)</string>
        </property>
       </widget>
      </widget>
@@ -2531,8 +2531,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>500</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">
