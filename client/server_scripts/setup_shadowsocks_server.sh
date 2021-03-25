@@ -1,7 +1,7 @@
 # CONTAINER_NAME=... this var will be set in ServerController
 # Don't run commands in background like sh -c "openvpn &"
 
-pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; if [[ -f "/usr/bin/sudo" ]]; then $pm install -y -q sudo; fi
+pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; if [[ ! -f "/usr/bin/sudo" ]]; then $pm update -y -q; $pm install -y -q sudo; fi
 sudo iptables -P FORWARD ACCEPT
 
 pm_apt="/usr/bin/apt-get"; pm_yum="/usr/bin/yum"; if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else pm=$pm_yum; fi; sudo $pm update -y -q
