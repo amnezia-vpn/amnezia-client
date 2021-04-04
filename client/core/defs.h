@@ -9,14 +9,30 @@ enum class Protocol {
     Any,
     OpenVpn,
     ShadowSocks,
+    OpenVpnOverCloak,
     WireGuard
 };
 
 enum class DockerContainer {
+    None,
     OpenVpn,
     ShadowSocks,
+    OpenVpnOverCloak,
     WireGuard
 };
+
+static DockerContainer containerForProto(Protocol proto)
+{
+    Q_ASSERT(proto != Protocol::Any);
+
+    switch (proto) {
+    case Protocol::OpenVpn: return DockerContainer::OpenVpn;
+    case Protocol::OpenVpnOverCloak: return DockerContainer::OpenVpnOverCloak;
+    case Protocol::ShadowSocks: return DockerContainer::ShadowSocks;
+    case Protocol::WireGuard: return DockerContainer::WireGuard;
+    case Protocol::Any: return DockerContainer::None;
+    }
+}
 
 struct ServerCredentials
 {
@@ -48,6 +64,7 @@ enum ErrorCode
     // Ssh remote process errors
     SshRemoteProcessCreationError,
     FailedToStartRemoteProcessError, RemoteProcessCrashError,
+    SshSftpError,
 
     // Local errors
     FailedToSaveConfigData,
@@ -59,6 +76,7 @@ enum ErrorCode
     OpenVpnExecutableMissing,
     EasyRsaExecutableMissing,
     ShadowSocksExecutableMissing,
+    CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
 
     // VPN errors
@@ -67,7 +85,8 @@ enum ErrorCode
 
     // 3rd party utils errors
     OpenVpnExecutableCrashed,
-    ShadowSocksExecutableCrashed
+    ShadowSocksExecutableCrashed,
+    CloakExecutableCrashed
 };
 
 namespace config {
@@ -75,9 +94,9 @@ namespace config {
 static QString key_openvpn_config_data() { return "openvpn_config_data"; }
 static QString key_openvpn_config_path() { return "openvpn_config_path"; }
 static QString key_shadowsocks_config_data() { return "shadowsocks_config_data"; }
+static QString key_cloak_config_data() { return "cloak_config_data"; }
 
 }
-
 
 } // namespace amnezia
 

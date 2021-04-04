@@ -39,7 +39,14 @@
         <file>images/background_connected.png</file>
         <file>server_scripts/setup_shadowsocks_server.sh</file>
         <file>server_scripts/template_shadowsocks.ovpn</file>
-        <file>server_scripts/setup_firewall.sh</file>
+        <file>server_scripts/setup_host_firewall.sh</file>
         <file>images/reload.png</file>
+        <file>server_scripts/openvpn_cloak/Dockerfile</file>
+        <file>server_scripts/openvpn_cloak/configure_container.sh</file>
+        <file>server_scripts/openvpn_cloak/start.sh</file>
+        <file>server_scripts/openvpn_cloak/template.ovpn</file>
+        <file>server_scripts/install_docker.sh</file>
+        <file>server_scripts/build_container.sh</file>
+        <file>server_scripts/prepare_host.sh</file>
     </qresource>
 </RCC>

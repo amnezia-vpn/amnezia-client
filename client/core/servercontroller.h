@@ -12,17 +12,12 @@ class ServerController : public QObject
 {
     Q_OBJECT
 public:
+    typedef QList<QPair<QString, QString>> Vars;
 
     static ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
 
     // QSsh exitCode and exitStatus are different things
     static ErrorCode fromSshProcessExitStatus(int exitStatus);
-
-    static QString caCertPath() { return "/opt/amneziavpn_data/pki/ca.crt"; }
-    static QString clientCertPath() { return "/opt/amneziavpn_data/pki/issued/"; }
-    static QString taKeyPath() { return "/opt/amneziavpn_data/ta.key"; }
-
-    static QString getContainerName(amnezia::DockerContainer container);
 
     static QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
 
@@ -31,33 +26,32 @@ public:
 
     static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
+    static ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath);
+
     static ErrorCode uploadTextFileToContainer(DockerContainer container,
-        const ServerCredentials &credentials, QString &file, const QString &path);
+        const ServerCredentials &credentials, const QString &file, const QString &path);
 
     static QString getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
 
-    static ErrorCode signCert(DockerContainer container,
-        const ServerCredentials &credentials, QString clientId);
-
-    static int ssRemotePort() { return 6789; } // TODO move to ShadowSocksDefs.h
-    static int ssContainerPort() { return 8585; } // TODO move to ShadowSocksDefs.h
-    static QString ssEncryption() { return "chacha20-ietf-poly1305"; } // TODO move to ShadowSocksDefs.h
-
     static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
-private:
-    static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
-    static ErrorCode runScript(const QHash<QString, QString> &vars,
-        const QSsh::SshConnectionParameters &sshParams, QString script,
+    static QString replaceVars(const QString &script, const Vars &vars);
+
+    static ErrorCode runScript(const QSsh::SshConnectionParameters &sshParams, QString script,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
 
+    static Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None);
+
+private:
+    static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
+
+    static ErrorCode installDocker(const ServerCredentials &credentials);
+
     static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials);
+    static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials);
     static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials);
-
-
-    static QHash<QString, QString> genVarsForScript(const ServerCredentials &credentials, DockerContainer container);
 };
 
 #endif // SERVERCONTROLLER_H

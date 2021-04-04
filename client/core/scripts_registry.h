@@ -1,0 +1,34 @@
+#ifndef SCRIPTS_REGISTRY_H
+#define SCRIPTS_REGISTRY_H
+
+#include <QLatin1String>
+#include "core/defs.h"
+
+namespace amnezia {
+
+enum SharedScriptType {
+    // General scripts
+    prepare_host,
+    install_docker,
+    build_container,
+    setup_host_firewall,
+};
+enum ProtocolScriptType {
+    // Protocol scripts
+    dockerfile,
+    configure_container,
+    container_startup,
+    openvpn_template
+};
+
+
+QString scriptFolder(Protocol proto);
+
+QString scriptName(SharedScriptType type);
+QString scriptName(ProtocolScriptType type);
+
+QString scriptData(SharedScriptType type);
+QString scriptData(ProtocolScriptType type, Protocol proto);
+}
+
+#endif // SCRIPTS_REGISTRY_H

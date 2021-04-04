@@ -1,24 +1,15 @@
-#include "openvpnconfigurator.h"
+#include "openvpn_configurator.h"
 #include <QApplication>
 #include <QProcess>
 #include <QString>
-#include <QRandomGenerator>
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <utils.h>
 
-QString OpenVpnConfigurator::getRandomString(int len)
-{
-    const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-
-    QString randomString;
-    for(int i=0; i<len; ++i) {
-        quint32 index = QRandomGenerator::global()->generate() % possibleCharacters.length();
-        QChar nextChar = possibleCharacters.at(index);
-        randomString.append(nextChar);
-    }
-    return randomString;
-}
+#include "core/server_defs.h"
+#include "protocols/protocols_defs.h"
+#include "core/scripts_registry.h"
 
 QString OpenVpnConfigurator::getEasyRsaShPath()
 {
@@ -26,17 +17,10 @@ QString OpenVpnConfigurator::getEasyRsaShPath()
     // easyrsa sh path should looks like
     // "/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa"
     QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-//    easyRsaShPath.replace("C:\\", "/cygdrive/c/");
-//    easyRsaShPath.replace("\\", "/");
     easyRsaShPath = "\"" + easyRsaShPath + "\"";
-
-//    easyRsaShPath = "\"/cygdrive/c/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
-
-//    easyRsaShPath = "\"C:\\Program Files (x86)\\AmneziaVPN\\easyrsa\\easyrsa\"";
     qDebug().noquote() << "EasyRsa sh path" << easyRsaShPath;
 
     return easyRsaShPath;
-//    return "\"/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa\"";
 #else
     return QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/easyrsa";
 #endif
@@ -126,7 +110,7 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 {
     OpenVpnConfigurator::ConnectionData connData;
-    connData.clientId = getRandomString(32);
+    connData.clientId = Utils::getRandomString(32);
 
     QTemporaryDir dir;
     //    if (dir.isValid()) {
@@ -165,15 +149,11 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    QString reqFileName = QString("/opt/amneziavpn_data/clients/%1.req").arg(connData.clientId);
+    QString reqFileName = QString("%1/%2.req").
+            arg(amnezia::protocols::openvpn::clientsDirPath()).
+            arg(connData.clientId);
 
-    DockerContainer container;
-    if (proto == Protocol::OpenVpn) container = DockerContainer::OpenVpn;
-    else if (proto == Protocol::ShadowSocks) container = DockerContainer::ShadowSocks;
-    else {
-        if (errorCode) *errorCode = ErrorCode::InternalError;
-        return connData;
-    }
+    DockerContainer container = amnezia::containerForProto(proto);
 
     ErrorCode e = ServerController::uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
     if (e) {
@@ -181,20 +161,22 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    e = ServerController::signCert(container, credentials, connData.clientId);
+    e = signCert(container, credentials, connData.clientId);
     if (e) {
         if (errorCode) *errorCode = e;
         return connData;
     }
 
-    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, ServerController::caCertPath(), &e);
-    connData.clientCert = ServerController::getTextFileFromContainer(container, credentials, ServerController::clientCertPath() + QString("%1.crt").arg(connData.clientId), &e);
+    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath(), &e);
+    connData.clientCert = ServerController::getTextFileFromContainer(container, credentials,
+        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath()).arg(connData.clientId), &e);
+
     if (e) {
         if (errorCode) *errorCode = e;
         return connData;
     }
 
-    connData.taKey = ServerController::getTextFileFromContainer(container, credentials, ServerController::taKeyPath(), &e);
+    connData.taKey = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath(), &e);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
@@ -214,23 +196,31 @@ Settings &OpenVpnConfigurator::m_settings()
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
     Protocol proto, ErrorCode *errorCode)
 {
-    QFile configTemplFile;
-    if (proto == Protocol::OpenVpn)
-        configTemplFile.setFileName(":/server_scripts/template_openvpn.ovpn");
-    else if (proto == Protocol::ShadowSocks) {
-        configTemplFile.setFileName(":/server_scripts/template_shadowsocks.ovpn");
-    }
+//    QFile configTemplFile;
+//    if (proto == Protocol::OpenVpn)
+//        configTemplFile.setFileName(":/server_scripts/template_openvpn.ovpn");
+//    else if (proto == Protocol::ShadowSocks) {
+//        configTemplFile.setFileName(":/server_scripts/template_shadowsocks.ovpn");
+//    }
 
-    configTemplFile.open(QIODevice::ReadOnly);
-    QString config = configTemplFile.readAll();
+//    configTemplFile.open(QIODevice::ReadOnly);
+//    QString config = configTemplFile.readAll();
+
+    QString config = amnezia::scriptData(ProtocolScriptType::openvpn_template, proto);
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, proto, errorCode);
+    if (errorCode && *errorCode) {
+        return "";
+    }
 
     if (proto == Protocol::OpenVpn)
         config.replace("$PROTO", "udp");
     else if (proto == Protocol::ShadowSocks) {
         config.replace("$PROTO", "tcp");
-        config.replace("$LOCAL_PROXY_PORT", QString::number(ServerController::ssContainerPort()));
+        config.replace("$LOCAL_PROXY_PORT", QString::number(amnezia::protocols::shadowsocks::ssContainerPort()));
+    }
+    else if (proto == Protocol::OpenVpnOverCloak) {
+        config.replace("$PROTO", "tcp");
     }
 
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
@@ -241,7 +231,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     }
 
     config.replace("$REMOTE_HOST", connData.host);
-    config.replace("$REMOTE_PORT", "1194");
+    config.replace("$REMOTE_PORT", amnezia::protocols::openvpn::openvpnDefaultPort());
     config.replace("$CA_CERT", connData.caCert);
     config.replace("$CLIENT_CERT", connData.clientCert);
     config.replace("$PRIV_KEY", connData.privKey);
@@ -286,4 +276,24 @@ QString OpenVpnConfigurator::convertOpenSShKey(const QString &key)
     tmp.open();
 
     return tmp.readAll();
+}
+
+ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
+    const ServerCredentials &credentials, QString clientId)
+{
+    QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
+                             "easyrsa import-req %2/%3.req %3\"")
+            .arg(amnezia::server::getContainerName(container))
+            .arg(amnezia::protocols::openvpn::clientsDirPath())
+            .arg(clientId);
+
+    QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
+                                    "easyrsa sign-req client %2\"")
+            .arg(amnezia::server::getContainerName(container))
+            .arg(clientId);
+
+    QStringList scriptList {script_import, script_sign};
+    QString script = ServerController::replaceVars(scriptList.join("\n"), ServerController::genVarsForScript(credentials, container));
+
+    return ServerController::runScript(ServerController::sshParams(credentials), script);
 }

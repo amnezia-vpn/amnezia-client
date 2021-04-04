@@ -1918,7 +1918,7 @@ background: #211966;
         </rect>
        </property>
        <property name="text">
-        <string>Software version: 1.5.3 (19.03.2021)</string>
+        <string>Software version: 1.6.0 (31.03.2021)</string>
        </property>
       </widget>
      </widget>
@@ -2659,8 +2659,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>500</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">

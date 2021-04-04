@@ -3,13 +3,16 @@
 #include <QFile>
 #include <QJsonObject>
 
-#include <core/openvpnconfigurator.h>
+#include <configurators/openvpn_configurator.h>
+#include <configurators/cloak_configurator.h>
 #include <core/servercontroller.h>
 
 #include "ipc.h"
 #include "core/ipcclient.h"
 #include "protocols/openvpnprotocol.h"
+#include "protocols/openvpnovercloakprotocol.h"
 #include "protocols/shadowsocksvpnprotocol.h"
+
 #include "utils.h"
 #include "vpnconnection.h"
 
@@ -80,7 +83,7 @@ ErrorCode VpnConnection::lastError() const
 ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credentials, Protocol protocol)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocks) {
+    if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocks || protocol == Protocol::OpenVpnOverCloak) {
         QString openVpnConfigData = OpenVpnConfigurator::genOpenVpnConfig(credentials, protocol, &errorCode);
         m_vpnConfiguration.insert(config::key_openvpn_config_data(), openVpnConfigData);
         if (errorCode) {
@@ -91,6 +94,7 @@ ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credent
         if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
             QTextStream stream(&file);
             stream << openVpnConfigData << endl;
+            file.close();
         }
         else {
             return ErrorCode::FailedToSaveConfigData;
@@ -102,6 +106,11 @@ ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credent
         m_vpnConfiguration.insert(config::key_shadowsocks_config_data(), ssConfigData);
     }
 
+    if (protocol == Protocol::OpenVpnOverCloak) {
+        QJsonObject cloakConfigData = CloakConfigurator::genCloakConfig(credentials, Protocol::OpenVpnOverCloak, &errorCode);
+        m_vpnConfiguration.insert(config::key_cloak_config_data(), cloakConfigData);
+    }
+
     //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
     return ErrorCode::NoError;
 }
@@ -111,7 +120,8 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
     qDebug() << "connectToVpn, CustomRouting is" << m_settings.customRouting();
 //    qDebug() << "Cred" << m_settings.serverCredentials().hostName <<
 //                m_settings.serverCredentials().password;
-    protocol = Protocol::ShadowSocks;
+    //protocol = Protocol::ShadowSocks;
+    protocol = Protocol::OpenVpnOverCloak;
 
     // TODO: Try protocols one by one in case of Protocol::Any
     // TODO: Implement some behavior in case if connection not stable
@@ -150,6 +160,20 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
         }
 
         m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
+        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            return e;
+        }
+    }
+    else if (protocol == Protocol::OpenVpnOverCloak) {
+        ErrorCode e = createVpnConfiguration(credentials, Protocol::OpenVpnOverCloak);
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            return e;
+        }
+
+        m_vpnProtocol.reset(new OpenVpnOverCloakProtocol(m_vpnConfiguration));
         e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
         if (e) {
             emit connectionStateChanged(VpnProtocol::ConnectionState::Error);

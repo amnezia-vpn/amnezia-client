@@ -15,7 +15,7 @@
 #include <protocols/shadowsocksvpnprotocol.h>
 
 #include "core/errorstrings.h"
-#include "core/openvpnconfigurator.h"
+#include "configurators/openvpn_configurator.h"
 #include "core/servercontroller.h"
 #include "ui/qautostart.h"
 
@@ -111,6 +111,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_new_server_ip->setValidator(&m_ipAddressPortValidator);
     ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
     ui->lineEdit_network_settings_dns2->setValidator(&m_ipAddressValidator);
+
+    ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(ui->page_share_shadowsocks));
+    ui->page_share_shadowsocks->setVisible(false);
 }
 
 MainWindow::~MainWindow()

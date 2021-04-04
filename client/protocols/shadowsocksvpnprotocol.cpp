@@ -3,6 +3,7 @@
 
 #include "debug.h"
 #include "utils.h"
+#include "protocols/protocols_defs.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
@@ -99,11 +100,11 @@ QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials
 {
     QJsonObject ssConfig;
     ssConfig.insert("server", credentials.hostName);
-    ssConfig.insert("server_port", ServerController::ssRemotePort());
-    ssConfig.insert("local_port", ServerController::ssContainerPort());
+    ssConfig.insert("server_port", amnezia::protocols::shadowsocks::ssRemotePort());
+    ssConfig.insert("local_port", amnezia::protocols::shadowsocks::ssContainerPort());
     ssConfig.insert("password", QString(QCryptographicHash::hash(credentials.password.toUtf8(), QCryptographicHash::Sha256).toHex()));
     ssConfig.insert("timeout", 60);
-    ssConfig.insert("method", ServerController::ssEncryption());
+    ssConfig.insert("method", amnezia::protocols::shadowsocks::ssEncryption());
     return ssConfig;
 }
 

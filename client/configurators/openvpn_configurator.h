@@ -1,13 +1,12 @@
-#ifndef OPENVPNCONFIGURATOR_H
-#define OPENVPNCONFIGURATOR_H
+#ifndef OPENVPN_CONFIGURATOR_H
+#define OPENVPN_CONFIGURATOR_H
 
 #include <QObject>
 #include <QProcessEnvironment>
 
-#include "defs.h"
+#include "core/defs.h"
 #include "settings.h"
-#include "servercontroller.h"
-
+#include "core/servercontroller.h"
 
 class OpenVpnConfigurator
 {
@@ -28,8 +27,10 @@ public:
 
     static QString convertOpenSShKey(const QString &key);
 
+    static ErrorCode signCert(DockerContainer container,
+        const ServerCredentials &credentials, QString clientId);
+
 private:
-    static QString getRandomString(int len);
     static QString getEasyRsaShPath();
 
     static QProcessEnvironment prepareEnv();
@@ -44,4 +45,4 @@ private:
     static Settings &m_settings();
 };
 
-#endif // OPENVPNCONFIGURATOR_H
+#endif // OPENVPN_CONFIGURATOR_H

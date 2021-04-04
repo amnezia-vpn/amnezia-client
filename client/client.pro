@@ -13,14 +13,19 @@ include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 
 HEADERS  += \
     ../ipc/ipc.h \
+   configurators/cloak_configurator.h \
     core/defs.h \
     core/errorstrings.h \
     core/ipcclient.h \
-    core/openvpnconfigurator.h \
+    configurators/openvpn_configurator.h \
+   core/scripts_registry.h \
+   core/server_defs.h \
     core/servercontroller.h \
     debug.h \
     defines.h \
     managementserver.h \
+   protocols/openvpnovercloakprotocol.h \
+   protocols/protocols_defs.h \
     protocols/shadowsocksvpnprotocol.h \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
@@ -32,12 +37,16 @@ HEADERS  += \
     protocols/openvpnprotocol.h \
 
 SOURCES  += \
+   configurators/cloak_configurator.cpp \
     core/ipcclient.cpp \
-    core/openvpnconfigurator.cpp \
+    configurators/openvpn_configurator.cpp \
+   core/scripts_registry.cpp \
+   core/server_defs.cpp \
     core/servercontroller.cpp \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+   protocols/openvpnovercloakprotocol.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
