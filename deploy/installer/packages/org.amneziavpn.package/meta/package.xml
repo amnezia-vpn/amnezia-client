@@ -2,8 +2,8 @@
 <Package>
     <DisplayName>AmneziaVPN</DisplayName>
     <Description>Installation package for AmneziaVPN</Description>
-    <Version>1.0.0</Version>
-    <ReleaseDate>1970-01-01</ReleaseDate>
+    <Version>1.6.0.0</Version>
+    <ReleaseDate>2021-03-31</ReleaseDate>
     <Default>true</Default>
     <ForcedInstallation>true</ForcedInstallation>
     <RequiresAdminRights>true</RequiresAdminRights>
