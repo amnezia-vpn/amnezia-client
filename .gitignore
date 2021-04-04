@@ -3,6 +3,7 @@
 macOSPackage/
 AmneziaVPN.dmg
 AmneziaVPN.exe
+AmneziaVPN_*.exe
 deploy/build/*
 winbuild.bat
 
