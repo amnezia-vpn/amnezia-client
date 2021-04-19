@@ -31,6 +31,7 @@ HEADERS  += \
     ui/Controls/SlidingStackedWidget.h \
     ui/mainwindow.h \
    ui/qautostart.h \
+   ui/server_widget.h \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
@@ -52,12 +53,14 @@ SOURCES  += \
     ui/Controls/SlidingStackedWidget.cpp \
     ui/mainwindow.cpp \
    ui/qautostart.cpp \
+   ui/server_widget.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     protocols/openvpnprotocol.cpp \
 
-FORMS    += ui/mainwindow.ui
+FORMS    += ui/mainwindow.ui \
+   ui/server_widget.ui
 
 RESOURCES += \
     resources.qrc

@@ -25,6 +25,8 @@
 #include "ui_mainwindow.h"
 #include "utils.h"
 #include "vpnconnection.h"
+#include "ui/server_widget.h"
+#include "ui_server_widget.h"
 
 #ifdef Q_OS_MAC
 #include "ui/macos_util.h"
@@ -43,8 +45,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setupTray();
     setupUiConnections();
+    setupProtocolsPage();
 
     ui->label_error_text->clear();
+    installEventFilter(this);
     ui->widget_tittlebar->installEventFilter(this);
 
     ui->stackedWidget_main->setSpeed(200);
@@ -67,11 +71,10 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     // Post initialization
+    goToPage(Page::Start, true, false);
 
     if (m_settings.haveAuthData()) {
         goToPage(Page::Vpn, true, false);
-    } else {
-        goToPage(Page::Start, true, false);
     }
 
     connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
@@ -137,6 +140,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::goToPage(Page page, bool reset, bool slide)
 {
+    qDebug() << "goToPage" << page;
     if (reset) {
         if (page == Page::NewServer) {
             ui->label_new_server_wait_info->hide();
@@ -148,13 +152,13 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
         if (page == Page::ServerSettings) {
             ui->label_server_settings_wait_info->hide();
             ui->label_server_settings_wait_info->clear();
-            ui->label_server_settings_server->setText(QString("%1@%2:%3")
-                                                      .arg(m_settings.userName())
-                                                      .arg(m_settings.serverName())
-                                                      .arg(m_settings.serverPort()));
+//            ui->label_server_settings_server->setText(QString("%1@%2:%3")
+//                                                      .arg(m_settings.userName())
+//                                                      .arg(m_settings.serverName())
+//                                                      .arg(m_settings.serverPort()));
         }
         if (page == Page::ShareConnection) {
-            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.serverCredentials());
+            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.defaultServerCredentials());
 
             QString ssString = QString("%1:%2@%3:%4")
                     .arg(ssConfig.value("method").toString())
@@ -171,14 +175,29 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             ui->label_share_ss_method->setText(ssConfig.value("method").toString());
             ui->label_share_ss_password->setText(ssConfig.value("password").toString());
         }
+        if (page == Page::ServerSettings) {
+            updateSettings();
+        }
+        if (page == Page::Start) {
+            ui->pushButton_back_from_start->setVisible(!pagesStack.isEmpty());
+        }
 
         ui->pushButton_new_server_connect_key->setChecked(false);
     }
 
     if (slide)
-        ui->stackedWidget_main->slideInWidget(getPageWidget(page));
+        ui->stackedWidget_main->slideInWidget(getPageWidget(page), SlidingStackedWidget::RIGHT2LEFT);
     else
         ui->stackedWidget_main->setCurrentWidget(getPageWidget(page));
+
+    pagesStack.push(page);
+}
+
+void MainWindow::closePage()
+{
+    Page prev = pagesStack.pop();
+    qDebug() << "closePage" << prev << "Set page" << pagesStack.top();
+    ui->stackedWidget_main->slideInWidget(getPageWidget(pagesStack.top()), SlidingStackedWidget::LEFT2RIGHT);
 }
 
 QWidget *MainWindow::getPageWidget(MainWindow::Page page)
@@ -191,8 +210,13 @@ QWidget *MainWindow::getPageWidget(MainWindow::Page page)
     case(Page::AppSettings): return ui->page_app_settings;
     case(Page::NetworkSettings): return ui->page_network_settings;
     case(Page::ServerSettings): return ui->page_server_settings;
+    case(Page::ServerVpnProtocols): return ui->page_server_protocols;
+    case(Page::ServersList): return ui->page_servers;
     case(Page::ShareConnection): return ui->page_share_connection;
     case(Page::Sites): return ui->page_sites;
+    case(Page::OpenVpnSettings): return ui->page_proto_openvpn;
+    case(Page::ShadowSocksSettings): return ui->page_proto_shadowsocks;
+    case(Page::CloakSettings): return ui->page_proto_cloak;
     }
     return nullptr;
 }
@@ -224,6 +248,14 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             return false;
         }
     }
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Escape && ! ui->stackedWidget_main->isAnimationRunning() ) {
+            if (currentPage() != Page::Vpn && currentPage() != Page::Start) {
+                closePage();
+            }
+        }
+    }
 
     return QMainWindow::eventFilter(obj, event);
 }
@@ -236,6 +268,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             QMessageBox::warning(this, APPLICATION_NAME, tr("Cannot open logs folder!"));
         }
         break;
+    case Qt::Key_Q:
+        qApp->quit();
     default:
         ;
     }
@@ -326,7 +360,7 @@ void MainWindow::onPushButtonNewServerConnectWithNewData(bool)
                             ui->label_new_server_wait_info);
 
     if (ok) {
-        m_settings.setServerCredentials(serverCredentials);
+        //m_settings.setServerCredentials(serverCredentials);
 
         goToPage(Page::Vpn);
         qApp->processEvents();
@@ -358,7 +392,7 @@ void MainWindow::onPushButtonNewServerConnectWithExistingCode(bool)
         return;
     }
 
-    m_settings.setServerCredentials(credentials);
+    //m_settings.setServerCredentials(credentials);
 
     goToPage(Page::Vpn);
 }
@@ -425,7 +459,7 @@ bool MainWindow::installServer(ServerCredentials credentials,
 void MainWindow::onPushButtonReinstallServer(bool)
 {
     onDisconnect();
-    installServer(m_settings.serverCredentials(),
+    installServer(m_settings.defaultServerCredentials(),
                   ui->page_server_settings,
                   ui->progressBar_server_settings_reinstall,
                   ui->pushButton_server_settings_reinstall,
@@ -436,7 +470,7 @@ void MainWindow::onPushButtonClearServer(bool)
 {
     onDisconnect();
 
-    ErrorCode e = ServerController::removeServer(m_settings.serverCredentials(), Protocol::Any);
+    ErrorCode e = ServerController::removeServer(m_settings.defaultServerCredentials(), Protocol::Any);
     if (e) {
         QMessageBox::warning(this, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
@@ -455,10 +489,10 @@ void MainWindow::onPushButtonForgetServer(bool)
 {
     onDisconnect();
 
-    m_settings.setUserName("");
-    m_settings.setPassword("");
-    m_settings.setServerName("");
-    m_settings.setServerPort();
+//    m_settings.setUserName("");
+//    m_settings.setPassword("");
+//    m_settings.setServerName("");
+//    m_settings.setServerPort();
 
     goToPage(Page::Start);
 }
@@ -580,6 +614,8 @@ void MainWindow::setTrayIcon(const QString &iconPath)
 
 MainWindow::Page MainWindow::currentPage()
 {
+    ui->stackedWidget_main->waitForAnimation();
+
     QWidget *currentPage = ui->stackedWidget_main->currentWidget();
     QMetaEnum e = QMetaEnum::fromType<MainWindow::Page>();
 
@@ -616,6 +652,8 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::AppSettings); });
     connect(ui->pushButton_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::NetworkSettings); });
     connect(ui->pushButton_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
+    connect(ui->pushButton_server_settings_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerVpnProtocols); });
+    connect(ui->pushButton_servers_list, &QPushButton::clicked, this, [this](){ goToPage(Page::ServersList); });
     connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
         goToPage(Page::ShareConnection);
         updateShareCode();
@@ -631,13 +669,35 @@ void MainWindow::setupUiConnections()
     });
 
 
-    connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
-    connect(ui->pushButton_back_from_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
-    connect(ui->pushButton_back_from_new_server, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
-    connect(ui->pushButton_back_from_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
-    connect(ui->pushButton_back_from_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
-    connect(ui->pushButton_back_from_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
-    connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
+//    connect(ui->pushButton_back_from_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::Vpn); });
+//    connect(ui->pushButton_back_from_new_server, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
+//    connect(ui->pushButton_back_from_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_server_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_servers, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
+//    connect(ui->pushButton_back_from_server_vpn_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
+
+//    connect(ui->pushButton_back_from_server_vpn_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
+//    connect(ui->pushButton_back_from_server_vpn_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
+//    connect(ui->pushButton_back_from_server_vpn_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerSettings); });
+
+    connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_start, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_new_server, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_app_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_network_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_server_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_servers, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_share, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_server_vpn_protocols, &QPushButton::clicked, this, [this](){ closePage(); });
+
+    connect(ui->pushButton_back_from_openvpn_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_cloak_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+    connect(ui->pushButton_back_from_shadowsocks_settings, &QPushButton::clicked, this, [this](){ closePage(); });
+
 
     connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
 
@@ -659,11 +719,11 @@ void MainWindow::setupUiConnections()
     });
 
     connect(ui->pushButton_network_settings_resetdns1, &QPushButton::clicked, this, [this](){
-        m_settings.setPrimaryDns(m_settings.cloudFlareNs1());
+        m_settings.setPrimaryDns(m_settings.cloudFlareNs1);
         updateSettings();
     });
     connect(ui->pushButton_network_settings_resetdns2, &QPushButton::clicked, this, [this](){
-        m_settings.setSecondaryDns(m_settings.cloudFlareNs2());
+        m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
         updateSettings();
     });
 
@@ -687,6 +747,36 @@ void MainWindow::setupUiConnections()
 
     connect(ui->pushButton_check_for_updates, &QPushButton::clicked, this, [this](){
         QDesktopServices::openUrl(QUrl("https://github.com/amnezia-vpn/desktop-client/releases"));
+    });
+
+    connect(ui->pushButton_servers_add_new, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
+}
+
+void MainWindow::setupProtocolsPage()
+{
+    connect(ui->pushButton_proto_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
+        goToPage(Page::OpenVpnSettings);
+    });
+    connect(ui->pushButton_proto_ss_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
+        goToPage(Page::OpenVpnSettings);
+    });
+    connect(ui->pushButton_proto_cloak_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
+        goToPage(Page::OpenVpnSettings);
+    });
+
+    connect(ui->pushButton_proto_cloak_openvpn_cont_default, &QPushButton::clicked, this, [this](){
+        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::OpenVpnOverCloak);
+        updateSettings();
+    });
+
+    connect(ui->pushButton_proto_ss_openvpn_cont_default, &QPushButton::clicked, this, [this](){
+        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::ShadowSocksOverOpenVpn);
+        updateSettings();
+    });
+
+    connect(ui->pushButton_proto_openvpn_cont_default, &QPushButton::clicked, this, [this](){
+        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::OpenVpn);
+        updateSettings();
     });
 
 }
@@ -753,7 +843,7 @@ void MainWindow::onConnect()
     qApp->processEvents();
 
     // TODO: Call connectToVpn with restricted server account
-    ServerCredentials credentials = m_settings.serverCredentials();
+    ServerCredentials credentials = m_settings.defaultServerCredentials();
 
     ErrorCode errorCode = m_vpnConnection->connectToVpn(credentials);
     if (errorCode) {
@@ -864,18 +954,36 @@ void MainWindow::updateSettings()
     for(const QString &site : m_settings.customSites()) {
         makeSitesListItem(ui->listWidget_sites, site);
     }
+
+    ui->listWidget_servers->clear();
+    const QJsonArray &servers = m_settings.serversArray();
+    int defaultServer = m_settings.defaultServerIndex();
+
+    for(int i = 0; i < servers.size(); i++) {
+        makeServersListItem(ui->listWidget_servers, servers.at(i).toObject(), i == defaultServer, i);
+    }
+
+    QJsonObject selectedServer = m_settings.server(selectedServerIndex);
+    QString selectedContainerName = m_settings.defaultContainerName(selectedServerIndex);
+
+    ui->label_server_settings_current_vpn_protocol->setText(tr("Protocol: ") + selectedContainerName);
+
+    qDebug() << "DefaultContainer(selectedServerIndex)" << selectedServerIndex << m_settings.defaultContainer(selectedServerIndex);
+    ui->pushButton_proto_cloak_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::OpenVpnOverCloak);
+    ui->pushButton_proto_ss_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::ShadowSocksOverOpenVpn);
+    ui->pushButton_proto_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::OpenVpn);
 }
 
 void MainWindow::updateShareCode()
 {
-    QJsonObject o;
-    o.insert("h", m_settings.serverName());
-    o.insert("p", m_settings.serverPort());
-    o.insert("u", m_settings.userName());
-    o.insert("w", m_settings.password());
+//    QJsonObject o;
+//    o.insert("h", m_settings.serverName());
+//    o.insert("p", m_settings.serverPort());
+//    o.insert("u", m_settings.userName());
+//    o.insert("w", m_settings.password());
 
-    QByteArray ba = QJsonDocument(o).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
+//    QByteArray ba = QJsonDocument(o).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+//    ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
 
     //qDebug() << "Share code" << QJsonDocument(o).toJson();
 }
@@ -900,6 +1008,34 @@ void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &addre
     connect(btn1, &QPushButton::clicked, this, [this, label]() {
         onPushButtonDeleteCustomSiteClicked(label->text());
         return;
+    });
+
+    QListWidgetItem* item = new QListWidgetItem(listWidget);
+    item->setSizeHint(size);
+    listWidget->setItemWidget(item, widget);
+
+    widget->setStyleSheet(styleSheet());
+}
+
+void MainWindow::makeServersListItem(QListWidget *listWidget, const QJsonObject &server, bool isDefault, int index)
+{
+    QSize size(310, 70);
+    ServerWidget* widget = new ServerWidget(server, isDefault);
+    widget->resize(size);
+
+    connect(widget->ui->pushButton_default, &QPushButton::clicked, this, [this, index](){
+        m_settings.setDefaultServer(index);
+        updateSettings();
+    });
+
+    connect(widget->ui->pushButton_share, &QPushButton::clicked, this, [this, index](){
+        goToPage(Page::ShareConnection);
+        // update share page
+    });
+
+    connect(widget->ui->pushButton_settings, &QPushButton::clicked, this, [this, index](){
+        selectedServerIndex = index;
+        goToPage(Page::ServerSettings);
     });
 
     QListWidgetItem* item = new QListWidgetItem(listWidget);

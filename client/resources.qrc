@@ -48,5 +48,9 @@
         <file>server_scripts/install_docker.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>
+        <file>images/check.png</file>
+        <file>images/uncheck.png</file>
+        <file>images/settings_grey.png</file>
+        <file>images/plus.png</file>
     </qresource>
 </RCC>

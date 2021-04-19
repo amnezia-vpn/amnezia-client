@@ -7,6 +7,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QRegExpValidator>
+#include <QStack>
 #include <QStringListModel>
 #include <QSystemTrayIcon>
 
@@ -39,7 +40,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    enum Page {Start, NewServer, Vpn, GeneralSettings, AppSettings, NetworkSettings, ServerSettings, ShareConnection,  Sites};
+    enum Page {Start, NewServer, Vpn, GeneralSettings, AppSettings, NetworkSettings,
+               ServerSettings, ServerVpnProtocols, ServersList, ShareConnection,  Sites,
+               OpenVpnSettings, ShadowSocksSettings, CloakSettings};
     Q_ENUM(Page)
 
 private slots:
@@ -69,6 +72,8 @@ private slots:
 
 private:
     void goToPage(Page page, bool reset = true, bool slide = true);
+    void closePage();
+
     QWidget *getPageWidget(Page page);
     Page currentPage();
 
@@ -78,10 +83,13 @@ private:
     void setTrayIcon(const QString &iconPath);
 
     void setupUiConnections();
+    void setupProtocolsPage();
+
     void updateSettings();
 
     void updateShareCode();
     void makeSitesListItem(QListWidget* listWidget, const QString &address);
+    void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
 
     void updateQRCodeImage(const QString &text, QLabel *label);
 private:
@@ -111,6 +119,10 @@ private:
     const QString ConnectedTrayIconName = "active.png";
     const QString DisconnectedTrayIconName = "default.png";
     const QString ErrorTrayIconName = "error.png";
+
+
+    QStack<Page> pagesStack;
+    int selectedServerIndex = -1; // server index to use when proto settings page opened
 };
 
 #endif // MAINWINDOW_H

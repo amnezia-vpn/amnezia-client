@@ -101,5 +101,5 @@ QString OpenVpnOverCloakProtocol::cloakExecPath()
 
 void OpenVpnOverCloakProtocol::readCloakConfiguration(const QJsonObject &configuration)
 {
-    m_cloakConfig = configuration.value(config::key_cloak_config_data()).toObject();
+    m_cloakConfig = configuration.value(config::key_cloak_config_data).toObject();
 }

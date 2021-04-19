@@ -9,7 +9,7 @@ QString amnezia::scriptFolder(amnezia::Protocol proto)
     switch (proto) {
     case Protocol::OpenVpn: return QLatin1String("openvpn");
     case Protocol::OpenVpnOverCloak: return QLatin1String("openvpn_cloak");
-    case Protocol::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
+    case Protocol::ShadowSocksOverOpenVpn: return QLatin1String("openvpn_shadowsocks");
     case Protocol::WireGuard: return QLatin1String("wireguard");
     default: return "";
     }

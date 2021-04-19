@@ -83,9 +83,9 @@ ErrorCode VpnConnection::lastError() const
 ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credentials, Protocol protocol)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocks || protocol == Protocol::OpenVpnOverCloak) {
+    if (protocol == Protocol::OpenVpn || protocol == Protocol::ShadowSocksOverOpenVpn || protocol == Protocol::OpenVpnOverCloak) {
         QString openVpnConfigData = OpenVpnConfigurator::genOpenVpnConfig(credentials, protocol, &errorCode);
-        m_vpnConfiguration.insert(config::key_openvpn_config_data(), openVpnConfigData);
+        m_vpnConfiguration.insert(config::key_openvpn_config_data, openVpnConfigData);
         if (errorCode) {
             return errorCode;
         }
@@ -101,14 +101,14 @@ ErrorCode VpnConnection::createVpnConfiguration(const ServerCredentials &credent
         }
     }
 
-    if (protocol == Protocol::ShadowSocks) {
+    if (protocol == Protocol::ShadowSocksOverOpenVpn) {
         QJsonObject ssConfigData = ShadowSocksVpnProtocol::genShadowSocksConfig(credentials);
-        m_vpnConfiguration.insert(config::key_shadowsocks_config_data(), ssConfigData);
+        m_vpnConfiguration.insert(config::key_shadowsocks_config_data, ssConfigData);
     }
 
     if (protocol == Protocol::OpenVpnOverCloak) {
         QJsonObject cloakConfigData = CloakConfigurator::genCloakConfig(credentials, Protocol::OpenVpnOverCloak, &errorCode);
-        m_vpnConfiguration.insert(config::key_cloak_config_data(), cloakConfigData);
+        m_vpnConfiguration.insert(config::key_cloak_config_data, cloakConfigData);
     }
 
     //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
@@ -152,8 +152,8 @@ ErrorCode VpnConnection::connectToVpn(const ServerCredentials &credentials, Prot
             return e;
         }
     }
-    else if (protocol == Protocol::ShadowSocks) {
-        ErrorCode e = createVpnConfiguration(credentials, Protocol::ShadowSocks);
+    else if (protocol == Protocol::ShadowSocksOverOpenVpn) {
+        ErrorCode e = createVpnConfiguration(credentials, Protocol::ShadowSocksOverOpenVpn);
         if (e) {
             emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
             return e;

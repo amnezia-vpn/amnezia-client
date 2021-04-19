@@ -215,7 +215,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 
     if (proto == Protocol::OpenVpn)
         config.replace("$PROTO", "udp");
-    else if (proto == Protocol::ShadowSocks) {
+    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
         config.replace("$PROTO", "tcp");
         config.replace("$LOCAL_PROXY_PORT", QString::number(amnezia::protocols::shadowsocks::ssContainerPort()));
     }

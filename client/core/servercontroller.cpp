@@ -392,15 +392,15 @@ ErrorCode ServerController::removeServer(const ServerCredentials &credentials, P
         if (e) {
             return e;
         }
-        return removeServer(credentials, Protocol::ShadowSocks);
+        return removeServer(credentials, Protocol::ShadowSocksOverOpenVpn);
     }
     else if (proto == Protocol::OpenVpn) {
         scriptFileName = ":/server_scripts/remove_container.sh";
         container = DockerContainer::OpenVpn;
     }
-    else if (proto == Protocol::ShadowSocks) {
+    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
         scriptFileName = ":/server_scripts/remove_container.sh";
-        container = DockerContainer::ShadowSocks;
+        container = DockerContainer::ShadowSocksOverOpenVpn;
     }
     else return ErrorCode::NotImplementedError;
 
@@ -427,7 +427,7 @@ ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Pr
         return ErrorCode::NoError;
         //return setupOpenVpnServer(credentials);
     }
-    else if (proto == Protocol::ShadowSocks) {
+    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
         return setupShadowSocksServer(credentials);
     }
     else if (proto == Protocol::Any) {
@@ -586,9 +586,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 {
     Vars vars;
 
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_IP", amnezia::server::vpnDefaultSubnetIp()));
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK_VAL", amnezia::server::vpnDefaultSubnetMaskVal()));
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK", amnezia::server::vpnDefaultSubnetMask()));
+    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_IP", amnezia::server::vpnDefaultSubnetIp));
+    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK_VAL", amnezia::server::vpnDefaultSubnetMaskVal));
+    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK", amnezia::server::vpnDefaultSubnetMask));
 
     vars.append(qMakePair<QString, QString>("$CONTAINER_NAME", amnezia::server::getContainerName(container)));
     vars.append(qMakePair<QString, QString>("$DOCKERFILE_FOLDER", "/opt/amnezia/" + amnezia::server::getContainerName(container)));
@@ -610,7 +610,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
         vars.append(qMakePair<QString, QString>("$SERVER_PORT", amnezia::protocols::cloak::ckDefaultPort()));
         vars.append(qMakePair<QString, QString>("$FAKE_WEB_SITE_ADDRESS", amnezia::protocols::cloak::ckDefaultRedirSite()));
     }
-    else if (container == DockerContainer::ShadowSocks) {
+    else if (container == DockerContainer::ShadowSocksOverOpenVpn) {
         vars.append(qMakePair<QString, QString>("$SERVER_PORT", "6789"));
     }
 

@@ -47,6 +47,8 @@ public slots:
     void slideInIdx(int idx, enum t_direction direction = AUTOMATIC);
     void slideInWidget(QWidget *widget, enum t_direction direction = AUTOMATIC);
 
+    bool isAnimationRunning();
+    void waitForAnimation();
 signals:
     // this is used for internal purposes in the class engine
     void animationFinished(void);
@@ -71,6 +73,10 @@ protected:
     bool m_active;
 
     QList<QWidget*> blockedPageList;
+
+    QPropertyAnimation *animnow;
+    QPropertyAnimation *animnext;
+    QParallelAnimationGroup *animgroup;
 };
 
 #endif // SLIDINGSTACKEDWIDGET_H
