@@ -45,13 +45,13 @@ bool RouterMac::clearSavedRoutes()
 //    return (cnt == m_addedRoutes.count());
 }
 
-bool RouterMac::routeDelete(const QString &ip)
+bool RouterMac::routeDelete(const QString &ip, const QString &gw)
 {
     //  route delete ip gw
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
-    p.start("route", QStringList() << "delete" << ip);
+    p.start("route", QStringList() << "delete" << ip << gw);
     p.waitForFinished();
     qDebug().noquote() << "OUTPUT routeDelete: " + p.readAll();
 

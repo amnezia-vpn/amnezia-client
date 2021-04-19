@@ -39,7 +39,7 @@ bool Router::routeDelete(const QString &ip, const QString &gw)
 #ifdef Q_OS_WIN
     return RouterWin::Instance().routeDelete(ip, gw);
 #elif defined (Q_OS_MAC)
-    return RouterMac::Instance().routeDelete(ip);
+    return RouterMac::Instance().routeDelete(ip, gw);
 #endif
 }
 
