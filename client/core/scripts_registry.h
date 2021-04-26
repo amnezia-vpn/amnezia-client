@@ -11,7 +11,10 @@ enum SharedScriptType {
     prepare_host,
     install_docker,
     build_container,
+    remove_container,
+    remove_all_containers,
     setup_host_firewall,
+    check_connection
 };
 enum ProtocolScriptType {
     // Protocol scripts

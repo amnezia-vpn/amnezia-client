@@ -9,10 +9,6 @@ namespace server {
 QString getContainerName(amnezia::DockerContainer container);
 QString getDockerfileFolder(amnezia::DockerContainer container);
 
-const char vpnDefaultSubnetIp[] = "10.8.0.0";
-const char vpnDefaultSubnetMask[] = "255.255.255.0";
-const char vpnDefaultSubnetMaskVal[] = "24";
-
 }
 }
 

@@ -38,8 +38,8 @@ ErrorCode OpenVpnOverCloakProtocol::start()
 
     QStringList args = QStringList() << "-c" << m_cloakCfgFile.fileName()
                                      << "-s" << m_cloakConfig.value("Remote").toString()
-                                     << "-p" << amnezia::protocols::cloak::ckDefaultPort()
-                                     << "-l" << amnezia::protocols::openvpn::openvpnDefaultPort();
+                                     << "-p" << amnezia::protocols::cloak::ckDefaultPort
+                                     << "-l" << amnezia::protocols::openvpn::openvpnDefaultPort;
 
     qDebug().noquote() << "OpenVpnOverCloakProtocol::start()"
                        << cloakExecPath() << args.join(" ");

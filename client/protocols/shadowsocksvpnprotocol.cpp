@@ -100,11 +100,11 @@ QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials
 {
     QJsonObject ssConfig;
     ssConfig.insert("server", credentials.hostName);
-    ssConfig.insert("server_port", amnezia::protocols::shadowsocks::ssRemotePort());
-    ssConfig.insert("local_port", amnezia::protocols::shadowsocks::ssContainerPort());
+    ssConfig.insert("server_port", amnezia::protocols::shadowsocks::ssDefaultPort);
+    ssConfig.insert("local_port", amnezia::protocols::shadowsocks::ssLocalProxyPort);
     ssConfig.insert("password", QString(QCryptographicHash::hash(credentials.password.toUtf8(), QCryptographicHash::Sha256).toHex()));
     ssConfig.insert("timeout", 60);
-    ssConfig.insert("method", amnezia::protocols::shadowsocks::ssEncryption());
+    ssConfig.insert("method", amnezia::protocols::shadowsocks::ssDefaultCipher);
     return ssConfig;
 }
 

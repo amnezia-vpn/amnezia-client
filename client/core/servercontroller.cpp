@@ -27,7 +27,12 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
 {
     SshConnection *client = connectToHost(sshParams);
-    if (client->state() != SshConnection::State::Connected) {
+    if (client->state() == SshConnection::State::Connecting) {
+        qDebug() << "ServerController::runScript aborted, connectToHost in progress";
+        return ErrorCode::SshTimeoutError;
+    }
+    else if (client->state() != SshConnection::State::Connected) {
+        qDebug() << "ServerController::runScript connectToHost error: " << fromSshConnectionErrorCode(client->errorState());
         return fromSshConnectionErrorCode(client->errorState());
     }
 
@@ -260,9 +265,9 @@ QString ServerController::getTextFileFromContainer(DockerContainer container,
 ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
 {
     QString caCert = ServerController::getTextFileFromContainer(container,
-        credentials, amnezia::protocols::openvpn::caCertPath());
+        credentials, amnezia::protocols::openvpn::caCertPath);
     QString taKey = ServerController::getTextFileFromContainer(container,
-        credentials, amnezia::protocols::openvpn::taKeyPath());
+        credentials, amnezia::protocols::openvpn::taKeyPath);
 
     if (!caCert.isEmpty() && !taKey.isEmpty()) {
         return ErrorCode::NoError;
@@ -382,66 +387,42 @@ SshConnectionParameters ServerController::sshParams(const ServerCredentials &cre
     return sshParams;
 }
 
-ErrorCode ServerController::removeServer(const ServerCredentials &credentials, Protocol proto)
+ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)
 {
-    QString scriptFileName;
-    DockerContainer container;
-
-    if (proto == Protocol::Any) {
-        ErrorCode e = removeServer(credentials, Protocol::OpenVpn);
-        if (e) {
-            return e;
-        }
-        return removeServer(credentials, Protocol::ShadowSocksOverOpenVpn);
-    }
-    else if (proto == Protocol::OpenVpn) {
-        scriptFileName = ":/server_scripts/remove_container.sh";
-        container = DockerContainer::OpenVpn;
-    }
-    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
-        scriptFileName = ":/server_scripts/remove_container.sh";
-        container = DockerContainer::ShadowSocksOverOpenVpn;
-    }
-    else return ErrorCode::NotImplementedError;
-
-
-    QString scriptData;
-
-    QFile file(scriptFileName);
-    if (! file.open(QIODevice::ReadOnly)) return ErrorCode::InternalError;
-
-    scriptData = file.readAll();
-    if (scriptData.isEmpty()) return ErrorCode::InternalError;
-
-    return runScript(sshParams(credentials), replaceVars(scriptData, genVarsForScript(credentials, container)));
+    return runScript(sshParams(credentials),
+        amnezia::scriptData(SharedScriptType::remove_all_containers));
 }
 
-ErrorCode ServerController::setupServer(const ServerCredentials &credentials, Protocol proto)
+ErrorCode ServerController::removeContainer(const ServerCredentials &credentials, DockerContainer container)
+{
+    return runScript(sshParams(credentials),
+        replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
+            genVarsForScript(credentials, container)));
+}
+
+ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     ErrorCode e = runScript(sshParams(credentials),
         replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
             genVarsForScript(credentials)));
+
     if (e) return e;
 
-    if (proto == Protocol::OpenVpn) {
+    if (container == DockerContainer::OpenVpn) {
         return ErrorCode::NoError;
-        //return setupOpenVpnServer(credentials);
+        //return setupOpenVpnServer(credentials, config);
     }
-    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
-        return setupShadowSocksServer(credentials);
+    else if (container == DockerContainer::ShadowSocksOverOpenVpn) {
+        return setupShadowSocksServer(credentials, config);
     }
-    else if (proto == Protocol::Any) {
-        //return ErrorCode::NotImplementedError;
-
-        //setupOpenVpnServer(credentials);
-        //return setupShadowSocksServer(credentials);
-        return setupOpenVpnOverCloakServer(credentials);
+    else if (container == DockerContainer::OpenVpnOverCloak) {
+        return setupOpenVpnOverCloakServer(credentials, config);
     }
 
     return ErrorCode::NoError;
 }
 
-ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credentials)
+ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credentials, const QJsonObject &config)
 {
     return ErrorCode::NotImplementedError;
 
@@ -475,7 +456,7 @@ ErrorCode ServerController::setupOpenVpnServer(const ServerCredentials &credenti
 //    return checkOpenVpnServer(DockerContainer::OpenVpn, credentials);
 }
 
-ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials &credentials)
+ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config)
 {
     ErrorCode e;
     DockerContainer container = DockerContainer::OpenVpnOverCloak;
@@ -490,7 +471,6 @@ ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials 
         amnezia::server::getDockerfileFolder(container) + "/Dockerfile");
 
 
-    // Setup openvpn part
     QString scriptData = amnezia::scriptData(SharedScriptType::build_container);
     if (scriptData.isEmpty()) return ErrorCode::InternalError;
 
@@ -518,11 +498,6 @@ ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials 
              genVarsForScript(credentials, container)),
         "/opt/amnezia/start.sh");
 
-//    qDebug().noquote() << "AAAA"
-// << amnezia::scriptData(ProtocolScriptType::container_startup, Protocol::OpenVpnOverCloak),
-//            replaceVars("/opt/amnezia/start.sh",
-//                genVarsForScript(credentials, container));
-
     runScript(sshParams(credentials),
         replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && /opt/amnezia/start.sh\"",
             genVarsForScript(credentials, container)));
@@ -531,7 +506,7 @@ ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials 
     return e;
 }
 
-ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &credentials)
+ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &credentials, const QJsonObject &config)
 {
     return ErrorCode::NotImplementedError;
 //    // Setup openvpn part
@@ -582,20 +557,20 @@ ErrorCode ServerController::setupShadowSocksServer(const ServerCredentials &cred
 //    return e;
 }
 
-ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container)
+ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     Vars vars;
 
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_IP", amnezia::server::vpnDefaultSubnetIp));
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK_VAL", amnezia::server::vpnDefaultSubnetMaskVal));
-    vars.append(qMakePair<QString, QString>("$VPN_SUBNET_MASK", amnezia::server::vpnDefaultSubnetMask));
+    vars.append({{"$VPN_SUBNET_IP", nonEmpty(config.value(config_key::subnet_address).toString(), amnezia::protocols::vpnDefaultSubnetAddress) }});
+    vars.append({{"$VPN_SUBNET_MASK_VAL", nonEmpty(config.value(config_key::subnet_mask_val).toString(), amnezia::protocols::vpnDefaultSubnetMaskVal) }});
+    vars.append({{"$VPN_SUBNET_MASK", nonEmpty(config.value(config_key::subnet_mask).toString(), amnezia::protocols::vpnDefaultSubnetMask) }});
 
-    vars.append(qMakePair<QString, QString>("$CONTAINER_NAME", amnezia::server::getContainerName(container)));
-    vars.append(qMakePair<QString, QString>("$DOCKERFILE_FOLDER", "/opt/amnezia/" + amnezia::server::getContainerName(container)));
+    vars.append({{"$CONTAINER_NAME", amnezia::server::getContainerName(container)}});
+    vars.append({{"$DOCKERFILE_FOLDER", "/opt/amnezia/" + amnezia::server::getContainerName(container)}});
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
-        vars.append(qMakePair<QString, QString>("$SERVER_IP_ADDRESS", serverIp));
+        vars.append({{"$SERVER_IP_ADDRESS", serverIp}});
     }
     else {
         qWarning() << "ServerController::genVarsForScript unable to resolve address for credentials.hostName";
@@ -603,23 +578,47 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
 
     //
+    const QJsonObject &openvpnConfig = config.value(config_key::openvpn).toObject();
+    const QJsonObject &cloakConfig = config.value(config_key::cloak).toObject();
+    const QJsonObject &ssConfig = config.value(config_key::shadowsocks).toObject();
+
     if (container == DockerContainer::OpenVpn) {
-        vars.append(qMakePair<QString, QString>("$SERVER_PORT", amnezia::protocols::openvpn::openvpnDefaultPort()));
+        vars.append({{"$DOCKER_PORT", nonEmpty(config.value(config_key::port).toString(), protocols::openvpn::openvpnDefaultPort) }});
     }
     else if (container == DockerContainer::OpenVpnOverCloak) {
-        vars.append(qMakePair<QString, QString>("$SERVER_PORT", amnezia::protocols::cloak::ckDefaultPort()));
-        vars.append(qMakePair<QString, QString>("$FAKE_WEB_SITE_ADDRESS", amnezia::protocols::cloak::ckDefaultRedirSite()));
+        vars.append({{"$DOCKER_PORT", nonEmpty(config.value(config_key::port).toString(), protocols::cloak::ckDefaultPort) }});
+
+        vars.append({{"$FAKE_WEB_SITE_ADDRESS", nonEmpty(cloakConfig.value(config_key::site).toString(), protocols::cloak::ckDefaultRedirSite) }});
     }
     else if (container == DockerContainer::ShadowSocksOverOpenVpn) {
-        vars.append(qMakePair<QString, QString>("$SERVER_PORT", "6789"));
+        vars.append({{"$DOCKER_PORT", nonEmpty(config.value(config_key::port).toString(), protocols::shadowsocks::ssDefaultPort) }});
     }
 
     return vars;
 }
 
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
+        stdOut += data + "\n";
+    };
+
+    ErrorCode e = runScript(sshParams(credentials),
+        amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
+
+    if (errorCode) *errorCode = e;
+
+    return stdOut;
+}
+
 SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
 {
     SshConnection *client = acquireConnection(sshParams);
+    if (!client) return nullptr;
 
     QEventLoop waitssh;
     QObject::connect(client, &SshConnection::connected, &waitssh, [&]() {
@@ -668,6 +667,12 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
+}
+
+void ServerController::disconnectFromHost(const ServerCredentials &credentials)
+{
+    SshConnection *client = acquireConnection(sshParams(credentials));
+    if (client) client->disconnectFromHost();
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)

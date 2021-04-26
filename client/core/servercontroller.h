@@ -1,6 +1,7 @@
 #ifndef SERVERCONTROLLER_H
 #define SERVERCONTROLLER_H
 
+#include <QJsonObject>
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
@@ -20,9 +21,11 @@ public:
     static ErrorCode fromSshProcessExitStatus(int exitStatus);
 
     static QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
+    static void disconnectFromHost(const ServerCredentials &credentials);
 
-    static ErrorCode removeServer(const ServerCredentials &credentials, Protocol proto);
-    static ErrorCode setupServer(const ServerCredentials &credentials, Protocol proto);
+    static ErrorCode removeAllContainers(const ServerCredentials &credentials);
+    static ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
+    static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
     static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
@@ -42,16 +45,17 @@ public:
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
 
-    static Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None);
+    static Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
+    static QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     static ErrorCode installDocker(const ServerCredentials &credentials);
 
-    static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials);
-    static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials);
-    static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials);
+    static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+    static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+    static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
 };
 
 #endif // SERVERCONTROLLER_H

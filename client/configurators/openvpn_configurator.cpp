@@ -150,7 +150,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     }
 
     QString reqFileName = QString("%1/%2.req").
-            arg(amnezia::protocols::openvpn::clientsDirPath()).
+            arg(amnezia::protocols::openvpn::clientsDirPath).
             arg(connData.clientId);
 
     DockerContainer container = amnezia::containerForProto(proto);
@@ -167,16 +167,16 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath(), &e);
+    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, &e);
     connData.clientCert = ServerController::getTextFileFromContainer(container, credentials,
-        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath()).arg(connData.clientId), &e);
+        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), &e);
 
     if (e) {
         if (errorCode) *errorCode = e;
         return connData;
     }
 
-    connData.taKey = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath(), &e);
+    connData.taKey = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, &e);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
@@ -217,7 +217,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("$PROTO", "udp");
     else if (proto == Protocol::ShadowSocksOverOpenVpn) {
         config.replace("$PROTO", "tcp");
-        config.replace("$LOCAL_PROXY_PORT", QString::number(amnezia::protocols::shadowsocks::ssContainerPort()));
+        config.replace("$LOCAL_PROXY_PORT", amnezia::protocols::shadowsocks::ssLocalProxyPort);
     }
     else if (proto == Protocol::OpenVpnOverCloak) {
         config.replace("$PROTO", "tcp");
@@ -231,7 +231,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     }
 
     config.replace("$REMOTE_HOST", connData.host);
-    config.replace("$REMOTE_PORT", amnezia::protocols::openvpn::openvpnDefaultPort());
+    config.replace("$REMOTE_PORT", amnezia::protocols::openvpn::openvpnDefaultPort);
     config.replace("$CA_CERT", connData.caCert);
     config.replace("$CLIENT_CERT", connData.clientCert);
     config.replace("$PRIV_KEY", connData.privKey);
@@ -284,7 +284,7 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                              "easyrsa import-req %2/%3.req %3\"")
             .arg(amnezia::server::getContainerName(container))
-            .arg(amnezia::protocols::openvpn::clientsDirPath())
+            .arg(amnezia::protocols::openvpn::clientsDirPath)
             .arg(clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "

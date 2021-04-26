@@ -14,11 +14,11 @@ QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentia
     DockerContainer container = amnezia::containerForProto(proto);
 
     QString cloakPublicKey = ServerController::getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckPublicKeyPath(), &e);
+        amnezia::protocols::cloak::ckPublicKeyPath, &e);
     cloakPublicKey.replace("\n", "");
 
     QString cloakBypassUid = ServerController::getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckBypassUidKeyPath(), &e);
+        amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
     cloakBypassUid.replace("\n", "");
 
     if (e) {
@@ -32,7 +32,7 @@ QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentia
     config.insert("EncryptionMethod", "aes-gcm");
     config.insert("UID", cloakBypassUid);
     config.insert("PublicKey", cloakPublicKey);
-    config.insert("ServerName", amnezia::protocols::cloak::ckDefaultRedirSite());
+    config.insert("ServerName", amnezia::protocols::cloak::ckDefaultRedirSite);
     config.insert("NumConn", 4);
     config.insert("BrowserSig", "chrome");
     config.insert("StreamTimeout", 300);

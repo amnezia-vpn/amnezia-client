@@ -14,7 +14,12 @@
    <string/>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget {
+   <string notr="true">QMainWindow {
+	background: white;
+}
+
+
+QWidget {
 font-family: &quot;Lato&quot;;
 }
 
@@ -282,62 +287,9 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>12</number>
      </property>
      <widget class="QWidget" name="page_start">
-      <widget class="QLabel" name="label_23">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>361</width>
-         <height>71</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 24px;
-line-height: 25px;
-color: #100A44;
-</string>
-       </property>
-       <property name="text">
-        <string>Connect to the already created VPN server</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_24">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>130</y>
-         <width>171</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 150%;
-
-/* or 24px */
-
-/* text */
-color: #333333;</string>
-       </property>
-       <property name="text">
-        <string>Connection code</string>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_25">
        <property name="geometry">
         <rect>
@@ -354,69 +306,11 @@ color: #333333;</string>
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_start_existing_code">
+      <widget class="QPushButton" name="pushButton_start_switch_page">
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>160</y>
-         <width>300</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="placeholderText">
-        <string>vpn://...</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_new_server_connect">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>220</y>
-         <width>301</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-	font-size: 13pt;
-	font: &quot;Open Sans Semibold&quot;;
-	color:rgb(212, 212, 212);
-	
-border-radius: 4px;
-
-font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 21px;
-
-background: #100A44;
-border-radius: 4px;
-}
-
-QPushButton:hover {
-background: #211966;
-}
-</string>
-       </property>
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_new_server_setup">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>320</y>
+         <y>530</y>
          <width>301</width>
          <height>40</height>
         </rect>
@@ -447,6 +341,9 @@ border-radius: 4px;
        </property>
        <property name="text">
         <string>Set up your own server</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_back_from_start">
@@ -481,6 +378,400 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
+      <widget class="QStackedWidget" name="stackedWidget_start">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>380</width>
+         <height>481</height>
+        </rect>
+       </property>
+       <widget class="QWidget" name="page_start_import">
+        <widget class="QPushButton" name="pushButton_new_server_import">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>210</y>
+           <width>301</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QPushButton:hover {
+background: #211966;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Connect</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_start_existing_code">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>140</y>
+           <width>300</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>vpn://...</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_23">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>381</width>
+           <height>71</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Connect to the already created VPN server</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_24">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>110</y>
+           <width>301</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Connection code</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="page_start_new_server">
+        <widget class="QTextEdit" name="textEdit_new_server_ssh_key">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>260</y>
+           <width>300</width>
+           <height>71</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:16px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_new_server_get_info">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>40</y>
+           <width>281</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 20px;
+text-align: center;
+
+/* акцент */
+color: #15CDCB;</string>
+         </property>
+         <property name="text">
+          <string>Where to get connection data →</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_new_server_wait_info">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>400</y>
+           <width>301</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Please wait, configuring process may take up to 5 minutes</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>0</y>
+           <width>361</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Setup your server to use VPN</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_new_server_ip">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>100</y>
+           <width>300</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_new_server_connect">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>350</y>
+           <width>301</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+         </property>
+         <property name="text">
+          <string>Connect</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_new_server_login">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>180</y>
+           <width>300</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>root</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_new_server_connect_key">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>450</y>
+           <width>281</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 20px;
+text-align: center;
+
+/* акцент */
+color: #15CDCB;</string>
+         </property>
+         <property name="text">
+          <string>Connect using SSH key</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_new_server_password">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>260</y>
+           <width>300</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLineEdit  {
+	background: #F4F4F4;
+	border: 1px solid #A7A7A7;
+	color: #333333;
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>70</y>
+           <width>171</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Server IP address</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_5">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>150</y>
+           <width>261</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Login to connect via SSH</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_new_server_password">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>230</y>
+           <width>171</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Password</string>
+         </property>
+        </widget>
+        <zorder>textEdit_new_server_ssh_key</zorder>
+        <zorder>pushButton_new_server_get_info</zorder>
+        <zorder>label_new_server_wait_info</zorder>
+        <zorder>lineEdit_new_server_ip</zorder>
+        <zorder>pushButton_new_server_connect</zorder>
+        <zorder>lineEdit_new_server_login</zorder>
+        <zorder>pushButton_new_server_connect_key</zorder>
+        <zorder>lineEdit_new_server_password</zorder>
+        <zorder>label_4</zorder>
+        <zorder>label_5</zorder>
+        <zorder>label_new_server_password</zorder>
+        <zorder>label_2</zorder>
+       </widget>
+      </widget>
      </widget>
      <widget class="QWidget" name="page_new_server">
       <property name="styleSheet">
@@ -497,269 +788,6 @@ padding-left: 10px;
 border: 1px solid #A7A7A7;
 }</string>
       </property>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>361</width>
-         <height>71</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 24px;
-line-height: 25px;
-color: #100A44;
-</string>
-       </property>
-       <property name="text">
-        <string>Connect your server to use VPN</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>150</y>
-         <width>171</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 150%;
-
-/* or 24px */
-
-/* text */
-color: #333333;</string>
-       </property>
-       <property name="text">
-        <string>Server IP address</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>235</y>
-         <width>261</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 150%;
-
-/* or 24px */
-
-/* text */
-color: #333333;</string>
-       </property>
-       <property name="text">
-        <string>Login to connect via SSH</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_new_server_password">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>320</y>
-         <width>171</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 150%;
-
-/* or 24px */
-
-/* text */
-color: #333333;</string>
-       </property>
-       <property name="text">
-        <string>Password</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_new_server_ip">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>180</y>
-         <width>300</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_new_server_login">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>265</y>
-         <width>300</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>root</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_new_server_password">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>350</y>
-         <width>300</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: #F4F4F4;
-
-/* grey */
-border: 1px solid #A7A7A7;
-color: #333333;</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_new_server_connect_with_new_data">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>450</y>
-         <width>301</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-color:rgb(212, 212, 212);
-border-radius: 4px;
-
-font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 21px;
-
-background: #100A44;
-border-radius: 4px;
-}
-QPushButton:hover {
-background: #211966;
-}</string>
-       </property>
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_new_server_get_info">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>115</y>
-         <width>281</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 20px;
-text-align: center;
-
-/* акцент */
-color: #15CDCB;</string>
-       </property>
-       <property name="text">
-        <string>Where to get connection data →</string>
-       </property>
-      </widget>
-      <widget class="QProgressBar" name="progressBar_new_server_connection">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>450</y>
-         <width>301</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QProgressBar{
-color:rgb(212, 212, 212);
-border-radius: 4px;
-
-font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 21px;
-
-background: #100A44;
-border-radius: 4px;
-}
-
-QProgressBar::chunk {
-background: rgba(255, 255, 255, 0.15);
-border-radius: 4px 0px 0px 4px;
-
-}
-</string>
-       </property>
-       <property name="value">
-        <number>24</number>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="textVisible">
-        <bool>true</bool>
-       </property>
-       <property name="format">
-        <string>Configuring...</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="pushButton_back_from_new_server">
        <property name="geometry">
         <rect>
@@ -808,93 +836,638 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_new_server_wait_info">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
+     </widget>
+     <widget class="QWidget" name="page_new_server_2">
+      <widget class="QLabel" name="label_39">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>500</y>
-         <width>301</width>
+         <x>10</x>
+         <y>30</y>
+         <width>361</width>
          <height>41</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+line-height: 25px;
+color: #100A44;
+</string>
+       </property>
        <property name="text">
-        <string>Please wait, configuring process may take up to 5 minutes</string>
+        <string>Select VPN protocols to install</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_new_server_connect_key">
+      <widget class="QPushButton" name="pushButton_back_from_new_server_2">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>550</y>
-         <width>281</width>
-         <height>21</height>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: normal;
-font-size: 16px;
-line-height: 20px;
-text-align: center;
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
 
-/* акцент */
-color: #15CDCB;</string>
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
        </property>
        <property name="text">
-        <string>Connect using SSH key</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+        <string/>
        </property>
       </widget>
-      <widget class="QTextEdit" name="textEdit_new_server_ssh_key">
+      <widget class="QScrollArea" name="scrollArea_new_server_protocols">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>350</y>
-         <width>300</width>
-         <height>81</height>
+         <x>0</x>
+         <y>80</y>
+         <width>381</width>
+         <height>491</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true"/>
+        <string notr="true">QScrollArea { background: transparent; }
+QScrollArea &gt; QWidget &gt; QWidget { background: transparent; }
+QScrollArea &gt; QWidget &gt; QScrollBar { background: palette(base); }
+
+QLineEdit {
+background: transparent;
+}
+QPushButton {
+	text-align: left;
+    background-repeat:no-repeat;                
+    background-position:left top;
+
+	background-image: url(:/images/settings.png);
+    padding-left: 30px;
+    min-height: 24px;
+}
+QFrame {
+background: transparent;
+border: 1px solid lightgrey;
+border-radius: 2px;
+}
+QFrame#scrollArea_server_protocols {
+border: none;
+}
+QLabel {
+border: none;
+}</string>
        </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:16px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>379</width>
+          <height>489</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <property name="bottomMargin">
+          <number>19</number>
+         </property>
+         <item>
+          <widget class="QFrame" name="frame_new_server_settings_parent_cloak">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
+            <property name="bottomMargin">
+             <number>9</number>
+            </property>
+            <item>
+             <widget class="QWidget" name="widget_2" native="true">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="checkBox_new_server_cloak">
+                 <property name="text">
+                  <string>OpenVPN and ShadowSocks
+ with masking using Cloak plugin</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_new_server_settings_cloak">
+                 <property name="maximumSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_new_server_settings_cloak">
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_40">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Port (TCP)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEdit_new_server_cloak_port">
+                 <property name="text">
+                  <string>443</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_46">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Fake Web Site</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="lineEdit_new_server_cloak_site">
+                 <property name="text">
+                  <string>mail.ru</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_new_server_settings_parent_ss">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_14">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
+            <item>
+             <widget class="QWidget" name="widget_3" native="true">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="checkBox_new_server_ss">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>ShadowSocks</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_new_server_settings_ss">
+                 <property name="maximumSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_new_server_settings_ss">
+              <layout class="QGridLayout" name="gridLayout_2">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_53">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Port(TCP)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEdit_new_server_ss_port">
+                 <property name="text">
+                  <string>6789</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_54">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Encryption</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="comboBox_new_server_ss_cipher">
+                 <item>
+                  <property name="text">
+                   <string>aes-256-gcm</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>aes-192-gcm</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>aes-128-gcm</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>chacha20-ietf-poly1305</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>xchacha20-ietf-poly1305</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_new_server_settings_parent_openvpn">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_15">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
+            <item>
+             <widget class="QWidget" name="widget_4" native="true">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="checkBox_new_server_openvpn">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>OpenVPN</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_new_server_settings_openvpn">
+                 <property name="maximumSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_new_server_settings_openvpn">
+              <layout class="QGridLayout" name="gridLayout_3">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_55">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Port</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEdit_new_server_openvpn_port"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_56">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>130</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Protocol</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="comboBox_new_server_openvpn_proto">
+                 <item>
+                  <property name="text">
+                   <string>UDP</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>TCP</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_new_server_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_new_server_connection">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>580</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
        </property>
       </widget>
-      <zorder>progressBar_new_server_connection</zorder>
-      <zorder>label_2</zorder>
-      <zorder>label_4</zorder>
-      <zorder>label_5</zorder>
-      <zorder>label_new_server_password</zorder>
-      <zorder>lineEdit_new_server_ip</zorder>
-      <zorder>lineEdit_new_server_login</zorder>
-      <zorder>lineEdit_new_server_password</zorder>
-      <zorder>pushButton_new_server_connect_with_new_data</zorder>
-      <zorder>pushButton_new_server_get_info</zorder>
-      <zorder>pushButton_back_from_new_server</zorder>
-      <zorder>label_7</zorder>
-      <zorder>label_new_server_wait_info</zorder>
-      <zorder>pushButton_new_server_connect_key</zorder>
-      <zorder>textEdit_new_server_ssh_key</zorder>
+      <widget class="QPushButton" name="pushButton_new_server_connect_configure">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>580</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Setup server</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="page_vpn">
       <property name="styleSheet">
@@ -3661,8 +4234,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>500</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -3943,7 +4516,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_network_settings_dns1_2">
+      <widget class="QLineEdit" name="lineEdit_proto_openvpn_subnet">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -4007,7 +4580,7 @@ QGroupBox::title {
        <property name="title">
         <string>Network protocol</string>
        </property>
-       <widget class="QRadioButton" name="radioButton">
+       <widget class="QRadioButton" name="radioButton_proto_openvpn_udp">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -4020,7 +4593,7 @@ QGroupBox::title {
          <string>UDP</string>
         </property>
        </widget>
-       <widget class="QRadioButton" name="radioButton_2">
+       <widget class="QRadioButton" name="radioButton_proto_openvpn_tcp">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -4034,7 +4607,7 @@ QGroupBox::title {
         </property>
        </widget>
       </widget>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="comboBox_proto_openvpn_cipher">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -4043,6 +4616,51 @@ QGroupBox::title {
          <height>31</height>
         </rect>
        </property>
+       <item>
+        <property name="text">
+         <string>AES-256-GCM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES-192-GCM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES-128-GCM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES-256-CBC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES-192-CBC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES-128-CBC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ChaCha20-Poly1305</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ARIA-256-CBC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CAMELLIA-256-CBC</string>
+        </property>
+       </item>
       </widget>
       <widget class="QLabel" name="label_new_server_wait_info_5">
        <property name="enabled">
@@ -4063,7 +4681,7 @@ QGroupBox::title {
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QComboBox" name="comboBox_2">
+      <widget class="QComboBox" name="comboBox_proto_openvpn_hash">
        <property name="geometry">
         <rect>
          <x>200</x>
@@ -4072,6 +4690,51 @@ QGroupBox::title {
          <height>31</height>
         </rect>
        </property>
+       <item>
+        <property name="text">
+         <string>SHA512</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA384</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA256</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA3-512</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA3-384</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA3-256</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>whirlpool</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BLAKE2b512</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BLAKE2s256</string>
+        </property>
+       </item>
       </widget>
       <widget class="QLabel" name="label_new_server_wait_info_6">
        <property name="enabled">
@@ -4092,7 +4755,7 @@ QGroupBox::title {
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="checkBox_proto_openvpn_block_dns">
        <property name="geometry">
         <rect>
          <x>30</x>

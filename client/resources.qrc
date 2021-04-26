@@ -52,5 +52,7 @@
         <file>images/uncheck.png</file>
         <file>images/settings_grey.png</file>
         <file>images/plus.png</file>
+        <file>server_scripts/check_connection.sh</file>
+        <file>server_scripts/remove_all_containers.sh</file>
     </qresource>
 </RCC>

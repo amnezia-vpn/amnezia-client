@@ -36,9 +36,10 @@ public:
 //    void setServerPort(int serverPort = 22) { m_settings.setValue("Server/serverPort", serverPort); }
 
     ServerCredentials defaultServerCredentials() const;
+    ServerCredentials serverCredentials(int index) const;
     //void setServerCredentials(const ServerCredentials &credentials);
 
-    QJsonArray serversArray() const {return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array(); }
+    QJsonArray serversArray() const { return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array(); }
     void setServersArray(const QJsonArray &servers) { m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson()); }
 
     // Servers section
@@ -52,11 +53,15 @@ public:
     void setDefaultServer(int index) { m_settings.setValue("Servers/defaultServerIndex", index); }
     QJsonObject defaultServer() const { return server(defaultServerIndex()); }
 
-    void setDefaultContainer(int serverIndex, DockerContainer container );
+    void setDefaultContainer(int serverIndex, DockerContainer container);
     DockerContainer defaultContainer(int serverIndex) const;
     QString defaultContainerName(int serverIndex) const;
 
+    QJsonObject containerConfig(int serverIndex, DockerContainer container);
+    QJsonObject protocolConfig(int serverIndex, DockerContainer container, Protocol proto);
+
     bool haveAuthData() const;
+    QString nextAvailableServerName() const;
 
     // App settings section
     bool isAutoConnect() const { return m_settings.value("Conf/autoConnect", QString()).toBool(); }
@@ -90,20 +95,11 @@ public:
 
 
 public:
-    // Json strings
-    static constexpr char hostNameString[] = "hostName";
-    static constexpr char userNameString[] = "userName";
-    static constexpr char passwordString[] = "password";
-    static constexpr char portString[] = "port";
-    static constexpr char descriptionString[] = "description";
 
-    static constexpr char defaultContainerString[] = "defaultContainer";
 
 
 private:
     QSettings m_settings;
-
-
 
 };
 

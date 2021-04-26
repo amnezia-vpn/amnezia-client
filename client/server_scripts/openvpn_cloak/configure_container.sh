@@ -5,11 +5,11 @@
 #sudo docker stop $CONTAINER_NAME
 #sudo docker rm -f $CONTAINER_NAME
 #sudo docker pull amneziavpn/openvpn-cloak:latest
-#sudo docker run -d --restart always --cap-add=NET_ADMIN -p $SERVER_PORT:443/tcp --name $CONTAINER_NAME amneziavpn/openvpn-cloak:latest
+#sudo docker run -d --restart always --cap-add=NET_ADMIN -p $DOCKER_PORT:443/tcp --name $CONTAINER_NAME amneziavpn/openvpn-cloak:latest
 
 sudo docker stop $CONTAINER_NAME
 sudo docker rm -f $CONTAINER_NAME
-sudo docker run -d --restart always --cap-add=NET_ADMIN -p $SERVER_PORT:443/tcp --name $CONTAINER_NAME $CONTAINER_NAME
+sudo docker run -d --restart always --cap-add=NET_ADMIN -p $DOCKER_PORT:443/tcp --name $CONTAINER_NAME $CONTAINER_NAME
 
 # Create tun device if not exist
 sudo docker exec -i $CONTAINER_NAME bash -c 'mkdir -p /dev/net; if [ ! -c /dev/net/tun ]; then mknod /dev/net/tun c 10 200; fi'

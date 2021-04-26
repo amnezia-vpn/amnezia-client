@@ -40,7 +40,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    enum Page {Start, NewServer, Vpn, GeneralSettings, AppSettings, NetworkSettings,
+    enum Page {Start, NewServer, NewServer_2, Vpn, GeneralSettings, AppSettings, NetworkSettings,
                ServerSettings, ServerVpnProtocols, ServersList, ShareConnection,  Sites,
                OpenVpnSettings, ShadowSocksSettings, CloakSettings};
     Q_ENUM(Page)
@@ -51,8 +51,9 @@ private slots:
     void onVpnProtocolError(amnezia::ErrorCode errorCode);
 
     void onPushButtonConnectClicked(bool checked);
-    void onPushButtonNewServerConnectWithNewData(bool);
-    void onPushButtonNewServerConnectWithExistingCode(bool);
+    void onPushButtonNewServerConnect(bool);
+    void onPushButtonNewServerConnectConfigure(bool);
+    void onPushButtonNewServerImport(bool);
 
     void onPushButtonReinstallServer(bool);
     void onPushButtonClearServer(bool);
@@ -77,21 +78,26 @@ private:
     QWidget *getPageWidget(Page page);
     Page currentPage();
 
-    bool installServer(ServerCredentials credentials, QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
+    bool installServer(ServerCredentials credentials, QList<DockerContainer> containers, QJsonArray configs,
+        QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
 
     void setupTray();
     void setTrayIcon(const QString &iconPath);
 
     void setupUiConnections();
-    void setupProtocolsPage();
+    void setupProtocolsPageConnections();
+    void setupNewServerPageConnections();
 
     void updateSettings();
+    void updateServersPage();
+    void updateShareCodePage();
+    void updateOpenVpnPage(const QJsonObject &openvpnConfig);
 
-    void updateShareCode();
     void makeSitesListItem(QListWidget* listWidget, const QString &address);
     void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
 
     void updateQRCodeImage(const QString &text, QLabel *label);
+
 private:
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
@@ -123,6 +129,7 @@ private:
 
     QStack<Page> pagesStack;
     int selectedServerIndex = -1; // server index to use when proto settings page opened
+    ServerCredentials installCredentials; // used to save cred between pages new_server and new_server_2
 };
 
 #endif // MAINWINDOW_H

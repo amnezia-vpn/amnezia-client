@@ -2,6 +2,7 @@
 #include "settings.h"
 
 #include <QDebug>
+#include "protocols/protocols_defs.h"
 
 Settings::Settings(QObject* parent) :
     QObject(parent),
@@ -16,11 +17,11 @@ Settings::Settings(QObject* parent) :
 
         if (!user.isEmpty() && !password.isEmpty() && !serverName.isEmpty()){
             QJsonObject server;
-            server.insert(userNameString, user);
-            server.insert(passwordString, password);
-            server.insert(hostNameString, serverName);
-            server.insert(portString, port);
-            server.insert(descriptionString, tr("Server #1"));
+            server.insert(config_key::userName, user);
+            server.insert(config_key::password, password);
+            server.insert(config_key::hostName, serverName);
+            server.insert(config_key::port, port);
+            server.insert(config_key::description, tr("Server #1"));
 
             addServer(server);
         }
@@ -69,7 +70,7 @@ bool Settings::editServer(int index, const QJsonObject &server)
 void Settings::setDefaultContainer(int serverIndex, DockerContainer container)
 {
     QJsonObject s = server(serverIndex);
-    s.insert(defaultContainerString, containerToString(container));
+    s.insert(config_key::defaultContainer, containerToString(container));
     editServer(serverIndex, s);
 }
 
@@ -80,11 +81,40 @@ DockerContainer Settings::defaultContainer(int serverIndex) const
 
 QString Settings::defaultContainerName(int serverIndex) const
 {
-    QString name = server(serverIndex).value(defaultContainerString).toString();
+    QString name = server(serverIndex).value(config_key::defaultContainer).toString();
     if (name.isEmpty()) {
         return containerToString(DockerContainer::OpenVpnOverCloak);
     }
     else return name;
+}
+
+QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container)
+{
+    if (container == DockerContainer::None) return QJsonObject();
+
+    const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
+    for (const QJsonValue &val : containers) {
+        if (val.toObject().value(config_key::container).toString() == containerToString(container)) {
+            return val.toObject();
+        }
+    }
+    return QJsonObject();
+}
+
+QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Protocol proto)
+{
+    const QJsonObject &c = containerConfig(serverIndex, container);
+
+    switch (proto) {
+    case Protocol::OpenVpn:
+        return c.value(config_key::openvpn).toObject();
+    case Protocol::OpenVpnOverCloak:
+        return c.value(config_key::openvpn).toObject();
+    case Protocol::ShadowSocksOverOpenVpn:
+        return c.value(config_key::openvpn).toObject();
+    default:
+        break;
+    }
 }
 
 bool Settings::haveAuthData() const
@@ -92,6 +122,26 @@ bool Settings::haveAuthData() const
     ServerCredentials cred = defaultServerCredentials();
 
     return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.password.isEmpty());
+}
+
+QString Settings::nextAvailableServerName() const
+{
+    int i = 0;
+    //bool found = false;
+    bool nameExist = false;
+
+    do {
+        i++;
+        nameExist = false;
+        for (const QJsonValue &server: serversArray()) {
+            if (server.toObject().value(config_key::description).toString() == tr("Server") + " " + QString::number(i)) {
+                nameExist = true;
+                break;
+            }
+        }
+    } while (nameExist);
+
+    return tr("Server") + " " + QString::number(i);
 }
 
 //void Settings::setServerCredentials(const ServerCredentials &credentials)
@@ -104,13 +154,18 @@ bool Settings::haveAuthData() const
 
 ServerCredentials Settings::defaultServerCredentials() const
 {
-    const QJsonObject &s = defaultServer();
+    return serverCredentials(defaultServerIndex());
+}
+
+ServerCredentials Settings::serverCredentials(int index) const
+{
+    const QJsonObject &s = server(index);
 
     ServerCredentials credentials;
-    credentials.hostName = s.value(hostNameString).toString();
-    credentials.userName = s.value(userNameString).toString();
-    credentials.password = s.value(passwordString).toString();
-    credentials.port = s.value(portString).toInt();
+    credentials.hostName = s.value(config_key::hostName).toString();
+    credentials.userName = s.value(config_key::userName).toString();
+    credentials.password = s.value(config_key::password).toString();
+    credentials.port = s.value(config_key::port).toInt();
 
     return credentials;
 }
