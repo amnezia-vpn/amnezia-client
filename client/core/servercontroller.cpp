@@ -467,7 +467,7 @@ ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials 
             genVarsForScript(credentials, container)));
     if (e) return e;
 
-    uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, Protocol::OpenVpnOverCloak).toUtf8(),
+    uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, DockerContainer::OpenVpnOverCloak).toUtf8(),
         amnezia::server::getDockerfileFolder(container) + "/Dockerfile");
 
 
@@ -489,12 +489,12 @@ ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials 
 
 
     runScript(sshParams(credentials),
-        replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, Protocol::OpenVpnOverCloak),
+        replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, DockerContainer::OpenVpnOverCloak),
             genVarsForScript(credentials, container)));
     if (e) return e;
 
     uploadTextFileToContainer(DockerContainer::OpenVpnOverCloak, credentials,
-        replaceVars(amnezia::scriptData(ProtocolScriptType::container_startup, Protocol::OpenVpnOverCloak),
+        replaceVars(amnezia::scriptData(ProtocolScriptType::container_startup, DockerContainer::OpenVpnOverCloak),
              genVarsForScript(credentials, container)),
         "/opt/amnezia/start.sh");
 

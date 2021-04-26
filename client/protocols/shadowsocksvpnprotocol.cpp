@@ -96,7 +96,7 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 #endif
 }
 
-QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto)
+QJsonObject ShadowSocksVpnProtocol::genShadowSocksConfig(const ServerCredentials &credentials, DockerContainer container)
 {
     QJsonObject ssConfig;
     ssConfig.insert("server", credentials.hostName);

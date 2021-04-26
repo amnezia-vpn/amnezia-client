@@ -13,7 +13,7 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-    static QJsonObject genShadowSocksConfig(const ServerCredentials &credentials, Protocol proto = Protocol::ShadowSocksOverOpenVpn);
+    static QJsonObject genShadowSocksConfig(const ServerCredentials &credentials, DockerContainer container = DockerContainer::ShadowSocksOverOpenVpn);
 
 protected:
     void readShadowSocksConfiguration(const QJsonObject &configuration);

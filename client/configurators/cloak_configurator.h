@@ -11,7 +11,7 @@ class CloakConfigurator
 {
 public:
 
-    static QJsonObject genCloakConfig(const ServerCredentials &credentials, Protocol proto,
+    static QJsonObject genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
         ErrorCode *errorCode = nullptr);
 };
 

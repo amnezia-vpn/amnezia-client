@@ -108,12 +108,12 @@ QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container,
     switch (proto) {
     case Protocol::OpenVpn:
         return c.value(config_key::openvpn).toObject();
-    case Protocol::OpenVpnOverCloak:
-        return c.value(config_key::openvpn).toObject();
-    case Protocol::ShadowSocksOverOpenVpn:
-        return c.value(config_key::openvpn).toObject();
+    case Protocol::ShadowSocks:
+        return c.value(config_key::shadowsocks).toObject();
+    case Protocol::Cloak:
+        return c.value(config_key::cloak).toObject();
     default:
-        break;
+        return QJsonObject();
     }
 }
 

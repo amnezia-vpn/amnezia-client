@@ -139,7 +139,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-    Protocol proto, ErrorCode *errorCode)
+    DockerContainer container, ErrorCode *errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
@@ -152,8 +152,6 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     QString reqFileName = QString("%1/%2.req").
             arg(amnezia::protocols::openvpn::clientsDirPath).
             arg(connData.clientId);
-
-    DockerContainer container = amnezia::containerForProto(proto);
 
     ErrorCode e = ServerController::uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
     if (e) {
@@ -194,7 +192,7 @@ Settings &OpenVpnConfigurator::m_settings()
 }
 
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
-    Protocol proto, ErrorCode *errorCode)
+    DockerContainer container, ErrorCode *errorCode)
 {
 //    QFile configTemplFile;
 //    if (proto == Protocol::OpenVpn)
@@ -206,20 +204,20 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 //    configTemplFile.open(QIODevice::ReadOnly);
 //    QString config = configTemplFile.readAll();
 
-    QString config = amnezia::scriptData(ProtocolScriptType::openvpn_template, proto);
+    QString config = amnezia::scriptData(ProtocolScriptType::openvpn_template, container);
 
-    ConnectionData connData = prepareOpenVpnConfig(credentials, proto, errorCode);
+    ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
     if (errorCode && *errorCode) {
         return "";
     }
 
-    if (proto == Protocol::OpenVpn)
+    if (container == DockerContainer::OpenVpn)
         config.replace("$PROTO", "udp");
-    else if (proto == Protocol::ShadowSocksOverOpenVpn) {
+    else if (container == DockerContainer::ShadowSocksOverOpenVpn) {
         config.replace("$PROTO", "tcp");
         config.replace("$LOCAL_PROXY_PORT", amnezia::protocols::shadowsocks::ssLocalProxyPort);
     }
-    else if (proto == Protocol::OpenVpnOverCloak) {
+    else if (container == DockerContainer::OpenVpnOverCloak) {
         config.replace("$PROTO", "tcp");
     }
 

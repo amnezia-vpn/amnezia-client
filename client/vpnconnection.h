@@ -24,9 +24,9 @@ public:
     static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
-    ErrorCode createVpnConfiguration(const ServerCredentials &credentials, Protocol protocol);
+    ErrorCode createVpnConfiguration(const ServerCredentials &credentials, DockerContainer container);
 
-    ErrorCode connectToVpn(const ServerCredentials &credentials, Protocol protocol = Protocol::Any);
+    ErrorCode connectToVpn(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None);
     void disconnectFromVpn();
 
     bool isConnected() const;

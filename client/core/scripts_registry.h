@@ -25,13 +25,13 @@ enum ProtocolScriptType {
 };
 
 
-QString scriptFolder(Protocol proto);
+QString scriptFolder(DockerContainer container);
 
 QString scriptName(SharedScriptType type);
 QString scriptName(ProtocolScriptType type);
 
 QString scriptData(SharedScriptType type);
-QString scriptData(ProtocolScriptType type, Protocol proto);
+QString scriptData(ProtocolScriptType type, DockerContainer container);
 }
 
 #endif // SCRIPTS_REGISTRY_H

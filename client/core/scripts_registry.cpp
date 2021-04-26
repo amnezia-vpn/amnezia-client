@@ -4,13 +4,13 @@
 #include <QDebug>
 #include <QFile>
 
-QString amnezia::scriptFolder(amnezia::Protocol proto)
+QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
-    switch (proto) {
-    case Protocol::OpenVpn: return QLatin1String("openvpn");
-    case Protocol::OpenVpnOverCloak: return QLatin1String("openvpn_cloak");
-    case Protocol::ShadowSocksOverOpenVpn: return QLatin1String("openvpn_shadowsocks");
-    case Protocol::WireGuard: return QLatin1String("wireguard");
+    switch (container) {
+    case DockerContainer::OpenVpn: return QLatin1String("openvpn");
+    case DockerContainer::OpenVpnOverCloak: return QLatin1String("openvpn_cloak");
+    case DockerContainer::ShadowSocksOverOpenVpn: return QLatin1String("openvpn_shadowsocks");
+    case DockerContainer::WireGuard: return QLatin1String("wireguard");
     default: return "";
     }
 }
@@ -49,9 +49,9 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
     return file.readAll();
 }
 
-QString amnezia::scriptData(amnezia::ProtocolScriptType type, amnezia::Protocol proto)
+QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer container)
 {
-    QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(proto), amnezia::scriptName(type));
+    QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
     QFile file(fileName);
     if (! file.open(QIODevice::ReadOnly)) {
         qDebug() << "Error opening script" << fileName;

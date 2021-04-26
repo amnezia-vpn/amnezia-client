@@ -22,7 +22,7 @@ public:
         QString host; // host ip
     };
 
-    static QString genOpenVpnConfig(const ServerCredentials &credentials, Protocol proto,
+    static QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
         ErrorCode *errorCode = nullptr);
 
     static QString convertOpenSShKey(const QString &key);
@@ -40,7 +40,7 @@ private:
     static ConnectionData createCertRequest();
 
     static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
-        Protocol proto, ErrorCode *errorCode = nullptr);
+        DockerContainer container, ErrorCode *errorCode = nullptr);
 
     static Settings &m_settings();
 };

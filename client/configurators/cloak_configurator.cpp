@@ -7,11 +7,9 @@
 #include "protocols/protocols_defs.h"
 
 QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
-    Protocol proto, ErrorCode *errorCode)
+    DockerContainer container, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
-
-    DockerContainer container = amnezia::containerForProto(proto);
 
     QString cloakPublicKey = ServerController::getTextFileFromContainer(container, credentials,
         amnezia::protocols::cloak::ckPublicKeyPath, &e);
