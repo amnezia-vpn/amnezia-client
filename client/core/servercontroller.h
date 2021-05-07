@@ -6,6 +6,8 @@
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
 #include "defs.h"
+#include "protocols/protocols_defs.h""
+
 
 using namespace amnezia;
 
@@ -26,6 +28,10 @@ public:
     static ErrorCode removeAllContainers(const ServerCredentials &credentials);
     static ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
     static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
+        const QJsonObject &oldConfig, const QJsonObject &newConfig = QJsonObject());
+
+    static bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
     static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
@@ -51,11 +57,18 @@ public:
 private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
-    static ErrorCode installDocker(const ServerCredentials &credentials);
+    static ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
 
-    static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
-    static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
-    static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+    //static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+    //static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+   // static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
+
+    static ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+
 };
 
 #endif // SERVERCONTROLLER_H

@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QClipboard>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QHBoxLayout>
 #include <QJsonDocument>
@@ -115,10 +116,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
     m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
+    m_ipNetwok24Validator.setRegExp(Utils::ipNetwork24RegExp());
 
     ui->lineEdit_new_server_ip->setValidator(&m_ipAddressPortValidator);
     ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
     ui->lineEdit_network_settings_dns2->setValidator(&m_ipAddressValidator);
+
+    ui->lineEdit_proto_openvpn_subnet->setValidator(&m_ipNetwok24Validator);
 
     ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(ui->page_share_shadowsocks));
     ui->page_share_shadowsocks->setVisible(false);
@@ -148,40 +152,28 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
     qDebug() << "goToPage" << page;
     if (reset) {
         if (page == Page::ServerSettings) {
-            updateSettings();
-
-            ui->label_server_settings_wait_info->hide();
-            ui->label_server_settings_wait_info->clear();
-
-            QJsonObject server = m_settings.server(selectedServerIndex);
-            QString port = server.value(config_key::port).toString();
-            ui->label_server_settings_server->setText(QString("%1@%2%3%4")
-                .arg(server.value(config_key::userName).toString())
-                .arg(server.value(config_key::hostName).toString())
-                .arg(port.isEmpty() ? "" : ":")
-                .arg(port));
-            ui->lineEdit_server_settings_description->setText(server.value(config_key::description).toString());
+            updateServerPage();
         }
         if (page == Page::ShareConnection) {
-            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.defaultServerCredentials());
+//            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.defaultServerCredentials());
 
-            QString ssString = QString("%1:%2@%3:%4")
-                    .arg(ssConfig.value("method").toString())
-                    .arg(ssConfig.value("password").toString())
-                    .arg(ssConfig.value("server").toString())
-                    .arg(QString::number(ssConfig.value("server_port").toInt()));
+//            QString ssString = QString("%1:%2@%3:%4")
+//                    .arg(ssConfig.value("method").toString())
+//                    .arg(ssConfig.value("password").toString())
+//                    .arg(ssConfig.value("server").toString())
+//                    .arg(QString::number(ssConfig.value("server_port").toInt()));
 
-            ssString = "ss://" + ssString.toUtf8().toBase64();
-            ui->lineEdit_share_ss_string->setText(ssString);
-            updateQRCodeImage(ssString, ui->label_share_ss_qr_code);
+//            ssString = "ss://" + ssString.toUtf8().toBase64();
+//            ui->lineEdit_share_ss_string->setText(ssString);
+//            updateQRCodeImage(ssString, ui->label_share_ss_qr_code);
 
-            ui->label_share_ss_server->setText(ssConfig.value("server").toString());
-            ui->label_share_ss_port->setText(QString::number(ssConfig.value("server_port").toInt()));
-            ui->label_share_ss_method->setText(ssConfig.value("method").toString());
-            ui->label_share_ss_password->setText(ssConfig.value("password").toString());
+//            ui->label_share_ss_server->setText(ssConfig.value("server").toString());
+//            ui->label_share_ss_port->setText(QString::number(ssConfig.value("server_port").toInt()));
+//            ui->label_share_ss_method->setText(ssConfig.value("method").toString());
+//            ui->label_share_ss_password->setText(ssConfig.value("password").toString());
         }
         if (page == Page::ServersList) {
-            updateServersPage();
+            updateServersListPage();
         }
         if (page == Page::Start) {
             ui->label_new_server_wait_info->hide();
@@ -200,14 +192,26 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             ui->pushButton_new_server_settings_openvpn->setChecked(true);
             ui->pushButton_new_server_settings_openvpn->setChecked(false);
 
-            ui->lineEdit_new_server_cloak_port->setText(amnezia::protocols::cloak::ckDefaultPort);
-            ui->lineEdit_new_server_cloak_site->setText(amnezia::protocols::cloak::ckDefaultRedirSite);
+            ui->lineEdit_new_server_cloak_port->setText(amnezia::protocols::cloak::defaultPort);
+            ui->lineEdit_new_server_cloak_site->setText(amnezia::protocols::cloak::defaultRedirSite);
 
-            ui->lineEdit_new_server_ss_port->setText(amnezia::protocols::shadowsocks::ssDefaultPort);
-            ui->comboBox_new_server_ss_cipher->setCurrentText(amnezia::protocols::shadowsocks::ssDefaultCipher);
+            ui->lineEdit_new_server_ss_port->setText(amnezia::protocols::shadowsocks::defaultPort);
+            ui->comboBox_new_server_ss_cipher->setCurrentText(amnezia::protocols::shadowsocks::defaultCipher);
 
-            ui->lineEdit_new_server_openvpn_port->setText(amnezia::protocols::openvpn::openvpnDefaultPort);
-            ui->comboBox_new_server_openvpn_proto->setCurrentText(amnezia::protocols::openvpn::openvpnDefaultProto);
+            ui->lineEdit_new_server_openvpn_port->setText(amnezia::protocols::openvpn::defaultPort);
+            ui->comboBox_new_server_openvpn_proto->setCurrentText(amnezia::protocols::openvpn::defaultTransportProto);
+        }
+        if (page == Page::ServerVpnProtocols) {
+            updateProtocolsPage();
+        }
+        if (page == Page::AppSettings) {
+            updateAppSettingsPage();
+        }
+        if (page == Page::Sites) {
+            updateSitesPage();
+        }
+        if (page == Page::Vpn) {
+            updateVpnPage();
         }
 
         ui->pushButton_new_server_connect_key->setChecked(false);
@@ -424,23 +428,23 @@ void MainWindow::onPushButtonNewServerConnectConfigure(bool)
 {
     QJsonObject cloakConfig {
                     { config_key::port, ui->lineEdit_new_server_cloak_port->text() },
-                    { config_key::container, amnezia::server::getContainerName(DockerContainer::OpenVpnOverCloak) },
+                    { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
                     { config_key::cloak, QJsonObject {
                         { config_key::site, ui->lineEdit_new_server_cloak_site->text() }}
                     }
     };
     QJsonObject ssConfig {
                     { config_key::port, ui->lineEdit_new_server_ss_port->text() },
-                    { config_key::container, amnezia::server::getContainerName(DockerContainer::ShadowSocksOverOpenVpn) },
+                    { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverShadowSocks) },
                     { config_key::shadowsocks, QJsonObject {
                         { config_key::cipher, ui->comboBox_new_server_ss_cipher->currentText() }}
                     }
     };
     QJsonObject openVpnConfig {
                     { config_key::port, ui->lineEdit_new_server_openvpn_port->text() },
-                    { config_key::container, amnezia::server::getContainerName(DockerContainer::OpenVpn) },
+                    { config_key::container, amnezia::containerToString(DockerContainer::OpenVpn) },
                     { config_key::openvpn, QJsonObject {
-                        { config_key::transport_protocol, ui->comboBox_new_server_openvpn_proto->currentText() }}
+                        { config_key::transport_proto, ui->comboBox_new_server_openvpn_proto->currentText() }}
                     }
     };
 
@@ -454,20 +458,20 @@ void MainWindow::onPushButtonNewServerConnectConfigure(bool)
 
     if (ui->checkBox_new_server_ss->isChecked()) {
         containerConfigs.append(ssConfig);
-        containers.append(DockerContainer::ShadowSocksOverOpenVpn);
+        containers.append(DockerContainer::OpenVpnOverShadowSocks);
     }
 
     if (ui->checkBox_new_server_openvpn->isChecked()) {
         containerConfigs.append(openVpnConfig);
-        containers.append(DockerContainer::ShadowSocksOverOpenVpn);
+        containers.append(DockerContainer::OpenVpnOverShadowSocks);
     }
 
-    bool ok = true;
-//    bool ok = installServer(installCredentials, containers, configs,
-//                            ui->page_new_server,
-//                            ui->progressBar_new_server_connection,
-//                            ui->pushButton_new_server_connect,
-//                            ui->label_new_server_wait_info);
+//    bool ok = true;
+    bool ok = installServer(installCredentials, containers, containerConfigs,
+                            ui->page_new_server_2,
+                            ui->progressBar_new_server_connection,
+                            ui->pushButton_new_server_connect,
+                            ui->label_new_server_wait_info);
 
     if (ok) {
         QJsonObject server;
@@ -587,6 +591,69 @@ bool MainWindow::installServer(ServerCredentials credentials,
     return true;
 }
 
+ErrorCode MainWindow::doInstallAction(const std::function<ErrorCode()> &action, QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info)
+{
+    progress->show();
+    if (page) page->setEnabled(false);
+    if (button) button->setVisible(false);
+
+    if (info) info->setVisible(true);
+    if (info) info->setText(tr("Please wait, configuring process may take up to 5 minutes"));
+
+
+    QTimer timer;
+    connect(&timer, &QTimer::timeout, [progress](){
+        progress->setValue(progress->value() + 1);
+    });
+
+    progress->setValue(0);
+    timer.start(1000);
+
+    ErrorCode e = action();
+    qDebug() << "doInstallAction finished with code" << e;
+
+    if (e) {
+        if (page) page->setEnabled(true);
+        if (button) button->setVisible(true);
+        if (info) info->setVisible(false);
+
+        QMessageBox::warning(this, APPLICATION_NAME,
+                             tr("Error occurred while configuring server.") + "\n" +
+                             errorString(e));
+
+        progress->hide();
+        return e;
+    }
+
+    // just ui progressbar tweak
+    timer.stop();
+
+    int remaining_val = progress->maximum() - progress->value();
+
+    if (remaining_val > 0) {
+        QTimer timer1;
+        QEventLoop loop1;
+
+        connect(&timer1, &QTimer::timeout, [&](){
+            progress->setValue(progress->value() + 1);
+            if (progress->value() >= progress->maximum()) {
+                loop1.quit();
+            }
+        });
+
+        timer1.start(5);
+        loop1.exec();
+    }
+
+
+    progress->hide();
+    if (button) button->show();
+    if (page) page->setEnabled(true);
+    if (info) info->setText(tr("Operation finished"));
+
+    return ErrorCode::NoError;
+}
+
 void MainWindow::onPushButtonReinstallServer(bool)
 {
 //    onDisconnect();
@@ -606,7 +673,7 @@ void MainWindow::onPushButtonClearServer(bool)
         onDisconnect();
     }
 
-    ErrorCode e = ServerController::removeContainer(m_settings.serverCredentials(selectedServerIndex), DockerContainer::None);
+    ErrorCode e = ServerController::removeAllContainers(m_settings.serverCredentials(selectedServerIndex));
     ServerController::disconnectFromHost(m_settings.serverCredentials(selectedServerIndex));
     if (e) {
         QMessageBox::warning(this, APPLICATION_NAME,
@@ -630,9 +697,10 @@ void MainWindow::onPushButtonForgetServer(bool)
         onDisconnect();
     }
     m_settings.removeServer(selectedServerIndex);
+    m_settings.setDefaultServer(0);
 
     closePage();
-    updateServersPage();
+    updateServersListPage();
 }
 
 void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
@@ -877,7 +945,7 @@ void MainWindow::setupUiConnections()
         QJsonObject server = m_settings.server(selectedServerIndex);
         server.insert(config_key::description, newText);
         m_settings.editServer(selectedServerIndex, server);
-        updateServersPage();
+        updateServersListPage();
     });
 
     connect(ui->lineEdit_server_settings_description, &QLineEdit::returnPressed, this, [this](){
@@ -890,32 +958,128 @@ void MainWindow::setupUiConnections()
 void MainWindow::setupProtocolsPageConnections()
 {
     QJsonObject openvpnConfig;
+
+    // default buttons
+    QList<DockerContainer> containers {
+        DockerContainer::OpenVpn,
+        DockerContainer::OpenVpnOverShadowSocks,
+        DockerContainer::OpenVpnOverCloak
+    };
+
+    // default buttons
+    QList<QPushButton *> defaultButtons {
+        ui->pushButton_proto_openvpn_cont_default,
+        ui->pushButton_proto_ss_openvpn_cont_default,
+        ui->pushButton_proto_cloak_openvpn_cont_default
+    };
+
+    for (int i = 0; i < containers.size(); ++i) {
+        connect(defaultButtons.at(i), &QPushButton::clicked, this, [this, containers, i](){
+            m_settings.setDefaultContainer(selectedServerIndex, containers.at(i));
+            updateProtocolsPage();
+        });
+    }
+
+    // install buttons
+    QList<QPushButton *> installButtons {
+        ui->pushButton_proto_openvpn_cont_install,
+        ui->pushButton_proto_ss_openvpn_cont_install,
+        ui->pushButton_proto_cloak_openvpn_cont_install
+    };
+
+    for (int i = 0; i < containers.size(); ++i) {
+        QPushButton *button = installButtons.at(i);
+        DockerContainer container = containers.at(i);
+
+        connect(button, &QPushButton::clicked, this, [this, container, button](bool checked){
+            if (checked) {
+                ErrorCode e = doInstallAction([this, container](){
+                    return ServerController::setupContainer(m_settings.serverCredentials(selectedServerIndex), container);
+                },
+                ui->page_server_protocols, ui->progressBar_protocols_container_reinstall,
+                nullptr, nullptr);
+
+                if (!e) {
+                    m_settings.setContainerConfig(selectedServerIndex, container, QJsonObject());
+                }
+            }
+            else {
+                button->setEnabled(false);
+                ErrorCode e = ServerController::removeContainer(m_settings.serverCredentials(selectedServerIndex), container);
+                m_settings.removeContainerConfig(selectedServerIndex, container);
+                button->setEnabled(true);
+            }
+
+            updateProtocolsPage();
+        });
+    }
+
+
+    // settings buttons
+
+    // settings openvpn container
     connect(ui->pushButton_proto_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
-        //updateOpenVpnPage(m_settings.server(selectedServerIndex).value());
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpn, Protocol::OpenVpn));
+        selectedDockerContainer = DockerContainer::OpenVpn;
         goToPage(Page::OpenVpnSettings);
     });
+
+    // settings shadowsocks container
     connect(ui->pushButton_proto_ss_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverShadowSocks, Protocol::OpenVpn),
+            DockerContainer::OpenVpnOverShadowSocks);
+        selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
         goToPage(Page::OpenVpnSettings);
     });
+    connect(ui->pushButton_proto_ss_openvpn_cont_ss_config, &QPushButton::clicked, this, [this](){
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverShadowSocks, Protocol::ShadowSocks));
+        selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+        goToPage(Page::ShadowSocksSettings);
+    });
+
+    // settings cloak container
     connect(ui->pushButton_proto_cloak_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::OpenVpn));
+        selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
         goToPage(Page::OpenVpnSettings);
     });
-
-    connect(ui->pushButton_proto_cloak_openvpn_cont_default, &QPushButton::clicked, this, [this](){
-        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::OpenVpnOverCloak);
-        updateSettings();
+    connect(ui->pushButton_proto_cloak_openvpn_cont_ss_config, &QPushButton::clicked, this, [this](){
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::ShadowSocks));
+        selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+        goToPage(Page::ShadowSocksSettings);
+    });
+    connect(ui->pushButton_proto_cloak_openvpn_cont_cloak_config, &QPushButton::clicked, this, [this](){
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::Cloak));
+        selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+        goToPage(Page::CloakSettings);
     });
 
-    connect(ui->pushButton_proto_ss_openvpn_cont_default, &QPushButton::clicked, this, [this](){
-        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::ShadowSocksOverOpenVpn);
-        updateSettings();
+    ///
+    // Protocols pages
+    connect(ui->checkBox_proto_openvpn_auto_encryption, &QCheckBox::stateChanged, this, [this](){
+        ui->comboBox_proto_openvpn_cipher->setDisabled(ui->checkBox_proto_openvpn_auto_encryption->isChecked());
+        ui->comboBox_proto_openvpn_hash->setDisabled(ui->checkBox_proto_openvpn_auto_encryption->isChecked());
     });
 
-    connect(ui->pushButton_proto_openvpn_cont_default, &QPushButton::clicked, this, [this](){
-        m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::OpenVpn);
-        updateSettings();
-    });
+    connect(ui->pushButton_proto_openvpn_save, &QPushButton::clicked, this, [this](){
+        QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn);
+        protocolConfig = getOpenVpnConfigFromPage(protocolConfig);
 
+        QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
+        QJsonObject newContainerConfig = containerConfig;
+        newContainerConfig.insert(config_key::openvpn, protocolConfig);
+
+        ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
+            return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
+        },
+           ui->page_proto_openvpn, ui->progressBar_proto_openvpn_reset,
+           ui->pushButton_proto_openvpn_save, ui->label_proto_openvpn_info);
+
+        if (!e) {
+            m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
+            m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
+        }
+    });
 }
 
 void MainWindow::setupNewServerPageConnections()
@@ -1020,14 +1184,22 @@ void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::onConnect()
 {
+
+    int serverIndex = m_settings.defaultServerIndex();
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+    DockerContainer container = m_settings.defaultContainer(serverIndex);
+    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+    onConnectWorker(serverIndex, credentials, container, containerConfig);
+}
+
+void MainWindow::onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
+{
     ui->label_error_text->clear();
     ui->pushButton_connect->setChecked(true);
     qApp->processEvents();
 
-    // TODO: Call connectToVpn with restricted server account
-    ServerCredentials credentials = m_settings.defaultServerCredentials();
-
-    ErrorCode errorCode = m_vpnConnection->connectToVpn(credentials);
+    ErrorCode errorCode = m_vpnConnection->connectToVpn(serverIndex, credentials, container, containerConfig);
     if (errorCode) {
         //ui->pushButton_connect->setChecked(false);
         QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
@@ -1122,33 +1294,55 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete
 
 void MainWindow::updateSettings()
 {
+
+}
+
+void MainWindow::updateSitesPage()
+{
+    ui->listWidget_sites->clear();
+    for (const QString &site : m_settings.customSites()) {
+        makeSitesListItem(ui->listWidget_sites, site);
+    }
+}
+
+void MainWindow::updateVpnPage()
+{
     ui->radioButton_mode_selected_sites->setChecked(m_settings.customRouting());
     ui->pushButton_vpn_add_site->setEnabled(m_settings.customRouting());
+}
 
+void MainWindow::updateAppSettingsPage()
+{
     ui->checkBox_autostart->setChecked(Autostart::isAutostart());
     ui->checkBox_autoconnect->setChecked(m_settings.isAutoConnect());
 
     ui->lineEdit_network_settings_dns1->setText(m_settings.primaryDns());
     ui->lineEdit_network_settings_dns2->setText(m_settings.secondaryDns());
+}
 
-    ui->listWidget_sites->clear();
-    for(const QString &site : m_settings.customSites()) {
-        makeSitesListItem(ui->listWidget_sites, site);
-    }
+void MainWindow::updateServerPage()
+{
+    ui->label_server_settings_wait_info->hide();
+    ui->label_server_settings_wait_info->clear();
 
+    QJsonObject server = m_settings.server(selectedServerIndex);
+    QString port = server.value(config_key::port).toString();
+    ui->label_server_settings_server->setText(QString("%1@%2%3%4")
+        .arg(server.value(config_key::userName).toString())
+        .arg(server.value(config_key::hostName).toString())
+        .arg(port.isEmpty() ? "" : ":")
+        .arg(port));
+    ui->lineEdit_server_settings_description->setText(server.value(config_key::description).toString());
 
-    QJsonObject selectedServer = m_settings.server(selectedServerIndex);
     QString selectedContainerName = m_settings.defaultContainerName(selectedServerIndex);
 
     ui->label_server_settings_current_vpn_protocol->setText(tr("Protocol: ") + selectedContainerName);
 
-    qDebug() << "DefaultContainer(selectedServerIndex)" << selectedServerIndex << m_settings.defaultContainer(selectedServerIndex);
-    ui->pushButton_proto_cloak_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::OpenVpnOverCloak);
-    ui->pushButton_proto_ss_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::ShadowSocksOverOpenVpn);
-    ui->pushButton_proto_openvpn_cont_default->setChecked(m_settings.defaultContainer(selectedServerIndex) == DockerContainer::OpenVpn);
+    //qDebug() << "DefaultContainer(selectedServerIndex)" << selectedServerIndex << containerToString(m_settings.defaultContainer(selectedServerIndex));
+
 }
 
-void MainWindow::updateServersPage()
+void MainWindow::updateServersListPage()
 {
     ui->listWidget_servers->clear();
     const QJsonArray &servers = m_settings.serversArray();
@@ -1159,6 +1353,34 @@ void MainWindow::updateServersPage()
         makeServersListItem(ui->listWidget_servers, servers.at(i).toObject(), i == defaultServer, i);
     }
     ui->listWidget_servers->setUpdatesEnabled(true);
+}
+
+void MainWindow::updateProtocolsPage()
+{
+    ui->progressBar_protocols_container_reinstall->hide();
+
+    auto containers = m_settings.containers(selectedServerIndex);
+
+    DockerContainer defaultContainer = m_settings.defaultContainer(selectedServerIndex);
+    ui->pushButton_proto_cloak_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpnOverCloak);
+    ui->pushButton_proto_ss_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpnOverShadowSocks);
+    ui->pushButton_proto_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpn);
+
+    ui->pushButton_proto_cloak_openvpn_cont_default->setVisible(containers.contains(DockerContainer::OpenVpnOverCloak));
+    ui->pushButton_proto_ss_openvpn_cont_default->setVisible(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
+    ui->pushButton_proto_openvpn_cont_default->setVisible(containers.contains(DockerContainer::OpenVpn));
+
+    ui->pushButton_proto_cloak_openvpn_cont_share->setVisible(containers.contains(DockerContainer::OpenVpnOverCloak));
+    ui->pushButton_proto_ss_openvpn_cont_share->setVisible(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
+    ui->pushButton_proto_openvpn_cont_share->setVisible(containers.contains(DockerContainer::OpenVpn));
+
+    ui->pushButton_proto_cloak_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpnOverCloak));
+    ui->pushButton_proto_ss_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
+    ui->pushButton_proto_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpn));
+
+    ui->frame_openvpn_ss_cloak_settings->setVisible(containers.contains(DockerContainer::OpenVpnOverCloak));
+    ui->frame_openvpn_ss_settings->setVisible(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
+    ui->frame_openvpn_settings->setVisible(containers.contains(DockerContainer::OpenVpn));
 }
 
 void MainWindow::updateShareCodePage()
@@ -1175,22 +1397,37 @@ void MainWindow::updateShareCodePage()
     //qDebug() << "Share code" << QJsonDocument(o).toJson();
 }
 
-void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig)
-{
-    ui->lineEdit_proto_openvpn_subnet->setText(nonEmpty(openvpnConfig.value(config_key::subnet_address).toString(),
-        protocols::vpnDefaultSubnetAddress));
+void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container)
+{   
+    ui->radioButton_proto_openvpn_udp->setEnabled(true);
+    ui->radioButton_proto_openvpn_tcp->setEnabled(true);
 
-    QString trasnsport = nonEmpty(openvpnConfig.value(config_key::transport_protocol).toString(),
-        protocols::openvpn::openvpnDefaultProto);
+    ui->lineEdit_proto_openvpn_subnet->setText(openvpnConfig.value(config_key::subnet_address).
+        toString(protocols::vpnDefaultSubnetAddress));
 
-    ui->radioButton_proto_openvpn_udp->setChecked(trasnsport == protocols::openvpn::openvpnDefaultProto);
-    ui->radioButton_proto_openvpn_tcp->setChecked(trasnsport != protocols::openvpn::openvpnDefaultProto);
+    QString trasnsport = openvpnConfig.value(config_key::transport_proto).
+        toString(protocols::openvpn::defaultTransportProto);
 
-    ui->comboBox_proto_openvpn_cipher->setCurrentText(nonEmpty(openvpnConfig.value(config_key::cipher).toString(),
-        protocols::openvpn::openvpnDefaultCipher));
+    ui->radioButton_proto_openvpn_udp->setChecked(trasnsport == protocols::openvpn::defaultTransportProto);
+    ui->radioButton_proto_openvpn_tcp->setChecked(trasnsport != protocols::openvpn::defaultTransportProto);
 
-    ui->comboBox_proto_openvpn_cipher->setCurrentText(nonEmpty(openvpnConfig.value(config_key::hash).toString(),
-        protocols::openvpn::openvpnDefaultHash));
+    ui->comboBox_proto_openvpn_cipher->setCurrentText(openvpnConfig.value(config_key::cipher).
+        toString(protocols::openvpn::defaultCipher));
+
+    ui->comboBox_proto_openvpn_hash->setCurrentText(openvpnConfig.value(config_key::hash).
+        toString(protocols::openvpn::defaultHash));
+
+    bool blockOutsideDns = openvpnConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
+    ui->checkBox_proto_openvpn_block_dns->setChecked(blockOutsideDns);
+
+    bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
+    ui->checkBox_proto_openvpn_auto_encryption->setChecked(!isNcpDisabled);
+
+    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+        ui->radioButton_proto_openvpn_udp->setEnabled(false);
+        ui->radioButton_proto_openvpn_tcp->setEnabled(false);
+        ui->radioButton_proto_openvpn_tcp->setChecked(true);
+    }
 }
 
 void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &address)
@@ -1232,7 +1469,7 @@ void MainWindow::makeServersListItem(QListWidget *listWidget, const QJsonObject 
     connect(widget->ui->pushButton_default, &QPushButton::clicked, this, [this, index](){
         m_settings.setDefaultServer(index);
         updateSettings();
-        updateServersPage();
+        updateServersListPage();
     });
 
     connect(widget->ui->pushButton_share, &QPushButton::clicked, this, [this, index](){
@@ -1274,4 +1511,16 @@ void MainWindow::updateQRCodeImage(const QString &text, QLabel *label)
                 encodeImage.setPixel( i + QR_MARGIN, j + QR_MARGIN, 0 );
 
     label->setPixmap(QPixmap::fromImage(encodeImage.scaledToWidth(label->width())));
+}
+
+QJsonObject MainWindow::getOpenVpnConfigFromPage(QJsonObject oldConfig)
+{
+    oldConfig.insert(config_key::subnet_address, ui->lineEdit_proto_openvpn_subnet->text());
+    oldConfig.insert(config_key::transport_proto, ui->radioButton_proto_openvpn_udp->isChecked() ? protocols::UDP : protocols::TCP);
+    oldConfig.insert(config_key::ncp_disable, ! ui->checkBox_proto_openvpn_auto_encryption->isChecked());
+    oldConfig.insert(config_key::cipher, ui->comboBox_proto_openvpn_cipher->currentText());
+    oldConfig.insert(config_key::hash, ui->comboBox_proto_openvpn_hash->currentText());
+    oldConfig.insert(config_key::block_outside_dns, ui->checkBox_proto_openvpn_block_dns->isChecked());
+
+    return oldConfig;
 }

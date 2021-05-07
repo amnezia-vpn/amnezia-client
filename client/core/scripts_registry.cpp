@@ -9,7 +9,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     switch (container) {
     case DockerContainer::OpenVpn: return QLatin1String("openvpn");
     case DockerContainer::OpenVpnOverCloak: return QLatin1String("openvpn_cloak");
-    case DockerContainer::ShadowSocksOverOpenVpn: return QLatin1String("openvpn_shadowsocks");
+    case DockerContainer::OpenVpnOverShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
     default: return "";
     }
@@ -32,6 +32,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
 {
     switch (type) {
     case ProtocolScriptType::dockerfile: return QLatin1String("Dockerfile");
+    case ProtocolScriptType::run_container: return QLatin1String("run_container.sh");
     case ProtocolScriptType::configure_container: return QLatin1String("configure_container.sh");
     case ProtocolScriptType::container_startup: return QLatin1String("start.sh");
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
@@ -46,7 +47,11 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
         qDebug() << "Error opening script" << fileName;
         return "";
     }
-    return file.readAll();
+    QByteArray ba = file.readAll();
+    if (ba.isEmpty()) {
+        qDebug() << "Error, script is empty" << fileName;
+    }
+    return ba;
 }
 
 QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer container)

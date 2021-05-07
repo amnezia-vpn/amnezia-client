@@ -24,9 +24,16 @@ public:
     static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
-    ErrorCode createVpnConfiguration(const ServerCredentials &credentials, DockerContainer container);
 
-    ErrorCode connectToVpn(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None);
+    static QMap<Protocol, QString> getLastVpnConfig(const QJsonObject &containerConfig);
+    QString createVpnConfigurationForProto(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Protocol proto,
+        ErrorCode *errorCode = nullptr);
+
+    ErrorCode createVpnConfiguration(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+
+    ErrorCode connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void disconnectFromVpn();
 
     bool isConnected() const;

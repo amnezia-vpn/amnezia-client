@@ -34,11 +34,7 @@
         <file>images/server_settings.png</file>
         <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
-        <file>server_scripts/setup_openvpn_server.sh</file>
-        <file>server_scripts/template_openvpn.ovpn</file>
         <file>images/background_connected.png</file>
-        <file>server_scripts/setup_shadowsocks_server.sh</file>
-        <file>server_scripts/template_shadowsocks.ovpn</file>
         <file>server_scripts/setup_host_firewall.sh</file>
         <file>images/reload.png</file>
         <file>server_scripts/openvpn_cloak/Dockerfile</file>
@@ -54,5 +50,16 @@
         <file>images/plus.png</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/remove_all_containers.sh</file>
+        <file>server_scripts/openvpn_cloak/run_container.sh</file>
+        <file>server_scripts/openvpn/configure_container.sh</file>
+        <file>server_scripts/openvpn/run_container.sh</file>
+        <file>server_scripts/openvpn/template.ovpn</file>
+        <file>server_scripts/openvpn/Dockerfile</file>
+        <file>server_scripts/openvpn/start.sh</file>
+        <file>server_scripts/openvpn_shadowsocks/configure_container.sh</file>
+        <file>server_scripts/openvpn_shadowsocks/Dockerfile</file>
+        <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>
+        <file>server_scripts/openvpn_shadowsocks/start.sh</file>
+        <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
     </qresource>
 </RCC>

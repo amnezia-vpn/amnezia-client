@@ -6,8 +6,8 @@
 
 #include "protocols/protocols_defs.h"
 
-QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
-    DockerContainer container, ErrorCode *errorCode)
+QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
+    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
 
@@ -21,7 +21,7 @@ QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentia
 
     if (e) {
         if (errorCode) *errorCode = e;
-        return QJsonObject();
+        return "";
     }
 
     QJsonObject config;
@@ -30,14 +30,18 @@ QJsonObject CloakConfigurator::genCloakConfig(const ServerCredentials &credentia
     config.insert("EncryptionMethod", "aes-gcm");
     config.insert("UID", cloakBypassUid);
     config.insert("PublicKey", cloakPublicKey);
-    config.insert("ServerName", amnezia::protocols::cloak::ckDefaultRedirSite);
+    config.insert("ServerName", "$FAKE_WEB_SITE_ADDRESS");
     config.insert("NumConn", 4);
     config.insert("BrowserSig", "chrome");
     config.insert("StreamTimeout", 300);
 
-    // Amnezia field
-    config.insert("Remote", credentials.hostName);
+    // transfer params to protocol runner
+    config.insert(config_key::transport_proto, "$OPENVPN_TRANSPORT_PROTO");
+    config.insert(config_key::remote, credentials.hostName);
 
-    qDebug().noquote() << QJsonDocument(config).toJson();
-    return config;
+    QString textCfg = ServerController::replaceVars(QJsonDocument(config).toJson(),
+        ServerController::genVarsForScript(credentials, container, containerConfig));
+
+    // qDebug().noquote() << textCfg;
+    return textCfg;
 }

@@ -88,33 +88,112 @@ QString Settings::defaultContainerName(int serverIndex) const
     else return name;
 }
 
+QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const
+{
+    const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
+
+    QMap<DockerContainer, QJsonObject> containersMap;
+    for (const QJsonValue &val : containers) {
+        containersMap.insert(containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
+    }
+
+    return containersMap;
+}
+
+void Settings::setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers)
+{
+    QJsonObject s = server(serverIndex);
+    QJsonArray c;
+    for (const QJsonObject &o: containers) {
+        c.append(o);
+    }
+    s.insert(config_key::containers, c);
+    editServer(serverIndex, s);
+}
+
+
 QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container)
 {
     if (container == DockerContainer::None) return QJsonObject();
-
-    const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
-    for (const QJsonValue &val : containers) {
-        if (val.toObject().value(config_key::container).toString() == containerToString(container)) {
-            return val.toObject();
-        }
-    }
-    return QJsonObject();
+    return containers(serverIndex).value(container);
 }
+
+//QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container)
+//{
+//    if (container == DockerContainer::None) return QJsonObject();
+
+//    const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
+//    for (const QJsonValue &val : containers) {
+//        if (val.toObject().value(config_key::container).toString() == containerToString(container)) {
+//            return val.toObject();
+//        }
+//    }
+//    return QJsonObject();
+//}
+
+void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
+{
+    if (container == DockerContainer::None) return;
+
+    auto c = containers(serverIndex);
+    c[container] = config;
+    c[container][config_key::container] = containerToString(container);
+    setContainers(serverIndex, c);
+}
+
+void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
+{
+    if (container == DockerContainer::None) return;
+
+    auto c = containers(serverIndex);
+    c.remove(container);
+    setContainers(serverIndex, c);
+}
+
+//void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
+//{
+//    if (container == DockerContainer::None) return;
+
+//    QJsonObject s = server(serverIndex);
+//    QJsonArray c = s.value(config_key::containers).toArray();
+//    for (int i = c.size() - 1; i >= 0; i--) {
+//        if (c.at(i).toObject().value(config_key::container).toString() == containerToString(container)) {
+//            c.removeAt(i);
+//        }
+//    }
+
+//    c.append(config);
+//    s.insert(config_key::containers, c);
+//    editServer(serverIndex, s);
+//}
 
 QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Protocol proto)
 {
     const QJsonObject &c = containerConfig(serverIndex, container);
+    return c.value(protoToString(proto)).toObject();
+}
 
-    switch (proto) {
-    case Protocol::OpenVpn:
-        return c.value(config_key::openvpn).toObject();
-    case Protocol::ShadowSocks:
-        return c.value(config_key::shadowsocks).toObject();
-    case Protocol::Cloak:
-        return c.value(config_key::cloak).toObject();
-    default:
-        return QJsonObject();
+void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Protocol proto, const QJsonObject &config)
+{
+    QJsonObject c = containerConfig(serverIndex, container);
+    c.insert(protoToString(proto), config);
+
+    setContainerConfig(serverIndex, container, c);
+}
+
+void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto)
+{
+    if (proto == Protocol::Any) {
+        for (Protocol p: { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak, Protocol::WireGuard}) {
+            clearLastConnectionConfig(serverIndex, container, p);
+        }
+        return;
     }
+
+    QJsonObject c = protocolConfig(serverIndex, container, proto);
+    c.remove(config_key::last_config);
+    setProtocolConfig(serverIndex, container, proto, c);
+    qDebug() << "Settings::clearLastConnectionConfig for" << protoToString(proto);
 }
 
 bool Settings::haveAuthData() const
@@ -127,7 +206,6 @@ bool Settings::haveAuthData() const
 QString Settings::nextAvailableServerName() const
 {
     int i = 0;
-    //bool found = false;
     bool nameExist = false;
 
     do {

@@ -5,44 +5,6 @@
 #include <QObject>
 
 namespace amnezia {
-Q_NAMESPACE
-
-enum class Protocol {
-    Any,
-    OpenVpn,
-    ShadowSocks,
-    Cloak,
-    WireGuard
-};
-Q_ENUM_NS(Protocol)
-
-inline Protocol protoFromString(QString proto){
-    auto&& metaEnum = QMetaEnum::fromType<Protocol>();
-    return static_cast<Protocol>(metaEnum.keyToValue(proto.toStdString().c_str()));
-}
-
-inline QString protoToString(Protocol proto){
-    return QVariant::fromValue(proto).toString();
-}
-
-
-enum class DockerContainer {
-    None,
-    OpenVpn,
-    ShadowSocksOverOpenVpn,
-    OpenVpnOverCloak,
-    WireGuard
-};
-Q_ENUM_NS(DockerContainer)
-
-inline DockerContainer containerFromString(QString container){
-    auto&& metaEnum = QMetaEnum::fromType<DockerContainer>();
-    return static_cast<DockerContainer>(metaEnum.keyToValue(container.toStdString().c_str()));
-}
-
-inline QString containerToString(DockerContainer container){
-    return QVariant::fromValue(container).toString();
-}
 
 //static DockerContainer containerForProto(Protocol proto)
 //{
@@ -78,6 +40,7 @@ enum ErrorCode
     // Server errors
     ServerCheckFailed,
     ServerPortAlreadyAllocatedError,
+    ServerContainerMissingError,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,

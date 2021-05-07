@@ -2,11 +2,11 @@
 #define SERVER_DEFS_H
 
 #include <QObject>
-#include "core/defs.h"
+#include "protocols/protocols_defs.h""
 
 namespace amnezia {
 namespace server {
-QString getContainerName(amnezia::DockerContainer container);
+//QString getContainerName(amnezia::DockerContainer container);
 QString getDockerfileFolder(amnezia::DockerContainer container);
 
 }

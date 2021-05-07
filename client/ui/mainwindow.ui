@@ -287,7 +287,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>12</number>
+      <number>14</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -3530,68 +3530,15 @@ border: none;
             <string notr="true"/>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
                <widget class="QLabel" name="label_36">
                 <property name="text">
                  <string>Cloak container</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_cloak_openvpn_cont_install">
-                <property name="minimumSize">
-                 <size>
-                  <width>36</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-padding: 0px;
-image: url(:/images/connect_button_connected.png);
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_cloak_openvpn_cont_share">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-image: url(:/images/share.png);
-padding: 0px;
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
                 </property>
                </widget>
               </item>
@@ -3639,10 +3586,80 @@ QPushButton:!checked {
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_cloak_openvpn_cont_share">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background: transparent;
+image: url(:/images/share.png);
+padding: 0px;
+margin: 0px;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_cloak_openvpn_cont_install">
+                <property name="minimumSize">
+                 <size>
+                  <width>36</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
+    background: transparent;
+    padding: 0px;
+    margin: 0px;
+}
+QPushButton:checked {
+	image: url(:/images/connect_button_connected.png);
+}
+QPushButton:!checked {
+	image: url(:/images/connect_button_disconnected.png);
+}
+</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
-             <widget class="QFrame" name="frame">
+             <widget class="QFrame" name="frame_openvpn_ss_cloak_settings">
               <layout class="QVBoxLayout" name="verticalLayout">
                <item>
                 <widget class="QPushButton" name="pushButton_proto_cloak_openvpn_cont_openvpn_config">
@@ -3689,68 +3706,15 @@ QPushButton:!checked {
             </size>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QLabel" name="label_37">
                 <property name="text">
                  <string>ShadowSocks container</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_ss_openvpn_cont_install">
-                <property name="minimumSize">
-                 <size>
-                  <width>36</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-padding: 0px;
-image: url(:/images/connect_button_disconnected.png);
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_ss_openvpn_cont_share">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-image: url(:/images/share.png);
-padding: 0px;
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
                 </property>
                </widget>
               </item>
@@ -3797,10 +3761,77 @@ QPushButton:!checked {
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_ss_openvpn_cont_share">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background: transparent;
+image: url(:/images/share.png);
+padding: 0px;
+margin: 0px;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_ss_openvpn_cont_install">
+                <property name="minimumSize">
+                 <size>
+                  <width>36</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
+    background: transparent;
+    padding: 0px;
+    margin: 0px;
+}
+QPushButton:checked {
+	image: url(:/images/connect_button_connected.png);
+}
+QPushButton:!checked {
+	image: url(:/images/connect_button_disconnected.png);
+}
+</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
-             <widget class="QFrame" name="frame_2">
+             <widget class="QFrame" name="frame_openvpn_ss_settings">
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <widget class="QPushButton" name="pushButton_proto_ss_openvpn_cont_openvpn_config">
@@ -3840,68 +3871,15 @@ QPushButton:!checked {
             <string notr="true"/>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_12">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QLabel" name="label_42">
                 <property name="text">
                  <string>OpenVPN container</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_openvpn_cont_install">
-                <property name="minimumSize">
-                 <size>
-                  <width>36</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-padding: 0px;
-image: url(:/images/connect_button_connected.png);
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_proto_openvpn_cont_share">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: transparent;
-image: url(:/images/share.png);
-padding: 0px;
-margin: 0px;</string>
-                </property>
-                <property name="text">
-                 <string/>
                 </property>
                </widget>
               </item>
@@ -3948,10 +3926,77 @@ QPushButton:!checked {
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_openvpn_cont_share">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background: transparent;
+image: url(:/images/share.png);
+padding: 0px;
+margin: 0px;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_openvpn_cont_install">
+                <property name="minimumSize">
+                 <size>
+                  <width>36</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
+    background: transparent;
+    padding: 0px;
+    margin: 0px;
+}
+QPushButton:checked {
+	image: url(:/images/connect_button_connected.png);
+}
+QPushButton:!checked {
+	image: url(:/images/connect_button_disconnected.png);
+}
+</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
-             <widget class="QFrame" name="frame_8">
+             <widget class="QFrame" name="frame_openvpn_settings">
               <layout class="QVBoxLayout" name="verticalLayout_13">
                <item>
                 <widget class="QPushButton" name="pushButton_proto_openvpn_cont_openvpn_config">
@@ -3984,6 +4029,50 @@ QPushButton:!checked {
          </item>
         </layout>
        </widget>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_protocols_container_reinstall">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>580</y>
+         <width>300</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
       </widget>
      </widget>
      <widget class="QWidget" name="page_share_connection">
@@ -4106,8 +4195,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>500</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -4234,8 +4323,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>500</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -4484,7 +4573,7 @@ color: #100A44;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_back_from_cloak_settings">
+      <widget class="QPushButton" name="pushButton_back_from_openvpn_settings">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -4532,7 +4621,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_new_server_wait_info_4">
+      <widget class="QLabel" name="label_98">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -4551,67 +4640,11 @@ QPushButton:hover {
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>150</y>
-         <width>321</width>
-         <height>91</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QGroupBox{
-    border: 1px solid lightgray;
-    border-radius: 2px;
-    margin-top: 7ex; 
-}
-
-QGroupBox::title {
-	font-size: 16px;
-	font-style: normal;
-	font-weight: normal;
-    color: #181922;
-
-    subcontrol-origin: margin;
-    subcontrol-position: top left; 
-}</string>
-       </property>
-       <property name="title">
-        <string>Network protocol</string>
-       </property>
-       <widget class="QRadioButton" name="radioButton_proto_openvpn_udp">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>171</width>
-          <height>19</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>UDP</string>
-        </property>
-       </widget>
-       <widget class="QRadioButton" name="radioButton_proto_openvpn_tcp">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>60</y>
-          <width>171</width>
-          <height>19</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>TCP</string>
-        </property>
-       </widget>
-      </widget>
       <widget class="QComboBox" name="comboBox_proto_openvpn_cipher">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>290</y>
+         <y>330</y>
          <width>151</width>
          <height>31</height>
         </rect>
@@ -4662,14 +4695,14 @@ QGroupBox::title {
         </property>
        </item>
       </widget>
-      <widget class="QLabel" name="label_new_server_wait_info_5">
+      <widget class="QLabel" name="label_99">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>260</y>
+         <y>300</y>
          <width>151</width>
          <height>21</height>
         </rect>
@@ -4685,7 +4718,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>200</x>
-         <y>290</y>
+         <y>330</y>
          <width>151</width>
          <height>31</height>
         </rect>
@@ -4736,14 +4769,14 @@ QGroupBox::title {
         </property>
        </item>
       </widget>
-      <widget class="QLabel" name="label_new_server_wait_info_6">
+      <widget class="QLabel" name="label_97">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
          <x>200</x>
-         <y>260</y>
+         <y>300</y>
          <width>151</width>
          <height>21</height>
         </rect>
@@ -4759,7 +4792,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>350</y>
+         <y>390</y>
          <width>321</width>
          <height>21</height>
         </rect>
@@ -4771,6 +4804,206 @@ QGroupBox::title {
         <bool>false</bool>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_proto_openvpn_save">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>300</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Save and restart VPN</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_100">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>140</y>
+         <width>151</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Network protocol</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QFrame" name="frame_3">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>170</y>
+         <width>321</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QFrame{
+    border: 1px solid lightgray;
+    border-radius: 2px;
+    margin-top: 0px; 
+}
+</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QRadioButton" name="radioButton_proto_openvpn_tcp">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>171</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TCP</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_proto_openvpn_udp">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>171</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>UDP</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_proto_openvpn_auto_encryption">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>270</y>
+         <width>321</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Auto-negotiate encryption</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_proto_openvpn_reset">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_proto_openvpn_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>570</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <zorder>progressBar_proto_openvpn_reset</zorder>
+      <zorder>label_38</zorder>
+      <zorder>pushButton_back_from_openvpn_settings</zorder>
+      <zorder>lineEdit_proto_openvpn_subnet</zorder>
+      <zorder>label_98</zorder>
+      <zorder>comboBox_proto_openvpn_cipher</zorder>
+      <zorder>label_99</zorder>
+      <zorder>comboBox_proto_openvpn_hash</zorder>
+      <zorder>label_97</zorder>
+      <zorder>checkBox_proto_openvpn_block_dns</zorder>
+      <zorder>pushButton_proto_openvpn_save</zorder>
+      <zorder>label_100</zorder>
+      <zorder>frame_3</zorder>
+      <zorder>checkBox_proto_openvpn_auto_encryption</zorder>
+      <zorder>label_proto_openvpn_info</zorder>
      </widget>
      <widget class="QWidget" name="page_proto_shadowsocks">
       <widget class="QLabel" name="label_43">
@@ -4792,7 +5025,7 @@ color: #100A44;
 </string>
        </property>
        <property name="text">
-        <string>OpenVPN Settings</string>
+        <string>ShadowSocks Settings</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -4833,6 +5066,170 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
+      <widget class="QComboBox" name="comboBox_proto_shadowsocks_cipher">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>80</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>chacha20-poly1305</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-256-gcm</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-128-gcm</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-256-cfb</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-128-cfb</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>chacha20</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>chacha20-ietf</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_proto_shadowsocks_reset">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_proto_shadowsocks_save">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>300</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Save and restart VPN</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_101">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>80</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cipher</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_proto_shadowsocks_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>570</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="page_proto_cloak">
       <widget class="QLabel" name="label_44">
@@ -4863,7 +5260,7 @@ color: #100A44;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_back_from_openvpn_settings">
+      <widget class="QPushButton" name="pushButton_back_from_cloak_settings">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -4893,6 +5290,155 @@ QPushButton:hover {
        </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_proto_cloak_cipher">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>80</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>chacha20-poly1305</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-256-gcm</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>aes-128-gcm</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>plain</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="label_102">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>80</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cipher</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="progressBar_proto_cloak_reset">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_proto_cloak_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>580</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_proto_cloak_save">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>530</y>
+         <width>300</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Save and restart VPN</string>
        </property>
       </widget>
      </widget>

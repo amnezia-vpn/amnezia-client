@@ -10,6 +10,7 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
+#include "protocols/protocols_defs.h"
 
 using namespace amnezia;
 
@@ -57,8 +58,17 @@ public:
     DockerContainer defaultContainer(int serverIndex) const;
     QString defaultContainerName(int serverIndex) const;
 
+    QMap<DockerContainer, QJsonObject> containers(int serverIndex) const;
+    void setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers);
+
     QJsonObject containerConfig(int serverIndex, DockerContainer container);
+    void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
+    void removeContainerConfig(int serverIndex, DockerContainer container);
+
     QJsonObject protocolConfig(int serverIndex, DockerContainer container, Protocol proto);
+    void setProtocolConfig(int serverIndex, DockerContainer container, Protocol proto, const QJsonObject &config);
+
+    void clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto = Protocol::Any);
 
     bool haveAuthData() const;
     QString nextAvailableServerName() const;

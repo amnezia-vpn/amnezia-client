@@ -14,6 +14,7 @@ include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 HEADERS  += \
     ../ipc/ipc.h \
    configurators/cloak_configurator.h \
+   configurators/shadowsocks_configurator.h \
     core/defs.h \
     core/errorstrings.h \
     core/ipcclient.h \
@@ -39,6 +40,7 @@ HEADERS  += \
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
+   configurators/shadowsocks_configurator.cpp \
     core/ipcclient.cpp \
     configurators/openvpn_configurator.cpp \
    core/scripts_registry.cpp \

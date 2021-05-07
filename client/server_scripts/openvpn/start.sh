@@ -19,10 +19,8 @@ iptables -t nat -A POSTROUTING -s $VPN_SUBNET_IP/$VPN_SUBNET_MASK_VAL -o eth0 -j
 
 # kill daemons in case of restart
 killall -KILL openvpn
-killall -KILL ck-server
 
 # start daemons if configured
 if [ -f /opt/amnezia/openvpn/ca.crt ]; then (openvpn --config /opt/amnezia/openvpn/server.conf --daemon); fi
-if [ -f /opt/amnezia/cloak/ck-config.json ]; then (ck-server -c /opt/amnezia/cloak/ck-config.json &); fi
 
 tail -f /dev/null

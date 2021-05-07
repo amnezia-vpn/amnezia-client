@@ -68,6 +68,7 @@ private slots:
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
     void onConnect();
+    void onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void onDisconnect();
 
 
@@ -81,6 +82,8 @@ private:
     bool installServer(ServerCredentials credentials, QList<DockerContainer> containers, QJsonArray configs,
         QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
 
+    ErrorCode doInstallAction(const std::function<ErrorCode()> &action, QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
+
     void setupTray();
     void setTrayIcon(const QString &iconPath);
 
@@ -89,14 +92,22 @@ private:
     void setupNewServerPageConnections();
 
     void updateSettings();
-    void updateServersPage();
+
+    void updateSitesPage();
+    void updateVpnPage();
+    void updateAppSettingsPage();
+    void updateServerPage();
+    void updateServersListPage();
+    void updateProtocolsPage();
     void updateShareCodePage();
-    void updateOpenVpnPage(const QJsonObject &openvpnConfig);
+    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container = DockerContainer::None);
 
     void makeSitesListItem(QListWidget* listWidget, const QString &address);
     void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
 
     void updateQRCodeImage(const QString &text, QLabel *label);
+
+    QJsonObject getOpenVpnConfigFromPage(QJsonObject oldConfig);
 
 private:
     Ui::MainWindow *ui;
@@ -111,6 +122,7 @@ private:
 
     QRegExpValidator m_ipAddressValidator;
     QRegExpValidator m_ipAddressPortValidator;
+    QRegExpValidator m_ipNetwok24Validator;
 
     CQR_Encode m_qrEncode;
 
@@ -129,6 +141,7 @@ private:
 
     QStack<Page> pagesStack;
     int selectedServerIndex = -1; // server index to use when proto settings page opened
+    DockerContainer selectedDockerContainer; // same
     ServerCredentials installCredentials; // used to save cred between pages new_server and new_server_2
 };
 

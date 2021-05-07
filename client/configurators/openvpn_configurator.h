@@ -23,7 +23,7 @@ public:
     };
 
     static QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-        ErrorCode *errorCode = nullptr);
+        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     static QString convertOpenSShKey(const QString &key);
 

@@ -3,6 +3,7 @@
 
 #include <QLatin1String>
 #include "core/defs.h"
+#include "protocols/protocols_defs.h""
 
 namespace amnezia {
 
@@ -19,6 +20,7 @@ enum SharedScriptType {
 enum ProtocolScriptType {
     // Protocol scripts
     dockerfile,
+    run_container,
     configure_container,
     container_startup,
     openvpn_template

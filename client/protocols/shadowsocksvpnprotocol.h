@@ -3,6 +3,7 @@
 
 #include "openvpnprotocol.h"
 #include "QProcess"
+#include "protocols/protocols_defs.h""
 
 class ShadowSocksVpnProtocol : public OpenVpnProtocol
 {
@@ -12,8 +13,6 @@ public:
 
     ErrorCode start() override;
     void stop() override;
-
-    static QJsonObject genShadowSocksConfig(const ServerCredentials &credentials, DockerContainer container = DockerContainer::ShadowSocksOverOpenVpn);
 
 protected:
     void readShadowSocksConfiguration(const QJsonObject &configuration);

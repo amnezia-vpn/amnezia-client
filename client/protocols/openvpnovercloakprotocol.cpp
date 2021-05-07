@@ -37,9 +37,13 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_cloakCfgFile.close();
 
     QStringList args = QStringList() << "-c" << m_cloakCfgFile.fileName()
-                                     << "-s" << m_cloakConfig.value("Remote").toString()
-                                     << "-p" << amnezia::protocols::cloak::ckDefaultPort
-                                     << "-l" << amnezia::protocols::openvpn::openvpnDefaultPort;
+                                     << "-s" << m_cloakConfig.value(config_key::remote).toString()
+                                     << "-p" << amnezia::protocols::cloak::defaultPort
+                                     << "-l" << amnezia::protocols::openvpn::defaultPort;
+
+    if (m_cloakConfig.value(config_key::transport_proto).toString() == protocols::UDP) {
+        args << "-u";
+    }
 
     qDebug().noquote() << "OpenVpnOverCloakProtocol::start()"
                        << cloakExecPath() << args.join(" ");
