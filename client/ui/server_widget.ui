@@ -84,7 +84,7 @@ QPushButton:!checked {
   <widget class="QPushButton" name="pushButton_share">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>170</x>
      <y>25</y>
      <width>24</width>
      <height>24</height>
@@ -139,7 +139,7 @@ QPushButton:!checked {
   <widget class="QPushButton" name="pushButton_settings">
    <property name="geometry">
     <rect>
-     <x>174</x>
+     <x>260</x>
      <y>25</y>
      <width>24</width>
      <height>24</height>

@@ -6,19 +6,6 @@
 
 namespace amnezia {
 
-//static DockerContainer containerForProto(Protocol proto)
-//{
-//    Q_ASSERT(proto != Protocol::Any);
-
-//    switch (proto) {
-//    case Protocol::OpenVpn: return DockerContainer::OpenVpn;
-//    case Protocol::OpenVpnOverCloak: return DockerContainer::OpenVpnOverCloak;
-//    case Protocol::ShadowSocksOverOpenVpn: return DockerContainer::ShadowSocksOverOpenVpn;
-//    case Protocol::WireGuard: return DockerContainer::WireGuard;
-//    case Protocol::Any: return DockerContainer::None;
-//    }
-//}
-
 struct ServerCredentials
 {
     QString hostName;

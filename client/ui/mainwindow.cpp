@@ -2,6 +2,7 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFileDialog>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -13,13 +14,19 @@
 #include <QThread>
 #include <QTimer>
 
-#include <protocols/shadowsocksvpnprotocol.h>
 
-#include "core/errorstrings.h"
+#include "configurators/vpn_configurator.h"
 #include "configurators/openvpn_configurator.h"
+#include "configurators/shadowsocks_configurator.h"
+#include "configurators/cloak_configurator.h"
+
 #include "core/servercontroller.h"
 #include "core/server_defs.h"
+#include "core/errorstrings.h"
+
 #include "protocols/protocols_defs.h"
+#include "protocols/shadowsocksvpnprotocol.h"
+
 #include "ui/qautostart.h"
 
 #include "debug.h"
@@ -52,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setupUiConnections();
     setupProtocolsPageConnections();
     setupNewServerPageConnections();
+    setupSharePageConnections();
+    setupServerSettingsPageConnections();
 
     ui->label_error_text->clear();
     installEventFilter(this);
@@ -117,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
     m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
     m_ipNetwok24Validator.setRegExp(Utils::ipNetwork24RegExp());
+    m_ipPortValidator.setRegExp(Utils::ipPortRegExp());
 
     ui->lineEdit_new_server_ip->setValidator(&m_ipAddressPortValidator);
     ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
@@ -124,8 +134,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->lineEdit_proto_openvpn_subnet->setValidator(&m_ipNetwok24Validator);
 
-    ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(ui->page_share_shadowsocks));
-    ui->page_share_shadowsocks->setVisible(false);
+    ui->lineEdit_proto_openvpn_port->setValidator(&m_ipPortValidator);
+    ui->lineEdit_proto_shadowsocks_port->setValidator(&m_ipPortValidator);
+    ui->lineEdit_proto_cloak_port->setValidator(&m_ipPortValidator);
+
+    //ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(ui->page_share_shadowsocks));
+    //ui->page_share_shadowsocks->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -155,22 +169,7 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             updateServerPage();
         }
         if (page == Page::ShareConnection) {
-//            QJsonObject ssConfig = ShadowSocksVpnProtocol::genShadowSocksConfig(m_settings.defaultServerCredentials());
 
-//            QString ssString = QString("%1:%2@%3:%4")
-//                    .arg(ssConfig.value("method").toString())
-//                    .arg(ssConfig.value("password").toString())
-//                    .arg(ssConfig.value("server").toString())
-//                    .arg(QString::number(ssConfig.value("server_port").toInt()));
-
-//            ssString = "ss://" + ssString.toUtf8().toBase64();
-//            ui->lineEdit_share_ss_string->setText(ssString);
-//            updateQRCodeImage(ssString, ui->label_share_ss_qr_code);
-
-//            ui->label_share_ss_server->setText(ssConfig.value("server").toString());
-//            ui->label_share_ss_port->setText(QString::number(ssConfig.value("server_port").toInt()));
-//            ui->label_share_ss_method->setText(ssConfig.value("method").toString());
-//            ui->label_share_ss_password->setText(ssConfig.value("password").toString());
         }
         if (page == Page::ServersList) {
             updateServersListPage();
@@ -281,14 +280,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             return false;
         }
     }
-    if (event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Escape && ! ui->stackedWidget_main->isAnimationRunning() ) {
-            if (currentPage() != Page::Vpn && currentPage() != Page::Start) {
-                closePage();
-            }
-        }
-    }
 
     return QMainWindow::eventFilter(obj, event);
 }
@@ -304,16 +295,30 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 #ifdef QT_DEBUG
     case Qt::Key_Q:
         qApp->quit();
+        break;
     case Qt::Key_C:
-        qDebug().noquote() << QJsonDocument(m_settings.serversArray()).toJson();
+        qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
+        //qDebug().noquote() << QJsonDocument(m_settings.serversArray()).toJson();
         break;
 #endif
     case Qt::Key_A:
         goToPage(Page::Start);
         break;
     case Qt::Key_S:
+        selectedServerIndex = m_settings.defaultServerIndex();
         goToPage(Page::ServerSettings);
         break;
+    case Qt::Key_P:
+        selectedServerIndex = m_settings.defaultServerIndex();
+        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+        goToPage(Page::ServerVpnProtocols);
+        break;
+    case Qt::Key_Escape:
+        if (! ui->stackedWidget_main->isAnimationRunning() && ui->stackedWidget_main->currentWidget()->isEnabled()) {
+            if (currentPage() != Page::Vpn && currentPage() != Page::Start) {
+                closePage();
+            }
+        }
     default:
         ;
     }
@@ -654,16 +659,6 @@ ErrorCode MainWindow::doInstallAction(const std::function<ErrorCode()> &action, 
     return ErrorCode::NoError;
 }
 
-void MainWindow::onPushButtonReinstallServer(bool)
-{
-//    onDisconnect();
-//    installServer(m_settings.defaultServerCredentials(),
-//                  ui->page_server_settings,
-//                  ui->progressBar_server_settings_reinstall,
-//                  ui->pushButton_server_settings_reinstall,
-//                  ui->label_server_settings_wait_info);
-}
-
 void MainWindow::onPushButtonClearServer(bool)
 {
     ui->page_server_settings->setEnabled(false);
@@ -697,8 +692,15 @@ void MainWindow::onPushButtonForgetServer(bool)
         onDisconnect();
     }
     m_settings.removeServer(selectedServerIndex);
-    m_settings.setDefaultServer(0);
 
+    if (m_settings.defaultServerIndex() == selectedServerIndex) {
+        m_settings.setDefaultServer(0);
+    }
+    else if (m_settings.defaultServerIndex() > selectedServerIndex) {
+        m_settings.setDefaultServer(m_settings.defaultServerIndex() - 1);
+    }
+
+    selectedServerIndex = -1;
     closePage();
     updateServersListPage();
 }
@@ -849,9 +851,6 @@ void MainWindow::setupUiConnections()
     connect(ui->pushButton_new_server_connect_configure, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerConnectConfigure(bool)));
     connect(ui->pushButton_new_server_import, SIGNAL(clicked(bool)), this, SLOT(onPushButtonNewServerImport(bool)));
 
-    connect(ui->pushButton_server_settings_reinstall, SIGNAL(clicked(bool)), this, SLOT(onPushButtonReinstallServer(bool)));
-    connect(ui->pushButton_server_settings_clear, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClearServer(bool)));
-    connect(ui->pushButton_server_settings_forget, SIGNAL(clicked(bool)), this, SLOT(onPushButtonForgetServer(bool)));
 
     connect(ui->pushButton_vpn_add_site, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
     connect(ui->pushButton_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
@@ -861,21 +860,12 @@ void MainWindow::setupUiConnections()
         selectedServerIndex = m_settings.defaultServerIndex();
         goToPage(Page::ServerSettings);
     });
-    connect(ui->pushButton_server_settings_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerVpnProtocols); });
     connect(ui->pushButton_servers_list, &QPushButton::clicked, this, [this](){ goToPage(Page::ServersList); });
     connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
         goToPage(Page::ShareConnection);
         updateShareCodePage();
     });
 
-    connect(ui->pushButton_copy_sharing_code, &QPushButton::clicked, this, [this](){
-        QGuiApplication::clipboard()->setText(ui->textEdit_sharing_code->toPlainText());
-        ui->pushButton_copy_sharing_code->setText(tr("Copied"));
-
-        QTimer::singleShot(3000, this, [this]() {
-            ui->pushButton_copy_sharing_code->setText(tr("Copy"));
-        });
-    });
 
     connect(ui->pushButton_back_from_sites, &QPushButton::clicked, this, [this](){ closePage(); });
     connect(ui->pushButton_back_from_settings, &QPushButton::clicked, this, [this](){ closePage(); });
@@ -1014,43 +1004,64 @@ void MainWindow::setupProtocolsPageConnections()
         });
     }
 
+    // share buttons
+    QList<QPushButton *> shareButtons {
+        ui->pushButton_proto_openvpn_cont_share,
+        ui->pushButton_proto_ss_openvpn_cont_share,
+        ui->pushButton_proto_cloak_openvpn_cont_share
+    };
+
+    for (int i = 0; i < containers.size(); ++i) {
+        QPushButton *button = shareButtons.at(i);
+        DockerContainer container = containers.at(i);
+
+        connect(button, &QPushButton::clicked, this, [this, button, container](){
+            updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), container);
+            goToPage(Page::ShareConnection);
+        });
+    }
 
     // settings buttons
 
     // settings openvpn container
     connect(ui->pushButton_proto_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpn, Protocol::OpenVpn));
         selectedDockerContainer = DockerContainer::OpenVpn;
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+            selectedDockerContainer);
         goToPage(Page::OpenVpnSettings);
     });
 
     // settings shadowsocks container
     connect(ui->pushButton_proto_ss_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverShadowSocks, Protocol::OpenVpn),
-            DockerContainer::OpenVpnOverShadowSocks);
         selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+            selectedDockerContainer);
         goToPage(Page::OpenVpnSettings);
     });
     connect(ui->pushButton_proto_ss_openvpn_cont_ss_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverShadowSocks, Protocol::ShadowSocks));
         selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+        updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
+            selectedDockerContainer);
         goToPage(Page::ShadowSocksSettings);
     });
 
     // settings cloak container
     connect(ui->pushButton_proto_cloak_openvpn_cont_openvpn_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::OpenVpn));
         selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+            selectedDockerContainer);
         goToPage(Page::OpenVpnSettings);
     });
     connect(ui->pushButton_proto_cloak_openvpn_cont_ss_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::ShadowSocks));
         selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+        updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
+            selectedDockerContainer);
         goToPage(Page::ShadowSocksSettings);
     });
     connect(ui->pushButton_proto_cloak_openvpn_cont_cloak_config, &QPushButton::clicked, this, [this](){
-        updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, DockerContainer::OpenVpnOverCloak, Protocol::Cloak));
         selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+        updateCloakPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak),
+            selectedDockerContainer);
         goToPage(Page::CloakSettings);
     });
 
@@ -1079,6 +1090,50 @@ void MainWindow::setupProtocolsPageConnections()
             m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
             m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
         }
+        qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
+    });
+
+    connect(ui->pushButton_proto_shadowsocks_save, &QPushButton::clicked, this, [this](){
+        QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks);
+        protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
+
+        QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
+        QJsonObject newContainerConfig = containerConfig;
+        newContainerConfig.insert(config_key::shadowsocks, protocolConfig);
+
+        ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
+            return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
+        },
+           ui->page_proto_shadowsocks, ui->progressBar_proto_shadowsocks_reset,
+           ui->pushButton_proto_shadowsocks_save, ui->label_proto_shadowsocks_info);
+
+        if (!e) {
+            m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
+            m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
+        }
+        qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
+    });
+
+    connect(ui->pushButton_proto_cloak_save, &QPushButton::clicked, this, [this](){
+        QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak);
+        protocolConfig = getCloakConfigFromPage(protocolConfig);
+
+        QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
+        QJsonObject newContainerConfig = containerConfig;
+        newContainerConfig.insert(config_key::cloak, protocolConfig);
+
+        ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
+            return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
+        },
+           ui->page_proto_cloak, ui->progressBar_proto_cloak_reset,
+           ui->pushButton_proto_cloak_save, ui->label_proto_cloak_info);
+
+        if (!e) {
+            m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
+            m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
+        }
+
+        qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
     });
 }
 
@@ -1124,6 +1179,137 @@ void MainWindow::setupNewServerPageConnections()
             ui->frame_new_server_settings_parent_openvpn->layout()->addWidget(ui->frame_new_server_settings_openvpn);
         else
             ui->frame_new_server_settings_parent_openvpn->layout()->removeWidget(ui->frame_new_server_settings_ss);
+    });
+}
+
+void MainWindow::setupServerSettingsPageConnections()
+{
+    connect(ui->pushButton_server_settings_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerVpnProtocols); });
+
+    connect(ui->pushButton_server_settings_clear, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClearServer(bool)));
+    connect(ui->pushButton_server_settings_forget, SIGNAL(clicked(bool)), this, SLOT(onPushButtonForgetServer(bool)));
+
+    connect(ui->pushButton_server_settings_clear_client_cache, &QPushButton::clicked, this, [this](){
+        ui->pushButton_server_settings_clear_client_cache->setText(tr("Cache cleared"));
+
+        const auto &containers = m_settings.containers(selectedServerIndex);
+        for (DockerContainer container: containers.keys()) {
+            m_settings.clearLastConnectionConfig(selectedServerIndex, container);
+        }
+
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_server_settings_clear_client_cache->setText(tr("Clear client cached profile"));
+        });
+    });
+
+}
+
+void MainWindow::setupSharePageConnections()
+{
+    connect(ui->pushButton_share_full_copy, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->textEdit_share_full_code->toPlainText());
+        ui->pushButton_share_full_copy->setText(tr("Copied"));
+
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_share_full_copy->setText(tr("Copy"));
+        });
+    });
+
+    connect(ui->pushButton_share_amnezia_copy, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->textEdit_share_amnezia_code->toPlainText());
+        ui->pushButton_share_amnezia_copy->setText(tr("Copied"));
+
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_share_amnezia_copy->setText(tr("Copy"));
+        });
+    });
+
+    connect(ui->pushButton_share_openvpn_copy, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->textEdit_share_openvpn_code->toPlainText());
+        ui->pushButton_share_openvpn_copy->setText(tr("Copied"));
+
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_share_openvpn_copy->setText(tr("Copy"));
+        });
+    });
+
+    connect(ui->pushButton_share_ss_copy, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->lineEdit_share_ss_string->text());
+        ui->pushButton_share_ss_copy->setText(tr("Copied"));
+
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_share_ss_copy->setText(tr("Copy"));
+        });
+    });
+
+//    connect(ui->pushButton_share_cloak_copy, &QPushButton::clicked, this, [this](){
+//        QGuiApplication::clipboard()->setText(ui->textEdit_share_openvpn_code->toPlainText());
+//        ui->pushButton_share_cloak_copy->setText(tr("Copied"));
+
+//        QTimer::singleShot(3000, this, [this]() {
+//            ui->pushButton_share_cloak_copy->setText(tr("Copy"));
+//        });
+//    });
+
+    connect(ui->pushButton_share_amnezia_generate, &QPushButton::clicked, this, [this](){
+        ui->pushButton_share_amnezia_generate->setEnabled(false);
+        ui->pushButton_share_amnezia_copy->setEnabled(false);
+        ui->pushButton_share_amnezia_generate->setText(tr("Generating..."));
+        qApp->processEvents();
+
+        ServerCredentials credentials = m_settings.serverCredentials(selectedServerIndex);
+        QJsonObject containerConfig; // = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
+        containerConfig.insert(config_key::container, containerToString(selectedDockerContainer));
+
+        for (Protocol p: amnezia::protocolsForContainer(selectedDockerContainer)) {
+            QJsonObject protoConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, p);
+
+            ErrorCode e = ErrorCode::NoError;
+            QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, selectedDockerContainer, containerConfig, p, &e);
+            if (e) {
+                cfg = "Error generating config";
+                break;
+            }
+            protoConfig.insert(config_key::last_config, cfg);
+
+            containerConfig.insert(protoToString(p), protoConfig);
+        }
+
+        QJsonObject serverConfig = m_settings.server(selectedServerIndex);
+        serverConfig.remove(config_key::userName);
+        serverConfig.remove(config_key::password);
+        serverConfig.remove(config_key::port);
+        serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
+        serverConfig.insert(config_key::defaultContainer, containerToString(selectedDockerContainer));
+
+
+        ui->textEdit_share_amnezia_code->setPlainText(QJsonDocument(serverConfig).toJson());
+
+        ui->pushButton_share_amnezia_generate->setEnabled(true);
+        ui->pushButton_share_amnezia_copy->setEnabled(true);
+        ui->pushButton_share_amnezia_generate->setText(tr("Generate config"));
+    });
+
+    connect(ui->pushButton_share_openvpn_generate, &QPushButton::clicked, this, [this](){
+        ServerCredentials credentials = m_settings.serverCredentials(selectedServerIndex);
+        const QJsonObject &containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
+        ui->pushButton_share_openvpn_copy->setEnabled(false);
+        ui->pushButton_share_openvpn_save->setEnabled(false);
+
+        ErrorCode e = ErrorCode::NoError;
+        QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, selectedDockerContainer, containerConfig, &e);
+
+        ui->textEdit_share_openvpn_code->setPlainText(cfg);
+        ui->pushButton_share_openvpn_copy->setEnabled(true);
+        ui->pushButton_share_openvpn_save->setEnabled(true);
+    });
+
+    connect(ui->pushButton_share_openvpn_save, &QPushButton::clicked, this, [this](){
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save OpenVPN config"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.ovpn");
+        QSaveFile save(fileName);
+        save.open(QIODevice::WriteOnly);
+        save.write(ui->textEdit_share_openvpn_code->toPlainText().toUtf8());
+        save.commit();
     });
 }
 
@@ -1223,7 +1409,6 @@ void MainWindow::onTrayActionConnect()
         onDisconnect();
     }
 }
-
 
 void MainWindow::onPushButtonAddCustomSitesClicked()
 {
@@ -1428,6 +1613,115 @@ void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerConta
         ui->radioButton_proto_openvpn_tcp->setEnabled(false);
         ui->radioButton_proto_openvpn_tcp->setChecked(true);
     }
+
+    ui->lineEdit_proto_openvpn_port->setText(openvpnConfig.value(config_key::port).
+        toString(protocols::openvpn::defaultPort));
+
+    ui->lineEdit_proto_openvpn_port->setEnabled(container == DockerContainer::OpenVpn);
+}
+
+void MainWindow::updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container)
+{
+    ui->comboBox_proto_shadowsocks_cipher->setCurrentText(ssConfig.value(config_key::cipher).
+        toString(protocols::shadowsocks::defaultCipher));
+
+    ui->lineEdit_proto_shadowsocks_port->setText(ssConfig.value(config_key::port).
+        toString(protocols::shadowsocks::defaultPort));
+
+    ui->lineEdit_proto_shadowsocks_port->setEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
+}
+
+void MainWindow::updateCloakPage(const QJsonObject &ckConfig, DockerContainer container)
+{
+    ui->comboBox_proto_cloak_cipher->setCurrentText(ckConfig.value(config_key::cipher).
+        toString(protocols::cloak::defaultCipher));
+
+    ui->lineEdit_proto_cloak_site->setText(ckConfig.value(config_key::site).
+        toString(protocols::cloak::defaultRedirSite));
+
+    ui->lineEdit_proto_cloak_port->setText(ckConfig.value(config_key::port).
+        toString(protocols::cloak::defaultPort));
+
+    ui->lineEdit_proto_cloak_port->setEnabled(container == DockerContainer::OpenVpnOverCloak);
+}
+
+void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &credentials,
+    DockerContainer container)
+{
+    selectedDockerContainer = container;
+    selectedServerIndex = serverIndex;
+
+    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+    for (QWidget *page : { ui->page_share_openvpn,
+                           ui->page_share_shadowsocks,
+                           ui->page_share_cloak,
+                           ui->page_share_full_access }) {
+
+        ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(page));
+        page->hide();
+    }
+
+    if (container == DockerContainer::OpenVpn) {
+        ui->toolBox_share_connection->addItem(ui->page_share_openvpn, tr("  Share for OpenVPN client"));
+
+        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::OpenVpn);
+        QString cfg = protoConfig.value(config_key::last_config).toString();
+        if (!cfg.isEmpty()) {
+            // TODO add redirect-gateway def1 bypass-dhcp here and on click Generate config
+            ui->textEdit_share_openvpn_code->setPlainText(cfg);
+        }
+        else {
+            cfg = tr("Press Generate config");
+            ui->textEdit_share_openvpn_code->setPlainText(cfg);
+            ui->pushButton_share_openvpn_copy->setEnabled(false);
+            ui->pushButton_share_openvpn_save->setEnabled(false);
+        }
+    }
+
+    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+        ui->toolBox_share_connection->addItem(ui->page_share_shadowsocks, tr("  Share for ShadowSocks client"));
+
+        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
+        QString cfg = protoConfig.value(config_key::last_config).toString();
+
+        if (cfg.isEmpty()) {
+            const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+            ErrorCode e = ErrorCode::NoError;
+            cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
+
+            ui->pushButton_share_ss_copy->setEnabled(true);
+        }
+
+        QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+
+        QString ssString = QString("%1:%2@%3:%4")
+                .arg(ssConfig.value("method").toString())
+                .arg(ssConfig.value("password").toString())
+                .arg(ssConfig.value("server").toString())
+                .arg(ssConfig.value("server_port").toString());
+
+        ssString = "ss://" + ssString.toUtf8().toBase64();
+        ui->lineEdit_share_ss_string->setText(ssString);
+        updateQRCodeImage(ssString, ui->label_share_ss_qr_code);
+
+        ui->label_share_ss_server->setText(ssConfig.value("server").toString());
+        ui->label_share_ss_port->setText(ssConfig.value("server_port").toString());
+        ui->label_share_ss_method->setText(ssConfig.value("method").toString());
+        ui->label_share_ss_password->setText(ssConfig.value("password").toString());
+    }
+
+    // Amnezia sharing
+    QJsonObject exportContainer;
+    for (Protocol p: protocolsForContainer(container)) {
+        QJsonObject protocolConfig = containerConfig.value(protoToString(p)).toObject();
+        protocolConfig.remove(config_key::last_config);
+        exportContainer.insert(protoToString(p), protocolConfig);
+    }
+    exportContainer.insert(config_key::container, containerToString(container));
+
+    ui->textEdit_share_amnezia_code->setPlainText(QJsonDocument(exportContainer).toJson());
 }
 
 void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &address)
@@ -1472,10 +1766,10 @@ void MainWindow::makeServersListItem(QListWidget *listWidget, const QJsonObject 
         updateServersListPage();
     });
 
-    connect(widget->ui->pushButton_share, &QPushButton::clicked, this, [this, index](){
-        goToPage(Page::ShareConnection);
-        // update share page
-    });
+//    connect(widget->ui->pushButton_share, &QPushButton::clicked, this, [this, index](){
+//        goToPage(Page::ShareConnection);
+//        // update share page
+//    });
 
     connect(widget->ui->pushButton_settings, &QPushButton::clicked, this, [this, index](){
         selectedServerIndex = index;
@@ -1521,6 +1815,24 @@ QJsonObject MainWindow::getOpenVpnConfigFromPage(QJsonObject oldConfig)
     oldConfig.insert(config_key::cipher, ui->comboBox_proto_openvpn_cipher->currentText());
     oldConfig.insert(config_key::hash, ui->comboBox_proto_openvpn_hash->currentText());
     oldConfig.insert(config_key::block_outside_dns, ui->checkBox_proto_openvpn_block_dns->isChecked());
+    oldConfig.insert(config_key::port, ui->lineEdit_proto_openvpn_port->text());
+
+    return oldConfig;
+}
+
+QJsonObject MainWindow::getShadowSocksConfigFromPage(QJsonObject oldConfig)
+{
+    oldConfig.insert(config_key::cipher, ui->comboBox_proto_shadowsocks_cipher->currentText());
+    oldConfig.insert(config_key::port, ui->lineEdit_proto_shadowsocks_port->text());
+
+    return oldConfig;
+}
+
+QJsonObject MainWindow::getCloakConfigFromPage(QJsonObject oldConfig)
+{
+    oldConfig.insert(config_key::cipher, ui->comboBox_proto_cloak_cipher->currentText());
+    oldConfig.insert(config_key::site, ui->lineEdit_proto_cloak_site->text());
+    oldConfig.insert(config_key::port, ui->lineEdit_proto_cloak_port->text());
 
     return oldConfig;
 }

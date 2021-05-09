@@ -55,7 +55,6 @@ private slots:
     void onPushButtonNewServerConnectConfigure(bool);
     void onPushButtonNewServerImport(bool);
 
-    void onPushButtonReinstallServer(bool);
     void onPushButtonClearServer(bool);
     void onPushButtonForgetServer(bool);
 
@@ -90,6 +89,8 @@ private:
     void setupUiConnections();
     void setupProtocolsPageConnections();
     void setupNewServerPageConnections();
+    void setupServerSettingsPageConnections();
+    void setupSharePageConnections();
 
     void updateSettings();
 
@@ -100,7 +101,12 @@ private:
     void updateServersListPage();
     void updateProtocolsPage();
     void updateShareCodePage();
-    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container = DockerContainer::None);
+    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container);
+    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container);
+    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container);
+
+    void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
+        DockerContainer container);
 
     void makeSitesListItem(QListWidget* listWidget, const QString &address);
     void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
@@ -108,6 +114,8 @@ private:
     void updateQRCodeImage(const QString &text, QLabel *label);
 
     QJsonObject getOpenVpnConfigFromPage(QJsonObject oldConfig);
+    QJsonObject getShadowSocksConfigFromPage(QJsonObject oldConfig);
+    QJsonObject getCloakConfigFromPage(QJsonObject oldConfig);
 
 private:
     Ui::MainWindow *ui;
@@ -123,6 +131,7 @@ private:
     QRegExpValidator m_ipAddressValidator;
     QRegExpValidator m_ipAddressPortValidator;
     QRegExpValidator m_ipNetwok24Validator;
+    QRegExpValidator m_ipPortValidator;
 
     CQR_Encode m_qrEncode;
 

@@ -30,6 +30,8 @@ public:
     static QRegExp ipNetwork24RegExp() { return QRegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"
         "0$"); }
 
+    static QRegExp ipPortRegExp() { return QRegExp("^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$"); }
+
     static bool processIsRunning(const QString& fileName);
     static void killProcessByName(const QString &name);
 

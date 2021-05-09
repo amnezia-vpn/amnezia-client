@@ -180,8 +180,6 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
     }
 
-    ServerController::setupServerFirewall(credentials);
-
     return connData;
 }
 
@@ -202,15 +200,6 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         return "";
     }
 
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
-
-    if (m_settings().customRouting()) {
-        config.replace("redirect-gateway def1 bypass-dhcp", "");
-    }
-
-    config.replace("$REMOTE_HOST", connData.host);
-    config.replace("$REMOTE_PORT", amnezia::protocols::openvpn::defaultPort);
     config.replace("$OPENVPN_CA_CERT", connData.caCert);
     config.replace("$OPENVPN_CLIENT_CERT", connData.clientCert);
     config.replace("$OPENVPN_PRIV_KEY", connData.privKey);
@@ -219,7 +208,21 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 #ifdef Q_OS_MAC
     config.replace("block-outside-dns", "");
 #endif
+
     //qDebug().noquote() << config;
+    return processConfigWithLocalSettings(config);
+}
+
+QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
+{
+    // TODO replace DNS if it already set
+    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
+    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+
+    if (m_settings().customRouting()) {
+        config.replace("redirect-gateway def1 bypass-dhcp", "");
+    }
+
     return config;
 }
 

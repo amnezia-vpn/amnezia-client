@@ -2,6 +2,7 @@
 #define PROTOCOLS_DEFS_H
 
 #include <QObject>
+#include <QDebug>
 
 namespace amnezia {
 namespace config_key {
@@ -88,6 +89,8 @@ constexpr char ckBypassUidKeyPath[] = "/opt/amnezia/cloak/cloak_bypass_uid.key";
 constexpr char ckAdminKeyPath[] = "/opt/amnezia/cloak/cloak_admin_uid.key";
 constexpr char defaultPort[] = "443";
 constexpr char defaultRedirSite[] = "mail.ru";
+constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
+
 }
 
 
@@ -101,24 +104,11 @@ enum class Protocol {
     Cloak,
     WireGuard
 };
+QVector<Protocol> allProtocols();
 
-inline Protocol protoFromString(QString proto){
-    if (proto == config_key::openvpn) return Protocol::OpenVpn;
-    if (proto == config_key::cloak) return Protocol::Cloak;
-    if (proto == config_key::shadowsocks) return Protocol::ShadowSocks;
-    if (proto == config_key::wireguard) return Protocol::WireGuard;
-    return Protocol::Any;
-}
+Protocol protoFromString(QString proto);
+QString protoToString(Protocol proto);
 
-inline QString protoToString(Protocol proto){
-    switch (proto) {
-    case(Protocol::OpenVpn): return config_key::openvpn;
-    case(Protocol::Cloak): return config_key::cloak;
-    case(Protocol::ShadowSocks): return config_key::shadowsocks;
-    case(Protocol::WireGuard): return config_key::wireguard;
-    default: return "";
-    }
-}
 
 enum class DockerContainer {
     None,
@@ -128,24 +118,14 @@ enum class DockerContainer {
     WireGuard
 };
 
-inline DockerContainer containerFromString(const QString &container){
-    if (container == config_key::amnezia_openvpn) return DockerContainer::OpenVpn;
-    if (container == config_key::amnezia_openvpn_cloak) return DockerContainer::OpenVpnOverCloak;
-    if (container == config_key::amnezia_shadowsocks) return DockerContainer::OpenVpnOverShadowSocks;
-    if (container == config_key::amnezia_wireguard) return DockerContainer::WireGuard;
-    return DockerContainer::None;
-}
+DockerContainer containerFromString(const QString &container);
+QString containerToString(DockerContainer container);
 
-inline QString containerToString(DockerContainer container){
-    switch (container) {
-    case(DockerContainer::OpenVpn): return config_key::amnezia_openvpn;
-    case(DockerContainer::OpenVpnOverCloak): return config_key::amnezia_openvpn_cloak;
-    case(DockerContainer::OpenVpnOverShadowSocks): return config_key::amnezia_shadowsocks;
-    case(DockerContainer::WireGuard): return config_key::amnezia_wireguard;
-    default: return "";
-    }
-}
+QVector<Protocol> protocolsForContainer(DockerContainer container);
 
 } // namespace amnezia
+
+QDebug operator<<(QDebug debug, const amnezia::Protocol &p);
+QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c);
 
 #endif // PROTOCOLS_DEFS_H

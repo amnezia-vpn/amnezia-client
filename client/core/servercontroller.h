@@ -6,7 +6,7 @@
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
 #include "defs.h"
-#include "protocols/protocols_defs.h""
+#include "protocols/protocols_defs.h"
 
 
 using namespace amnezia;

@@ -122,7 +122,7 @@ ErrorCode ServerController::runScript(const SshConnectionParameters &sshParams, 
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     const ServerCredentials &credentials, const QString &file, const QString &path)
 {
-    ErrorCode e;
+    ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
     e = uploadFileToHost(credentials, file.toUtf8(), tmpFileName);
     if (e) return e;
@@ -388,7 +388,10 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
-    if (isReinstallContainerRequred(container, oldConfig, newConfig)) {
+    bool reinstallRequred = isReinstallContainerRequred(container, oldConfig, newConfig);
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
+
+    if (reinstallRequred) {
         return setupContainer(credentials, container, newConfig);
     }
     else {
@@ -423,6 +426,15 @@ bool ServerController::isReinstallContainerRequred(DockerContainer container, co
                 return true;
     }
 
+    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+        const QJsonObject &oldProtoConfig = oldConfig[config_key::shadowsocks].toObject();
+        const QJsonObject &newProtoConfig = newConfig[config_key::shadowsocks].toObject();
+
+        if (oldProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) !=
+            newProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort))
+                return true;
+    }
+
     return false;
 }
 
@@ -433,7 +445,7 @@ bool ServerController::isReinstallContainerRequred(DockerContainer container, co
 
 //ErrorCode ServerController::setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config)
 //{
-//    ErrorCode e;
+//    ErrorCode e = ErrorCode::NoError;
 //    DockerContainer container = DockerContainer::OpenVpnOverCloak;
 
 //    e = prepareHostWorker(credentials, container, config);
@@ -588,6 +600,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     Vars vars;
 
+    vars.append({{"$REMOTE_HOST", credentials.hostName}});
+
     // OpenVPN vars
     vars.append({{"$VPN_SUBNET_IP", openvpnConfig.value(config_key::subnet_address).toString(amnezia::protocols::vpnDefaultSubnetAddress) }});
     vars.append({{"$VPN_SUBNET_MASK_VAL", openvpnConfig.value(config_key::subnet_mask_val).toString(amnezia::protocols::vpnDefaultSubnetMaskVal) }});
@@ -609,27 +623,16 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$CONTAINER_NAME", amnezia::containerToString(container)}});
     vars.append({{"$DOCKERFILE_FOLDER", "/opt/amnezia/" + amnezia::containerToString(container)}});
 
+    // Cloak vars
+    vars.append({{"$CLOAK_SERVER_PORT", config.value(config_key::port).toString(protocols::cloak::defaultPort) }});
+    vars.append({{"$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) }});
+
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
         vars.append({{"$SERVER_IP_ADDRESS", serverIp}});
     }
     else {
         qWarning() << "ServerController::genVarsForScript unable to resolve address for credentials.hostName";
-    }
-
-    //
-
-
-    if (container == DockerContainer::OpenVpn) {
-        vars.append({{"$DOCKER_PORT", config.value(config_key::port).toString(protocols::openvpn::defaultPort) }});
-    }
-    else if (container == DockerContainer::OpenVpnOverCloak) {
-        vars.append({{"$DOCKER_PORT", config.value(config_key::port).toString(protocols::cloak::defaultPort) }});
-
-        vars.append({{"$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) }});
-    }
-    else if (container == DockerContainer::OpenVpnOverShadowSocks) {
-        vars.append({{"$DOCKER_PORT", config.value(config_key::port).toString(protocols::shadowsocks::defaultPort) }});
     }
 
     return vars;

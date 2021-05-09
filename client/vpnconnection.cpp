@@ -105,10 +105,11 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
     QString configData;
     if (lastVpnConfig.contains(proto)) {
-        configData = lastVpnConfig.value(proto);
-        qDebug() << "VpnConnection::createVpnConfiguration using saved config for " << protoToString(proto);
+        configData = OpenVpnConfigurator::processConfigWithLocalSettings(lastVpnConfig.value(proto));
+        qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << protoToString(proto);
     }
     else {
+        qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << protoToString(proto);
         if (proto == Protocol::OpenVpn) {
             configData = OpenVpnConfigurator::genOpenVpnConfig(credentials,
                 container, containerConfig, &e);
@@ -129,6 +130,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
 
         if (serverIndex >= 0) {
+            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container << proto;
             QJsonObject protoObject = m_settings.protocolConfig(serverIndex, container, proto);
             protoObject.insert(config_key::last_config, configData);
             m_settings.setProtocolConfig(serverIndex, container, proto, protoObject);
@@ -196,6 +198,8 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &
     qDebug() << "СonnectToVpn, CustomRouting is" << m_settings.customRouting();
 
     emit connectionStateChanged(VpnProtocol::ConnectionState::Connecting);
+
+    ServerController::setupServerFirewall(credentials);
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);

@@ -3,7 +3,7 @@
 
 #include <QLatin1String>
 #include "core/defs.h"
-#include "protocols/protocols_defs.h""
+#include "protocols/protocols_defs.h"
 
 namespace amnezia {
 

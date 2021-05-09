@@ -118,23 +118,12 @@ QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container
     return containers(serverIndex).value(container);
 }
 
-//QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container)
-//{
-//    if (container == DockerContainer::None) return QJsonObject();
-
-//    const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
-//    for (const QJsonValue &val : containers) {
-//        if (val.toObject().value(config_key::container).toString() == containerToString(container)) {
-//            return val.toObject();
-//        }
-//    }
-//    return QJsonObject();
-//}
-
 void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
 {
-    if (container == DockerContainer::None) return;
-
+    if (container == DockerContainer::None) {
+        qCritical() << "Settings::setContainerConfig trying to set config for container == DockerContainer::None";
+        return;
+    }
     auto c = containers(serverIndex);
     c[container] = config;
     c[container][config_key::container] = containerToString(container);
@@ -143,29 +132,15 @@ void Settings::setContainerConfig(int serverIndex, DockerContainer container, co
 
 void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
 {
-    if (container == DockerContainer::None) return;
+    if (container == DockerContainer::None) {
+        qCritical() << "Settings::removeContainerConfig trying to remove config for container == DockerContainer::None";
+        return;
+    }
 
     auto c = containers(serverIndex);
     c.remove(container);
     setContainers(serverIndex, c);
 }
-
-//void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
-//{
-//    if (container == DockerContainer::None) return;
-
-//    QJsonObject s = server(serverIndex);
-//    QJsonArray c = s.value(config_key::containers).toArray();
-//    for (int i = c.size() - 1; i >= 0; i--) {
-//        if (c.at(i).toObject().value(config_key::container).toString() == containerToString(container)) {
-//            c.removeAt(i);
-//        }
-//    }
-
-//    c.append(config);
-//    s.insert(config_key::containers, c);
-//    editServer(serverIndex, s);
-//}
 
 QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Protocol proto)
 {
@@ -193,7 +168,7 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     QJsonObject c = protocolConfig(serverIndex, container, proto);
     c.remove(config_key::last_config);
     setProtocolConfig(serverIndex, container, proto, c);
-    qDebug() << "Settings::clearLastConnectionConfig for" << protoToString(proto);
+    qDebug() << "Settings::clearLastConnectionConfig for" << serverIndex << container << proto;
 }
 
 bool Settings::haveAuthData() const
