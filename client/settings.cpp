@@ -171,10 +171,10 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     qDebug() << "Settings::clearLastConnectionConfig for" << serverIndex << container << proto;
 }
 
-bool Settings::haveAuthData() const
+bool Settings::haveAuthData(int serverIndex) const
 {
-    ServerCredentials cred = defaultServerCredentials();
-
+    if (serverIndex < 0) return false;
+    ServerCredentials cred = serverCredentials(serverIndex);
     return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.password.isEmpty());
 }
 

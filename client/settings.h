@@ -70,7 +70,7 @@ public:
 
     void clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto = Protocol::Any);
 
-    bool haveAuthData() const;
+    bool haveAuthData(int serverIndex) const;
     QString nextAvailableServerName() const;
 
     // App settings section

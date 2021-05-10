@@ -73,6 +73,7 @@ private slots:
 
 private:
     void goToPage(Page page, bool reset = true, bool slide = true);
+    void setStartPage(Page page, bool slide = true);
     void closePage();
 
     QWidget *getPageWidget(Page page);
@@ -101,9 +102,9 @@ private:
     void updateServersListPage();
     void updateProtocolsPage();
     void updateShareCodePage();
-    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container);
-    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container);
-    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container);
+    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
+    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
+    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
 
     void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
         DockerContainer container);
