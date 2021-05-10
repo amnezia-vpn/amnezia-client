@@ -88,8 +88,8 @@ public:
     QStringList customIps() { return m_settings.value("Conf/customIps").toStringList(); }
     void setCustomIps(const QStringList &customIps) { m_settings.setValue("Conf/customIps", customIps); }
 
-    QString primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString(); }
-    QString secondaryDns() const { return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString(); }
+    QString primaryDns() const;
+    QString secondaryDns() const;
 
     //QString primaryDns() const { return m_primaryDns; }
     void setPrimaryDns(const QString &primaryDns) { m_settings.setValue("Conf/primaryDns", primaryDns); }
@@ -97,8 +97,8 @@ public:
     //QString secondaryDns() const { return m_secondaryDns; }
     void setSecondaryDns(const QString &secondaryDns) { m_settings.setValue("Conf/secondaryDns", secondaryDns); }
 
-    static constexpr char cloudFlareNs1[] = "1.1.1.1";
-    static constexpr char cloudFlareNs2[] = "1.0.0.1";
+    static const char cloudFlareNs1[];
+    static const char cloudFlareNs2[];
 
     static constexpr char openNicNs5[] = "94.103.153.176";
     static constexpr char openNicNs13[] = "144.76.103.143";

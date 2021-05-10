@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Post initialization
     goToPage(Page::Start, true, false);
 
-    if (m_settings.defaultServerIndex() >= 0) {
+    if (m_settings.defaultServerIndex() >= 0 && m_settings.serversCount() > 0) {
         goToPage(Page::Vpn, true, false);
     }
 
@@ -182,6 +182,8 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             ui->progressBar_new_server_connection->setMaximum(300);
 
             ui->pushButton_back_from_start->setVisible(!pagesStack.isEmpty());
+
+            ui->pushButton_new_server_connect->setVisible(true);
         }
         if (page == Page::NewServer_2) {
             ui->pushButton_new_server_settings_cloak->setChecked(true);
@@ -722,6 +724,10 @@ void MainWindow::onPushButtonForgetServer(bool)
 
     selectedServerIndex = -1;
     closePage();
+
+    if (m_settings.serversCount() == 0) {
+        setStartPage(Page::Start);
+    }
     updateServersListPage();
 }
 

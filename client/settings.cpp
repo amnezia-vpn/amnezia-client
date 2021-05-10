@@ -4,6 +4,9 @@
 #include <QDebug>
 #include "protocols/protocols_defs.h"
 
+const char Settings::cloudFlareNs1[] = "1.1.1.1";
+const char Settings::cloudFlareNs2[] = "1.0.0.1";
+
 Settings::Settings(QObject* parent) :
     QObject(parent),
     m_settings (ORGANIZATION_NAME, APPLICATION_NAME, this)
@@ -24,6 +27,11 @@ Settings::Settings(QObject* parent) :
             server.insert(config_key::description, tr("Server #1"));
 
             addServer(server);
+
+            m_settings.remove("Server/userName");
+            m_settings.remove("Server/password");
+            m_settings.remove("Server/serverName");
+            m_settings.remove("Server/serverPort");
         }
     }
 }
@@ -196,6 +204,10 @@ QString Settings::nextAvailableServerName() const
 
     return tr("Server") + " " + QString::number(i);
 }
+
+QString Settings::primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString(); }
+
+QString Settings::secondaryDns() const { return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString(); }
 
 //void Settings::setServerCredentials(const ServerCredentials &credentials)
 //{
