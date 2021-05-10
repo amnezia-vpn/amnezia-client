@@ -48,7 +48,7 @@ QString amnezia::containerToString(amnezia::DockerContainer container){
     case(DockerContainer::OpenVpnOverCloak): return config_key::amnezia_openvpn_cloak;
     case(DockerContainer::OpenVpnOverShadowSocks): return config_key::amnezia_shadowsocks;
     case(DockerContainer::WireGuard): return config_key::amnezia_wireguard;
-    default: return "";
+    default: return "none";
     }
 }
 

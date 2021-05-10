@@ -287,7 +287,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>14</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">

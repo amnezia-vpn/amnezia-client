@@ -96,8 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->pushButton_sites_add_custom->click();
     });
 
-    updateSettings();
-
     //ui->pushButton_general_settings_exit->hide();
 
     setFixedSize(width(),height());
@@ -175,15 +173,7 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
             updateServersListPage();
         }
         if (page == Page::Start) {
-            ui->label_new_server_wait_info->hide();
-            ui->label_new_server_wait_info->clear();
-
-            ui->progressBar_new_server_connection->setMinimum(0);
-            ui->progressBar_new_server_connection->setMaximum(300);
-
-            ui->pushButton_back_from_start->setVisible(!pagesStack.isEmpty());
-
-            ui->pushButton_new_server_connect->setVisible(true);
+            updateStartPage();
         }
         if (page == Page::NewServer_2) {
             ui->pushButton_new_server_settings_cloak->setChecked(true);
@@ -235,10 +225,14 @@ void MainWindow::setStartPage(MainWindow::Page page, bool slide)
 
     pagesStack.clear();
     pagesStack.push(page);
+
+    if (page == Page::Start) updateStartPage();
 }
 
 void MainWindow::closePage()
 {
+    if (pagesStack.size() <= 1) return;
+
     Page prev = pagesStack.pop();
     //qDebug() << "closePage" << prev << "Set page" << pagesStack.top();
     ui->stackedWidget_main->slideInWidget(getPageWidget(pagesStack.top()), SlidingStackedWidget::LEFT2RIGHT);
@@ -310,6 +304,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         qApp->quit();
         break;
     case Qt::Key_C:
+        qDebug().noquote() << "Def server" << m_settings.defaultServerIndex() << m_settings.defaultContainerName(m_settings.defaultServerIndex());
         qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
         //qDebug().noquote() << QJsonDocument(m_settings.serversArray()).toJson();
         break;
@@ -484,6 +479,8 @@ void MainWindow::onPushButtonNewServerConnectConfigure(bool)
         containers.append(DockerContainer::OpenVpnOverShadowSocks);
     }
 
+    if (containers.isEmpty()) return;
+
 //    bool ok = true;
     bool ok = installServer(installCredentials, containers, containerConfigs,
                             ui->page_new_server_2,
@@ -500,14 +497,12 @@ void MainWindow::onPushButtonNewServerConnectConfigure(bool)
         server.insert(config_key::description, m_settings.nextAvailableServerName());
 
         server.insert(config_key::containers, containerConfigs);
+        server.insert(config_key::defaultContainer, containerToString(containers.first()));
 
         m_settings.addServer(server);
-        updateSettings();
 
         goToPage(Page::Vpn);
         qApp->processEvents();
-
-        //onConnect();
     }
 }
 
@@ -704,6 +699,9 @@ void MainWindow::onPushButtonClearServer(bool)
         ui->label_server_settings_wait_info->setText(tr("Amnezia server successfully uninstalled"));
     }
 
+    m_settings.setContainers(selectedServerIndex, {});
+    m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::None);
+
     ui->page_server_settings->setEnabled(true);
     ui->pushButton_server_settings_clear->setText(tr("Clear server from Amnezia software"));
 }
@@ -723,12 +721,15 @@ void MainWindow::onPushButtonForgetServer(bool)
     }
 
     selectedServerIndex = -1;
-    closePage();
+
+    updateServersListPage();
 
     if (m_settings.serversCount() == 0) {
         setStartPage(Page::Start);
     }
-    updateServersListPage();
+    else {
+        closePage();
+    }
 }
 
 void MainWindow::onBytesChanged(quint64 receivedData, quint64 sentData)
@@ -935,11 +936,11 @@ void MainWindow::setupUiConnections()
 
     connect(ui->pushButton_network_settings_resetdns1, &QPushButton::clicked, this, [this](){
         m_settings.setPrimaryDns(m_settings.cloudFlareNs1);
-        updateSettings();
+        updateAppSettingsPage();
     });
     connect(ui->pushButton_network_settings_resetdns2, &QPushButton::clicked, this, [this](){
         m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
-        updateSettings();
+        updateAppSettingsPage();
     });
 
     connect(ui->lineEdit_network_settings_dns1, &QLineEdit::textEdited, this, [this](const QString &newText){
@@ -1021,6 +1022,7 @@ void MainWindow::setupProtocolsPageConnections()
 
                 if (!e) {
                     m_settings.setContainerConfig(selectedServerIndex, container, QJsonObject());
+                    m_settings.setDefaultContainer(selectedServerIndex, container);
                 }
             }
             else {
@@ -1028,6 +1030,12 @@ void MainWindow::setupProtocolsPageConnections()
                 ErrorCode e = ServerController::removeContainer(m_settings.serverCredentials(selectedServerIndex), container);
                 m_settings.removeContainerConfig(selectedServerIndex, container);
                 button->setEnabled(true);
+
+                if (m_settings.defaultContainer(selectedServerIndex) == container) {
+                    const auto &c = m_settings.containers(selectedServerIndex);
+                    if (c.isEmpty()) m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::None);
+                    else m_settings.setDefaultContainer(selectedServerIndex, c.keys().first());
+                }
             }
 
             updateProtocolsPage();
@@ -1291,10 +1299,10 @@ void MainWindow::setupSharePageConnections()
         QJsonObject containerConfig; // = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
         containerConfig.insert(config_key::container, containerToString(selectedDockerContainer));
 
+        ErrorCode e = ErrorCode::NoError;
         for (Protocol p: amnezia::protocolsForContainer(selectedDockerContainer)) {
             QJsonObject protoConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, p);
 
-            ErrorCode e = ErrorCode::NoError;
             QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, selectedDockerContainer, containerConfig, p, &e);
             if (e) {
                 cfg = "Error generating config";
@@ -1305,16 +1313,22 @@ void MainWindow::setupSharePageConnections()
             containerConfig.insert(protoToString(p), protoConfig);
         }
 
-        QJsonObject serverConfig = m_settings.server(selectedServerIndex);
-        serverConfig.remove(config_key::userName);
-        serverConfig.remove(config_key::password);
-        serverConfig.remove(config_key::port);
-        serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
-        serverConfig.insert(config_key::defaultContainer, containerToString(selectedDockerContainer));
+        QByteArray ba;
+        if (!e) {
+            QJsonObject serverConfig = m_settings.server(selectedServerIndex);
+            serverConfig.remove(config_key::userName);
+            serverConfig.remove(config_key::password);
+            serverConfig.remove(config_key::port);
+            serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
+            serverConfig.insert(config_key::defaultContainer, containerToString(selectedDockerContainer));
 
 
-        QByteArray ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-        ui->textEdit_share_amnezia_code->setPlainText(QString("vpn://%1").arg(QString(ba)));
+            ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+            ui->textEdit_share_amnezia_code->setPlainText(QString("vpn://%1").arg(QString(ba)));
+        }
+        else {
+            ui->textEdit_share_amnezia_code->setPlainText(tr("Error while generating connection profile"));
+        }
 
         ui->pushButton_share_amnezia_generate->setEnabled(true);
         ui->pushButton_share_amnezia_copy->setEnabled(true);
@@ -1401,10 +1415,23 @@ void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::onConnect()
 {
-
     int serverIndex = m_settings.defaultServerIndex();
     ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
     DockerContainer container = m_settings.defaultContainer(serverIndex);
+
+    if (m_settings.containers(serverIndex).isEmpty()) {
+        ui->label_error_text->setText(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
+        ui->pushButton_connect->setChecked(false);
+        return;
+    }
+
+    if (container == DockerContainer::None) {
+        ui->label_error_text->setText(tr("VPN Protocol not choosen"));
+        ui->pushButton_connect->setChecked(false);
+        return;
+    }
+
+
     const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
     onConnectWorker(serverIndex, credentials, container, containerConfig);
@@ -1473,8 +1500,7 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
             }
         }
 
-        updateSettings();
-
+        updateSitesPage();
         ui->lineEdit_sites_add_custom->clear();
     }
     else {
@@ -1500,7 +1526,7 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete
     qDebug() << "Deleted custom ip:" << ipToDelete;
     m_settings.setCustomIps(customIps);
 
-    updateSettings();
+    updateSitesPage();
 
     if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
         IpcClient::Interface()->routeDelete(ipToDelete, "");
@@ -1508,9 +1534,24 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete
     }
 }
 
-void MainWindow::updateSettings()
+void MainWindow::updateStartPage()
 {
+    ui->lineEdit_start_existing_code->clear();
+    ui->textEdit_new_server_ssh_key->clear();
+    ui->lineEdit_new_server_ip->clear();
+    ui->lineEdit_new_server_password->clear();
+    ui->textEdit_new_server_ssh_key->clear();
+    ui->lineEdit_new_server_login->setText("root");
 
+    ui->label_new_server_wait_info->hide();
+    ui->label_new_server_wait_info->clear();
+
+    ui->progressBar_new_server_connection->setMinimum(0);
+    ui->progressBar_new_server_connection->setMaximum(300);
+
+    ui->pushButton_back_from_start->setVisible(!pagesStack.isEmpty());
+
+    ui->pushButton_new_server_connect->setVisible(true);
 }
 
 void MainWindow::updateSitesPage()
@@ -1816,7 +1857,6 @@ void MainWindow::makeServersListItem(QListWidget *listWidget, const QJsonObject 
 
     connect(widget->ui->pushButton_default, &QPushButton::clicked, this, [this, index](){
         m_settings.setDefaultServer(index);
-        updateSettings();
         updateServersListPage();
     });
 

@@ -93,8 +93,7 @@ private:
     void setupServerSettingsPageConnections();
     void setupSharePageConnections();
 
-    void updateSettings();
-
+    void updateStartPage();
     void updateSitesPage();
     void updateVpnPage();
     void updateAppSettingsPage();

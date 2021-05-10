@@ -91,7 +91,7 @@ QString Settings::defaultContainerName(int serverIndex) const
 {
     QString name = server(serverIndex).value(config_key::defaultContainer).toString();
     if (name.isEmpty()) {
-        return containerToString(DockerContainer::OpenVpnOverCloak);
+        return containerToString(DockerContainer::None);
     }
     else return name;
 }
