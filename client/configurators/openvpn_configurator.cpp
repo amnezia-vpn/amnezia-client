@@ -223,6 +223,10 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
 
+#ifdef Q_OS_MAC
+    config.replace("block-outside-dns", "");
+#endif
+
     return config;
 }
 
