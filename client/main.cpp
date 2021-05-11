@@ -77,10 +77,6 @@ int main(int argc, char *argv[])
         qWarning() << "Initialization of debug subsystem failed";
     }
 
-    QFont f("Lato Regular", 10);
-    f.setStyleStrategy(QFont::PreferAntialias);
-    app.setFont(f);
-
     app.setQuitOnLastWindowClosed(false);
 
     MainWindow mainWindow;
