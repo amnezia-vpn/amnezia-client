@@ -45,6 +45,8 @@ public:
                OpenVpnSettings, ShadowSocksSettings, CloakSettings};
     Q_ENUM(Page)
 
+    void showOnStartup();
+
 private slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
@@ -88,6 +90,8 @@ private:
     void setTrayIcon(const QString &iconPath);
 
     void setupUiConnections();
+    void setupAppSettingsConnections();
+    void setupNetworkSettingsConnections();
     void setupProtocolsPageConnections();
     void setupNewServerPageConnections();
     void setupServerSettingsPageConnections();

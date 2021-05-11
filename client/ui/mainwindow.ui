@@ -287,7 +287,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -2557,9 +2557,9 @@ QPushButton:hover {
       <widget class="QLabel" name="label_34">
        <property name="geometry">
         <rect>
-         <x>120</x>
+         <x>50</x>
          <y>40</y>
-         <width>111</width>
+         <width>171</width>
          <height>40</height>
         </rect>
        </property>
@@ -2573,16 +2573,16 @@ color: #100A44;
 </string>
        </property>
        <property name="text">
-        <string>Servers</string>
+        <string>Servers list</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_servers_add_new">
        <property name="geometry">
         <rect>
-         <x>230</x>
+         <x>240</x>
          <y>49</y>
          <width>24</width>
          <height>24</height>
@@ -2655,7 +2655,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox_autostart">
+      <widget class="QCheckBox" name="checkBox_app_settings_autostart">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -2693,7 +2693,7 @@ color: #100A44;
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox_autoconnect">
+      <widget class="QCheckBox" name="checkBox_app_settings_autoconnect">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -2706,11 +2706,11 @@ color: #100A44;
         <string>Auto connect</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_check_for_updates">
+      <widget class="QPushButton" name="pushButton_app_settings_check_for_updates">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>250</y>
+         <y>280</y>
          <width>321</width>
          <height>41</height>
         </rect>
@@ -2745,13 +2745,26 @@ background: #211966;
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>210</y>
+         <y>240</y>
          <width>281</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>Software version: 1.6.0 (31.03.2021)</string>
+        <string>Software version: 1.6.1 (09.05.2021)</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_app_settings_start_minimized">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>180</y>
+         <width>211</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Start minimized</string>
        </property>
       </widget>
      </widget>

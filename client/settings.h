@@ -23,19 +23,6 @@ class Settings : public QObject
 public:
     explicit Settings(QObject* parent = nullptr);
 
-
-//    QString userName() const { return m_settings.value("Server/userName", QString()).toString(); }
-//    void setUserName(const QString& login) { m_settings.setValue("Server/userName", login); }
-
-//    QString password() const { return m_settings.value("Server/password", QString()).toString(); }
-//    void setPassword(const QString& password) { m_settings.setValue("Server/password", password); }
-
-//    QString serverName() const { return m_settings.value("Server/serverName", QString()).toString(); }
-//    void setServerName(const QString& serverName) { m_settings.setValue("Server/serverName", serverName); }
-
-//    int serverPort() const { return m_settings.value("Server/serverPort", 22).toInt(); }
-//    void setServerPort(int serverPort = 22) { m_settings.setValue("Server/serverPort", serverPort); }
-
     ServerCredentials defaultServerCredentials() const;
     ServerCredentials serverCredentials(int index) const;
     //void setServerCredentials(const ServerCredentials &credentials);
@@ -74,8 +61,11 @@ public:
     QString nextAvailableServerName() const;
 
     // App settings section
-    bool isAutoConnect() const { return m_settings.value("Conf/autoConnect", QString()).toBool(); }
+    bool isAutoConnect() const { return m_settings.value("Conf/autoConnect", false).toBool(); }
     void setAutoConnect(bool enabled) { m_settings.setValue("Conf/autoConnect", enabled); }
+
+    bool isStartMinimized() const { return m_settings.value("Conf/startMinimized", false).toBool(); }
+    void setStartMinimized(bool enabled) { m_settings.setValue("Conf/startMinimized", enabled); }
 
     bool customRouting() const { return m_settings.value("Conf/customRouting", false).toBool(); }
     void setCustomRouting(bool customRouting) { m_settings.setValue("Conf/customRouting", customRouting); }

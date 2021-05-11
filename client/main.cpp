@@ -68,6 +68,11 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
+    QCommandLineOption c_autostart {{"a", "autostart"}, "System autostart"};
+    parser.addOption(c_autostart);
+
+    parser.process(app);
+
     if (!Debug::init()) {
         qWarning() << "Initialization of debug subsystem failed";
     }
@@ -79,7 +84,8 @@ int main(int argc, char *argv[])
     app.setQuitOnLastWindowClosed(false);
 
     MainWindow mainWindow;
-    mainWindow.show();
+    if (parser.isSet("a")) mainWindow.showOnStartup();
+    else mainWindow.show();
 
     if (app.isPrimary()) {
         QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){

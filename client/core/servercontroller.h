@@ -58,11 +58,6 @@ private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     static ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
-
-    //static ErrorCode setupOpenVpnServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
-    //static ErrorCode setupOpenVpnOverCloakServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
-   // static ErrorCode setupShadowSocksServer(const ServerCredentials &credentials, const QJsonObject &config = QJsonObject());
-
     static ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     static ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());

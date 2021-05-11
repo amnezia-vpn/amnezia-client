@@ -38,6 +38,7 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
     // transfer params to protocol runner
     config.insert(config_key::transport_proto, "$OPENVPN_TRANSPORT_PROTO");
     config.insert(config_key::remote, credentials.hostName);
+    config.insert(config_key::port, "$CLOAK_SERVER_PORT");
 
     QString textCfg = ServerController::replaceVars(QJsonDocument(config).toJson(),
         ServerController::genVarsForScript(credentials, container, containerConfig));
