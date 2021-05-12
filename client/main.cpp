@@ -80,8 +80,13 @@ int main(int argc, char *argv[])
     app.setQuitOnLastWindowClosed(false);
 
     MainWindow mainWindow;
+
+#ifdef Q_OS_WIN
     if (parser.isSet("a")) mainWindow.showOnStartup();
     else mainWindow.show();
+#else
+    mainWindow.showOnStartup();
+#endif
 
     if (app.isPrimary()) {
         QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){

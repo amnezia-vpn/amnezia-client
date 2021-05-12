@@ -71,7 +71,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
 
-    bool needToHideCustomTitlebar = false;
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
         needToHideCustomTitlebar = true;
     }
@@ -83,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (needToHideCustomTitlebar) {
         ui->widget_tittlebar->hide();
-        resize(width(), height() - ui->stackedWidget_main->y());
+        resize(width(), 640);
         ui->stackedWidget_main->move(0,0);
     }
 
@@ -164,11 +163,16 @@ MainWindow::~MainWindow()
 void MainWindow::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) show();
+    else {
+#ifdef Q_OS_MACX
+        setDockIconVisible(false);
+#endif
+    }
 }
 
 void MainWindow::goToPage(Page page, bool reset, bool slide)
 {
-    qDebug() << "goToPage" << page;
+    //qDebug() << "goToPage" << page;
     if (reset) {
         if (page == Page::ServerSettings) {
             updateServerPage();
@@ -355,6 +359,11 @@ void MainWindow::showEvent(QShowEvent *event)
 #ifdef Q_OS_MACX
     if (!event->spontaneous()) {
         setDockIconVisible(true);
+    }
+    if (needToHideCustomTitlebar) {
+        ui->widget_tittlebar->hide();
+        resize(width(), 640);
+        ui->stackedWidget_main->move(0,0);
     }
 #endif
 }

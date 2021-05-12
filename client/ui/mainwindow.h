@@ -141,6 +141,8 @@ private:
 
     bool canMove = false;
     QPoint offset;
+    bool needToHideCustomTitlebar = false;
+
     bool eventFilter(QObject *obj, QEvent *event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void closeEvent(QCloseEvent *event) override;
