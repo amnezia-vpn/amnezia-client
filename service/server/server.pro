@@ -45,9 +45,11 @@ LIBS += \
 macx {
 HEADERS += \
     router_mac.h
+    helper_route_mac.h
 
 SOURCES += \
-    router_mac.cpp
+    router_mac.cpp \
+    helper_route_mac.c
 }
 
 include(../src/qtservice.pri)

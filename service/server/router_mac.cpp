@@ -1,4 +1,5 @@
 #include "router_mac.h"
+#include "helper_route_mac.h"
 
 #include <QProcess>
 
@@ -10,18 +11,44 @@ RouterMac &RouterMac::Instance()
 
 bool RouterMac::routeAdd(const QString &ip, const QString &gw, QString mask)
 {
-    //  route add -host ip gw
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
+    int argc = 5;
+    char **argv = new char*[argc];
 
-    p.start("route", QStringList() << "add" << "-host" << ip << gw);
-    p.waitForFinished();
-    qDebug().noquote() << "OUTPUT routeAdd: " + p.readAll();
-    bool ok = (p.exitCode() == 0);
-    if (ok) {
-        m_addedRoutes.append(ip);
+    argv[0] = new char[std::string("route").length() + 1];
+    strcpy(argv[0], std::string("route").c_str());
+
+    argv[1] = new char[std::string("add").length() + 1];
+    strcpy(argv[1], std::string("add").c_str());
+
+    argv[2] = new char[6];
+    strcpy(argv[2], std::string("-host").c_str());
+
+    argv[3] = new char[ip.toStdString().length() + 1];
+    strcpy(argv[3], ip.toStdString().c_str());
+
+    argv[4] = new char[gw.toStdString().length() + 1];
+    strcpy(argv[4], gw.toStdString().c_str());
+
+    mainRouteIface(argc, argv);
+
+    for (int i = 0; i < argc; i++) {
+        delete [] argv[i];
     }
-    return ok;
+    delete[] argv;
+    return true;
+
+//    //  route add -host ip gw
+//    QProcess p;
+//    p.setProcessChannelMode(QProcess::MergedChannels);
+
+//    p.start("route", QStringList() << "add" << "-host" << ip << gw);
+//    p.waitForFinished();
+//    qDebug().noquote() << "OUTPUT routeAdd: " + p.readAll();
+//    bool ok = (p.exitCode() == 0);
+//    if (ok) {
+//        m_addedRoutes.append(ip);
+//    }
+//    return ok;
 }
 
 int RouterMac::routeAddList(const QString &gw, const QStringList &ips)
@@ -47,13 +74,20 @@ bool RouterMac::clearSavedRoutes()
 
 bool RouterMac::routeDelete(const QString &ip, const QString &gw)
 {
+    if (ip == "0.0.0.0") {
+        qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
+        return true;
+    }
+
     //  route delete ip gw
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
-    p.start("route", QStringList() << "delete" << ip << gw);
+    p.start("route", QStringList() << "delete" << ip);
     p.waitForFinished();
-    qDebug().noquote() << "OUTPUT routeDelete: " + p.readAll();
+    // skipping gw
+    qDebug().noquote() << "routeDelete, skipping gw`: " << ip;
+    qDebug().noquote() << "OUTPUT routeDelete: " << p.readAll();
 
     return p.exitCode() == 0;
 }
