@@ -225,6 +225,13 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
 
 #ifdef Q_OS_MAC
     config.replace("block-outside-dns", "");
+    QString dnsConf = QString(
+                "\nscript-security 2\n"
+                "up %1/update-resolv-conf.sh\n"
+                "down %1/update-resolv-conf.sh\n").
+            arg(qApp->applicationDirPath());
+
+    config.append(dnsConf);
 #endif
 
     return config;
