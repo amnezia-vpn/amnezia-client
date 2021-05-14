@@ -90,8 +90,8 @@ public:
     static const char cloudFlareNs1[];
     static const char cloudFlareNs2[];
 
-    static constexpr char openNicNs5[] = "94.103.153.176";
-    static constexpr char openNicNs13[] = "144.76.103.143";
+//    static constexpr char openNicNs5[] = "94.103.153.176";
+//    static constexpr char openNicNs13[] = "144.76.103.143";
 
 
 public:
