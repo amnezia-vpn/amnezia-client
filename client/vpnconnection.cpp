@@ -105,7 +105,10 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
     QString configData;
     if (lastVpnConfig.contains(proto)) {
-        configData = OpenVpnConfigurator::processConfigWithLocalSettings(lastVpnConfig.value(proto));
+        configData = lastVpnConfig.value(proto);
+        if (proto == Protocol::OpenVpn) {
+            configData = OpenVpnConfigurator::processConfigWithLocalSettings(configData);
+        }
         qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << protoToString(proto);
     }
     else {
