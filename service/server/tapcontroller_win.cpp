@@ -3,6 +3,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatchIterator>
 #include <QCoreApplication>
+#include <QOperatingSystemVersion>
 
 #include "tapcontroller_win.h"
 
@@ -253,7 +254,14 @@ bool TapController::checkOpenVpn()
 QString TapController::getTapInstallPath()
 {
 #ifdef Q_OS_WIN
-    return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\tapinstall.exe";
+
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\tapinstall.exe";
+    }
+    else {
+        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\tapinstall.exe";
+    }
+
 //    if (QSysInfo::currentCpuArchitecture() == "i386") {
 //        return qApp->applicationDirPath() + "\\openvpn\\drivers_x32\\tapinstall.exe";
 //    }
@@ -269,16 +277,21 @@ QString TapController::getOpenVpnPath()
 {
 #ifdef Q_OS_WIN
     //return qApp->applicationDirPath() + "\\openvpn\\"+ QSysInfo::currentCpuArchitecture() + "\\openvpn.exe";
-    return qApp->applicationDirPath() + "\\openvpn\\i386\\openvpn.exe";
 
-    //return qApp->applicationDirPath() + "\\openvpn\\bin\\openvpn.exe";
+    return qApp->applicationDirPath() + "\\openvpn\\i386\\openvpn.exe";
 #endif
     return "";
 }
 
 QString TapController::getTapDriverDir()
 {
-    return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\";
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\";
+    }
+    else {
+        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\";
+    }
+
 
 //    if (QSysInfo::currentCpuArchitecture() == "i386") {
 //        return qApp->applicationDirPath() + "\\openvpn\\drivers_x32\\";
@@ -312,7 +325,9 @@ bool TapController::removeDriver(const QString& tapInstanceId)
 
 bool TapController::setupDriver()
 {
-    //setupDriverCertificate();
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+        setupDriverCertificate();
+    }
 
     QStringList tapList = getTapList();
     for (QString tap : tapList) {
