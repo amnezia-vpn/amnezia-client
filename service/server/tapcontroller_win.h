@@ -35,6 +35,9 @@ private:
     static bool setupDriverCertificate();
     static bool removeDriver(const QString& tapInstanceId);
 
+    static bool oldDriversRequired();
+    static bool restartTapService();
+
 };
 
 #endif // TAPCONTROLLER_H

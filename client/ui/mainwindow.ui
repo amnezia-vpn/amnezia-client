@@ -291,7 +291,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>13</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -513,8 +513,8 @@ color: #100A44;
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8.25pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lato'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pushButton_new_server_get_info">
@@ -542,25 +542,6 @@ color: #15CDCB;</string>
          </property>
          <property name="text">
           <string>Where to get connection data →</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_new_server_wait_info">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>400</y>
-           <width>301</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Please wait, configuring process may take up to 5 minutes</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
          </property>
         </widget>
         <widget class="QLabel" name="label_2">
@@ -762,9 +743,27 @@ color: #15CDCB;</string>
           <string>Password</string>
          </property>
         </widget>
+        <widget class="QLabel" name="label_new_server_wait_info">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>390</y>
+           <width>301</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Please wait, configuring process may take up to 5 minutes</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
         <zorder>textEdit_new_server_ssh_key</zorder>
         <zorder>pushButton_new_server_get_info</zorder>
-        <zorder>label_new_server_wait_info</zorder>
         <zorder>lineEdit_new_server_ip</zorder>
         <zorder>pushButton_new_server_connect</zorder>
         <zorder>lineEdit_new_server_login</zorder>
@@ -774,6 +773,7 @@ color: #15CDCB;</string>
         <zorder>label_5</zorder>
         <zorder>label_new_server_password</zorder>
         <zorder>label_2</zorder>
+        <zorder>label_new_server_wait_info</zorder>
        </widget>
       </widget>
      </widget>
@@ -840,15 +840,1126 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_new_server_advanced">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>310</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Configure VPN protocols manually</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_45">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>35</y>
+         <width>361</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup your server to use VPN</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_new_server_wizard">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>150</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Run Setup Wizard</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_48">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>100</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>If you want easily configure your server just run Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_49">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>260</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Press configure manually to choose VPN protocols you want to install</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
-     <widget class="QWidget" name="page_new_server_2">
+     <widget class="QWidget" name="page_setup_wizard">
+      <widget class="QLabel" name="label_50">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_setup_wizard">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget_5" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>361</width>
+         <height>561</height>
+        </rect>
+       </property>
+       <widget class="QRadioButton" name="radioButton_setup_wizard_high">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>331</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>High censorship level</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_setup_wizard_medium">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>180</y>
+          <width>331</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Medium censorship level</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_setup_wizard_low">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>330</y>
+          <width>331</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Low censorship level</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_51">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>40</y>
+          <width>321</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>I'm living in country with high censorship level. Many of foreign web sites and VPNs blocked by my government. I want to setup reliable VPN, which is invisible for government.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_52">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>210</y>
+          <width>321</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>I'm living in country with medium censorship level. Some web sites blocked by my government, but VPNs are not blocked at all. I want to setup flexible solution.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_57">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>360</y>
+          <width>321</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>I just want to improve my privacy in internet. </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_setup_wizard_next">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>490</y>
+          <width>301</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_setup_wizard_high_level">
+      <widget class="QLabel" name="label_58">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget_6" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>361</width>
+         <height>561</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+	font-size: 16px;
+}</string>
+       </property>
+       <widget class="QLabel" name="label_61">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>10</y>
+          <width>321</width>
+          <height>321</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>AmneziaVPN will install VPN protocol which is not visible for your internet provider and government firewall. Your VPN connection will be detected by your provider as regular web traffic to particular web site.
+
+You SHOULD set this web site address to some foreign web site which is not blocked by your internet provider. Other words you need to type below some foreign web site address which is accessible without VPN.
+
+Please note, this protocol still does not support export connection profile to mobile devices. Keep for updates.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_63">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>400</y>
+          <width>321</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OpenVPN over Cloak (VPN obfuscation) profile will be installed</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_setup_wizard_high_next">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>490</y>
+          <width>301</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_setup_wizard_high_website_masking">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>360</y>
+          <width>301</width>
+          <height>41</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_66">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>330</y>
+          <width>291</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Type web site address for mask</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_setup_wizard_high">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_setup_wizard_vpn_mode">
+      <widget class="QWidget" name="widget_7" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>361</width>
+         <height>561</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+	font-size: 16px;
+}</string>
+       </property>
+       <widget class="QLabel" name="label_62">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>10</y>
+          <width>321</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Optional.
+
+We recommend to enable VPN mode &quot;For selected sites&quot; and add blocked sites you need to visit manually. If you will choose this option, you will need add every bloked site you want to visit to the access list. You may switch between modes later.
+
+Please note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_setup_wizard_vpn_mode_finish">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>490</y>
+          <width>301</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+        </property>
+        <property name="text">
+         <string>Start configuring</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBox_setup_wizard_vpn_mode">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>350</y>
+          <width>301</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Turn on mode &quot;VPN for selected sites&quot;</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_setup_wizard_vpn_mode">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_65">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_setup_wizard_medium_level">
+      <widget class="QLabel" name="label_59">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget_8" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>361</width>
+         <height>561</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+	font-size: 16px;
+}</string>
+       </property>
+       <widget class="QLabel" name="label_67">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>10</y>
+          <width>321</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>AmneziaVPN will install VPN protocol which is difficult to detect by your internet provider and government firewall (but possible). In most cases, this is the most suitable protocol. This protocol is faster compared to the VPN protocols with &quot;web traffic masking&quot;.
+
+This protocol support export connection profile to mobile devices using QR code (you should launch 3rd party opensource VPN client - ShadowSocks VPN).</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_68">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>400</y>
+          <width>321</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OpenVPN over ShadowSocks profile will be installed</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_setup_wizard_medium_next">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>490</y>
+          <width>301</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_setup_wizard_medium">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_setup_wizard_low_level">
+      <widget class="QLabel" name="label_60">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Setup Wizard</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget_9" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>361</width>
+         <height>561</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+	font-size: 16px;
+}</string>
+       </property>
+       <widget class="QLabel" name="label_69">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>10</y>
+          <width>321</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>AmneziaVPN will install OpenVPN protocol with public/private key pairs generated on server and client sides. You can also configure connection on your mobile device by copying exported &quot;.ovpn&quot; file to your device and setting up official OpenVPN client. We recommend do not use messengers for sending connection profile - it contains VPN private keys.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_70">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>400</y>
+          <width>321</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OpenVPN profile will be installed</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_setup_wizard_low_finish">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>490</y>
+          <width>301</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+        </property>
+        <property name="text">
+         <string>Start configuring</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="pushButton_back_from_setup_wizard_low">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>26</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	image: url(:/images/arrow_right.png);
+	image-position: left;
+	text-align: left;
+    /*font: 17pt &quot;Ancient&quot;;*/
+
+	padding: 1px;
+	image: url(:/images/arrow_left.png);
+}
+QPushButton:hover {
+	padding: 0px;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_new_server_configuring">
+      <widget class="QProgressBar" name="progressBar_new_server_configuring">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>510</y>
+         <width>301</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar{
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QProgressBar::chunk {
+background: rgba(255, 255, 255, 0.15);
+border-radius: 4px 0px 0px 4px;
+
+}
+</string>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="format">
+        <string>Configuring...</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_71">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>35</y>
+         <width>381</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 24px;
+color: #100A44;
+}
+</string>
+       </property>
+       <property name="text">
+        <string>Configuring...</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_72">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>90</y>
+         <width>321</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Please wait.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_new_server_configuring_wait_info">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>560</y>
+         <width>301</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Please wait, configuring process may take up to 5 minutes</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_new_server_protocols">
       <widget class="QLabel" name="label_39">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>35</y>
          <width>361</width>
-         <height>61</height>
+         <height>31</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -861,7 +1972,7 @@ color: #100A44;
 </string>
        </property>
        <property name="text">
-        <string>Select VPN protocols to install</string>
+        <string>Select VPN protocols</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -870,7 +1981,7 @@ color: #100A44;
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_back_from_new_server_2">
+      <widget class="QPushButton" name="pushButton_back_from_new_server_protocols">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -906,7 +2017,7 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>95</y>
+         <y>70</y>
          <width>380</width>
          <height>471</height>
         </rect>
@@ -1468,12 +2579,12 @@ border: none;
                  </property>
                  <item>
                   <property name="text">
-                   <string>UDP</string>
+                   <string>udp</string>
                   </property>
                  </item>
                  <item>
                   <property name="text">
-                   <string>TCP</string>
+                   <string>tcp</string>
                   </property>
                  </item>
                 </widget>
@@ -1507,7 +2618,7 @@ border: none;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>580</y>
+         <y>570</y>
          <width>301</width>
          <height>40</height>
         </rect>
@@ -1551,7 +2662,7 @@ border-radius: 4px 0px 0px 4px;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>580</y>
+         <y>570</y>
          <width>301</width>
          <height>40</height>
         </rect>
@@ -2020,9 +3131,9 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>50</y>
+         <y>40</y>
          <width>340</width>
-         <height>40</height>
+         <height>60</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -2038,7 +3149,7 @@ color: #100A44;
         <string>These sites will be opened using VPN</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignHCenter|Qt::AlignTop</set>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -2048,7 +3159,7 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>150</y>
+         <y>140</y>
          <width>281</width>
          <height>31</height>
         </rect>
@@ -2090,7 +3201,7 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>310</x>
-         <y>150</y>
+         <y>140</y>
          <width>51</width>
          <height>31</height>
         </rect>
@@ -2117,7 +3228,7 @@ background: #211966;
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>115</y>
+         <y>110</y>
          <width>311</width>
          <height>21</height>
         </rect>
@@ -2183,6 +3294,24 @@ QListView::item:hover {
       </widget>
      </widget>
      <widget class="QWidget" name="page_general_settings">
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+font-family: Lato;
+font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+Text-align:left;
+padding-left: 30px;
+
+
+/* black */
+color: #100A44;
+
+background-repeat: no-repeat;
+ background-position: left center;
+}</string>
+      </property>
       <widget class="QPushButton" name="pushButton_back_from_settings">
        <property name="geometry">
         <rect>
@@ -2247,21 +3376,7 @@ QPushButton:hover {
         <string>Reinstall server, clear server</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-image: url(:/images/server_settings.png);
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true">background-image: url(:/images/server_settings.png);</string>
        </property>
        <property name="text">
         <string>Server management</string>
@@ -2299,21 +3414,7 @@ background-repeat: no-repeat;
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-image: url(:/images/share.png);
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true">background-image: url(:/images/share.png);</string>
        </property>
        <property name="text">
         <string>Share connection</string>
@@ -2367,20 +3468,7 @@ background-repeat: no-repeat;
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Exit</string>
@@ -2418,21 +3506,8 @@ background-repeat: no-repeat;
         <string>Auto start, Auto connect</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-image: url(:/images/settings.png);
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true">background-image: url(:/images/settings.png);
+</string>
        </property>
        <property name="text">
         <string>App settings</string>
@@ -2483,24 +3558,11 @@ background-repeat: no-repeat;
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Dns, Kill Switch</string>
+        <string>DNS settings</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-image: url(:/images/settings.png);
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true">background-image: url(:/images/settings.png);
+</string>
        </property>
        <property name="text">
         <string>Network settings</string>
@@ -2522,21 +3584,7 @@ background-repeat: no-repeat;
         <string>Reinstall server, clear server</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-family: Lato;
-font-style: normal;
-font-weight: bold;
-font-size: 20px;
-line-height: 25px;
-Text-align:left;
-padding-left: 30px;
-
-
-/* black */
-color: #100A44;
-
-background-image: url(:/images/server_settings.png);
-background-repeat: no-repeat;
- background-position: left center;</string>
+        <string notr="true">background-image: url(:/images/server_settings.png);</string>
        </property>
        <property name="text">
         <string>Servers</string>
@@ -2556,6 +3604,45 @@ background-repeat: no-repeat;
        </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_64">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>400</y>
+         <width>360</width>
+         <height>10</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">image: url(:/images/line.png);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_general_settings_add_server">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>360</y>
+         <width>330</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Add or import new server</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-image: url(:/images/plus.png);
+</string>
+       </property>
+       <property name="text">
+        <string>Add server</string>
        </property>
       </widget>
      </widget>
@@ -2671,7 +3758,7 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>40</y>
+         <y>30</y>
          <width>171</width>
          <height>40</height>
         </rect>
@@ -2696,7 +3783,7 @@ color: #100A44;
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>49</y>
+         <y>39</y>
          <width>24</width>
          <height>24</height>
         </rect>
@@ -2785,7 +3872,7 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>50</y>
+         <y>30</y>
          <width>340</width>
          <height>40</height>
         </rect>
@@ -2864,7 +3951,7 @@ background: #211966;
         </rect>
        </property>
        <property name="text">
-        <string>Software version: 1.6.1 (09.05.2021)</string>
+        <string>Software version: 1.7.0 (18.05.2021)</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_app_settings_start_minimized">
@@ -2878,6 +3965,41 @@ background: #211966;
        </property>
        <property name="text">
         <string>Start minimized</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_app_settings_open_logs">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>340</y>
+         <width>321</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Open logs folder</string>
        </property>
       </widget>
      </widget>
@@ -2950,7 +4072,7 @@ QPushButton:hover {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>50</y>
+         <y>30</y>
          <width>340</width>
          <height>40</height>
         </rect>
@@ -4265,7 +5387,7 @@ QToolBox::tab:hover {
         <number>0</number>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>6</number>
@@ -4275,8 +5397,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -4563,8 +5685,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4729,8 +5851,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -4953,8 +6075,8 @@ color: #15CDCB;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5355,6 +6477,11 @@ background: #211966;
           <string>BLAKE2s256</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>SHA1</string>
+         </property>
+        </item>
        </widget>
        <widget class="QLabel" name="label_103">
         <property name="enabled">
@@ -5379,7 +6506,7 @@ background: #211966;
         <property name="geometry">
          <rect>
           <x>30</x>
-          <y>400</y>
+          <y>430</y>
           <width>321</width>
           <height>21</height>
          </rect>
@@ -5457,6 +6584,22 @@ border-radius: 4px 0px 0px 4px;
          <bool>true</bool>
         </property>
        </widget>
+       <widget class="QCheckBox" name="checkBox_proto_openvpn_tls_auth">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>390</y>
+          <width>321</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable TLS auth</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
        <zorder>progressBar_proto_openvpn_reset</zorder>
        <zorder>label_38</zorder>
        <zorder>label_97</zorder>
@@ -5473,6 +6616,7 @@ border-radius: 4px 0px 0px 4px;
        <zorder>label_103</zorder>
        <zorder>checkBox_proto_openvpn_block_dns</zorder>
        <zorder>label_proto_openvpn_info</zorder>
+       <zorder>checkBox_proto_openvpn_tls_auth</zorder>
       </widget>
      </widget>
      <widget class="QWidget" name="page_proto_shadowsocks">

@@ -508,7 +508,7 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
             genVarsForScript(credentials, container, config)));
 }
 
-ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ServerController::Vars ServerController::   genVarsForScript(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     const QJsonObject &openvpnConfig = config.value(config_key::openvpn).toObject();
     const QJsonObject &cloakConfig = config.value(config_key::cloak).toObject();
@@ -529,8 +529,16 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(amnezia::protocols::openvpn::defaultNcpDisable);
     vars.append({{"$OPENVPN_NCP_DISABLE",  isNcpDisabled ? protocols::openvpn::ncpDisableString : "" }});
+
     vars.append({{"$OPENVPN_CIPHER", openvpnConfig.value(config_key::cipher).toString(amnezia::protocols::openvpn::defaultCipher) }});
     vars.append({{"$OPENVPN_HASH", openvpnConfig.value(config_key::hash).toString(amnezia::protocols::openvpn::defaultHash) }});
+
+    bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(amnezia::protocols::openvpn::defaultTlsAuth);
+    vars.append({{"$OPENVPN_TLS_AUTH", isTlsAuth ? protocols::openvpn::tlsAuthString : "" }});
+    if (!isTlsAuth) {
+        // erase $OPENVPN_TA_KEY, so it will not set in OpenVpnConfigurator::genOpenVpnConfig
+        vars.append({{"$OPENVPN_TA_KEY", "" }});
+    }
 
     // ShadowSocks vars
     vars.append({{"$SHADOWSOCKS_SERVER_PORT", ssConfig.value(config_key::port).toString(amnezia::protocols::shadowsocks::defaultPort) }});

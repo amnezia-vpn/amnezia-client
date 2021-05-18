@@ -121,6 +121,8 @@ void SlidingStackedWidget::slideInWgtImpl(QWidget * newwidget, enum t_direction 
     }
     else m_active = true;
 
+    m_nextWidget = newwidget;
+
     enum t_direction directionhint;
     int now = currentIndex(); // currentIndex() is a function inherited from QStackedWidget
     int next = indexOf(newwidget);
@@ -207,6 +209,18 @@ void SlidingStackedWidget::slideInWgtImpl(QWidget * newwidget, enum t_direction 
     // animation->finished() provides a signal when animation is done;
     // so we connect this to some post processing slot,
     // that we implement here below in animationDoneSlot.
+}
+
+void SlidingStackedWidget::setCurrentWidget(QWidget *w)
+{
+    m_nextWidget = w;
+    QStackedWidget::setCurrentWidget(w);
+}
+
+QWidget *SlidingStackedWidget::nextWidget() const
+{
+    if (m_nextWidget == nullptr) return currentWidget();
+    return m_nextWidget;
 }
 
 void SlidingStackedWidget::animationDoneSlot(void) {

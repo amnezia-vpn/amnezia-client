@@ -34,6 +34,9 @@ public:
     SlidingStackedWidget(QWidget *parent);
     ~SlidingStackedWidget(void);
 
+    QWidget *nextWidget() const;
+    void setCurrentWidget(QWidget *w);
+
 public slots:
     // Some basic settings API
     void setSpeed(int speed); // animation duration in milliseconds
@@ -77,6 +80,8 @@ protected:
     QPropertyAnimation *animnow;
     QPropertyAnimation *animnext;
     QParallelAnimationGroup *animgroup;
+
+    QWidget *m_nextWidget = nullptr;
 };
 
 #endif // SLIDINGSTACKEDWIDGET_H

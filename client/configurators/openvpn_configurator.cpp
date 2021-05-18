@@ -203,7 +203,14 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     config.replace("$OPENVPN_CA_CERT", connData.caCert);
     config.replace("$OPENVPN_CLIENT_CERT", connData.clientCert);
     config.replace("$OPENVPN_PRIV_KEY", connData.privKey);
-    config.replace("$OPENVPN_TA_KEY", connData.taKey);
+
+    if (config.contains("$OPENVPN_TA_KEY")) {
+        config.replace("$OPENVPN_TA_KEY", connData.taKey);
+    }
+    else {
+        config.replace("<tls-auth>", "");
+        config.replace("</tls-auth>", "");
+    }
 
 #ifdef Q_OS_MAC
     config.replace("block-outside-dns", "");
@@ -221,6 +228,11 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
 
     if (m_settings().customRouting()) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
+    }
+    else {
+        if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
+            config.append("redirect-gateway def1 bypass-dhcp\n");
+        }
     }
 
 #ifdef Q_OS_MAC

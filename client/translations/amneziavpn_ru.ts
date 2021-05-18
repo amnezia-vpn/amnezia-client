@@ -4,32 +4,32 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../ui/mainwindow.ui" line="469"/>
+        <location filename="../ui/mainwindow.ui" line="473"/>
         <source>Connect to the already created VPN server</source>
         <translation>Подключиться к уже созданному серверу VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="491"/>
+        <location filename="../ui/mainwindow.ui" line="495"/>
         <source>Connection code</source>
         <translation>Код для подключения</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="414"/>
+        <location filename="../ui/mainwindow.cpp" line="452"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="427"/>
-        <location filename="../ui/mainwindow.ui" line="638"/>
-        <location filename="../ui/mainwindow.cpp" line="434"/>
-        <location filename="../ui/mainwindow.cpp" line="816"/>
-        <location filename="../ui/mainwindow.cpp" line="1464"/>
+        <location filename="../ui/mainwindow.ui" line="431"/>
+        <location filename="../ui/mainwindow.ui" line="623"/>
+        <location filename="../ui/mainwindow.cpp" line="477"/>
+        <location filename="../ui/mainwindow.cpp" line="913"/>
+        <location filename="../ui/mainwindow.cpp" line="1640"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="343"/>
-        <location filename="../ui/mainwindow.cpp" line="1188"/>
+        <location filename="../ui/mainwindow.ui" line="347"/>
+        <location filename="../ui/mainwindow.cpp" line="1358"/>
         <source>Set up your own server</source>
         <translation>Настроить собственный сервер</translation>
     </message>
@@ -38,196 +38,198 @@
         <translation type="vanished">Подключите ваш сервер, чтобы использовать VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="726"/>
+        <location filename="../ui/mainwindow.ui" line="711"/>
         <source>Server IP address</source>
         <translation>IP адрес сервера</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="742"/>
+        <location filename="../ui/mainwindow.ui" line="727"/>
         <source>Login to connect via SSH</source>
         <translation>Логин для подключения по SSH</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="758"/>
-        <location filename="../ui/mainwindow.ui" line="4626"/>
-        <location filename="../ui/mainwindow.cpp" line="1194"/>
+        <location filename="../ui/mainwindow.ui" line="743"/>
+        <location filename="../ui/mainwindow.ui" line="5874"/>
+        <location filename="../ui/mainwindow.cpp" line="1364"/>
         <source>Password</source>
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="540"/>
+        <location filename="../ui/mainwindow.ui" line="544"/>
         <source>Where to get connection data →</source>
         <translation>Где взять логин для подключения →</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="446"/>
+        <location filename="../ui/mainwindow.ui" line="450"/>
         <source>vpn://...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="509"/>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Lato&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:16px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.ui" line="556"/>
-        <location filename="../ui/mainwindow.ui" line="2981"/>
-        <location filename="../ui/mainwindow.cpp" line="554"/>
-        <location filename="../ui/mainwindow.cpp" line="623"/>
+        <location filename="../ui/mainwindow.ui" line="759"/>
+        <location filename="../ui/mainwindow.ui" line="1948"/>
+        <location filename="../ui/mainwindow.ui" line="4229"/>
+        <location filename="../ui/mainwindow.cpp" line="647"/>
+        <location filename="../ui/mainwindow.cpp" line="715"/>
         <source>Please wait, configuring process may take up to 5 minutes</source>
         <translation>Пожалуйста подождите, настройка может занять до 5 минут</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="582"/>
+        <location filename="../ui/mainwindow.ui" line="567"/>
+        <location filename="../ui/mainwindow.ui" line="897"/>
         <source>Setup your server to use VPN</source>
         <translation>Настроить ваш сервер для VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="654"/>
+        <location filename="../ui/mainwindow.ui" line="639"/>
         <source>root</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="681"/>
-        <location filename="../ui/mainwindow.cpp" line="1195"/>
+        <location filename="../ui/mainwindow.ui" line="666"/>
+        <location filename="../ui/mainwindow.cpp" line="1365"/>
         <source>Connect using SSH key</source>
         <translation>Использовать SSH ключ</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="860"/>
         <source>Select VPN protocols to install</source>
-        <translation>Выберите VPN протоколы для установки</translation>
+        <translation type="vanished">Выберите VPN протоколы для установки</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1000"/>
+        <location filename="../ui/mainwindow.ui" line="2133"/>
         <source>OpenVPN and ShadowSocks
  with masking using Cloak plugin</source>
         <translation>OpenVPN и ShadowSocks
  с маскировкой плагином Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1048"/>
+        <location filename="../ui/mainwindow.ui" line="2187"/>
         <source>Port (TCP)</source>
         <translation>Порт (TCP)</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1055"/>
+        <location filename="../ui/mainwindow.ui" line="2206"/>
         <source>443</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1074"/>
-        <location filename="../ui/mainwindow.ui" line="5773"/>
+        <location filename="../ui/mainwindow.ui" line="2225"/>
+        <location filename="../ui/mainwindow.ui" line="7043"/>
         <source>Fake Web Site</source>
         <translation>Сайт маскировки</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1081"/>
-        <location filename="../ui/mainwindow.ui" line="5729"/>
+        <location filename="../ui/mainwindow.ui" line="2244"/>
+        <location filename="../ui/mainwindow.ui" line="6999"/>
         <source>mail.ru</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1133"/>
+        <location filename="../ui/mainwindow.ui" line="2293"/>
         <source>ShadowSocks</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1177"/>
+        <location filename="../ui/mainwindow.ui" line="2343"/>
         <source>Port(TCP)</source>
         <translation>Порт (TCP)</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1184"/>
+        <location filename="../ui/mainwindow.ui" line="2362"/>
         <source>6789</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1203"/>
+        <location filename="../ui/mainwindow.ui" line="2381"/>
         <source>Encryption</source>
         <translation>Шифрование</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1211"/>
+        <location filename="../ui/mainwindow.ui" line="2401"/>
         <source>chacha20-ietf-poly1305</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1216"/>
+        <location filename="../ui/mainwindow.ui" line="2406"/>
         <source>xchacha20-ietf-poly1305</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1221"/>
-        <location filename="../ui/mainwindow.ui" line="5473"/>
-        <location filename="../ui/mainwindow.ui" line="5792"/>
+        <location filename="../ui/mainwindow.ui" line="2411"/>
+        <location filename="../ui/mainwindow.ui" line="6743"/>
+        <location filename="../ui/mainwindow.ui" line="7062"/>
         <source>aes-256-gcm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1226"/>
-        <location filename="../ui/mainwindow.ui" line="5797"/>
+        <location filename="../ui/mainwindow.ui" line="2416"/>
+        <location filename="../ui/mainwindow.ui" line="7067"/>
         <source>aes-192-gcm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1231"/>
-        <location filename="../ui/mainwindow.ui" line="5478"/>
-        <location filename="../ui/mainwindow.ui" line="5802"/>
+        <location filename="../ui/mainwindow.ui" line="2421"/>
+        <location filename="../ui/mainwindow.ui" line="6748"/>
+        <location filename="../ui/mainwindow.ui" line="7072"/>
         <source>aes-128-gcm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1284"/>
+        <location filename="../ui/mainwindow.ui" line="2477"/>
         <source>OpenVPN</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1328"/>
-        <location filename="../ui/mainwindow.ui" line="5246"/>
-        <location filename="../ui/mainwindow.ui" line="5451"/>
-        <location filename="../ui/mainwindow.ui" line="5682"/>
+        <location filename="../ui/mainwindow.ui" line="2527"/>
+        <location filename="../ui/mainwindow.ui" line="6499"/>
+        <location filename="../ui/mainwindow.ui" line="6721"/>
+        <location filename="../ui/mainwindow.ui" line="6952"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1350"/>
+        <location filename="../ui/mainwindow.ui" line="2562"/>
         <source>Protocol</source>
         <translation>Протокол</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1358"/>
-        <location filename="../ui/mainwindow.ui" line="5142"/>
+        <location filename="../ui/mainwindow.ui" line="3561"/>
+        <source>DNS settings</source>
+        <translation>Настройки DNS</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="6390"/>
         <source>UDP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1363"/>
-        <location filename="../ui/mainwindow.ui" line="5129"/>
+        <location filename="../ui/mainwindow.ui" line="6377"/>
         <source>TCP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1434"/>
-        <location filename="../ui/mainwindow.ui" line="4029"/>
-        <location filename="../ui/mainwindow.ui" line="5309"/>
-        <location filename="../ui/mainwindow.ui" line="5576"/>
-        <location filename="../ui/mainwindow.ui" line="5886"/>
+        <location filename="../ui/mainwindow.ui" line="1740"/>
+        <source>AmneziaVPN will install OpenVPN protocol with public/private key pairs generated on server and client sides. You can also configure connection on your mobile device by copying exported &quot;.ovpn&quot; file to your device and setting up official OpenVPN client. We recommend do not use messengers for sending connection profile - it contains VPN private keys.</source>
+        <translation>AmneziaVPN установит протокол OpenVPN и сгенерирует публичные/приваные пары ключей для серверной и клиентской стороны. Вы сможете так же настроить подключение для вашего мобильного устройства, экспортировав конфиг &quot;.ovpn&quot; на устройство и установив официальный клиент OpenVPN. Мы рекоммендуем не передавать конфиг через мессенджеры - он содержит приватный ключ для VPN.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1881"/>
+        <location filename="../ui/mainwindow.ui" line="1904"/>
+        <location filename="../ui/mainwindow.ui" line="2658"/>
+        <location filename="../ui/mainwindow.ui" line="5277"/>
+        <location filename="../ui/mainwindow.ui" line="6562"/>
+        <location filename="../ui/mainwindow.ui" line="6846"/>
+        <location filename="../ui/mainwindow.ui" line="7156"/>
         <source>Configuring...</source>
         <translation>Настройка...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1468"/>
+        <location filename="../ui/mainwindow.ui" line="2692"/>
         <source>Setup server</source>
         <translation>Установить сервер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1562"/>
-        <location filename="../ui/mainwindow.ui" line="1591"/>
+        <location filename="../ui/mainwindow.ui" line="2786"/>
+        <location filename="../ui/mainwindow.ui" line="2815"/>
         <source>0 Mbps</source>
         <translation>0 Мбит/сек</translation>
     </message>
@@ -236,32 +238,32 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Добавить сайт</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1713"/>
+        <location filename="../ui/mainwindow.ui" line="2937"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1756"/>
+        <location filename="../ui/mainwindow.ui" line="2980"/>
         <source>How to use VPN</source>
         <translation>Как использовать VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1775"/>
+        <location filename="../ui/mainwindow.ui" line="2999"/>
         <source>For all connections</source>
         <translation>Для всех соединений</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1794"/>
+        <location filename="../ui/mainwindow.ui" line="3018"/>
         <source>For selected sites</source>
         <translation>Для выбранных сайтов</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1810"/>
+        <location filename="../ui/mainwindow.ui" line="3034"/>
         <source>Error text</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1894"/>
+        <location filename="../ui/mainwindow.ui" line="3118"/>
         <source>List of the most popular prohibited sites</source>
         <translation>Список самых популярных запрещенных сайтов</translation>
     </message>
@@ -286,212 +288,389 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Имя хоста или IP адрес</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2000"/>
+        <location filename="../ui/mainwindow.ui" line="3224"/>
         <source>+</source>
         <translation>+</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2754"/>
+        <location filename="../ui/mainwindow.ui" line="3954"/>
         <source>Software version: 1.6.1 (09.05.2021)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3072"/>
+        <location filename="../ui/mainwindow.ui" line="4320"/>
         <source>Server settings</source>
         <translation>Настройки сервера</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2206"/>
+        <location filename="../ui/mainwindow.ui" line="3420"/>
         <source>Share connection</source>
         <translation>Поделиться подключением</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1639"/>
+        <location filename="../ui/mainwindow.ui" line="513"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Lato&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="874"/>
+        <source>Configure VPN protocols manually</source>
+        <translation>Выбрать протоколы</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="937"/>
+        <source>Run Setup Wizard</source>
+        <translation>Мастер настройки</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="953"/>
+        <source>If you want easily configure your server just run Wizard</source>
+        <translation>Для облегченной настройки сервера запустите мастер настройки</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="975"/>
+        <source>Press configure manually to choose VPN protocols you want to install</source>
+        <translation>Выбрать протоколы для установки самостоятельно</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1006"/>
+        <location filename="../ui/mainwindow.ui" line="1221"/>
+        <location filename="../ui/mainwindow.ui" line="1521"/>
+        <location filename="../ui/mainwindow.ui" line="1552"/>
+        <location filename="../ui/mainwindow.ui" line="1707"/>
+        <source>Setup Wizard</source>
+        <translation>Мастер настройки</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1066"/>
+        <source>High censorship level</source>
+        <translation>Высокий уровень цензуры</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1079"/>
+        <source>Medium censorship level</source>
+        <translation>Средний уровень цензуры</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1095"/>
+        <source>Low censorship level</source>
+        <translation>Низкий уровень цензуры</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1108"/>
+        <source>I&apos;m living in country with high censorship level. Many of foreign web sites and VPNs blocked by my government. I want to setup reliable VPN, which is invisible for government.</source>
+        <translation>Я живу в стране с высоким уровнем цензуры. Многие зарубежные сайты и VPN сервисы заблокированы. Я хочу установить надёжный VPN, невидимый для надзорных органов.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1130"/>
+        <source>I&apos;m living in country with medium censorship level. Some web sites blocked by my government, but VPNs are not blocked at all. I want to setup flexible solution.</source>
+        <translation>Я живу в стране со средним уровнем цензуры. Некоторые зарубежные сайты заблокированы, но VPN сервисы в целом работают. Я хочу установить гибкое решение.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1152"/>
+        <source>I just want to improve my privacy in internet. </source>
+        <translation>Я просто хочу повысить уровень моей приватности в интернете.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1195"/>
+        <location filename="../ui/mainwindow.ui" line="1320"/>
+        <location filename="../ui/mainwindow.ui" line="1649"/>
+        <source>Next</source>
+        <translation>Далее</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1254"/>
+        <source>AmneziaVPN will install VPN protocol which is not visible for your internet provider and government firewall. Your VPN connection will be detected by your provider as regular web traffic to particular web site.
+
+You SHOULD set this web site address to some foreign web site which is not blocked by your internet provider. Other words you need to type below some foreign web site address which is accessible without VPN.
+
+Please note, this protocol still does not support export connection profile to mobile devices. Keep for updates.</source>
+        <translation>AmneziaVPN установит VPN протокол невидимый для вашего провайдера и гос. фаервола. Ваше VPN соединение будет определяться как обычные запросы к определнному web сайту.
+Вы ДОЛЖНЫ установить адрес этого сайта таким, который не заблокирован вашим провайдером, и находится за границей. Другими словами, вы должны ввести адрес какого-либо зарубежного сайта, который доступен и без VPN.
+
+Заметьте, этот протокол пока не имеет функции экспорта настроек подключения для мобильных устаройств. Следите за обновлениями.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1280"/>
+        <source>OpenVPN over Cloak (VPN obfuscation) profile will be installed</source>
+        <translation>Будет установлен профиль OpenVPN over Cloak (VPN маскировка)</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1343"/>
+        <source>Type web site address for mask</source>
+        <translation>Адрес сайта для маскировки</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1405"/>
+        <source>Optional.
+
+We recommend to enable VPN mode &quot;For selected sites&quot; and add blocked sites you need to visit manually. If you will choose this option, you will need add every bloked site you want to visit to the access list. You may switch between modes later.
+
+Please note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.</source>
+        <translation>Опционально.
+
+Мы рекомендуем включить режим VPN &quot;Для выбранных сайтов&quot; и добавить вручную заблокированные сайты, которые вы хотите посещать. Если вы выберите эту опцию, вы должны будете добавить каждый заблокированный сайт, который вы хотите посетить в список. Позже вы сможете переключаться между режимами работы VPN.
+
+Мы рекомендуем добавлять сайты в список только после того, как соединение VPN будет подключено. Вы сможете добавить любые домены, URL или IP адреса.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1452"/>
+        <location filename="../ui/mainwindow.ui" line="1802"/>
+        <source>Start configuring</source>
+        <translation>Начать настройку</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1465"/>
+        <source>Turn on mode &quot;VPN for selected sites&quot;</source>
+        <translation>Включить режим
+&quot;VPN для выбранных сайтов&quot;</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1585"/>
+        <source>AmneziaVPN will install VPN protocol which is difficult to detect by your internet provider and government firewall (but possible). In most cases, this is the most suitable protocol. This protocol is faster compared to the VPN protocols with &quot;web traffic masking&quot;.
+
+This protocol support export connection profile to mobile devices using QR code (you should launch 3rd party opensource VPN client - ShadowSocks VPN).</source>
+        <translation>AmneziaVPN установит VPN протокол, который трудно детектировать интернет провайдерам (но возможно). В большинстве случаев, это наиболее подходящий выбор. Этот протокол быстрее, по сравнению с VPN протоколами с полной маскировкой трафика.
+
+Этот протокол поддерживает экспорт профиля подключения с помощью QR кода для настройки на мобильных устройствах (вам нужно будет установить сторонний клиент VPN - ShadowSocks VPN).</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1609"/>
+        <source>OpenVPN over ShadowSocks profile will be installed</source>
+        <translation>Будет установлен профиль
+OpenVPN over ShadowSocks</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1762"/>
+        <source>OpenVPN profile will be installed</source>
+        <translation>Будет установлен профиль OpenVPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1923"/>
+        <source>Please wait.</source>
+        <translation>Пожалуйста, ждите.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="1975"/>
+        <source>Select VPN protocols</source>
+        <translation>Выберите протоколы</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="2582"/>
+        <source>udp</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="2587"/>
+        <source>tcp</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="2863"/>
         <source>+ Add site</source>
         <translation>+ Добавить сайт</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1925"/>
+        <location filename="../ui/mainwindow.ui" line="3149"/>
         <source>These sites will be opened using VPN</source>
         <translation>Эти сайты будут открываться через VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="1970"/>
+        <location filename="../ui/mainwindow.ui" line="3194"/>
         <source>For example, yousite.com or 17.21.111.8</source>
         <translation>Например, yousite.com или 17.21.111.8</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2025"/>
+        <location filename="../ui/mainwindow.ui" line="3249"/>
         <source>Web site or hostname or IP address</source>
         <translation>Web-сайт, имя хоста или IP-адрес</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2134"/>
-        <location filename="../ui/mainwindow.ui" line="2409"/>
+        <location filename="../ui/mainwindow.ui" line="3376"/>
+        <location filename="../ui/mainwindow.ui" line="3584"/>
         <source>Reinstall server, clear server</source>
         <translation>Переустановить сервер, очистить сервер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2154"/>
+        <location filename="../ui/mainwindow.ui" line="3382"/>
         <source>Server management</source>
         <translation>Управление сервером</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2273"/>
-        <location filename="../ui/mainwindow.cpp" line="828"/>
+        <location filename="../ui/mainwindow.ui" line="3474"/>
+        <location filename="../ui/mainwindow.cpp" line="925"/>
         <source>Exit</source>
         <translation>Выход из приложения</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2305"/>
+        <location filename="../ui/mainwindow.ui" line="3506"/>
         <source>Auto start, Auto connect</source>
         <translation>Авто-запуск, авто-соединение</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2325"/>
+        <location filename="../ui/mainwindow.ui" line="3513"/>
         <source>App settings</source>
         <translation>Настройки приложения</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2373"/>
-        <source>Dns, Kill Switch</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.ui" line="2393"/>
+        <location filename="../ui/mainwindow.ui" line="3568"/>
         <source>Network settings</source>
         <translation>Настройки сети</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2429"/>
+        <location filename="../ui/mainwindow.ui" line="3590"/>
         <source>Servers</source>
         <translation>Список серверов</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2576"/>
+        <location filename="../ui/mainwindow.ui" line="3638"/>
+        <source>Add or import new server</source>
+        <translation>Добавить или импортировать новый сервер</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="3645"/>
+        <source>Add server</source>
+        <translation>Добавить сервер</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="3776"/>
         <source>Servers list</source>
         <translation>Список серверов</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2668"/>
+        <location filename="../ui/mainwindow.ui" line="3868"/>
         <source>Auto start</source>
         <translation>Авто старт</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2690"/>
+        <location filename="../ui/mainwindow.ui" line="3890"/>
         <source>Application Settings</source>
         <translation>Настройки приложения</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2706"/>
+        <location filename="../ui/mainwindow.ui" line="3906"/>
         <source>Auto connect</source>
         <translation>Авто соединение</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2741"/>
+        <location filename="../ui/mainwindow.ui" line="3941"/>
         <source>Check for updates</source>
         <translation>Проверить обновления</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2842"/>
+        <location filename="../ui/mainwindow.ui" line="3967"/>
+        <source>Start minimized</source>
+        <translation>Запускать свёрнутым</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="4002"/>
+        <source>Open logs folder</source>
+        <translation>Открыть папки с логами</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="4090"/>
         <source>DNS Servers</source>
         <translation>DNS сервера</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2880"/>
-        <location filename="../ui/mainwindow.ui" line="2912"/>
+        <location filename="../ui/mainwindow.ui" line="4128"/>
+        <location filename="../ui/mainwindow.ui" line="4160"/>
         <source>Reset to default value</source>
         <translation>Сбросить по умолчанию</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2941"/>
+        <location filename="../ui/mainwindow.ui" line="4189"/>
         <source>Primary DNS server</source>
         <translation>Первичный DSN сервер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="2960"/>
+        <location filename="../ui/mainwindow.ui" line="4208"/>
         <source>Secondray DNS server</source>
         <translation>Вторичный DNS сервер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3018"/>
-        <location filename="../ui/mainwindow.cpp" line="1239"/>
+        <location filename="../ui/mainwindow.ui" line="4266"/>
+        <location filename="../ui/mainwindow.cpp" line="1409"/>
         <source>Clear client cached profile</source>
         <translation>Удалить закешировнный профиль</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3128"/>
-        <location filename="../ui/mainwindow.cpp" line="706"/>
+        <location filename="../ui/mainwindow.ui" line="4376"/>
+        <location filename="../ui/mainwindow.cpp" line="798"/>
         <source>Clear server from Amnezia software</source>
         <translation>Очистить сервер от Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3162"/>
+        <location filename="../ui/mainwindow.ui" line="4410"/>
         <source>Forget this server</source>
         <translation>Забыть этот сервер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3183"/>
+        <location filename="../ui/mainwindow.ui" line="4431"/>
         <source>root@yourserver.org</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3249"/>
+        <location filename="../ui/mainwindow.ui" line="4497"/>
         <source>VPN protocols</source>
         <translation>VPN протоколы</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3270"/>
+        <location filename="../ui/mainwindow.ui" line="4518"/>
         <source>VPN Protocol: </source>
         <translation>VPN протокол:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3386"/>
+        <location filename="../ui/mainwindow.ui" line="4634"/>
         <source>Protocols</source>
         <translation>Протоколы</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3496"/>
+        <location filename="../ui/mainwindow.ui" line="4744"/>
         <source>Cloak container</source>
         <translation>Cloak контейнер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3625"/>
-        <location filename="../ui/mainwindow.ui" line="3797"/>
-        <location filename="../ui/mainwindow.ui" line="3962"/>
+        <location filename="../ui/mainwindow.ui" line="4873"/>
+        <location filename="../ui/mainwindow.ui" line="5045"/>
+        <location filename="../ui/mainwindow.ui" line="5210"/>
         <source>OpenVPN settings</source>
         <translation>Настройки OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3635"/>
-        <location filename="../ui/mainwindow.ui" line="3807"/>
+        <location filename="../ui/mainwindow.ui" line="4883"/>
+        <location filename="../ui/mainwindow.ui" line="5055"/>
         <source>ShadowSocks settings</source>
         <translation>Настройки ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3645"/>
+        <location filename="../ui/mainwindow.ui" line="4893"/>
         <source>Cloak settings</source>
         <translation>Настройки Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3672"/>
+        <location filename="../ui/mainwindow.ui" line="4920"/>
         <source>ShadowSocks container</source>
         <translation>ShadowSocks контейнер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="3837"/>
+        <location filename="../ui/mainwindow.ui" line="5085"/>
         <source>OpenVPN container</source>
         <translation>OpenVPN контейнер</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4160"/>
+        <location filename="../ui/mainwindow.ui" line="5408"/>
         <source>  Full access</source>
         <translation>  Полный доступ</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4200"/>
-        <location filename="../ui/mainwindow.ui" line="4325"/>
-        <location filename="../ui/mainwindow.ui" line="4485"/>
+        <location filename="../ui/mainwindow.ui" line="5448"/>
+        <location filename="../ui/mainwindow.ui" line="5573"/>
+        <location filename="../ui/mainwindow.ui" line="5733"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -500,7 +679,7 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4227"/>
+        <location filename="../ui/mainwindow.ui" line="5475"/>
         <source>Anyone who logs in with this code will have the same permissions to use VPN and your server as you. 
 This code includes your server credentials!
 Provide this code only to TRUSTED users.</source>
@@ -508,381 +687,398 @@ Provide this code only to TRUSTED users.</source>
 Предоставляйте этот код только доверенным пользователям.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4285"/>
+        <location filename="../ui/mainwindow.ui" line="5533"/>
         <source>  Share for Amnezia client</source>
         <translation>  Расшарить для Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4352"/>
+        <location filename="../ui/mainwindow.ui" line="5600"/>
         <source>Anyone who logs in with this code will be able to connect to this VPN server. 
 This code does not include server credentials.</source>
         <translation>Любой, кто получит этот код, получит возможность подключаться к этому VPN серверу
 Этот код не содержи пароль от сервера.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4431"/>
-        <location filename="../ui/mainwindow.ui" line="4597"/>
-        <location filename="../ui/mainwindow.cpp" line="1335"/>
+        <location filename="../ui/mainwindow.ui" line="5679"/>
+        <location filename="../ui/mainwindow.ui" line="5845"/>
+        <location filename="../ui/mainwindow.cpp" line="1505"/>
+        <location filename="../ui/mainwindow.cpp" line="1525"/>
         <source>Generate config</source>
         <translation>Сгенерировать конфиг</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4445"/>
-        <location filename="../ui/mainwindow.cpp" line="1759"/>
+        <location filename="../ui/mainwindow.ui" line="5693"/>
+        <location filename="../ui/mainwindow.cpp" line="1939"/>
         <source>  Share for OpenVPN client</source>
         <translation>  Расшарить для OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4561"/>
+        <location filename="../ui/mainwindow.ui" line="5809"/>
         <source>Save file</source>
         <translation>Сохранить файл</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4614"/>
-        <location filename="../ui/mainwindow.cpp" line="1776"/>
+        <location filename="../ui/mainwindow.ui" line="5862"/>
+        <location filename="../ui/mainwindow.cpp" line="1957"/>
         <source>  Share for ShadowSocks client</source>
         <translation>  Расшарить для ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4639"/>
-        <location filename="../ui/mainwindow.ui" line="4678"/>
+        <location filename="../ui/mainwindow.ui" line="5887"/>
+        <location filename="../ui/mainwindow.ui" line="5926"/>
         <source>Server:</source>
         <translation>Сервер:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4652"/>
-        <location filename="../ui/mainwindow.ui" line="4694"/>
+        <location filename="../ui/mainwindow.ui" line="5900"/>
+        <location filename="../ui/mainwindow.ui" line="5942"/>
         <source>Encryption:</source>
         <translation>Шифрование:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4665"/>
-        <location filename="../ui/mainwindow.ui" line="4710"/>
+        <location filename="../ui/mainwindow.ui" line="5913"/>
+        <location filename="../ui/mainwindow.ui" line="5958"/>
         <source>Port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4726"/>
+        <location filename="../ui/mainwindow.ui" line="5974"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4742"/>
+        <location filename="../ui/mainwindow.ui" line="5990"/>
         <source>Connection string</source>
         <translation>Строка подключения</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4835"/>
+        <location filename="../ui/mainwindow.ui" line="6083"/>
         <source>  Share for Cloak client</source>
         <translation>  Расшарить для Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4901"/>
+        <location filename="../ui/mainwindow.ui" line="6149"/>
         <source>OpenVPN Settings</source>
         <translation>Настройки OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4923"/>
+        <location filename="../ui/mainwindow.ui" line="6171"/>
         <source>Hash</source>
         <translation>Хеш</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4942"/>
-        <location filename="../ui/mainwindow.ui" line="5495"/>
-        <location filename="../ui/mainwindow.ui" line="5745"/>
+        <location filename="../ui/mainwindow.ui" line="6190"/>
+        <location filename="../ui/mainwindow.ui" line="6765"/>
+        <location filename="../ui/mainwindow.ui" line="7015"/>
         <source>Cipher</source>
         <translation>Шифр</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4961"/>
+        <location filename="../ui/mainwindow.ui" line="6209"/>
         <source>Network protocol</source>
         <translation>Сетевой протокол</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4994"/>
+        <location filename="../ui/mainwindow.ui" line="6242"/>
         <source>AES-256-GCM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4999"/>
+        <location filename="../ui/mainwindow.ui" line="6247"/>
         <source>AES-192-GCM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5004"/>
+        <location filename="../ui/mainwindow.ui" line="6252"/>
         <source>AES-128-GCM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5009"/>
+        <location filename="../ui/mainwindow.ui" line="6257"/>
         <source>AES-256-CBC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5014"/>
+        <location filename="../ui/mainwindow.ui" line="6262"/>
         <source>AES-192-CBC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5019"/>
+        <location filename="../ui/mainwindow.ui" line="6267"/>
         <source>AES-128-CBC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5024"/>
+        <location filename="../ui/mainwindow.ui" line="6272"/>
         <source>ChaCha20-Poly1305</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5029"/>
+        <location filename="../ui/mainwindow.ui" line="6277"/>
         <source>ARIA-256-CBC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5034"/>
+        <location filename="../ui/mainwindow.ui" line="6282"/>
         <source>CAMELLIA-256-CBC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5039"/>
+        <location filename="../ui/mainwindow.ui" line="6287"/>
         <source>none</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5056"/>
+        <location filename="../ui/mainwindow.ui" line="6304"/>
         <source>VPN Addresses Subnet</source>
         <translation>Подсеть для VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5093"/>
-        <location filename="../ui/mainwindow.ui" line="5532"/>
-        <location filename="../ui/mainwindow.ui" line="5842"/>
+        <location filename="../ui/mainwindow.ui" line="6341"/>
+        <location filename="../ui/mainwindow.ui" line="6802"/>
+        <location filename="../ui/mainwindow.ui" line="7112"/>
         <source>Save and restart VPN</source>
         <translation>Сохранить и перезапустить VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5172"/>
+        <location filename="../ui/mainwindow.ui" line="6420"/>
         <source>Auto-negotiate encryption</source>
         <translation>Авто-согласование шифрования</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5189"/>
+        <location filename="../ui/mainwindow.ui" line="6437"/>
         <source>SHA512</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5194"/>
+        <location filename="../ui/mainwindow.ui" line="6442"/>
         <source>SHA384</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5199"/>
+        <location filename="../ui/mainwindow.ui" line="6447"/>
         <source>SHA256</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5204"/>
+        <location filename="../ui/mainwindow.ui" line="6452"/>
         <source>SHA3-512</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5209"/>
+        <location filename="../ui/mainwindow.ui" line="6457"/>
         <source>SHA3-384</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5214"/>
+        <location filename="../ui/mainwindow.ui" line="6462"/>
         <source>SHA3-256</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5219"/>
+        <location filename="../ui/mainwindow.ui" line="6467"/>
         <source>whirlpool</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5224"/>
+        <location filename="../ui/mainwindow.ui" line="6472"/>
         <source>BLAKE2b512</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5229"/>
+        <location filename="../ui/mainwindow.ui" line="6477"/>
         <source>BLAKE2s256</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5262"/>
+        <location filename="../ui/mainwindow.ui" line="6482"/>
+        <source>SHA1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="6515"/>
         <source>Block DNS requests outside of VPN</source>
         <translation>Блокировать запросы DNS мимо VPN</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5429"/>
+        <location filename="../ui/mainwindow.ui" line="6597"/>
+        <source>Enable TLS auth</source>
+        <translation>Включить TLS auth</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="6699"/>
         <source>ShadowSocks Settings</source>
         <translation>Настройки ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5468"/>
-        <location filename="../ui/mainwindow.ui" line="5787"/>
+        <location filename="../ui/mainwindow.ui" line="6738"/>
+        <location filename="../ui/mainwindow.ui" line="7057"/>
         <source>chacha20-poly1305</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5707"/>
+        <location filename="../ui/mainwindow.ui" line="6977"/>
         <source>Cloak Settings</source>
         <translation>Настройки Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="5807"/>
+        <location filename="../ui/mainwindow.ui" line="7077"/>
         <source>plain</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="4271"/>
-        <location filename="../ui/mainwindow.ui" line="4395"/>
-        <location filename="../ui/mainwindow.ui" line="4525"/>
-        <location filename="../ui/mainwindow.ui" line="4778"/>
-        <location filename="../ui/mainwindow.cpp" line="1252"/>
-        <location filename="../ui/mainwindow.cpp" line="1261"/>
-        <location filename="../ui/mainwindow.cpp" line="1270"/>
-        <location filename="../ui/mainwindow.cpp" line="1279"/>
+        <location filename="../ui/mainwindow.ui" line="5519"/>
+        <location filename="../ui/mainwindow.ui" line="5643"/>
+        <location filename="../ui/mainwindow.ui" line="5773"/>
+        <location filename="../ui/mainwindow.ui" line="6026"/>
+        <location filename="../ui/mainwindow.cpp" line="1422"/>
+        <location filename="../ui/mainwindow.cpp" line="1431"/>
+        <location filename="../ui/mainwindow.cpp" line="1440"/>
+        <location filename="../ui/mainwindow.cpp" line="1449"/>
         <source>Copy</source>
         <translation>Копировать</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="299"/>
+        <location filename="../ui/mainwindow.cpp" line="325"/>
         <source>Cannot open logs folder!</source>
         <translation>Невозможно открыть папку с логами!</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="369"/>
-        <location filename="../ui/mainwindow.cpp" line="378"/>
+        <location filename="../ui/mainwindow.cpp" line="407"/>
+        <location filename="../ui/mainwindow.cpp" line="416"/>
         <source>Please fill in all fields</source>
         <translation>Пожалуйста, заполните все поля</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="398"/>
+        <location filename="../ui/mainwindow.cpp" line="436"/>
         <source>It&apos;s public key. Private key required</source>
         <translation>Это публичный ключ. Требуется приватный</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="567"/>
+        <location filename="../ui/mainwindow.cpp" line="661"/>
         <source>of</source>
         <translation>из</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="579"/>
-        <location filename="../ui/mainwindow.cpp" line="643"/>
-        <location filename="../ui/mainwindow.cpp" line="692"/>
+        <location filename="../ui/mainwindow.cpp" line="673"/>
+        <location filename="../ui/mainwindow.cpp" line="735"/>
+        <location filename="../ui/mainwindow.cpp" line="784"/>
         <source>Error occurred while configuring server.</source>
         <translation>Ошибка во время настройки сервера</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="674"/>
+        <location filename="../ui/mainwindow.cpp" line="703"/>
+        <source>Amnezia server installed</source>
+        <translation>Amnezia сервер установлен</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="766"/>
         <source>Operation finished</source>
         <translation>Операция завершена</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="682"/>
+        <location filename="../ui/mainwindow.cpp" line="774"/>
         <source>Uninstalling Amnezia software...</source>
         <translation>Удаление Amnezia...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="694"/>
+        <location filename="../ui/mainwindow.cpp" line="786"/>
         <source>See logs for details.</source>
         <translation>Смотрите логи для подробных деталей</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="699"/>
+        <location filename="../ui/mainwindow.cpp" line="791"/>
         <source>Amnezia server successfully uninstalled</source>
         <translation>Amnezia сервер удален</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="811"/>
+        <location filename="../ui/mainwindow.cpp" line="908"/>
         <source>Show</source>
         <translation>Показать окно</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="817"/>
-        <location filename="../ui/mainwindow.cpp" line="1466"/>
+        <location filename="../ui/mainwindow.cpp" line="914"/>
+        <location filename="../ui/mainwindow.cpp" line="1642"/>
         <source>Disconnect</source>
         <translation>Отключиться</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="821"/>
+        <location filename="../ui/mainwindow.cpp" line="918"/>
         <source>Visit Website</source>
         <translation>Посетить сайт</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="825"/>
+        <location filename="../ui/mainwindow.cpp" line="922"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="828"/>
+        <location filename="../ui/mainwindow.cpp" line="925"/>
         <source>Do you really want to quit?</source>
         <translation>Вы действительно хотите выйти?</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1184"/>
+        <location filename="../ui/mainwindow.cpp" line="1354"/>
         <source>Import connection</source>
         <translation>Импортировать соединение</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1194"/>
+        <location filename="../ui/mainwindow.cpp" line="1364"/>
         <source>Private key</source>
         <translation>Приватный ключ</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1195"/>
+        <location filename="../ui/mainwindow.cpp" line="1365"/>
         <source>Connect using SSH password</source>
         <translation>Соединиться с паролем SSH</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1231"/>
+        <location filename="../ui/mainwindow.cpp" line="1401"/>
         <source>Cache cleared</source>
         <translation>Кеш очищен</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1249"/>
-        <location filename="../ui/mainwindow.cpp" line="1258"/>
-        <location filename="../ui/mainwindow.cpp" line="1267"/>
-        <location filename="../ui/mainwindow.cpp" line="1276"/>
+        <location filename="../ui/mainwindow.cpp" line="1419"/>
+        <location filename="../ui/mainwindow.cpp" line="1428"/>
+        <location filename="../ui/mainwindow.cpp" line="1437"/>
+        <location filename="../ui/mainwindow.cpp" line="1446"/>
         <source>Copied</source>
         <translation>Скопировано</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1295"/>
+        <location filename="../ui/mainwindow.cpp" line="1465"/>
+        <location filename="../ui/mainwindow.cpp" line="1512"/>
         <source>Generating...</source>
         <translation>Генерация...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1330"/>
+        <location filename="../ui/mainwindow.cpp" line="1500"/>
         <source>Error while generating connection profile</source>
         <translation>Ошибка во время генерации профиля</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1353"/>
+        <location filename="../ui/mainwindow.cpp" line="1529"/>
         <source>Save OpenVPN config</source>
         <translation>Сохранить OpenVPN конфиг</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1423"/>
+        <location filename="../ui/mainwindow.cpp" line="1599"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN протоколы ещё не установлены. Установите VPN контейнеры</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1429"/>
+        <location filename="../ui/mainwindow.cpp" line="1605"/>
         <source>VPN Protocol not choosen</source>
         <translation>VPN протокол не выбран</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1599"/>
+        <location filename="../ui/mainwindow.cpp" line="1776"/>
         <source>Protocol: </source>
         <translation>Протокол:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="1768"/>
+        <location filename="../ui/mainwindow.cpp" line="1948"/>
         <source>Press Generate config</source>
         <translation>Нажмите Сгенерировать конфиг</translation>
     </message>
@@ -1522,7 +1718,7 @@ with a password, which you can enter below.</source>
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="265"/>
+        <location filename="../vpnconnection.cpp" line="268"/>
         <source>Mbps</source>
         <translation type="unfinished"></translation>
     </message>

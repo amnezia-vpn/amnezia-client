@@ -140,6 +140,10 @@ bool TapController::checkAndSetup()
     qDebug() << "TapController: Installing TAP driver...";
     bool ok = setupDriver();
 
+    if (QSysInfo::prettyProductName().contains("Server 2008")) {
+        restartTapService();
+    }
+
     if (ok)  qDebug() << "TapController: TAP driver successfully installed";
     else  qDebug() << "TapController: Failed to install TAP driver";
 
@@ -255,7 +259,7 @@ QString TapController::getTapInstallPath()
 {
 #ifdef Q_OS_WIN
 
-    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+    if (oldDriversRequired()) {
         return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\tapinstall.exe";
     }
     else {
@@ -285,7 +289,7 @@ QString TapController::getOpenVpnPath()
 
 QString TapController::getTapDriverDir()
 {
-    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+    if (oldDriversRequired()) {
         return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\";
     }
     else {
@@ -323,9 +327,36 @@ bool TapController::removeDriver(const QString& tapInstanceId)
     }
 }
 
+bool TapController::oldDriversRequired()
+{
+    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) return true;
+    if (QSysInfo::prettyProductName().contains("Server 2008")) return true;
+
+    return false;
+}
+
+bool TapController::restartTapService()
+{
+    {
+        QProcess tapRestartroc;
+        tapRestartroc.start("net", QStringList() << "stop" << "TapiSrv");
+        if(!tapRestartroc.waitForStarted()) return false;
+        tapRestartroc.waitForFinished();
+    }
+
+    {
+        QProcess tapRestartroc;
+        tapRestartroc.start("net", QStringList() << "start" << "TapiSrv");
+        if(!tapRestartroc.waitForStarted()) return false;
+        tapRestartroc.waitForFinished();
+    }
+
+    return true;
+}
+
 bool TapController::setupDriver()
 {
-    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
+    if (oldDriversRequired()) {
         setupDriverCertificate();
     }
 

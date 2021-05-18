@@ -23,5 +23,5 @@ status openvpn-status.log \\n\
 verb 1 \\n\
 tls-server \\n\
 tls-version-min 1.2 \\n\
-tls-auth /opt/amnezia/openvpn/ta.key 0" >>/opt/amnezia/openvpn/server.conf'
+$OPENVPN_TLS_AUTH" >/opt/amnezia/openvpn/server.conf'
 

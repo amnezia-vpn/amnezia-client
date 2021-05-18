@@ -29,6 +29,7 @@ constexpr char transport_proto[] = "transport_proto";
 constexpr char cipher[] = "cipher";
 constexpr char hash[] = "hash";
 constexpr char ncp_disable[] = "ncp_disable";
+constexpr char tls_auth[] = "tls_auth";
 
 constexpr char site[] = "site";
 constexpr char block_outside_dns[] = "block_outside_dns";
@@ -72,7 +73,9 @@ constexpr char defaultCipher[] = "AES-256-GCM";
 constexpr char defaultHash[] = "SHA512";
 constexpr bool defaultBlockOutsideDns = true;
 constexpr bool defaultNcpDisable = false;
+constexpr bool defaultTlsAuth = true;
 constexpr char ncpDisableString[] = "ncp-disable";
+constexpr char tlsAuthString[] = "tls-auth /opt/amnezia/openvpn/ta.key 0";
 
 }
 
