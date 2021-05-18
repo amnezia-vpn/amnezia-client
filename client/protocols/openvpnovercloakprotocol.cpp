@@ -57,7 +57,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         qDebug().noquote() << "ck-client:" << m_ckProcess.readAllStandardOutput();
     });
 
-    connect(&m_ckProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
+    m_errorHandlerConnection = connect(&m_ckProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
         qDebug().noquote() << "OpenVpnOverCloakProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(VpnProtocol::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit){
@@ -83,6 +83,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
 
 void OpenVpnOverCloakProtocol::stop()
 {
+    disconnect(m_errorHandlerConnection);
     OpenVpnProtocol::stop();
 
     qDebug() << "OpenVpnOverCloakProtocol::stop()";

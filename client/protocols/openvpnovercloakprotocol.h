@@ -25,6 +25,7 @@ private:
 private:
     QProcess m_ckProcess;
     QTemporaryFile m_cloakCfgFile;
+    QMetaObject::Connection m_errorHandlerConnection;
 };
 
 #endif // OPENVPNOVERCLOAKPROTOCOL_H
