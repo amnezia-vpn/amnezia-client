@@ -186,6 +186,15 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
         if (page == Page::ShareConnection) {
 
         }
+        if (page == Page::Wizard) {
+            ui->radioButton_setup_wizard_medium->setChecked(true);
+        }
+        if (page == Page::WizardHigh) {
+            ui->lineEdit_setup_wizard_high_website_masking->setText(protocols::cloak::defaultRedirSite);
+        }
+        if (page == Page::ServerConfiguring) {
+            ui->progressBar_new_server_configuring->setValue(0);
+        }
         if (page == Page::ServersList) {
             updateServersListPage();
         }
@@ -1041,8 +1050,8 @@ void MainWindow::setupWizardConnections()
     connect(ui->pushButton_new_server_advanced, &QPushButton::clicked, this, [this](){ goToPage(Page::NewServerProtocols); });
     connect(ui->pushButton_setup_wizard_next, &QPushButton::clicked, this, [this](){
         if (ui->radioButton_setup_wizard_high->isChecked()) goToPage(Page::WizardHigh);
-        if (ui->radioButton_setup_wizard_medium->isChecked()) goToPage(Page::WizardMedium);
-        if (ui->radioButton_setup_wizard_low->isChecked()) goToPage(Page::WizardLow);
+        else if (ui->radioButton_setup_wizard_medium->isChecked()) goToPage(Page::WizardMedium);
+        else if (ui->radioButton_setup_wizard_low->isChecked()) goToPage(Page::WizardLow);
     });
 
     connect(ui->pushButton_setup_wizard_high_next, &QPushButton::clicked, this, [this](){
@@ -1069,6 +1078,10 @@ void MainWindow::setupWizardConnections()
 
     connect(ui->pushButton_setup_wizard_low_finish, &QPushButton::clicked, this, [this](){
         installServer(getInstallConfigsFromWizardPage());
+    });
+
+    connect(ui->lineEdit_setup_wizard_high_website_masking, &QLineEdit::returnPressed, this, [this](){
+        ui->pushButton_setup_wizard_high_next->click();
     });
 }
 
@@ -1097,7 +1110,6 @@ void MainWindow::setupAppSettingsConnections()
         Debug::openLogsFolder();
         QDesktopServices::openUrl(QUrl::fromLocalFile(Utils::systemLogPath()));
     });
-
 }
 
 void MainWindow::setupGeneralSettingsConnections()
