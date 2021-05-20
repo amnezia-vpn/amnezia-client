@@ -116,6 +116,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
         if (proto == Protocol::OpenVpn) {
             configData = OpenVpnConfigurator::genOpenVpnConfig(credentials,
                 container, containerConfig, &e);
+            configData = OpenVpnConfigurator::processConfigWithLocalSettings(configData);
         }
         else if (proto == Protocol::Cloak) {
             configData = CloakConfigurator::genCloakConfig(credentials,
@@ -272,10 +273,12 @@ void VpnConnection::disconnectFromVpn()
 {
     qDebug() << "Disconnect from VPN";
 
-    IpcClient::Interface()->flushDns();
+    if (IpcClient::Interface()) {
+        IpcClient::Interface()->flushDns();
 
-    if (m_settings.customRouting()) {
-        IpcClient::Interface()->clearSavedRoutes();
+        if (m_settings.customRouting()) {
+            IpcClient::Interface()->clearSavedRoutes();
+        }
     }
 
     if (!m_vpnProtocol.data()) {

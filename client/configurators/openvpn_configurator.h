@@ -26,6 +26,7 @@ public:
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     static QString processConfigWithLocalSettings(QString config);
+    static QString processConfigWithExportSettings(QString config);
 
     static QString convertOpenSShKey(const QString &key);
 

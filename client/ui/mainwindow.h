@@ -106,6 +106,7 @@ private:
     void updateSitesPage();
     void updateVpnPage();
     void updateAppSettingsPage();
+    void updateGeneralSettingPage();
     void updateServerPage();
     void updateServersListPage();
     void updateProtocolsPage();

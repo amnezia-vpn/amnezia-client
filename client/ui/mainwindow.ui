@@ -291,7 +291,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>11</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -3310,9 +3310,13 @@ color: #100A44;
 
 background-repeat: no-repeat;
  background-position: left center;
+}
+
+QPushButton:!enabled {
+color: #AAAAAA;
 }</string>
       </property>
-      <widget class="QPushButton" name="pushButton_back_from_settings">
+      <widget class="QPushButton" name="pushButton_back_from_general_settings">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -3360,7 +3364,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_server_settings">
+      <widget class="QPushButton" name="pushButton_general_settings_server_settings">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -3398,7 +3402,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_share_connection">
+      <widget class="QPushButton" name="pushButton_general_settings_share_connection">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -3490,7 +3494,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_app_settings">
+      <widget class="QPushButton" name="pushButton_general_settings_app_settings">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -3545,7 +3549,7 @@ QPushButton:hover {
         <string/>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_network_settings">
+      <widget class="QPushButton" name="pushButton_general_settings_network_settings">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -3568,7 +3572,7 @@ QPushButton:hover {
         <string>Network settings</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_servers_list">
+      <widget class="QPushButton" name="pushButton_general_settings_servers_list">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -5397,8 +5401,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">

@@ -195,6 +195,9 @@ void MainWindow::goToPage(Page page, bool reset, bool slide)
         if (page == Page::ServerConfiguring) {
             ui->progressBar_new_server_configuring->setValue(0);
         }
+        if (page == Page::GeneralSettings) {
+            updateGeneralSettingPage();
+        }
         if (page == Page::ServersList) {
             updateServersListPage();
         }
@@ -639,8 +642,14 @@ void MainWindow::onPushButtonNewServerImport(bool)
     else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(o).toJson();
+        return;
     }
 
+    if (!o.contains(config_key::containers)) {
+        selectedServerIndex = m_settings.defaultServerIndex();
+        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+        goToPage(Page::ServerVpnProtocols);
+    }
 }
 
 bool MainWindow::installContainers(ServerCredentials credentials,
@@ -809,7 +818,7 @@ void MainWindow::onPushButtonClearServer(bool)
 
 void MainWindow::onPushButtonForgetServer(bool)
 {
-    if (m_settings.defaultServerIndex() == selectedServerIndex) {
+    if (m_settings.defaultServerIndex() == selectedServerIndex && m_vpnConnection->isConnected()) {
         onDisconnect();
     }
     m_settings.removeServer(selectedServerIndex);
@@ -974,15 +983,13 @@ void MainWindow::setupUiConnections()
         if (currentPage() == Page::Start || currentPage() == Page::NewServer) qApp->quit();
         else hide();
     });
-    connect(ui->pushButton_general_settings_exit, &QPushButton::clicked, this, [&](){ qApp->quit(); });
-
 
     connect(ui->pushButton_vpn_add_site, &QPushButton::clicked, this, [this](){ goToPage(Page::Sites); });
 
 
     QVector<QPushButton *> backButtons {
         ui->pushButton_back_from_sites,
-        ui->pushButton_back_from_settings,
+        ui->pushButton_back_from_general_settings,
         ui->pushButton_back_from_start,
         ui->pushButton_back_from_new_server,
         ui->pushButton_back_from_new_server_protocols,
@@ -1114,15 +1121,17 @@ void MainWindow::setupAppSettingsConnections()
 
 void MainWindow::setupGeneralSettingsConnections()
 {
+    connect(ui->pushButton_general_settings_exit, &QPushButton::clicked, this, [&](){ qApp->quit(); });
+
     connect(ui->pushButton_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::GeneralSettings); });
-    connect(ui->pushButton_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::AppSettings); });
-    connect(ui->pushButton_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::NetworkSettings); });
-    connect(ui->pushButton_server_settings, &QPushButton::clicked, this, [this](){
+    connect(ui->pushButton_general_settings_app_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::AppSettings); });
+    connect(ui->pushButton_general_settings_network_settings, &QPushButton::clicked, this, [this](){ goToPage(Page::NetworkSettings); });
+    connect(ui->pushButton_general_settings_server_settings, &QPushButton::clicked, this, [this](){
         selectedServerIndex = m_settings.defaultServerIndex();
         goToPage(Page::ServerSettings);
     });
-    connect(ui->pushButton_servers_list, &QPushButton::clicked, this, [this](){ goToPage(Page::ServersList); });
-    connect(ui->pushButton_share_connection, &QPushButton::clicked, this, [this](){
+    connect(ui->pushButton_general_settings_servers_list, &QPushButton::clicked, this, [this](){ goToPage(Page::ServersList); });
+    connect(ui->pushButton_general_settings_share_connection, &QPushButton::clicked, this, [this](){
         selectedServerIndex = m_settings.defaultServerIndex();
         selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
 
@@ -1528,6 +1537,7 @@ void MainWindow::setupSharePageConnections()
 
         ErrorCode e = ErrorCode::NoError;
         QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, selectedDockerContainer, containerConfig, &e);
+        cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
 
         ui->textEdit_share_openvpn_code->setPlainText(cfg);
 
@@ -1683,7 +1693,7 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
             m_settings.setCustomIps(customIps);
 
             if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-                IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
+                if (IpcClient::Interface()) IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
                     QStringList() << newIp);
             }
         }
@@ -1717,8 +1727,8 @@ void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete
     updateSitesPage();
 
     if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-        IpcClient::Interface()->routeDelete(ipToDelete, "");
-        IpcClient::Interface()->flushDns();
+        if (IpcClient::Interface()) IpcClient::Interface()->routeDelete(ipToDelete, "");
+        if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
     }
 }
 
@@ -1764,6 +1774,11 @@ void MainWindow::updateAppSettingsPage()
 
     ui->lineEdit_network_settings_dns1->setText(m_settings.primaryDns());
     ui->lineEdit_network_settings_dns2->setText(m_settings.secondaryDns());
+}
+
+void MainWindow::updateGeneralSettingPage()
+{
+    ui->pushButton_general_settings_share_connection->setEnabled(m_settings.haveAuthData(m_settings.defaultServerIndex()));
 }
 
 void MainWindow::updateServerPage()

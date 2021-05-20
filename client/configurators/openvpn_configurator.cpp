@@ -217,7 +217,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 #endif
 
     //qDebug().noquote() << config;
-    return processConfigWithLocalSettings(config);
+    return config;
 }
 
 QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
@@ -244,6 +244,22 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
             arg(qApp->applicationDirPath());
 
     config.append(dnsConf);
+#endif
+
+    return config;
+}
+
+QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
+{
+    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
+    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+
+    if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
+        config.append("redirect-gateway def1 bypass-dhcp\n");
+    }
+
+#ifdef Q_OS_MAC
+    config.replace("block-outside-dns", "");
 #endif
 
     return config;
