@@ -10,10 +10,10 @@ jobs:
   include:
     - name: MacOS
       os: osx
-      osx_image: xcode12.2
+      osx_image: xcode12.5
       
       env:
-        - QT_VERSION=5.15.1
+        - QT_VERSION=5.15.2
          
       script:
         - |
@@ -21,7 +21,7 @@ jobs:
           brew install p7zip && \
           pip3 install aqtinstall requests py7zr && \
           python3 -m aqt install --outputdir $HOME/Qt $QT_VERSION mac desktop clang_64 -m qtbase && \
-          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.0.1 qt.tools.ifw.40;
+          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.1.0 qt.tools.ifw.41;
           fi
         - bash deploy/build_macos.sh 
 
@@ -52,7 +52,7 @@ jobs:
           if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
           pip3 install aqtinstall requests py7zr && \
           python -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.0.1 qt.tools.ifw.40; \
+          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1.0 qt.tools.ifw.41; \
           fi
         - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"' > winbuild.bat
         - echo -e "\r\n" >> winbuild.bat

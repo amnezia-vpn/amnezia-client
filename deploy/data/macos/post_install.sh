@@ -29,4 +29,4 @@ launchctl load $LAUNCH_DAEMONS_PLIST_NAME
 echo "`date` Service status: $?" >> $LOG_FILE
 echo "`date` Script finished" >> $LOG_FILE
 
-rm -- "$0"
+#rm -- "$0"
