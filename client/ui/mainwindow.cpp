@@ -1445,12 +1445,25 @@ void MainWindow::setupSharePageConnections()
     });
 
     connect(ui->pushButton_share_amnezia_copy, &QPushButton::clicked, this, [this](){
+        if (ui->textEdit_share_amnezia_code->toPlainText().isEmpty()) return;
+
         QGuiApplication::clipboard()->setText(ui->textEdit_share_amnezia_code->toPlainText());
         ui->pushButton_share_amnezia_copy->setText(tr("Copied"));
 
         QTimer::singleShot(3000, this, [this]() {
             ui->pushButton_share_amnezia_copy->setText(tr("Copy"));
         });
+    });
+
+    connect(ui->pushButton_share_amnezia_save, &QPushButton::clicked, this, [this](){
+        if (ui->textEdit_share_amnezia_code->toPlainText().isEmpty()) return;
+
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save AmneziaVPN config"),
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.amnezia");
+        QSaveFile save(fileName);
+        save.open(QIODevice::WriteOnly);
+        save.write(ui->textEdit_share_amnezia_code->toPlainText().toUtf8());
+        save.commit();
     });
 
     connect(ui->pushButton_share_openvpn_copy, &QPushButton::clicked, this, [this](){
@@ -1548,7 +1561,9 @@ void MainWindow::setupSharePageConnections()
     });
 
     connect(ui->pushButton_share_openvpn_save, &QPushButton::clicked, this, [this](){
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save OpenVPN config"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.ovpn");
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save OpenVPN config"),
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.ovpn");
+
         QSaveFile save(fileName);
         save.open(QIODevice::WriteOnly);
         save.write(ui->textEdit_share_openvpn_code->toPlainText().toUtf8());
