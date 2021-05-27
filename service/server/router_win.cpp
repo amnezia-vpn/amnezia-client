@@ -1,4 +1,5 @@
 #include "router_win.h"
+#include "../client/utils.h"
 
 #include <QProcess>
 
@@ -8,20 +9,11 @@ RouterWin &RouterWin::Instance()
     return s;
 }
 
-bool RouterWin::routeAdd(const QString &ip, const QString &gw, QString mask)
+bool RouterWin::routeAdd(const QString &ip, const QString &gw)
 {
-    qDebug().noquote() << QString("ROUTE ADD: IP:%1 %2 GW %3")
-                          .arg(ip)
-                          .arg(mask)
-                          .arg(gw);
+    //qDebug().noquote() << QString("ROUTE ADD: IP:%1 GW %2").arg(ip).arg(gw);
 
-    if (mask == "") {
-        mask = "255.255.255.255";
-        if (ip.endsWith(".0")) mask = "255.255.255.0";
-        if (ip.endsWith(".0.0")) mask = "255.255.0.0";
-        if (ip.endsWith(".0.0.0")) mask = "255.0.0.0";
-    }
-
+    QString mask = Utils::netMaskFromIpWithSubnet(ip);
 
     PMIB_IPFORWARDTABLE pIpForwardTable = NULL;
     MIB_IPFORWARDROW ipfrow;
@@ -58,7 +50,7 @@ bool RouterWin::routeAdd(const QString &ip, const QString &gw, QString mask)
     }
 
     // address
-    ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());
+    ipfrow.dwForwardDest = inet_addr(Utils::ipAddressFromIpWithSubnet(ip).toStdString().c_str());
 
     // mask
     in_addr maskAddr;
@@ -109,12 +101,12 @@ bool RouterWin::routeAdd(const QString &ip, const QString &gw, QString mask)
 
 int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 {
-    qDebug().noquote() << QString("ROUTE ADD List: IPs size:%1, GW: %2")
-                          .arg(ips.size())
-                          .arg(gw);
+//    qDebug().noquote() << QString("ROUTE ADD List: IPs size:%1, GW: %2")
+//                          .arg(ips.size())
+//                          .arg(gw);
 
-    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
-                          .arg(ips.join("\n"));
+//    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
+//                          .arg(ips.join("\n"));
 
 
 
@@ -188,15 +180,10 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     for (int i = 0; i < ips.size(); ++i) {
         QString ip = ips.at(i);
         if (ip.isEmpty()) continue;
-
-        mask = "255.255.255.255";
-        if (ip.endsWith(".0")) mask = "255.255.255.0";
-        if (ip.endsWith(".0.0")) mask = "255.255.0.0";
-        if (ip.endsWith(".0.0.0")) mask = "255.0.0.0";
+        QString mask = Utils::netMaskFromIpWithSubnet(ip);
 
         // address
-        ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());
-
+        ipfrow.dwForwardDest = inet_addr(Utils::ipAddressFromIpWithSubnet(ip).toStdString().c_str());
 
         // mask
         in_addr maskAddr;
@@ -280,7 +267,7 @@ bool RouterWin::routeDelete(const QString &ip, const QString &gw)
 
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
-    QString command = QString("route delete %1 %2").arg(ip).arg(gw);
+    QString command = QString("route delete %1 %2").arg(Utils::ipAddressFromIpWithSubnet(ip)).arg(gw);
 
     p.start(command);
     p.waitForFinished();

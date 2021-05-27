@@ -34,6 +34,7 @@ HEADERS  += \
     ui/mainwindow.h \
    ui/qautostart.h \
    ui/server_widget.h \
+   ui/sites_model.h \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
@@ -60,6 +61,7 @@ SOURCES  += \
     ui/mainwindow.cpp \
    ui/qautostart.cpp \
    ui/server_widget.cpp \
+   ui/sites_model.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \

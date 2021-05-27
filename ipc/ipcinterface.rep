@@ -7,7 +7,7 @@ class IpcInterface
     //SIGNAL(sendMessage(const QByteArray &message));
 
     // Route functions
-    SLOT( bool routeAdd(const QString &ip, const QString &gw, const QString &mask) );
+    SLOT( bool routeAdd(const QString &ip, const QString &gw) );
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDelete(const QString &ip, const QString &gw) );

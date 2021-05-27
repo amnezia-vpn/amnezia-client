@@ -146,12 +146,24 @@ bool Utils::checkIPFormat(const QString& ip)
         return false;
 
     QStringList list = ip.trimmed().split(".");
-    foreach(QString it, list) {
+    for (const QString &it : list) {
         if(it.toInt() <= 255 && it.toInt() >= 0)
             continue;
         return false;
     }
     return true;
+}
+
+bool Utils::checkIpSubnetFormat(const QString &ip)
+{
+    if (!ip.contains("/")) return checkIPFormat(ip);
+
+    QStringList parts = ip.split("/");
+    if (parts.size() != 2) return false;
+
+    bool ok;
+    if (parts.at(1).toInt(&ok) <= 32 && ok) return checkIPFormat(parts.at(0));
+    else return false;
 }
 
 void Utils::killProcessByName(const QString &name)
@@ -162,6 +174,28 @@ void Utils::killProcessByName(const QString &name)
 #else
     QProcess::execute(QString("pkill %1").arg(name));
 #endif
+}
+
+QString Utils::netMaskFromIpWithSubnet(const QString ip)
+{
+    if (!ip.contains("/")) return "255.255.255.255";
+
+    bool ok;
+    int prefix = ip.split("/").at(1).toInt(&ok);
+    if (!ok) return "255.255.255.255";
+
+    unsigned long mask = (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF;
+
+    return QString("%1.%2.%3.%4")
+            .arg(mask >> 24)
+            .arg((mask >> 16) & 0xFF)
+            .arg((mask >> 8) & 0xFF)
+            .arg( mask & 0xFF);
+}
+
+QString Utils::ipAddressFromIpWithSubnet(const QString ip)
+{
+    return ip.split("/").first();
 }
 
 #ifdef Q_OS_WIN

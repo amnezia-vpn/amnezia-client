@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "settings.h"
+#include "utils.h"
 
 #include <QDebug>
 #include "protocols/protocols_defs.h"
@@ -204,6 +205,127 @@ QString Settings::nextAvailableServerName() const
 
     return tr("Server") + " " + QString::number(i);
 }
+
+QString Settings::routeModeString(RouteMode mode) const
+{
+    switch (mode) {
+    case VpnAllSites:
+        return "AllSites";
+    case VpnOnlyForwardSites:
+        return "ForwardSites";
+    case VpnAllExceptSites:
+        return "ExceptSites";
+    }
+}
+
+void Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
+{
+    QVariantMap sites = vpnSites(mode);
+    if (sites.contains(site) && ip.isEmpty()) return;
+
+    sites.insert(site, ip);
+    setVpnSites(mode, sites);
+
+//    QStringList l = sites.value(site).toStringList();
+//    if (!l.contains(ip)) {
+//        if (!ip.isEmpty()) l.append(ip);
+//        //l.append(ip);
+//        sites.insert(site, l);
+//        setVpnSites(mode, sites);
+//        qDebug() << "sites after" << vpnSites(mode);
+//    }
+}
+
+QStringList Settings::getVpnIps(RouteMode mode) const
+{
+    QStringList ips;
+    const QVariantMap &m = vpnSites(mode);
+    for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
+        if (Utils::checkIPFormat(i.key())) {
+            ips.append(i.key());
+        }
+        else if (Utils::checkIPFormat(i.value().toString())) {
+            ips.append(i.value().toString());
+        }
+    }
+    ips.removeDuplicates();
+    return ips;
+}
+
+void Settings::removeVpnSite(RouteMode mode, const QString &site)
+{
+    QVariantMap sites = vpnSites(mode);
+    if (!sites.contains(site)) return;
+
+    sites.remove(site);
+    setVpnSites(mode, sites);
+}
+
+void Settings::addVpnIps(RouteMode mode, const QStringList &ips)
+{
+    QVariantMap sites = vpnSites(mode);
+    for (const QString &ip : ips) {
+        if (ip.isEmpty()) continue;
+
+        sites.insert(ip, "");
+    }
+
+    setVpnSites(mode, sites);
+}
+
+void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
+{
+    QVariantMap sitesMap = vpnSites(mode);
+    for (const QString &site : sites) {
+        if (site.isEmpty()) continue;
+
+        sitesMap.remove(site);
+    }
+
+    setVpnSites(mode, sitesMap);
+}
+
+//void Settings::addVpnForwardSite(const QString &site, const QString &ip)
+//{
+//    auto sites = vpnForwardSites();
+//    QStringList l = sites.value(site).toStringList();
+//    if (!l.contains(ip)) {
+//        l.append(ip);
+//        setVpnForwardSites(sites);
+//    }
+//}
+
+//QStringList Settings::getVpnForwardIps() const
+//{
+//    QStringList ips;
+//    const QVariantMap &m = vpnForwardSites();
+//    for (const QVariant &v : m) {
+//        ips.append(v.toStringList());
+//    }
+//    ips.removeDuplicates();
+//    return ips;
+//}
+
+//void Settings::addVpnExceptSite(const QString &site, const QString &ip)
+//{
+//    auto sites = vpnExceptSites();
+//    QStringList l = sites.value(site).toStringList();
+//    if (!l.contains(ip)) {
+//        l.append(ip);
+//        setVpnExceptSites(sites);
+//    }
+//}
+
+//QStringList Settings::getVpnExceptIps() const
+//{
+//    QStringList ips;
+//    const QVariantMap &m = vpnExceptSites();
+//    for (const QVariant &v : m) {
+//        ips.append(v.toStringList());
+//    }
+//    ips.removeDuplicates();
+//    return ips;
+//}
 
 QString Settings::primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString(); }
 

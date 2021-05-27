@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string/>
+   <string>AmneziaVPN</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
@@ -120,18 +120,18 @@ border-image: url(:/images/controls/check_on.png);
 }
 
 
-
 QScrollBar:vertical { /* The area behind the scrollbar covering entire height.   */  
-    background-color: grey;
+    background-color: rgba(0, 0, 0,0);
     opacity: 100;
-    width: 7px; /* set width to zero to hide scrollbar entirely. Can look quite clean and scrolling still works with mousewheel.  */
-    margin: 0px 0px; /* Takes the height of the buttons + 3 extra pixels to leave some free space between handle and buttons */
+    width: 10px; /* set width to zero to hide scrollbar entirely. Can look quite clean and scrolling still works with mousewheel.  */
+    margin: 10px px; /* Takes the height of the buttons + 3 extra pixels to leave some free space between handle and buttons */
 
 }
 
 QScrollBar::handle:vertical { /* The handle you scroll with */
     image-position: center; /* image is used as a small gripper in the center of the scrollbar.. You can also use background-image to use two images  */
     background-color: rgb(200, 200, 200);
+    border: 2px solid rgb(240,240,240);
     border-radius: 1px;
     min-height: 10px;
 }
@@ -143,7 +143,7 @@ QScrollBar::handle:vertical:pressed { /* state when you hover over the handle */
 }
 QScrollBar::sub-line:vertical { /* button to scroll up */
     background-color: rgb(240,240,240);
-    height: 0px;
+    height: 10px;
     subcontrol-position: top;
     subcontrol-origin: margin;
 }
@@ -158,7 +158,8 @@ QScrollBar::up-arrow:vertical { /* arrow to scroll up with */
 
 QScrollBar::add-line:vertical  { /* Button to scroll down */
     background-color: rgb(240,240,240);
-    height: 0px;
+    height: 10px;
+    padding-top: 2px;
     subcontrol-position: bottom;
     subcontrol-origin: margin;
 }
@@ -171,27 +172,9 @@ QScrollBar::down-arrow:vertical { /* arrow to scroll down with */
 }
 
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background-color: black;
-}
+    background-color: rgb(240,240,240);
 
-/*
-QGroupBox {
-    border: 1px solid lightgray;
-    border-radius: 2px;
-    margin-top: 1ex; 
-}
-
-QGroupBox::title {
-	font-size: 16px;
-	font-style: normal;
-	font-weight: normal;
-    color: #181922;
-
-    subcontrol-origin: margin;
-    subcontrol-position: top left; 
-    padding: 0 3px;
-}
-*/</string>
+}</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
@@ -291,7 +274,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>10</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -2720,7 +2703,7 @@ background: #211966;
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>370</y>
+         <y>360</y>
          <width>380</width>
          <height>51</height>
         </rect>
@@ -2826,7 +2809,7 @@ font: 16px &quot;Lato&quot;;	</string>
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>550</y>
+         <y>560</y>
          <width>341</width>
          <height>40</height>
         </rect>
@@ -2960,9 +2943,9 @@ color: #181922;
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>450</y>
+         <y>440</y>
          <width>281</width>
-         <height>31</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -2983,49 +2966,11 @@ color: #181922;
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_mode_all_sites">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>490</y>
-         <width>341</width>
-         <height>19</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>For all connections</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_mode_selected_sites">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>520</y>
-         <width>341</width>
-         <height>19</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>For selected sites</string>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_error_text">
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>290</y>
+         <y>280</y>
          <width>381</width>
          <height>61</height>
         </rect>
@@ -3043,10 +2988,77 @@ color: #181922;
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QWidget" name="widget_vpn_mode" native="true">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>470</y>
+         <width>351</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <widget class="QRadioButton" name="radioButton_vpn_mode_except_sites">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>60</y>
+          <width>341</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Except selected sites</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_vpn_mode_forward_sites">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>30</y>
+          <width>341</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>For selected sites</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_vpn_mode_all_sites">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>341</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>For all connections</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QWidget" name="page_sites">
       <property name="styleSheet">
-       <string notr="true">QListView {
+       <string notr="true">/*QListView {
     outline: 0;
     background: transparent;
     border: none;
@@ -3071,7 +3083,8 @@ QListView::item:selected {
     border: none;
     background: rgba(167, 167, 167, 0.1);
     color: #181922;
-}</string>
+}
+*/</string>
       </property>
       <widget class="QPushButton" name="pushButton_back_from_sites">
        <property name="geometry">
@@ -3160,7 +3173,7 @@ color: #100A44;
         <rect>
          <x>20</x>
          <y>140</y>
-         <width>281</width>
+         <width>231</width>
          <height>31</height>
         </rect>
        </property>
@@ -3191,7 +3204,7 @@ color: #100A44;
         <set>Qt::AlignCenter</set>
        </property>
        <property name="placeholderText">
-        <string>For example, yousite.com or 17.21.111.8</string>
+        <string>yousite.com or IP address</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_sites_add_custom">
@@ -3200,7 +3213,7 @@ color: #100A44;
        </property>
        <property name="geometry">
         <rect>
-         <x>310</x>
+         <x>260</x>
          <y>140</y>
          <width>51</width>
          <height>31</height>
@@ -3246,50 +3259,127 @@ line-height: 150%;
 color: #333333;</string>
        </property>
        <property name="text">
-        <string>Web site or hostname or IP address</string>
+        <string>Web site/Hostname/IP address/Subnet</string>
        </property>
       </widget>
-      <widget class="QListWidget" name="listWidget_sites">
+      <widget class="QTableView" name="tableView_sites">
        <property name="geometry">
         <rect>
          <x>20</x>
          <y>200</y>
-         <width>340</width>
-         <height>400</height>
+         <width>341</width>
+         <height>371</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">QWidget {
-	margin: 0px;
-	padding: 0px;
-}
-
-QPushButton:hover {
-	image: url(:/images/close.png);
-    image-position: right center;
-}
-
-QListView {
-    show-decoration-selected: 1; /* make the selection span the entire width of the view */
-}
-
-QListView::item:selected:!active {
+        <string notr="true">QTableView {
     background: transparent;
+	gridline-color: transparent;
+
     border: none;
+	outline: none;
+    show-decoration-selected: 1; 
 }
 
-QListView::item:selected:active {
-    background: transparent;
-    border: none;
+QTableView::item
+{
+  padding-left: 5px;
+  border-top: 1px solid lightgray;
+  color: #181922;
 }
 
-QListView::item:hover {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 #FAFBFE, stop: 1 #ECEEFF);
+QTableView::item::selected
+{
+  border: 0px;
+  padding-left: 5px;
+  background-color: rgb(99, 180, 251);
+  border: : rgb(99, 180, 251);
 }</string>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::NoSelection</enum>
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
+       <property name="gridStyle">
+        <enum>Qt::NoPen</enum>
+       </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
+      <widget class="QPushButton" name="pushButton_sites_delete">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>589</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Delete selected</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_sites_import">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>140</y>
+         <width>51</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+background: #100A44;
+border-radius: 4px;
+padding: 5px;
+image: url(:/images/folder.png);
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -4471,7 +4561,7 @@ font-weight: bold;
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>220</y>
+         <y>210</y>
          <width>300</width>
          <height>40</height>
         </rect>
@@ -4528,6 +4618,40 @@ font-size: 20px;
         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_server_settings_share_full">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>260</y>
+         <width>300</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+color:rgb(212, 212, 212);
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+background: #100A44;
+border-radius: 4px;
+}
+QPushButton:hover {
+background: #211966;
+}</string>
+       </property>
+       <property name="text">
+        <string>Share Server (FULL ACCESS)</string>
+       </property>
+      </widget>
       <zorder>label_server_settings_wait_info</zorder>
       <zorder>label_16</zorder>
       <zorder>label_17</zorder>
@@ -4539,6 +4663,7 @@ font-size: 20px;
       <zorder>pushButton_server_settings_protocols</zorder>
       <zorder>pushButton_back_from_server_settings</zorder>
       <zorder>label_server_settings_current_vpn_protocol</zorder>
+      <zorder>pushButton_server_settings_share_full</zorder>
      </widget>
      <widget class="QWidget" name="page_server_protocols">
       <property name="styleSheet">
@@ -5284,7 +5409,30 @@ border-radius: 4px 0px 0px 4px;
      </widget>
      <widget class="QWidget" name="page_share_connection">
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">QScrollBar::sub-line:vertical { /* button to scroll up */
+	border-top-right-radius: 3px;
+    background-color: rgb(240,240,240);
+    height: 10px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+	margin-top: 3px;
+}
+
+
+QScrollBar::add-line:vertical  { /* Button to scroll down */
+	border-bottom-right-radius: 3px;
+    background-color: rgb(240,240,240);
+    height: 10px;
+    padding-top: 2px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+	margin-bottom: 3px;
+}
+
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background-color: rgb(240,240,240);
+}</string>
       </property>
       <widget class="QPushButton" name="pushButton_back_from_share">
        <property name="geometry">
@@ -5391,7 +5539,7 @@ QToolBox::tab:hover {
         <number>0</number>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>6</number>
@@ -5401,8 +5549,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -5725,8 +5873,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5891,8 +6039,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -6115,8 +6263,8 @@ color: #15CDCB;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">

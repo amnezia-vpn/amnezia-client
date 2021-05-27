@@ -9,7 +9,7 @@ RouterMac &RouterMac::Instance()
     return s;
 }
 
-bool RouterMac::routeAdd(const QString &ip, const QString &gw, QString mask)
+bool RouterMac::routeAdd(const QString &ip, const QString &gw)
 {
     int argc = 5;
     char **argv = new char*[argc];

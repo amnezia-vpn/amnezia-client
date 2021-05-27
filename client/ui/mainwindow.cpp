@@ -4,6 +4,8 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QHBoxLayout>
+#include <QHostInfo>
+#include <QItemSelectionModel>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setupUiConnections();
     setupNewServerConnections();
     setupWizardConnections();
+    setupVpnPageConnections();
+    setupSitesPageConnections();
     setupGeneralSettingsConnections();
     setupAppSettingsConnections();
     setupNetworkSettingsConnections();
@@ -73,6 +77,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->stackedWidget_main->setSpeed(200);
     ui->stackedWidget_main->setAnimation(QEasingCurve::Linear);
+
+
+    ui->tableView_sites->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//    ui->tableView_sites->setColumnWidth(0, 450);
+//    ui->tableView_sites->setColumnWidth(1, 120);
 
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
         needToHideCustomTitlebar = true;
@@ -95,10 +104,6 @@ MainWindow::MainWindow(QWidget *parent) :
     if (m_settings.defaultServerIndex() >= 0 && m_settings.serversCount() > 0) {
         goToPage(Page::Vpn, true, false);
     }
-
-    connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
-        ui->pushButton_sites_add_custom->click();
-    });
 
     //ui->pushButton_general_settings_exit->hide();
     updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer);
@@ -143,6 +148,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(ui->page_share_shadowsocks));
     //ui->page_share_shadowsocks->setVisible(false);
+
+
+    sitesModels.insert(Settings::VpnOnlyForwardSites, new SitesModel(Settings::VpnOnlyForwardSites));
+    sitesModels.insert(Settings::VpnAllExceptSites, new SitesModel(Settings::VpnAllExceptSites));
 }
 
 MainWindow::~MainWindow()
@@ -351,7 +360,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 #endif
     case Qt::Key_C:
         qDebug().noquote() << "Def server" << m_settings.defaultServerIndex() << m_settings.defaultContainerName(m_settings.defaultServerIndex());
-        qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
+        //qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
+        qDebug().noquote() << QJsonDocument(m_settings.defaultServer()).toJson();
         break;
     case Qt::Key_A:
         goToPage(Page::Start);
@@ -369,6 +379,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         if (currentPage() == Page::Vpn) break;
         if (currentPage() == Page::ServerConfiguring) break;
         if (currentPage() == Page::Start && pagesStack.size() < 2) break;
+        if (currentPage() == Page::Sites &&
+            ui->tableView_sites->selectionModel()->selection().indexes().size() > 0) {
+            ui->tableView_sites->clearSelection();
+            break;
+        }
+
         if (! ui->stackedWidget_main->isAnimationRunning() && ui->stackedWidget_main->currentWidget()->isEnabled()) {
             closePage();
         }
@@ -626,6 +642,17 @@ void MainWindow::onPushButtonNewServerImport(bool)
     credentials.password = o.value("w").toString();
     if (credentials.password.isEmpty()) credentials.password = o.value(config_key::password).toString();
 
+    if (credentials.isValid()) {
+        o.insert(config_key::hostName, credentials.hostName);
+        o.insert(config_key::port, credentials.port);
+        o.insert(config_key::userName, credentials.userName);
+        o.insert(config_key::password, credentials.password);
+
+        o.remove("h");
+        o.remove("p");
+        o.remove("u");
+        o.remove("w");
+    }
     qDebug() << QString("Added server %3@%1:%2").
                 arg(credentials.hostName).
                 arg(credentials.port).
@@ -901,8 +928,7 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     }
 
     ui->pushButton_connect->setEnabled(pushButtonConnectEnabled);
-    ui->radioButton_mode_all_sites->setEnabled(radioButtonsModeEnabled);
-    ui->radioButton_mode_selected_sites->setEnabled(radioButtonsModeEnabled);
+    ui->widget_vpn_mode->setEnabled(radioButtonsModeEnabled);
 }
 
 void MainWindow::onVpnProtocolError(ErrorCode errorCode)
@@ -1013,27 +1039,6 @@ void MainWindow::setupUiConnections()
         connect(b, &QPushButton::clicked, this, [this](){ closePage(); });
     }
 
-    connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
-
-    connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, ui->pushButton_vpn_add_site, &QPushButton::setEnabled);
-
-    connect(ui->radioButton_mode_selected_sites, &QRadioButton::toggled, this, [this](bool toggled) {
-        m_settings.setCustomRouting(toggled);
-    });
-
-    connect(ui->pushButton_servers_add_new, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
-
-    connect(ui->lineEdit_server_settings_description, &QLineEdit::editingFinished, this, [this](){
-        const QString &newText = ui->lineEdit_server_settings_description->text();
-        QJsonObject server = m_settings.server(selectedServerIndex);
-        server.insert(config_key::description, newText);
-        m_settings.editServer(selectedServerIndex, server);
-        updateServersListPage();
-    });
-
-    connect(ui->lineEdit_server_settings_description, &QLineEdit::returnPressed, this, [this](){
-        ui->lineEdit_server_settings_description->clearFocus();
-    });
 }
 
 void MainWindow::setupNewServerConnections()
@@ -1080,7 +1085,8 @@ void MainWindow::setupWizardConnections()
 
     connect(ui->pushButton_setup_wizard_vpn_mode_finish, &QPushButton::clicked, this, [this](){
         installServer(getInstallConfigsFromWizardPage());
-        m_settings.setCustomRouting(ui->checkBox_setup_wizard_vpn_mode->isChecked());
+        if (ui->checkBox_setup_wizard_vpn_mode->isChecked()) m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
+        else m_settings.setRouteMode(Settings::VpnAllSites);
     });
 
     connect(ui->pushButton_setup_wizard_low_finish, &QPushButton::clicked, this, [this](){
@@ -1089,6 +1095,86 @@ void MainWindow::setupWizardConnections()
 
     connect(ui->lineEdit_setup_wizard_high_website_masking, &QLineEdit::returnPressed, this, [this](){
         ui->pushButton_setup_wizard_high_next->click();
+    });
+}
+
+void MainWindow::setupVpnPageConnections()
+{
+    connect(ui->radioButton_vpn_mode_all_sites, &QRadioButton::toggled, ui->pushButton_vpn_add_site, &QPushButton::setDisabled);
+
+    connect(ui->radioButton_vpn_mode_all_sites, &QRadioButton::toggled, this, [this](bool toggled) {
+        m_settings.setRouteMode(Settings::VpnAllSites);
+    });
+
+    connect(ui->radioButton_vpn_mode_forward_sites, &QRadioButton::toggled, this, [this](bool toggled) {
+        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
+    });
+
+    connect(ui->radioButton_vpn_mode_except_sites, &QRadioButton::toggled, this, [this](bool toggled) {
+        m_settings.setRouteMode(Settings::VpnAllExceptSites);
+    });
+}
+
+void MainWindow::setupSitesPageConnections()
+{
+    connect(ui->pushButton_sites_add_custom, &QPushButton::clicked, this, [this](){ onPushButtonAddCustomSitesClicked(); });
+
+    connect(ui->lineEdit_sites_add_custom, &QLineEdit::returnPressed, [&](){
+        ui->pushButton_sites_add_custom->click();
+    });
+
+    connect(ui->pushButton_sites_delete, &QPushButton::clicked, this, [this](){
+        Settings::RouteMode mode = m_settings.routeMode();
+
+        QItemSelectionModel* selection = ui->tableView_sites->selectionModel();
+        if (!selection) return;
+
+        QModelIndexList indexes = selection->selectedRows();
+
+        QStringList sites;
+        for (const QModelIndex &index : indexes) {
+            sites.append(index.data().toString());
+        }
+
+        m_settings.removeVpnSites(mode, sites);
+        updateSitesPage();
+
+        //    if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
+        //        if (IpcClient::Interface()) IpcClient::Interface()->routeDelete(ipToDelete, "");
+        //        if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
+        //    }
+
+
+//        if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
+//            if (IpcClient::Interface())
+//                IpcClient::Interface()->routeDelete(m_vpnConnection->vpnProtocol()->vpnGateway(),
+//                    QStringList() << ip);
+//        }
+    });
+
+    connect(ui->pushButton_sites_import, &QPushButton::clicked, this, [this](){
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Import IP addresses"),
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly)) return;
+
+        Settings::RouteMode mode = m_settings.routeMode();
+
+        QStringList ips;
+        while (!file.atEnd()) {
+            QString line = file.readLine();
+
+            int pos = 0;
+            QRegExp rx = Utils::ipAddressWithSubnetRegExp();
+            while ((pos = rx.indexIn(line, pos)) != -1) {
+                ips << rx.cap(0);
+                pos += rx.matchedLength();
+            }
+        }
+
+        m_settings.addVpnIps(mode, ips);
+        updateSitesPage();
     });
 }
 
@@ -1413,7 +1499,13 @@ void MainWindow::setupNewServerPageConnections()
 
 void MainWindow::setupServerSettingsPageConnections()
 {
+    connect(ui->pushButton_servers_add_new, &QPushButton::clicked, this, [this](){ goToPage(Page::Start); });
+
     connect(ui->pushButton_server_settings_protocols, &QPushButton::clicked, this, [this](){ goToPage(Page::ServerVpnProtocols); });
+    connect(ui->pushButton_server_settings_share_full, &QPushButton::clicked, this, [this](){
+        updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), DockerContainer::None);
+        goToPage(Page::ShareConnection);
+    });
 
     connect(ui->pushButton_server_settings_clear, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClearServer(bool)));
     connect(ui->pushButton_server_settings_forget, SIGNAL(clicked(bool)), this, SLOT(onPushButtonForgetServer(bool)));
@@ -1431,6 +1523,17 @@ void MainWindow::setupServerSettingsPageConnections()
         });
     });
 
+    connect(ui->lineEdit_server_settings_description, &QLineEdit::editingFinished, this, [this](){
+        const QString &newText = ui->lineEdit_server_settings_description->text();
+        QJsonObject server = m_settings.server(selectedServerIndex);
+        server.insert(config_key::description, newText);
+        m_settings.editServer(selectedServerIndex, server);
+        updateServersListPage();
+    });
+
+    connect(ui->lineEdit_server_settings_description, &QLineEdit::returnPressed, this, [this](){
+        ui->lineEdit_server_settings_description->clearFocus();
+    });
 }
 
 void MainWindow::setupSharePageConnections()
@@ -1683,67 +1786,57 @@ void MainWindow::onTrayActionConnect()
 
 void MainWindow::onPushButtonAddCustomSitesClicked()
 {
+    if (ui->radioButton_vpn_mode_all_sites->isChecked()) return;
+    Settings::RouteMode mode = m_settings.routeMode();
+
     QString newSite = ui->lineEdit_sites_add_custom->text();
 
     if (newSite.isEmpty()) return;
     if (!newSite.contains(".")) return;
 
-    // get domain name if it present
-    newSite.replace("https://", "");
-    newSite.replace("http://", "");
-    newSite.replace("ftp://", "");
+    if (!Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
+        // get domain name if it present
+        newSite.replace("https://", "");
+        newSite.replace("http://", "");
+        newSite.replace("ftp://", "");
 
-    newSite = newSite.split("/", QString::SkipEmptyParts).first();
+        newSite = newSite.split("/", QString::SkipEmptyParts).first();
+    }
 
+    qDebug() << "Adding site" << newSite;
 
-    QStringList customSites = m_settings.customSites();
-    if (!customSites.contains(newSite)) {
-        customSites.append(newSite);
-        m_settings.setCustomSites(customSites);
+    //qDebug() << "sites:" << m_settings.vpnSites(mode);
 
-        QString newIp = Utils::getIPAddress(newSite);
-        QStringList customIps = m_settings.customIps();
-        if (!newIp.isEmpty() && !customIps.contains(newIp)) {
-            customIps.append(newIp);
-            m_settings.setCustomIps(customIps);
+    const auto &cbProcess = [this, mode](const QString &newSite, const QString &ip) {
+        m_settings.addVpnSite(mode, newSite, ip);
 
-            if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-                if (IpcClient::Interface()) IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
-                    QStringList() << newIp);
-            }
+        if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
+            if (IpcClient::Interface())
+                IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
+                    QStringList() << ip);
         }
 
         updateSitesPage();
-        ui->lineEdit_sites_add_custom->clear();
-    }
-    else {
-        qDebug() << "customSites already contains" << newSite;
-    }
-}
+    };
 
-void MainWindow::onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete)
-{
-    if (siteToDelete.isEmpty()) {
+    const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo){
+        const QList<QHostAddress> &addresses = hostInfo.addresses();
+        if (!addresses.isEmpty()) {
+            //qDebug() << "Resolved address for" << hostInfo.hostName() << addresses.first().toString();
+            cbProcess(hostInfo.hostName(), addresses.first().toString());
+        }
+    };
+
+    ui->lineEdit_sites_add_custom->clear();
+
+    if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
+        cbProcess(newSite, newSite);
         return;
     }
-
-    QString ipToDelete = Utils::getIPAddress(siteToDelete);
-
-    QStringList customSites = m_settings.customSites();
-    customSites.removeAll(siteToDelete);
-    qDebug() << "Deleted custom site:" << siteToDelete;
-    m_settings.setCustomSites(customSites);
-
-    QStringList customIps = m_settings.customIps();
-    customIps.removeAll(ipToDelete);
-    qDebug() << "Deleted custom ip:" << ipToDelete;
-    m_settings.setCustomIps(customIps);
-
-    updateSitesPage();
-
-    if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-        if (IpcClient::Interface()) IpcClient::Interface()->routeDelete(ipToDelete, "");
-        if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
+    else {
+        cbProcess(newSite, "");
+        updateSitesPage();
+        int reqId = QHostInfo::lookupHost(newSite, this, cbResolv);
     }
 }
 
@@ -1769,16 +1862,20 @@ void MainWindow::updateStartPage()
 
 void MainWindow::updateSitesPage()
 {
-    ui->listWidget_sites->clear();
-    for (const QString &site : m_settings.customSites()) {
-        makeSitesListItem(ui->listWidget_sites, site);
-    }
+    Settings::RouteMode m = m_settings.routeMode();
+    if (m == Settings::VpnAllSites) return;
+
+    ui->tableView_sites->setModel(sitesModels.value(m));
+    sitesModels.value(m)->resetCache();
 }
 
 void MainWindow::updateVpnPage()
 {
-    ui->radioButton_mode_selected_sites->setChecked(m_settings.customRouting());
-    ui->pushButton_vpn_add_site->setEnabled(m_settings.customRouting());
+    Settings::RouteMode mode = m_settings.routeMode();
+    ui->radioButton_vpn_mode_all_sites->setChecked(mode == Settings::VpnAllSites);
+    ui->radioButton_vpn_mode_forward_sites->setChecked(mode == Settings::VpnOnlyForwardSites);
+    ui->radioButton_vpn_mode_except_sites->setChecked(mode == Settings::VpnAllExceptSites);
+    ui->pushButton_vpn_add_site->setEnabled(mode != Settings::VpnAllSites);
 }
 
 void MainWindow::updateAppSettingsPage()
@@ -1868,20 +1965,6 @@ void MainWindow::updateProtocolsPage()
     ui->frame_openvpn_settings->setVisible(containers.contains(DockerContainer::OpenVpn));
 }
 
-void MainWindow::updateShareCodePage()
-{
-//    QJsonObject o;
-//    o.insert("h", m_settings.serverName());
-//    o.insert("p", m_settings.serverPort());
-//    o.insert("u", m_settings.userName());
-//    o.insert("w", m_settings.password());
-
-//    QByteArray ba = QJsonDocument(o).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-//    ui->textEdit_sharing_code->setText(QString("vpn://%1").arg(QString(ba)));
-
-    //qDebug() << "Share code" << QJsonDocument(o).toJson();
-}
-
 void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {   
     ui->widget_proto_openvpn->setEnabled(haveAuthData);
@@ -1968,34 +2051,43 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
 
     const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
-    for (QWidget *page : { ui->page_share_openvpn,
-                           ui->page_share_shadowsocks,
-                           ui->page_share_cloak,
-                           ui->page_share_full_access }) {
+    for (QWidget *page : {
+         ui->page_share_amnezia,
+         ui->page_share_openvpn,
+         ui->page_share_shadowsocks,
+         ui->page_share_cloak,
+         ui->page_share_full_access }) {
 
         ui->toolBox_share_connection->removeItem(ui->toolBox_share_connection->indexOf(page));
         page->hide();
     }
 
     if (container == DockerContainer::OpenVpn) {
+        ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
         ui->toolBox_share_connection->addItem(ui->page_share_openvpn, tr("  Share for OpenVPN client"));
 
-        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::OpenVpn);
-        QString cfg = protoConfig.value(config_key::last_config).toString();
-        if (!cfg.isEmpty()) {
-            // TODO add redirect-gateway def1 bypass-dhcp here and on click Generate config
-            ui->textEdit_share_openvpn_code->setPlainText(cfg);
-        }
-        else {
-            cfg = tr("Press Generate config");
-            ui->textEdit_share_openvpn_code->setPlainText(cfg);
-            ui->pushButton_share_openvpn_copy->setEnabled(false);
-            ui->pushButton_share_openvpn_save->setEnabled(false);
-        }
+        QString cfg = tr("Press Generate config");
+        ui->textEdit_share_openvpn_code->setPlainText(cfg);
+        ui->pushButton_share_openvpn_copy->setEnabled(false);
+        ui->pushButton_share_openvpn_save->setEnabled(false);
+
+//        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::OpenVpn);
+//        QString cfg = protoConfig.value(config_key::last_config).toString();
+//        if (!cfg.isEmpty()) {
+//            // TODO add redirect-gateway def1 bypass-dhcp here and on click Generate config
+//            ui->textEdit_share_openvpn_code->setPlainText(cfg);
+//        }
+//        else {
+//            cfg = tr("Press Generate config");
+//            ui->textEdit_share_openvpn_code->setPlainText(cfg);
+//            ui->pushButton_share_openvpn_copy->setEnabled(false);
+//            ui->pushButton_share_openvpn_save->setEnabled(false);
+//        }
         ui->toolBox_share_connection->setCurrentWidget(ui->page_share_openvpn);
     }
 
     if (container == DockerContainer::OpenVpnOverShadowSocks) {
+        ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
         ui->toolBox_share_connection->addItem(ui->page_share_shadowsocks, tr("  Share for ShadowSocks client"));
 
         QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
@@ -2034,6 +2126,24 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
         ui->toolBox_share_connection->layout()->update();
     }
 
+    if (container == DockerContainer::OpenVpnOverCloak) {
+        ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
+    }
+
+    // Full access
+    if (container == DockerContainer::None) {
+        ui->toolBox_share_connection->addItem(ui->page_share_full_access, tr("  Share server full access"));
+
+        const QJsonObject &server = m_settings.server(selectedServerIndex);
+
+        QByteArray ba = QJsonDocument(server).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
+        ui->textEdit_share_full_code->setText(QString("vpn://%1").arg(QString(ba)));
+        ui->toolBox_share_connection->setCurrentWidget(ui->page_share_full_access);
+    }
+
+    //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
+
     // Amnezia sharing
 //    QJsonObject exportContainer;
 //    for (Protocol p: protocolsForContainer(container)) {
@@ -2046,38 +2156,6 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
 //    ui->textEdit_share_amnezia_code->setPlainText(QJsonDocument(exportContainer).toJson());
 
     ui->textEdit_share_amnezia_code->setPlainText(tr(""));
-    repaint();
-    update();
-    updateGeometry();
-}
-
-void MainWindow::makeSitesListItem(QListWidget *listWidget, const QString &address)
-{
-    QSize size(310, 25);
-    QWidget* widget = new QWidget;
-    widget->resize(size);
-
-    QLabel *label = new QLabel(address, widget);
-    label->resize(size);
-
-    QPushButton* btn = new QPushButton(widget);
-    btn->resize(size);
-
-    QPushButton* btn1 = new QPushButton(widget);
-    btn1->resize(30, 25);
-    btn1->move(280, 0);
-    btn1->setCursor(QCursor(Qt::PointingHandCursor));
-
-    connect(btn1, &QPushButton::clicked, this, [this, label]() {
-        onPushButtonDeleteCustomSiteClicked(label->text());
-        return;
-    });
-
-    QListWidgetItem* item = new QListWidgetItem(listWidget);
-    item->setSizeHint(size);
-    listWidget->setItemWidget(item, widget);
-
-    widget->setStyleSheet(styleSheet());
 }
 
 void MainWindow::makeServersListItem(QListWidget *listWidget, const QJsonObject &server, bool isDefault, int index)

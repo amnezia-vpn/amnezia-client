@@ -226,7 +226,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    if (m_settings().customRouting()) {
+    if (m_settings().routeMode() == Settings::VpnOnlyForwardSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
     else {

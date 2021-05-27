@@ -43,22 +43,22 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
         if (state == VpnProtocol::ConnectionState::Connected && IpcClient::Interface()){
             IpcClient::Interface()->flushDns();
 
-            if (m_settings.customRouting()) {
+            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
                 IpcClient::Interface()->routeDelete("0.0.0.0", m_vpnProtocol->vpnGateway());
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
                     QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
 
-                const QStringList &black_custom = m_settings.customIps();
-                qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << black_custom.size();
+                const QStringList &forwardIps = m_settings.getVpnIps(Settings::VpnOnlyForwardSites);
+                qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
 
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), black_custom);
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), forwardIps);
             }
         }
         else if (state == VpnProtocol::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
-            if (m_settings.customRouting()) {
+            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
                 IpcClient::Interface()->clearSavedRoutes();
             }
         }
@@ -199,7 +199,7 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
 
 ErrorCode VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
-    qDebug() << "СonnectToVpn, CustomRouting is" << m_settings.customRouting();
+    qDebug() << "СonnectToVpn, Route mode is" << m_settings.routeMode();
 
     emit connectionStateChanged(VpnProtocol::ConnectionState::Connecting);
 
@@ -276,7 +276,7 @@ void VpnConnection::disconnectFromVpn()
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 
-        if (m_settings.customRouting()) {
+        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->clearSavedRoutes();
         }
     }

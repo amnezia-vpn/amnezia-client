@@ -7,12 +7,12 @@
 #endif
 
 
-bool Router::routeAdd(const QString &ip, const QString &gw, QString mask)
+bool Router::routeAdd(const QString &ip, const QString &gw)
 {
 #ifdef Q_OS_WIN
-    return RouterWin::Instance().routeAdd(ip, gw, mask);
+    return RouterWin::Instance().routeAdd(ip, gw);
 #elif defined (Q_OS_MAC)
-    return RouterMac::Instance().routeAdd(ip, gw, mask);
+    return RouterMac::Instance().routeAdd(ip, gw);
 #endif
 }
 

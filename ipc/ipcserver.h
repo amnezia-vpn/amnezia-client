@@ -15,7 +15,7 @@ public:
     explicit IpcServer(QObject *parent = nullptr);
     virtual int createPrivilegedProcess() override;
 
-    virtual bool routeAdd(const QString &ip, const QString &gw, const QString &mask = QString()) override;
+    virtual bool routeAdd(const QString &ip, const QString &gw) override;
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDelete(const QString &ip, const QString &gw) override;

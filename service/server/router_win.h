@@ -38,7 +38,7 @@ class RouterWin : public QObject
 public:
     static RouterWin& Instance();
 
-    bool routeAdd(const QString &ip, const QString &gw, QString mask = QString());
+    bool routeAdd(const QString &ip, const QString &gw);
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     bool routeDelete(const QString &ip, const QString &gw);

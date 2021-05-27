@@ -17,6 +17,7 @@
 #include "protocols/vpnprotocol.h"
 
 #include "settings.h"
+#include "sites_model.h"
 
 class VpnConnection;
 
@@ -63,7 +64,6 @@ private slots:
     void onPushButtonForgetServer(bool);
 
     void onPushButtonAddCustomSitesClicked();
-    void onPushButtonDeleteCustomSiteClicked(const QString &siteToDelete);
 
     void onTrayActionConnect(); // connect from context menu
     void setTrayState(VpnProtocol::ConnectionState state);
@@ -94,6 +94,8 @@ private:
     void setupUiConnections();
     void setupNewServerConnections();
     void setupWizardConnections();
+    void setupVpnPageConnections();
+    void setupSitesPageConnections();
     void setupAppSettingsConnections();
     void setupGeneralSettingsConnections();
     void setupNetworkSettingsConnections();
@@ -110,7 +112,6 @@ private:
     void updateServerPage();
     void updateServersListPage();
     void updateProtocolsPage();
-    void updateShareCodePage();
     void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
     void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
     void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
@@ -118,7 +119,6 @@ private:
     void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
         DockerContainer container);
 
-    void makeSitesListItem(QListWidget* listWidget, const QString &address);
     void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
 
     void updateQRCodeImage(const QString &text, QLabel *label);
@@ -134,6 +134,8 @@ private:
     Ui::MainWindow *ui;
     VpnConnection* m_vpnConnection;
     Settings m_settings;
+
+    QMap<Settings::RouteMode, SitesModel *> sitesModels;
 
     QAction* m_trayActionConnect;
     QAction* m_trayActionDisconnect;

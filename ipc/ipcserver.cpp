@@ -53,9 +53,9 @@ int IpcServer::createPrivilegedProcess()
     return m_localpid;
 }
 
-bool IpcServer::routeAdd(const QString &ip, const QString &gw, const QString &mask)
+bool IpcServer::routeAdd(const QString &ip, const QString &gw)
 {
-    return Router::routeAdd(ip, gw, mask);
+    return Router::routeAdd(ip, gw);
 }
 
 int IpcServer::routeAddList(const QString &gw, const QStringList &ips)

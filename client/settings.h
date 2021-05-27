@@ -67,16 +67,48 @@ public:
     bool isStartMinimized() const { return m_settings.value("Conf/startMinimized", false).toBool(); }
     void setStartMinimized(bool enabled) { m_settings.setValue("Conf/startMinimized", enabled); }
 
-    bool customRouting() const { return m_settings.value("Conf/customRouting", false).toBool(); }
-    void setCustomRouting(bool customRouting) { m_settings.setValue("Conf/customRouting", customRouting); }
+    enum RouteMode {
+        VpnAllSites,
+        VpnOnlyForwardSites,
+        VpnAllExceptSites
+    };
+    Q_ENUM (RouteMode)
 
-    // list of sites to pass blocking added by user
-    QStringList customSites() { return m_settings.value("Conf/customSites").toStringList(); }
-    void setCustomSites(const QStringList &customSites) { m_settings.setValue("Conf/customSites", customSites); }
+    QString routeModeString(RouteMode mode) const;
 
-    // list of ips to pass blocking generated from customSites
-    QStringList customIps() { return m_settings.value("Conf/customIps").toStringList(); }
-    void setCustomIps(const QStringList &customIps) { m_settings.setValue("Conf/customIps", customIps); }
+    RouteMode routeMode() const  { return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt()); }
+    void setRouteMode(RouteMode mode) { m_settings.setValue("Conf/routeMode", mode); }
+    //    bool customRouting() const { return m_settings.value("Conf/customRouting", false).toBool(); }
+//    void setCustomRouting(bool customRouting) { m_settings.setValue("Conf/customRouting", customRouting); }
+
+//    // list of sites to pass blocking added by user
+//    QStringList customSites() { return m_settings.value("Conf/customSites").toStringList(); }
+//    void setCustomSites(const QStringList &customSites) { m_settings.setValue("Conf/customSites", customSites); }
+
+//    // list of ips to pass blocking generated from customSites
+//    QStringList customIps() { return m_settings.value("Conf/customIps").toStringList(); }
+//    void setCustomIps(const QStringList &customIps) { m_settings.setValue("Conf/customIps", customIps); }
+
+
+    QVariantMap vpnSites(RouteMode mode) const { return m_settings.value("Conf/" + routeModeString(mode)).toMap(); }
+    void setVpnSites(RouteMode mode, const QVariantMap &sites) { m_settings.setValue("Conf/"+ routeModeString(mode), sites); m_settings.sync(); }
+    void addVpnSite(RouteMode mode, const QString &site, const QString &ip= "");
+    QStringList getVpnIps(RouteMode mode) const;
+    void removeVpnSite(RouteMode mode, const QString &site);
+
+    void addVpnIps(RouteMode mode, const QStringList &ip);
+    void removeVpnSites(RouteMode mode, const QStringList &sites);
+
+
+//    QVariantMap vpnForwardSites() const { return m_settings.value("Conf/vpnForwardSites").toMap(); }
+//    void setVpnForwardSites(const QVariantMap &sites) { m_settings.setValue("Conf/vpnForwardSites", sites); }
+//    void addVpnForwardSite(const QString &site, const QString &ip);
+//    QStringList getVpnForwardIps() const;
+
+//    QVariantMap vpnExceptSites() const { return m_settings.value("Conf/vpnExceptSites").toMap(); }
+//    void setVpnExceptSites(const QVariantMap &sites) { m_settings.setValue("Conf/vpnExceptSites", sites); }
+//    void addVpnExceptSite(const QString &site, const QString &ip);
+//    QStringList getVpnExceptIps() const;
 
     QString primaryDns() const;
     QString secondaryDns() const;
