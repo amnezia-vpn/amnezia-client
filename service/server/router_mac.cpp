@@ -2,6 +2,8 @@
 #include "helper_route_mac.h"
 
 #include <QProcess>
+#include <QThread>
+#include <utils.h>
 
 RouterMac &RouterMac::Instance()
 {
@@ -9,25 +11,30 @@ RouterMac &RouterMac::Instance()
     return s;
 }
 
-bool RouterMac::routeAdd(const QString &ip, const QString &gw)
+bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
 {
-    int argc = 5;
+
+
+    QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
+    QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+
+    QString cmd;
+    if (mask == "255.255.255.255") {
+        cmd = QString("route add -host %1 %2").arg(ip).arg(gw);
+    }
+    else {
+        cmd = QString("route add -net %1 %2 %3").arg(ip).arg(gw).arg(mask);
+    }
+
+    QStringList parts = cmd.split(" ");
+
+    int argc = parts.size();
     char **argv = new char*[argc];
 
-    argv[0] = new char[std::string("route").length() + 1];
-    strcpy(argv[0], std::string("route").c_str());
-
-    argv[1] = new char[std::string("add").length() + 1];
-    strcpy(argv[1], std::string("add").c_str());
-
-    argv[2] = new char[6];
-    strcpy(argv[2], std::string("-host").c_str());
-
-    argv[3] = new char[ip.toStdString().length() + 1];
-    strcpy(argv[3], ip.toStdString().c_str());
-
-    argv[4] = new char[gw.toStdString().length() + 1];
-    strcpy(argv[4], gw.toStdString().c_str());
+    for (int i = 0; i < argc; i++) {
+        argv[i] = new char[parts.at(i).toStdString().length() + 1];
+        strcpy(argv[i], parts.at(i).toStdString().c_str());
+    }
 
     mainRouteIface(argc, argv);
 
@@ -36,19 +43,6 @@ bool RouterMac::routeAdd(const QString &ip, const QString &gw)
     }
     delete[] argv;
     return true;
-
-//    //  route add -host ip gw
-//    QProcess p;
-//    p.setProcessChannelMode(QProcess::MergedChannels);
-
-//    p.start("route", QStringList() << "add" << "-host" << ip << gw);
-//    p.waitForFinished();
-//    qDebug().noquote() << "OUTPUT routeAdd: " + p.readAll();
-//    bool ok = (p.exitCode() == 0);
-//    if (ok) {
-//        m_addedRoutes.append(ip);
-//    }
-//    return ok;
 }
 
 int RouterMac::routeAddList(const QString &gw, const QStringList &ips)
@@ -56,6 +50,7 @@ int RouterMac::routeAddList(const QString &gw, const QStringList &ips)
     int cnt = 0;
     for (const QString &ip: ips) {
         if (routeAdd(ip, gw)) cnt++;
+        //QThread::msleep(10);
     }
     return cnt;
 }

@@ -316,6 +316,7 @@ mainRouteIface(argc, argv)
             break;
             /* NOTREACHED */
         }
+    close(s);
     fflush(stdout);
     return 0;
     //usage(*argv);
@@ -859,17 +860,17 @@ newroute(argc, argv)
 	if (*cmd == 'g')
         return;
 	oerrno = errno;
-	(void) printf("%s %s %s", cmd, ishost? "host" : "net", dest);
-	if (*gateway) {
-		(void) printf(": gateway %s", gateway);
-		if (attempts > 1 && ret == 0 && af == AF_INET)
-		    (void) printf(" (%s)", inet_ntoa(so_gate.sin.sin_addr));
-	}
-	if (ret == 0)
-		(void) printf("\n");
-	else {
-		(void)printf(": %s\n", route_strerror(oerrno));
-	}
+//	(void) printf("%s %s %s", cmd, ishost? "host" : "net", dest);
+//	if (*gateway) {
+//		(void) printf(": gateway %s", gateway);
+//		if (attempts > 1 && ret == 0 && af == AF_INET)
+//		    (void) printf(" (%s)", inet_ntoa(so_gate.sin.sin_addr));
+//	}
+//	if (ret == 0)
+//		(void) printf("\n");
+//	else {
+//		(void)printf(": %s\n", route_strerror(oerrno));
+//	}
 }
 
 static void
@@ -1252,7 +1253,6 @@ rtmsg(cmd, flags)
 #define NEXTADDR(w, u) \
 	if (rtm_addrs & (w)) {\
 	    l = ROUNDUP(u.sa.sa_len); bcopy((char *)&(u), cp, l); cp += l;\
-	    if (verbose) sodump(&(u),"u");\
 	}
 
 	errno = 0;
@@ -1601,24 +1601,6 @@ keyword(cp)
 	while (kt->kt_cp && strcmp(kt->kt_cp, cp))
 		kt++;
 	return kt->kt_i;
-}
-
-void
-sodump(su, which)
-	register sup su;
-	char *which;
-{
-	switch (su->sa.sa_family) {
-	case AF_LINK:
-		(void) printf("%s: link %s; ",
-		    which, link_ntoa(&su->sdl));
-		break;
-	case AF_INET:
-		(void) printf("%s: inet %s; ",
-		    which, inet_ntoa(su->sin.sin_addr));
-		break;
-	}
-	(void) fflush(stdout);
 }
 
 /* States*/
