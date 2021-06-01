@@ -174,7 +174,7 @@ ErrorCode OpenVpnProtocol::start()
     QStringList arguments({"--config" , configPath(),
                       "--management", m_managementHost, QString::number(m_managementPort),
                       "--management-client",
-                      "--log-append", vpnLogFileNamePath
+                      "--log", vpnLogFileNamePath
                      });
     m_openVpnProcess->setArguments(arguments);
 
