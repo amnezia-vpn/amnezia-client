@@ -15,7 +15,7 @@ set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 rmdir /Q /S %WORK_DIR%
-mkdir %SCRIPT_DIR:"=%\build
+mkdir %WORK_DIR%
 
 
 set APP_NAME=AmneziaVPN
@@ -27,7 +27,7 @@ set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set PRO_FILE_PATH=%PROJECT_DIR:"=%\%APP_NAME:"=%.pro
 set QMAKE_STASH_FILE=%PROJECT_DIR:"=%\.qmake_stash
-set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%.exe
+set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
 
 echo "Environment:"
 echo "APP_FILENAME:			%APP_FILENAME%"
@@ -57,7 +57,7 @@ Del %TARGET_FILENAME%
 nmake /?
 
 cd %PROJECT_DIR%
-"%QT_BIN_DIR:"=%\qmake" -spec win32-msvc  -o deploy\build\Makefile
+"%QT_BIN_DIR:"=%\qmake" -spec win32-msvc  -o "%WORK_DIR:"=%\Makefile"
 
 cd %WORK_DIR%
 set CL=/MP
@@ -81,11 +81,11 @@ signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://ti
 signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll
 
 echo "Copying deploy data..."
-xcopy %DEPLOY_DATA_DIR% 											%OUT_APP_DIR%  /s /e /y /i /f
+xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 
 
 cd %SCRIPT_DIR%
-xcopy %SCRIPT_DIR:"=%\installer 									%RELEASE_DIR:"=%\installer /s /e /y /i /f
+xcopy %SCRIPT_DIR:"=%\installer  %RELEASE_DIR:"=%\installer /s /e /y /i /f
 mkdir %INSTALLER_DATA_DIR%
 
 echo "Deploy finished, content:"

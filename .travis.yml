@@ -21,7 +21,7 @@ jobs:
           brew install p7zip && \
           pip3 install aqtinstall requests py7zr && \
           python3 -m aqt install --outputdir $HOME/Qt $QT_VERSION mac desktop clang_64 -m qtbase && \
-          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.1.0 qt.tools.ifw.41;
+          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.1 qt.tools.ifw.41;
           fi
         - bash deploy/build_macos.sh 
 
@@ -41,26 +41,29 @@ jobs:
       
       env:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
+        - QT_VERSION=5.14.2
+        - BUILD_ARCH="64"
         
       before_install:
-        - if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
+        - if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then choco install python --version 3.9.1; fi
         
       script:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
-          if [ ! -f /C/Qt/5.14.2/msvc2017/bin/qmake ]; then \
+          if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then \
           pip3 install aqtinstall requests py7zr && \
-          python -m aqt install --outputdir /C/Qt 5.14.2 windows desktop win32_msvc2017 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1.0 qt.tools.ifw.41; \
+          python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017_64 -m qtbase && \
+          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1 qt.tools.ifw.41; \
           fi
-        - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"' > winbuild.bat
-        - echo -e "\r\n" >> winbuild.bat
-        - echo 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsamd64_x86.bat"' >> winbuild.bat
-        - echo -e "\r\n" >> winbuild.bat
-        - echo -e "set WIN_CERT_PW=$WIN_CERT_PW" >> winbuild.bat
-        - echo -e "\r\n" >> winbuild.bat
-        - echo -e "call deploy\\\build_windows.bat" >> winbuild.bat
+        - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat"\n' > winbuild.bat
+        - echo -e 'set BUILD_ARCH="64"\n' >> winbuild.bat
+        - echo -e 'set QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2017_64\\bin"\n' >> winbuild.bat
+        - echo -e 'set QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\4.1\\bin"\n' >> winbuild.bat
+        - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars%BUILD_ARCH:"=%.bat"\n' >> winbuild.bat
+        - cat winbuild.bat
+        - echo -e 'set WIN_CERT_PW=$WIN_CERT_PW\n' >> winbuild.bat
+        - echo -e 'call deploy\\\build_windows.bat' >> winbuild.bat
         - cmd //c winbuild.bat
         
       deploy:
@@ -68,10 +71,50 @@ jobs:
         token: $GH_TOKEN
         skip_cleanup: true
         file:
-        - "AmneziaVPN.exe"
+        - "AmneziaVPN_x64.exe"
         on:
           tags: true
           branch: master
+
+- name: Windows
+  os: windows
+
+  env:
+    - PATH=/c/Python39:/c/Python39/Scripts:$PATH
+    - QT_VERSION=5.14.2
+    - BUILD_ARCH="32"
+
+  before_install:
+    - if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
+
+  script:
+    - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+    - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+    - |
+      if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then \
+      pip3 install aqtinstall requests py7zr && \
+      python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017 -m qtbase && \
+      python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1 qt.tools.ifw.41; \
+      fi
+    - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat"\n' > winbuild.bat
+    - echo -e 'set BUILD_ARCH="32"\n' >> winbuild.bat
+    - echo -e 'set QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2017\\bin"\n' >> winbuild.bat
+    - echo -e 'set QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\4.1\\bin"\n' >> winbuild.bat
+    - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars%BUILD_ARCH:"=%.bat"\n' >> winbuild.bat
+    - cat winbuild.bat
+    - echo -e 'set WIN_CERT_PW=$WIN_CERT_PW\n' >> winbuild.bat
+    - echo -e 'call deploy\\\build_windows.bat' >> winbuild.bat
+    - cmd //c winbuild.bat
+
+  deploy:
+    provider: releases
+    token: $GH_TOKEN
+    skip_cleanup: true
+    file:
+    - "AmneziaVPN_x32.exe"
+    on:
+      tags: true
+      branch: master
 
 deploy:
   skip_cleanup: true

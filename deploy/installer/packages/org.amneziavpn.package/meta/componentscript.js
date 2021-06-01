@@ -68,7 +68,13 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-            component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist_2017_x86.log");
+			if (systemInfo.currentCpuArchitecture.search("64") < 0) {
+				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+			}
+			else {
+				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+			}
+
         } else {
             console.log("Microsoft Visual C++ 2017 Redistributable already installed");
         }
