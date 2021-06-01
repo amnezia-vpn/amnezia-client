@@ -21,6 +21,7 @@ public:
     bool routeAdd(const QString &ip, const QString &gw);
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
+    bool routeDelete(const QString &ip, const QString &gw);
     bool routeDeleteList(const QString &gw, const QStringList &ips);
     void flushDns();
 
