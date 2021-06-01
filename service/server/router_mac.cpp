@@ -13,8 +13,6 @@ RouterMac &RouterMac::Instance()
 
 bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
 {
-
-
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
@@ -67,7 +65,7 @@ bool RouterMac::clearSavedRoutes()
 //    return (cnt == m_addedRoutes.count());
 }
 
-bool RouterMac::routeDelete(const QString &ip, const QString &gw)
+bool RouterMac::routeDeleteList(const QString &gw, const QStringList &ips)
 {
     if (ip == "0.0.0.0") {
         qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;

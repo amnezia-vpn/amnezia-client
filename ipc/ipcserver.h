@@ -3,6 +3,7 @@
 
 #include <QLocalServer>
 #include <QObject>
+#include <QRemoteObjectNode>
 
 #include "ipc.h"
 #include "ipcserverprocess.h"
@@ -15,10 +16,9 @@ public:
     explicit IpcServer(QObject *parent = nullptr);
     virtual int createPrivilegedProcess() override;
 
-    virtual bool routeAdd(const QString &ip, const QString &gw) override;
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
-    virtual bool routeDelete(const QString &ip, const QString &gw) override;
+    virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
     virtual void flushDns() override;
     virtual bool checkAndInstallDriver() override;
     virtual QStringList getTapList() override;
@@ -32,6 +32,7 @@ private:
             ipcProcess = QSharedPointer<IpcServerProcess>(new IpcServerProcess(parent));
             localServer = QSharedPointer<QLocalServer>(new QLocalServer(parent));
         }
+
         QSharedPointer<IpcServerProcess> ipcProcess;
         QSharedPointer<QRemoteObjectHost> serverNode;
         QSharedPointer<QLocalServer> localServer;

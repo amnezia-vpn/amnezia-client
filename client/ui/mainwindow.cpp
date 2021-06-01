@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
     connect(m_vpnConnection, SIGNAL(vpnProtocolError(amnezia::ErrorCode)), this, SLOT(onVpnProtocolError(amnezia::ErrorCode)));
 
-    onConnectionStateChanged(VpnProtocol::ConnectionState::Disconnected);
+    onConnectionStateChanged(VpnProtocol::Disconnected);
 
     if (m_settings.isAutoConnect() && m_settings.defaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this](){
@@ -350,6 +350,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Q:
         qApp->quit();
         break;
+//    case Qt::Key_0:
+//        *((char*)-1) = 'x';
+//        break;
     case Qt::Key_H:
         selectedServerIndex = m_settings.defaultServerIndex();
         selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
@@ -891,38 +894,38 @@ void MainWindow::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     setTrayState(state);
 
     switch (state) {
-    case VpnProtocol::ConnectionState::Disconnected:
+    case VpnProtocol::Disconnected:
         onBytesChanged(0,0);
         ui->pushButton_connect->setChecked(false);
         pushButtonConnectEnabled = true;
         radioButtonsModeEnabled = true;
         break;
-    case VpnProtocol::ConnectionState::Preparing:
+    case VpnProtocol::Preparing:
         pushButtonConnectEnabled = false;
         radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::Connecting:
+    case VpnProtocol::Connecting:
         pushButtonConnectEnabled = false;
         radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::Connected:
+    case VpnProtocol::Connected:
         pushButtonConnectEnabled = true;
         radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::Disconnecting:
+    case VpnProtocol::Disconnecting:
         pushButtonConnectEnabled = false;
         radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::Reconnecting:
+    case VpnProtocol::Reconnecting:
         pushButtonConnectEnabled = true;
         radioButtonsModeEnabled = false;
         break;
-    case VpnProtocol::ConnectionState::Error:
+    case VpnProtocol::Error:
         ui->pushButton_connect->setChecked(false);
         pushButtonConnectEnabled = true;
         radioButtonsModeEnabled = true;
         break;
-    case VpnProtocol::ConnectionState::Unknown:
+    case VpnProtocol::Unknown:
         pushButtonConnectEnabled = true;
         radioButtonsModeEnabled = true;
     }
@@ -976,7 +979,7 @@ void MainWindow::setupTray()
     });
 
     m_tray.setContextMenu(m_menu);
-    setTrayState(VpnProtocol::ConnectionState::Disconnected);
+    setTrayState(VpnProtocol::Disconnected);
 
     m_tray.show();
 
@@ -1129,27 +1132,31 @@ void MainWindow::setupSitesPageConnections()
         QItemSelectionModel* selection = ui->tableView_sites->selectionModel();
         if (!selection) return;
 
-        QModelIndexList indexes = selection->selectedRows();
+        {
+            QModelIndexList indexesSites = selection->selectedRows(0);
 
-        QStringList sites;
-        for (const QModelIndex &index : indexes) {
-            sites.append(index.data().toString());
+            QStringList sites;
+            for (const QModelIndex &index : indexesSites) {
+                sites.append(index.data().toString());
+            }
+
+            m_settings.removeVpnSites(mode, sites);
         }
 
-        m_settings.removeVpnSites(mode, sites);
+
+        if (m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+            QModelIndexList indexesIps = selection->selectedRows(1);
+
+            QStringList ips;
+            for (const QModelIndex &index : indexesIps) {
+                ips.append(index.data().toString());
+            }
+
+            m_vpnConnection->deleteRoutes(ips);
+            m_vpnConnection->flushDns();
+        }
+
         updateSitesPage();
-
-        //    if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-        //        if (IpcClient::Interface()) IpcClient::Interface()->routeDelete(ipToDelete, "");
-        //        if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
-        //    }
-
-
-//        if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-//            if (IpcClient::Interface())
-//                IpcClient::Interface()->routeDelete(m_vpnConnection->vpnProtocol()->vpnGateway(),
-//                    QStringList() << ip);
-//        }
     });
 
     connect(ui->pushButton_sites_import, &QPushButton::clicked, this, [this](){
@@ -1174,6 +1181,10 @@ void MainWindow::setupSitesPageConnections()
         }
 
         m_settings.addVpnIps(mode, ips);
+
+        m_vpnConnection->addRoutes(QStringList() << ips);
+        m_vpnConnection->flushDns();
+
         updateSitesPage();
     });
 }
@@ -1678,32 +1689,32 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
 {
     QString resourcesPath = ":/images/tray/%1";
 
-    m_trayActionDisconnect->setEnabled(state == VpnProtocol::ConnectionState::Connected);
-    m_trayActionConnect->setEnabled(state == VpnProtocol::ConnectionState::Disconnected);
+    m_trayActionDisconnect->setEnabled(state == VpnProtocol::Connected);
+    m_trayActionConnect->setEnabled(state == VpnProtocol::Disconnected);
 
     switch (state) {
-    case VpnProtocol::ConnectionState::Disconnected:
+    case VpnProtocol::Disconnected:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Preparing:
+    case VpnProtocol::Preparing:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Connecting:
+    case VpnProtocol::Connecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Connected:
+    case VpnProtocol::Connected:
         setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Disconnecting:
+    case VpnProtocol::Disconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Reconnecting:
+    case VpnProtocol::Reconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Error:
+    case VpnProtocol::Error:
         setTrayIcon(QString(resourcesPath).arg(ErrorTrayIconName));
         break;
-    case VpnProtocol::ConnectionState::Unknown:
+    case VpnProtocol::Unknown:
     default:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
     }
@@ -1759,7 +1770,10 @@ void MainWindow::onConnectWorker(int serverIndex, const ServerCredentials &crede
     ui->pushButton_connect->setChecked(true);
     qApp->processEvents();
 
-    ErrorCode errorCode = m_vpnConnection->connectToVpn(serverIndex, credentials, container, containerConfig);
+    ErrorCode errorCode = m_vpnConnection->connectToVpn(
+        serverIndex, credentials, container, containerConfig
+    );
+
     if (errorCode) {
         //ui->pushButton_connect->setChecked(false);
         QMessageBox::critical(this, APPLICATION_NAME, errorString(errorCode));
@@ -1810,11 +1824,8 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
     const auto &cbProcess = [this, mode](const QString &newSite, const QString &ip) {
         m_settings.addVpnSite(mode, newSite, ip);
 
-        if (m_vpnConnection->connectionState() == VpnProtocol::ConnectionState::Connected) {
-            if (IpcClient::Interface())
-                IpcClient::Interface()->routeAddList(m_vpnConnection->vpnProtocol()->vpnGateway(),
-                    QStringList() << ip);
-        }
+        m_vpnConnection->addRoutes(QStringList() << ip);
+        m_vpnConnection->flushDns();
 
         updateSitesPage();
     };
@@ -1886,6 +1897,12 @@ void MainWindow::updateAppSettingsPage()
 
     ui->lineEdit_network_settings_dns1->setText(m_settings.primaryDns());
     ui->lineEdit_network_settings_dns2->setText(m_settings.secondaryDns());
+
+    QString ver = QString("%1: %2 (%3)")
+            .arg(tr("Software version"))
+            .arg(QString(APP_MAJOR_VERSION))
+            .arg(__DATE__);
+    ui->label_app_settings_version->setText(ver);
 }
 
 void MainWindow::updateGeneralSettingPage()
@@ -2049,7 +2066,7 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
     selectedDockerContainer = container;
     selectedServerIndex = serverIndex;
 
-    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+    //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
     for (QWidget *page : {
          ui->page_share_amnezia,

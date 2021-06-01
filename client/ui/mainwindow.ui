@@ -274,7 +274,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>10</number>
+      <number>13</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -4035,7 +4035,7 @@ background: #211966;
         <string>Check for updates</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="label_app_settings_version">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -4045,7 +4045,7 @@ background: #211966;
         </rect>
        </property>
        <property name="text">
-        <string>Software version: 1.7.0 (18.05.2021)</string>
+        <string>Software version: X.X.X (01.06.2021)</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_app_settings_start_minimized">
@@ -5549,8 +5549,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -5677,8 +5677,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5873,8 +5873,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6039,8 +6039,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -6263,8 +6263,8 @@ color: #15CDCB;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">

@@ -16,18 +16,23 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
         qDebug() << "IpcServerProcess errorOccurred " << error;
     });
 
-    connect(m_process.data(), &QProcess::readyReadStandardError, [&](){
+    connect(m_process.data(), &QProcess::readyReadStandardError, this, [this](){
         qDebug() << "IpcServerProcess StandardError " << m_process->readAllStandardError();
 
     });
-    connect(m_process.data(), &QProcess::readyReadStandardOutput, [&](){
+    connect(m_process.data(), &QProcess::readyReadStandardOutput, this, [this](){
         qDebug() << "IpcServerProcess StandardOutput " << m_process->readAllStandardOutput();
     });
 
-    connect(m_process.data(), &QProcess::readyRead, [&](){
+    connect(m_process.data(), &QProcess::readyRead, this, [this](){
         qDebug() << "IpcServerProcess StandardOutput " << m_process->readAll();
     });
 
+}
+
+IpcServerProcess::~IpcServerProcess()
+{
+    qDebug() << "IpcServerProcess::~IpcServerProcess";
 }
 
 void IpcServerProcess::start(const QString &program, const QStringList &arguments)
@@ -36,7 +41,6 @@ void IpcServerProcess::start(const QString &program, const QStringList &argument
     qDebug() << "IpcServerProcess started, " << arguments;
 
     m_process->waitForStarted();
-    qDebug() << "waitForStarted started, " << m_process->errorString();
 }
 
 void IpcServerProcess::start()
@@ -45,7 +49,6 @@ void IpcServerProcess::start()
     qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
 
     m_process->waitForStarted();
-    qDebug() << "waitForStarted , " << m_process->errorString() << m_process->error();
 }
 
 void IpcServerProcess::close()
@@ -69,7 +72,6 @@ void IpcServerProcess::setNativeArguments(const QString &arguments)
     m_process->setNativeArguments(arguments);
 #endif
 }
-
 
 void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
 {

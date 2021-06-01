@@ -7,15 +7,6 @@
 #endif
 
 
-bool Router::routeAdd(const QString &ip, const QString &gw)
-{
-#ifdef Q_OS_WIN
-    return RouterWin::Instance().routeAdd(ip, gw);
-#elif defined (Q_OS_MAC)
-    return RouterMac::Instance().routeAdd(ip, gw);
-#endif
-}
-
 int Router::routeAddList(const QString &gw, const QStringList &ips)
 {
 #ifdef Q_OS_WIN
@@ -34,12 +25,12 @@ bool Router::clearSavedRoutes()
 #endif
 }
 
-bool Router::routeDelete(const QString &ip, const QString &gw)
+int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 {
 #ifdef Q_OS_WIN
-    return RouterWin::Instance().routeDelete(ip, gw);
+    return RouterWin::Instance().routeDeleteList(gw, ips);
 #elif defined (Q_OS_MAC)
-    return RouterMac::Instance().routeDelete(ip, gw);
+    return RouterMac::Instance().routeDeleteList(gw, ips);
 #endif
 }
 

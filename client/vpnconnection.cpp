@@ -40,22 +40,26 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
     if (IpcClient::Interface()) {
-        if (state == VpnProtocol::ConnectionState::Connected && IpcClient::Interface()){
+        if (state == VpnProtocol::Connected){
             IpcClient::Interface()->flushDns();
 
             if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
-                IpcClient::Interface()->routeDelete("0.0.0.0", m_vpnProtocol->vpnGateway());
-
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
-                    QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
-
-                const QStringList &forwardIps = m_settings.getVpnIps(Settings::VpnOnlyForwardSites);
-                qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
-
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), forwardIps);
+                IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
+                //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
+            IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
+                QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
+
+
+            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), m_settings.getVpnIps(Settings::VpnOnlyForwardSites));
+            }
+            else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), m_settings.getVpnIps(Settings::VpnAllExceptSites));
+            }
+
         }
-        else if (state == VpnProtocol::ConnectionState::Error) {
+        else if (state == VpnProtocol::Error) {
             IpcClient::Interface()->flushDns();
 
             if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
@@ -70,6 +74,35 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
 {
     return m_vpnProtocol;
+}
+
+void VpnConnection::addRoutes(const QStringList &ips)
+{
+    if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
+        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+            IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
+        }
+        else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+            IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips);
+        }
+    }
+}
+
+void VpnConnection::deleteRoutes(const QStringList &ips)
+{
+    if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
+        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+            IpcClient::Interface()->routeDeleteList(vpnProtocol()->vpnGateway(), ips);
+        }
+        else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+            IpcClient::Interface()->routeDeleteList(m_vpnProtocol->routeGateway(), ips);
+        }
+    }
+}
+
+void VpnConnection::flushDns()
+{
+    if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
 }
 
 ErrorCode VpnConnection::lastError() const
@@ -197,11 +230,12 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
     return ErrorCode::NoError;
 }
 
-ErrorCode VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
+ErrorCode VpnConnection::connectToVpn(int serverIndex,
+    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << "СonnectToVpn, Route mode is" << m_settings.routeMode();
 
-    emit connectionStateChanged(VpnProtocol::ConnectionState::Connecting);
+    emit connectionStateChanged(VpnProtocol::Connecting);
 
     ServerController::setupServerFirewall(credentials);
 
@@ -214,42 +248,42 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &
     if (container == DockerContainer::None || container == DockerContainer::OpenVpn) {
         ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpn, containerConfig);
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
 
         m_vpnProtocol.reset(new OpenVpnProtocol(m_vpnConfiguration));
         e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
     }
     else if (container == DockerContainer::OpenVpnOverShadowSocks) {
         ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpnOverShadowSocks, containerConfig);
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
 
         m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
         e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
     }
     else if (container == DockerContainer::OpenVpnOverCloak) {
         ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpnOverCloak, containerConfig);
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
 
         m_vpnProtocol.reset(new OpenVpnOverCloakProtocol(m_vpnConfiguration));
         e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
         if (e) {
-            emit connectionStateChanged(VpnProtocol::ConnectionState::Error);
+            emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
     }
@@ -276,9 +310,8 @@ void VpnConnection::disconnectFromVpn()
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 
-        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
-            IpcClient::Interface()->clearSavedRoutes();
-        }
+        // delete cached routes
+        IpcClient::Interface()->clearSavedRoutes();
     }
 
     if (!m_vpnProtocol.data()) {
@@ -289,7 +322,7 @@ void VpnConnection::disconnectFromVpn()
 
 VpnProtocol::ConnectionState VpnConnection::connectionState()
 {
-    if (!m_vpnProtocol) return VpnProtocol::ConnectionState::Disconnected;
+    if (!m_vpnProtocol) return VpnProtocol::Disconnected;
     return m_vpnProtocol->connectionState();
 }
 

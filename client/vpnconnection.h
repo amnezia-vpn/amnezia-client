@@ -33,15 +33,20 @@ public:
     ErrorCode createVpnConfiguration(int serverIndex,
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
 
-    ErrorCode connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+    ErrorCode connectToVpn(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+
     void disconnectFromVpn();
 
     bool isConnected() const;
     bool isDisconnected() const;
 
     VpnProtocol::ConnectionState connectionState();
-
     QSharedPointer<VpnProtocol> vpnProtocol() const;
+
+    void addRoutes(const QStringList &ips);
+    void deleteRoutes(const QStringList &ips);
+    void flushDns();
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -60,6 +65,7 @@ protected:
 private:
     Settings m_settings;
     QJsonObject m_vpnConfiguration;
+    QJsonObject m_routeMode;
 
 };
 

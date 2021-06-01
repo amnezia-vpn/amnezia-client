@@ -5,7 +5,7 @@ AmneziaVPN.dmg
 AmneziaVPN.exe
 AmneziaVPN_*.exe
 deploy/build/*
-winbuild.bat
+winbuild*.bat
 
 # Qt-es
 /.qmake.cache

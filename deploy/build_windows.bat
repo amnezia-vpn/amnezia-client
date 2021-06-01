@@ -4,9 +4,6 @@ CHCP 1252
 
 REM %VAR:"=% mean dequoted %VAR%
 
-set QT_BIN_DIR="c:\Qt\5.14.2\msvc2017\bin"
-set QIF_BIN_DIR="c:\Qt\Tools\QtInstallerFramework\4.0\bin"
-
 set PATH=%QT_BIN_DIR:"=%;%PATH%
 
 echo "Using Qt in %QT_BIN_DIR%"
@@ -16,9 +13,9 @@ REM Hold on to current directory
 set PROJECT_DIR=%cd%
 set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
+set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 rmdir /Q /S %WORK_DIR%
 mkdir %SCRIPT_DIR:"=%\build
-set WORK_DIR=%SCRIPT_DIR:"=%\build
 
 
 set APP_NAME=AmneziaVPN
@@ -26,7 +23,7 @@ set APP_FILENAME=%APP_NAME:"=%.exe
 set APP_DOMAIN=org.amneziavpn.package
 set RELEASE_DIR=%WORK_DIR:"=%
 set OUT_APP_DIR=%RELEASE_DIR:"=%\client\release
-set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows
+set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set PRO_FILE_PATH=%PROJECT_DIR:"=%\%APP_NAME:"=%.pro
 set QMAKE_STASH_FILE=%PROJECT_DIR:"=%\.qmake_stash
@@ -35,14 +32,14 @@ set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%.exe
 echo "Environment:"
 echo "APP_FILENAME:			%APP_FILENAME%"
 echo "PROJECT_DIR:			%PROJECT_DIR%"
-echo "SCRIPT_DIR:			%SCRIPT_DIR%"
+echo "SCRIPT_DIR:                   %SCRIPT_DIR%"
 echo "RELEASE_DIR:			%RELEASE_DIR%"
 echo "OUT_APP_DIR:			%OUT_APP_DIR%"
-echo "DEPLOY_DATA_DIR: 		%DEPLOY_DATA_DIR%"
+echo "DEPLOY_DATA_DIR:              %DEPLOY_DATA_DIR%"
 echo "INSTALLER_DATA_DIR: 		%INSTALLER_DATA_DIR%"
-echo "PRO_FILE_PATH: 		%PRO_FILE_PATH%"
+echo "PRO_FILE_PATH:                %PRO_FILE_PATH%"
 echo "QMAKE_STASH_FILE: 		%QMAKE_STASH_FILE%"
-echo "TARGET_FILENAME: 		%TARGET_FILENAME%"
+echo "TARGET_FILENAME:              %TARGET_FILENAME%"
 
 rem Signing staff
 powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine

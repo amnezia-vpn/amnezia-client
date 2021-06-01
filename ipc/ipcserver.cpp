@@ -31,14 +31,6 @@ int IpcServer::createPrivilegedProcess()
         return -1;
     }
 
-//    connect(m_server.data(), &QLocalServer::newConnection, this, &LocalServer::onNewConnection);
-
-//    qDebug().noquote() << QString("Local server started on '%1'").arg(m_server->serverName());
-
-//    m_serverNode.setHostUrl(QUrl(QStringLiteral(IPC_SERVICE_URL))); // create host node without Registry
-
-
-
     // Make sure any connections are handed to QtRO
     QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
         qDebug() << "LocalServer new connection";
@@ -48,14 +40,27 @@ int IpcServer::createPrivilegedProcess()
         }
     });
 
+    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::error, this, [pd](QRemoteObjectNode::ErrorCode errorCode) {
+        qDebug() << "QRemoteObjectHost::error" << errorCode;
+    });
+
+    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::destroyed, this, [pd]() {
+        qDebug() << "QRemoteObjectHost::destroyed";
+    });
+
+    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
+        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
+//        if (m_processes.contains(pid)) {
+//            m_processes[pid].ipcProcess.reset();
+//            m_processes[pid].serverNode.reset();
+//            m_processes[pid].localServer.reset();
+//            m_processes.remove(pid);
+//        }
+    });
+
     m_processes.insert(m_localpid, pd);
 
     return m_localpid;
-}
-
-bool IpcServer::routeAdd(const QString &ip, const QString &gw)
-{
-    return Router::routeAdd(ip, gw);
 }
 
 int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
@@ -68,9 +73,9 @@ bool IpcServer::clearSavedRoutes()
     return Router::clearSavedRoutes();
 }
 
-bool IpcServer::routeDelete(const QString &ip, const QString &gw)
+bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
 {
-    return Router::routeDelete(ip, gw);
+    return Router::routeDeleteList(gw ,ips);
 }
 
 void IpcServer::flushDns()

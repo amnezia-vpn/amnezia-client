@@ -240,7 +240,6 @@ bool TapController::checkDriver(const QString& tapInstanceId)
 bool TapController::checkOpenVpn()
 {
     /// Check openvpn executable
-
     QProcess openVpnProc;
     openVpnProc.start(getOpenVpnPath(), QStringList() << "--version");
     if (!openVpnProc.waitForStarted()) {
@@ -257,53 +256,22 @@ bool TapController::checkOpenVpn()
 
 QString TapController::getTapInstallPath()
 {
-#ifdef Q_OS_WIN
-
-    if (oldDriversRequired()) {
-        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\tapinstall.exe";
-    }
-    else {
-        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\tapinstall.exe";
-    }
-
-//    if (QSysInfo::currentCpuArchitecture() == "i386") {
-//        return qApp->applicationDirPath() + "\\openvpn\\drivers_x32\\tapinstall.exe";
-//    }
-//    else if (QSysInfo::currentCpuArchitecture() == "x86_64") {
-//        return qApp->applicationDirPath() + "\\openvpn\\drivers_x64\\tapinstall.exe";
-//    }
-//    else return "";
-#endif
-    return "";
+    return getTapDriverDir() + "\\tapinstall.exe";
 }
 
 QString TapController::getOpenVpnPath()
 {
-#ifdef Q_OS_WIN
-    //return qApp->applicationDirPath() + "\\openvpn\\"+ QSysInfo::currentCpuArchitecture() + "\\openvpn.exe";
-
-    return qApp->applicationDirPath() + "\\openvpn\\i386\\openvpn.exe";
-#endif
-    return "";
+    return qApp->applicationDirPath() + "\\openvpn\\openvpn.exe";
 }
 
 QString TapController::getTapDriverDir()
 {
     if (oldDriversRequired()) {
-        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "_windows_7\\";
+        return qApp->applicationDirPath() + "\\tap\\windows_7";
     }
     else {
-        return qApp->applicationDirPath() + "\\tap\\"+ QSysInfo::currentCpuArchitecture() + "\\";
+        return qApp->applicationDirPath() + "\\tap\\windows_10";
     }
-
-
-//    if (QSysInfo::currentCpuArchitecture() == "i386") {
-//        return qApp->applicationDirPath() + "\\openvpn\\drivers_x32\\";
-//    }
-//    else if (QSysInfo::currentCpuArchitecture() == "x86_64") {
-//        return qApp->applicationDirPath() + "\\openvpn\\drivers_x64\\";
-//    }
-//    else return "";
 }
 
 bool TapController::removeDriver(const QString& tapInstanceId)
@@ -372,7 +340,7 @@ bool TapController::setupDriver()
 
     /// else try to install driver
     QProcess tapInstallProc;
-    tapInstallProc.start(getTapInstallPath(), QStringList() << "install" << getTapDriverDir() + "OemVista.inf" << "tap0901");
+    tapInstallProc.start(getTapInstallPath(), QStringList() << "install" << getTapDriverDir() + "\\OemVista.inf" << "tap0901");
     bool ok = tapInstallProc.waitForStarted();
     if (!ok) {
         qDebug() << "TapController: setupDriver failer to start tapInstallProc" << tapInstallProc.errorString();

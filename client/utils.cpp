@@ -195,7 +195,25 @@ QString Utils::netMaskFromIpWithSubnet(const QString ip)
 
 QString Utils::ipAddressFromIpWithSubnet(const QString ip)
 {
+    if (ip.count(".") != 3) return "";
     return ip.split("/").first();
+}
+
+QStringList Utils::summarizeRoutes(const QStringList &ips, const QString cidr)
+{
+//    QMap<int, int>
+//    QHostAddress
+
+//    QMap<QString, QStringList> subnets; // <"a.b", <list subnets>>
+
+//    for (const QString &ip : ips) {
+//        if (ip.count(".") != 3) continue;
+
+//        const QStringList &parts = ip.split(".");
+//        subnets[parts.at(0) + "." + parts.at(1)].append(ip);
+//    }
+
+    return QStringList();
 }
 
 #ifdef Q_OS_WIN

@@ -39,7 +39,9 @@ LIBS += \
         -liphlpapi \
         -lws2_32 \
         -liphlpapi \
-        -lgdi32
+        -lgdi32 \
+        -lAdvapi32 \
+        -lKernel32
 }
 
 macx {
