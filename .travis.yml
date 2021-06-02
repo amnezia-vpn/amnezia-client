@@ -16,7 +16,7 @@ jobs:
         - QT_VERSION=5.15.2
         - QIF_VERSION=4.1
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
-        - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/4.0/bin
+        - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
          
       script:
         - |
@@ -72,7 +72,8 @@ jobs:
         - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars%BUILD_ARCH:"=%.bat"\n' >> winbuild.bat
         - cat winbuild.bat
         - echo -e 'set WIN_CERT_PW=$WIN_CERT_PW\n' >> winbuild.bat
-        - echo -e 'call deploy\\\build_windows.bat' >> winbuild.bat
+        - echo -e 'echo Starting build with build_windows.bat\n' >> winbuild.bat
+        - echo -e 'call deploy\\build_windows.bat' >> winbuild.bat
         - cmd //c winbuild.bat
 
         
@@ -118,7 +119,7 @@ jobs:
         - echo -e 'call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars%BUILD_ARCH:"=%.bat"\n' >> winbuild.bat
         - cat winbuild.bat
         - echo -e 'set WIN_CERT_PW=$WIN_CERT_PW\n' >> winbuild.bat
-        - echo -e 'call deploy\\\build_windows.bat' >> winbuild.bat
+        - echo -e 'call deploy\\build_windows.bat' >> winbuild.bat
         - cmd //c winbuild.bat
 
       deploy:
