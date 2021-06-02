@@ -1,0 +1,4 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+*.cmd text
+*.bat text
+* text eol=lf
