@@ -15,9 +15,7 @@ QString OpenVpnConfigurator::getEasyRsaShPath()
 {
 #ifdef Q_OS_WIN
     // easyrsa sh path should looks like
-    // "/Program Files (x86)/AmneziaVPN/easyrsa/easyrsa"
     QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-    easyRsaShPath = "\"" + easyRsaShPath + "\"";
     qDebug().noquote() << "EasyRsa sh path" << easyRsaShPath;
 
     return easyRsaShPath;
@@ -34,7 +32,7 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
 #ifdef Q_OS_WIN
     pathEnvVar.clear();
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn\\i386;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
 #else
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
 #endif
@@ -52,7 +50,7 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 #ifdef Q_OS_WIN
     p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe %1\"").arg(getEasyRsaShPath() + " init-pki"));
+    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2\"").arg(getEasyRsaShPath()).arg("init-pki"));
     qDebug().noquote() << "EasyRsa tmp path" << path;
     qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
 #else
@@ -81,7 +79,10 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 #ifdef Q_OS_WIN
     p.setProcessEnvironment(prepareEnv());
     p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe %1\"").arg(getEasyRsaShPath() + " gen-req " + clientId + " nopass"));
+    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2 %3 %4\"")
+                         .arg(getEasyRsaShPath())
+                         .arg("gen-req").arg(clientId).arg("nopass"));
+
     qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
 #else
     p.setArguments(QStringList() << "gen-req" << clientId << "nopass");

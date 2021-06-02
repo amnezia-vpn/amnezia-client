@@ -1,16 +1,12 @@
 var requestToQuitFromApp = false;
 var updaterCompleted = 0;
-var desktopAppProcessRunning = false; 
+var desktopAppProcessRunning = false;
 var appInstalledUninstallerPath;
+var appInstalledUninstallerPath_x86;
 
 function appName()
 {
     return installer.value("Name");
-}
-
-function appAlreadyInstalled()
-{
-    return installer.fileExists(appInstalledUninstallerPath);
 }
 
 function appExecutableFileName()
@@ -25,12 +21,13 @@ function appExecutableFileName()
 function appInstalled()
 {
     if (runningOnWindows()) {
-        appInstalledUninstallerPath = installer.value("TargetDir") + "\\maintenancetool.exe";
+        appInstalledUninstallerPath = installer.value("RootDir") + "Program Files/AmneziaVPN/maintenancetool.exe";
+        appInstalledUninstallerPath_x86 = installer.value("RootDir") + "Program Files (x86)/AmneziaVPN/maintenancetool.exe";
     } else if (runningOnMacOS()){
         appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
     }
 
-    return appAlreadyInstalled();
+    return installer.fileExists(appInstalledUninstallerPath) || installer.fileExists(appInstalledUninstallerPath_x86);
 }
 
 function endsWith(str, suffix)
@@ -249,14 +246,25 @@ function Controller () {
             installer.setMessageBoxAutomaticAnswer("OverwriteTargetDirectory", QMessageBox.Yes);
         }
 
-        if (appAlreadyInstalled()) {
+        if (appInstalled()) {
             if (QMessageBox.Ok === QMessageBox.information("os.information", appName(),
                                                            qsTr("The application is already installed.") + " " +
                                                            qsTr("We need to remove the old installation first. Do you wish to proceed?"),
                                                            QMessageBox.Ok | QMessageBox.Cancel)) {
 
-                if (appAlreadyInstalled()) {
-                    var resultArray = installer.execute(appInstalledUninstallerPath);
+
+                if (appInstalled()) {
+                    var resultArray = [];
+
+                    if (installer.fileExists(appInstalledUninstallerPath_x86)) {
+                        console.log("Starting uninstallation " + appInstalledUninstallerPath_x86);
+                        resultArray = installer.execute(appInstalledUninstallerPath_x86);
+                    }
+
+                    if (installer.fileExists(appInstalledUninstallerPath)) {
+                        console.log("Starting uninstallation " + appInstalledUninstallerPath);
+                        resultArray = installer.execute(appInstalledUninstallerPath);
+                    }
 
                     console.log("Uninstaller finished with code: " + resultArray[1])
 
@@ -265,7 +273,7 @@ function Controller () {
                         installer.setCancelled();
                         return;
                     } else {
-                        for (var i = 0; i < 100; i++) {
+                        for (var i = 0; i < 300; i++) {
                             sleep(100);
                             if (!installer.fileExists(appInstalledUninstallerPath)) {
                                 break;
