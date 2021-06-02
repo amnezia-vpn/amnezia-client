@@ -14,6 +14,7 @@ jobs:
       
       env:
         - QT_VERSION=5.15.2
+        - QIF_VERSION=4.1
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
         - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/4.0/bin
          
@@ -21,9 +22,11 @@ jobs:
         - |
           if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
           brew install p7zip && \
-          pip3 install aqtinstall requests py7zr && \
+          python3 -m pip install --upgrade pip && \
+          pip install -U aqtinstall requests py7zr && \
+          pip show aqtinstall && \
           python3 -m aqt install --outputdir $HOME/Qt $QT_VERSION mac desktop clang_64 -m qtbase && \
-          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw 4.1 qt.tools.ifw.41;
+          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./};
           fi
         - bash deploy/build_macos.sh 
 
@@ -43,7 +46,10 @@ jobs:
       env:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
         - QT_VERSION=5.14.2
-        - BUILD_ARCH="64"
+        - QIF_VERSION=4.1
+        - QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2017_64\\bin"
+        - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\$QIF_VERSION\\bin"
+        - BUILD_ARCH=64
         
       before_install:
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then choco install python --version 3.9.1; fi
@@ -53,9 +59,11 @@ jobs:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then \
-          pip3 install aqtinstall requests py7zr && \
-          python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017_64 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1 qt.tools.ifw.41; \
+          python -m pip install --upgrade pip && \
+          pip3 install -U aqtinstall requests py7zr && \
+          pip3 show aqtinstall && \
+          python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win64_msvc2017_64 -m qtbase && \
+          python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
           fi
         - bash deploy/build_windows.sh
         
@@ -75,7 +83,10 @@ jobs:
       env:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
         - QT_VERSION=5.14.2
-        - BUILD_ARCH="32"
+        - QIF_VERSION=4.1
+        - QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2017\\bin"
+        - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\$QIF_VERSION\\bin"
+        - BUILD_ARCH=32
 
       before_install:
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
@@ -85,9 +96,11 @@ jobs:
         - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then \
-          pip3 install aqtinstall requests py7zr && \
+          python -m pip install --upgrade pip && \
+          pip3 install -U aqtinstall requests py7zr && \
+          pip3 show aqtinstall && \
           python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw 4.1 qt.tools.ifw.41; \
+          python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
           fi
           - bash deploy/build_windows.sh
 
