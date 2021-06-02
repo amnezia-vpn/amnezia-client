@@ -65,10 +65,11 @@ jobs:
           python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win64_msvc2017_64 -m qtbase && \
           python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
           fi
-        - echo set BUILD_ARCH=$BUILD_ARCH >> winbuild.bat
+        - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\"" >> winbuild.bat
         - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
@@ -109,10 +110,11 @@ jobs:
           python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017 -m qtbase && \
           python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
           fi
+        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\"" > winbuild.bat
         - echo set BUILD_ARCH=$BUILD_ARCH >> winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
         - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
