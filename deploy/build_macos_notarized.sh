@@ -30,7 +30,12 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}_unsigned.dmg
 
 # Seacrh Qt
-if [ -z "${QT_VERSION+x}" ]; then export QT_VERSION=5.15.2; fi
+if [ -z "${QT_VERSION+x}" ]; then
+QT_VERSION=5.15.2;
+QIF_VERSION=4.1
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
+QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+fi
 
 echo "Using Qt in $QT_BIN_DIR"
 echo "Using QIF in $QIF_BIN_DIR"
