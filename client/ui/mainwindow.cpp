@@ -1760,7 +1760,6 @@ void MainWindow::onConnect()
 
 
     const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-
     onConnectWorker(serverIndex, credentials, container, containerConfig);
 }
 
@@ -1832,9 +1831,12 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
 
     const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo){
         const QList<QHostAddress> &addresses = hostInfo.addresses();
-        if (!addresses.isEmpty()) {
-            //qDebug() << "Resolved address for" << hostInfo.hostName() << addresses.first().toString();
-            cbProcess(hostInfo.hostName(), addresses.first().toString());
+        QString ipv4Addr;
+        for (const QHostAddress &addr: hostInfo.addresses()) {
+            if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
+                cbProcess(hostInfo.hostName(),addr.toString());
+                break;
+            }
         }
     };
 
@@ -1847,7 +1849,7 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
     else {
         cbProcess(newSite, "");
         updateSitesPage();
-        int reqId = QHostInfo::lookupHost(newSite, this, cbResolv);
+        QHostInfo::lookupHost(newSite, this, cbResolv);
     }
 }
 
@@ -1875,6 +1877,9 @@ void MainWindow::updateSitesPage()
 {
     Settings::RouteMode m = m_settings.routeMode();
     if (m == Settings::VpnAllSites) return;
+
+    if (m == Settings::VpnOnlyForwardSites) ui->label_sites_add_custom->setText(tr("These sites will be opened using VPN"));
+    if (m == Settings::VpnAllExceptSites) ui->label_sites_add_custom->setText(tr("These sites will be excepted from VPN"));
 
     ui->tableView_sites->setModel(sitesModels.value(m));
     sitesModels.value(m)->resetCache();
@@ -1917,6 +1922,7 @@ void MainWindow::updateServerPage()
 
     ui->pushButton_server_settings_clear->setVisible(m_settings.haveAuthData(selectedServerIndex));
     ui->pushButton_server_settings_clear_client_cache->setVisible(m_settings.haveAuthData(selectedServerIndex));
+    ui->pushButton_server_settings_share_full->setVisible(m_settings.haveAuthData(selectedServerIndex));
 
     QJsonObject server = m_settings.server(selectedServerIndex);
     QString port = server.value(config_key::port).toString();

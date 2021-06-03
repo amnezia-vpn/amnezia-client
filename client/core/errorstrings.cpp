@@ -42,6 +42,7 @@ QString errorString(ErrorCode code){
 
     // VPN errors
     case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");
+    case (OpenVpnTapAdapterError): return QObject::tr("Can't setup OpenVPN TAP network adapter");
 
     case(InternalError):
     default:

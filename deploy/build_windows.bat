@@ -99,8 +99,10 @@ cd "%RELEASE_DIR:"=%\installer"
 echo "Creating installer..."
 "%QIF_BIN_DIR:"=%\binarycreator" --offline-only -v -c config\windows.xml -p packages -f %TARGET_FILENAME%
 
+timeout 5
+
 cd %PROJECT_DIR%
-signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 %TARGET_FILENAME%
+signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%"
 
 echo "Finished, see %TARGET_FILENAME%"
 exit 0

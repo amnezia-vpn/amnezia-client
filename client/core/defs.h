@@ -55,6 +55,7 @@ enum ErrorCode
     // VPN errors
     OpenVpnAdaptersInUseError,
     OpenVpnUnknownError,
+    OpenVpnTapAdapterError,
 
     // 3rd party utils errors
     OpenVpnExecutableCrashed,

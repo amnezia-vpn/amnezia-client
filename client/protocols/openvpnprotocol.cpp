@@ -54,7 +54,7 @@ ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
         QRemoteObjectPendingReply<bool> resultInstall = IpcClient::Interface()->checkAndInstallDriver();
         resultInstall.waitForFinished();
 
-        if (!resultInstall.returnValue()) return ErrorCode::OpenVpnUnknownError;
+        if (!resultInstall.returnValue()) return ErrorCode::OpenVpnTapAdapterError;
     }
     return ErrorCode::NoError;
 }
@@ -288,52 +288,11 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
     for (const QString &l : params) {
         if (l.contains("ifconfig")) {
             if (l.split(" ").size() == 3) {
-                m_vpnAddress = l.split(" ").at(1);
+                m_vpnLocalAddress = l.split(" ").at(1);
                 m_vpnGateway = l.split(" ").at(2);
 
-                qDebug() << QString("Set vpn address %1, gw %2").arg(m_vpnAddress).arg(vpnGateway());
+                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }
         }
     }
-
-//    QProcess ipconfig;
-//    ipconfig.start("ipconfig", QStringList() << "/all");
-//    ipconfig.waitForStarted();
-//    ipconfig.waitForFinished();
-
-//    QString d = ipconfig.readAll();
-//    d.replace("\r", "");
-//    //qDebug().noquote() << d;
-
-//    QStringList adapters = d.split(":\n");
-
-//    bool isTapV9Present = false;
-//    QString tapV9;
-//    for (int i = 0; i < adapters.size(); ++i) {
-//        if (adapters.at(i).contains("TAP-Windows Adapter V9")) {
-//            isTapV9Present = true;
-//            tapV9 = adapters.at(i);
-//            break;
-//        }
-//    }
-//    if (!isTapV9Present) {
-//        m_vpnGateway = "";
-//    }
-
-//    QStringList lines = tapV9.split("\n");
-//    for (int i = 0; i < lines.size(); ++i) {
-//        if (!lines.at(i).contains("DHCP")) continue;
-
-//        QRegularExpression re("(: )([\\d\\.]+)($)");
-//        QRegularExpressionMatch match = re.match(lines.at(i));
-
-//        if (match.hasMatch()) {
-//            qDebug().noquote() << "Current VPN Gateway IP Address: " << match.captured(0);
-//            m_vpnGateway = match.captured(2);
-//            return;
-//        }
-//        else continue;
-//    }
-
-//    m_vpnGateway = "";
 }
