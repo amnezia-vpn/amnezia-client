@@ -16,6 +16,11 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
+    if (!Utils::checkIPFormat(ip) || !Utils::checkIPFormat(gw)) {
+        qCritical().noquote() << "Critical, trying to add invalid route: " << ip << gw;
+        return false;
+    }
+
     QString cmd;
     if (mask == "255.255.255.255") {
         cmd = QString("route add -host %1 %2").arg(ip).arg(gw);
@@ -69,6 +74,10 @@ bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
+    if (!Utils::checkIPFormat(ip) || !Utils::checkIPFormat(gw)) {
+        qCritical().noquote() << "Critical, trying to remove invalid route: " << ip << gw;
+        return false;
+    }
 
     if (ip == "0.0.0.0") {
         qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;

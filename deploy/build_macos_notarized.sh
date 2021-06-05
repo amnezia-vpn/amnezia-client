@@ -122,6 +122,7 @@ $QIF_BIN_DIR/binarycreator --offline-only -v -c $BUILD_DIR/installer/config/maco
 
 if [ "${MAC_CERT_PW+x}" ]; then
 echo "Signing installer bundle..."
+security unlock-keychain -p $TEMP_PASS $KEYCHAIN
 /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $INSTALLER_BUNDLE_DIR
 /usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
 
@@ -141,6 +142,7 @@ hdiutil create -volname $APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app 
 
 if [ "${MAC_CERT_PW+x}" ]; then
 echo "Signing DMG installer..."
+security unlock-keychain -p $TEMP_PASS $KEYCHAIN
 /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $DMG_FILENAME
 /usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
 
