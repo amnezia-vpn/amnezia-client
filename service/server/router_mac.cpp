@@ -16,7 +16,7 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
-    if (!Utils::checkIPFormat(ip) || !Utils::checkIPFormat(gw)) {
+    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to add invalid route: " << ip << gw;
         return false;
     }
@@ -74,7 +74,7 @@ bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
-    if (!Utils::checkIPFormat(ip) || !Utils::checkIPFormat(gw)) {
+    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to remove invalid route: " << ip << gw;
         return false;
     }

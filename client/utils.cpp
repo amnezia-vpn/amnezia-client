@@ -139,30 +139,26 @@ QString Utils::getStringBetween(const QString& s, const QString& a, const QStrin
     return s.mid(ap, bp - ap).trimmed();
 }
 
-bool Utils::checkIPFormat(const QString& ip)
+bool Utils::checkIPv4Format(const QString& ip)
 {
+    if (ip.isEmpty()) return false;
     int count = ip.count(".");
-    if(count != 3)
-        return false;
+    if(count != 3) return false;
 
-    QStringList list = ip.trimmed().split(".");
-    for (const QString &it : list) {
-        if(it.toInt() <= 255 && it.toInt() >= 0)
-            continue;
-        return false;
-    }
-    return true;
+    QHostAddress addr(ip);
+    return  (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol);
 }
 
 bool Utils::checkIpSubnetFormat(const QString &ip)
 {
-    if (!ip.contains("/")) return checkIPFormat(ip);
+    if (!ip.contains("/")) return checkIPv4Format(ip);
 
     QStringList parts = ip.split("/");
     if (parts.size() != 2) return false;
 
     bool ok;
-    if (parts.at(1).toInt(&ok) <= 32 && ok) return checkIPFormat(parts.at(0));
+    int subnet = parts.at(1).toInt(&ok);
+    if (subnet >= 0 && subnet <= 32 && ok) return checkIPv4Format(parts.at(0));
     else return false;
 }
 

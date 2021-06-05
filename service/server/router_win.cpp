@@ -35,6 +35,11 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 //                          .arg(ips.join("\n"));
 
 
+    if (!Utils::checkIPv4Format(gw)) {
+        qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
+        return 0;
+    }
+
     PMIB_IPFORWARDTABLE pIpForwardTable = NULL;
     DWORD dwSize = 0;
     BOOL bOrder = FALSE;
@@ -99,12 +104,18 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     ipfrow.dwForwardMetric5 = 0;
 
     for (int i = 0; i < ips.size(); ++i) {
-        QString ip = ips.at(i);
-        if (ip.isEmpty()) continue;
+        QString ipWithMask = ips.at(i);
+        QString ip = Utils::ipAddressFromIpWithSubnet(ipWithMask);
+
+        if (!Utils::checkIPv4Format(ip)) {
+            qCritical().noquote() << "Critical, trying to add invalid route, ip: " << ip;
+            continue;
+        }
+
         QString mask = Utils::netMaskFromIpWithSubnet(ip);
 
         // address
-        ipfrow.dwForwardDest = inet_addr(Utils::ipAddressFromIpWithSubnet(ip).toStdString().c_str());
+        ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());
 
         // mask
         in_addr maskAddr;

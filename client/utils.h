@@ -22,7 +22,7 @@ public:
 
     static QString getIPAddress(const QString& host);
     static QString getStringBetween(const QString& s, const QString& a, const QString& b);
-    static bool checkIPFormat(const QString& ip);
+    static bool checkIPv4Format(const QString& ip);
     static bool checkIpSubnetFormat(const QString& ip);
     static QRegExp ipAddressRegExp() { return QRegExp("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$"); }
     static QRegExp ipAddressPortRegExp() { return QRegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"

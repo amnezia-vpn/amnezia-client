@@ -225,15 +225,6 @@ void Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip
 
     sites.insert(site, ip);
     setVpnSites(mode, sites);
-
-//    QStringList l = sites.value(site).toStringList();
-//    if (!l.contains(ip)) {
-//        if (!ip.isEmpty()) l.append(ip);
-//        //l.append(ip);
-//        sites.insert(site, l);
-//        setVpnSites(mode, sites);
-//        qDebug() << "sites after" << vpnSites(mode);
-//    }
 }
 
 QStringList Settings::getVpnIps(RouteMode mode) const
@@ -241,10 +232,10 @@ QStringList Settings::getVpnIps(RouteMode mode) const
     QStringList ips;
     const QVariantMap &m = vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (Utils::checkIPFormat(i.key())) {
+        if (Utils::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         }
-        else if (Utils::checkIPFormat(i.value().toString())) {
+        else if (Utils::checkIpSubnetFormat(i.value().toString())) {
             ips.append(i.value().toString());
         }
     }

@@ -1143,13 +1143,17 @@ void MainWindow::setupSitesPageConnections()
             m_settings.removeVpnSites(mode, sites);
         }
 
-
         if (m_vpnConnection->connectionState() == VpnProtocol::Connected) {
             QModelIndexList indexesIps = selection->selectedRows(1);
 
             QStringList ips;
             for (const QModelIndex &index : indexesIps) {
-                ips.append(index.data().toString());
+                if (index.data().toString().isEmpty()) {
+                    ips.append(index.sibling(index.row(), 0).data().toString());
+                }
+                else {
+                    ips.append(index.data().toString());
+                }
             }
 
             m_vpnConnection->deleteRoutes(ips);
@@ -1816,15 +1820,13 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
         newSite = newSite.split("/", QString::SkipEmptyParts).first();
     }
 
-    qDebug() << "Adding site" << newSite;
-
-    //qDebug() << "sites:" << m_settings.vpnSites(mode);
-
     const auto &cbProcess = [this, mode](const QString &newSite, const QString &ip) {
         m_settings.addVpnSite(mode, newSite, ip);
 
-        m_vpnConnection->addRoutes(QStringList() << ip);
-        m_vpnConnection->flushDns();
+        if (!ip.isEmpty()) {
+            m_vpnConnection->addRoutes(QStringList() << ip);
+            m_vpnConnection->flushDns();
+        }
 
         updateSitesPage();
     };
@@ -1834,7 +1836,7 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
         QString ipv4Addr;
         for (const QHostAddress &addr: hostInfo.addresses()) {
             if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                cbProcess(hostInfo.hostName(),addr.toString());
+                cbProcess(hostInfo.hostName(), addr.toString());
                 break;
             }
         }
@@ -1843,7 +1845,7 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
     ui->lineEdit_sites_add_custom->clear();
 
     if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-        cbProcess(newSite, newSite);
+        cbProcess(newSite, "");
         return;
     }
     else {

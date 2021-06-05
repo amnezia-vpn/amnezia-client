@@ -32,6 +32,6 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
     QString textCfg = ServerController::replaceVars(QJsonDocument(config).toJson(),
         ServerController::genVarsForScript(credentials, container, containerConfig));
 
-    qDebug().noquote() << textCfg;
+    //qDebug().noquote() << textCfg;
     return textCfg;
 }
