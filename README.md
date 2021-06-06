@@ -39,5 +39,11 @@ Look to the `build_macos.sh` and `build_windows.bat` scripts in `deploy` folder 
 GPL v.3
 
 ## Contacts
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - main support channel
-[https://amnezia.org](https://amnezia.org) - our website
+[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)
+[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
+[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel
+[https://amnezia.org](https://amnezia.org) - project website
+
+## Donate
+Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u
+Buy coffee for AmneziaVPN : [https://ko-fi.com/amnezia_vpn](https://ko-fi.com/amnezia_vpn)
