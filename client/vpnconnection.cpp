@@ -6,7 +6,9 @@
 #include <configurators/openvpn_configurator.h>
 #include <configurators/cloak_configurator.h>
 #include <configurators/shadowsocks_configurator.h>
+#include <configurators/wireguard_configurator.h>
 #include <core/servercontroller.h>
+#include <protocols/wireguardprotocol.h>
 
 #include "ipc.h"
 #include "core/ipcclient.h"
@@ -43,7 +45,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
         if (state == VpnProtocol::Connected){
             IpcClient::Interface()->flushDns();
 
-            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+            if (m_settings.routeMode() != Settings::VpnAllSites) {
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                 //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
@@ -55,6 +57,10 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), m_settings.getVpnIps(Settings::VpnOnlyForwardSites));
             }
             else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), m_settings.getVpnIps(Settings::VpnAllExceptSites));
             }
 
@@ -69,6 +75,11 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     }
 
     emit connectionStateChanged(state);
+}
+
+const QString &VpnConnection::remoteAddress() const
+{
+    return m_remoteAddress;
 }
 
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
@@ -159,6 +170,10 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
             configData = ShadowSocksConfigurator::genShadowSocksConfig(credentials,
                 container, containerConfig, &e);
         }
+        else if (proto == Protocol::WireGuard) {
+            configData = WireguardConfigurator::genWireguardConfig(credentials,
+                container, containerConfig, &e);
+        }
 
         if (errorCode && e) {
             *errorCode = e;
@@ -197,7 +212,7 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
             return errorCode;
         }
 
-        QFile file(Utils::defaultVpnConfigFileName());
+        QFile file(OpenVpnProtocol::defaultConfigFileName());
         if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
             QTextStream stream(&file);
             stream << openVpnConfigData << endl;
@@ -226,6 +241,13 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
         m_vpnConfiguration.insert(config::key_cloak_config_data, cloakConfigData);
     }
 
+    if (container == DockerContainer::WireGuard) {
+        QString wgConfigData = createVpnConfigurationForProto(
+                    serverIndex, credentials, container, containerConfig, Protocol::WireGuard, &errorCode);
+
+        m_vpnConfiguration.insert(config::key_wireguard_config_data, wgConfigData);
+    }
+
     //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
     return ErrorCode::NoError;
 }
@@ -233,11 +255,15 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
 ErrorCode VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
-    qDebug() << "СonnectToVpn, Route mode is" << m_settings.routeMode();
+    qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
+                .arg(serverIndex).arg(containerToString(container)) << m_settings.routeMode();
+    m_remoteAddress = credentials.hostName;
 
     emit connectionStateChanged(VpnProtocol::Connecting);
 
-    ServerController::setupServerFirewall(credentials);
+    if (credentials.isValid()) {
+        ServerController::setupServerFirewall(credentials);
+    }
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
@@ -286,6 +312,15 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
             emit connectionStateChanged(VpnProtocol::Error);
             return e;
         }
+    }
+    else if (container == DockerContainer::WireGuard) {
+        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::WireGuard, containerConfig);
+        if (e) {
+            emit connectionStateChanged(VpnProtocol::Error);
+            return e;
+        }
+
+        m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
     }
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);

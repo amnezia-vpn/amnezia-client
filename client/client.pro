@@ -15,7 +15,9 @@ HEADERS  += \
     ../ipc/ipc.h \
    configurators/cloak_configurator.h \
    configurators/shadowsocks_configurator.h \
+   configurators/ssh_configurator.h \
    configurators/vpn_configurator.h \
+   configurators/wireguard_configurator.h \
     core/defs.h \
     core/errorstrings.h \
     core/ipcclient.h \
@@ -29,6 +31,7 @@ HEADERS  += \
    protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
     protocols/shadowsocksvpnprotocol.h \
+   protocols/wireguardprotocol.h \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
     ui/mainwindow.h \
@@ -43,7 +46,9 @@ HEADERS  += \
 SOURCES  += \
    configurators/cloak_configurator.cpp \
    configurators/shadowsocks_configurator.cpp \
+   configurators/ssh_configurator.cpp \
    configurators/vpn_configurator.cpp \
+   configurators/wireguard_configurator.cpp \
    core/errorstrings.cpp \
     core/ipcclient.cpp \
     configurators/openvpn_configurator.cpp \
@@ -56,6 +61,7 @@ SOURCES  += \
    protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
+   protocols/wireguardprotocol.cpp \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
     ui/mainwindow.cpp \

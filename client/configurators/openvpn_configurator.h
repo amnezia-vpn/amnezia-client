@@ -28,8 +28,6 @@ public:
     static QString processConfigWithLocalSettings(QString config);
     static QString processConfigWithExportSettings(QString config);
 
-    static QString convertOpenSShKey(const QString &key);
-
     static ErrorCode signCert(DockerContainer container,
         const ServerCredentials &credentials, QString clientId);
 

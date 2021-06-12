@@ -5,12 +5,16 @@
 #include <QTcpSocket>
 
 #include "debug.h"
-#include "openvpnprotocol.h"
+#include "defines.h"
 #include "utils.h"
+#include "openvpnprotocol.h"
+
 
 OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
 {
+    Utils::initializePath(defaultConfigPath());
+
     readOpenVpnConfiguration(configuration);
     connect(&m_managementServer, &ManagementServer::readyRead, this, &OpenVpnProtocol::onReadyReadDataFromManagementServer);
 }
@@ -20,6 +24,17 @@ OpenVpnProtocol::~OpenVpnProtocol()
     qDebug() << "OpenVpnProtocol::~OpenVpnProtocol()";
     OpenVpnProtocol::stop();
     QThread::msleep(200);
+}
+
+QString OpenVpnProtocol::defaultConfigFileName()
+{
+    qDebug() << "OpenVpnProtocol::defaultConfigFileName" << defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
+    return defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
+}
+
+QString OpenVpnProtocol::defaultConfigPath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config";
 }
 
 void OpenVpnProtocol::stop()
@@ -81,7 +96,7 @@ void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
         QFileInfo file(m_configFileName);
 
         if (file.fileName().isEmpty()) {
-            m_configFileName = Utils::defaultVpnConfigFileName();
+            m_configFileName = defaultConfigFileName();
         }
 
         qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());

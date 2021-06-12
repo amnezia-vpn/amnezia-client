@@ -13,8 +13,6 @@ class Utils {
 public:
     static QString getRandomString(int len);
 
-    static QString configPath();
-    static QString defaultVpnConfigFileName();
     static QString executable(const QString& baseName, bool absPath);
     static QString systemLogPath();
     static bool createEmptyFile(const QString& path);

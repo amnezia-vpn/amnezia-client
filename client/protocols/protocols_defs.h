@@ -36,7 +36,7 @@ constexpr char block_outside_dns[] = "block_outside_dns";
 
 constexpr char subnet_address[] = "subnet_address";
 constexpr char subnet_mask[] = "subnet_mask";
-constexpr char subnet_mask_val[] = "subnet_mask_val";
+constexpr char subnet_cidr[] = "subnet_cidr";
 
 // proto config keys
 constexpr char last_config[] = "last_config";
@@ -55,14 +55,16 @@ constexpr char amnezia_wireguard[] = "amnezia-wireguard";
 
 namespace protocols {
 
-constexpr char vpnDefaultSubnetAddress[] = "10.8.0.0";
-constexpr char vpnDefaultSubnetMask[] = "255.255.255.0";
-constexpr char vpnDefaultSubnetMaskVal[] = "24";
+
 
 constexpr char UDP[] = "udp"; // case sens
 constexpr char TCP[] = "tcp";
 
 namespace openvpn {
+constexpr char defaultSubnetAddress[] = "10.8.0.0";
+constexpr char defaultSubnetMask[] = "255.255.255.0";
+constexpr char defaultSubnetCidr[] = "24";
+
 constexpr char caCertPath[] = "/opt/amnezia/openvpn/pki/ca.crt";
 constexpr char clientCertPath[] = "/opt/amnezia/openvpn/pki/issued";
 constexpr char taKeyPath[] = "/opt/amnezia/openvpn/ta.key";
@@ -96,6 +98,17 @@ constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
 
 }
 
+namespace wireguard {
+constexpr char defaultSubnetAddress[] = "10.8.1.0";
+constexpr char defaultSubnetMask[] = "255.255.255.0";
+constexpr char defaultSubnetCidr[] = "24";
+
+constexpr char defaultPort[] = "51820";
+constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
+constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
+constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
+
+}
 
 
 } // namespace protocols

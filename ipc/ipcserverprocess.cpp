@@ -7,6 +7,7 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
 {
     connect(m_process.data(), &QProcess::errorOccurred, this, &IpcServerProcess::errorOccurred);
     connect(m_process.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IpcServerProcess::finished);
+    connect(m_process.data(), &QProcess::readyRead, this, &IpcServerProcess::readyRead);
     connect(m_process.data(), &QProcess::readyReadStandardError, this, &IpcServerProcess::readyReadStandardError);
     connect(m_process.data(), &QProcess::readyReadStandardOutput, this, &IpcServerProcess::readyReadStandardOutput);
     connect(m_process.data(), &QProcess::started, this, &IpcServerProcess::started);
@@ -86,6 +87,11 @@ void IpcServerProcess::setProgram(const QString &program)
 void IpcServerProcess::setWorkingDirectory(const QString &dir)
 {
     m_process->setWorkingDirectory(dir);
+}
+
+QByteArray IpcServerProcess::readAll()
+{
+    return m_process->readAll();
 }
 
 QByteArray IpcServerProcess::readAllStandardError()

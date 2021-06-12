@@ -7,7 +7,7 @@ ca /opt/amnezia/openvpn/ca.crt \\n\
 cert /opt/amnezia/openvpn/AmneziaReq.crt \\n\
 key /opt/amnezia/openvpn/AmneziaReq.key \\n\
 dh /opt/amnezia/openvpn/dh.pem \\n\
-server $VPN_SUBNET_IP $VPN_SUBNET_MASK \\n\
+server $OPENVPN_SUBNET_IP $OPENVPN_SUBNET_MASK \\n\
 ifconfig-pool-persist ipp.txt \\n\
 duplicate-cn \\n\
 keepalive 10 120 \\n\

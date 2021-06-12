@@ -16,11 +16,11 @@
 #include <QThread>
 #include <QTimer>
 
-
+#include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
 #include "configurators/openvpn_configurator.h"
 #include "configurators/shadowsocks_configurator.h"
-#include "configurators/cloak_configurator.h"
+#include "configurators/ssh_configurator.h"
 
 #include "core/servercontroller.h"
 #include "core/server_defs.h"
@@ -113,7 +113,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
 
-    Utils::initializePath(Utils::configPath());
 
     m_vpnConnection = new VpnConnection(this);
     connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
@@ -128,8 +127,6 @@ MainWindow::MainWindow(QWidget *parent) :
             onConnect();
         });
     }
-
-    qDebug().noquote() << QString("Default config: %1").arg(Utils::defaultVpnConfigFileName());
 
     m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
     m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
@@ -378,6 +375,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
         goToPage(Page::ServerVpnProtocols);
         break;
+    case Qt::Key_T:
+        SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
+        break;
     case Qt::Key_Escape:
         if (currentPage() == Page::Vpn) break;
         if (currentPage() == Page::ServerConfiguring) break;
@@ -470,7 +470,7 @@ void MainWindow::onPushButtonNewServerConnect(bool)
         }
 
         if (key.contains("OPENSSH") && key.contains("BEGIN") && key.contains("PRIVATE KEY")) {
-            key = OpenVpnConfigurator::convertOpenSShKey(key);
+            key = SshConfigurator::convertOpenSShKey(key);
         }
 
         serverCredentials.password = key;
@@ -1272,18 +1272,20 @@ void MainWindow::setupProtocolsPageConnections()
 {
     QJsonObject openvpnConfig;
 
-    // default buttons
+    // all containers
     QList<DockerContainer> containers {
         DockerContainer::OpenVpn,
         DockerContainer::OpenVpnOverShadowSocks,
-        DockerContainer::OpenVpnOverCloak
+        DockerContainer::OpenVpnOverCloak,
+        DockerContainer::WireGuard
     };
 
     // default buttons
     QList<QPushButton *> defaultButtons {
         ui->pushButton_proto_openvpn_cont_default,
         ui->pushButton_proto_ss_openvpn_cont_default,
-        ui->pushButton_proto_cloak_openvpn_cont_default
+        ui->pushButton_proto_cloak_openvpn_cont_default,
+        ui->pushButton_proto_wireguard_cont_default
     };
 
     for (int i = 0; i < containers.size(); ++i) {
@@ -1297,7 +1299,8 @@ void MainWindow::setupProtocolsPageConnections()
     QList<QPushButton *> installButtons {
         ui->pushButton_proto_openvpn_cont_install,
         ui->pushButton_proto_ss_openvpn_cont_install,
-        ui->pushButton_proto_cloak_openvpn_cont_install
+        ui->pushButton_proto_cloak_openvpn_cont_install,
+        ui->pushButton_proto_wireguard_cont_install
     };
 
     for (int i = 0; i < containers.size(); ++i) {
@@ -1338,7 +1341,8 @@ void MainWindow::setupProtocolsPageConnections()
     QList<QPushButton *> shareButtons {
         ui->pushButton_proto_openvpn_cont_share,
         ui->pushButton_proto_ss_openvpn_cont_share,
-        ui->pushButton_proto_cloak_openvpn_cont_share
+        ui->pushButton_proto_cloak_openvpn_cont_share,
+        ui->pushButton_proto_wireguard_cont_share
     };
 
     for (int i = 0; i < containers.size(); ++i) {
@@ -1827,6 +1831,10 @@ void MainWindow::onPushButtonAddCustomSitesClicked()
             m_vpnConnection->addRoutes(QStringList() << ip);
             m_vpnConnection->flushDns();
         }
+        else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
+            m_vpnConnection->addRoutes(QStringList() << newSite);
+            m_vpnConnection->flushDns();
+        }
 
         updateSitesPage();
     };
@@ -1961,33 +1969,58 @@ void MainWindow::updateProtocolsPage()
     ui->progressBar_protocols_container_reinstall->hide();
 
     auto containers = m_settings.containers(selectedServerIndex);
-
+    DockerContainer defaultContainer = m_settings.defaultContainer(selectedServerIndex);
     bool haveAuthData = m_settings.haveAuthData(selectedServerIndex);
 
-    DockerContainer defaultContainer = m_settings.defaultContainer(selectedServerIndex);
-    ui->pushButton_proto_cloak_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpnOverCloak);
-    ui->pushButton_proto_ss_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpnOverShadowSocks);
-    ui->pushButton_proto_openvpn_cont_default->setChecked(defaultContainer == DockerContainer::OpenVpn);
+    // all containers
+    QList<DockerContainer> allContainers {
+        DockerContainer::OpenVpn,
+        DockerContainer::OpenVpnOverShadowSocks,
+        DockerContainer::OpenVpnOverCloak,
+        DockerContainer::WireGuard
+    };
 
-    ui->pushButton_proto_cloak_openvpn_cont_default->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpnOverCloak));
-    ui->pushButton_proto_ss_openvpn_cont_default->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpnOverShadowSocks));
-    ui->pushButton_proto_openvpn_cont_default->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpn));
+    // install buttons
+    QList<QPushButton *> installButtons {
+        ui->pushButton_proto_openvpn_cont_install,
+        ui->pushButton_proto_ss_openvpn_cont_install,
+        ui->pushButton_proto_cloak_openvpn_cont_install,
+        ui->pushButton_proto_wireguard_cont_install
+    };
 
-    ui->pushButton_proto_cloak_openvpn_cont_share->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpnOverCloak));
-    ui->pushButton_proto_ss_openvpn_cont_share->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpnOverShadowSocks));
-    ui->pushButton_proto_openvpn_cont_share->setVisible(haveAuthData && containers.contains(DockerContainer::OpenVpn));
+    // default buttons
+    QList<QPushButton *> defaultButtons {
+        ui->pushButton_proto_openvpn_cont_default,
+        ui->pushButton_proto_ss_openvpn_cont_default,
+        ui->pushButton_proto_cloak_openvpn_cont_default,
+        ui->pushButton_proto_wireguard_cont_default
+    };
 
-    ui->pushButton_proto_cloak_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpnOverCloak));
-    ui->pushButton_proto_ss_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
-    ui->pushButton_proto_openvpn_cont_install->setChecked(containers.contains(DockerContainer::OpenVpn));
+    // share buttons
+    QList<QPushButton *> shareButtons {
+        ui->pushButton_proto_openvpn_cont_share,
+        ui->pushButton_proto_ss_openvpn_cont_share,
+        ui->pushButton_proto_cloak_openvpn_cont_share,
+        ui->pushButton_proto_wireguard_cont_share
+    };
 
-    ui->pushButton_proto_cloak_openvpn_cont_install->setEnabled(haveAuthData);
-    ui->pushButton_proto_ss_openvpn_cont_install->setEnabled(haveAuthData);
-    ui->pushButton_proto_openvpn_cont_install->setEnabled(haveAuthData);
+    // frames
+    QList<QFrame *> frames {
+        ui->frame_openvpn_settings,
+        ui->frame_openvpn_ss_settings,
+        ui->frame_openvpn_ss_cloak_settings,
+        ui->frame_wireguard_settings
+    };
 
-    ui->frame_openvpn_ss_cloak_settings->setVisible(containers.contains(DockerContainer::OpenVpnOverCloak));
-    ui->frame_openvpn_ss_settings->setVisible(containers.contains(DockerContainer::OpenVpnOverShadowSocks));
-    ui->frame_openvpn_settings->setVisible(containers.contains(DockerContainer::OpenVpn));
+    for (int i = 0; i < allContainers.size(); ++i) {
+        defaultButtons.at(i)->setChecked(defaultContainer == allContainers.at(i));
+        defaultButtons.at(i)->setVisible(haveAuthData && containers.contains(allContainers.at(i)));
+        shareButtons.at(i)->setVisible(haveAuthData && containers.contains(allContainers.at(i)));
+        installButtons.at(i)->setChecked(containers.contains(allContainers.at(i)));
+        installButtons.at(i)->setEnabled(haveAuthData);
+        frames.at(i)->setVisible(containers.contains(allContainers.at(i)));
+
+    }
 }
 
 void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
@@ -2000,7 +2033,7 @@ void MainWindow::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerConta
     ui->radioButton_proto_openvpn_tcp->setEnabled(true);
 
     ui->lineEdit_proto_openvpn_subnet->setText(openvpnConfig.value(config_key::subnet_address).
-        toString(protocols::vpnDefaultSubnetAddress));
+        toString(protocols::openvpn::defaultSubnetAddress));
 
     QString trasnsport = openvpnConfig.value(config_key::transport_proto).
         toString(protocols::openvpn::defaultTransportProto);
