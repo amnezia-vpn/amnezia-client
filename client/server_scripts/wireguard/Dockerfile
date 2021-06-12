@@ -1,5 +1,4 @@
-#FROM alpine:latest
-FROM itsthenetwork/alpine-tcpdump:latest
+FROM alpine:latest
 
 LABEL maintainer="AmneziaVPN"
 
