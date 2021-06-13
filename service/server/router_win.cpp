@@ -297,7 +297,7 @@ void RouterWin::suspendWcmSvc(bool suspend)
     DWORD wcmSvcPid = GetServicePid(std::wstring(L"wcmSvc").c_str());
 
     //ListProcessThreads(wcmSvcPid);
-    BOOL ok = SuspendProcess(suspend, wcmSvcPid);
+    BOOL ok = StopProcessThreads(suspend, wcmSvcPid);
     if (ok) {
         m_suspended = suspend;
     }
@@ -305,7 +305,6 @@ void RouterWin::suspendWcmSvc(bool suspend)
     qDebug() << "RouterWin::routeAddList" <<
                 (ok ? "succeed to" : "failed to") <<
                 (suspend ? "suspend wcmSvc" : "resume wcmSvc");
-
 }
 
 DWORD RouterWin::GetServicePid(LPCWSTR serviceName)
@@ -373,6 +372,50 @@ BOOL RouterWin::ListProcessThreads( DWORD dwOwnerPID )
   return( TRUE );
 }
 
+BOOL RouterWin::StopProcessThreads(BOOL fSuspend, DWORD dwOwnerPID )
+{
+  HANDLE hThreadSnap = INVALID_HANDLE_VALUE;
+  THREADENTRY32 te32;
+
+  //THREAD_INFORMATION_CLASS need check
+
+  // Take a snapshot of current process
+  hThreadSnap = CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, GetCurrentProcessId() );
+  if( hThreadSnap == INVALID_HANDLE_VALUE )
+    return( FALSE );
+
+  // Fill in the size of the structure before using it.
+  te32.dwSize = sizeof(THREADENTRY32);
+
+  // Retrieve information about the first thread,
+  // and exit if unsuccessful
+  if( !Thread32First( hThreadSnap, &te32 ) )
+  {
+    CloseHandle( hThreadSnap );          // clean the snapshot object
+    return( FALSE );
+  }
+
+  do
+  {
+    if( te32.th32OwnerProcessID == dwOwnerPID )
+    {
+        HANDLE threadHandle = OpenThread (PROCESS_QUERY_INFORMATION, FALSE, te32.th32ThreadID);
+        qDebug() << "Owner: "<< te32.th32OwnerProcessID << "OpenThread "
+                 << te32.th32ThreadID << " GetLastError: " << GetLastError() << " handle: " << threadHandle;
+        ULONG64 cycles = 0;
+        BOOL ok = QueryThreadCycleTime(threadHandle, &cycles);
+        qDebug() << "QueryThreadCycleTime GetLastError:" << ok << GetLastError();
+
+        qDebug() << "Thread cycles:" << te32.th32ThreadID << cycles;
+        SuspendThread(fSuspend, te32.th32ThreadID);
+        CloseHandle(threadHandle);
+    }
+  } while( Thread32Next(hThreadSnap, &te32 ) );
+
+  CloseHandle( hThreadSnap );
+  return( TRUE );
+}
+
 BOOL RouterWin::EnableDebugPrivilege(VOID)
 {
   HANDLE           hToken = NULL;
@@ -422,3 +465,13 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
     return ok;
 }
 
+BOOL RouterWin::SuspendThread(BOOL fSuspend, DWORD dwThreadId)
+{
+    HANDLE pHandle = OpenThread(PROCESS_SUSPEND_RESUME, FALSE, dwThreadId);
+    if (pHandle == NULL) return false;
+
+    bool ok = ((fSuspend ? NtSuspendProcess : NtResumeProcess)(pHandle) == STATUS_SUCCESS);
+    CloseHandle(pHandle);
+
+    return ok;
+}

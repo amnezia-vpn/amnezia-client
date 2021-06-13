@@ -49,9 +49,11 @@ private:
 
     DWORD GetServicePid(LPCWSTR serviceName);
     BOOL ListProcessThreads(DWORD dwOwnerPID);
+    BOOL StopProcessThreads(BOOL fSuspend, DWORD dwOwnerPID);
     BOOL EnableDebugPrivilege();
     BOOL InitNtFunctions();
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
+    BOOL SuspendThread(BOOL fSuspend, DWORD dwThreadId);
 
 
 private:
