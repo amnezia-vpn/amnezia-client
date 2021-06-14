@@ -441,13 +441,13 @@ BOOL RouterWin::InitNtFunctions(VOID)
   if (hModule == NULL)
     return FALSE;
 
-  //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
-  NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
+  NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
+  //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
   if (NtSuspendProcess == NULL)
     return FALSE;
 
-  //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
-  NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
+  NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
+  //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
   if (NtResumeProcess == NULL)
     return FALSE;
 
@@ -467,7 +467,7 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
 
 BOOL RouterWin::SuspendThread(BOOL fSuspend, DWORD dwThreadId)
 {
-    HANDLE pHandle = OpenThread(PROCESS_SUSPEND_RESUME, FALSE, dwThreadId);
+    HANDLE pHandle = OpenThread(THREAD_SUSPEND_RESUME, FALSE, dwThreadId);
     if (pHandle == NULL) return false;
 
     bool ok = ((fSuspend ? NtSuspendProcess : NtResumeProcess)(pHandle) == STATUS_SUCCESS);
