@@ -34,6 +34,11 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 //    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
 //                          .arg(ips.join("\n"));
 
+    //if (ips.size() > 500) suspendWcmSvc(true);
+    system("ipconfig /flushdns");
+    system("netsh int ip reset");
+    system("netsh int ipv4 reset");
+    system("netsh winsock reset");
 
     if (!Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
@@ -144,8 +149,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
     qDebug() << "Router::routeAddList finished, success: " << success_count << "/" << ips.size();
 
-    if (m_ipForwardRows.size() > 500) suspendWcmSvc(true);
-
     return success_count;
 }
 
@@ -165,12 +168,11 @@ bool RouterWin::clearSavedRoutes()
     dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     if (dwStatus == ERROR_INSUFFICIENT_BUFFER) {
         // Allocate the memory for the table
+        free(pIpForwardTable);
         if (!(pIpForwardTable = (PMIB_IPFORWARDTABLE) malloc(dwSize))) {
             qDebug() << "Router::clearSavedRoutes : Malloc failed. Out of memory";
             return false;
         }
-        // Now get the table.
-        dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
 
     if (dwStatus != ERROR_SUCCESS) {
@@ -197,8 +199,8 @@ bool RouterWin::clearSavedRoutes()
     qDebug() << "Router::clearSavedRoutes : removed routes:" << removed_count << "of" << m_ipForwardRows.size();
     m_ipForwardRows.clear();
 
-    suspendWcmSvc(false);
-
+    //suspendWcmSvc(false);
+    system("ipconfig /renew");
     return true;
 }
 
