@@ -1216,7 +1216,7 @@ void MainWindow::setupAppSettingsConnections()
 
     connect(ui->pushButton_app_settings_open_logs, &QPushButton::clicked, this, [this](){
         Debug::openLogsFolder();
-        QDesktopServices::openUrl(QUrl::fromLocalFile(Utils::systemLogPath()));
+        //QDesktopServices::openUrl(QUrl::fromLocalFile(Utils::systemLogPath()));
     });
 }
 
@@ -1566,6 +1566,17 @@ void MainWindow::setupSharePageConnections()
         });
     });
 
+    connect(ui->pushButton_share_full_save, &QPushButton::clicked, this, [this](){
+        if (ui->textEdit_share_full_code->toPlainText().isEmpty()) return;
+
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save AmneziaVPN config"),
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.amnezia");
+        QSaveFile save(fileName);
+        save.open(QIODevice::WriteOnly);
+        save.write(ui->textEdit_share_full_code->toPlainText().toUtf8());
+        save.commit();
+    });
+
     connect(ui->pushButton_share_amnezia_copy, &QPushButton::clicked, this, [this](){
         if (ui->textEdit_share_amnezia_code->toPlainText().isEmpty()) return;
 
@@ -1606,14 +1617,14 @@ void MainWindow::setupSharePageConnections()
         });
     });
 
-//    connect(ui->pushButton_share_cloak_copy, &QPushButton::clicked, this, [this](){
-//        QGuiApplication::clipboard()->setText(ui->textEdit_share_openvpn_code->toPlainText());
-//        ui->pushButton_share_cloak_copy->setText(tr("Copied"));
+    connect(ui->pushButton_share_cloak_copy, &QPushButton::clicked, this, [this](){
+        QGuiApplication::clipboard()->setText(ui->plainTextEdit_share_cloak->toPlainText());
+        ui->pushButton_share_cloak_copy->setText(tr("Copied"));
 
-//        QTimer::singleShot(3000, this, [this]() {
-//            ui->pushButton_share_cloak_copy->setText(tr("Copy"));
-//        });
-//    });
+        QTimer::singleShot(3000, this, [this]() {
+            ui->pushButton_share_cloak_copy->setText(tr("Copy"));
+        });
+    });
 
     connect(ui->pushButton_share_amnezia_generate, &QPushButton::clicked, this, [this](){
         ui->pushButton_share_amnezia_generate->setEnabled(false);
@@ -2129,22 +2140,11 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
         ui->pushButton_share_openvpn_copy->setEnabled(false);
         ui->pushButton_share_openvpn_save->setEnabled(false);
 
-//        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::OpenVpn);
-//        QString cfg = protoConfig.value(config_key::last_config).toString();
-//        if (!cfg.isEmpty()) {
-//            // TODO add redirect-gateway def1 bypass-dhcp here and on click Generate config
-//            ui->textEdit_share_openvpn_code->setPlainText(cfg);
-//        }
-//        else {
-//            cfg = tr("Press Generate config");
-//            ui->textEdit_share_openvpn_code->setPlainText(cfg);
-//            ui->pushButton_share_openvpn_copy->setEnabled(false);
-//            ui->pushButton_share_openvpn_save->setEnabled(false);
-//        }
         ui->toolBox_share_connection->setCurrentWidget(ui->page_share_openvpn);
     }
 
-    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+    if (container == DockerContainer::OpenVpnOverShadowSocks ||
+            container == DockerContainer::OpenVpnOverCloak) {
         ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
         ui->toolBox_share_connection->addItem(ui->page_share_shadowsocks, tr("  Share for ShadowSocks client"));
 
@@ -2185,7 +2185,27 @@ void MainWindow::updateSharingPage(int serverIndex, const ServerCredentials &cre
     }
 
     if (container == DockerContainer::OpenVpnOverCloak) {
-        ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
+        //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
+        ui->toolBox_share_connection->addItem(ui->page_share_cloak, tr("  Share for Cloak client"));
+        ui->plainTextEdit_share_cloak->setPlainText(QString(""));
+
+        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
+        QString cfg = protoConfig.value(config_key::last_config).toString();
+
+        if (cfg.isEmpty()) {
+            const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+            ErrorCode e = ErrorCode::NoError;
+            cfg = CloakConfigurator::genCloakConfig(credentials, container, containerConfig, &e);
+
+            ui->pushButton_share_cloak_copy->setEnabled(true);
+        }
+
+        QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+        cloakConfig.remove(config_key::transport_proto);
+        cloakConfig.insert("ProxyMethod", "shadowsocks");
+
+        ui->plainTextEdit_share_cloak->setPlainText(QJsonDocument(cloakConfig).toJson());
     }
 
     // Full access

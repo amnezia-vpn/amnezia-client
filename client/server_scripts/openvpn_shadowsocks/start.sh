@@ -25,4 +25,5 @@ killall -KILL ssserver
 # start daemons if configured
 if [ -f /opt/amnezia/openvpn/ca.crt ]; then (openvpn --config /opt/amnezia/openvpn/server.conf --daemon); fi
 if [ -f /opt/amnezia/shadowsocks/ss-config.json ]; then (ssserver -c /opt/amnezia/shadowsocks/ss-config.json &); fi
+
 tail -f /dev/null

@@ -37,9 +37,13 @@ echo $CLOAK_PRIVATE_KEY > /opt/amnezia/cloak/cloak_private.key; \
 echo -e "{\\n\
   \"ProxyBook\": {\\n\
      \"openvpn\": [\\n\
-      \"$OPENVPN_TRANSPORT_PROTO\",\\n\
-      \"localhost:$OPENVPN_PORT\"\\n\
-    ]\\n\
+     \"$OPENVPN_TRANSPORT_PROTO\",\\n\
+     \"localhost:$OPENVPN_PORT\"\\n\
+    ],\\n\
+     \"shadowsocks\": [\\n\
+     \"tcp\",\\n\
+     \"localhost:$SHADOWSOCKS_SERVER_PORT\"\\n\
+   ]\\n\
   },\\n\
   \"BypassUID\": [\\n\
     \"$CLOAK_BYPASS_UID\"\\n\
@@ -51,3 +55,17 @@ echo -e "{\\n\
   \"DatabasePath\": \"userinfo.db\",\\n\
   \"StreamTimeout\": 300\\n\
 }" >/opt/amnezia/cloak/ck-config.json'
+
+# ShadowSocks config
+sudo docker exec -i $CONTAINER_NAME bash -c '\
+mkdir -p /opt/amnezia/shadowsocks; \
+cd /opt/amnezia/shadowsocks || exit 1; \
+SHADOWSOCKS_PASSWORD=$(openssl rand -base64 32 | tr "=" "A" | tr "+" "A" | tr "/" "A") && echo $SHADOWSOCKS_PASSWORD > /opt/amnezia/shadowsocks/shadowsocks.key; \
+echo -e "{\\n\
+    \"local_port\": 8585,\\n\
+    \"method\": \"$SHADOWSOCKS_CIPHER\",\\n\
+    \"password\": \"$SHADOWSOCKS_PASSWORD\",\\n\
+    \"server\": \"0.0.0.0\",\\n\
+    \"server_port\": $SHADOWSOCKS_SERVER_PORT,\\n\
+    \"timeout\": 60\\n\
+}" >/opt/amnezia/shadowsocks/ss-config.json'
