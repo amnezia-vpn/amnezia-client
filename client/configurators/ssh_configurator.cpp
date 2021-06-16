@@ -70,7 +70,7 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
             .arg(credentials.userName).arg(credentials.hostName).arg(credentials.password));
     }
 #else
-    p.setProgram("/bin/bash");
+    p->setProgram("/bin/bash");
 #endif
 
     p->startDetached();

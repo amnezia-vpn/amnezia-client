@@ -34,11 +34,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 //    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
 //                          .arg(ips.join("\n"));
 
-    //if (ips.size() > 500) suspendWcmSvc(true);
-    system("ipconfig /flushdns");
-    system("netsh int ip reset");
-    system("netsh int ipv4 reset");
-    system("netsh winsock reset");
 
     if (!Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
@@ -149,6 +144,8 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
     qDebug() << "Router::routeAddList finished, success: " << success_count << "/" << ips.size();
 
+    if (m_ipForwardRows.size() > 500) suspendWcmSvc(true);
+
     return success_count;
 }
 
@@ -168,11 +165,12 @@ bool RouterWin::clearSavedRoutes()
     dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     if (dwStatus == ERROR_INSUFFICIENT_BUFFER) {
         // Allocate the memory for the table
-        free(pIpForwardTable);
         if (!(pIpForwardTable = (PMIB_IPFORWARDTABLE) malloc(dwSize))) {
             qDebug() << "Router::clearSavedRoutes : Malloc failed. Out of memory";
             return false;
         }
+        // Now get the table.
+        dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
 
     if (dwStatus != ERROR_SUCCESS) {
@@ -199,8 +197,8 @@ bool RouterWin::clearSavedRoutes()
     qDebug() << "Router::clearSavedRoutes : removed routes:" << removed_count << "of" << m_ipForwardRows.size();
     m_ipForwardRows.clear();
 
-    //suspendWcmSvc(false);
-    system("ipconfig /renew");
+    suspendWcmSvc(false);
+
     return true;
 }
 
@@ -299,7 +297,7 @@ void RouterWin::suspendWcmSvc(bool suspend)
     DWORD wcmSvcPid = GetServicePid(std::wstring(L"wcmSvc").c_str());
 
     //ListProcessThreads(wcmSvcPid);
-    BOOL ok = StopProcessThreads(suspend, wcmSvcPid);
+    BOOL ok = SuspendProcess(suspend, wcmSvcPid);
     if (ok) {
         m_suspended = suspend;
     }
@@ -307,6 +305,7 @@ void RouterWin::suspendWcmSvc(bool suspend)
     qDebug() << "RouterWin::routeAddList" <<
                 (ok ? "succeed to" : "failed to") <<
                 (suspend ? "suspend wcmSvc" : "resume wcmSvc");
+
 }
 
 DWORD RouterWin::GetServicePid(LPCWSTR serviceName)
@@ -374,50 +373,6 @@ BOOL RouterWin::ListProcessThreads( DWORD dwOwnerPID )
   return( TRUE );
 }
 
-BOOL RouterWin::StopProcessThreads(BOOL fSuspend, DWORD dwOwnerPID )
-{
-  HANDLE hThreadSnap = INVALID_HANDLE_VALUE;
-  THREADENTRY32 te32;
-
-  //THREAD_INFORMATION_CLASS need check
-
-  // Take a snapshot of current process
-  hThreadSnap = CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, GetCurrentProcessId() );
-  if( hThreadSnap == INVALID_HANDLE_VALUE )
-    return( FALSE );
-
-  // Fill in the size of the structure before using it.
-  te32.dwSize = sizeof(THREADENTRY32);
-
-  // Retrieve information about the first thread,
-  // and exit if unsuccessful
-  if( !Thread32First( hThreadSnap, &te32 ) )
-  {
-    CloseHandle( hThreadSnap );          // clean the snapshot object
-    return( FALSE );
-  }
-
-  do
-  {
-    if( te32.th32OwnerProcessID == dwOwnerPID )
-    {
-        HANDLE threadHandle = OpenThread (PROCESS_QUERY_INFORMATION, FALSE, te32.th32ThreadID);
-        qDebug() << "Owner: "<< te32.th32OwnerProcessID << "OpenThread "
-                 << te32.th32ThreadID << " GetLastError: " << GetLastError() << " handle: " << threadHandle;
-        ULONG64 cycles = 0;
-        BOOL ok = QueryThreadCycleTime(threadHandle, &cycles);
-        qDebug() << "QueryThreadCycleTime GetLastError:" << ok << GetLastError();
-
-        qDebug() << "Thread cycles:" << te32.th32ThreadID << cycles;
-        SuspendThread(fSuspend, te32.th32ThreadID);
-        CloseHandle(threadHandle);
-    }
-  } while( Thread32Next(hThreadSnap, &te32 ) );
-
-  CloseHandle( hThreadSnap );
-  return( TRUE );
-}
-
 BOOL RouterWin::EnableDebugPrivilege(VOID)
 {
   HANDLE           hToken = NULL;
@@ -443,13 +398,13 @@ BOOL RouterWin::InitNtFunctions(VOID)
   if (hModule == NULL)
     return FALSE;
 
-  NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
-  //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
+  //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
+  NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
   if (NtSuspendProcess == NULL)
     return FALSE;
 
-  NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
-  //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
+  //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
+  NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
   if (NtResumeProcess == NULL)
     return FALSE;
 
@@ -467,13 +422,3 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
     return ok;
 }
 
-BOOL RouterWin::SuspendThread(BOOL fSuspend, DWORD dwThreadId)
-{
-    HANDLE pHandle = OpenThread(THREAD_SUSPEND_RESUME, FALSE, dwThreadId);
-    if (pHandle == NULL) return false;
-
-    bool ok = ((fSuspend ? NtSuspendProcess : NtResumeProcess)(pHandle) == STATUS_SUCCESS);
-    CloseHandle(pHandle);
-
-    return ok;
-}
