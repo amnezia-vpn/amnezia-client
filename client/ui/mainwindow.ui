@@ -274,7 +274,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>8</number>
+      <number>17</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -5815,7 +5815,7 @@ QToolBox::tab:hover {
         <number>0</number>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>6</number>
@@ -5825,8 +5825,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -5884,7 +5884,7 @@ p, li { white-space: pre-wrap; }
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>180</y>
+           <y>260</y>
            <width>341</width>
            <height>111</height>
           </rect>
@@ -5947,14 +5947,50 @@ background: #282932;
           <string>Copy</string>
          </property>
         </widget>
+        <widget class="QPushButton" name="pushButton_share_full_save">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>341</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+}
+QPushButton:hover {
+background: #282932;
+}</string>
+         </property>
+         <property name="text">
+          <string>Save file</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="page_share_amnezia">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6149,8 +6185,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6315,8 +6351,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -6493,10 +6529,10 @@ background: #282932;
         <widget class="QLabel" name="label_share_ss_qr_code">
          <property name="geometry">
           <rect>
-           <x>65</x>
-           <y>250</y>
-           <width>240</width>
-           <height>240</height>
+           <x>85</x>
+           <y>235</y>
+           <width>200</width>
+           <height>200</height>
           </rect>
          </property>
          <property name="styleSheet">
@@ -6539,13 +6575,59 @@ color: #15CDCB;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>360</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
          <string>  Share for Cloak client</string>
         </attribute>
+        <widget class="QPushButton" name="pushButton_share_cloak_copy">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>290</y>
+           <width>331</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	font-size: 13pt;
+	font: &quot;Open Sans Semibold&quot;;
+	color:rgb(212, 212, 212);
+	
+background: #181922;
+border-radius: 4px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: normal;
+font-size: 16px;
+line-height: 21px;
+
+}
+QPushButton:hover {
+background: #282932;
+}</string>
+         </property>
+         <property name="text">
+          <string>Copy</string>
+         </property>
+        </widget>
+        <widget class="QPlainTextEdit" name="plainTextEdit_share_cloak">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>331</width>
+           <height>221</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </widget>
      </widget>

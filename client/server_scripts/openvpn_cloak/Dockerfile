@@ -16,6 +16,10 @@ RUN chmod a+x /opt/amnezia/start.sh
 RUN curl -L https://github.com/cbeuw/Cloak/releases/download/v2.5.3/ck-server-linux-amd64-v2.5.3 > /usr/bin/ck-server
 RUN chmod a+x /usr/bin/ck-server
 
+RUN curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/v1.10.9/shadowsocks-v1.10.9.x86_64-unknown-linux-musl.tar.xz  > /usr/bin/ss.tar.xz
+RUN tar -Jxvf /usr/bin/ss.tar.xz -C /usr/bin/
+RUN chmod a+x /usr/bin/ssserver
+
 # Tune network  
 RUN echo -e " \n\
   fs.file-max = 51200 \n\

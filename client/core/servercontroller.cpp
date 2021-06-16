@@ -364,25 +364,31 @@ ErrorCode ServerController::removeContainer(const ServerCredentials &credentials
 ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     qDebug().noquote() << "ServerController::setupContainer" << containerToString(container);
-    qDebug().noquote() << QJsonDocument(config).toJson();
+    //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
 
     e = installDockerWorker(credentials, container);
     if (e) return e;
+    qDebug().noquote() << "ServerController::setupContainer installDockerWorker finished";
 
     e = prepareHostWorker(credentials, container, config);
     if (e) return e;
+    qDebug().noquote() << "ServerController::setupContainer prepareHostWorker finished";
 
     removeContainer(credentials, container);
+    qDebug().noquote() << "ServerController::setupContainer removeContainer finished";
 
     e = buildContainerWorker(credentials, container, config);
     if (e) return e;
+    qDebug().noquote() << "ServerController::setupContainer buildContainerWorker finished";
 
     e = runContainerWorker(credentials, container, config);
     if (e) return e;
+    qDebug().noquote() << "ServerController::setupContainer runContainerWorker finished";
 
     e = configureContainerWorker(credentials, container, config);
     if (e) return e;
+    qDebug().noquote() << "ServerController::setupContainer configureContainerWorker finished";
 
     return startupContainerWorker(credentials, container, config);
 }

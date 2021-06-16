@@ -25,7 +25,7 @@ tls-server \\n\
 tls-version-min 1.2 \\n\
 $OPENVPN_TLS_AUTH" >/opt/amnezia/openvpn/server.conf'
 
-# Cloak config
+# ShadowSocks config
 sudo docker exec -i $CONTAINER_NAME bash -c '\
 mkdir -p /opt/amnezia/shadowsocks; \
 cd /opt/amnezia/shadowsocks || exit 1; \
