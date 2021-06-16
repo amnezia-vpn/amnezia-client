@@ -57,6 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->frame_wireguard_settings->hide();
+    ui->frame_wireguard->hide();
+    ui->frame_new_server_settings_parent_wireguard->hide();
+
     setupTray();
     setupUiConnections();
     setupNewServerConnections();
