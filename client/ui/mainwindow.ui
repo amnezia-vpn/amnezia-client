@@ -2224,7 +2224,7 @@ border: none;
                   </size>
                  </property>
                  <property name="text">
-                  <string>mail.ru</string>
+                  <string>tile.openstreetmap.org</string>
                  </property>
                 </widget>
                </item>
@@ -7542,7 +7542,7 @@ color: #100A44;
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>mail.ru</string>
+         <string>tile.openstreetmap.org</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_102">

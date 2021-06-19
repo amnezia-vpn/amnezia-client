@@ -109,7 +109,7 @@ void SlidingStackedWidget::waitForAnimation()
 {
     if (!isAnimationRunning()) return;
 
-    qDebug() << "Wait for stacked widget animation";
+    //qDebug() << "Wait for stacked widget animation";
     QEventLoop l;
     connect(animgroup, &QParallelAnimationGroup::finished, &l, &QEventLoop::quit);
     l.exec();

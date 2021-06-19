@@ -13,8 +13,6 @@
 OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
 {
-    Utils::initializePath(defaultConfigPath());
-
     readOpenVpnConfiguration(configuration);
     connect(&m_managementServer, &ManagementServer::readyRead, this, &OpenVpnProtocol::onReadyReadDataFromManagementServer);
 }
@@ -28,13 +26,16 @@ OpenVpnProtocol::~OpenVpnProtocol()
 
 QString OpenVpnProtocol::defaultConfigFileName()
 {
-    qDebug() << "OpenVpnProtocol::defaultConfigFileName" << defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
+    //qDebug() << "OpenVpnProtocol::defaultConfigFileName" << defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
     return defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
 }
 
 QString OpenVpnProtocol::defaultConfigPath()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config";
+    QString p = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config";
+    Utils::initializePath(p);
+
+    return p;
 }
 
 void OpenVpnProtocol::stop()
