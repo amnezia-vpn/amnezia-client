@@ -390,6 +390,9 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     if (e) return e;
     qDebug().noquote() << "ServerController::setupContainer configureContainerWorker finished";
 
+    setupServerFirewall(credentials);
+    qDebug().noquote() << "ServerController::setupContainer setupServerFirewall finished";
+
     return startupContainerWorker(credentials, container, config);
 }
 
@@ -460,10 +463,14 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         stdOut += data + "\n";
     };
 
-    return runScript(sshParams(credentials),
+    ErrorCode e = runScript(sshParams(credentials),
         replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
-            genVarsForScript(credentials, container)),
+            genVarsForScript(credentials)),
                 cbReadStdOut, cbReadStdErr);
+
+    if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
+
+    return e;
 }
 
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
@@ -681,7 +688,7 @@ ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credent
 {
     return runScript(sshParams(credentials),
         replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall),
-            genVarsForScript(credentials, DockerContainer::OpenVpnOverCloak)));
+            genVarsForScript(credentials)));
 }
 
 QString ServerController::replaceVars(const QString &script, const Vars &vars)

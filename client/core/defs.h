@@ -28,6 +28,7 @@ enum ErrorCode
     ServerCheckFailed,
     ServerPortAlreadyAllocatedError,
     ServerContainerMissingError,
+    ServerDockerFailedError,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,

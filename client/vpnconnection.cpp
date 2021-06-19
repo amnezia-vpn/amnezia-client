@@ -261,10 +261,6 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
     emit connectionStateChanged(VpnProtocol::Connecting);
 
-    if (credentials.isValid()) {
-        ServerController::setupServerFirewall(credentials);
-    }
-
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
@@ -346,7 +342,8 @@ void VpnConnection::disconnectFromVpn()
         IpcClient::Interface()->flushDns();
 
         // delete cached routes
-        IpcClient::Interface()->clearSavedRoutes();
+        QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
+        response.waitForFinished(1000);
     }
 
     if (!m_vpnProtocol.data()) {
