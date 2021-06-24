@@ -23,7 +23,8 @@ enum ProtocolScriptType {
     run_container,
     configure_container,
     container_startup,
-    openvpn_template
+    openvpn_template,
+    wireguard_template
 };
 
 

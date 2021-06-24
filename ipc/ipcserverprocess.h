@@ -23,6 +23,7 @@ public:
     void setProgram(const QString &program) override;
     void setWorkingDirectory(const QString &dir) override;
 
+    QByteArray readAll() override;
     QByteArray readAllStandardError() override;
     QByteArray readAllStandardOutput() override;
 

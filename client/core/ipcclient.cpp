@@ -48,7 +48,7 @@ QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
                 qWarning() << "IpcProcessInterfaceReplica replica is not connected!";
             }
 
-            connect(pd->ipcProcess.data(), &IpcProcessInterfaceReplica::destroyed, pd->ipcProcess.data(), [pd](){
+            QObject::connect(pd->ipcProcess.data(), &IpcProcessInterfaceReplica::destroyed, pd->ipcProcess.data(), [pd](){
                 pd->replicaNode->deleteLater();
             });
         }

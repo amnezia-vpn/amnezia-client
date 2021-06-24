@@ -23,11 +23,6 @@ QString Utils::getRandomString(int len)
     return randomString;
 }
 
-QString Utils::defaultVpnConfigFileName()
-{
-    return configPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
-}
-
 QString Utils::systemLogPath()
 {
 #ifdef Q_OS_WIN
@@ -52,11 +47,6 @@ bool Utils::initializePath(const QString& path)
         return false;
     }
     return true;
-}
-
-QString Utils::configPath()
-{
-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config";
 }
 
 bool Utils::createEmptyFile(const QString& path)

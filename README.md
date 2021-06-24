@@ -28,22 +28,23 @@ AmneziaVPN uses a number of open source projects to work:
 ## Development
 
 Want to contribute? Welcome!
-Use Qt Creator for fast developing.
 
 ### Building sources and deployment
-Easiest way to build your own executables - is to fork project and configure [Travis CI](https://travis-ci.com/)
-Or you can build sources manually using Qt Creator. Qt >= 14.2 supported.
+Easiest way to build your own executables - is to fork project and configure [Travis CI](https://travis-ci.com/)  
+Or you can build sources manually using Qt Creator. Qt >= 14.2 supported.  
 Look to the `build_macos.sh` and `build_windows.bat` scripts in `deploy` folder for details.
 
 ## License
 GPL v.3
 
 ## Contacts
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
-[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel
-[https://amnezia.org](https://amnezia.org) - project website
+[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
+[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
+[https://amnezia.org](https://amnezia.org) - project website  
 
 ## Donate
-Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u
-Buy coffee for AmneziaVPN : [https://ko-fi.com/amnezia_vpn](https://ko-fi.com/amnezia_vpn)
+Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u  
+XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
+payeer.com: P2561305  
+ko-fi.com: [https://ko-fi.com/amnezia_vpn](https://ko-fi.com/amnezia_vpn)  

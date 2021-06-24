@@ -112,7 +112,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
             continue;
         }
 
-        QString mask = Utils::netMaskFromIpWithSubnet(ip);
+        QString mask = Utils::netMaskFromIpWithSubnet(ipWithMask);
 
         // address
         ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());

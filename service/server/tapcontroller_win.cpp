@@ -299,6 +299,7 @@ bool TapController::oldDriversRequired()
 {
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) return true;
     if (QSysInfo::prettyProductName().contains("Server 2008")) return true;
+    if (QSysInfo::prettyProductName().contains("Server 2012")) return true;
 
     return false;
 }

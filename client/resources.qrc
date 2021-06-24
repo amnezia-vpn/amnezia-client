@@ -62,5 +62,10 @@
         <file>server_scripts/openvpn_shadowsocks/start.sh</file>
         <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
         <file>images/folder.png</file>
+        <file>server_scripts/wireguard/configure_container.sh</file>
+        <file>server_scripts/wireguard/Dockerfile</file>
+        <file>server_scripts/wireguard/run_container.sh</file>
+        <file>server_scripts/wireguard/start.sh</file>
+        <file>server_scripts/wireguard/template.conf</file>
     </qresource>
 </RCC>

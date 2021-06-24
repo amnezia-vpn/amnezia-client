@@ -13,7 +13,7 @@ struct ServerCredentials
     QString password;
     int port = 22;
 
-    bool isValid() { return !hostName.isEmpty() && !userName.isEmpty() && !password.isEmpty() && port > 0; }
+    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !password.isEmpty() && port > 0; }
 };
 
 enum ErrorCode
@@ -28,6 +28,7 @@ enum ErrorCode
     ServerCheckFailed,
     ServerPortAlreadyAllocatedError,
     ServerContainerMissingError,
+    ServerDockerFailedError,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,
@@ -44,6 +45,7 @@ enum ErrorCode
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
     EasyRsaError,
+    ConfigMissing,
 
     // Distro errors
     OpenVpnExecutableMissing,
@@ -51,6 +53,7 @@ enum ErrorCode
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
+    ExecutableMissing,
 
     // VPN errors
     OpenVpnAdaptersInUseError,
@@ -69,6 +72,7 @@ const char key_openvpn_config_data[] = "openvpn_config_data";
 const char key_openvpn_config_path[] = "openvpn_config_path";
 const char key_shadowsocks_config_data[] = "shadowsocks_config_data";
 const char key_cloak_config_data[] = "cloak_config_data";
+const char key_wireguard_config_data[] = "wireguard_config_data";
 
 }
 

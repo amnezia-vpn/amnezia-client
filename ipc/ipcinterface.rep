@@ -29,12 +29,14 @@ class IpcProcessInterface
     SLOT( setProgram(const QString &program) );
     SLOT( setWorkingDirectory(const QString &dir) );
 
+    SLOT( QByteArray readAll() );
     SLOT( QByteArray readAllStandardError() );
     SLOT( QByteArray readAllStandardOutput() );
 
 
     SIGNAL( errorOccurred(QProcess::ProcessError error) );
     SIGNAL( finished(int exitCode, QProcess::ExitStatus exitStatus) );
+    SIGNAL( readyRead() );
     SIGNAL( readyReadStandardError() );
     SIGNAL( readyReadStandardOutput() );
     SIGNAL( started() );

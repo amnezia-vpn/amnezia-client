@@ -22,6 +22,8 @@ public:
     void stop() override;
 
     ErrorCode checkAndSetupTapDriver();
+    static QString defaultConfigFileName();
+    static QString defaultConfigPath();
 
 protected slots:
     void onReadyReadDataFromManagementServer();

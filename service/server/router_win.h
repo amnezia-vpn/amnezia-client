@@ -55,7 +55,7 @@ private:
 
 
 private:
-    QMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;
+    QMultiMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;
     bool m_suspended = false;
 
 };

@@ -48,6 +48,8 @@ public:
     void deleteRoutes(const QStringList &ips);
     void flushDns();
 
+    const QString &remoteAddress() const;
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
@@ -66,6 +68,7 @@ private:
     Settings m_settings;
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
+    QString m_remoteAddress;
 
 };
 

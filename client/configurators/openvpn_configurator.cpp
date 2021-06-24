@@ -5,11 +5,11 @@
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
-#include <utils.h>
 
 #include "core/server_defs.h"
 #include "protocols/protocols_defs.h"
 #include "core/scripts_registry.h"
+#include "utils.h"
 
 QString OpenVpnConfigurator::getEasyRsaShPath()
 {
@@ -227,7 +227,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    if (m_settings().routeMode() == Settings::VpnOnlyForwardSites) {
+    if (m_settings().routeMode() != Settings::VpnAllSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
     else {
@@ -264,40 +264,6 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
 #endif
 
     return config;
-}
-
-QString OpenVpnConfigurator::convertOpenSShKey(const QString &key)
-{
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
-    QTemporaryFile tmp;
-#ifdef QT_DEBUG
-    tmp.setAutoRemove(false);
-#endif
-    tmp.open();
-    tmp.write(key.toUtf8());
-    tmp.close();
-
-    // ssh-keygen -p -P "" -N "" -m pem -f id_ssh
-
-#ifdef Q_OS_WIN
-    p.setProcessEnvironment(prepareEnv());
-    p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ssh-keygen.exe -p -P \"\" -N \"\" -m pem -f \"%1\"\"").arg(tmp.fileName()));
-#else
-    p.setProgram("ssh-keygen");
-    p.setArguments(QStringList() << "-p" << "-P" << "" << "-N" << "" << "-m" << "pem" << "-f" << tmp.fileName());
-#endif
-
-    p.start();
-    p.waitForFinished();
-
-    qDebug().noquote() << "OpenVpnConfigurator::convertOpenSShKey" << p.exitCode() << p.exitStatus() << p.readAll();
-
-    tmp.open();
-
-    return tmp.readAll();
 }
 
 ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,

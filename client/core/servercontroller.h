@@ -8,6 +8,7 @@
 #include "defs.h"
 #include "protocols/protocols_defs.h"
 
+#include "sftpdefs.h"
 
 using namespace amnezia;
 
@@ -35,10 +36,12 @@ public:
 
     static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
-    static ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath);
+    static ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
+        const QString &remotePath, QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
 
     static ErrorCode uploadTextFileToContainer(DockerContainer container,
-        const ServerCredentials &credentials, const QString &file, const QString &path);
+        const ServerCredentials &credentials, const QString &file, const QString &path,
+        QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
 
     static QString getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
@@ -54,8 +57,9 @@ public:
     static Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
     static QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
-private:
     static QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
+
+private:
 
     static ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     static ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
