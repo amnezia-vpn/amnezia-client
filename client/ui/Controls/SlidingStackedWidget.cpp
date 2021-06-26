@@ -95,7 +95,7 @@ void SlidingStackedWidget::slideInWidget(QWidget *widget, SlidingStackedWidget::
     slideInIdx(idx, direction);
 #endif
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined Q_OS_LINUX
     setCurrentWidget(widget);
 #endif
 }
