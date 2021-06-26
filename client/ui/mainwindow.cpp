@@ -40,7 +40,7 @@
 #include "ui/server_widget.h"
 #include "ui_server_widget.h"
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined Q_OS_LINUX
 #include "ui/macos_util.h"
 #endif
 
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
         needToHideCustomTitlebar = true;
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC
     fixWidget(this);
     needToHideCustomTitlebar = true;
 #endif
@@ -178,7 +178,7 @@ void MainWindow::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) show();
     else {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
         setDockIconVisible(false);
 #endif
     }
@@ -411,7 +411,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::showEvent(QShowEvent *event)
 {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
     if (!event->spontaneous()) {
         setDockIconVisible(true);
     }
@@ -425,7 +425,7 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::hideEvent(QHideEvent *event)
 {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
     if (!event->spontaneous()) {
         setDockIconVisible(false);
     }
@@ -1754,7 +1754,7 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
 
 void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-#ifndef Q_OS_MAC
+#if defined Q_OS_MACX || defined Q_OS_LINUX
     if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
         show();
         raise();

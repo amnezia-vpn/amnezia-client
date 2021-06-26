@@ -69,7 +69,7 @@ private:
     bool m_bResizeable;
 };
 
-#elif defined Q_OS_MAC
+#elif defined Q_OS_MAC || defined Q_OS_LINUX
 #include <QMouseEvent>
 #include <QResizeEvent>
 #include <QPoint>
