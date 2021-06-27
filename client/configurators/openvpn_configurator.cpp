@@ -213,7 +213,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("</tls-auth>", "");
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined(Q_OS_LINUX)
     config.replace("block-outside-dns", "");
 #endif
 
@@ -236,7 +236,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
         }
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined(Q_OS_LINUX)
     config.replace("block-outside-dns", "");
     QString dnsConf = QString(
                 "\nscript-security 2\n"
@@ -259,7 +259,7 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
         config.append("redirect-gateway def1 bypass-dhcp\n");
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined(Q_OS_LINUX)
     config.replace("block-outside-dns", "");
 #endif
 

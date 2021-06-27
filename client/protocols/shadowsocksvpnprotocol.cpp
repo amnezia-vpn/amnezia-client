@@ -36,8 +36,12 @@ ErrorCode ShadowSocksVpnProtocol::start()
     m_shadowSocksCfgFile.write(QJsonDocument(m_shadowSocksConfig).toJson());
     m_shadowSocksCfgFile.close();
 
+#ifdef Q_OS_LINUX
+    QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName();
+#else
     QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName()
                                      << "--no-delay";
+#endif
 
     qDebug().noquote() << "ShadowSocksVpnProtocol::start()"
                        << shadowSocksExecPath() << args.join(" ");
