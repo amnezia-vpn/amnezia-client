@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <QFileInfo>
 
 RouterLinux &RouterLinux::Instance()
 {
@@ -144,11 +145,22 @@ void RouterLinux::flushDns()
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
-    p.start("systemctl restart nscd"); //running as root
+    //check what the dns manager use
+    if (QFileInfo::exists("/usr/bin/nscd")
+        || QFileInfo::exists("/usr/sbin/nscd")
+        || QFileInfo::exists("/usr/lib/systemd/system/nscd.service"))
+    {
+        p.start("systemctl restart nscd");
+    }
+    else
+    {
+        p.start("systemctl restart systemd-resolved");
+    }
+
     p.waitForFinished();
     QByteArray output(p.readAll());
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
     else
-        qDebug().noquote() << "OUTPUT sudo systemctl restart nscd: " + output;
+        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
 }
