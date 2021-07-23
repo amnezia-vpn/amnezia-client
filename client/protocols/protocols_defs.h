@@ -131,7 +131,8 @@ enum class DockerContainer {
     OpenVpn,
     OpenVpnOverShadowSocks,
     OpenVpnOverCloak,
-    WireGuard
+    WireGuard,
+    WebSiteInTor
 };
 
 DockerContainer containerFromString(const QString &container);

@@ -67,5 +67,7 @@
         <file>server_scripts/wireguard/run_container.sh</file>
         <file>server_scripts/wireguard/start.sh</file>
         <file>server_scripts/wireguard/template.conf</file>
+        <file>server_scripts/website_tor/configure_container.sh</file>
+        <file>server_scripts/website_tor/run_container.sh</file>
     </qresource>
 </RCC>

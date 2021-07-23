@@ -274,7 +274,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>17</number>
+      <number>16</number>
      </property>
      <widget class="QWidget" name="page_start">
       <widget class="QLabel" name="label_25">
@@ -4962,9 +4962,9 @@ border: none;
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
-          <width>381</width>
-          <height>511</height>
+          <y>-47</y>
+          <width>371</width>
+          <height>558</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -5623,6 +5623,90 @@ QPushButton:!checked {
           </widget>
          </item>
          <item>
+          <widget class="QFrame" name="frame_tor_web_site">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_19">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_75">
+                <property name="text">
+                 <string>TOR Web site</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_proto_tor_web_site_cont_install">
+                <property name="minimumSize">
+                 <size>
+                  <width>36</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
+    background: transparent;
+    padding: 0px;
+    margin: 0px;
+}
+QPushButton:checked {
+	image: url(:/images/connect_button_connected.png);
+}
+QPushButton:!checked {
+	image: url(:/images/connect_button_disconnected.png);
+}
+</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_wireguard_settings_2">
+              <layout class="QVBoxLayout" name="verticalLayout_20">
+               <item>
+                <widget class="QLabel" name="label_tor_web_site">
+                 <property name="text">
+                  <string>Not installed</string>
+                 </property>
+                 <property name="textInteractionFlags">
+                  <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -5825,8 +5909,8 @@ QToolBox::tab:hover {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -5989,8 +6073,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6185,8 +6269,8 @@ background: #282932;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6575,8 +6659,8 @@ color: #15CDCB;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>360</width>
-          <height>360</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
