@@ -277,7 +277,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.close();
 
     auto job = sftp->uploadFile(localFile.fileName(), remotePath, QSsh::SftpOverwriteMode::SftpOverwriteExisting);
-    QObject::connect(sftp.data(), &SftpChannel::finished, &wait, [&](QSsh::SftpJobId j, const QString &error){
+    QObject::connect(sftp.data(), &SftpChannel::finished, &wait, [&](QSsh::SftpJobId j, const SftpError errorType = SftpError::NoError, const QString &error = QString()){
         if (job == j) {
             qDebug() << "Sftp finished with status" << error;
             wait.quit();
@@ -336,12 +336,12 @@ SshConnectionParameters ServerController::sshParams(const ServerCredentials &cre
     }
     else {
         sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
-        sshParams.password = credentials.password;
+        sshParams.setPassword(credentials.password);
     }
-    sshParams.host = credentials.hostName;
-    sshParams.userName = credentials.userName;
+    sshParams.setHost(credentials.hostName);
+    sshParams.setUserName(credentials.userName);
     sshParams.timeout = 10;
-    sshParams.port = credentials.port;
+    sshParams.setPort(credentials.port);
     sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
     sshParams.options = SshIgnoreDefaultProxy;
 

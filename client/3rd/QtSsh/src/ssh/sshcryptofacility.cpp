@@ -1,39 +1,53 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshcryptofacility_p.h"
 
+#include "opensshkeyfilereader_p.h"
 #include "sshbotanconversions_p.h"
 #include "sshcapabilities_p.h"
 #include "sshexception_p.h"
 #include "sshkeyexchange_p.h"
 #include "sshkeypasswordretriever_p.h"
-#include "sshlogging_p.h"
 #include "sshpacket_p.h"
+#include "sshlogging_p.h"
 
-#include <botan/botan.h>
+#include <botan/block_cipher.h>
+#include <botan/hash.h>
+#include <botan/pkcs8.h>
+#include <botan/dsa.h>
+#include <botan/rsa.h>
+#include <botan/ber_dec.h>
+#include <botan/pubkey.h>
+#include <botan/filters.h>
+#include <botan/ecdsa.h>
 
 #include <QDebug>
 #include <QList>
@@ -57,8 +71,8 @@ void SshAbstractCryptoFacility::clearKeys()
     m_cipherBlockSize = 0;
     m_macLength = 0;
     m_sessionId.clear();
-    m_pipe.reset(0);
-    m_hMac.reset(0);
+    m_pipe.reset(nullptr);
+    m_hMac.reset(nullptr);
 }
 
 SshAbstractCryptoFacility::Mode SshAbstractCryptoFacility::getMode(const QByteArray &algoName)
@@ -77,28 +91,32 @@ void SshAbstractCryptoFacility::recreateKeys(const SshKeyExchange &kex)
 
     if (m_sessionId.isEmpty())
         m_sessionId = kex.h();
-    Algorithm_Factory &af = global_state().algorithm_factory();
-    const QByteArray &rfcCryptAlgoName = cryptAlgoName(kex);
-    BlockCipher * const cipher
-            = af.prototype_block_cipher(botanCryptAlgoName(rfcCryptAlgoName))->clone();
+   const QByteArray &rfcCryptAlgoName = cryptAlgoName(kex);
 
-    m_cipherBlockSize = static_cast<quint32>(cipher->block_size());
+   { // Don't know how else to get this with the new botan API
+       std::unique_ptr<BlockCipher> cipher
+               = BlockCipher::create_or_throw(botanCryptAlgoName(rfcCryptAlgoName));
+       m_cipherBlockSize = static_cast<quint32>(cipher->block_size());
+   }
     const QByteArray ivData = generateHash(kex, ivChar(), m_cipherBlockSize);
     const InitializationVector iv(convertByteArray(ivData), m_cipherBlockSize);
 
-    const quint32 keySize = static_cast<quint32>(cipher->key_spec().maximum_keylength());
+    Keyed_Filter * const cipherMode
+            = makeCipherMode(botanCipherAlgoName(rfcCryptAlgoName), getMode(rfcCryptAlgoName));
+
+    const quint32 keySize = static_cast<quint32>(cipherMode->key_spec().maximum_keylength());
     const QByteArray cryptKeyData = generateHash(kex, keyChar(), keySize);
     SymmetricKey cryptKey(convertByteArray(cryptKeyData), keySize);
-    Keyed_Filter * const cipherMode
-            = makeCipherMode(cipher, getMode(rfcCryptAlgoName), iv, cryptKey);
+
+    cipherMode->set_key(cryptKey);
+    cipherMode->set_iv(iv);
+
     m_pipe.reset(new Pipe(cipherMode));
 
     m_macLength = botanHMacKeyLen(hMacAlgoName(kex));
     const QByteArray hMacKeyData = generateHash(kex, macChar(), macLength());
     SymmetricKey hMacKey(convertByteArray(hMacKeyData), macLength());
-    const HashFunction * const hMacProto
-        = af.prototype_hash_function(botanHMacAlgoName(hMacAlgoName(kex)));
-    m_hMac.reset(new HMAC(hMacProto->clone()));
+    m_hMac = MessageAuthenticationCode::create_or_throw("HMAC(" + std::string(botanHMacAlgoName(hMacAlgoName(kex))) + ")");
     m_hMac->set_key(hMacKey);
 }
 
@@ -127,12 +145,9 @@ void SshAbstractCryptoFacility::convert(QByteArray &data, quint32 offset,
     }
 }
 
-Keyed_Filter *SshAbstractCryptoFacility::makeCtrCipherMode(BlockCipher *cipher,
-        const InitializationVector &iv, const SymmetricKey &key)
+Keyed_Filter *SshAbstractCryptoFacility::makeCtrCipherMode(const QByteArray &cipher)
 {
-    StreamCipher_Filter * const filter = new StreamCipher_Filter(new CTR_BE(cipher));
-    filter->set_key(key);
-    filter->set_iv(iv);
+    StreamCipher_Filter *filter = new StreamCipher_Filter(cipher.toStdString());
     return filter;
 }
 
@@ -155,13 +170,13 @@ QByteArray SshAbstractCryptoFacility::generateHash(const SshKeyExchange &kex,
     SecureVector<byte> key
         = kex.hash()->process(convertByteArray(data), data.size());
     while (key.size() < length) {
-        SecureVector<byte> tmpKey;
-        tmpKey += SecureVector<byte>(convertByteArray(k), k.size());
-        tmpKey += SecureVector<byte>(convertByteArray(h), h.size());
+        secure_vector<byte> tmpKey;
+        tmpKey += secure_vector<byte>(k.begin(), k.end());
+        tmpKey += secure_vector<byte>(h.begin(), h.end());
         tmpKey += key;
         key += kex.hash()->process(tmpKey);
     }
-    return QByteArray(reinterpret_cast<const char *>(key.begin()), length);
+    return QByteArray(reinterpret_cast<const char *>(key.data()), length);
 }
 
 void SshAbstractCryptoFacility::checkInvariant() const
@@ -187,16 +202,17 @@ QByteArray SshEncryptionFacility::hMacAlgoName(const SshKeyExchange &kex) const
     return kex.hMacAlgoClientToServer();
 }
 
-Keyed_Filter *SshEncryptionFacility::makeCipherMode(BlockCipher *cipher, Mode mode,
-        const InitializationVector &iv, const SymmetricKey &key)
+Keyed_Filter *SshEncryptionFacility::makeCipherMode(const QByteArray &cipher, const Mode mode)
 {
-    switch (mode) {
-    case CbcMode:
-        return new CBC_Encryption(cipher, new Null_Padding, key, iv);
-    case CtrMode:
-        return makeCtrCipherMode(cipher, iv, key);
+    if (mode == CtrMode) {
+        return new StreamCipher_Filter(cipher.toStdString());
     }
-    return 0; // For dumb compilers.
+
+    qWarning() << "I haven't been able to test the CBC encryption modes, so if this files file a bug at https://github.com/sandsmark/QSsh";
+
+    Cipher_Mode_Filter *filter = new Cipher_Mode_Filter(
+                Cipher_Mode::create_or_throw(cipher.toStdString(), ENCRYPTION).release()); // We have to release, otherwise clang fails to link
+    return filter;
 }
 
 void SshEncryptionFacility::encrypt(QByteArray &data) const
@@ -215,7 +231,14 @@ void SshEncryptionFacility::createAuthenticationKey(const QByteArray &privKeyFil
     QList<BigInt> allKeyParams;
     QString error1;
     QString error2;
-    if (!createAuthenticationKeyFromPKCS8(privKeyFileContents, pubKeyParams, allKeyParams, error1)
+    OpenSshKeyFileReader openSshReader(m_rng);
+    if (openSshReader.parseKey(privKeyFileContents)) {
+        m_authKeyAlgoName = openSshReader.keyType();
+        m_authKey.reset(openSshReader.privateKey().release());
+        pubKeyParams = openSshReader.publicParameters();
+        allKeyParams = openSshReader.allParameters();
+    } else if (!createAuthenticationKeyFromPKCS8(privKeyFileContents, pubKeyParams, allKeyParams,
+                                                 error1)
             && !createAuthenticationKeyFromOpenSSL(privKeyFileContents, pubKeyParams, allKeyParams,
                 error2)) {
         qCDebug(sshLog, "%s: %s\n\t%s\n", Q_FUNC_INFO, qPrintable(error1), qPrintable(error2));
@@ -235,7 +258,7 @@ void SshEncryptionFacility::createAuthenticationKey(const QByteArray &privKeyFil
     if (ecdsaKey) {
         m_authPubKeyBlob += AbstractSshPacket::encodeString(m_authKeyAlgoName.mid(11)); // Without "ecdsa-sha2-" prefix.
         m_authPubKeyBlob += AbstractSshPacket::encodeString(
-                    convertByteArray(EC2OSP(ecdsaKey->public_point(), PointGFp::UNCOMPRESSED)));
+                    convertByteArray(ecdsaKey->public_point().encode(PointGFp::UNCOMPRESSED)));
     } else {
         foreach (const BigInt &b, pubKeyParams)
             m_authPubKeyBlob += AbstractSshPacket::encodeMpInt(b);
@@ -249,7 +272,7 @@ bool SshEncryptionFacility::createAuthenticationKeyFromPKCS8(const QByteArray &p
     try {
         Pipe pipe;
         pipe.process_msg(convertByteArray(privKeyFileContents), privKeyFileContents.size());
-        m_authKey.reset(PKCS8::load_key(pipe, m_rng, SshKeyPasswordRetriever()));
+        m_authKey.reset(PKCS8::load_key(pipe, m_rng, SshKeyPasswordRetriever::get_passphrase));
         if (auto * const dsaKey = dynamic_cast<DSA_PrivateKey *>(m_authKey.data())) {
             m_authKeyAlgoName = SshCapabilities::PubKeyDss;
             pubKeyParams << dsaKey->group_p() << dsaKey->group_q()
@@ -338,7 +361,7 @@ bool SshEncryptionFacility::createAuthenticationKeyFromOpenSSL(const QByteArray 
         } else if (m_authKeyAlgoName == SshCapabilities::PubKeyRsa) {
             BigInt p, q, e, d, n;
             sequence.decode(n).decode(e).decode(d).decode(p).decode(q);
-            RSA_PrivateKey * const rsaKey = new RSA_PrivateKey(m_rng, p, q, e, d, n);
+            RSA_PrivateKey * const rsaKey = new RSA_PrivateKey(p, q, e, d, n);
             m_authKey.reset(rsaKey);
             pubKeyParams << e << n;
             allKeyParams << pubKeyParams << p << q << d;
@@ -375,6 +398,7 @@ QByteArray SshEncryptionFacility::authenticationKeySignature(const QByteArray &d
     Q_ASSERT(m_authKey);
 
     QScopedPointer<PK_Signer> signer(new PK_Signer(*m_authKey,
+        m_rng,
         botanEmsaAlgoName(m_authKeyAlgoName)));
     QByteArray dataToSign = AbstractSshPacket::encodeString(sessionId()) + data;
     QByteArray signature
@@ -412,16 +436,17 @@ QByteArray SshDecryptionFacility::hMacAlgoName(const SshKeyExchange &kex) const
     return kex.hMacAlgoServerToClient();
 }
 
-Keyed_Filter *SshDecryptionFacility::makeCipherMode(BlockCipher *cipher, Mode mode, const InitializationVector &iv,
-    const SymmetricKey &key)
+Keyed_Filter *SshDecryptionFacility::makeCipherMode(const QByteArray &cipher, const Mode mode)
 {
-    switch (mode) {
-    case CbcMode:
-        return new CBC_Decryption(cipher, new Null_Padding, key, iv);
-    case CtrMode:
-        return makeCtrCipherMode(cipher, iv, key);
+    if (mode == CtrMode) {
+        return new StreamCipher_Filter(cipher.toStdString());
     }
-    return 0; // For dumb compilers.
+
+    qWarning() << "I haven't been able to test the CBC decryption modes, so if this files file a bug at https://github.com/sandsmark/QSsh";
+
+    Cipher_Mode_Filter *filter = new Cipher_Mode_Filter(
+                Cipher_Mode::create_or_throw(cipher.toStdString(), DECRYPTION).release()); // We have to release, otherwise clang fails to link
+    return filter;
 }
 
 void SshDecryptionFacility::decrypt(QByteArray &data, quint32 offset,
@@ -432,7 +457,7 @@ void SshDecryptionFacility::decrypt(QByteArray &data, quint32 offset,
     const char * const start = data.constData() + offset;
     const char * const end = start + dataSize;
     for (const char *c = start; c < end; ++c)
-        qCDebug(sshLog, ) << "'" << *c << "' (0x" << (static_cast<int>(*c) & 0xff) << ")";
+        qCDebug(sshLog) << "'" << *c << "' (0x" << (static_cast<int>(*c) & 0xff) << ")";
 }
 
 } // namespace Internal

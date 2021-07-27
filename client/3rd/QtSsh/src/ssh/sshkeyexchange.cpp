@@ -1,40 +1,56 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshkeyexchange_p.h"
 
 #include "ssh_global.h"
 #include "sshbotanconversions_p.h"
 #include "sshcapabilities_p.h"
-#include "sshlogging_p.h"
 #include "sshsendfacility_p.h"
 #include "sshexception_p.h"
 #include "sshincomingpacket_p.h"
+#include "sshlogging_p.h"
 
-#include <botan/botan.h>
+#include <botan/dl_group.h>
+#include <botan/dh.h>
+#include <botan/numthry.h>
+#include <botan/pubkey.h>
+#include <botan/dsa.h>
+#include <botan/rsa.h>
+#include <botan/pk_ops.h>
+#include <botan/ecdh.h>
+#include <botan/ecdsa.h>
 
+#ifdef CREATOR_SSH_DEBUG
+#include <iostream>
+#endif
 #include <string>
 
 using namespace Botan;
@@ -94,22 +110,23 @@ bool SshKeyExchange::sendDhInitPacket(const SshIncomingPacket &serverKexInit)
     qCDebug(sshLog, "First packet follows: %d", kexInitParams.firstKexPacketFollows);
 
     m_kexAlgoName = SshCapabilities::findBestMatch(SshCapabilities::KeyExchangeMethods,
-                                                   kexInitParams.keyAlgorithms.names);
+                                                   kexInitParams.keyAlgorithms.names,
+                                                   "KeyExchange");
     m_serverHostKeyAlgo = SshCapabilities::findBestMatch(SshCapabilities::PublicKeyAlgorithms,
-            kexInitParams.serverHostKeyAlgorithms.names);
+            kexInitParams.serverHostKeyAlgorithms.names, "HostKey");
     determineHashingAlgorithm(kexInitParams, true);
     determineHashingAlgorithm(kexInitParams, false);
 
     m_encryptionAlgo
         = SshCapabilities::findBestMatch(SshCapabilities::EncryptionAlgorithms,
-              kexInitParams.encryptionAlgorithmsClientToServer.names);
+              kexInitParams.encryptionAlgorithmsClientToServer.names, "Encryption");
     m_decryptionAlgo
         = SshCapabilities::findBestMatch(SshCapabilities::EncryptionAlgorithms,
-              kexInitParams.encryptionAlgorithmsServerToClient.names);
+              kexInitParams.encryptionAlgorithmsServerToClient.names, "Decryption");
     SshCapabilities::findBestMatch(SshCapabilities::CompressionAlgorithms,
-        kexInitParams.compressionAlgorithmsClientToServer.names);
+        kexInitParams.compressionAlgorithmsClientToServer.names, "Compression Client to Server");
     SshCapabilities::findBestMatch(SshCapabilities::CompressionAlgorithms,
-        kexInitParams.compressionAlgorithmsServerToClient.names);
+        kexInitParams.compressionAlgorithmsServerToClient.names, "Compression Server to Client");
 
     AutoSeeded_RNG rng;
     if (m_kexAlgoName.startsWith(SshCapabilities::EcdhKexNamePrefix)) {
@@ -147,36 +164,42 @@ void SshKeyExchange::sendNewKeysPacket(const SshIncomingPacket &dhReply,
     printData("Server payload", AbstractSshPacket::encodeString(m_serverKexInitPayload));
     printData("K_S", reply.k_s);
 
+    AutoSeeded_RNG rng;
+
     SecureVector<byte> encodedK;
     if (m_dhKey) {
         concatenatedData += AbstractSshPacket::encodeMpInt(m_dhKey->get_y());
         concatenatedData += AbstractSshPacket::encodeMpInt(reply.f);
-        DH_KA_Operation dhOp(*m_dhKey);
-        SecureVector<byte> encodedF = BigInt::encode(reply.f);
-        encodedK = dhOp.agree(encodedF, encodedF.size());
+
+        std::unique_ptr<PK_Ops::Key_Agreement> dhOp = m_dhKey->create_key_agreement_op(rng, "Raw", "base");
+        std::vector<byte> encodedF = BigInt::encode(reply.f);
+        encodedK = dhOp->agree(0, encodedF.data(), encodedF.size(), nullptr, 0);
         printData("y", AbstractSshPacket::encodeMpInt(m_dhKey->get_y()));
         printData("f", AbstractSshPacket::encodeMpInt(reply.f));
-        m_dhKey.reset(nullptr);
+        m_dhKey.reset();
     } else {
         Q_ASSERT(m_ecdhKey);
         concatenatedData // Q_C.
                 += AbstractSshPacket::encodeString(convertByteArray(m_ecdhKey->public_value()));
         concatenatedData += AbstractSshPacket::encodeString(reply.q_s);
-        ECDH_KA_Operation ecdhOp(*m_ecdhKey);
-        encodedK = ecdhOp.agree(convertByteArray(reply.q_s), reply.q_s.count());
-        m_ecdhKey.reset(nullptr);
+        std::unique_ptr<PK_Ops::Key_Agreement> ecdhOp = m_ecdhKey->create_key_agreement_op(rng, "Raw", "base");
+
+        encodedK = ecdhOp->agree(0, convertByteArray(reply.q_s), reply.q_s.count(), nullptr, 0);
+        m_ecdhKey.reset();
     }
 
-    const BigInt k = BigInt::decode(encodedK);
+    // If we try to just use "BigInt::decode(encodedK)" clang fails to link
+    const BigInt k = BigInt::decode(encodedK.data(), encodedK.size());
     m_k = AbstractSshPacket::encodeMpInt(k); // Roundtrip, as Botan encodes BigInts somewhat differently.
     printData("K", m_k);
     concatenatedData += m_k;
     printData("Concatenated data", concatenatedData);
 
-    m_hash.reset(get_hash(botanHMacAlgoName(hashAlgoForKexAlgo())));
+    m_hash = HashFunction::create_or_throw(botanHMacAlgoName(hashAlgoForKexAlgo()));
     const SecureVector<byte> &hashResult = m_hash->process(convertByteArray(concatenatedData),
                                                            concatenatedData.size());
     m_h = convertByteArray(hashResult);
+
     printData("H", m_h);
 
     QScopedPointer<Public_Key> sigKey;
@@ -193,8 +216,8 @@ void SshKeyExchange::sendNewKeysPacket(const SshIncomingPacket &dhReply,
     } else {
         QSSH_ASSERT_AND_RETURN(m_serverHostKeyAlgo.startsWith(SshCapabilities::PubKeyEcdsaPrefix));
         const EC_Group domain(SshCapabilities::oid(m_serverHostKeyAlgo));
-        const PointGFp point = OS2ECP(convertByteArray(reply.q), reply.q.count(),
-                                      domain.get_curve());
+
+        const PointGFp point = domain.OS2ECP(convertByteArray(reply.q), reply.q.count());
         ECDSA_PublicKey * const ecdsaKey = new ECDSA_PublicKey(domain, point);
         sigKey.reset(ecdsaKey);
     }
@@ -210,6 +233,8 @@ void SshKeyExchange::sendNewKeysPacket(const SshIncomingPacket &dhReply,
     checkHostKey(reply.k_s);
 
     m_sendFacility.sendNewKeysPacket();
+    m_hostFingerprint = QByteArray::fromStdString(sigKey->fingerprint_public("SHA-256"));
+
 }
 
 QByteArray SshKeyExchange::hashAlgoForKexAlgo() const
@@ -230,14 +255,16 @@ void SshKeyExchange::determineHashingAlgorithm(const SshKeyExchangeInit &kexInit
     const QList<QByteArray> &serverCapabilities = serverToClient
             ? kexInit.macAlgorithmsServerToClient.names
             : kexInit.macAlgorithmsClientToServer.names;
-    *algo = SshCapabilities::findBestMatch(SshCapabilities::MacAlgorithms, serverCapabilities);
+    *algo = SshCapabilities::findBestMatch(SshCapabilities::MacAlgorithms,
+                                           serverCapabilities,
+                                           "MacAlgorithms");
 }
 
 void SshKeyExchange::checkHostKey(const QByteArray &hostKey)
 {
     if (m_connParams.hostKeyCheckingMode == SshHostKeyCheckingNone) {
         if (m_connParams.hostKeyDatabase)
-            m_connParams.hostKeyDatabase->insertHostKey(m_connParams.host, hostKey);
+            m_connParams.hostKeyDatabase->insertHostKey(m_connParams.host(), hostKey);
         return;
     }
 
@@ -247,7 +274,7 @@ void SshKeyExchange::checkHostKey(const QByteArray &hostKey)
                                         "if host key checking is enabled."));
     }
 
-    switch (m_connParams.hostKeyDatabase->matchHostKey(m_connParams.host, hostKey)) {
+    switch (m_connParams.hostKeyDatabase->matchHostKey(m_connParams.host(), hostKey)) {
     case SshHostKeyDatabase::KeyLookupMatch:
         return; // Nothing to do.
     case SshHostKeyDatabase::KeyLookupMismatch:
@@ -259,14 +286,14 @@ void SshKeyExchange::checkHostKey(const QByteArray &hostKey)
             throwHostKeyException();
         break;
     }
-    m_connParams.hostKeyDatabase->insertHostKey(m_connParams.host, hostKey);
+    m_connParams.hostKeyDatabase->insertHostKey(m_connParams.host(), hostKey);
 }
 
 void SshKeyExchange::throwHostKeyException()
 {
     throw SshServerException(SSH_DISCONNECT_HOST_KEY_NOT_VERIFIABLE, "Host key changed",
                              SSH_TR("Host key of machine \"%1\" has changed.")
-                             .arg(m_connParams.host));
+                             .arg(m_connParams.host()));
 }
 
 } // namespace Internal

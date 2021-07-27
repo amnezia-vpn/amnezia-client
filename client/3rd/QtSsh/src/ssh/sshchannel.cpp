@@ -1,44 +1,45 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshchannel_p.h"
 
 #include "sshincomingpacket_p.h"
-#include "sshlogging_p.h"
 #include "sshsendfacility_p.h"
+#include "sshlogging_p.h"
 
-#include <botan/botan.h>
+#include <botan/exceptn.h>
 
 #include <QTimer>
 
 namespace QSsh {
 namespace Internal {
-
-// "Payload length" (RFC 4253, 6.1), i.e. minus packet type, channel number
-// and length field for string.
-const quint32 MinMaxPacketSize = 32768 - sizeof(quint32) - sizeof(quint32) - 1;
 
 const quint32 NoChannel = 0xffffffffu;
 
@@ -49,6 +50,7 @@ AbstractSshChannel::AbstractSshChannel(quint32 channelId,
       m_localWindowSize(initialWindowSize()), m_remoteWindowSize(0),
       m_state(Inactive)
 {
+    m_timeoutTimer.setTimerType(Qt::VeryCoarseTimer);
     m_timeoutTimer.setSingleShot(true);
     connect(&m_timeoutTimer, &QTimer::timeout, this, &AbstractSshChannel::timeout);
 }
@@ -102,7 +104,7 @@ quint32 AbstractSshChannel::maxPacketSize()
     return 16 * 1024 * 1024;
 }
 
-void AbstractSshChannel::handleWindowAdjust(quint32 bytesToAdd)
+void AbstractSshChannel::handleWindowAdjust(quint64 bytesToAdd)
 {
     checkChannelActive();
 
@@ -144,11 +146,6 @@ void AbstractSshChannel::handleOpenSuccess(quint32 remoteChannelId,
     }
 
     m_timeoutTimer.stop();
-
-   if (remoteMaxPacketSize < MinMaxPacketSize) {
-       throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
-           "Maximum packet size too low.");
-   }
 
    qCDebug(sshLog, "Channel opened. remote channel id: %u, remote window size: %u, "
        "remote max packet size: %u",
@@ -264,7 +261,7 @@ void AbstractSshChannel::closeChannel()
     }
 }
 
-void AbstractSshChannel::checkChannelActive()
+void AbstractSshChannel::checkChannelActive() const
 {
     if (channelState() == Inactive || channelState() == Closed)
         throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
