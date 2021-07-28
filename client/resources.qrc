@@ -67,5 +67,41 @@
         <file>server_scripts/wireguard/run_container.sh</file>
         <file>server_scripts/wireguard/start.sh</file>
         <file>server_scripts/wireguard/template.conf</file>
+        <file>ui/qml/main.qml</file>
+        <file>ui/qml/GlobalConfig.qml</file>
+        <file>ui/qml/qmldir</file>
+        <file>ui/qml/TitleBar.qml</file>
+        <file>ui/qml/PageStart.qml</file>
+        <file>ui/qml/TextFieldType.qml</file>
+        <file>ui/qml/LabelType.qml</file>
+        <file>ui/qml/BasicButtonType.qml</file>
+        <file>ui/qml/ImageButtonType.qml</file>
+        <file>ui/qml/PageNewServer.qml</file>
+        <file>ui/qml/BlueButtonType.qml</file>
+        <file>ui/qml/PageSetupWizard.qml</file>
+        <file>ui/qml/RadioButtonType.qml</file>
+        <file>ui/qml/PageSetupWizardHighLevel.qml</file>
+        <file>ui/qml/PageSetupWizardVPNMode.qml</file>
+        <file>ui/qml/CheckBoxType.qml</file>
+        <file>ui/qml/PageSetupWizardMediumLevel.qml</file>
+        <file>ui/qml/PageSetupWizardLowLevel.qml</file>
+        <file>ui/qml/PageNewServerConfiguring.qml</file>
+        <file>ui/qml/PageNewServerProtocol.qml</file>
+        <file>ui/qml/ComboBoxType.qml</file>
+        <file>ui/qml/PageVPN.qml</file>
+        <file>ui/qml/PageSites.qml</file>
+        <file>ui/qml/PageGeneralSettings.qml</file>
+        <file>ui/qml/SettingButtonType.qml</file>
+        <file>ui/qml/PageServer.qml</file>
+        <file>ui/qml/PageAppSetting.qml</file>
+        <file>ui/qml/PageNetworkSetting.qml</file>
+        <file>ui/qml/PageServerSetting.qml</file>
+        <file>ui/qml/PageServerProtocols.qml</file>
+        <file>ui/qml/PageShareConnection.qml</file>
+        <file>ui/qml/PageProtoOpenVPN.qml</file>
+        <file>ui/qml/PageProtoShadowSock.qml</file>
+        <file>ui/qml/PageProtoCloak.qml</file>
+        <file>ui/qml/ShareConnectionContent.qml</file>
+        <file>ui/qml/ShareConnectionButtonType.qml</file>
     </qresource>
 </RCC>

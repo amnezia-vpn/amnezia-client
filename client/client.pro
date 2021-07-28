@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects
+QT += widgets core gui network xml remoteobjects quick
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -35,6 +35,7 @@ HEADERS  += \
     settings.h \
     ui/Controls/SlidingStackedWidget.h \
     ui/mainwindow.h \
+    ui/uilogic.h \
    ui/qautostart.h \
    ui/server_widget.h \
    ui/sites_model.h \
@@ -65,6 +66,7 @@ SOURCES  += \
     settings.cpp \
     ui/Controls/SlidingStackedWidget.cpp \
     ui/mainwindow.cpp \
+    ui/uilogic.cpp \
    ui/qautostart.cpp \
    ui/server_widget.cpp \
    ui/sites_model.cpp \

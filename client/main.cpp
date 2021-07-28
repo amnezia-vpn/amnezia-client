@@ -5,10 +5,16 @@
 #include <QTranslator>
 #include <QTimer>
 #include <QLoggingCategory>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include "ui/uilogic.h"
 
 #include "debug.h"
 #include "defines.h"
+#define QAPPLICATION_CLASS QGuiApplication
 #include "singleapplication.h"
+#undef QAPPLICATION_CLASS
 
 #include "ui/mainwindow.h"
 
@@ -79,23 +85,35 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-    MainWindow mainWindow;
+//    MainWindow mainWindow;
 
-#ifdef Q_OS_WIN
-    if (parser.isSet("a")) mainWindow.showOnStartup();
-    else mainWindow.show();
-#else
-    mainWindow.showOnStartup();
-#endif
+//#ifdef Q_OS_WIN
+//    if (parser.isSet("a")) mainWindow.showOnStartup();
+//    else mainWindow.show();
+//#else
+//    mainWindow.showOnStartup();
+//#endif
 
-    if (app.isPrimary()) {
-        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
-            qDebug() << "Secondary instance started, showing this window instead";
-            mainWindow.show();
-            mainWindow.showNormal();
-            mainWindow.raise();
-        });
-    }
+//    if (app.isPrimary()) {
+//        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
+//            qDebug() << "Secondary instance started, showing this window instead";
+//            mainWindow.show();
+//            mainWindow.showNormal();
+//            mainWindow.raise();
+//        });
+//    }
+
+    UiLogic uiLogic;
+    UiLogic::declareQML();
+    QQmlApplicationEngine engine;
+    const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+    engine.rootContext()->setContextProperty("UiLogic", &uiLogic);
+    engine.load(url);
 
     return app.exec();
 }
