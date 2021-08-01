@@ -138,12 +138,8 @@ SshAgent::SshAgent()
 {
     connect(&m_agentSocket, &QLocalSocket::connected, this, &SshAgent::handleConnected);
     connect(&m_agentSocket, &QLocalSocket::disconnected, this, &SshAgent::handleDisconnected);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(&m_agentSocket, SIGNAL(error(QAbstractSocket::SocketError)), this,
         SLOT(handleSocketError()));
-#else
-    connect(m_agentSocket, &QAbstractSocket::errorOccurred, this, &SshAgent::handleSocketError);
-#endif
     connect(&m_agentSocket, &QLocalSocket::readyRead, this, &SshAgent::handleIncomingData);
     QTimer::singleShot(0, this, &SshAgent::connectToServer);
 }
