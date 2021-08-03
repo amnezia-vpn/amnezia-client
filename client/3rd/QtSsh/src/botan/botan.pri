@@ -20,6 +20,12 @@ win32 {
    }
 }
 
+macx {
+    message("macOS build")
+    INCLUDEPATH += $$PWD/include/macos/botan-2
+    LIBS += -L$$PWD/lib/macos -lbotan-2
+}
+
 linux-g++ {
     message("Linux build")
     INCLUDEPATH += $$PWD/include/linux/botan-2
