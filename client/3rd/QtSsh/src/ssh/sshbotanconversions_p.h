@@ -1,34 +1,40 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
-#pragma once
+#ifndef BYTEARRAYCONVERSIONS_P_H
+#define BYTEARRAYCONVERSIONS_P_H
 
 #include "sshcapabilities_p.h"
 #include "sshexception_p.h"
 
-#include <botan/botan.h>
+#include <botan/secmem.h>
 
 namespace QSsh {
 namespace Internal {
@@ -43,9 +49,14 @@ inline Botan::byte *convertByteArray(QByteArray &a)
     return reinterpret_cast<Botan::byte *>(a.data());
 }
 
-inline QByteArray convertByteArray(const Botan::SecureVector<Botan::byte> &v)
+inline QByteArray convertByteArray(const Botan::secure_vector<Botan::byte> &v)
 {
-    return QByteArray(reinterpret_cast<const char *>(v.begin()), static_cast<int>(v.size()));
+    return QByteArray(reinterpret_cast<const char *>(v.data()), static_cast<int>(v.size()));
+}
+
+inline QByteArray convertByteArray(const std::vector<uint8_t> &v)
+{
+    return QByteArray(reinterpret_cast<const char *>(v.data()), v.size());
 }
 
 inline const char *botanKeyExchangeAlgoName(const QByteArray &rfcAlgoName)
@@ -64,8 +75,35 @@ inline const char *botanKeyExchangeAlgoName(const QByteArray &rfcAlgoName)
                              .arg(QString::fromLatin1(rfcAlgoName)));
 }
 
+inline const char *botanCipherAlgoName(const QByteArray &rfcAlgoName)
+{
+
+    if (rfcAlgoName == SshCapabilities::CryptAlgoAes128Cbc) {
+        return "CBC(AES-128)";
+    }
+    if (rfcAlgoName == SshCapabilities::CryptAlgoAes128Ctr) {
+        return "CTR(AES-128)";
+    }
+    if (rfcAlgoName == SshCapabilities::CryptAlgo3DesCbc) {
+        return "CBC(TripleDES)";
+    }
+    if (rfcAlgoName == SshCapabilities::CryptAlgo3DesCtr) {
+        return "CTR(TripleDES)";
+    }
+    if (rfcAlgoName == SshCapabilities::CryptAlgoAes192Ctr) {
+        return "CBR(AES-192)";
+    }
+    if (rfcAlgoName == SshCapabilities::CryptAlgoAes256Ctr) {
+        return "CTR(AES-256)";
+    }
+    throw SshClientException(SshInternalError, SSH_TR("Unexpected cipher \"%1\"")
+                             .arg(QString::fromLatin1(rfcAlgoName)));
+}
+
+
 inline const char *botanCryptAlgoName(const QByteArray &rfcAlgoName)
 {
+
     if (rfcAlgoName == SshCapabilities::CryptAlgoAes128Cbc
             || rfcAlgoName == SshCapabilities::CryptAlgoAes128Ctr) {
         return "AES-128";
@@ -91,7 +129,7 @@ inline const char *botanEmsaAlgoName(const QByteArray &rfcAlgoName)
     if (rfcAlgoName == SshCapabilities::PubKeyRsa)
         return "EMSA3(SHA-1)";
     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa256)
-        return "EMSA1_BSI(SHA-256)";
+        return "EMSA1(SHA-256)";
     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa384)
         return "EMSA1_BSI(SHA-384)";
     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa521)
@@ -130,3 +168,5 @@ inline quint32 botanHMacKeyLen(const QByteArray &rfcAlgoName)
 
 } // namespace Internal
 } // namespace QSsh
+
+#endif // BYTEARRAYCONVERSIONS_P_H

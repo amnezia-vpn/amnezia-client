@@ -1,27 +1,32 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshincomingpacket_p.h"
 
@@ -203,7 +208,8 @@ SshKeyExchangeReply SshIncomingPacket::extractKeyExchangeReply(const QByteArray 
             throw SshPacketParseException();
         getHostKeySpecificReplyData(replyData, hostKeyAlgo, replyData.k_s.mid(k_sOffset));
 
-        if (kexAlgo == SshCapabilities::DiffieHellmanGroup1Sha1) {
+        if (kexAlgo == SshCapabilities::DiffieHellmanGroup1Sha1
+                || kexAlgo == SshCapabilities::DiffieHellmanGroup14Sha1) {
             replyData.f = SshPacketParser::asBigInt(m_data, &topLevelOffset);
         } else {
             QSSH_ASSERT_AND_RETURN_VALUE(kexAlgo.startsWith(SshCapabilities::EcdhKexNamePrefix),
@@ -296,6 +302,23 @@ SshUserAuthInfoRequestPacket SshIncomingPacket::extractUserAuthInfoRequest() con
     }
 }
 
+SshUserAuthPkOkPacket SshIncomingPacket::extractUserAuthPkOk() const
+{
+    Q_ASSERT(isComplete());
+    Q_ASSERT(type() == SSH_MSG_USERAUTH_PK_OK);
+
+    try {
+        SshUserAuthPkOkPacket msg;
+        quint32 offset = TypeOffset + 1;
+        msg.algoName= SshPacketParser::asString(m_data, &offset);
+        msg.keyBlob = SshPacketParser::asString(m_data, &offset);
+        return msg;
+    } catch (const SshPacketParseException &) {
+        throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
+            "Invalid SSH_MSG_USERAUTH_PK_OK.");
+    }
+}
+
 SshDebug SshIncomingPacket::extractDebug() const
 {
     Q_ASSERT(isComplete());
@@ -346,29 +369,63 @@ SshUnimplemented SshIncomingPacket::extractUnimplemented() const
     }
 }
 
-SshChannelOpen SshIncomingPacket::extractChannelOpen() const
+SshChannelOpenGeneric SshIncomingPacket::extractChannelOpen() const
 {
     Q_ASSERT(isComplete());
     Q_ASSERT(type() == SSH_MSG_CHANNEL_OPEN);
 
-    SshChannelOpen open;
     try {
+        SshChannelOpenGeneric channelOpen;
         quint32 offset = TypeOffset + 1;
-        QByteArray type = SshPacketParser::asString(m_data, &offset);
-        open.remoteChannel = SshPacketParser::asUint32(m_data, &offset);
-        open.remoteWindowSize = SshPacketParser::asUint32(m_data, &offset);
-        open.remoteMaxPacketSize = SshPacketParser::asUint32(m_data, &offset);
-        if (type == ForwardedTcpIpType) {
-            open.remoteAddress = SshPacketParser::asString(m_data, &offset);
-            open.remotePort = SshPacketParser::asUint32(m_data, &offset);
-        } else {
-            open.remotePort = 0;
-        }
+        channelOpen.channelType = SshPacketParser::asString(m_data, &offset);
+        channelOpen.commonData.remoteChannel = SshPacketParser::asUint32(m_data, &offset);
+        channelOpen.commonData.remoteWindowSize = SshPacketParser::asUint32(m_data, &offset);
+        channelOpen.commonData.remoteMaxPacketSize = SshPacketParser::asUint32(m_data, &offset);
+        channelOpen.typeSpecificData = m_data.mid(offset, length() - paddingLength() - offset
+                                                  + int(sizeof m_length));
+        return channelOpen;
     } catch (const SshPacketParseException &) {
         throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
             "Server sent invalid SSH_MSG_CHANNEL_OPEN packet.");
     }
-    return open;
+}
+
+SshChannelOpenForwardedTcpIp SshIncomingPacket::extractChannelOpenForwardedTcpIp(
+        const SshChannelOpenGeneric &genericData)
+{
+    try {
+        SshChannelOpenForwardedTcpIp specificData;
+        specificData.common = genericData.commonData;
+        quint32 offset = 0;
+        specificData.remoteAddress = SshPacketParser::asString(genericData.typeSpecificData,
+                                                               &offset);
+        specificData.remotePort = SshPacketParser::asUint32(genericData.typeSpecificData, &offset);
+        specificData.originatorAddress = SshPacketParser::asString(genericData.typeSpecificData,
+                                                                   &offset);
+        specificData.originatorPort = SshPacketParser::asUint32(genericData.typeSpecificData,
+                                                                &offset);
+        return specificData;
+    } catch (const SshPacketParseException &) {
+        throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
+            "Server sent invalid SSH_MSG_CHANNEL_OPEN packet.");
+    }
+}
+
+SshChannelOpenX11 SshIncomingPacket::extractChannelOpenX11(const SshChannelOpenGeneric &genericData)
+{
+    try {
+        SshChannelOpenX11 specificData;
+        specificData.common = genericData.commonData;
+        quint32 offset = 0;
+        specificData.originatorAddress = SshPacketParser::asString(genericData.typeSpecificData,
+                                                                   &offset);
+        specificData.originatorPort = SshPacketParser::asUint32(genericData.typeSpecificData,
+                                                                &offset);
+        return specificData;
+    } catch (const SshPacketParseException &) {
+        throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
+            "Server sent invalid SSH_MSG_CHANNEL_OPEN packet.");
+    }
 }
 
 SshChannelOpenFailure SshIncomingPacket::extractChannelOpenFailure() const

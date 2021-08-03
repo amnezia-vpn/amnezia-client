@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/ssh">
+        <file>images/dir.png</file>
+        <file>images/help.png</file>
+        <file>images/unknownfile.png</file>
+    </qresource>
+</RCC>

@@ -1,56 +1,48 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshremoteprocess.h"
 #include "sshremoteprocess_p.h"
+#include "sshlogging_p.h"
 
 #include "ssh_global.h"
 #include "sshincomingpacket_p.h"
-#include "sshlogging_p.h"
 #include "sshsendfacility_p.h"
+#include "sshx11displayinfo_p.h"
 
-#include <botan/botan.h>
+#include <botan/exceptn.h>
 
 #include <QTimer>
 
 #include <cstring>
 #include <cstdlib>
-
-/*!
-    \class QSsh::SshRemoteProcess
-
-    \brief The SshRemoteProcess class implements an SSH channel for running a
-    remote process.
-
-    Objects are created via SshConnection::createRemoteProcess.
-    The process is started via the start() member function.
-    If the process needs a pseudo terminal, you can request one
-    via requestTerminal() before calling start().
-    Note that this class does not support QIODevice's waitFor*() functions, i.e. it has
-    no synchronous mode.
- */
 
 namespace QSsh {
 
@@ -83,7 +75,7 @@ SshRemoteProcess::SshRemoteProcess(quint32 channelId, Internal::SshSendFacility 
 SshRemoteProcess::~SshRemoteProcess()
 {
     QSSH_ASSERT(d->channelState() != Internal::AbstractSshChannel::SessionEstablished);
-    close();
+    SshRemoteProcess::close();
     delete d;
 }
 
@@ -188,6 +180,12 @@ void SshRemoteProcess::requestTerminal(const SshPseudoTerminal &terminal)
     d->m_terminal = terminal;
 }
 
+void SshRemoteProcess::requestX11Forwarding(const QString &displayName)
+{
+    QSSH_ASSERT_AND_RETURN(d->channelState() == Internal::SshRemoteProcessPrivate::Inactive);
+    d->m_x11DisplayName = displayName;
+}
+
 void SshRemoteProcess::start()
 {
     if (d->channelState() == Internal::SshRemoteProcessPrivate::Inactive) {
@@ -201,7 +199,7 @@ void SshRemoteProcess::sendSignal(Signal signal)
 {
     try {
         if (isRunning()) {
-            const char *signalString = 0;
+            const char *signalString = nullptr;
             for (size_t i = 0; i < sizeof signalMap/sizeof *signalMap && !signalString; ++i) {
                 if (signalMap[i].signalEnum == signal)
                     signalString = signalMap[i].signalString;
@@ -210,7 +208,7 @@ void SshRemoteProcess::sendSignal(Signal signal)
             d->m_sendFacility.sendChannelSignalPacket(d->remoteChannel(), signalString);
         }
     }  catch (const std::exception &e) {
-        setErrorString(QString::fromLatin1(e.what()));
+        setErrorString(QString::fromLocal8Bit(e.what()));
         d->closeChannel();
     }
 }
@@ -228,6 +226,14 @@ SshRemoteProcess::Signal SshRemoteProcess::exitSignal() const
 }
 
 namespace Internal {
+
+void SshRemoteProcessPrivate::failToStart(const QString &reason)
+{
+    if (m_procState != NotYetStarted)
+        return;
+    m_proc->setErrorString(reason);
+    setProcState(StartFailed);
+}
 
 SshRemoteProcessPrivate::SshRemoteProcessPrivate(const QByteArray &command,
         quint32 channelId, SshSendFacility &sendFacility, SshRemoteProcess *proc)
@@ -288,26 +294,41 @@ void SshRemoteProcessPrivate::closeHook()
 
 void SshRemoteProcessPrivate::handleOpenSuccessInternal()
 {
-   foreach (const EnvVar &envVar, m_env) {
-       m_sendFacility.sendEnvPacket(remoteChannel(), envVar.first,
-           envVar.second);
-   }
+    if (m_x11DisplayName.isEmpty())
+        startProcess(X11DisplayInfo());
+    else
+        emit x11ForwardingRequested(m_x11DisplayName);
+}
 
-   if (m_useTerminal)
-       m_sendFacility.sendPtyRequestPacket(remoteChannel(), m_terminal);
+void SshRemoteProcessPrivate::startProcess(const X11DisplayInfo &displayInfo)
+{
+    if (m_procState != NotYetStarted)
+        return;
 
-   if (m_isShell)
-       m_sendFacility.sendShellPacket(remoteChannel());
-   else
-       m_sendFacility.sendExecPacket(remoteChannel(), m_command);
-   setProcState(ExecRequested);
-   m_timeoutTimer.start(ReplyTimeout);
+    foreach (const EnvVar &envVar, m_env) {
+        m_sendFacility.sendEnvPacket(remoteChannel(), envVar.first,
+            envVar.second);
+    }
+
+    if (!m_x11DisplayName.isEmpty()) {
+        m_sendFacility.sendX11ForwardingPacket(remoteChannel(), displayInfo.protocol,
+                                               displayInfo.randomCookie.toHex(), 0);
+    }
+
+    if (m_useTerminal)
+        m_sendFacility.sendPtyRequestPacket(remoteChannel(), m_terminal);
+
+    if (m_isShell)
+        m_sendFacility.sendShellPacket(remoteChannel());
+    else
+        m_sendFacility.sendExecPacket(remoteChannel(), m_command);
+    setProcState(ExecRequested);
+    m_timeoutTimer.start(ReplyTimeout);
 }
 
 void SshRemoteProcessPrivate::handleOpenFailureInternal(const QString &reason)
 {
-   setProcState(StartFailed);
-   m_proc->setErrorString(reason);
+    failToStart(reason);
 }
 
 void SshRemoteProcessPrivate::handleChannelSuccess()

@@ -1,31 +1,37 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sftpchannel.h"
 #include "sftpchannel_p.h"
 
+#include "sftpdefs.h"
 #include "sshexception_p.h"
 #include "sshincomingpacket_p.h"
 #include "sshlogging_p.h"
@@ -34,33 +40,9 @@
 #include <QDir>
 #include <QFile>
 
-/*!
-    \class QSsh::SftpChannel
-
-    \brief The SftpChannel class provides SFTP operations.
-
-    Objects are created via SshConnection::createSftpChannel().
-    The channel needs to be initialized with
-    a call to initialize() and is closed via closeChannel(). After closing
-    a channel, no more operations are possible. It cannot be re-opened
-    using initialize(); use SshConnection::createSftpChannel() if you need
-    a new one.
-
-    After the initialized() signal has been emitted, operations can be started.
-    All SFTP operations are asynchronous (non-blocking) and can be in-flight
-    simultaneously (though callers must ensure that concurrently running jobs
-    are independent of each other, e.g. they must not write to the same file).
-    Operations are identified by their job id, which is returned by
-    the respective member function. If the function can right away detect that
-    the operation cannot succeed, it returns SftpInvalidJob. If an error occurs
-    later, the finished() signal is emitted for the respective job with a
-    non-empty error string.
-
-    Note that directory names must not have a trailing slash.
-*/
-
 namespace QSsh {
 namespace Internal {
+
 namespace {
     const quint32 ProtocolVersion = 3;
 
@@ -76,8 +58,52 @@ namespace {
         return response.status == SSH_FX_OK ? QString()
             : errorMessage(response.errorString, alternativeMessage);
     }
+
+    bool openFile(QFile *localFile, SftpOverwriteMode mode)
+    {
+        if (mode == SftpSkipExisting && localFile->exists())
+            return false;
+
+        QIODevice::OpenMode openMode = QIODevice::WriteOnly;
+        if (mode == SftpOverwriteExisting)
+            openMode |= QIODevice::Truncate;
+        else if (mode == SftpAppendToExisting)
+            openMode |= QIODevice::Append;
+
+        return localFile->open(openMode);
+    }
+
+    SftpError sftpStatusToError(const SftpStatusCode status)
+    {
+        switch (status) {
+        case SSH_FX_OK:
+            return SftpError::NoError;
+        case SSH_FX_EOF:
+            return SftpError::EndOfFile;
+        case SSH_FX_NO_SUCH_FILE:
+            return SftpError::FileNotFound;
+        case SSH_FX_PERMISSION_DENIED:
+            return SftpError::PermissionDenied;
+        case SSH_FX_BAD_MESSAGE:
+            return SftpError::BadMessage;
+        case SSH_FX_NO_CONNECTION:
+            return SftpError::NoConnection;
+        case SSH_FX_CONNECTION_LOST:
+            return SftpError::ConnectionLost;
+        case SSH_FX_OP_UNSUPPORTED:
+            return SftpError::UnsupportedOperation;
+        case SSH_FX_FAILURE:
+        default:
+            return SftpError::GenericFailure;
+        }
+    }
+
 } // anonymous namespace
 } // namespace Internal
+
+//--------------------------------------------------------------------------------------------------
+// SftpChannel
+//--------------------------------------------------------------------------------------------------
 
 SftpChannel::SftpChannel(quint32 channelId,
     Internal::SshSendFacility &sendFacility)
@@ -95,6 +121,8 @@ SftpChannel::SftpChannel(quint32 channelId,
             this, &SftpChannel::finished, Qt::QueuedConnection);
     connect(d, &Internal::SftpChannelPrivate::closed,
             this, &SftpChannel::closed, Qt::QueuedConnection);
+    connect(d, &Internal::SftpChannelPrivate::transferProgress,
+            this, &SftpChannel::transferProgress, Qt::QueuedConnection);
 }
 
 SftpChannel::State SftpChannel::state() const
@@ -177,6 +205,15 @@ SftpJobId SftpChannel::createFile(const QString &path, SftpOverwriteMode mode)
         new Internal::SftpCreateFile(++d->m_nextJobId, path, mode)));
 }
 
+SftpJobId SftpChannel::uploadFile(QSharedPointer<QIODevice> device,
+    const QString &remoteFilePath, SftpOverwriteMode mode)
+{
+    if (!device->isOpen() && !device->open(QIODevice::ReadOnly))
+        return SftpInvalidJob;
+    return d->createJob(Internal::SftpUploadFile::Ptr(
+        new Internal::SftpUploadFile(++d->m_nextJobId, remoteFilePath, device, mode)));
+}
+
 SftpJobId SftpChannel::uploadFile(const QString &localFilePath,
     const QString &remoteFilePath, SftpOverwriteMode mode)
 {
@@ -191,17 +228,14 @@ SftpJobId SftpChannel::downloadFile(const QString &remoteFilePath,
     const QString &localFilePath, SftpOverwriteMode mode)
 {
     QSharedPointer<QFile> localFile(new QFile(localFilePath));
-    if (mode == SftpSkipExisting && localFile->exists())
-        return SftpInvalidJob;
-    QIODevice::OpenMode openMode = QIODevice::WriteOnly;
-    if (mode == SftpOverwriteExisting)
-        openMode |= QIODevice::Truncate;
-    else if (mode == SftpAppendToExisting)
-        openMode |= QIODevice::Append;
-    if (!localFile->open(openMode))
-        return SftpInvalidJob;
     return d->createJob(Internal::SftpDownload::Ptr(
-        new Internal::SftpDownload(++d->m_nextJobId, remoteFilePath, localFile)));
+        new Internal::SftpDownload(++d->m_nextJobId, remoteFilePath, localFile, mode)));
+}
+
+SftpJobId SftpChannel::downloadFile(const QString &remoteFilePath, QSharedPointer<QIODevice> device)
+{
+    return d->createJob(Internal::SftpDownload::Ptr(
+        new Internal::SftpDownload(++d->m_nextJobId, remoteFilePath, device, SftpOverwriteExisting)));
 }
 
 SftpJobId SftpChannel::uploadDir(const QString &localDirPath,
@@ -224,11 +258,31 @@ SftpJobId SftpChannel::uploadDir(const QString &localDirPath,
     return uploadDirOp->jobId;
 }
 
+SftpJobId SftpChannel::downloadDir(const QString &remoteDirPath,
+    const QString &localDirPath, SftpOverwriteMode mode)
+{
+    if (state() != Initialized)
+        return SftpInvalidJob;
+    if (!QDir().mkpath(localDirPath))
+        return SftpInvalidJob;
+    const Internal::SftpDownloadDir::Ptr downloadDirOp(
+        new Internal::SftpDownloadDir(++d->m_nextJobId, mode));
+    const Internal::SftpListDir::Ptr lsdirOp(
+        new Internal::SftpListDir(++d->m_nextJobId, remoteDirPath, downloadDirOp));
+    downloadDirOp->lsdirsInProgress.insert(lsdirOp,
+       Internal::SftpDownloadDir::Dir(localDirPath, remoteDirPath));
+    d->createJob(lsdirOp);
+    return downloadDirOp->jobId;
+}
+
 SftpChannel::~SftpChannel()
 {
     delete d;
 }
 
+//--------------------------------------------------------------------------------------------------
+// SftpChannelPrivate
+//--------------------------------------------------------------------------------------------------
 
 namespace Internal {
 
@@ -396,21 +450,21 @@ void SftpChannelPrivate::handleHandle()
     }
 }
 
-void SftpChannelPrivate::handleLsHandle(const JobMap::Iterator &it)
+void SftpChannelPrivate::handleLsHandle(JobMap::Iterator it)
 {
     SftpListDir::Ptr op = it.value().staticCast<SftpListDir>();
     sendData(m_outgoingPacket.generateReadDir(op->remoteHandle,
         op->jobId).rawData());
 }
 
-void SftpChannelPrivate::handleCreateFileHandle(const JobMap::Iterator &it)
+void SftpChannelPrivate::handleCreateFileHandle(JobMap::Iterator it)
 {
     SftpCreateFile::Ptr op = it.value().staticCast<SftpCreateFile>();
     sendData(m_outgoingPacket.generateCloseHandle(op->remoteHandle,
         op->jobId).rawData());
 }
 
-void SftpChannelPrivate::handleGetHandle(const JobMap::Iterator &it)
+void SftpChannelPrivate::handleGetHandle(JobMap::Iterator it)
 {
     SftpDownload::Ptr op = it.value().staticCast<SftpDownload>();
     sendData(m_outgoingPacket.generateFstat(op->remoteHandle,
@@ -418,7 +472,7 @@ void SftpChannelPrivate::handleGetHandle(const JobMap::Iterator &it)
     op->statRequested = true;
 }
 
-void SftpChannelPrivate::handlePutHandle(const JobMap::Iterator &it)
+void SftpChannelPrivate::handlePutHandle(JobMap::Iterator it)
 {
     SftpUploadFile::Ptr op = it.value().staticCast<SftpUploadFile>();
     if (op->parentJob && op->parentJob->hasError)
@@ -464,16 +518,16 @@ void SftpChannelPrivate::handleStatus()
     }
 }
 
-void SftpChannelPrivate::handleStatusGeneric(const JobMap::Iterator &it,
+void SftpChannelPrivate::handleStatusGeneric(JobMap::Iterator it,
     const SftpStatusResponse &response)
 {
     AbstractSftpOperation::Ptr op = it.value();
     const QString error = errorMessage(response, tr("Unknown error."));
-    emit finished(op->jobId, error);
+    emit finished(op->jobId, sftpStatusToError(response.status), error);
     m_jobs.erase(it);
 }
 
-void SftpChannelPrivate::handleMkdirStatus(const JobMap::Iterator &it,
+void SftpChannelPrivate::handleMkdirStatus(JobMap::Iterator it,
     const SftpStatusResponse &response)
 {
     SftpMakeDir::Ptr op = it.value().staticCast<SftpMakeDir>();
@@ -500,6 +554,7 @@ void SftpChannelPrivate::handleMkdirStatus(const JobMap::Iterator &it,
     } else {
         parentJob->setError();
         emit finished(parentJob->jobId,
+            sftpStatusToError(response.status),
             tr("Error creating directory \"%1\": %2")
             .arg(remoteDir, response.errorString));
         m_jobs.erase(it);
@@ -524,6 +579,7 @@ void SftpChannelPrivate::handleMkdirStatus(const JobMap::Iterator &it,
         if (!localFile->open(QIODevice::ReadOnly)) {
             parentJob->setError();
             emit finished(parentJob->jobId,
+                sftpStatusToError(response.status),
                 tr("Could not open local file \"%1\": %2")
                 .arg(fileInfo.absoluteFilePath(), localFile->errorString()));
             m_jobs.erase(it);
@@ -544,29 +600,58 @@ void SftpChannelPrivate::handleMkdirStatus(const JobMap::Iterator &it,
     m_jobs.erase(it);
 }
 
-void SftpChannelPrivate::handleLsStatus(const JobMap::Iterator &it,
+void SftpChannelPrivate::handleLsStatus(JobMap::Iterator it,
     const SftpStatusResponse &response)
 {
     SftpListDir::Ptr op = it.value().staticCast<SftpListDir>();
+
+    if (op->parentJob && op->parentJob->hasError) {
+        m_jobs.erase(it);
+        return;
+    }
+
     switch (op->state) {
     case SftpListDir::OpenRequested:
-        emit finished(op->jobId, errorMessage(response.errorString,
+        reportRequestError(op, sftpStatusToError(response.status), errorMessage(response.errorString,
             tr("Remote directory could not be opened for reading.")));
         m_jobs.erase(it);
         break;
     case SftpListDir::Open:
         if (response.status != SSH_FX_EOF)
-            reportRequestError(op, errorMessage(response.errorString,
+            reportRequestError(op,
+                sftpStatusToError(response.status),
+                errorMessage(response.errorString,
                 tr("Failed to list remote directory contents.")));
         op->state = SftpListDir::CloseRequested;
         sendData(m_outgoingPacket.generateCloseHandle(op->remoteHandle,
             op->jobId).rawData());
         break;
     case SftpListDir::CloseRequested:
-        if (!op->hasError) {
+        if (op->hasError || (op->parentJob && op->parentJob->hasError)) {
+            m_jobs.erase(it);
+            return;
+        }
+
+        {
             const QString error = errorMessage(response,
                 tr("Failed to close remote directory."));
-            emit finished(op->jobId, error);
+
+            if (op->parentJob) {
+                if (!error.isEmpty()) {
+                    op->parentJob->setError();
+                }
+                if (op->parentJob->hasError) {
+                    emit finished(op->parentJob->jobId, sftpStatusToError(response.status), error);
+                } else {
+                    op->parentJob->lsdirsInProgress.remove(op);
+                    if (op->parentJob->lsdirsInProgress.isEmpty() &&
+                        op->parentJob->downloadsInProgress.isEmpty()) {
+                        emit finished(op->parentJob->jobId);
+                    }
+                }
+            } else {
+                emit finished(op->jobId, sftpStatusToError(response.status), error);
+            }
         }
         m_jobs.erase(it);
         break;
@@ -576,26 +661,31 @@ void SftpChannelPrivate::handleLsStatus(const JobMap::Iterator &it,
     }
 }
 
-void SftpChannelPrivate::handleGetStatus(const JobMap::Iterator &it,
+void SftpChannelPrivate::handleGetStatus(JobMap::Iterator it,
     const SftpStatusResponse &response)
 {
     SftpDownload::Ptr op = it.value().staticCast<SftpDownload>();
+
+    if (op->parentJob && op->parentJob->hasError) {
+        m_jobs.erase(it);
+        return;
+    }
+
     switch (op->state) {
     case SftpDownload::OpenRequested:
-        emit finished(op->jobId,
-            errorMessage(response.errorString,
-                tr("Failed to open remote file for reading.")));
+        reportRequestError(op, sftpStatusToError(response.status), errorMessage(response.errorString,
+            tr("Failed to open remote file for reading.")));
         m_jobs.erase(it);
         break;
     case SftpDownload::Open:
         if (op->statRequested) {
-            reportRequestError(op, errorMessage(response.errorString,
+            reportRequestError(op, sftpStatusToError(response.status), errorMessage(response.errorString,
                 tr("Failed to retrieve information on the remote file ('stat' failed).")));
             sendTransferCloseHandle(op, response.requestId);
         } else {
             if ((response.status != SSH_FX_EOF || response.requestId != op->eofId)
                 && !op->hasError)
-                reportRequestError(op, errorMessage(response.errorString,
+                reportRequestError(op, sftpStatusToError(response.status), errorMessage(response.errorString,
                     tr("Failed to read remote file.")));
             finishTransferRequest(it);
         }
@@ -603,11 +693,20 @@ void SftpChannelPrivate::handleGetStatus(const JobMap::Iterator &it,
     case SftpDownload::CloseRequested:
         Q_ASSERT(op->inFlightCount == 1);
         if (!op->hasError) {
-            if (response.status == SSH_FX_OK)
-                emit finished(op->jobId);
-            else
-                reportRequestError(op, errorMessage(response.errorString,
-                    tr("Failed to close remote file.")));
+            if (response.status == SSH_FX_OK) {
+                if (op->parentJob) {
+                    op->parentJob->downloadsInProgress.removeOne(op);
+                    if (op->parentJob->lsdirsInProgress.isEmpty()
+                        && op->parentJob->downloadsInProgress.isEmpty())
+                        emit finished(op->parentJob->jobId);
+                } else {
+                    emit finished(op->jobId);
+                }
+            } else {
+                const QString error = errorMessage(response.errorString,
+                    tr("Failed to close remote file."));
+                reportRequestError(op, sftpStatusToError(response.status), error);
+            }
         }
         removeTransferRequest(it);
         break;
@@ -617,7 +716,7 @@ void SftpChannelPrivate::handleGetStatus(const JobMap::Iterator &it,
     }
 }
 
-void SftpChannelPrivate::handlePutStatus(const JobMap::Iterator &it,
+void SftpChannelPrivate::handlePutStatus(JobMap::Iterator it,
     const SftpStatusResponse &response)
 {
     SftpUploadFile::Ptr job = it.value().staticCast<SftpUploadFile>();
@@ -635,6 +734,7 @@ void SftpChannelPrivate::handlePutStatus(const JobMap::Iterator &it,
 
         if (emitError) {
             emit finished(job->jobId,
+                sftpStatusToError(response.status),
                 errorMessage(response.errorString,
                     tr("Failed to open remote file for writing.")));
         }
@@ -653,7 +753,7 @@ void SftpChannelPrivate::handlePutStatus(const JobMap::Iterator &it,
         } else {
             if (job->parentJob)
                 job->parentJob->setError();
-            reportRequestError(job, errorMessage(response.errorString,
+            reportRequestError(job, sftpStatusToError(response.status), errorMessage(response.errorString,
                 tr("Failed to write remote file.")));
             finishTransferRequest(it);
         }
@@ -679,9 +779,9 @@ void SftpChannelPrivate::handlePutStatus(const JobMap::Iterator &it,
                 tr("Failed to close remote file."));
             if (job->parentJob) {
                 job->parentJob->setError();
-                emit finished(job->parentJob->jobId, error);
+                emit finished(job->parentJob->jobId, sftpStatusToError(response.status), error);
             } else {
-                emit finished(job->jobId, error);
+                emit finished(job->jobId, sftpStatusToError(response.status), error);
             }
         }
         m_jobs.erase(it);
@@ -713,7 +813,13 @@ void SftpChannelPrivate::handleName()
             attributesToFileInfo(file.attributes, fileInfo);
             fileInfoList << fileInfo;
         }
-        emit fileInfoAvailable(op->jobId, fileInfoList);
+
+        if (op->parentJob) {
+            handleDownloadDir(op, fileInfoList);
+        } else {
+            emit fileInfoAvailable(op->jobId, fileInfoList);
+        }
+
         sendData(m_outgoingPacket.generateReadDir(op->remoteHandle,
             op->jobId).rawData());
         break;
@@ -739,17 +845,34 @@ void SftpChannelPrivate::handleReadData()
         return;
     }
 
+    if (!op->localFile->isOpen()) {
+        QFile *fileDevice = qobject_cast<QFile*>(op->localFile.data());
+        if (fileDevice){
+            if (!Internal::openFile(fileDevice, op->mode)) {
+                reportRequestError(op, SftpError::GenericFailure, tr("Cannot open file ") + fileDevice->fileName());
+                finishTransferRequest(it);
+                return;
+            }
+        } else {
+            reportRequestError(op, SftpError::GenericFailure, tr("File to upload is not open"));
+            finishTransferRequest(it);
+            return;
+        }
+    }
+
     if (!op->localFile->seek(op->offsets[response.requestId])) {
-        reportRequestError(op, op->localFile->errorString());
+        reportRequestError(op, SftpError::GenericFailure, op->localFile->errorString());
         finishTransferRequest(it);
         return;
     }
 
     if (op->localFile->write(response.data) != response.data.size()) {
-        reportRequestError(op, op->localFile->errorString());
+        reportRequestError(op, SftpError::GenericFailure, op->localFile->errorString());
         finishTransferRequest(it);
         return;
     }
+
+    emit transferProgress(op->jobId, op->localFile->pos(), op->fileSize);
 
     if (op->offset >= op->fileSize && op->fileSize != 0)
         finishTransferRequest(it);
@@ -792,6 +915,7 @@ void SftpChannelPrivate::handleAttrs()
             op->eofId = op->jobId;
         }
         op->statRequested = false;
+        emit transferProgress(op->jobId, op->offset, op->fileSize);
         spawnReadRequests(op);
     } else {
         SftpUploadFile::Ptr op = transfer.staticCast<SftpUploadFile>();
@@ -803,13 +927,58 @@ void SftpChannelPrivate::handleAttrs()
 
         if (response.attrs.sizePresent) {
             op->offset = response.attrs.size;
+            emit transferProgress(op->jobId, op->offset, op->fileSize);
             spawnWriteRequests(it);
         } else {
             if (op->parentJob)
                 op->parentJob->setError();
-            reportRequestError(op, tr("Cannot append to remote file: "
+            reportRequestError(op, SftpError::UnsupportedOperation, tr("Cannot append to remote file: "
                 "Server does not support the file size attribute."));
             sendTransferCloseHandle(op, op->jobId);
+        }
+    }
+}
+
+void SftpChannelPrivate::handleDownloadDir(SftpListDir::Ptr op,
+    const QList<SftpFileInfo> &fileInfoList)
+{
+    if (op->parentJob->hasError) {
+        return;
+    }
+
+    foreach (SftpFileInfo fileInfo, fileInfoList) {
+        Internal::SftpDownloadDir::Dir dir = op->parentJob->lsdirsInProgress[op];
+        QString fullPathRemote = QDir(dir.remoteDir).path() + QLatin1Char('/') + fileInfo.name;
+        QString fullPathLocal = QDir(dir.localDir).path() + QLatin1Char('/') + fileInfo.name;
+
+        if (fileInfo.type == FileTypeRegular) {
+            QSharedPointer<QFile> localFile(new QFile(fullPathLocal));
+            Internal::SftpDownload::Ptr downloadJob = Internal::SftpDownload::Ptr(
+                new Internal::SftpDownload(++m_nextJobId, fullPathRemote, localFile,
+                                           op->parentJob->mode, op->parentJob));
+
+            op->parentJob->downloadsInProgress.append(downloadJob);
+            createJob(downloadJob);
+
+        } else if (fileInfo.type == FileTypeDirectory) {
+            if (fileInfo.name == QLatin1String(".") || fileInfo.name == QLatin1String("..")) {
+                continue;
+            }
+
+            if (!QDir().mkpath(fullPathLocal)) {
+                reportRequestError(op, SftpError::GenericFailure, tr("Cannot create directory ") + fullPathLocal);
+                break;
+            }
+
+            Internal::SftpListDir::Ptr lsdir = Internal::SftpListDir::Ptr(
+                new Internal::SftpListDir(++m_nextJobId, fullPathRemote, op->parentJob));
+
+            op->parentJob->lsdirsInProgress.insert(lsdir,
+                Internal::SftpDownloadDir::Dir(fullPathLocal, fullPathRemote));
+            createJob(lsdir);
+
+        } else {
+            // andres.pagliano TODO handle?
         }
     }
 }
@@ -827,7 +996,7 @@ SftpChannelPrivate::JobMap::Iterator SftpChannelPrivate::lookupJob(SftpJobId id)
 void SftpChannelPrivate::closeHook()
 {
     for (JobMap::ConstIterator it = m_jobs.constBegin(); it != m_jobs.constEnd(); ++it)
-        emit finished(it.key(), tr("SFTP channel closed unexpectedly."));
+        emit finished(it.key(), SftpError::EndOfFile, tr("SFTP channel closed unexpectedly."));
     m_jobs.clear();
     m_incomingData.clear();
     m_incomingPacket.clear();
@@ -863,13 +1032,35 @@ void SftpChannelPrivate::sendReadRequest(const SftpDownload::Ptr &job,
 }
 
 void SftpChannelPrivate::reportRequestError(const AbstractSftpOperationWithHandle::Ptr &job,
+    const SftpError errorType,
     const QString &error)
 {
-    emit finished(job->jobId, error);
+    // andres.pagliano TODO refactor
+
+    // Report list error during download dir
+    SftpListDir::Ptr lsjob = job.dynamicCast<SftpListDir>();
+    if (!lsjob.isNull() && lsjob->parentJob) {
+        if (!lsjob->parentJob->hasError) {
+            emit finished(lsjob->parentJob->jobId, errorType, error);
+            lsjob->parentJob->hasError = true;
+        }
+    } else {
+        // Report download error during recursive download dir
+        SftpDownload::Ptr djob = job.dynamicCast<SftpDownload>();
+        if (!djob.isNull() && djob->parentJob) {
+            if (!djob->parentJob->hasError) {
+                emit finished(djob->parentJob->jobId, errorType, error);
+                djob->parentJob->hasError = true;
+            }
+        } else {
+            // Other error
+            emit finished(job->jobId, errorType, error);
+        }
+    }
     job->hasError = true;
 }
 
-void SftpChannelPrivate::finishTransferRequest(const JobMap::Iterator &it)
+void SftpChannelPrivate::finishTransferRequest(JobMap::Iterator it)
 {
     AbstractSftpTransfer::Ptr job = it.value().staticCast<AbstractSftpTransfer>();
     if (job->inFlightCount == 1)
@@ -901,7 +1092,14 @@ void SftpChannelPrivate::attributesToFileInfo(const SftpFileAttributes &attribut
         else
             fileInfo.type = FileTypeOther;
         fileInfo.permissionsValid = true;
-        fileInfo.permissions = 0;
+        fileInfo.permissions = {};
+
+        if (attributes.timesPresent) {
+            fileInfo.atime = attributes.atime;
+            fileInfo.mtime = attributes.mtime;
+            fileInfo.timestampsValid = true;
+        }
+
         if (attributes.permissions & 00001) // S_IXOTH
             fileInfo.permissions |= QFile::ExeOther;
         if (attributes.permissions & 00002) // S_IWOTH
@@ -923,20 +1121,25 @@ void SftpChannelPrivate::attributesToFileInfo(const SftpFileAttributes &attribut
     }
 }
 
-void SftpChannelPrivate::removeTransferRequest(const JobMap::Iterator &it)
+void SftpChannelPrivate::removeTransferRequest(JobMap::Iterator it)
 {
     --it.value().staticCast<AbstractSftpTransfer>()->inFlightCount;
     m_jobs.erase(it);
 }
 
-void SftpChannelPrivate::sendWriteRequest(const JobMap::Iterator &it)
+void SftpChannelPrivate::sendWriteRequest(JobMap::Iterator it)
 {
     SftpUploadFile::Ptr job = it.value().staticCast<SftpUploadFile>();
+
+    emit transferProgress(job->jobId, job->localFile->pos(), job->localFile->size());
+
     QByteArray data = job->localFile->read(AbstractSftpPacket::MaxDataSize);
-    if (job->localFile->error() != QFile::NoError) {
+
+    QFileDevice *fileDevice = qobject_cast<QFileDevice*>(job->localFile.data());
+    if (fileDevice && fileDevice->error() != QFileDevice::NoError) {
         if (job->parentJob)
             job->parentJob->setError();
-        reportRequestError(job, tr("Error reading local file: %1")
+        reportRequestError(job, SftpError::GenericFailure, tr("Error reading local file: %1")
             .arg(job->localFile->errorString()));
         finishTransferRequest(it);
     } else if (data.isEmpty()) {
@@ -948,7 +1151,7 @@ void SftpChannelPrivate::sendWriteRequest(const JobMap::Iterator &it)
     }
 }
 
-void SftpChannelPrivate::spawnWriteRequests(const JobMap::Iterator &it)
+void SftpChannelPrivate::spawnWriteRequests(JobMap::Iterator it)
 {
     SftpUploadFile::Ptr op = it.value().staticCast<SftpUploadFile>();
     op->calculateInFlightCount(AbstractSftpPacket::MaxDataSize);

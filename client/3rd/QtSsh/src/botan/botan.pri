@@ -1,50 +1,45 @@
-INCLUDEPATH *= $$PWD/..
-HEADERS += $$PWD/botan.h
+INCLUDEPATH += $$PWD/include
+DEPENDPATH += $$PWD
 
-SOURCES += $$PWD/botan.cpp
-
-CONFIG += exceptions
-
-DEPENDPATH += .
-
-DEFINES += BOTAN_DLL=
-unix:DEFINES += BOTAN_TARGET_OS_HAS_GETTIMEOFDAY BOTAN_HAS_ALLOC_MMAP \
-    BOTAN_HAS_ENTROPY_SRC_DEV_RANDOM BOTAN_HAS_ENTROPY_SRC_EGD BOTAN_HAS_ENTROPY_SRC_FTW \
-    BOTAN_HAS_ENTROPY_SRC_UNIX BOTAN_HAS_MUTEX_PTHREAD BOTAN_HAS_PIPE_UNIXFD_IO
-*linux*:DEFINES += BOTAN_TARGET_OS_IS_LINUX BOTAN_TARGET_OS_HAS_CLOCK_GETTIME \
-    BOTAN_TARGET_OS_HAS_DLOPEN BOTAN_TARGET_OS_HAS_GMTIME_R BOTAN_TARGET_OS_HAS_POSIX_MLOCK \
-    BOTAN_HAS_DYNAMICALLY_LOADED_ENGINE BOTAN_HAS_DYNAMIC_LOADER
-macx:DEFINES += BOTAN_TARGET_OS_IS_DARWIN
-*g++*:DEFINES += BOTAN_BUILD_COMPILER_IS_GCC
-*clang*:DEFINES += BOTAN_BUILD_COMPILER_IS_CLANG
-*icc*:DEFINES += BOTAN_BUILD_COMPILER_IS_INTEL
-
-CONFIG(x86_64):DEFINES += BOTAN_TARGET_ARCH_IS_X86_64
+CONFIG += c++17
 
 win32 {
-    DEFINES += BOTAN_TARGET_OS_IS_WINDOWS \
-        BOTAN_TARGET_OS_HAS_LOADLIBRARY BOTAN_TARGET_OS_HAS_WIN32_GET_SYSTEMTIME \
-        BOTAN_TARGET_OS_HAS_WIN32_VIRTUAL_LOCK \
-        BOTAN_HAS_ENTROPY_SRC_CAPI BOTAN_HAS_ENTROPY_SRC_WIN32 \
-        BOTAN_HAS_MUTEX_WIN32
+   INCLUDEPATH += $$PWD/include/windows/botan-2
 
-    msvc {
-        QMAKE_CXXFLAGS_EXCEPTIONS_ON = -EHs
-        QMAKE_CXXFLAGS += -wd4251 -wd4290 -wd4250 -wd4297 -wd4267 -wd4334
-        DEFINES += BOTAN_BUILD_COMPILER_IS_MSVC BOTAN_TARGET_OS_HAS_GMTIME_S _SCL_SECURE_NO_WARNINGS
-    } else {
-        QMAKE_CFLAGS += -fpermissive -finline-functions -Wno-long-long
-        QMAKE_CXXFLAGS += -fpermissive -finline-functions -Wno-long-long
-    }
-    LIBS += -ladvapi32 -luser32
+   !contains(QMAKE_TARGET.arch, x86_64) {
+           message("x86 build")
+           INCLUDEPATH += $$PWD/include/windows/x86
+           CONFIG(release, debug|release): LIBS += -L$$PWD/lib/windows/x86 -lbotan
+           CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/windows/x86 -lbotand
+       }
+   else {
+           message("x86_64 build")
+           INCLUDEPATH += $$PWD/include/windows/x86_64
+           CONFIG(release, debug|release): LIBS += -L$$PWD/lib/windows/x86_64 -lbotan
+           CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/windows/x86_64 -lbotand
+   }
 }
 
-unix:*-g++* {
-    QMAKE_CFLAGS += -fPIC -fpermissive -finline-functions -Wno-long-long
-    QMAKE_CXXFLAGS += -fPIC -fpermissive -finline-functions -Wno-long-long
+macx {
+    message("macOS build")
+    INCLUDEPATH += $$PWD/include/macos/botan-2
+    LIBS += -L$$PWD/lib/macos -lbotan-2
 }
 
-linux*|freebsd* {
-    LIBS += -lrt $$QMAKE_LIBS_DYNLOAD
+linux-g++ {
+    message("Linux build")
+    INCLUDEPATH += $$PWD/include/linux/botan-2
+    LIBS += -L$$PWD/lib/linux -lbotan-2
 }
 
+android {
+   INCLUDEPATH += $$PWD/include/android/botan-2
+   for (abi, ANDROID_ABIS): {
+      equals(ANDROID_TARGET_ARCH,$$abi) {
+         message( "ANDROID_TARGET_ARCH" $$abi)
+         INCLUDEPATH += $$PWD/include/android/$${abi}
+         LIBS += -L$$PWD/lib/android/$${abi} -lbotan-2
+         ANDROID_EXTRA_LIBS += $$PWD/lib/android/$${abi}/libbotan-2.so
+      }
+   }
+}

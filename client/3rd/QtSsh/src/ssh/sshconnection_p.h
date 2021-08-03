@@ -1,29 +1,35 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
-#pragma once
+#ifndef SSHCONNECTION_P_H
+#define SSHCONNECTION_P_H
 
 #include "sshconnection.h"
 #include "sshexception_p.h"
@@ -32,6 +38,7 @@
 
 #include <QHash>
 #include <QList>
+#include <QQueue>
 #include <QObject>
 #include <QPair>
 #include <QScopedPointer>
@@ -56,6 +63,7 @@ enum SshStateInternal {
     SocketConnecting, // After connectToHost()
     SocketConnected, // After socket's connected() signal
     UserAuthServiceRequested,
+    WaitingForAgentKeys,
     UserAuthRequested,
     ConnectionEstablished // After service has been started
     // ...
@@ -92,6 +100,7 @@ public:
     SshStateInternal state() const { return m_state; }
     SshError errorState() const { return m_error; }
     QString errorString() const { return m_errorString; }
+    const QByteArray &hostKeyFingerprint() const { return m_hostFingerprint; }
 
 signals:
     void connected();
@@ -107,6 +116,12 @@ private:
     void handleTimeout();
     void sendKeepAlivePacket();
 
+    void handleAgentKeysUpdated();
+    void handleSignatureFromAgent(const QByteArray &key, const QByteArray &signature, uint token);
+    void tryAllAgentKeys();
+    void authenticateWithPublicKey();
+    void setAgentError();
+
     void handleServerId();
     void handlePackets();
     void handleCurrentPacket();
@@ -118,6 +133,7 @@ private:
     void handleUserAuthInfoRequestPacket();
     void handleUserAuthSuccessPacket();
     void handleUserAuthFailurePacket();
+    void handleUserAuthKeyOkPacket();
     void handleUserAuthBannerPacket();
     void handleUnexpectedPacket();
     void handleGlobalRequest();
@@ -143,6 +159,8 @@ private:
 
     void sendData(const QByteArray &data);
 
+    uint tokenForAgent() const;
+
     typedef void (SshConnectionPrivate::*PacketHandler)();
     typedef QList<SshStateInternal> StateList;
     void setupPacketHandlers();
@@ -165,15 +183,22 @@ private:
     SshError m_error;
     QString m_errorString;
     QScopedPointer<SshKeyExchange> m_keyExchange;
+    QByteArray m_hostFingerprint;
     QTimer m_timeoutTimer;
     QTimer m_keepAliveTimer;
     bool m_ignoreNextPacket;
     SshConnection *m_conn;
     quint64 m_lastInvalidMsgSeqNr;
     QByteArray m_serverId;
+    QByteArray m_agentSignature;
+    QQueue<QByteArray> m_pendingKeyChecks;
+    QByteArray m_agentKeyToUse;
     bool m_serverHasSentDataBeforeId;
     bool m_triedAllPasswordBasedMethods;
+    bool m_agentKeysUpToDate;
 };
 
 } // namespace Internal
 } // namespace QSsh
+
+#endif // SSHCONNECTION_P_H
