@@ -1,6 +1,8 @@
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD
 
+CONFIG += c++17
+
 win32 {
    INCLUDEPATH += $$PWD/include/windows/botan-2
 
@@ -18,6 +20,11 @@ win32 {
    }
 }
 
+linux-g++ {
+    message("Linux build")
+    INCLUDEPATH += $$PWD/include/linux/botan-2
+    LIBS += -L$$PWD/lib/linux -lbotan-2
+}
 
 android {
    INCLUDEPATH += $$PWD/include/android/botan-2
