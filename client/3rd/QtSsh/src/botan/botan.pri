@@ -26,12 +26,14 @@ win32 {
 
 macx {
     message("macOS build")
+    INCLUDEPATH += $$PWD/macos
     HEADERS += $$PWD/macos/botan_all.h
     SOURCES += $$PWD/macos/botan_all.cpp
 }
 
 linux-g++ {
     message("Linux build")
+    INCLUDEPATH += $$PWD/linux
     HEADERS += $$PWD/linux/botan_all.h
     SOURCES += $$PWD/linux/botan_all.cpp
 }
@@ -40,6 +42,7 @@ android {
    for (abi, ANDROID_ABIS): {
       equals(ANDROID_TARGET_ARCH,$$abi) {
          message("Android build for ANDROID_TARGET_ARCH" $$abi)
+         INCLUDEPATH += $$PWD/android/$${abi}
          HEADERS += $$PWD/android/$${abi}/botan_all.h
          SOURCES += $$PWD/android/$${abi}/botan_all.cpp
       }
