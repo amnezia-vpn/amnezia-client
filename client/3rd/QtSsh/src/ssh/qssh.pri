@@ -3,11 +3,11 @@ QT += gui network widgets
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-!win32-msvc* {
-    QMAKE_CXXFLAGS += -Wextra -pedantic
-}
+#!win32-msvc* {
+#    QMAKE_CXXFLAGS += -Wextra -pedantic
+#}
 
-contains(QT_CONFIG, reduce_exports):CONFIG += hide_symbols
+#contains(QT_CONFIG, reduce_exports):CONFIG += hide_symbols
 
 SOURCES = $$PWD/sshsendfacility.cpp \
     $$PWD/sshremoteprocess.cpp \

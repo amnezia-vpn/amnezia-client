@@ -38,15 +38,7 @@
 #include "sshincomingpacket_p.h"
 #include "sshlogging_p.h"
 
-#include <botan/dl_group.h>
-#include <botan/dh.h>
-#include <botan/numthry.h>
-#include <botan/pubkey.h>
-#include <botan/dsa.h>
-#include <botan/rsa.h>
-#include <botan/pk_ops.h>
-#include <botan/ecdh.h>
-#include <botan/ecdsa.h>
+#include <botan_all.h>
 
 #ifdef CREATOR_SSH_DEBUG
 #include <iostream>

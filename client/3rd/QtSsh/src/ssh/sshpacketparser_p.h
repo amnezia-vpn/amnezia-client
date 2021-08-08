@@ -31,7 +31,7 @@
 #ifndef SSHPACKETPARSER_P_H
 #define SSHPACKETPARSER_P_H
 
-#include <botan/bigint.h>
+#include <botan_all.h>
 
 #include <QByteArray>
 #include <QList>

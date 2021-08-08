@@ -28,7 +28,7 @@
 #include <QByteArray>
 #include <QList>
 
-#include <botan/bigint.h>
+#include <botan_all.h>
 
 #include <memory>
 

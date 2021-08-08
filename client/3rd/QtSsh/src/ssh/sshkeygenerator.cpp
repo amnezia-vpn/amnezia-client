@@ -36,17 +36,7 @@
 #include "sshpacket_p.h"
 #include "sshlogging_p.h"
 
-#include <botan/rsa.h>
-#include <botan/dsa.h>
-#include <botan/auto_rng.h>
-#include <botan/pipe.h>
-#include <botan/pkcs8.h>
-#include <botan/der_enc.h>
-#include <botan/pem.h>
-#include <botan/x509cert.h>
-#include <botan/x509_key.h>
-#include <botan/numthry.h>
-#include <botan/ecdsa.h>
+#include <botan_all.h>
 
 #include <QDateTime>
 #include <QInputDialog>

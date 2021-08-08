@@ -37,7 +37,7 @@
 #include "sshsendfacility_p.h"
 #include "sshx11displayinfo_p.h"
 
-#include <botan/exceptn.h>
+#include <botan_all.h>
 
 #include <QTimer>
 

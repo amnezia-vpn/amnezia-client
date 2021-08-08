@@ -31,12 +31,7 @@
 #ifndef SSHABSTRACTCRYPTOFACILITY_P_H
 #define SSHABSTRACTCRYPTOFACILITY_P_H
 
-#include <botan/filters.h>
-#include <botan/block_cipher.h>
-#include <botan/pipe.h>
-#include <botan/bigint.h>
-#include <botan/pk_keys.h>
-#include <botan/auto_rng.h>
+#include <botan_all.h>
 
 #include <QByteArray>
 #include <QScopedPointer>

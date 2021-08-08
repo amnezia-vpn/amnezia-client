@@ -32,10 +32,7 @@
 #include "sshpacketparser_p.h"
 #include "ssh_global.h"
 
-#include <botan/dl_group.h>
-#include <botan/dsa.h>
-#include <botan/ecdsa.h>
-#include <botan/rsa.h>
+#include <botan_all.h>
 
 #include <memory>
 

@@ -33,7 +33,7 @@
 #include <QTemporaryFile>
 #include <QTimer>
 
-#include <botan/auto_rng.h>
+#include <botan_all.h>
 
 namespace QSsh {
 namespace Internal {

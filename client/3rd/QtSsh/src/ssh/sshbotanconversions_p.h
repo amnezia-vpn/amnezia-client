@@ -34,7 +34,7 @@
 #include "sshcapabilities_p.h"
 #include "sshexception_p.h"
 
-#include <botan/secmem.h>
+#include <botan_all.h>
 
 namespace QSsh {
 namespace Internal {

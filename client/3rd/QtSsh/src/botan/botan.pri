@@ -3,43 +3,46 @@ DEPENDPATH += $$PWD
 
 CONFIG += c++17
 
+INCLUDEPATH += $$PWD/include/external
+
 win32 {
-   INCLUDEPATH += $$PWD/include/windows/botan-2
+   QMAKE_CXXFLAGS += -bigobj
+   LIBS += \
+       -lcrypt32 \
 
    !contains(QMAKE_TARGET.arch, x86_64) {
-           message("x86 build")
-           INCLUDEPATH += $$PWD/include/windows/x86
-           CONFIG(release, debug|release): LIBS += -L$$PWD/lib/windows/x86 -lbotan
-           CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/windows/x86 -lbotand
-       }
+      message("Windows x86 build")
+      INCLUDEPATH += $$PWD/windows/x86_64
+      HEADERS += $$PWD/windows/x86/botan_all.h
+      SOURCES += $$PWD/windows/x86/botan_all.cpp
+   }
    else {
-           message("x86_64 build")
-           INCLUDEPATH += $$PWD/include/windows/x86_64
-           CONFIG(release, debug|release): LIBS += -L$$PWD/lib/windows/x86_64 -lbotan
-           CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/windows/x86_64 -lbotand
+      message("Windows x86_64 build")
+      INCLUDEPATH += $$PWD/windows/x86_64
+      HEADERS += $$PWD/windows/x86_64/botan_all.h
+      SOURCES += $$PWD/windows/x86_64/botan_all.cpp
    }
 }
 
 macx {
     message("macOS build")
-    INCLUDEPATH += $$PWD/include/macos/botan-2
-    LIBS += -L$$PWD/lib/macos -lbotan-2
+    HEADERS += $$PWD/macos/botan_all.h
+    SOURCES += $$PWD/macos/botan_all.cpp
 }
 
 linux-g++ {
     message("Linux build")
-    INCLUDEPATH += $$PWD/include/linux/botan-2
-    LIBS += -L$$PWD/lib/linux -lbotan-2
+    HEADERS += $$PWD/linux/botan_all.h
+    SOURCES += $$PWD/linux/botan_all.cpp
 }
 
 android {
-   INCLUDEPATH += $$PWD/include/android/botan-2
    for (abi, ANDROID_ABIS): {
       equals(ANDROID_TARGET_ARCH,$$abi) {
-         message( "ANDROID_TARGET_ARCH" $$abi)
-         INCLUDEPATH += $$PWD/include/android/$${abi}
-         LIBS += -L$$PWD/lib/android/$${abi} -lbotan-2
-         ANDROID_EXTRA_LIBS += $$PWD/lib/android/$${abi}/libbotan-2.so
+         message("Android build for ANDROID_TARGET_ARCH" $$abi)
+         HEADERS += $$PWD/android/$${abi}/botan_all.h
+         SOURCES += $$PWD/android/$${abi}/botan_all.cpp
       }
    }
 }
+

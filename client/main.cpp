@@ -8,7 +8,9 @@
 
 #include "debug.h"
 #include "defines.h"
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 #include "singleapplication.h"
+#endif
 
 #include "ui/mainwindow.h"
 
@@ -34,6 +36,7 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     SingleApplication app(argc, argv, true, SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
 
     if (!app.isPrimary()) {
@@ -42,6 +45,10 @@ int main(int argc, char *argv[])
         });
         return app.exec();
     }
+#else
+    QApplication app(argc, argv);
+#endif
+
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
 #endif
@@ -88,6 +95,7 @@ int main(int argc, char *argv[])
     mainWindow.showOnStartup();
 #endif
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (app.isPrimary()) {
         QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
             qDebug() << "Secondary instance started, showing this window instead";
@@ -96,6 +104,7 @@ int main(int argc, char *argv[])
             mainWindow.raise();
         });
     }
+#endif
 
     return app.exec();
 }

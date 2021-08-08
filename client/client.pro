@@ -8,7 +8,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
-include("3rd/SingleApplication/singleapplication.pri")
+!android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 
 HEADERS  += \
@@ -127,3 +127,7 @@ macx {
 
 REPC_REPLICA += ../ipc/ipcinterface.rep
 
+DISTFILES += \
+   android/AndroidManifest.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

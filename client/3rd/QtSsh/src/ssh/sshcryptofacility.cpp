@@ -39,15 +39,7 @@
 #include "sshpacket_p.h"
 #include "sshlogging_p.h"
 
-#include <botan/block_cipher.h>
-#include <botan/hash.h>
-#include <botan/pkcs8.h>
-#include <botan/dsa.h>
-#include <botan/rsa.h>
-#include <botan/ber_dec.h>
-#include <botan/pubkey.h>
-#include <botan/filters.h>
-#include <botan/ecdsa.h>
+#include <botan_all.h>
 
 #include <QDebug>
 #include <QList>
