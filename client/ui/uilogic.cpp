@@ -171,7 +171,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_pushButtonNewServerConnectEnabled{},
     m_pushButtonNewServerConnectText{tr("Connect")},
     m_dialogConnectErrorText{},
-    m_pageServerSettingsEnabled{false},
+    m_pageServerSettingsEnabled{true},
     m_pushButtonServerSettingsClearText{tr("Clear server from Amnezia software")},
     m_pageShareAmneziaVisible{true},
     m_pageShareOpenvpnVisible{true},

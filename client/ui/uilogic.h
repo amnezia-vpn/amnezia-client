@@ -651,6 +651,9 @@ public:
     Q_INVOKABLE void onPushButtonForgetServer();
     Q_INVOKABLE void onPushButtonServerSettingsClearClientCacheClicked();
     Q_INVOKABLE void onLineEditServerSettingsDescriptionEditingFinished();
+    Q_INVOKABLE void updateSitesPage();
+    Q_INVOKABLE void updateServersListPage();
+    Q_INVOKABLE void updateProtocolsPage();
 
 signals:
     void frameWireguardSettingsVisibleChanged();
@@ -1094,9 +1097,6 @@ private:
     void setupSitesPageConnections();
     void setupProtocolsPageConnections();
 
-    void updateSitesPage();
-    void updateServersListPage();
-    void updateProtocolsPage();
     void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
     void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
     void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);

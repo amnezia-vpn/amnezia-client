@@ -70,7 +70,7 @@ Item {
         checked: UiLogic.pushButtonConnectChecked
         onCheckedChanged: {
             UiLogic.pushButtonConnectChecked = checked
-            UiLogic.onPushButtonConnectClicked()
+            UiLogic.onPushButtonConnectClicked(checked)
         }
         background: Image {
             anchors.fill: parent

@@ -120,45 +120,73 @@ Item {
             UiLogic.onPushButtonSitesImportClicked(fileUrl)
         }
     }
-    TableView {
+    ListView {
         id: tb
         x: 20
         y: 200
         width: 341
         height: 371
-        rowSpacing: 1
+        spacing: 1
         clip: true
         property int currentRow: -1
-        columnSpacing: 0
         model: UiLogic.tableViewSitesModel
 
         delegate: Item {
-            implicitWidth: 170
+            implicitWidth: 170 * 2
             implicitHeight: 30
-            Rectangle {
-                anchors.top: parent.top
-                width: parent.width
-                height: 1
-                color: "lightgray"
-                visible: row !== tb.currentRow
-            }
-            Rectangle {
-                anchors.fill: parent
-                color: "#63B4FB"
-                visible: row === tb.currentRow
+            Item {
+                width: 170
+                height: 30
+                anchors.left: parent.left
+                id: c1
+                Rectangle {
+                    anchors.top: parent.top
+                    width: parent.width
+                    height: 1
+                    color: "lightgray"
+                    visible: index !== tb.currentRow
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#63B4FB"
+                    visible: index === tb.currentRow
 
+                }
+                Text {
+                    text: url_path
+                    anchors.fill: parent
+                    leftPadding: 10
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
+            Item {
+                anchors.left: c1.right
+                width: 170
+                height: 30
+                Rectangle {
+                    anchors.top: parent.top
+                    width: parent.width
+                    height: 1
+                    color: "lightgray"
+                    visible: index !== tb.currentRow
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#63B4FB"
+                    visible: index === tb.currentRow
 
-            Text {
-                text: display
-                anchors.fill: parent
-                leftPadding: 10
-                verticalAlignment: Text.AlignVCenter
+                }
+                Text {
+                    text: ip
+                    anchors.fill: parent
+                    leftPadding: 10
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    tb.currentRow = row
+                    tb.currentRow = index
                 }
             }
         }

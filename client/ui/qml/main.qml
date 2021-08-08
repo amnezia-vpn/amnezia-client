@@ -15,7 +15,7 @@ Window {
         UiLogic.onCloseWindow()
     }
 
-    //    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
     function getPageComponent(page) {
         switch (page) {
