@@ -1,26 +1,31 @@
 #ifndef SITESMODEL_H
 #define SITESMODEL_H
 
-#include <QAbstractTableModel>
+#include <QAbstractListModel>
 
 #include "settings.h"
 
-class SitesModel : public QAbstractTableModel
+class SitesModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
+    enum SiteRoles {
+        UrlRole = Qt::UserRole + 1,
+        IpRole
+    };
+
     explicit SitesModel(Settings::RouteMode mode, QObject *parent = nullptr);
     void resetCache();
 
-    // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(int row, int column);
+
+protected:
+    QHash<int, QByteArray> roleNames() const override;
 
 private:
     void genCache() const;

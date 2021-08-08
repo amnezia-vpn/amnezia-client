@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
 import QtGraphicalEffects 1.12
+import PageEnum 1.0
 
 Item {
     id: root
@@ -37,34 +38,38 @@ Item {
         width: 24
         height: 24
         icon.source: "qrc:/images/plus.png"
-    }
-    ListModel {
-        id: md
-        ListElement {
-            description: "Bill Smith"
-            address: "555 3264"
-        }
-        ListElement {
-            description: "John Brown"
-            address: "555 8426"
-        }
-        ListElement {
-            description: "Sam Wise"
-            address: "555 0473"
+        onClicked: {
+            UiLogic.goToPage(PageEnum.Start);
         }
     }
-
     ListView {
         id: listWidget_servers
         x: 20
         y: 90
         width: 340
         height: 501
-        model: md
+        model: UiLogic.serverListModel
         spacing: 5
         delegate: Item {
             height: 60
             width: 341
+            MouseArea {
+                id: ms
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    listWidget_servers.currentIndex = index
+                    mouse.accepted = false
+                }
+                onEntered: {
+                    mouseExitAni.stop()
+                    mouseEnterAni.start()
+                }
+                onExited: {
+                    mouseEnterAni.stop()
+                    mouseExitAni.start()
+                }
+            }
             LinearGradient {
                 visible: !ms.containsMouse
                 anchors.fill: parent
@@ -106,7 +111,7 @@ Item {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
-                text: description
+                text: desc
             }
             ImageButtonType {
                 x: 212
@@ -117,6 +122,7 @@ Item {
                 iconMargin: 0
                 icon.source: checked ? "qrc:/images/connect_button_connected.png"
                                      : "qrc:/images/connect_button_disconnected.png"
+                visible: false
             }
             ImageButtonType {
                 x: 300
@@ -126,21 +132,39 @@ Item {
                 checkable: true
                 icon.source: checked ? "qrc:/images/check.png"
                                      : "qrc:/images/uncheck.png"
+                onClicked: {
+                    UiLogic.onServerListPushbuttonDefaultClicked(index)
+                }
+                checked: is_default
+                enabled: !is_default
             }
             ImageButtonType {
+                id: pushButtonSetting
                 x: 260
                 y: 25
                 width: 24
                 height: 24
                 icon.source: "qrc:/images/settings.png"
-            }
-            MouseArea {
-                id: ms
-                anchors.fill: parent
-                hoverEnabled: true
                 onClicked: {
-                    listWidget_servers.currentIndex = index
-                    mouse.accepted = false
+                    UiLogic.onServerListPushbuttonSettingsClicked(index)
+                }
+                OpacityAnimator {
+                    id: mouseEnterAni
+                    target: pushButtonSetting;
+                    from: 0;
+                    to: 1;
+                    duration: 150
+                    running: false
+                    easing.type: Easing.InOutQuad
+                }
+                OpacityAnimator {
+                    id: mouseExitAni
+                    target: pushButtonSetting;
+                    from: 1;
+                    to: 0;
+                    duration: 150
+                    running: false
+                    easing.type: Easing.InOutQuad
                 }
             }
         }

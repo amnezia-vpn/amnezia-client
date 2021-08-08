@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -60,7 +60,7 @@ Item {
             height: 40
             text: qsTr("Next")
             onClicked: {
-                UiLogic.goToPage(Page.WizardVpnMode)
+                UiLogic.goToPage(PageEnum.WizardVpnMode)
             }
         }
     }

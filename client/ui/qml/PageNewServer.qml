@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -47,7 +47,7 @@ Item {
         height: 40
         anchors.horizontalCenter: parent.horizontalCenter
         onClicked: {
-            UiLogic.goToPage(Page.Wizard);
+            UiLogic.goToPage(PageEnum.Wizard);
         }
     }
     BlueButtonType {
@@ -57,7 +57,7 @@ Item {
         height: 40
         anchors.horizontalCenter: parent.horizontalCenter
         onClicked: {
-            UiLogic.goToPage(Page.NewServerProtocols);
+            UiLogic.goToPage(PageEnum.NewServerProtocols);
         }
     }
 

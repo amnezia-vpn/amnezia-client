@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -90,7 +90,7 @@ Item {
                 if (!domain || !domain.includes(".")) {
                     return
                 }
-                UiLogic.goToPage(Page.WizardVpnMode)
+                UiLogic.goToPage(PageEnum.WizardVpnMode)
             }
         }
     }

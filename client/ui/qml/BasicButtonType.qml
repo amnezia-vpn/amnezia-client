@@ -3,11 +3,12 @@ import QtQuick.Controls 2.12
 
 Button {
     id: root
-    property alias containsMouse: mouseArea.containsMouse
+    hoverEnabled: true
+    property bool containsMouse: hovered
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        enabled: false
         cursorShape: Qt.PointingHandCursor
     }
 }

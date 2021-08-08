@@ -1,7 +1,9 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
-import Qt.labs.qmlmodels 1.0
+import Qt.labs.platform 1.0
+import QtQuick.Dialogs 1.0
+
 Item {
     id: root
     width: GC.screenWidth
@@ -26,7 +28,7 @@ Item {
         color: "#100A44"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignTop
-        text: qsTr("These sites will be opened using VPN")
+        text: UiLogic.labelSitesAddCustomText
         x: 20
         y: 40
         width: 340
@@ -38,6 +40,13 @@ Item {
         width: 231
         height: 31
         placeholderText: qsTr("yousite.com or IP address")
+        text: UiLogic.lineEditSitesAddCustomText
+        onEditingFinished: {
+            UiLogic.lineEditSitesAddCustomText = text
+        }
+        onAccepted: {
+            UiLogic.onPushButtonAddCustomSitesClicked()
+        }
     }
     ImageButtonType {
         id: back
@@ -58,6 +67,9 @@ Item {
         height: 31
         font.pixelSize: 24
         text: "+"
+        onClicked: {
+            UiLogic.onPushButtonAddCustomSitesClicked()
+        }
     }
     BlueButtonType {
         id: sites_delete
@@ -67,6 +79,9 @@ Item {
         height: 31
         font.pixelSize: 16
         text: qsTr("Delete selected")
+        onClicked: {
+            UiLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
+        }
     }
 
     BasicButtonType {
@@ -92,6 +107,18 @@ Item {
             }
         }
         antialiasing: true
+        onClicked: {
+            fileDialog.open()
+        }
+    }
+    FileDialog {
+        id: fileDialog
+        title: qsTr("Import IP addresses")
+        visible: false
+        folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        onAccepted: {
+            UiLogic.onPushButtonSitesImportClicked(fileUrl)
+        }
     }
     TableView {
         id: tb
@@ -103,25 +130,7 @@ Item {
         clip: true
         property int currentRow: -1
         columnSpacing: 0
-        model: TableModel {
-            TableModelColumn { display: "name" }
-            TableModelColumn { display: "color" }
-
-            rows: [
-                {
-                    "name": "cat",
-                    "color": "black"
-                },
-                {
-                    "name": "dog",
-                    "color": "brown"
-                },
-                {
-                    "name": "bird",
-                    "color": "white"
-                }
-            ]
-        }
+        model: UiLogic.tableViewSitesModel
 
         delegate: Item {
             implicitWidth: 170

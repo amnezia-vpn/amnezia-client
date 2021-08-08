@@ -102,6 +102,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 5
                     anchors.horizontalCenter: parent.horizontalCenter
+                    visible: false
                     radius: 2
                     Grid {
                         anchors.fill: parent
@@ -164,6 +165,11 @@ Item {
                         checked: UiLogic.pushButtonNewServerSettingsCloakChecked
                         onCheckedChanged: {
                             UiLogic.pushButtonNewServerSettingsCloakChecked = checked
+                            if (checked) {
+                                frame_new_server_setting_cloak.visible = true
+                            } else {
+                                frame_new_server_setting_cloak.visible = false
+                            }
                         }
                     }
                 }
@@ -186,6 +192,7 @@ Item {
                     anchors.bottomMargin: 5
                     anchors.horizontalCenter: parent.horizontalCenter
                     radius: 2
+                    visible: false
                     Grid {
                         anchors.fill: parent
                         columns: 2
@@ -258,8 +265,14 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
                         checked: UiLogic.pushButtonNewServerSettingsSsChecked
+                        checkable: true
                         onCheckedChanged: {
                             UiLogic.pushButtonNewServerSettingsSsChecked = checked
+                            if (checked) {
+                                frame_new_server_settings_ss.visible = true
+                            } else {
+                                frame_new_server_settings_ss.visible = false
+                            }
                         }
                     }
                 }
@@ -282,6 +295,7 @@ Item {
                     anchors.bottomMargin: 5
                     anchors.horizontalCenter: parent.horizontalCenter
                     radius: 2
+                    visible: false
                     Grid {
                         anchors.fill: parent
                         columns: 2
@@ -351,8 +365,14 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
                         checked: UiLogic.pushButtonNewServerSettingsOpenvpnChecked
+                        checkable: true
                         onCheckedChanged: {
                             UiLogic.pushButtonNewServerSettingsOpenvpnChecked = checked
+                            if (checked) {
+                                frame_new_server_settings_openvpn.visible = true
+                            } else {
+                                frame_new_server_settings_openvpn.visible = false
+                            }
                         }
                     }
                 }
@@ -377,6 +397,7 @@ Item {
                     anchors.bottomMargin: 5
                     anchors.horizontalCenter: parent.horizontalCenter
                     radius: 2
+                    visible: false
                     Grid {
                         anchors.fill: parent
                         columns: 2
@@ -414,6 +435,14 @@ Item {
                         height: 35
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
+                        checkable: true
+                        onCheckedChanged: {
+                            if (checked) {
+                                frame_new_server_settings_wireguard.visible = true
+                            } else {
+                                frame_new_server_settings_wireguard.visible = false
+                            }
+                        }
                     }
                 }
             }

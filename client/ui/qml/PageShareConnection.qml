@@ -34,10 +34,23 @@ Item {
                 share_shadowshock,
                 share_cloak
             ]
+            property int currentIndex: UiLogic.toolBoxShareConnectionCurrentIndex
+            onCurrentIndexChanged: {
+                UiLogic.toolBoxShareConnectionCurrentIndex = currentIndex
+                for (let i = 0; i < contentList.length; ++i) {
+                    if (i == currentIndex) {
+                        contentList[i].active = true
+                    } else {
+                        contentList[i].active = false
+                    }
+                }
+            }
+
             function clearActive() {
                 for (let i = 0; i < contentList.length; ++i) {
                     contentList[i].active = false
                 }
+                currentIndex = -1;
             }
             Column {
                 spacing: 5
@@ -45,6 +58,7 @@ Item {
                     id: full_access
                     x: 0
                     text: qsTr("Full access")
+                    visible: UiLogic.pageShareFullAccessVisible
                     content: Component {
                         Item {
                             width: 360
@@ -68,7 +82,10 @@ Item {
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: qsTr("Copy")
+                                text: UiLogic.pushButtonShareFullCopyText
+                                onClicked: {
+                                    UiLogic.onPushButtonShareFullCopyClicked()
+                                }
                             }
                             ShareConnectionButtonType {
                                 x: 10
@@ -76,6 +93,9 @@ Item {
                                 width: 341
                                 height: 40
                                 text: qsTr("Save file")
+                                onClicked: {
+                                    UiLogic.onPushButtonShareFullSaveClicked()
+                                }
                             }
                             TextFieldType {
                                 x: 10
@@ -83,15 +103,19 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
+                                text: UiLogic.textEditShareFullCodeText
+                                onEditingFinished: {
+                                    UiLogic.textEditShareFullCodeText = text
+                                }
                             }
                         }
                     }
                     onClicked: {
                         if (active) {
-                            active = false
+                            ct.currentIndex = -1
                         } else {
                             ct.clearActive()
-                            active = true
+                            ct.currentIndex = 0
                         }
                     }
                 }
@@ -99,6 +123,7 @@ Item {
                     id: share_amezia
                     x: 0
                     text: qsTr("Share for Amnezia client")
+                    visible: UiLogic.pageShareAmneziaVisible
                     content: Component {
                         Item {
                             width: 360
@@ -122,14 +147,22 @@ Item {
                                 y: 180
                                 width: 341
                                 height: 40
-                                text: qsTr("Copy")
+                                text: UiLogic.pushButtonShareAmneziaCopyText
+                                onClicked: {
+                                    UiLogic.onPushButtonShareAmneziaCopyClicked()
+                                }
+                                enabled: UiLogic.pushButtonShareAmneziaCopyEnabled
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: qsTr("Generate config")
+                                text: UiLogic.pushButtonShareAmneziaGenerateText
+                                enabled: UiLogic.pushButtonShareAmneziaGenerateEnabled
+                                onClicked: {
+                                    UiLogic.onPushButtonShareAmneziaGenerateClicked()
+                                }
                             }
                             ShareConnectionButtonType {
                                 x: 10
@@ -137,6 +170,9 @@ Item {
                                 width: 341
                                 height: 40
                                 text: qsTr("Save file")
+                                onClicked: {
+                                    UiLogic.onPushButtonShareAmneziaSaveClicked()
+                                }
                             }
                             TextFieldType {
                                 x: 10
@@ -144,15 +180,19 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
+                                text: UiLogic.textEditShareAmneziaCodeText
+                                onEditingFinished: {
+                                    UiLogic.textEditShareAmneziaCodeText = text
+                                }
                             }
                         }
                     }
                     onClicked: {
                         if (active) {
-                            active = false
+                            ct.currentIndex = -1
                         } else {
                             ct.clearActive()
-                            active = true
+                            ct.currentIndex = 1
                         }
                     }
                 }
@@ -160,6 +200,7 @@ Item {
                     id: share_openvpn
                     x: 0
                     text: qsTr("Share for OpenVPN client")
+                    visible: UiLogic.pageShareOpenvpnVisible
                     content: Component {
                         Item {
                             width: 360
@@ -169,14 +210,22 @@ Item {
                                 y: 180
                                 width: 341
                                 height: 40
-                                text: qsTr("Copy")
+                                text: UiLogic.pushButtonShareOpenvpnCopyText
+                                enabled: UiLogic.pushButtonShareOpenvpnCopyEnabled
+                                onClicked: {
+                                    UiLogic.onPushButtonShareOpenvpnCopyClicked()
+                                }
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: qsTr("Generate config")
+                                text: UiLogic.pushButtonShareOpenvpnGenerateText
+                                onClicked: {
+                                    UiLogic.onPushButtonShareOpenvpnGenerateClicked()
+                                }
+                                enabled: UiLogic.pushButtonShareOpenvpnGenerateEnabled
                             }
                             ShareConnectionButtonType {
                                 x: 10
@@ -184,6 +233,10 @@ Item {
                                 width: 341
                                 height: 40
                                 text: qsTr("Save file")
+                                enabled: UiLogic.pushButtonShareOpenvpnSaveEnabled
+                                onClicked: {
+                                    UiLogic.onPushButtonShareOpenvpnSaveClicked()
+                                }
                             }
                             TextFieldType {
                                 x: 10
@@ -191,15 +244,19 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
+                                text: UiLogic.textEditShareOpenvpnCodeText
+                                onEditingFinished: {
+                                    UiLogic.textEditShareOpenvpnCodeText = text
+                                }
                             }
                         }
                     }
                     onClicked: {
                         if (active) {
-                            active = false
+                            ct.currentIndex = -1
                         } else {
                             ct.clearActive()
-                            active = true
+                            ct.currentIndex = 2
                         }
                     }
                 }
@@ -207,6 +264,7 @@ Item {
                     id: share_shadowshock
                     x: 0
                     text: qsTr("Share for ShadowSocks client")
+                    visible: UiLogic.pageShareShadowsocksVisible
                     content: Component {
                         Item {
                             width: 360
@@ -251,28 +309,28 @@ Item {
                                 y: 70
                                 width: 100
                                 height: 20
-                                text: qsTr("Password")
+                                text: UiLogic.labelShareSsPasswordText
                             }
                             LabelType {
                                 x: 130
                                 y: 10
                                 width: 100
                                 height: 20
-                                text: qsTr("Server:")
+                                text: UiLogic.labelShareSsServerText
                             }
                             LabelType {
                                 x: 130
                                 y: 50
                                 width: 100
                                 height: 20
-                                text: qsTr("Encryption:")
+                                text: UiLogic.labelShareSsMethodText
                             }
                             LabelType {
                                 x: 130
                                 y: 30
                                 width: 100
                                 height: 20
-                                text: qsTr("Port:")
+                                text: UiLogic.labelShareSsPortText
                             }
                             Image {
                                 id: label_share_ss_qr_code
@@ -280,15 +338,18 @@ Item {
                                 y: 235
                                 width: 200
                                 height: 200
-
-                                //                            source: "file"
+                                source: UiLogic.labelShareSsQrCodeText == "" ? "" : "data:image/png;base64," + UiLogic.labelShareSsQrCodeText
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 180
                                 width: 331
                                 height: 40
-                                text: qsTr("Copy")
+                                text: UiLogic.pushButtonShareSsCopyText
+                                enabled: UiLogic.pushButtonShareSsCopyEnabled
+                                onClicked: {
+                                    UiLogic.onPushButtonShareSsCopyClicked()
+                                }
                             }
                             TextFieldType {
                                 x: 10
@@ -296,15 +357,19 @@ Item {
                                 width: 331
                                 height: 100
                                 horizontalAlignment: Text.AlignHCenter
+                                text: UiLogic.lineEditShareSsStringText
+                                onEditingFinished: {
+                                    UiLogic.lineEditShareSsStringText = text
+                                }
                             }
                         }
                     }
                     onClicked: {
                         if (active) {
-                            active = false
+                            ct.currentIndex = -1
                         } else {
                             ct.clearActive()
-                            active = true
+                            ct.currentIndex = 3
                         }
                     }
                 }
@@ -312,6 +377,7 @@ Item {
                     id: share_cloak
                     x: 0
                     text: qsTr("Share for Cloak client")
+                    visible: UiLogic.pageShareCloakVisible
                     content: Component {
                         Item {
                             width: 360
@@ -321,22 +387,30 @@ Item {
                                 y: 290
                                 width: 331
                                 height: 40
-                                text: qsTr("Copy")
+                                text: UiLogic.pushButtonShareCloakCopyText
+                                enabled: UiLogic.pushButtonShareCloakCopyEnabled
+                                onClicked: {
+                                    UiLogic.onPushButtonShareCloakCopyClicked()
+                                }
                             }
                             TextInput {
                                 x: 10
                                 y: 30
                                 width: 331
                                 height: 100
+                                text: UiLogic.plainTextEditShareCloakText
+                                onEditingFinished: {
+                                    UiLogic.plainTextEditShareCloakText = text
+                                }
                             }
                         }
                     }
                     onClicked: {
                         if (active) {
-                            active = false
+                            ct.currentIndex = -1
                         } else {
                             ct.clearActive()
-                            active = true
+                            ct.currentIndex = 4
                         }
                     }
                 }

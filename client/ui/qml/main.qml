@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.1
 import "./"
@@ -11,51 +11,55 @@ Window {
     visible: true
     width: GC.screenWidth
     height: GC.isDesktop() ? GC.screenHeight + titleBar.height : GC.screenHeight
+    onClosing: {
+        UiLogic.onCloseWindow()
+    }
+
     //    flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
     function getPageComponent(page) {
         switch (page) {
-        case Page.Start:
+        case PageEnum.Start:
             return page_start;
-        case Page.NewServer:
+        case PageEnum.NewServer:
             return page_new_server
-        case Page.NewServerProtocols:
+        case PageEnum.NewServerProtocols:
             return page_new_server_protocols
-        case Page.Wizard:
+        case PageEnum.Wizard:
             return page_setup_wizard
-        case Page.WizardHigh:
+        case PageEnum.WizardHigh:
             return page_setup_wizard_high_level
-        case Page.WizardLow:
+        case PageEnum.WizardLow:
             return page_setup_wizard_low_level
-        case Page.WizardMedium:
+        case PageEnum.WizardMedium:
             return page_setup_wizard_medium_level
-        case Page.WizardVpnMode:
+        case PageEnum.WizardVpnMode:
             return page_setup_wizard_vpn_mode
-        case Page.ServerConfiguring:
+        case PageEnum.ServerConfiguring:
             return page_new_server_configuring
-        case Page.Vpn:
+        case PageEnum.Vpn:
             return page_vpn
-        case Page.GeneralSettings:
+        case PageEnum.GeneralSettings:
             return page_general_settings
-        case Page.AppSettings:
+        case PageEnum.AppSettings:
             return page_app_settings
-        case Page.NetworkSettings:
+        case PageEnum.NetworkSettings:
             return page_network_settings
-        case Page.ServerSettings:
+        case PageEnum.ServerSettings:
             return page_server_settings
-        case Page.ServerVpnProtocols:
+        case PageEnum.ServerVpnProtocols:
             return page_server_protocols
-        case Page.ServersList:
+        case PageEnum.ServersList:
             return page_servers
-        case Page.ShareConnection:
+        case PageEnum.ShareConnection:
             return page_share_connection
-        case Page.Sites:
+        case PageEnum.Sites:
             return page_sites
-        case Page.OpenVpnSettings:
+        case PageEnum.OpenVpnSettings:
             return page_proto_openvpn
-        case Page.ShadowSocksSettings:
+        case PageEnum.ShadowSocksSettings:
             return page_proto_shadowsocks
-        case Page.CloakSettings:
+        case PageEnum.CloakSettings:
             return page_proto_cloak
         }
         return undefined;
@@ -63,113 +67,114 @@ Window {
 
     function getPageEnum(item) {
         if (item instanceof PageStart) {
-            return Page.Start
+            return PageEnum.Start
         }
         if (item instanceof PageNewServer) {
-            return Page.NewServer
+            return PageEnum.NewServer
         }
         if (item instanceof PageNewServerProtocol) {
-            return Page.NewServerProtocols
+            return PageEnum.NewServerProtocols
         }
         if (item instanceof PageSetupWizard) {
-            return Page.Wizard
+            return PageEnum.Wizard
         }
         if (item instanceof PageSetupWizardHighLevel) {
-            return Page.WizardHigh
+            return PageEnum.WizardHigh
         }
         if (item instanceof PageSetupWizardLowLevel) {
-            return Page.WizardLow
+            return PageEnum.WizardLow
         }
         if (item instanceof PageSetupWizardMediumLevel) {
-            return Page.WizardMedium
+            return PageEnum.WizardMedium
         }
         if (item instanceof PageSetupWizardVPNMode) {
-            return Page.WizardVpnMode
+            return PageEnum.WizardVpnMode
         }
         if (item instanceof PageNewServerConfiguring) {
-            return Page.ServerConfiguring
+            return PageEnum.ServerConfiguring
         }
         if (item instanceof PageVPN) {
-            return Page.Vpn
+            return PageEnum.Vpn
         }
         if (item instanceof PageGeneralSettings) {
-            return Page.GeneralSettings
+            return PageEnum.GeneralSettings
         }
         if (item instanceof PageAppSetting) {
-            return Page.AppSettings
+            return PageEnum.AppSettings
         }
         if (item instanceof PageNetworkSetting) {
-            return Page.NetworkSettings
+            return PageEnum.NetworkSettings
         }
         if (item instanceof PageServerSetting) {
-            return Page.ServerSettings
+            return PageEnum.ServerSettings
         }
         if (item instanceof PageServerProtocols) {
-            return Page.ServerVpnProtocols
+            return PageEnum.ServerVpnProtocols
         }
         if (item instanceof PageServer) {
-            return Page.ServersList
+            return PageEnum.ServersList
         }
         if (item instanceof PageShareConnection) {
-            return Page.ShareConnection
+            return PageEnum.ShareConnection
         }
         if (item instanceof PageSites) {
-            return Page.Sites
+            return PageEnum.Sites
         }
         if (item instanceof PageProtoOpenVPN) {
-            return Page.OpenVpnSettings
+            return PageEnum.OpenVpnSettings
         }
         if (item instanceof PageProtoShadowSock) {
-            return Page.ShadowSocksSettings
+            return PageEnum.ShadowSocksSettings
         }
         if (item instanceof PageProtoCloak) {
-            return Page.CloakSettings
+            return PageEnum.CloakSettings
         }
-        return Page.Start
+        return PageEnum.Start
     }
 
     function gotoPage(page, reset, slide) {
         let pageComponent = getPageComponent(page)
+        console.debug(pageComponent)
         if (reset) {
-            if (page === Page.ServerSettings) {
+            if (page === PageEnum.ServerSettings) {
                 UiLogic.updateServerPage();
             }
-            if (page === Page.ShareConnection) {}
-            if (page === Page.Wizard) {
+            if (page === PageEnum.ShareConnection) {}
+            if (page === PageEnum.Wizard) {
                 UiLogic.radioButtonSetupWizardMediumChecked = true
             }
-            if (page === Page.WizardHigh) {
+            if (page === PageEnum.WizardHigh) {
                 UiLogic.updateWizardHighPage();
             }
-            if (page === Page.ServerConfiguring) {
+            if (page === PageEnum.ServerConfiguring) {
                 UiLogic.progressBarNewServerConfiguringValue = 0;
             }
-            if (page === Page.GeneralSettings) {
+            if (page === PageEnum.GeneralSettings) {
                 UiLogic.updateGeneralSettingPage();
             }
-            if (page === Page.ServersList) {
+            if (page === PageEnum.ServersList) {
                 UiLogic.updateServersListPage();
             }
-            if (page === Page.Start) {
+            if (page === PageEnum.Start) {
                 UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
                 UiLogic.updateStartPage();
             }
-            if (page === Page.NewServerProtocols) {
+            if (page === PageEnum.NewServerProtocols) {
                 UiLogic.updateNewServerProtocolsPage()
             }
-            if (page === Page.ServerVpnProtocols) {
+            if (page === PageEnum.ServerVpnProtocols) {
                 UiLogic.updateProtocolsPage()
             }
-            if (page === Page.AppSettings) {
+            if (page === PageEnum.AppSettings) {
                 UiLogic.updateAppSettingsPage()
             }
-            if (page === Page.NetworkSettings) {
+            if (page === PageEnum.NetworkSettings) {
                 UiLogic.updateAppSettingsPage()
             }
-            if (page === Page.Sites) {
+            if (page === PageEnum.Sites) {
                 UiLogic.updateSitesPage()
             }
-            if (page === Page.Vpn) {
+            if (page === PageEnum.Vpn) {
                 UiLogic.updateVpnPage()
             }
             UiLogic.pushButtonNewServerConnectKeyChecked = false
@@ -196,7 +201,7 @@ Window {
         } else {
             pageLoader.push(pageComponent, {}, StackView.Immediate)
         }
-        if (page === Page.Start) {
+        if (page === PageEnum.Start) {
             UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
             UiLogic.updateStartPage();
         }
@@ -216,8 +221,8 @@ Window {
             target: null
         }
         onCloseButtonClicked: {
-            if (UiLogic.currentPageValue === Page.Start ||
-                    UiLogic.currentPageValue === Page.NewServer) {
+            if (UiLogic.currentPageValue === PageEnum.Start ||
+                    UiLogic.currentPageValue === PageEnum.NewServer) {
                 Qt.quit()
             } else {
                 root.hide()
@@ -237,10 +242,9 @@ Window {
         y: GC.isDesktop() ? titleBar.height : 0
         width: GC.screenWidth
         height: GC.screenHeight
-        initialItem: page_vpn
+//        initialItem: page_servers
         onCurrentItemChanged: {
             let pageEnum = root.getPageEnum(currentItem)
-            console.debug(pageEnum)
             UiLogic.currentPageValue = pageEnum
         }
     }
@@ -345,6 +349,18 @@ Window {
         onSetStartPage: {
             root.set_start_page(page, slide)
         }
+        onShowPublicKeyWarning: {
+            publicKeyWarning.visible = true
+        }
+        onShowConnectErrorDialog: {
+            connectErrorDialog.visible = true
+        }
+        onShow: {
+            root.show()
+        }
+        onHide: {
+            root.hide()
+        }
     }
     MessageDialog {
         id: closePrompt
@@ -414,4 +430,17 @@ Window {
             }
         }
     }
+    MessageDialog {
+        id: publicKeyWarning
+        title: "AmneziaVPN"
+        text: qsTr("It's public key. Private key required")
+        visible: false
+    }
+    MessageDialog {
+        id: connectErrorDialog
+        title: "AmneziaVPN"
+        text: UiLogic.dialogConnectErrorText
+        visible: false
+    }
+
 }

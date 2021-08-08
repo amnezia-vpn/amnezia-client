@@ -6,6 +6,7 @@ Item {
     id: root
     width: GC.screenWidth
     height: GC.screenHeight
+    enabled: UiLogic.pageProtoShadowsocksEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -22,6 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
+        enabled: UiLogic.widgetProtoSsEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -77,6 +79,8 @@ Item {
             y: 550
             width: 321
             height: 41
+            visible: UiLogic.labelProtoShadowsocksInfoVisible
+            text: UiLogic.labelProtoShadowsocksInfoText
         }
         TextFieldType {
             id: lineEdit_proto_shadowsocks_port
@@ -88,6 +92,7 @@ Item {
             onEditingFinished: {
                 UiLogic.lineEditProtoShadowsocksPortText = text
             }
+            enabled: UiLogic.lineEditProtoShadowsocksPortEnabled
         }
         ProgressBar {
             id: progressBar_proto_shadowsocks_reset
@@ -96,8 +101,9 @@ Item {
             width: 321
             height: 40
             from: 0
-            to: 100
-            value: 0
+            to: UiLogic.progressBarProtoShadowsocksResetMaximium
+            value: UiLogic.progressBarProtoShadowsocksResetValue
+            visible: UiLogic.progressBarProtoShadowsocksResetVisible
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -122,6 +128,10 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
+            visible: UiLogic.pushButtonProtoShadowsocksSaveVisible
+            onClicked: {
+                UiLogic.pushButtonProtoShadowsocksSaveClicked()
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -37,7 +37,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.Wrap
-        text: qsTr("Error text")
+        text: UiLogic.labelErrorText
     }
     Text {
         x: 0
@@ -51,7 +51,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.Wrap
-        text: qsTr("Connected")
+        text: UiLogic.labelStateText
     }
     Image {
         x: 0
@@ -79,6 +79,7 @@ Item {
         }
         contentItem: Item {}
         antialiasing: true
+        enabled: UiLogic.pushButtonConnectEnabled
     }
 
     ImageButtonType {
@@ -87,6 +88,9 @@ Item {
         width: 31
         height: 31
         icon.source: "qrc:/images/settings_grey.png"
+        onClicked: {
+            UiLogic.goToPage(PageEnum.GeneralSettings)
+        }
     }
     BasicButtonType {
         id: button_add_site
@@ -122,7 +126,7 @@ Item {
         }
         antialiasing: true
         onClicked: {
-            UiLogic.goToPage(Page.Sites)
+            UiLogic.goToPage(PageEnum.Sites)
         }
     }
     Item {
@@ -156,7 +160,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.Wrap
-            text: qsTr("0 Mbps")
+            text: UiLogic.labelSpeedReceivedText
         }
         Text {
             x: 260
@@ -170,7 +174,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.Wrap
-            text: qsTr("0 Mbps")
+            text: UiLogic.labelSpeedSentText
         }
     }
     Item {
@@ -178,6 +182,7 @@ Item {
         y: 470
         width: 351
         height: 91
+        enabled: UiLogic.widgetVpnModeEnabled
         RadioButtonType {
             x: 0
             y: 0
@@ -215,6 +220,5 @@ Item {
                 UiLogic.onRadioButtonVpnModeForwardSitesToggled(checked)
             }
         }
-
     }
 }

@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Page 1.0
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -74,11 +74,11 @@ Item {
             text: qsTr("Next")
             onClicked: {
                 if (radioButton_setup_wizard_high.checked) {
-                    UiLogic.goToPage(Page.WizardHigh);
+                    UiLogic.goToPage(PageEnum.WizardHigh);
                 } else if (radioButton_setup_wizard_medium.checked) {
-                    UiLogic.goToPage(Page.WizardMedium);
+                    UiLogic.goToPage(PageEnum.WizardMedium);
                 } else if (radioButton_setup_wizard_low.checked) {
-                    UiLogic.goToPage(Page.WizardLow);
+                    UiLogic.goToPage(PageEnum.WizardLow);
                 }
             }
         }

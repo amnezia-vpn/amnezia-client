@@ -1,24 +1,29 @@
 #ifndef UILOGIC_H
 #define UILOGIC_H
 
-#include <QLabel>
-#include <QListWidget>
-#include <QProgressBar>
-#include <QPushButton>
 #include <QRegExpValidator>
-#include <QStack>
-#include <QStringListModel>
-#include <QSystemTrayIcon>
 #include <QQmlEngine>
+#include <functional>
 #include "3rd/QRCodeGenerator/QRCodeGenerator.h"
 
-#include "framelesswindow.h"
 #include "protocols/vpnprotocol.h"
 
 #include "settings.h"
 #include "sites_model.h"
+#include "serversmodel.h"
 
 class VpnConnection;
+
+namespace PageEnumNS
+{
+Q_NAMESPACE
+enum Page {Start = 0, NewServer, NewServerProtocols, Vpn,
+           Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
+           GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
+           ServerVpnProtocols, ServersList, ShareConnection,  Sites,
+           OpenVpnSettings, ShadowSocksSettings, CloakSettings};
+Q_ENUM_NS(Page)
+}
 
 class UiLogic : public QObject
 {
@@ -94,24 +99,134 @@ class UiLogic : public QObject
     Q_PROPERTY(bool checkBoxSetupWizardVpnModeChecked READ getCheckBoxSetupWizardVpnModeChecked WRITE setCheckBoxSetupWizardVpnModeChecked NOTIFY checkBoxSetupWizardVpnModeCheckedChanged)
     Q_PROPERTY(QString ipAddressValidatorRegex READ getIpAddressValidatorRegex CONSTANT)
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
+    Q_PROPERTY(QString labelSitesAddCustomText READ getLabelSitesAddCustomText WRITE setLabelSitesAddCustomText NOTIFY labelSitesAddCustomTextChanged)
+    Q_PROPERTY(QObject* tableViewSitesModel READ getTableViewSitesModel NOTIFY tableViewSitesModelChanged)
+    Q_PROPERTY(QString lineEditSitesAddCustomText READ getLineEditSitesAddCustomText WRITE setLineEditSitesAddCustomText NOTIFY lineEditSitesAddCustomTextChanged)
+    Q_PROPERTY(bool widgetProtoCloakEnabled READ getWidgetProtoCloakEnabled WRITE setWidgetProtoCloakEnabled NOTIFY widgetProtoCloakEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakSaveVisible READ getPushButtonProtoCloakSaveVisible WRITE setPushButtonProtoCloakSaveVisible NOTIFY pushButtonProtoCloakSaveVisibleChanged)
+    Q_PROPERTY(bool progressBarProtoCloakResetVisible READ getProgressBarProtoCloakResetVisible WRITE setProgressBarProtoCloakResetVisible NOTIFY progressBarProtoCloakResetVisibleChanged)
+    Q_PROPERTY(bool lineEditProtoCloakPortEnabled READ getLineEditProtoCloakPortEnabled WRITE setLineEditProtoCloakPortEnabled NOTIFY lineEditProtoCloakPortEnabledChanged)
+    Q_PROPERTY(bool widgetProtoSsEnabled READ getWidgetProtoSsEnabled WRITE setWidgetProtoSsEnabled NOTIFY widgetProtoSsEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoShadowsocksSaveVisible READ getPushButtonProtoShadowsocksSaveVisible WRITE setPushButtonProtoShadowsocksSaveVisible NOTIFY pushButtonProtoShadowsocksSaveVisibleChanged)
+    Q_PROPERTY(bool progressBarProtoShadowsocksResetVisible READ getProgressBarProtoShadowsocksResetVisible WRITE setProgressBarProtoShadowsocksResetVisible NOTIFY progressBarProtoShadowsocksResetVisibleChanged)
+    Q_PROPERTY(bool lineEditProtoShadowsocksPortEnabled READ getLineEditProtoShadowsocksPortEnabled WRITE setLineEditProtoShadowsocksPortEnabled NOTIFY lineEditProtoShadowsocksPortEnabledChanged)
+    Q_PROPERTY(bool widgetProtoOpenvpnEnabled READ getWidgetProtoOpenvpnEnabled WRITE setWidgetProtoOpenvpnEnabled NOTIFY widgetProtoOpenvpnEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnSaveVisible READ getPushButtonProtoOpenvpnSaveVisible WRITE setPushButtonProtoOpenvpnSaveVisible NOTIFY pushButtonProtoOpenvpnSaveVisibleChanged)
+    Q_PROPERTY(bool progressBarProtoOpenvpnResetVisible READ getProgressBarProtoOpenvpnResetVisible WRITE setProgressBarProtoOpenvpnResetVisible NOTIFY progressBarProtoOpenvpnResetVisibleChanged)
+    Q_PROPERTY(bool radioButtonProtoOpenvpnUdpEnabled READ getRadioButtonProtoOpenvpnUdpEnabled WRITE setRadioButtonProtoOpenvpnUdpEnabled NOTIFY radioButtonProtoOpenvpnUdpEnabledChanged)
+    Q_PROPERTY(bool radioButtonProtoOpenvpnTcpEnabled READ getRadioButtonProtoOpenvpnTcpEnabled WRITE setRadioButtonProtoOpenvpnTcpEnabled NOTIFY radioButtonProtoOpenvpnTcpEnabledChanged)
+    Q_PROPERTY(bool radioButtonProtoOpenvpnTcpChecked READ getRadioButtonProtoOpenvpnTcpChecked WRITE setRadioButtonProtoOpenvpnTcpChecked NOTIFY radioButtonProtoOpenvpnTcpCheckedChanged)
+    Q_PROPERTY(bool lineEditProtoOpenvpnPortEnabled READ getLineEditProtoOpenvpnPortEnabled WRITE setLineEditProtoOpenvpnPortEnabled NOTIFY lineEditProtoOpenvpnPortEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnContInstallChecked READ getPushButtonProtoOpenvpnContInstallChecked WRITE setPushButtonProtoOpenvpnContInstallChecked NOTIFY pushButtonProtoOpenvpnContInstallCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoSsOpenvpnContInstallChecked READ getPushButtonProtoSsOpenvpnContInstallChecked WRITE setPushButtonProtoSsOpenvpnContInstallChecked NOTIFY pushButtonProtoSsOpenvpnContInstallCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContInstallChecked READ getPushButtonProtoCloakOpenvpnContInstallChecked WRITE setPushButtonProtoCloakOpenvpnContInstallChecked NOTIFY pushButtonProtoCloakOpenvpnContInstallCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoWireguardContInstallChecked READ getPushButtonProtoWireguardContInstallChecked WRITE setPushButtonProtoWireguardContInstallChecked NOTIFY pushButtonProtoWireguardContInstallCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnContInstallEnabled READ getPushButtonProtoOpenvpnContInstallEnabled WRITE setPushButtonProtoOpenvpnContInstallEnabled NOTIFY pushButtonProtoOpenvpnContInstallEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoSsOpenvpnContInstallEnabled READ getPushButtonProtoSsOpenvpnContInstallEnabled WRITE setPushButtonProtoSsOpenvpnContInstallEnabled NOTIFY pushButtonProtoSsOpenvpnContInstallEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContInstallEnabled READ getPushButtonProtoCloakOpenvpnContInstallEnabled WRITE setPushButtonProtoCloakOpenvpnContInstallEnabled NOTIFY pushButtonProtoCloakOpenvpnContInstallEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoWireguardContInstallEnabled READ getPushButtonProtoWireguardContInstallEnabled WRITE setPushButtonProtoWireguardContInstallEnabled NOTIFY pushButtonProtoWireguardContInstallEnabledChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnContDefaultChecked READ getPushButtonProtoOpenvpnContDefaultChecked WRITE setPushButtonProtoOpenvpnContDefaultChecked NOTIFY pushButtonProtoOpenvpnContDefaultCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoSsOpenvpnContDefaultChecked READ getPushButtonProtoSsOpenvpnContDefaultChecked WRITE setPushButtonProtoSsOpenvpnContDefaultChecked NOTIFY pushButtonProtoSsOpenvpnContDefaultCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContDefaultChecked READ getPushButtonProtoCloakOpenvpnContDefaultChecked WRITE setPushButtonProtoCloakOpenvpnContDefaultChecked NOTIFY pushButtonProtoCloakOpenvpnContDefaultCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoWireguardContDefaultChecked READ getPushButtonProtoWireguardContDefaultChecked WRITE setPushButtonProtoWireguardContDefaultChecked NOTIFY pushButtonProtoWireguardContDefaultCheckedChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnContDefaultVisible READ getPushButtonProtoOpenvpnContDefaultVisible WRITE setPushButtonProtoOpenvpnContDefaultVisible NOTIFY pushButtonProtoOpenvpnContDefaultVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoSsOpenvpnContDefaultVisible READ getPushButtonProtoSsOpenvpnContDefaultVisible WRITE setPushButtonProtoSsOpenvpnContDefaultVisible NOTIFY pushButtonProtoSsOpenvpnContDefaultVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContDefaultVisible READ getPushButtonProtoCloakOpenvpnContDefaultVisible WRITE setPushButtonProtoCloakOpenvpnContDefaultVisible NOTIFY pushButtonProtoCloakOpenvpnContDefaultVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoWireguardContDefaultVisible READ getPushButtonProtoWireguardContDefaultVisible WRITE setPushButtonProtoWireguardContDefaultVisible NOTIFY pushButtonProtoWireguardContDefaultVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoOpenvpnContShareVisible READ getPushButtonProtoOpenvpnContShareVisible WRITE setPushButtonProtoOpenvpnContShareVisible NOTIFY pushButtonProtoOpenvpnContShareVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoSsOpenvpnContShareVisible READ getPushButtonProtoSsOpenvpnContShareVisible WRITE setPushButtonProtoSsOpenvpnContShareVisible NOTIFY pushButtonProtoSsOpenvpnContShareVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContShareVisible READ getPushButtonProtoCloakOpenvpnContShareVisible WRITE setPushButtonProtoCloakOpenvpnContShareVisible NOTIFY pushButtonProtoCloakOpenvpnContShareVisibleChanged)
+    Q_PROPERTY(bool pushButtonProtoWireguardContShareVisible READ getPushButtonProtoWireguardContShareVisible WRITE setPushButtonProtoWireguardContShareVisible NOTIFY pushButtonProtoWireguardContShareVisibleChanged)
+    Q_PROPERTY(bool frameOpenvpnSettingsVisible READ getFrameOpenvpnSettingsVisible WRITE setFrameOpenvpnSettingsVisible NOTIFY frameOpenvpnSettingsVisibleChanged)
+    Q_PROPERTY(bool frameOpenvpnSsSettingsVisible READ getFrameOpenvpnSsSettingsVisible WRITE setFrameOpenvpnSsSettingsVisible NOTIFY frameOpenvpnSsSettingsVisibleChanged)
+    Q_PROPERTY(bool frameOpenvpnSsCloakSettingsVisible READ getFrameOpenvpnSsCloakSettingsVisible WRITE setFrameOpenvpnSsCloakSettingsVisible NOTIFY frameOpenvpnSsCloakSettingsVisibleChanged)
+    Q_PROPERTY(bool progressBarProtocolsContainerReinstallVisible READ getProgressBarProtocolsContainerReinstallVisible WRITE setProgressBarProtocolsContainerReinstallVisible NOTIFY progressBarProtocolsContainerReinstallVisibleChanged)
+    Q_PROPERTY(QString labelSpeedReceivedText READ getLabelSpeedReceivedText WRITE setLabelSpeedReceivedText NOTIFY labelSpeedReceivedTextChanged)
+    Q_PROPERTY(QString labelSpeedSentText READ getLabelSpeedSentText WRITE setLabelSpeedSentText NOTIFY labelSpeedSentTextChanged)
+    Q_PROPERTY(QString labelStateText READ getLabelStateText WRITE setLabelStateText NOTIFY labelStateTextChanged)
+    Q_PROPERTY(bool pushButtonConnectEnabled READ getPushButtonConnectEnabled WRITE setPushButtonConnectEnabled NOTIFY pushButtonConnectEnabledChanged)
+    Q_PROPERTY(bool widgetVpnModeEnabled READ getWidgetVpnModeEnabled WRITE setWidgetVpnModeEnabled NOTIFY widgetVpnModeEnabledChanged)
+    Q_PROPERTY(QString labelErrorText READ getLabelErrorText WRITE setLabelErrorText NOTIFY labelErrorTextChanged)
+    Q_PROPERTY(bool pushButtonNewServerConnectEnabled READ getPushButtonNewServerConnectEnabled WRITE setPushButtonNewServerConnectEnabled NOTIFY pushButtonNewServerConnectEnabledChanged)
+    Q_PROPERTY(QString pushButtonNewServerConnectText READ getPushButtonNewServerConnectText WRITE setPushButtonNewServerConnectText NOTIFY pushButtonNewServerConnectTextChanged)
+    Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
+    Q_PROPERTY(bool pageServerSettingsEnabled READ getPageServerSettingsEnabled WRITE setPageServerSettingsEnabled NOTIFY pageServerSettingsEnabledChanged)
+    Q_PROPERTY(QString pushButtonServerSettingsClearText READ getPushButtonServerSettingsClearText WRITE setPushButtonServerSettingsClearText NOTIFY pushButtonServerSettingsClearTextChanged)
+    Q_PROPERTY(bool pageShareAmneziaVisible READ getPageShareAmneziaVisible WRITE setPageShareAmneziaVisible NOTIFY pageShareAmneziaVisibleChanged)
+    Q_PROPERTY(bool pageShareOpenvpnVisible READ getPageShareOpenvpnVisible WRITE setPageShareOpenvpnVisible NOTIFY pageShareOpenvpnVisibleChanged)
+    Q_PROPERTY(bool pageShareShadowsocksVisible READ getPageShareShadowsocksVisible WRITE setPageShareShadowsocksVisible NOTIFY pageShareShadowsocksVisibleChanged)
+    Q_PROPERTY(bool pageShareCloakVisible READ getPageShareCloakVisible WRITE setPageShareCloakVisible NOTIFY pageShareCloakVisibleChanged)
+    Q_PROPERTY(bool pageShareFullAccessVisible READ getPageShareFullAccessVisible WRITE setPageShareFullAccessVisible NOTIFY pageShareFullAccessVisibleChanged)
+    Q_PROPERTY(QString textEditShareOpenvpnCodeText READ getTextEditShareOpenvpnCodeText WRITE setTextEditShareOpenvpnCodeText NOTIFY textEditShareOpenvpnCodeTextChanged)
+    Q_PROPERTY(bool pushButtonShareOpenvpnCopyEnabled READ getPushButtonShareOpenvpnCopyEnabled WRITE setPushButtonShareOpenvpnCopyEnabled NOTIFY pushButtonShareOpenvpnCopyEnabledChanged)
+    Q_PROPERTY(bool pushButtonShareOpenvpnSaveEnabled READ getPushButtonShareOpenvpnSaveEnabled WRITE setPushButtonShareOpenvpnSaveEnabled NOTIFY pushButtonShareOpenvpnSaveEnabledChanged)
+    Q_PROPERTY(int toolBoxShareConnectionCurrentIndex READ getToolBoxShareConnectionCurrentIndex WRITE setToolBoxShareConnectionCurrentIndex NOTIFY toolBoxShareConnectionCurrentIndexChanged)
+    Q_PROPERTY(bool pushButtonShareSsCopyEnabled READ getPushButtonShareSsCopyEnabled WRITE setPushButtonShareSsCopyEnabled NOTIFY pushButtonShareSsCopyEnabledChanged)
+    Q_PROPERTY(QString lineEditShareSsStringText READ getLineEditShareSsStringText WRITE setLineEditShareSsStringText NOTIFY lineEditShareSsStringTextChanged)
+    Q_PROPERTY(QString labelShareSsQrCodeText READ getLabelShareSsQrCodeText WRITE setLabelShareSsQrCodeText NOTIFY labelShareSsQrCodeTextChanged)
+    Q_PROPERTY(QString labelShareSsServerText READ getLabelShareSsServerText WRITE setLabelShareSsServerText NOTIFY labelShareSsServerTextChanged)
+    Q_PROPERTY(QString labelShareSsPortText READ getLabelShareSsPortText WRITE setLabelShareSsPortText NOTIFY labelShareSsPortTextChanged)
+    Q_PROPERTY(QString labelShareSsMethodText READ getLabelShareSsMethodText WRITE setLabelShareSsMethodText NOTIFY labelShareSsMethodTextChanged)
+    Q_PROPERTY(QString labelShareSsPasswordText READ getLabelShareSsPasswordText WRITE setLabelShareSsPasswordText NOTIFY labelShareSsPasswordTextChanged)
+    Q_PROPERTY(QString plainTextEditShareCloakText READ getPlainTextEditShareCloakText WRITE setPlainTextEditShareCloakText NOTIFY plainTextEditShareCloakTextChanged)
+    Q_PROPERTY(bool pushButtonShareCloakCopyEnabled READ getPushButtonShareCloakCopyEnabled WRITE setPushButtonShareCloakCopyEnabled NOTIFY pushButtonShareCloakCopyEnabledChanged)
+    Q_PROPERTY(QString textEditShareFullCodeText READ getTextEditShareFullCodeText WRITE setTextEditShareFullCodeText NOTIFY textEditShareFullCodeTextChanged)
+    Q_PROPERTY(QString textEditShareAmneziaCodeText READ getTextEditShareAmneziaCodeText WRITE setTextEditShareAmneziaCodeText NOTIFY textEditShareAmneziaCodeTextChanged)
+    Q_PROPERTY(QString pushButtonShareFullCopyText READ getPushButtonShareFullCopyText WRITE setPushButtonShareFullCopyText NOTIFY pushButtonShareFullCopyTextChanged)
+    Q_PROPERTY(QString pushButtonShareAmneziaCopyText READ getPushButtonShareAmneziaCopyText WRITE setPushButtonShareAmneziaCopyText NOTIFY pushButtonShareAmneziaCopyTextChanged)
+    Q_PROPERTY(QString pushButtonShareOpenvpnCopyText READ getPushButtonShareOpenvpnCopyText WRITE setPushButtonShareOpenvpnCopyText NOTIFY pushButtonShareOpenvpnCopyTextChanged)
+    Q_PROPERTY(QString pushButtonShareSsCopyText READ getPushButtonShareSsCopyText WRITE setPushButtonShareSsCopyText NOTIFY pushButtonShareSsCopyTextChanged)
+    Q_PROPERTY(QString pushButtonShareCloakCopyText READ getPushButtonShareCloakCopyText WRITE setPushButtonShareCloakCopyText NOTIFY pushButtonShareCloakCopyTextChanged)
+    Q_PROPERTY(bool pushButtonShareAmneziaGenerateEnabled READ getPushButtonShareAmneziaGenerateEnabled WRITE setPushButtonShareAmneziaGenerateEnabled NOTIFY pushButtonShareAmneziaGenerateEnabledChanged)
+    Q_PROPERTY(bool pushButtonShareAmneziaCopyEnabled READ getPushButtonShareAmneziaCopyEnabled WRITE setPushButtonShareAmneziaCopyEnabled NOTIFY pushButtonShareAmneziaCopyEnabledChanged)
+    Q_PROPERTY(QString pushButtonShareAmneziaGenerateText READ getPushButtonShareAmneziaGenerateText WRITE setPushButtonShareAmneziaGenerateText NOTIFY pushButtonShareAmneziaGenerateTextChanged)
+    Q_PROPERTY(bool pushButtonShareOpenvpnGenerateEnabled READ getPushButtonShareOpenvpnGenerateEnabled WRITE setPushButtonShareOpenvpnGenerateEnabled NOTIFY pushButtonShareOpenvpnGenerateEnabledChanged)
+    Q_PROPERTY(QString pushButtonShareOpenvpnGenerateText READ getPushButtonShareOpenvpnGenerateText WRITE setPushButtonShareOpenvpnGenerateText NOTIFY pushButtonShareOpenvpnGenerateTextChanged)
+    Q_PROPERTY(bool pageNewServerConfiguringEnabled READ getPageNewServerConfiguringEnabled WRITE setPageNewServerConfiguringEnabled NOTIFY pageNewServerConfiguringEnabledChanged)
+    Q_PROPERTY(bool labelNewServerConfiguringWaitInfoVisible READ getLabelNewServerConfiguringWaitInfoVisible WRITE setLabelNewServerConfiguringWaitInfoVisible NOTIFY labelNewServerConfiguringWaitInfoVisibleChanged)
+    Q_PROPERTY(QString labelNewServerConfiguringWaitInfoText READ getLabelNewServerConfiguringWaitInfoText WRITE setLabelNewServerConfiguringWaitInfoText NOTIFY labelNewServerConfiguringWaitInfoTextChanged)
+    Q_PROPERTY(bool progressBarNewServerConfiguringVisible READ getProgressBarNewServerConfiguringVisible WRITE setProgressBarNewServerConfiguringVisible NOTIFY progressBarNewServerConfiguringVisibleChanged)
+    Q_PROPERTY(int progressBarNewServerConfiguringMaximium READ getProgressBarNewServerConfiguringMaximium WRITE setProgressBarNewServerConfiguringMaximium NOTIFY progressBarNewServerConfiguringMaximiumChanged)
+    Q_PROPERTY(bool progressBarNewServerConfiguringTextVisible READ getProgressBarNewServerConfiguringTextVisible WRITE setProgressBarNewServerConfiguringTextVisible NOTIFY progressBarNewServerConfiguringTextVisibleChanged)
+    Q_PROPERTY(QString progressBarNewServerConfiguringText READ getProgressBarNewServerConfiguringText WRITE setProgressBarNewServerConfiguringText NOTIFY progressBarNewServerConfiguringTextChanged)
+    Q_PROPERTY(bool pageServerProtocolsEnabled READ getPageServerProtocolsEnabled WRITE setPageServerProtocolsEnabled NOTIFY pageServerProtocolsEnabledChanged)
+    Q_PROPERTY(int progressBarProtocolsContainerReinstallValue READ getProgressBarProtocolsContainerReinstallValue WRITE setProgressBarProtocolsContainerReinstallValue NOTIFY progressBarProtocolsContainerReinstallValueChanged)
+    Q_PROPERTY(int progressBarProtocolsContainerReinstallMaximium READ getProgressBarProtocolsContainerReinstallMaximium WRITE setProgressBarProtocolsContainerReinstallMaximium NOTIFY progressBarProtocolsContainerReinstallMaximiumChanged)
+    Q_PROPERTY(bool comboBoxProtoOpenvpnCipherEnabled READ getComboBoxProtoOpenvpnCipherEnabled WRITE setComboBoxProtoOpenvpnCipherEnabled NOTIFY comboBoxProtoOpenvpnCipherEnabledChanged)
+    Q_PROPERTY(bool comboBoxProtoOpenvpnHashEnabled READ getComboBoxProtoOpenvpnHashEnabled WRITE setComboBoxProtoOpenvpnHashEnabled NOTIFY comboBoxProtoOpenvpnHashEnabledChanged)
+    Q_PROPERTY(bool pageProtoOpenvpnEnabled READ getPageProtoOpenvpnEnabled WRITE setPageProtoOpenvpnEnabled NOTIFY pageProtoOpenvpnEnabledChanged)
+    Q_PROPERTY(bool labelProtoOpenvpnInfoVisible READ getLabelProtoOpenvpnInfoVisible WRITE setLabelProtoOpenvpnInfoVisible NOTIFY labelProtoOpenvpnInfoVisibleChanged)
+    Q_PROPERTY(QString labelProtoOpenvpnInfoText READ getLabelProtoOpenvpnInfoText WRITE setLabelProtoOpenvpnInfoText NOTIFY labelProtoOpenvpnInfoTextChanged)
+    Q_PROPERTY(int progressBarProtoOpenvpnResetValue READ getProgressBarProtoOpenvpnResetValue WRITE setProgressBarProtoOpenvpnResetValue NOTIFY progressBarProtoOpenvpnResetValueChanged)
+    Q_PROPERTY(int progressBarProtoOpenvpnResetMaximium READ getProgressBarProtoOpenvpnResetMaximium WRITE setProgressBarProtoOpenvpnResetMaximium NOTIFY progressBarProtoOpenvpnResetMaximiumChanged)
+    Q_PROPERTY(bool pageProtoShadowsocksEnabled READ getPageProtoShadowsocksEnabled WRITE setPageProtoShadowsocksEnabled NOTIFY pageProtoShadowsocksEnabledChanged)
+    Q_PROPERTY(bool labelProtoShadowsocksInfoVisible READ getLabelProtoShadowsocksInfoVisible WRITE setLabelProtoShadowsocksInfoVisible NOTIFY labelProtoShadowsocksInfoVisibleChanged)
+    Q_PROPERTY(QString labelProtoShadowsocksInfoText READ getLabelProtoShadowsocksInfoText WRITE setLabelProtoShadowsocksInfoText NOTIFY labelProtoShadowsocksInfoTextChanged)
+    Q_PROPERTY(int progressBarProtoShadowsocksResetValue READ getProgressBarProtoShadowsocksResetValue WRITE setProgressBarProtoShadowsocksResetValue NOTIFY progressBarProtoShadowsocksResetValueChanged)
+    Q_PROPERTY(int progressBarProtoShadowsocksResetMaximium READ getProgressBarProtoShadowsocksResetMaximium WRITE setProgressBarProtoShadowsocksResetMaximium NOTIFY progressBarProtoShadowsocksResetMaximiumChanged)
+    Q_PROPERTY(bool pageProtoCloakEnabled READ getPageProtoCloakEnabled WRITE setPageProtoCloakEnabled NOTIFY pageProtoCloakEnabledChanged)
+    Q_PROPERTY(bool labelProtoCloakInfoVisible READ getLabelProtoCloakInfoVisible WRITE setLabelProtoCloakInfoVisible NOTIFY labelProtoCloakInfoVisibleChanged)
+    Q_PROPERTY(QString labelProtoCloakInfoText READ getLabelProtoCloakInfoText WRITE setLabelProtoCloakInfoText NOTIFY labelProtoCloakInfoTextChanged)
+    Q_PROPERTY(int progressBarProtoCloakResetValue READ getProgressBarProtoCloakResetValue WRITE setProgressBarProtoCloakResetValue NOTIFY progressBarProtoCloakResetValueChanged)
+    Q_PROPERTY(int progressBarProtoCloakResetMaximium READ getProgressBarProtoCloakResetMaximium WRITE setProgressBarProtoCloakResetMaximium NOTIFY progressBarProtoCloakResetMaximiumChanged)
+    Q_PROPERTY(QObject* serverListModel READ getServerListModel CONSTANT)
+    Q_PROPERTY(QString pushButtonServerSettingsClearClientCacheText READ getPushButtonServerSettingsClearClientCacheText WRITE setPushButtonServerSettingsClearClientCacheText NOTIFY pushButtonServerSettingsClearClientCacheTextChanged)
 
 
 public:
     explicit UiLogic(QObject *parent = nullptr);
-    //    ~UiLogic();
-
-    enum Page {Start, NewServer, NewServerProtocols, Vpn,
-               Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
-               GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
-               ServerVpnProtocols, ServersList, ShareConnection,  Sites,
-               OpenVpnSettings, ShadowSocksSettings, CloakSettings};
-    Q_ENUM(Page)
-
-    //    void showOnStartup();
+    ~UiLogic();
+    void showOnStartup();
 
     Q_INVOKABLE void initalizeUiLogic();
     static void declareQML() {
-        qmlRegisterType<UiLogic>("Page", 1, 0, "Style");
+        qmlRegisterUncreatableMetaObject(
+                    PageEnumNS::staticMetaObject,
+                    "PageEnum",
+                    1, 0,
+                    "PageEnum",
+                    "Error: only enums"
+                    );
     }
     bool getFrameWireguardSettingsVisible() const;
     void setFrameWireguardSettingsVisible(bool frameWireguardSettingsVisible);
@@ -254,6 +369,229 @@ public:
     QString getIpAddressValidatorRegex() const;
     bool getPushButtonConnectChecked() const;
     void setPushButtonConnectChecked(bool pushButtonConnectChecked);
+    QString getLabelSitesAddCustomText() const;
+    void setLabelSitesAddCustomText(const QString &labelSitesAddCustomText);
+    QObject* getTableViewSitesModel() const;
+    void setTableViewSitesModel(QObject *tableViewSitesModel);
+    QString getLineEditSitesAddCustomText() const;
+    void setLineEditSitesAddCustomText(const QString &lineEditSitesAddCustomText);
+    bool getWidgetProtoCloakEnabled() const;
+    void setWidgetProtoCloakEnabled(bool widgetProtoCloakEnabled);
+    bool getPushButtonProtoCloakSaveVisible() const;
+    void setPushButtonProtoCloakSaveVisible(bool pushButtonProtoCloakSaveVisible);
+    bool getProgressBarProtoCloakResetVisible() const;
+    void setProgressBarProtoCloakResetVisible(bool progressBarProtoCloakResetVisible);
+    bool getLineEditProtoCloakPortEnabled() const;
+    void setLineEditProtoCloakPortEnabled(bool lineEditProtoCloakPortEnabled);
+    bool getWidgetProtoSsEnabled() const;
+    void setWidgetProtoSsEnabled(bool widgetProtoSsEnabled);
+    bool getPushButtonProtoShadowsocksSaveVisible() const;
+    void setPushButtonProtoShadowsocksSaveVisible(bool pushButtonProtoShadowsocksSaveVisible);
+    bool getProgressBarProtoShadowsocksResetVisible() const;
+    void setProgressBarProtoShadowsocksResetVisible(bool progressBarProtoShadowsocksResetVisible);
+    bool getLineEditProtoShadowsocksPortEnabled() const;
+    void setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsocksPortEnabled);
+    bool getWidgetProtoOpenvpnEnabled() const;
+    void setWidgetProtoOpenvpnEnabled(bool widgetProtoOpenvpnEnabled);
+    bool getPushButtonProtoOpenvpnSaveVisible() const;
+    void setPushButtonProtoOpenvpnSaveVisible(bool pushButtonProtoOpenvpnSaveVisible);
+    bool getProgressBarProtoOpenvpnResetVisible() const;
+    void setProgressBarProtoOpenvpnResetVisible(bool progressBarProtoOpenvpnResetVisible);
+    bool getRadioButtonProtoOpenvpnUdpEnabled() const;
+    void setRadioButtonProtoOpenvpnUdpEnabled(bool radioButtonProtoOpenvpnUdpEnabled);
+    bool getRadioButtonProtoOpenvpnTcpEnabled() const;
+    void setRadioButtonProtoOpenvpnTcpEnabled(bool radioButtonProtoOpenvpnTcpEnabled);
+    bool getRadioButtonProtoOpenvpnTcpChecked() const;
+    void setRadioButtonProtoOpenvpnTcpChecked(bool radioButtonProtoOpenvpnTcpChecked);
+    bool getLineEditProtoOpenvpnPortEnabled() const;
+    void setLineEditProtoOpenvpnPortEnabled(bool lineEditProtoOpenvpnPortEnabled);
+    bool getPushButtonProtoOpenvpnContInstallChecked() const;
+    void setPushButtonProtoOpenvpnContInstallChecked(bool pushButtonProtoOpenvpnContInstallChecked);
+    bool getPushButtonProtoSsOpenvpnContInstallChecked() const;
+    void setPushButtonProtoSsOpenvpnContInstallChecked(bool pushButtonProtoSsOpenvpnContInstallChecked);
+    bool getPushButtonProtoCloakOpenvpnContInstallChecked() const;
+    void setPushButtonProtoCloakOpenvpnContInstallChecked(bool pushButtonProtoCloakOpenvpnContInstallChecked);
+    bool getPushButtonProtoWireguardContInstallChecked() const;
+    void setPushButtonProtoWireguardContInstallChecked(bool pushButtonProtoWireguardContInstallChecked);
+    bool getPushButtonProtoOpenvpnContInstallEnabled() const;
+    void setPushButtonProtoOpenvpnContInstallEnabled(bool pushButtonProtoOpenvpnContInstallEnabled);
+    bool getPushButtonProtoSsOpenvpnContInstallEnabled() const;
+    void setPushButtonProtoSsOpenvpnContInstallEnabled(bool pushButtonProtoSsOpenvpnContInstallEnabled);
+    bool getPushButtonProtoCloakOpenvpnContInstallEnabled() const;
+    void setPushButtonProtoCloakOpenvpnContInstallEnabled(bool pushButtonProtoCloakOpenvpnContInstallEnabled);
+    bool getPushButtonProtoWireguardContInstallEnabled() const;
+    void setPushButtonProtoWireguardContInstallEnabled(bool pushButtonProtoWireguardContInstallEnabled);
+    bool getPushButtonProtoOpenvpnContDefaultChecked() const;
+    void setPushButtonProtoOpenvpnContDefaultChecked(bool pushButtonProtoOpenvpnContDefaultChecked);
+    bool getPushButtonProtoSsOpenvpnContDefaultChecked() const;
+    void setPushButtonProtoSsOpenvpnContDefaultChecked(bool pushButtonProtoSsOpenvpnContDefaultChecked);
+    bool getPushButtonProtoCloakOpenvpnContDefaultChecked() const;
+    void setPushButtonProtoCloakOpenvpnContDefaultChecked(bool pushButtonProtoCloakOpenvpnContDefaultChecked);
+    bool getPushButtonProtoWireguardContDefaultChecked() const;
+    void setPushButtonProtoWireguardContDefaultChecked(bool pushButtonProtoWireguardContDefaultChecked);
+    bool getPushButtonProtoOpenvpnContDefaultVisible() const;
+    void setPushButtonProtoOpenvpnContDefaultVisible(bool pushButtonProtoOpenvpnContDefaultVisible);
+    bool getPushButtonProtoSsOpenvpnContDefaultVisible() const;
+    void setPushButtonProtoSsOpenvpnContDefaultVisible(bool pushButtonProtoSsOpenvpnContDefaultVisible);
+    bool getPushButtonProtoCloakOpenvpnContDefaultVisible() const;
+    void setPushButtonProtoCloakOpenvpnContDefaultVisible(bool pushButtonProtoCloakOpenvpnContDefaultVisible);
+    bool getPushButtonProtoWireguardContDefaultVisible() const;
+    void setPushButtonProtoWireguardContDefaultVisible(bool pushButtonProtoWireguardContDefaultVisible);
+    bool getPushButtonProtoOpenvpnContShareVisible() const;
+    void setPushButtonProtoOpenvpnContShareVisible(bool pushButtonProtoOpenvpnContShareVisible);
+    bool getPushButtonProtoSsOpenvpnContShareVisible() const;
+    void setPushButtonProtoSsOpenvpnContShareVisible(bool pushButtonProtoSsOpenvpnContShareVisible);
+    bool getPushButtonProtoCloakOpenvpnContShareVisible() const;
+    void setPushButtonProtoCloakOpenvpnContShareVisible(bool pushButtonProtoCloakOpenvpnContShareVisible);
+    bool getPushButtonProtoWireguardContShareVisible() const;
+    void setPushButtonProtoWireguardContShareVisible(bool pushButtonProtoWireguardContShareVisible);
+    bool getFrameOpenvpnSettingsVisible() const;
+    void setFrameOpenvpnSettingsVisible(bool frameOpenvpnSettingsVisible);
+    bool getFrameOpenvpnSsSettingsVisible() const;
+    void setFrameOpenvpnSsSettingsVisible(bool frameOpenvpnSsSettingsVisible);
+    bool getFrameOpenvpnSsCloakSettingsVisible() const;
+    void setFrameOpenvpnSsCloakSettingsVisible(bool frameOpenvpnSsCloakSettingsVisible);
+    bool getProgressBarProtocolsContainerReinstallVisible() const;
+    void setProgressBarProtocolsContainerReinstallVisible(bool progressBarProtocolsContainerReinstallVisible);
+    QString getLabelSpeedReceivedText() const;
+    void setLabelSpeedReceivedText(const QString &labelSpeedReceivedText);
+    QString getLabelSpeedSentText() const;
+    void setLabelSpeedSentText(const QString &labelSpeedSentText);
+    QString getLabelStateText() const;
+    void setLabelStateText(const QString &labelStateText);
+    bool getPushButtonConnectEnabled() const;
+    void setPushButtonConnectEnabled(bool pushButtonConnectEnabled);
+    bool getWidgetVpnModeEnabled() const;
+    void setWidgetVpnModeEnabled(bool widgetVpnModeEnabled);
+    QString getLabelErrorText() const;
+    void setLabelErrorText(const QString &labelErrorText);
+    bool getPushButtonNewServerConnectEnabled() const;
+    void setPushButtonNewServerConnectEnabled(bool pushButtonNewServerConnectEnabled);
+    QString getPushButtonNewServerConnectText() const;
+    void setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText);
+    QString getDialogConnectErrorText() const;
+    void setDialogConnectErrorText(const QString &dialogConnectErrorText);
+    bool getPageServerSettingsEnabled() const;
+    void setPageServerSettingsEnabled(bool pageServerSettingsEnabled);
+    QString getPushButtonServerSettingsClearText() const;
+    void setPushButtonServerSettingsClearText(const QString &pushButtonServerSettingsClearText);
+    bool getPageShareAmneziaVisible() const;
+    void setPageShareAmneziaVisible(bool pageShareAmneziaVisible);
+    bool getPageShareOpenvpnVisible() const;
+    void setPageShareOpenvpnVisible(bool pageShareOpenvpnVisible);
+    bool getPageShareShadowsocksVisible() const;
+    void setPageShareShadowsocksVisible(bool pageShareShadowsocksVisible);
+    bool getPageShareCloakVisible() const;
+    void setPageShareCloakVisible(bool pageShareCloakVisible);
+    bool getPageShareFullAccessVisible() const;
+    void setPageShareFullAccessVisible(bool pageShareFullAccessVisible);
+    QString getTextEditShareOpenvpnCodeText() const;
+    void setTextEditShareOpenvpnCodeText(const QString &textEditShareOpenvpnCodeText);
+    bool getPushButtonShareOpenvpnCopyEnabled() const;
+    void setPushButtonShareOpenvpnCopyEnabled(bool pushButtonShareOpenvpnCopyEnabled);
+    bool getPushButtonShareOpenvpnSaveEnabled() const;
+    void setPushButtonShareOpenvpnSaveEnabled(bool pushButtonShareOpenvpnSaveEnabled);
+    int getToolBoxShareConnectionCurrentIndex() const;
+    void setToolBoxShareConnectionCurrentIndex(int toolBoxShareConnectionCurrentIndex);
+    bool getPushButtonShareSsCopyEnabled() const;
+    void setPushButtonShareSsCopyEnabled(bool pushButtonShareSsCopyEnabled);
+    QString getLineEditShareSsStringText() const;
+    void setLineEditShareSsStringText(const QString &lineEditShareSsStringText);
+    QString getLabelShareSsQrCodeText() const;
+    void setLabelShareSsQrCodeText(const QString &labelShareSsQrCodeText);
+    QString getLabelShareSsServerText() const;
+    void setLabelShareSsServerText(const QString &labelShareSsServerText);
+    QString getLabelShareSsPortText() const;
+    void setLabelShareSsPortText(const QString &labelShareSsPortText);
+    QString getLabelShareSsMethodText() const;
+    void setLabelShareSsMethodText(const QString &labelShareSsMethodText);
+    QString getLabelShareSsPasswordText() const;
+    void setLabelShareSsPasswordText(const QString &labelShareSsPasswordText);
+    QString getPlainTextEditShareCloakText() const;
+    void setPlainTextEditShareCloakText(const QString &plainTextEditShareCloakText);
+    bool getPushButtonShareCloakCopyEnabled() const;
+    void setPushButtonShareCloakCopyEnabled(bool pushButtonShareCloakCopyEnabled);
+    QString getTextEditShareFullCodeText() const;
+    void setTextEditShareFullCodeText(const QString &textEditShareFullCodeText);
+    QString getTextEditShareAmneziaCodeText() const;
+    void setTextEditShareAmneziaCodeText(const QString &textEditShareAmneziaCodeText);
+    QString getPushButtonShareFullCopyText() const;
+    void setPushButtonShareFullCopyText(const QString &pushButtonShareFullCopyText);
+    QString getPushButtonShareAmneziaCopyText() const;
+    void setPushButtonShareAmneziaCopyText(const QString &pushButtonShareAmneziaCopyText);
+    QString getPushButtonShareOpenvpnCopyText() const;
+    void setPushButtonShareOpenvpnCopyText(const QString &pushButtonShareOpenvpnCopyText);
+    QString getPushButtonShareSsCopyText() const;
+    void setPushButtonShareSsCopyText(const QString &pushButtonShareSsCopyText);
+    QString getPushButtonShareCloakCopyText() const;
+    void setPushButtonShareCloakCopyText(const QString &pushButtonShareCloakCopyText);
+    bool getPushButtonShareAmneziaGenerateEnabled() const;
+    void setPushButtonShareAmneziaGenerateEnabled(bool pushButtonShareAmneziaGenerateEnabled);
+    bool getPushButtonShareAmneziaCopyEnabled() const;
+    void setPushButtonShareAmneziaCopyEnabled(bool pushButtonShareAmneziaCopyEnabled);
+    QString getPushButtonShareAmneziaGenerateText() const;
+    void setPushButtonShareAmneziaGenerateText(const QString &pushButtonShareAmneziaGenerateText);
+    bool getPushButtonShareOpenvpnGenerateEnabled() const;
+    void setPushButtonShareOpenvpnGenerateEnabled(bool pushButtonShareOpenvpnGenerateEnabled);
+    QString getPushButtonShareOpenvpnGenerateText() const;
+    void setPushButtonShareOpenvpnGenerateText(const QString &pushButtonShareOpenvpnGenerateText);
+    bool getPageNewServerConfiguringEnabled() const;
+    void setPageNewServerConfiguringEnabled(bool pageNewServerConfiguringEnabled);
+    bool getLabelNewServerConfiguringWaitInfoVisible() const;
+    void setLabelNewServerConfiguringWaitInfoVisible(bool labelNewServerConfiguringWaitInfoVisible);
+    QString getLabelNewServerConfiguringWaitInfoText() const;
+    void setLabelNewServerConfiguringWaitInfoText(const QString &labelNewServerConfiguringWaitInfoText);
+    bool getProgressBarNewServerConfiguringVisible() const;
+    void setProgressBarNewServerConfiguringVisible(bool progressBarNewServerConfiguringVisible);
+    int getProgressBarNewServerConfiguringMaximium() const;
+    void setProgressBarNewServerConfiguringMaximium(int progressBarNewServerConfiguringMaximium);
+    bool getProgressBarNewServerConfiguringTextVisible() const;
+    void setProgressBarNewServerConfiguringTextVisible(bool progressBarNewServerConfiguringTextVisible);
+    QString getProgressBarNewServerConfiguringText() const;
+    void setProgressBarNewServerConfiguringText(const QString &progressBarNewServerConfiguringText);
+    bool getPageServerProtocolsEnabled() const;
+    void setPageServerProtocolsEnabled(bool pageServerProtocolsEnabled);
+    int getProgressBarProtocolsContainerReinstallValue() const;
+    void setProgressBarProtocolsContainerReinstallValue(int progressBarProtocolsContainerReinstallValue);
+    int getProgressBarProtocolsContainerReinstallMaximium() const;
+    void setProgressBarProtocolsContainerReinstallMaximium(int progressBarProtocolsContainerReinstallMaximium);
+    bool getComboBoxProtoOpenvpnCipherEnabled() const;
+    void setComboBoxProtoOpenvpnCipherEnabled(bool comboBoxProtoOpenvpnCipherEnabled);
+    bool getComboBoxProtoOpenvpnHashEnabled() const;
+    void setComboBoxProtoOpenvpnHashEnabled(bool comboBoxProtoOpenvpnHashEnabled);
+    bool getPageProtoOpenvpnEnabled() const;
+    void setPageProtoOpenvpnEnabled(bool pageProtoOpenvpnEnabled);
+    bool getLabelProtoOpenvpnInfoVisible() const;
+    void setLabelProtoOpenvpnInfoVisible(bool labelProtoOpenvpnInfoVisible);
+    QString getLabelProtoOpenvpnInfoText() const;
+    void setLabelProtoOpenvpnInfoText(const QString &labelProtoOpenvpnInfoText);
+    int getProgressBarProtoOpenvpnResetValue() const;
+    void setProgressBarProtoOpenvpnResetValue(int progressBarProtoOpenvpnResetValue);
+    int getProgressBarProtoOpenvpnResetMaximium() const;
+    void setProgressBarProtoOpenvpnResetMaximium(int progressBarProtoOpenvpnResetMaximium);
+    bool getPageProtoShadowsocksEnabled() const;
+    void setPageProtoShadowsocksEnabled(bool pageProtoShadowsocksEnabled);
+    bool getLabelProtoShadowsocksInfoVisible() const;
+    void setLabelProtoShadowsocksInfoVisible(bool labelProtoShadowsocksInfoVisible);
+    QString getLabelProtoShadowsocksInfoText() const;
+    void setLabelProtoShadowsocksInfoText(const QString &labelProtoShadowsocksInfoText);
+    int getProgressBarProtoShadowsocksResetValue() const;
+    void setProgressBarProtoShadowsocksResetValue(int progressBarProtoShadowsocksResetValue);
+    int getProgressBarProtoShadowsocksResetMaximium() const;
+    void setProgressBarProtoShadowsocksResetMaximium(int progressBarProtoShadowsocksResetMaximium);
+    bool getPageProtoCloakEnabled() const;
+    void setPageProtoCloakEnabled(bool pageProtoCloakEnabled);
+    bool getLabelProtoCloakInfoVisible() const;
+    void setLabelProtoCloakInfoVisible(bool labelProtoCloakInfoVisible);
+    QString getLabelProtoCloakInfoText() const;
+    void setLabelProtoCloakInfoText(const QString &labelProtoCloakInfoText);
+    int getProgressBarProtoCloakResetValue() const;
+    void setProgressBarProtoCloakResetValue(int progressBarProtoCloakResetValue);
+    int getProgressBarProtoCloakResetMaximium() const;
+    void setProgressBarProtoCloakResetMaximium(int progressBarProtoCloakResetMaximium);
+    QObject* getServerListModel() const;
+    QString getPushButtonServerSettingsClearClientCacheText() const;
+    void setPushButtonServerSettingsClearClientCacheText(const QString &pushButtonServerSettingsClearClientCacheText);
 
 
     Q_INVOKABLE void updateWizardHighPage();
@@ -280,8 +618,39 @@ public:
     Q_INVOKABLE void onPushButtonNetworkSettingsResetdns1Clicked();
     Q_INVOKABLE void onPushButtonNetworkSettingsResetdns2Clicked();
     Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
-
-
+    Q_INVOKABLE void onPushButtonAddCustomSitesClicked();
+    Q_INVOKABLE void onPushButtonSitesDeleteClicked(int row);
+    Q_INVOKABLE void onPushButtonSitesImportClicked(const QString &fileName);
+    Q_INVOKABLE void onPushButtonShareFullCopyClicked();
+    Q_INVOKABLE void onPushButtonShareFullSaveClicked();
+    Q_INVOKABLE void onPushButtonShareAmneziaCopyClicked();
+    Q_INVOKABLE void onPushButtonShareAmneziaSaveClicked();
+    Q_INVOKABLE void onPushButtonShareOpenvpnCopyClicked();
+    Q_INVOKABLE void onPushButtonShareSsCopyClicked();
+    Q_INVOKABLE void onPushButtonShareCloakCopyClicked();
+    Q_INVOKABLE void onPushButtonShareAmneziaGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareOpenvpnGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareOpenvpnSaveClicked();
+    Q_INVOKABLE void onPushButtonGeneralSettingsServerSettingsClicked();
+    Q_INVOKABLE void onPushButtonGeneralSettingsShareConnectionClicked();
+    Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContSsConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContCloakConfigClicked();
+    Q_INVOKABLE void onCheckBoxProtoOpenvpnAutoEncryptionClicked();
+    Q_INVOKABLE void onPushButtonProtoOpenvpnSaveClicked();
+    Q_INVOKABLE void onPushButtonProtoShadowsocksSaveClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakSaveClicked();
+    Q_INVOKABLE void onCloseWindow();
+    Q_INVOKABLE void onServerListPushbuttonDefaultClicked(int index);
+    Q_INVOKABLE void onServerListPushbuttonSettingsClicked(int index);
+    Q_INVOKABLE void onPushButtonServerSettingsShareFullClicked();
+    Q_INVOKABLE void onPushButtonClearServer();
+    Q_INVOKABLE void onPushButtonForgetServer();
+    Q_INVOKABLE void onPushButtonServerSettingsClearClientCacheClicked();
+    Q_INVOKABLE void onLineEditServerSettingsDescriptionEditingFinished();
 
 signals:
     void frameWireguardSettingsVisibleChanged();
@@ -354,11 +723,138 @@ signals:
     void radioButtonSetupWizardLowCheckedChanged();
     void checkBoxSetupWizardVpnModeCheckedChanged();
     void pushButtonConnectCheckedChanged();
+    void labelSitesAddCustomTextChanged();
+    void tableViewSitesModelChanged();
+    void lineEditSitesAddCustomTextChanged();
+    void widgetProtoCloakEnabledChanged();
+    void pushButtonProtoCloakSaveVisibleChanged();
+    void progressBarProtoCloakResetVisibleChanged();
+    void lineEditProtoCloakPortEnabledChanged();
+    void widgetProtoSsEnabledChanged();
+    void pushButtonProtoShadowsocksSaveVisibleChanged();
+    void progressBarProtoShadowsocksResetVisibleChanged();
+    void lineEditProtoShadowsocksPortEnabledChanged();
+    void widgetProtoOpenvpnEnabledChanged();
+    void pushButtonProtoOpenvpnSaveVisibleChanged();
+    void progressBarProtoOpenvpnResetVisibleChanged();
+    void radioButtonProtoOpenvpnUdpEnabledChanged();
+    void radioButtonProtoOpenvpnTcpEnabledChanged();
+    void radioButtonProtoOpenvpnTcpCheckedChanged();
+    void lineEditProtoOpenvpnPortEnabledChanged();
+    void pushButtonProtoOpenvpnContInstallCheckedChanged();
+    void pushButtonProtoSsOpenvpnContInstallCheckedChanged();
+    void pushButtonProtoCloakOpenvpnContInstallCheckedChanged();
+    void pushButtonProtoWireguardContInstallCheckedChanged();
+    void pushButtonProtoOpenvpnContInstallEnabledChanged();
+    void pushButtonProtoSsOpenvpnContInstallEnabledChanged();
+    void pushButtonProtoCloakOpenvpnContInstallEnabledChanged();
+    void pushButtonProtoWireguardContInstallEnabledChanged();
+    void pushButtonProtoOpenvpnContDefaultCheckedChanged();
+    void pushButtonProtoSsOpenvpnContDefaultCheckedChanged();
+    void pushButtonProtoCloakOpenvpnContDefaultCheckedChanged();
+    void pushButtonProtoWireguardContDefaultCheckedChanged();
+    void pushButtonProtoOpenvpnContDefaultVisibleChanged();
+    void pushButtonProtoSsOpenvpnContDefaultVisibleChanged();
+    void pushButtonProtoCloakOpenvpnContDefaultVisibleChanged();
+    void pushButtonProtoWireguardContDefaultVisibleChanged();
+    void pushButtonProtoOpenvpnContShareVisibleChanged();
+    void pushButtonProtoSsOpenvpnContShareVisibleChanged();
+    void pushButtonProtoCloakOpenvpnContShareVisibleChanged();
+    void pushButtonProtoWireguardContShareVisibleChanged();
+    void frameOpenvpnSettingsVisibleChanged();
+    void frameOpenvpnSsSettingsVisibleChanged();
+    void frameOpenvpnSsCloakSettingsVisibleChanged();
+    void progressBarProtocolsContainerReinstallVisibleChanged();
+    void labelSpeedReceivedTextChanged();
+    void labelSpeedSentTextChanged();
+    void labelStateTextChanged();
+    void pushButtonConnectEnabledChanged();
+    void widgetVpnModeEnabledChanged();
+    void labelErrorTextChanged();
+    void pushButtonNewServerConnectEnabledChanged();
+    void pushButtonNewServerConnectTextChanged();
+    void dialogConnectErrorTextChanged();
+    void pageServerSettingsEnabledChanged();
+    void pushButtonServerSettingsClearTextChanged();
+    void pageShareAmneziaVisibleChanged();
+    void pageShareOpenvpnVisibleChanged();
+    void pageShareShadowsocksVisibleChanged();
+    void pageShareCloakVisibleChanged();
+    void pageShareFullAccessVisibleChanged();
+    void textEditShareOpenvpnCodeTextChanged();
+    void pushButtonShareOpenvpnCopyEnabledChanged();
+    void pushButtonShareOpenvpnSaveEnabledChanged();
+    void toolBoxShareConnectionCurrentIndexChanged();
+    void pushButtonShareSsCopyEnabledChanged();
+    void lineEditShareSsStringTextChanged();
+    void labelShareSsQrCodeTextChanged();
+    void labelShareSsServerTextChanged();
+    void labelShareSsPortTextChanged();
+    void labelShareSsMethodTextChanged();
+    void labelShareSsPasswordTextChanged();
+    void plainTextEditShareCloakTextChanged();
+    void pushButtonShareCloakCopyEnabledChanged();
+    void textEditShareFullCodeTextChanged();
+    void textEditShareAmneziaCodeTextChanged();
+    void pushButtonShareFullCopyTextChanged();
+    void pushButtonShareAmneziaCopyTextChanged();
+    void pushButtonShareOpenvpnCopyTextChanged();
+    void pushButtonShareSsCopyTextChanged();
+    void pushButtonShareCloakCopyTextChanged();
+    void pushButtonShareAmneziaGenerateEnabledChanged();
+    void pushButtonShareAmneziaCopyEnabledChanged();
+    void pushButtonShareAmneziaGenerateTextChanged();
+    void pushButtonShareOpenvpnGenerateEnabledChanged();
+    void pushButtonShareOpenvpnGenerateTextChanged();
+    void pageNewServerConfiguringEnabledChanged();
+    void labelNewServerConfiguringWaitInfoVisibleChanged();
+    void labelNewServerConfiguringWaitInfoTextChanged();
+    void progressBarNewServerConfiguringVisibleChanged();
+    void progressBarNewServerConfiguringMaximiumChanged();
+    void progressBarNewServerConfiguringTextVisibleChanged();
+    void progressBarNewServerConfiguringTextChanged();
+    void pageServerProtocolsEnabledChanged();
+    void progressBarProtocolsContainerReinstallValueChanged();
+    void progressBarProtocolsContainerReinstallMaximiumChanged();
+    void comboBoxProtoOpenvpnCipherEnabledChanged();
+    void comboBoxProtoOpenvpnHashEnabledChanged();
+    void pageProtoOpenvpnEnabledChanged();
+    void labelProtoOpenvpnInfoVisibleChanged();
+    void labelProtoOpenvpnInfoTextChanged();
+    void progressBarProtoOpenvpnResetValueChanged();
+    void progressBarProtoOpenvpnResetMaximiumChanged();
+    void pageProtoShadowsocksEnabledChanged();
+    void labelProtoShadowsocksInfoVisibleChanged();
+    void labelProtoShadowsocksInfoTextChanged();
+    void progressBarProtoShadowsocksResetValueChanged();
+    void progressBarProtoShadowsocksResetMaximiumChanged();
+    void pageProtoCloakEnabledChanged();
+    void labelProtoCloakInfoVisibleChanged();
+    void labelProtoCloakInfoTextChanged();
+    void progressBarProtoCloakResetValueChanged();
+    void progressBarProtoCloakResetMaximiumChanged();
+    void pushButtonServerSettingsClearClientCacheTextChanged();
 
-    void goToPage(Page page, bool reset = true, bool slide = true);
+    void goToPage(int page, bool reset = true, bool slide = true);
     void closePage();
-    void setStartPage(Page page, bool slide = true);
+    void setStartPage(int page, bool slide = true);
     void pushButtonNewServerConnectConfigureClicked();
+    void showPublicKeyWarning();
+    void showConnectErrorDialog();
+    void show();
+    void hide();
+    void pushButtonProtoOpenvpnContDefaultClicked(bool checked);
+    void pushButtonProtoSsOpenvpnContDefaultClicked(bool checked);
+    void pushButtonProtoCloakOpenvpnContDefaultClicked(bool checked);
+    void pushButtonProtoWireguardContDefaultClicked(bool checked);
+    void pushButtonProtoOpenvpnContInstallClicked(bool checked);
+    void pushButtonProtoSsOpenvpnContInstallClicked(bool checked);
+    void pushButtonProtoCloakOpenvpnContInstallClicked(bool checked);
+    void pushButtonProtoWireguardContInstallClicked(bool checked);
+    void pushButtonProtoOpenvpnContShareClicked(bool checked);
+    void pushButtonProtoSsOpenvpnContShareClicked(bool checked);
+    void pushButtonProtoCloakOpenvpnContShareClicked(bool checked);
+    void pushButtonProtoWireguardContShareClicked(bool checked);
 
 private:
     bool m_frameWireguardSettingsVisible;
@@ -432,60 +928,182 @@ private:
     bool m_checkBoxSetupWizardVpnModeChecked;
     QString m_ipAddressValidatorRegex;
     bool m_pushButtonConnectChecked;
+    QString m_labelSitesAddCustomText;
+    QObject* m_tableViewSitesModel;
+    QString m_lineEditSitesAddCustomText;
+    bool m_widgetProtoCloakEnabled;
+    bool m_pushButtonProtoCloakSaveVisible;
+    bool m_progressBarProtoCloakResetVisible;
+    bool m_lineEditProtoCloakPortEnabled;
+    bool m_widgetProtoSsEnabled;
+    bool m_pushButtonProtoShadowsocksSaveVisible;
+    bool m_progressBarProtoShadowsocksResetVisible;
+    bool m_lineEditProtoShadowsocksPortEnabled;
+    bool m_widgetProtoOpenvpnEnabled;
+    bool m_pushButtonProtoOpenvpnSaveVisible;
+    bool m_progressBarProtoOpenvpnResetVisible;
+    bool m_radioButtonProtoOpenvpnUdpEnabled;
+    bool m_radioButtonProtoOpenvpnTcpEnabled;
+    bool m_radioButtonProtoOpenvpnTcpChecked;
+    bool m_lineEditProtoOpenvpnPortEnabled;
+    bool m_pushButtonProtoOpenvpnContInstallChecked;
+    bool m_pushButtonProtoSsOpenvpnContInstallChecked;
+    bool m_pushButtonProtoCloakOpenvpnContInstallChecked;
+    bool m_pushButtonProtoWireguardContInstallChecked;
+    bool m_pushButtonProtoOpenvpnContInstallEnabled;
+    bool m_pushButtonProtoSsOpenvpnContInstallEnabled;
+    bool m_pushButtonProtoCloakOpenvpnContInstallEnabled;
+    bool m_pushButtonProtoWireguardContInstallEnabled;
+    bool m_pushButtonProtoOpenvpnContDefaultChecked;
+    bool m_pushButtonProtoSsOpenvpnContDefaultChecked;
+    bool m_pushButtonProtoCloakOpenvpnContDefaultChecked;
+    bool m_pushButtonProtoWireguardContDefaultChecked;
+    bool m_pushButtonProtoOpenvpnContDefaultVisible;
+    bool m_pushButtonProtoSsOpenvpnContDefaultVisible;
+    bool m_pushButtonProtoCloakOpenvpnContDefaultVisible;
+    bool m_pushButtonProtoWireguardContDefaultVisible;
+    bool m_pushButtonProtoOpenvpnContShareVisible;
+    bool m_pushButtonProtoSsOpenvpnContShareVisible;
+    bool m_pushButtonProtoCloakOpenvpnContShareVisible;
+    bool m_pushButtonProtoWireguardContShareVisible;
+    bool m_frameOpenvpnSettingsVisible;
+    bool m_frameOpenvpnSsSettingsVisible;
+    bool m_frameOpenvpnSsCloakSettingsVisible;
+    bool m_progressBarProtocolsContainerReinstallVisible;
+    QString m_labelSpeedReceivedText;
+    QString m_labelSpeedSentText;
+    QString m_labelStateText;
+    bool m_pushButtonConnectEnabled;
+    bool m_widgetVpnModeEnabled;
+    QString m_labelErrorText;
+    bool m_pushButtonNewServerConnectEnabled;
+    QString m_pushButtonNewServerConnectText;
+    QString m_dialogConnectErrorText;
+    bool m_pageServerSettingsEnabled;
+    QString m_pushButtonServerSettingsClearText;
+    bool m_pageShareAmneziaVisible;
+    bool m_pageShareOpenvpnVisible;
+    bool m_pageShareShadowsocksVisible;
+    bool m_pageShareCloakVisible;
+    bool m_pageShareFullAccessVisible;
+    QString m_textEditShareOpenvpnCodeText;
+    bool m_pushButtonShareOpenvpnCopyEnabled;
+    bool m_pushButtonShareOpenvpnSaveEnabled;
+    int m_toolBoxShareConnectionCurrentIndex;
+    bool m_pushButtonShareSsCopyEnabled;
+    QString m_lineEditShareSsStringText;
+    QString m_labelShareSsQrCodeText;
+    QString m_labelShareSsServerText;
+    QString m_labelShareSsPortText;
+    QString m_labelShareSsMethodText;
+    QString m_labelShareSsPasswordText;
+    QString m_plainTextEditShareCloakText;
+    bool m_pushButtonShareCloakCopyEnabled;
+    QString m_textEditShareFullCodeText;
+    QString m_textEditShareAmneziaCodeText;
+    QString m_pushButtonShareFullCopyText;
+    QString m_pushButtonShareAmneziaCopyText;
+    QString m_pushButtonShareOpenvpnCopyText;
+    QString m_pushButtonShareSsCopyText;
+    QString m_pushButtonShareCloakCopyText;
+    bool m_pushButtonShareAmneziaGenerateEnabled;
+    bool m_pushButtonShareAmneziaCopyEnabled;
+    QString m_pushButtonShareAmneziaGenerateText;
+    bool m_pushButtonShareOpenvpnGenerateEnabled;
+    QString m_pushButtonShareOpenvpnGenerateText;
+    bool m_pageNewServerConfiguringEnabled;
+    bool m_labelNewServerConfiguringWaitInfoVisible;
+    QString m_labelNewServerConfiguringWaitInfoText;
+    bool m_progressBarNewServerConfiguringVisible;
+    int m_progressBarNewServerConfiguringMaximium;
+    bool m_progressBarNewServerConfiguringTextVisible;
+    QString m_progressBarNewServerConfiguringText;
+    bool m_pageServerProtocolsEnabled;
+    int m_progressBarProtocolsContainerReinstallValue;
+    int m_progressBarProtocolsContainerReinstallMaximium;
+    bool m_comboBoxProtoOpenvpnCipherEnabled;
+    bool m_comboBoxProtoOpenvpnHashEnabled;
+    bool m_pageProtoOpenvpnEnabled;
+    bool m_labelProtoOpenvpnInfoVisible;
+    QString m_labelProtoOpenvpnInfoText;
+    int m_progressBarProtoOpenvpnResetValue;
+    int m_progressBarProtoOpenvpnResetMaximium;
+    bool m_pageProtoShadowsocksEnabled;
+    bool m_labelProtoShadowsocksInfoVisible;
+    QString m_labelProtoShadowsocksInfoText;
+    int m_progressBarProtoShadowsocksResetValue;
+    int m_progressBarProtoShadowsocksResetMaximium;
+    bool m_pageProtoCloakEnabled;
+    bool m_labelProtoCloakInfoVisible;
+    QString m_labelProtoCloakInfoText;
+    int m_progressBarProtoCloakResetValue;
+    int m_progressBarProtoCloakResetMaximium;
+    ServersModel* m_serverListModel;
+    QString m_pushButtonServerSettingsClearClientCacheText;
 
-    //private slots:
-    //    void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    //    void onConnectionStateChanged(VpnProtocol::ConnectionState state);
-    //    void onVpnProtocolError(amnezia::ErrorCode errorCode);
+private slots:
+    void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
+    void onConnectionStateChanged(VpnProtocol::ConnectionState state);
+    void onVpnProtocolError(amnezia::ErrorCode errorCode);
 
     void installServer(const QMap<DockerContainer, QJsonObject> &containers);
-
-    //    void onPushButtonClearServer(bool);
-    //    void onPushButtonForgetServer(bool);
-
-    //    void onPushButtonAddCustomSitesClicked();
-
     void setTrayState(VpnProtocol::ConnectionState state);
-
-
     void onConnect();
-    //    void onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+    void onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void onDisconnect();
 
 
 private:
+    PageEnumNS::Page currentPage();
+    struct ProgressFunc {
+        std::function<void(bool)> setVisibleFunc;
+        std::function<void(int)> setValueFunc;
+        std::function<int(void)> getValueFunc;
+        std::function<int(void)> getMaximiumFunc;
+        std::function<void(bool)> setTextVisibleFunc;
+        std::function<void(const QString&)> setTextFunc;
+    };
+    struct PageFunc {
+        std::function<void(bool)> setEnabledFunc;
+    };
+    struct ButtonFunc {
+        std::function<void(bool)> setVisibleFunc;
+    };
+    struct LabelFunc {
+        std::function<void(bool)> setVisibleFunc;
+        std::function<void(const QString&)> setTextFunc;
+    };
 
-    Page currentPage();
+    bool installContainers(ServerCredentials credentials,
+                           const QMap<DockerContainer, QJsonObject> &containers,
+                           const PageFunc& page,
+                           const ProgressFunc& progress,
+                           const ButtonFunc& button,
+                           const LabelFunc& info);
 
-    //    bool installContainers(ServerCredentials credentials, const QMap<DockerContainer, QJsonObject> &containers,
-    //        QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
-
-    //    ErrorCode doInstallAction(const std::function<ErrorCode()> &action, QWidget *page, QProgressBar *progress, QPushButton *button, QLabel *info);
+    ErrorCode doInstallAction(const std::function<ErrorCode()> &action,
+                              const PageFunc& page,
+                              const ProgressFunc& progress,
+                              const ButtonFunc& button,
+                              const LabelFunc& info);
 
     void setupTray();
     void setTrayIcon(const QString &iconPath);
 
     void setupNewServerConnections();
-    //        void setupSitesPageConnections();
-    //        void setupGeneralSettingsConnections();
-    //    void setupProtocolsPageConnections();
-    void setupNewServerPageConnections();
-    //    void setupServerSettingsPageConnections();
-    //    void setupSharePageConnections();
+    void setupSitesPageConnections();
+    void setupProtocolsPageConnections();
 
-    //    void updateSitesPage();
-    //    void updateServersListPage();
-    //    void updateProtocolsPage();
-    //    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
-    //    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
-    //    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
+    void updateSitesPage();
+    void updateServersListPage();
+    void updateProtocolsPage();
+    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
+    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
+    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
 
-    //    void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
-    //        DockerContainer container);
-
-    //    void makeServersListItem(QListWidget* listWidget, const QJsonObject &server, bool isDefault, int index);
-
-    //    void updateQRCodeImage(const QString &text, QLabel *label);
+    void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
+                           DockerContainer container);
+    void updateQRCodeImage(const QString &text, const std::function<void(const QString&)>& setLabelFunc);
 
     QJsonObject getOpenVpnConfigFromPage(QJsonObject oldConfig);
     QJsonObject getShadowSocksConfigFromPage(QJsonObject oldConfig);
@@ -498,22 +1116,19 @@ private:
     VpnConnection* m_vpnConnection;
     Settings m_settings;
 
-    //    QMap<Settings::RouteMode, SitesModel *> sitesModels;
+    QMap<Settings::RouteMode, SitesModel *> sitesModels;
 
     //    QRegExpValidator m_ipAddressValidator;
     //    QRegExpValidator m_ipAddressPortValidator;
     //    QRegExpValidator m_ipNetwok24Validator;
     //    QRegExpValidator m_ipPortValidator;
 
-    //    CQR_Encode m_qrEncode;
+    CQR_Encode m_qrEncode;
 
-    //    bool canMove = false;
     //    QPoint offset;
     //    bool needToHideCustomTitlebar = false;
 
-    //    bool eventFilter(QObject *obj, QEvent *event) override;
     //    void keyPressEvent(QKeyEvent* event) override;
-    //    void closeEvent(QCloseEvent *event) override;
     //    void showEvent(QShowEvent *event) override;
     //    void hideEvent(QHideEvent *event) override;
 

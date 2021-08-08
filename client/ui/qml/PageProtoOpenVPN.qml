@@ -6,6 +6,7 @@ Item {
     id: root
     width: GC.screenWidth
     height: GC.screenHeight
+    enabled: UiLogic.pageProtoOpenvpnEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -22,6 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
+        enabled: UiLogic.widgetProtoOpenvpnEnabled
         CheckBoxType {
             x: 30
             y: 280
@@ -31,6 +33,9 @@ Item {
             checked: UiLogic.checkBoxProtoOpenvpnAutoEncryptionChecked
             onCheckedChanged: {
                 UiLogic.checkBoxProtoOpenvpnAutoEncryptionChecked = checked
+            }
+            onClicked: {
+                UiLogic.checkBoxProtoOpenvpnAutoEncryptionClicked()
             }
         }
         CheckBoxType {
@@ -84,6 +89,7 @@ Item {
             onCurrentTextChanged: {
                 UiLogic.comboBoxProtoOpenvpnCipherText = currentText
             }
+            enabled: UiLogic.comboBoxProtoOpenvpnCipherEnabled
         }
         ComboBoxType {
             x: 200
@@ -113,6 +119,7 @@ Item {
             onCurrentTextChanged: {
                 UiLogic.comboBoxProtoOpenvpnHashText = currentText
             }
+            enabled: UiLogic.comboBoxProtoOpenvpnHashEnabled
         }
         Rectangle {
             x: 30
@@ -128,6 +135,11 @@ Item {
                 width: 171
                 height: 19
                 text: qsTr("TCP")
+                enabled: UiLogic.radioButtonProtoOpenvpnTcpEnabled
+                checked: UiLogic.radioButtonProtoOpenvpnTcpChecked
+                onCheckedChanged: {
+                    UiLogic.radioButtonProtoOpenvpnTcpChecked = checked
+                }
             }
             RadioButtonType {
                 x: 10
@@ -139,6 +151,7 @@ Item {
                 onCheckedChanged: {
                     UiLogic.radioButtonProtoOpenvpnUdpChecked = checked
                 }
+                enabled: UiLogic.radioButtonProtoOpenvpnUdpEnabled
             }
         }
         LabelType {
@@ -195,6 +208,8 @@ Item {
             y: 550
             width: 321
             height: 41
+            visible: UiLogic.labelProtoOpenvpnInfoVisible
+            text: UiLogic.labelProtoOpenvpnInfoText
         }
         TextFieldType {
             id: lineEdit_proto_openvpn_port
@@ -206,6 +221,7 @@ Item {
             onEditingFinished: {
                 UiLogic.lineEditProtoOpenvpnPortText = text
             }
+            enabled: UiLogic.lineEditProtoOpenvpnPortEnabled
         }
         TextFieldType {
             id: lineEdit_proto_openvpn_subnet
@@ -225,8 +241,9 @@ Item {
             width: 321
             height: 40
             from: 0
-            to: 100
-            value: 0
+            to: UiLogic.progressBarProtoOpenvpnResetMaximium
+            value: UiLogic.progressBarProtoOpenvpnResetValue
+            visible: UiLogic.progressBarProtoOpenvpnResetVisible
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -251,6 +268,10 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
+            visible: UiLogic.pushButtonProtoOpenvpnSaveVisible
+            onClicked: {
+                UiLogic.pushButtonProtoOpenvpnSaveClicked()
+            }
         }
     }
 }

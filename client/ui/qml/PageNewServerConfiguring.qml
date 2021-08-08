@@ -6,6 +6,7 @@ Item {
     id: root
     width: GC.screenWidth
     height: GC.screenHeight
+    enabled: UiLogic.pageNewServerConfiguringEnabled
     Text {
         font.family: "Lato"
         font.styleName: "normal"
@@ -31,7 +32,8 @@ Item {
         y: 560
         width: 301
         height: 41
-        text: qsTr("Please wait, configuring process may take up to 5 minutes")
+        text: UiLogic.labelNewServerConfiguringWaitInfoText
+        visible: UiLogic.labelNewServerConfiguringWaitInfoVisible
     }
     ProgressBar {
         id: pr
@@ -40,8 +42,9 @@ Item {
         width: 301
         height: 40
         from: 0
-        to: 100
+        to: UiLogic.progressBarNewServerConfiguringMaximium
         value: UiLogic.progressBarNewServerConfiguringValue
+        visible: UiLogic.progressBarNewServerConfiguringVisible
         background: Rectangle {
             implicitWidth: parent.width
             implicitHeight: parent.height
@@ -62,12 +65,13 @@ Item {
 
         LabelType {
             anchors.fill: parent
-            text: qsTr("Configuring...")
+            text: UiLogic.progressBarNewServerConfiguringText
             horizontalAlignment: Text.AlignHCenter
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             color: "#D4D4D4"
+            visible: UiLogic.progressBarNewServerConfiguringTextVisible
         }
     }
 }

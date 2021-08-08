@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import PageEnum 1.0
 import "./"
 
 Item {
@@ -87,6 +88,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/plus.png"
         text: qsTr("Add server")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.Start)
+        }
     }
     SettingButtonType {
         x: 30
@@ -95,6 +99,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/settings.png"
         text: qsTr("App settings")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.AppSettings)
+        }
     }
     SettingButtonType {
         x: 30
@@ -103,6 +110,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/settings.png"
         text: qsTr("Exit")
+        onClicked: {
+            Qt.quit()
+        }
     }
     SettingButtonType {
         x: 30
@@ -111,6 +121,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/settings.png"
         text: qsTr("Network settings")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.NetworkSettings)
+        }
     }
     SettingButtonType {
         x: 30
@@ -119,6 +132,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/server_settings.png"
         text: qsTr("Server management")
+        onClicked: {
+            UiLogic.onPushButtonGeneralSettingsServerSettingsClicked()
+        }
     }
     SettingButtonType {
         x: 30
@@ -127,6 +143,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/server_settings.png"
         text: qsTr("Servers")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.ServersList)
+        }
     }
     SettingButtonType {
         x: 30
@@ -136,5 +155,8 @@ Item {
         icon.source: "qrc:/images/share.png"
         text: qsTr("Share connection")
         enabled: UiLogic.pushButtonGeneralSettingsShareConnectionEnable
+        onClicked: {
+            UiLogic.onPushButtonGeneralSettingsShareConnectionClicked()
+        }
     }
 }

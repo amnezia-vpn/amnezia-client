@@ -1,8 +1,8 @@
 #include "sites_model.h"
 
 SitesModel::SitesModel(Settings::RouteMode mode, QObject *parent)
-    : m_mode(mode),
-      QAbstractTableModel(parent)
+    : QAbstractListModel(parent),
+      m_mode(mode)
 {
 }
 
@@ -14,22 +14,13 @@ void SitesModel::resetCache()
     endResetModel();
 }
 
-QVariant SitesModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    // FIXME: Implement me!
-    return QVariant();
-}
-
 int SitesModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     if (!m_cacheReady) genCache();
     return m_ipsCache.size();
 }
 
-int SitesModel::columnCount(const QModelIndex &parent) const
-{
-    return 2;
-}
 
 QVariant SitesModel::data(const QModelIndex &index, int role) const
 {
@@ -38,21 +29,37 @@ QVariant SitesModel::data(const QModelIndex &index, int role) const
 
     if (!m_cacheReady) genCache();
 
-    if (role == Qt::DisplayRole){
+    if (role == SitesModel::UrlRole || role == SitesModel::IpRole) {
         if (m_ipsCache.isEmpty()) return QVariant();
 
-        if (index.column() == 0) {
+        if (role == SitesModel::UrlRole) {
             return m_ipsCache.at(index.row()).first;
         }
-        if (index.column() == 1) {
+        if (role == SitesModel::IpRole) {
             return m_ipsCache.at(index.row()).second;
         }
     }
 
-//    if (role == Qt::TextAlignmentRole && index.column() == 1) {
-//        return Qt::AlignRight;
-//    }
+    //    if (role == Qt::TextAlignmentRole && index.column() == 1) {
+    //        return Qt::AlignRight;
+    //    }
 
+    return QVariant();
+}
+
+QVariant SitesModel::data(int row, int column)
+{
+    if (row < 0 || row >= rowCount() || column < 0 || column >= 2) {
+        return QVariant();
+    }
+    if (!m_cacheReady) genCache();
+
+    if (column == 0) {
+        return m_ipsCache.at(row).first;
+    }
+    if (column == 1) {
+        return m_ipsCache.at(row).second;
+    }
     return QVariant();
 }
 
@@ -69,4 +76,11 @@ void SitesModel::genCache() const
     }
 
     m_cacheReady= true;
+}
+
+QHash<int, QByteArray> SitesModel::roleNames() const {
+    QHash<int, QByteArray> roles;
+    roles[UrlRole] = "url_path";
+    roles[IpRole] = "ip";
+    return roles;
 }

@@ -6,6 +6,7 @@ Item {
     id: root
     width: GC.screenWidth
     height: GC.screenHeight
+    enabled: UiLogic.pageProtoCloakEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -22,6 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
+        enabled: UiLogic.widgetProtoCloakEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -86,6 +88,8 @@ Item {
             y: 550
             width: 321
             height: 41
+            visible: UiLogic.labelProtoCloakInfoVisible
+            text: UiLogic.labelProtoCloakInfoText
         }
         TextFieldType {
             id: lineEdit_proto_cloak_port
@@ -97,6 +101,7 @@ Item {
             onEditingFinished: {
                 UiLogic.lineEditProtoCloakPortText = text
             }
+            enabled: UiLogic.lineEditProtoCloakPortEnabled
         }
         TextFieldType {
             id: lineEdit_proto_cloak_site
@@ -116,8 +121,8 @@ Item {
             width: 321
             height: 40
             from: 0
-            to: 100
-            value: 0
+            to: UiLogic.progressBarProtoCloakResetMaximium
+            value: UiLogic.progressBarProtoCloakResetValue
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -135,6 +140,7 @@ Item {
                     color: Qt.rgba(255, 255, 255, 0.15);
                 }
             }
+            visible: UiLogic.progressBarProtoCloakResetVisible
         }
         BlueButtonType {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -142,6 +148,10 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
+            visible: UiLogic.pushButtonProtoCloakSaveVisible
+            onClicked: {
+                UiLogic.pushButtonProtoCloakSaveClicked()
+            }
         }
     }
 }

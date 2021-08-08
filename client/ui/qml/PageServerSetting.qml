@@ -1,11 +1,14 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
+import PageEnum 1.0
 
 Item {
     id: root
     width: GC.screenWidth
     height: GC.screenHeight
+    enabled: UiLogic.pageServerSettingsEnabled
+
     ImageButtonType {
         id: back
         x: 10
@@ -72,6 +75,7 @@ Item {
         text: UiLogic.lineEditServerSettingsDescriptionText
         onEditingFinished: {
             UiLogic.lineEditServerSettingsDescriptionText = text
+            UiLogic.onLineEditServerSettingsDescriptionEditingFinished()
         }
     }
     BlueButtonType {
@@ -79,16 +83,22 @@ Item {
         y: 410
         width: 300
         height: 40
-        text: qsTr("Clear server from Amnezia software")
+        text: UiLogic.pushButtonServerSettingsClearText
         visible: UiLogic.pushButtonServerSettingsClearVisible
+        onClicked: {
+            UiLogic.onPushButtonClearServer()
+        }
     }
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 350
         width: 300
         height: 40
-        text: qsTr("Clear client cached profile")
+        text: UiLogic.pushButtonServerSettingsClearClientCacheText
         visible: UiLogic.pushButtonServerSettingsClearClientCacheVisible
+        onClicked: {
+            UiLogic.onPushButtonServerSettingsClearClientCacheClicked()
+        }
     }
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -96,6 +106,9 @@ Item {
         width: 300
         height: 40
         text: qsTr("Forget this server")
+        onClicked: {
+            UiLogic.onPushButtonForgetServer()
+        }
     }
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -103,6 +116,9 @@ Item {
         width: 300
         height: 40
         text: qsTr("VPN protocols")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.ServerVpnProtocols)
+        }
     }
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -111,5 +127,8 @@ Item {
         height: 40
         text: qsTr("Share Server (FULL ACCESS)")
         visible: UiLogic.pushButtonServerSettingsShareFullVisible
+        onClicked: {
+            UiLogic.onPushButtonServerSettingsShareFullClicked()
+        }
     }
 }

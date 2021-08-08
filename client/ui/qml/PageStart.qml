@@ -25,15 +25,16 @@ Item {
         checked: false
         checkable: true
         onCheckedChanged: {
-//            if (checked){
-//                ui->stackedWidget_start->setCurrentWidget(ui->page_start_new_server);
-//                ui->pushButton_start_switch_page->setText(tr("Import connection"));
-//            }
-//            else {
-//                ui->stackedWidget_start->setCurrentWidget(ui->page_start_import);
-//                ui->pushButton_start_switch_page->setText(tr("Set up your own server"));
-//            }
-
+            if (checked) {
+                page_start_new_server.visible = true
+                page_start_import.visible = false
+                text = qsTr("Import connection");
+            }
+            else {
+                page_start_new_server.visible = false
+                page_start_import.visible = true
+                text = qsTr("Set up your own server");
+            }
         }
 
         background: Rectangle {
@@ -57,20 +58,14 @@ Item {
 
     }
 
-    StackView {
-        id: page_start_stack_view
-        x: 0
-        y: 35
-        width: 380
-        height: 481
-        initialItem: page_start_new_server
-    }
 
-    Component {
-        id: page_start_import
         Item {
+            id: page_start_import
             width: 380
             height: 481
+            x: 0
+            y: 35
+            visible: true
             Text {
                 x: 0
                 y: 20
@@ -120,13 +115,15 @@ Item {
                 }
             }
         }
-    }
 
-    Component {
-        id: page_start_new_server
+
         Item {
+            id: page_start_new_server
             width: 380
             height: 481
+            x: 0
+            y: 35
+            visible: false
             Label {
                 x:10
                 y:0
@@ -157,6 +154,7 @@ Item {
                 text: qsTr("Login to connect via SSH")
             }
             LabelType {
+                id: label_new_server_password
                 x: 40
                 y: 230
                 width: 171
@@ -212,11 +210,12 @@ Item {
                 y: 350
                 width: 301
                 height: 40
-                text: qsTr("Connect")
+                text: UiLogic.pushButtonNewServerConnectText
                 visible: UiLogic.pushButtonNewServerConnectVisible
                 onClicked: {
                     UiLogic.onPushButtonNewServerConnect()
                 }
+                enabled: UiLogic.pushButtonNewServerConnectEnabled
             }
             BasicButtonType {
                 id: new_sever_connect_key
@@ -244,6 +243,10 @@ Item {
                 checked: UiLogic.pushButtonNewServerConnectKeyChecked
                 onCheckedChanged: {
                     UiLogic.pushButtonNewServerConnectKeyChecked = checked
+                    label_new_server_password.text = checked ? qsTr("Private key") : qsTr("Password")
+                    new_sever_connect_key.text = checked ? qsTr("Connect using SSH password") : qsTr("Connect using SSH key")
+                    new_server_password.visible = !checked
+                    new_server_ssh_key.visible = checked
                 }
             }
             BasicButtonType {
@@ -287,9 +290,10 @@ Item {
                 onEditingFinished: {
                     UiLogic.textEditNewServerSshKeyText = text
                 }
+                visible: false
             }
         }
-    }
+
 
     ImageButtonType {
         id: back_from_start

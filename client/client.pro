@@ -33,11 +33,9 @@ HEADERS  += \
     protocols/shadowsocksvpnprotocol.h \
    protocols/wireguardprotocol.h \
     settings.h \
-    ui/Controls/SlidingStackedWidget.h \
-    ui/mainwindow.h \
+    ui/serversmodel.h \
     ui/uilogic.h \
    ui/qautostart.h \
-   ui/server_widget.h \
    ui/sites_model.h \
     utils.h \
     vpnconnection.h \
@@ -64,18 +62,16 @@ SOURCES  += \
     protocols/shadowsocksvpnprotocol.cpp \
    protocols/wireguardprotocol.cpp \
     settings.cpp \
-    ui/Controls/SlidingStackedWidget.cpp \
-    ui/mainwindow.cpp \
+    ui/serversmodel.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \
-   ui/server_widget.cpp \
    ui/sites_model.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     protocols/openvpnprotocol.cpp \
 
-FORMS    += ui/mainwindow.ui \
+FORMS    += \
    ui/server_widget.ui
 
 RESOURCES += \

@@ -9,14 +9,13 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "ui/uilogic.h"
+#include <QDebug>
 
 #include "debug.h"
 #include "defines.h"
 #define QAPPLICATION_CLASS QGuiApplication
 #include "singleapplication.h"
 #undef QAPPLICATION_CLASS
-
-#include "ui/mainwindow.h"
 
 #ifdef Q_OS_WIN
 #include "Windows.h"
@@ -85,27 +84,9 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-//    MainWindow mainWindow;
-
-//#ifdef Q_OS_WIN
-//    if (parser.isSet("a")) mainWindow.showOnStartup();
-//    else mainWindow.show();
-//#else
-//    mainWindow.showOnStartup();
-//#endif
-
-//    if (app.isPrimary()) {
-//        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
-//            qDebug() << "Secondary instance started, showing this window instead";
-//            mainWindow.show();
-//            mainWindow.showNormal();
-//            mainWindow.raise();
-//        });
-//    }
-
     UiLogic uiLogic;
-    UiLogic::declareQML();
     QQmlApplicationEngine engine;
+    UiLogic::declareQML();
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
