@@ -36,10 +36,10 @@
 * Build configuration for Botan 2.18.1
 *
 * Automatically generated from
-* 'configure.py --amalgamation --os=linux --cc=clang --cpu=x86_64 --disable-shared'
+* 'configure.py --amalgamation --os=linux --cc=gcc --cpu=x86_64 --disable-shared'
 *
 * Target
-*  - Compiler: clang++ -fstack-protector -m64 -pthread -std=c++11 -D_REENTRANT -O3
+*  - Compiler: g++ -fstack-protector -m64 -pthread -std=c++11 -D_REENTRANT -O3
 *  - Arch: x86_64
 *  - OS: linux
 */
@@ -89,7 +89,7 @@
 #define BOTAN_TARGET_OS_HAS_THREADS
 
 
-#define BOTAN_BUILD_COMPILER_IS_CLANG
+#define BOTAN_BUILD_COMPILER_IS_GCC
 
 
 
@@ -204,6 +204,7 @@
 #define BOTAN_HAS_FILTERS 20160415
 #define BOTAN_HAS_FPE_FE1 20131128
 #define BOTAN_HAS_GHASH 20201002
+#define BOTAN_HAS_GHASH_CLMUL_CPU 20201002
 #define BOTAN_HAS_GHASH_CLMUL_VPERM 20201002
 #define BOTAN_HAS_GMAC 20160207
 #define BOTAN_HAS_GOST_28147_89 20131128
@@ -283,7 +284,9 @@
 #define BOTAN_HAS_SERPENT_SIMD 20160903
 #define BOTAN_HAS_SHA1 20131128
 #define BOTAN_HAS_SHA1_SSE2 20160803
+#define BOTAN_HAS_SHA1_X86_SHA_NI 20170518
 #define BOTAN_HAS_SHA2_32 20131128
+#define BOTAN_HAS_SHA2_32_X86 20170518
 #define BOTAN_HAS_SHA2_32_X86_BMI2 20180526
 #define BOTAN_HAS_SHA2_64 20131128
 #define BOTAN_HAS_SHA2_64_BMI2 20190117
@@ -292,6 +295,7 @@
 #define BOTAN_HAS_SHACAL2 20170813
 #define BOTAN_HAS_SHACAL2_AVX2 20180826
 #define BOTAN_HAS_SHACAL2_SIMD 20170813
+#define BOTAN_HAS_SHACAL2_X86 20170814
 #define BOTAN_HAS_SHAKE 20161009
 #define BOTAN_HAS_SHAKE_CIPHER 20161018
 #define BOTAN_HAS_SIMD_32 20131128

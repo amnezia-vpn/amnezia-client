@@ -44413,6 +44413,210 @@ void GHASH::reset()
 
 }
 /*
+* Hook for CLMUL/PMULL/VPMSUM
+* (C) 2013,2017,2019,2020 Jack Lloyd
+*
+* Botan is released under the Simplified BSD License (see license.txt)
+*/
+
+
+#if defined(BOTAN_SIMD_USE_SSE2)
+  #include <immintrin.h>
+#endif
+
+namespace Botan {
+
+namespace {
+
+BOTAN_FORCE_INLINE SIMD_4x32 BOTAN_FUNC_ISA(BOTAN_VPERM_ISA) reverse_vector(const SIMD_4x32& in)
+   {
+#if defined(BOTAN_SIMD_USE_SSE2)
+   const __m128i BSWAP_MASK = _mm_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+   return SIMD_4x32(_mm_shuffle_epi8(in.raw(), BSWAP_MASK));
+#elif defined(BOTAN_SIMD_USE_NEON)
+   const uint8_t maskb[16] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+   const uint8x16_t mask = vld1q_u8(maskb);
+   return SIMD_4x32(vreinterpretq_u32_u8(vqtbl1q_u8(vreinterpretq_u8_u32(in.raw()), mask)));
+#elif defined(BOTAN_SIMD_USE_ALTIVEC)
+   const __vector unsigned char mask = {15,14,13,12, 11,10,9,8, 7,6,5,4, 3,2,1,0};
+   return SIMD_4x32(vec_perm(in.raw(), in.raw(), mask));
+#endif
+   }
+
+template<int M>
+BOTAN_FORCE_INLINE SIMD_4x32 BOTAN_FUNC_ISA(BOTAN_CLMUL_ISA) clmul(const SIMD_4x32& H, const SIMD_4x32& x)
+   {
+   static_assert(M == 0x00 || M == 0x01 || M == 0x10 || M == 0x11, "Valid clmul mode");
+
+#if defined(BOTAN_SIMD_USE_SSE2)
+   return SIMD_4x32(_mm_clmulepi64_si128(x.raw(), H.raw(), M));
+#elif defined(BOTAN_SIMD_USE_NEON)
+   const uint64_t a = vgetq_lane_u64(vreinterpretq_u64_u32(x.raw()), M & 0x01);
+   const uint64_t b = vgetq_lane_u64(vreinterpretq_u64_u32(H.raw()), (M & 0x10) >> 4);
+   return SIMD_4x32(reinterpret_cast<uint32x4_t>(vmull_p64(a, b)));
+#elif defined(BOTAN_SIMD_USE_ALTIVEC)
+   const SIMD_4x32 mask_lo = SIMD_4x32(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
+
+   SIMD_4x32 i1 = x;
+   SIMD_4x32 i2 = H;
+
+   if(M == 0x11)
+      {
+      i1 &= mask_lo;
+      i2 &= mask_lo;
+      }
+   else if(M == 0x10)
+      {
+      i1 = i1.shift_elems_left<2>();
+      }
+   else if(M == 0x01)
+      {
+      i2 = i2.shift_elems_left<2>();
+      }
+   else if(M == 0x00)
+      {
+      i1 = mask_lo.andc(i1);
+      i2 = mask_lo.andc(i2);
+      }
+
+   auto i1v = reinterpret_cast<__vector unsigned long long>(i1.raw());
+   auto i2v = reinterpret_cast<__vector unsigned long long>(i2.raw());
+
+#if defined(__clang__)
+   auto rv = __builtin_altivec_crypto_vpmsumd(i1v, i2v);
+#else
+   auto rv = __builtin_crypto_vpmsumd(i1v, i2v);
+#endif
+
+   return SIMD_4x32(reinterpret_cast<__vector unsigned int>(rv));
+#endif
+   }
+
+inline SIMD_4x32 gcm_reduce(const SIMD_4x32& B0, const SIMD_4x32& B1)
+   {
+   SIMD_4x32 X0 = B1.shr<31>();
+   SIMD_4x32 X1 = B1.shl<1>();
+   SIMD_4x32 X2 = B0.shr<31>();
+   SIMD_4x32 X3 = B0.shl<1>();
+
+   X3 |= X0.shift_elems_right<3>();
+   X3 |= X2.shift_elems_left<1>();
+   X1 |= X0.shift_elems_left<1>();
+
+   X0 = X1.shl<31>() ^ X1.shl<30>() ^ X1.shl<25>();
+
+   X1 ^= X0.shift_elems_left<3>();
+
+   X0 = X1 ^ X3 ^ X0.shift_elems_right<1>();
+   X0 ^= X1.shr<7>() ^ X1.shr<2>() ^ X1.shr<1>();
+   return X0;
+   }
+
+inline SIMD_4x32 BOTAN_FUNC_ISA(BOTAN_CLMUL_ISA) gcm_multiply(const SIMD_4x32& H, const SIMD_4x32& x)
+   {
+   SIMD_4x32 T0 = clmul<0x11>(H, x);
+   SIMD_4x32 T1 = clmul<0x10>(H, x);
+   SIMD_4x32 T2 = clmul<0x01>(H, x);
+   SIMD_4x32 T3 = clmul<0x00>(H, x);
+
+   T1 ^= T2;
+   T0 ^= T1.shift_elems_right<2>();
+   T3 ^= T1.shift_elems_left<2>();
+
+   return gcm_reduce(T0, T3);
+   }
+
+inline SIMD_4x32 BOTAN_FUNC_ISA(BOTAN_CLMUL_ISA)
+   gcm_multiply_x4(const SIMD_4x32& H1, const SIMD_4x32& H2, const SIMD_4x32& H3, const SIMD_4x32& H4,
+                   const SIMD_4x32& X1, const SIMD_4x32& X2, const SIMD_4x32& X3, const SIMD_4x32& X4)
+   {
+   /*
+   * Mutiply with delayed reduction, algorithm by Krzysztof Jankowski
+   * and Pierre Laurent of Intel
+   */
+
+   const SIMD_4x32 lo = (clmul<0x00>(H1, X1) ^ clmul<0x00>(H2, X2)) ^
+                        (clmul<0x00>(H3, X3) ^ clmul<0x00>(H4, X4));
+
+   const SIMD_4x32 hi = (clmul<0x11>(H1, X1) ^ clmul<0x11>(H2, X2)) ^
+                        (clmul<0x11>(H3, X3) ^ clmul<0x11>(H4, X4));
+
+   SIMD_4x32 T;
+
+   T ^= clmul<0x00>(H1 ^ H1.shift_elems_right<2>(), X1 ^ X1.shift_elems_right<2>());
+   T ^= clmul<0x00>(H2 ^ H2.shift_elems_right<2>(), X2 ^ X2.shift_elems_right<2>());
+   T ^= clmul<0x00>(H3 ^ H3.shift_elems_right<2>(), X3 ^ X3.shift_elems_right<2>());
+   T ^= clmul<0x00>(H4 ^ H4.shift_elems_right<2>(), X4 ^ X4.shift_elems_right<2>());
+   T ^= lo;
+   T ^= hi;
+
+   return gcm_reduce(hi ^ T.shift_elems_right<2>(),
+                     lo ^ T.shift_elems_left<2>());
+   }
+
+}
+
+BOTAN_FUNC_ISA(BOTAN_VPERM_ISA)
+void GHASH::ghash_precompute_cpu(const uint8_t H_bytes[16], uint64_t H_pow[4*2])
+   {
+   const SIMD_4x32 H1 = reverse_vector(SIMD_4x32::load_le(H_bytes));
+   const SIMD_4x32 H2 = gcm_multiply(H1, H1);
+   const SIMD_4x32 H3 = gcm_multiply(H1, H2);
+   const SIMD_4x32 H4 = gcm_multiply(H2, H2);
+
+   H1.store_le(H_pow);
+   H2.store_le(H_pow + 2);
+   H3.store_le(H_pow + 4);
+   H4.store_le(H_pow + 6);
+   }
+
+BOTAN_FUNC_ISA(BOTAN_VPERM_ISA)
+void GHASH::ghash_multiply_cpu(uint8_t x[16],
+                               const uint64_t H_pow[8],
+                               const uint8_t input[], size_t blocks)
+   {
+   /*
+   * Algorithms 1 and 5 from Intel's CLMUL guide
+   */
+   const SIMD_4x32 H1 = SIMD_4x32::load_le(H_pow);
+
+   SIMD_4x32 a = reverse_vector(SIMD_4x32::load_le(x));
+
+   if(blocks >= 4)
+      {
+      const SIMD_4x32 H2 = SIMD_4x32::load_le(H_pow + 2);
+      const SIMD_4x32 H3 = SIMD_4x32::load_le(H_pow + 4);
+      const SIMD_4x32 H4 = SIMD_4x32::load_le(H_pow + 6);
+
+      while(blocks >= 4)
+         {
+         const SIMD_4x32 m0 = reverse_vector(SIMD_4x32::load_le(input       ));
+         const SIMD_4x32 m1 = reverse_vector(SIMD_4x32::load_le(input + 16*1));
+         const SIMD_4x32 m2 = reverse_vector(SIMD_4x32::load_le(input + 16*2));
+         const SIMD_4x32 m3 = reverse_vector(SIMD_4x32::load_le(input + 16*3));
+
+         a ^= m0;
+         a = gcm_multiply_x4(H1, H2, H3, H4, m3, m2, m1, a);
+
+         input += 4*16;
+         blocks -= 4;
+         }
+      }
+
+   for(size_t i = 0; i != blocks; ++i)
+      {
+      const SIMD_4x32 m = reverse_vector(SIMD_4x32::load_le(input + 16*i));
+
+      a ^= m;
+      a = gcm_multiply(H1, a);
+      }
+
+   a = reverse_vector(a);
+   a.store_le(x);
+   }
+
+}
+/*
 * (C) 2017 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -74948,6 +75152,220 @@ void SHA_160::sse2_compress_n(secure_vector<uint32_t>& digest, const uint8_t inp
 
 }
 /*
+* SHA-1 using Intel SHA intrinsic
+*
+* Based on public domain code by Sean Gulley
+* (https://github.com/mitls/hacl-star/tree/master/experimental/hash)
+* Adapted to Botan by Jeffrey Walton.
+*
+* Further changes
+*
+* (C) 2017 Jack Lloyd
+*
+* Botan is released under the Simplified BSD License (see license.txt)
+*/
+
+
+namespace Botan {
+
+#if defined(BOTAN_HAS_SHA1_X86_SHA_NI)
+BOTAN_FUNC_ISA("sha,ssse3,sse4.1")
+void SHA_160::sha1_compress_x86(secure_vector<uint32_t>& digest,
+                                const uint8_t input[],
+                                size_t blocks)
+   {
+   const __m128i MASK = _mm_set_epi64x(0x0001020304050607ULL, 0x08090a0b0c0d0e0fULL);
+   const __m128i* input_mm = reinterpret_cast<const __m128i*>(input);
+
+   uint32_t* state = digest.data();
+
+   // Load initial values
+   __m128i ABCD = _mm_loadu_si128(reinterpret_cast<__m128i*>(state));
+   __m128i E0 = _mm_set_epi32(state[4], 0, 0, 0);
+   ABCD = _mm_shuffle_epi32(ABCD, 0x1B);
+
+   while (blocks)
+      {
+      // Save current hash
+      const __m128i ABCD_SAVE = ABCD;
+      const __m128i E0_SAVE = E0;
+
+      __m128i MSG0, MSG1, MSG2, MSG3;
+      __m128i E1;
+
+      // Rounds 0-3
+      MSG0 = _mm_loadu_si128(input_mm+0);
+      MSG0 = _mm_shuffle_epi8(MSG0, MASK);
+      E0 = _mm_add_epi32(E0, MSG0);
+      E1 = ABCD;
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 0);
+
+      // Rounds 4-7
+      MSG1 = _mm_loadu_si128(input_mm+1);
+      MSG1 = _mm_shuffle_epi8(MSG1, MASK);
+      E1 = _mm_sha1nexte_epu32(E1, MSG1);
+      E0 = ABCD;
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 0);
+      MSG0 = _mm_sha1msg1_epu32(MSG0, MSG1);
+
+      // Rounds 8-11
+      MSG2 = _mm_loadu_si128(input_mm+2);
+      MSG2 = _mm_shuffle_epi8(MSG2, MASK);
+      E0 = _mm_sha1nexte_epu32(E0, MSG2);
+      E1 = ABCD;
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 0);
+      MSG1 = _mm_sha1msg1_epu32(MSG1, MSG2);
+      MSG0 = _mm_xor_si128(MSG0, MSG2);
+
+      // Rounds 12-15
+      MSG3 = _mm_loadu_si128(input_mm+3);
+      MSG3 = _mm_shuffle_epi8(MSG3, MASK);
+      E1 = _mm_sha1nexte_epu32(E1, MSG3);
+      E0 = ABCD;
+      MSG0 = _mm_sha1msg2_epu32(MSG0, MSG3);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 0);
+      MSG2 = _mm_sha1msg1_epu32(MSG2, MSG3);
+      MSG1 = _mm_xor_si128(MSG1, MSG3);
+
+      // Rounds 16-19
+      E0 = _mm_sha1nexte_epu32(E0, MSG0);
+      E1 = ABCD;
+      MSG1 = _mm_sha1msg2_epu32(MSG1, MSG0);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 0);
+      MSG3 = _mm_sha1msg1_epu32(MSG3, MSG0);
+      MSG2 = _mm_xor_si128(MSG2, MSG0);
+
+      // Rounds 20-23
+      E1 = _mm_sha1nexte_epu32(E1, MSG1);
+      E0 = ABCD;
+      MSG2 = _mm_sha1msg2_epu32(MSG2, MSG1);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 1);
+      MSG0 = _mm_sha1msg1_epu32(MSG0, MSG1);
+      MSG3 = _mm_xor_si128(MSG3, MSG1);
+
+      // Rounds 24-27
+      E0 = _mm_sha1nexte_epu32(E0, MSG2);
+      E1 = ABCD;
+      MSG3 = _mm_sha1msg2_epu32(MSG3, MSG2);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 1);
+      MSG1 = _mm_sha1msg1_epu32(MSG1, MSG2);
+      MSG0 = _mm_xor_si128(MSG0, MSG2);
+
+      // Rounds 28-31
+      E1 = _mm_sha1nexte_epu32(E1, MSG3);
+      E0 = ABCD;
+      MSG0 = _mm_sha1msg2_epu32(MSG0, MSG3);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 1);
+      MSG2 = _mm_sha1msg1_epu32(MSG2, MSG3);
+      MSG1 = _mm_xor_si128(MSG1, MSG3);
+
+      // Rounds 32-35
+      E0 = _mm_sha1nexte_epu32(E0, MSG0);
+      E1 = ABCD;
+      MSG1 = _mm_sha1msg2_epu32(MSG1, MSG0);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 1);
+      MSG3 = _mm_sha1msg1_epu32(MSG3, MSG0);
+      MSG2 = _mm_xor_si128(MSG2, MSG0);
+
+      // Rounds 36-39
+      E1 = _mm_sha1nexte_epu32(E1, MSG1);
+      E0 = ABCD;
+      MSG2 = _mm_sha1msg2_epu32(MSG2, MSG1);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 1);
+      MSG0 = _mm_sha1msg1_epu32(MSG0, MSG1);
+      MSG3 = _mm_xor_si128(MSG3, MSG1);
+
+      // Rounds 40-43
+      E0 = _mm_sha1nexte_epu32(E0, MSG2);
+      E1 = ABCD;
+      MSG3 = _mm_sha1msg2_epu32(MSG3, MSG2);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 2);
+      MSG1 = _mm_sha1msg1_epu32(MSG1, MSG2);
+      MSG0 = _mm_xor_si128(MSG0, MSG2);
+
+      // Rounds 44-47
+      E1 = _mm_sha1nexte_epu32(E1, MSG3);
+      E0 = ABCD;
+      MSG0 = _mm_sha1msg2_epu32(MSG0, MSG3);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 2);
+      MSG2 = _mm_sha1msg1_epu32(MSG2, MSG3);
+      MSG1 = _mm_xor_si128(MSG1, MSG3);
+
+      // Rounds 48-51
+      E0 = _mm_sha1nexte_epu32(E0, MSG0);
+      E1 = ABCD;
+      MSG1 = _mm_sha1msg2_epu32(MSG1, MSG0);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 2);
+      MSG3 = _mm_sha1msg1_epu32(MSG3, MSG0);
+      MSG2 = _mm_xor_si128(MSG2, MSG0);
+
+      // Rounds 52-55
+      E1 = _mm_sha1nexte_epu32(E1, MSG1);
+      E0 = ABCD;
+      MSG2 = _mm_sha1msg2_epu32(MSG2, MSG1);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 2);
+      MSG0 = _mm_sha1msg1_epu32(MSG0, MSG1);
+      MSG3 = _mm_xor_si128(MSG3, MSG1);
+
+      // Rounds 56-59
+      E0 = _mm_sha1nexte_epu32(E0, MSG2);
+      E1 = ABCD;
+      MSG3 = _mm_sha1msg2_epu32(MSG3, MSG2);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 2);
+      MSG1 = _mm_sha1msg1_epu32(MSG1, MSG2);
+      MSG0 = _mm_xor_si128(MSG0, MSG2);
+
+      // Rounds 60-63
+      E1 = _mm_sha1nexte_epu32(E1, MSG3);
+      E0 = ABCD;
+      MSG0 = _mm_sha1msg2_epu32(MSG0, MSG3);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 3);
+      MSG2 = _mm_sha1msg1_epu32(MSG2, MSG3);
+      MSG1 = _mm_xor_si128(MSG1, MSG3);
+
+      // Rounds 64-67
+      E0 = _mm_sha1nexte_epu32(E0, MSG0);
+      E1 = ABCD;
+      MSG1 = _mm_sha1msg2_epu32(MSG1, MSG0);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 3);
+      MSG3 = _mm_sha1msg1_epu32(MSG3, MSG0);
+      MSG2 = _mm_xor_si128(MSG2, MSG0);
+
+      // Rounds 68-71
+      E1 = _mm_sha1nexte_epu32(E1, MSG1);
+      E0 = ABCD;
+      MSG2 = _mm_sha1msg2_epu32(MSG2, MSG1);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 3);
+      MSG3 = _mm_xor_si128(MSG3, MSG1);
+
+      // Rounds 72-75
+      E0 = _mm_sha1nexte_epu32(E0, MSG2);
+      E1 = ABCD;
+      MSG3 = _mm_sha1msg2_epu32(MSG3, MSG2);
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E0, 3);
+
+      // Rounds 76-79
+      E1 = _mm_sha1nexte_epu32(E1, MSG3);
+      E0 = ABCD;
+      ABCD = _mm_sha1rnds4_epu32(ABCD, E1, 3);
+
+      // Add values back to state
+      E0 = _mm_sha1nexte_epu32(E0, E0_SAVE);
+      ABCD = _mm_add_epi32(ABCD, ABCD_SAVE);
+
+      input_mm += 4;
+      blocks--;
+      }
+
+   // Save state
+   ABCD = _mm_shuffle_epi32(ABCD, 0x1B);
+   _mm_storeu_si128(reinterpret_cast<__m128i*>(state), ABCD);
+   state[4] = _mm_extract_epi32(E0, 3);
+   }
+#endif
+
+}
+/*
 * SHA-{224,256}
 * (C) 1999-2010,2017 Jack Lloyd
 *     2007 FlexSecure GmbH
@@ -75356,6 +75774,219 @@ void SHA_256::compress_digest_x86_bmi2(secure_vector<uint32_t>& digest,
       input += 64;
       }
    }
+
+}
+/*
+* Support for SHA-256 x86 instrinsic
+* Based on public domain code by Sean Gulley
+*    (https://github.com/mitls/hacl-star/tree/master/experimental/hash)
+*
+* Botan is released under the Simplified BSD License (see license.txt)
+*/
+
+
+namespace Botan {
+
+// called from sha2_32.cpp
+#if defined(BOTAN_HAS_SHA2_32_X86)
+BOTAN_FUNC_ISA("sha,sse4.1,ssse3")
+void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t input[], size_t blocks)
+   {
+   __m128i STATE0, STATE1;
+   __m128i MSG, TMP, MASK;
+   __m128i TMSG0, TMSG1, TMSG2, TMSG3;
+   __m128i ABEF_SAVE, CDGH_SAVE;
+
+   uint32_t* state = &digest[0];
+
+   const __m128i* input_mm = reinterpret_cast<const __m128i*>(input);
+
+   // Load initial values
+   TMP = _mm_loadu_si128(reinterpret_cast<__m128i*>(&state[0]));
+   STATE1 = _mm_loadu_si128(reinterpret_cast<__m128i*>(&state[4]));
+   MASK = _mm_set_epi64x(0x0c0d0e0f08090a0bULL, 0x0405060700010203ULL);
+
+   TMP = _mm_shuffle_epi32(TMP, 0xB1); // CDAB
+   STATE1 = _mm_shuffle_epi32(STATE1, 0x1B); // EFGH
+   STATE0 = _mm_alignr_epi8(TMP, STATE1, 8); // ABEF
+   STATE1 = _mm_blend_epi16(STATE1, TMP, 0xF0); // CDGH
+
+   while (blocks)
+      {
+      // Save current hash
+      ABEF_SAVE = STATE0;
+      CDGH_SAVE = STATE1;
+
+      // Rounds 0-3
+      MSG = _mm_loadu_si128(input_mm);
+      TMSG0 = _mm_shuffle_epi8(MSG, MASK);
+      MSG = _mm_add_epi32(TMSG0, _mm_set_epi64x(0xE9B5DBA5B5C0FBCFULL, 0x71374491428A2F98ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+
+      // Rounds 4-7
+      TMSG1 = _mm_loadu_si128(input_mm + 1);
+      TMSG1 = _mm_shuffle_epi8(TMSG1, MASK);
+      MSG = _mm_add_epi32(TMSG1, _mm_set_epi64x(0xAB1C5ED5923F82A4ULL, 0x59F111F13956C25BULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG0 = _mm_sha256msg1_epu32(TMSG0, TMSG1);
+
+      // Rounds 8-11
+      TMSG2 = _mm_loadu_si128(input_mm + 2);
+      TMSG2 = _mm_shuffle_epi8(TMSG2, MASK);
+      MSG = _mm_add_epi32(TMSG2, _mm_set_epi64x(0x550C7DC3243185BEULL, 0x12835B01D807AA98ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG1 = _mm_sha256msg1_epu32(TMSG1, TMSG2);
+
+      // Rounds 12-15
+      TMSG3 = _mm_loadu_si128(input_mm + 3);
+      TMSG3 = _mm_shuffle_epi8(TMSG3, MASK);
+      MSG = _mm_add_epi32(TMSG3, _mm_set_epi64x(0xC19BF1749BDC06A7ULL, 0x80DEB1FE72BE5D74ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG3, TMSG2, 4);
+      TMSG0 = _mm_add_epi32(TMSG0, TMP);
+      TMSG0 = _mm_sha256msg2_epu32(TMSG0, TMSG3);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG2 = _mm_sha256msg1_epu32(TMSG2, TMSG3);
+
+      // Rounds 16-19
+      MSG = _mm_add_epi32(TMSG0, _mm_set_epi64x(0x240CA1CC0FC19DC6ULL, 0xEFBE4786E49B69C1ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG0, TMSG3, 4);
+      TMSG1 = _mm_add_epi32(TMSG1, TMP);
+      TMSG1 = _mm_sha256msg2_epu32(TMSG1, TMSG0);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG3 = _mm_sha256msg1_epu32(TMSG3, TMSG0);
+
+      // Rounds 20-23
+      MSG = _mm_add_epi32(TMSG1, _mm_set_epi64x(0x76F988DA5CB0A9DCULL, 0x4A7484AA2DE92C6FULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG1, TMSG0, 4);
+      TMSG2 = _mm_add_epi32(TMSG2, TMP);
+      TMSG2 = _mm_sha256msg2_epu32(TMSG2, TMSG1);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG0 = _mm_sha256msg1_epu32(TMSG0, TMSG1);
+
+      // Rounds 24-27
+      MSG = _mm_add_epi32(TMSG2, _mm_set_epi64x(0xBF597FC7B00327C8ULL, 0xA831C66D983E5152ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG2, TMSG1, 4);
+      TMSG3 = _mm_add_epi32(TMSG3, TMP);
+      TMSG3 = _mm_sha256msg2_epu32(TMSG3, TMSG2);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG1 = _mm_sha256msg1_epu32(TMSG1, TMSG2);
+
+      // Rounds 28-31
+      MSG = _mm_add_epi32(TMSG3, _mm_set_epi64x(0x1429296706CA6351ULL,  0xD5A79147C6E00BF3ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG3, TMSG2, 4);
+      TMSG0 = _mm_add_epi32(TMSG0, TMP);
+      TMSG0 = _mm_sha256msg2_epu32(TMSG0, TMSG3);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG2 = _mm_sha256msg1_epu32(TMSG2, TMSG3);
+
+      // Rounds 32-35
+      MSG = _mm_add_epi32(TMSG0, _mm_set_epi64x(0x53380D134D2C6DFCULL, 0x2E1B213827B70A85ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG0, TMSG3, 4);
+      TMSG1 = _mm_add_epi32(TMSG1, TMP);
+      TMSG1 = _mm_sha256msg2_epu32(TMSG1, TMSG0);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG3 = _mm_sha256msg1_epu32(TMSG3, TMSG0);
+
+      // Rounds 36-39
+      MSG = _mm_add_epi32(TMSG1, _mm_set_epi64x(0x92722C8581C2C92EULL, 0x766A0ABB650A7354ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG1, TMSG0, 4);
+      TMSG2 = _mm_add_epi32(TMSG2, TMP);
+      TMSG2 = _mm_sha256msg2_epu32(TMSG2, TMSG1);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG0 = _mm_sha256msg1_epu32(TMSG0, TMSG1);
+
+      // Rounds 40-43
+      MSG = _mm_add_epi32(TMSG2, _mm_set_epi64x(0xC76C51A3C24B8B70ULL, 0xA81A664BA2BFE8A1ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG2, TMSG1, 4);
+      TMSG3 = _mm_add_epi32(TMSG3, TMP);
+      TMSG3 = _mm_sha256msg2_epu32(TMSG3, TMSG2);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG1 = _mm_sha256msg1_epu32(TMSG1, TMSG2);
+
+      // Rounds 44-47
+      MSG = _mm_add_epi32(TMSG3, _mm_set_epi64x(0x106AA070F40E3585ULL, 0xD6990624D192E819ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG3, TMSG2, 4);
+      TMSG0 = _mm_add_epi32(TMSG0, TMP);
+      TMSG0 = _mm_sha256msg2_epu32(TMSG0, TMSG3);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG2 = _mm_sha256msg1_epu32(TMSG2, TMSG3);
+
+      // Rounds 48-51
+      MSG = _mm_add_epi32(TMSG0, _mm_set_epi64x(0x34B0BCB52748774CULL, 0x1E376C0819A4C116ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG0, TMSG3, 4);
+      TMSG1 = _mm_add_epi32(TMSG1, TMP);
+      TMSG1 = _mm_sha256msg2_epu32(TMSG1, TMSG0);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+      TMSG3 = _mm_sha256msg1_epu32(TMSG3, TMSG0);
+
+      // Rounds 52-55
+      MSG = _mm_add_epi32(TMSG1, _mm_set_epi64x(0x682E6FF35B9CCA4FULL, 0x4ED8AA4A391C0CB3ULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG1, TMSG0, 4);
+      TMSG2 = _mm_add_epi32(TMSG2, TMP);
+      TMSG2 = _mm_sha256msg2_epu32(TMSG2, TMSG1);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+
+      // Rounds 56-59
+      MSG = _mm_add_epi32(TMSG2, _mm_set_epi64x(0x8CC7020884C87814ULL, 0x78A5636F748F82EEULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      TMP = _mm_alignr_epi8(TMSG2, TMSG1, 4);
+      TMSG3 = _mm_add_epi32(TMSG3, TMP);
+      TMSG3 = _mm_sha256msg2_epu32(TMSG3, TMSG2);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+
+      // Rounds 60-63
+      MSG = _mm_add_epi32(TMSG3, _mm_set_epi64x(0xC67178F2BEF9A3F7ULL, 0xA4506CEB90BEFFFAULL));
+      STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
+      MSG = _mm_shuffle_epi32(MSG, 0x0E);
+      STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
+
+      // Add values back to state
+      STATE0 = _mm_add_epi32(STATE0, ABEF_SAVE);
+      STATE1 = _mm_add_epi32(STATE1, CDGH_SAVE);
+
+      input_mm += 4;
+      blocks--;
+      }
+
+   TMP = _mm_shuffle_epi32(STATE0, 0x1B); // FEBA
+   STATE1 = _mm_shuffle_epi32(STATE1, 0xB1); // DCHG
+   STATE0 = _mm_blend_epi16(TMP, STATE1, 0xF0); // DCBA
+   STATE1 = _mm_alignr_epi8(STATE1, TMP, 8); // ABEF
+
+   // Save state
+   _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[0]), STATE0);
+   _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[4]), STATE1);
+   }
+#endif
 
 }
 /*
@@ -76666,6 +77297,122 @@ void SHACAL2::simd_decrypt_4(const uint8_t in[], uint8_t out[]) const
    G.store_be(out+80);
    D.store_be(out+96);
    H.store_be(out+112);
+   }
+
+}
+/*
+* SHACAL-2 using x86 SHA extensions
+* (C) 2017 Jack Lloyd
+*
+* Botan is released under the Simplified BSD License (see license.txt)
+*/
+
+
+namespace Botan {
+
+/*
+Only encryption is supported since the inverse round function would
+require a different instruction
+*/
+
+BOTAN_FUNC_ISA("sha,ssse3")
+void SHACAL2::x86_encrypt_blocks(const uint8_t in[], uint8_t out[], size_t blocks) const
+   {
+   const __m128i MASK1 = _mm_set_epi8(8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7);
+   const __m128i MASK2 = _mm_set_epi8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+
+   const __m128i* RK_mm = reinterpret_cast<const __m128i*>(m_RK.data());
+   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
+   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+
+   while(blocks >= 2)
+      {
+      __m128i B0_0 = _mm_loadu_si128(in_mm);
+      __m128i B0_1 = _mm_loadu_si128(in_mm+1);
+      __m128i B1_0 = _mm_loadu_si128(in_mm+2);
+      __m128i B1_1 = _mm_loadu_si128(in_mm+3);
+
+      __m128i TMP = _mm_shuffle_epi8(_mm_unpacklo_epi64(B0_0, B0_1), MASK2);
+      B0_1 = _mm_shuffle_epi8(_mm_unpackhi_epi64(B0_0, B0_1), MASK2);
+      B0_0 = TMP;
+
+      TMP = _mm_shuffle_epi8(_mm_unpacklo_epi64(B1_0, B1_1), MASK2);
+      B1_1 = _mm_shuffle_epi8(_mm_unpackhi_epi64(B1_0, B1_1), MASK2);
+      B1_0 = TMP;
+
+      for(size_t i = 0; i != 8; ++i)
+         {
+         const __m128i RK0 = _mm_loadu_si128(RK_mm + 2*i);
+         const __m128i RK2 = _mm_loadu_si128(RK_mm + 2*i+1);
+         const __m128i RK1 = _mm_srli_si128(RK0, 8);
+         const __m128i RK3 = _mm_srli_si128(RK2, 8);
+
+         B0_1 = _mm_sha256rnds2_epu32(B0_1, B0_0, RK0);
+         B1_1 = _mm_sha256rnds2_epu32(B1_1, B1_0, RK0);
+
+         B0_0 = _mm_sha256rnds2_epu32(B0_0, B0_1, RK1);
+         B1_0 = _mm_sha256rnds2_epu32(B1_0, B1_1, RK1);
+
+         B0_1 = _mm_sha256rnds2_epu32(B0_1, B0_0, RK2);
+         B1_1 = _mm_sha256rnds2_epu32(B1_1, B1_0, RK2);
+
+         B0_0 = _mm_sha256rnds2_epu32(B0_0, B0_1, RK3);
+         B1_0 = _mm_sha256rnds2_epu32(B1_0, B1_1, RK3);
+         }
+
+      TMP = _mm_shuffle_epi8(_mm_unpackhi_epi64(B0_0, B0_1), MASK1);
+      B0_1 = _mm_shuffle_epi8(_mm_unpacklo_epi64(B0_0, B0_1), MASK1);
+      B0_0 = TMP;
+
+      TMP = _mm_shuffle_epi8(_mm_unpackhi_epi64(B1_0, B1_1), MASK1);
+      B1_1 = _mm_shuffle_epi8(_mm_unpacklo_epi64(B1_0, B1_1), MASK1);
+      B1_0 = TMP;
+
+      // Save state
+      _mm_storeu_si128(out_mm + 0, B0_0);
+      _mm_storeu_si128(out_mm + 1, B0_1);
+      _mm_storeu_si128(out_mm + 2, B1_0);
+      _mm_storeu_si128(out_mm + 3, B1_1);
+
+      blocks -= 2;
+      in_mm += 4;
+      out_mm += 4;
+      }
+
+   while(blocks)
+      {
+      __m128i B0 = _mm_loadu_si128(in_mm);
+      __m128i B1 = _mm_loadu_si128(in_mm+1);
+
+      __m128i TMP = _mm_shuffle_epi8(_mm_unpacklo_epi64(B0, B1), MASK2);
+      B1 = _mm_shuffle_epi8(_mm_unpackhi_epi64(B0, B1), MASK2);
+      B0 = TMP;
+
+      for(size_t i = 0; i != 8; ++i)
+         {
+         const __m128i RK0 = _mm_loadu_si128(RK_mm + 2*i);
+         const __m128i RK2 = _mm_loadu_si128(RK_mm + 2*i+1);
+         const __m128i RK1 = _mm_srli_si128(RK0, 8);
+         const __m128i RK3 = _mm_srli_si128(RK2, 8);
+
+         B1 = _mm_sha256rnds2_epu32(B1, B0, RK0);
+         B0 = _mm_sha256rnds2_epu32(B0, B1, RK1);
+         B1 = _mm_sha256rnds2_epu32(B1, B0, RK2);
+         B0 = _mm_sha256rnds2_epu32(B0, B1, RK3);
+         }
+
+      TMP = _mm_shuffle_epi8(_mm_unpackhi_epi64(B0, B1), MASK1);
+      B1 = _mm_shuffle_epi8(_mm_unpacklo_epi64(B0, B1), MASK1);
+      B0 = TMP;
+
+      // Save state
+      _mm_storeu_si128(out_mm, B0);
+      _mm_storeu_si128(out_mm + 1, B1);
+
+      blocks--;
+      in_mm += 2;
+      out_mm += 2;
+      }
    }
 
 }
