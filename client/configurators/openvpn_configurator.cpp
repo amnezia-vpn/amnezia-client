@@ -128,6 +128,21 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 
     Q_UNUSED(errorCode)
 
+#if defined Q_OS_LINUX
+    if (!QDir(path).exists())
+    {
+        QDir().mkdir(path);
+    }
+
+    if (!QDir(path + "/pki/").exists())
+    {
+        QDir().mkdir(path + "/pki/");
+        QDir().mkdir(path + "/pki/reqs/");
+        QDir().mkdir(path + "/pki/private/");
+    }
+#endif
+
+
     QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
     req.open(QIODevice::ReadOnly);
     connData.request = req.readAll();
