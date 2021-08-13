@@ -270,7 +270,7 @@ Item {
             text: qsTr("Save and restart VPN")
             visible: UiLogic.pushButtonProtoOpenvpnSaveVisible
             onClicked: {
-                UiLogic.pushButtonProtoOpenvpnSaveClicked()
+                UiLogic.onPushButtonProtoOpenvpnSaveClicked()
             }
         }
     }
