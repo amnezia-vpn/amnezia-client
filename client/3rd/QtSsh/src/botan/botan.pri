@@ -36,6 +36,8 @@ linux-g++ {
     INCLUDEPATH += $$PWD/linux
     HEADERS += $$PWD/linux/botan_all.h
     SOURCES += $$PWD/linux/botan_all.cpp
+
+    LIBS += -ldl
 }
 
 android {
