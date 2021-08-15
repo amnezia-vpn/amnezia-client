@@ -142,13 +142,12 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     }
 #endif
 
-
     QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
-    req.open(QIODevice::ReadOnly);
+    req.open(QIODevice::ReadWrite);
     connData.request = req.readAll();
 
     QFile key(path + "/pki/private/" + connData.clientId + ".key");
-    key.open(QIODevice::ReadOnly);
+    key.open(QIODevice::ReadWrite);
     connData.privKey = key.readAll();
 
     //    qDebug().noquote() << connData.request;
