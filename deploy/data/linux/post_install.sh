@@ -25,6 +25,8 @@ if sudo systemctl is-active --quiet $APP_NAME; then
 	sudo rm -rf /etc/systemd/system/$APP_NAME.service >> $LOG_FILE
 fi
 
+sudo chmod +x $APP_PATH/client/bin/easyrsa >> $LOG_FILE
+
 sudo cp $APP_PATH/service/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 
 sudo ln -s $APP_PATH/client/lib/* /usr/lib/ >> $LOG_FILE
