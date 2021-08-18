@@ -1,28 +1,32 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
-
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 #include "sftpfilesystemmodel.h"
 
 #include "sftpchannel.h"
@@ -43,7 +47,7 @@ class SftpDirNode;
 class SftpFileNode
 {
 public:
-    SftpFileNode() : parent(0) { }
+    SftpFileNode() : parent(nullptr) { }
     virtual ~SftpFileNode() { }
 
     QString path;
@@ -95,9 +99,9 @@ using namespace Internal;
 SftpFileSystemModel::SftpFileSystemModel(QObject *parent)
     : QAbstractItemModel(parent), d(new SftpFileSystemModelPrivate)
 {
-    d->sshConnection = 0;
+    d->sshConnection = nullptr;
     d->rootDirectory = QLatin1Char('/');
-    d->rootNode = 0;
+    d->rootNode = nullptr;
     d->statJobId = SftpInvalidJob;
 }
 
@@ -128,7 +132,7 @@ void SftpFileSystemModel::setRootDirectory(const QString &path)
     beginResetModel();
     d->rootDirectory = path;
     delete d->rootNode;
-    d->rootNode = 0;
+    d->rootNode = nullptr;
     d->lsOps.clear();
     d->statJobId = SftpInvalidJob;
     endResetModel();
@@ -161,16 +165,20 @@ int SftpFileSystemModel::columnCount(const QModelIndex &parent) const
 
 QVariant SftpFileSystemModel::data(const QModelIndex &index, int role) const
 {
+    if (!index.internalPointer()) {
+        return QVariant();
+    }
+
     const SftpFileNode * const node = indexToFileNode(index);
     if (index.column() == 0 && role == Qt::DecorationRole) {
         switch (node->fileInfo.type) {
         case FileTypeRegular:
         case FileTypeOther:
-            return QIcon(":/utils/images/unknownfile.png");
+            return QIcon(QStringLiteral(":/ssh/images/unknownfile.png"));
         case FileTypeDirectory:
-            return QIcon(":/utils/images/dir.png");
+            return QIcon(QStringLiteral(":/ssh/images/dir.png"));
         case FileTypeUnknown:
-            return QIcon(":/utils/images/help.png"); // Shows a question mark.
+            return QIcon(QStringLiteral(":/ssh/images/help.png")); // Shows a question mark.
         }
     }
     if (index.column() == 1) {
@@ -237,7 +245,7 @@ QModelIndex SftpFileSystemModel::parent(const QModelIndex &child) const
 int SftpFileSystemModel::rowCount(const QModelIndex &parent) const
 {
     if (!d->rootNode)
-        return 0;
+        return 1; // fake it until we make it, otherwise QTreeView isn't happy
     if (!parent.isValid())
         return 1;
     if (parent.column() != 0)
@@ -254,23 +262,27 @@ int SftpFileSystemModel::rowCount(const QModelIndex &parent) const
 
 void SftpFileSystemModel::statRootDirectory()
 {
+    if (!d->sftpChannel) {
+        return;
+    }
+
     d->statJobId = d->sftpChannel->statFile(d->rootDirectory);
 }
 
 void SftpFileSystemModel::shutDown()
 {
     if (d->sftpChannel) {
-        disconnect(d->sftpChannel.data(), 0, this, 0);
+        disconnect(d->sftpChannel.data(), nullptr, this, nullptr);
         d->sftpChannel->closeChannel();
         d->sftpChannel.clear();
     }
     if (d->sshConnection) {
-        disconnect(d->sshConnection, 0, this, 0);
+        disconnect(d->sshConnection, nullptr, this, nullptr);
         QSsh::releaseConnection(d->sshConnection);
-        d->sshConnection = 0;
+        d->sshConnection = nullptr;
     }
     delete d->rootNode;
-    d->rootNode = 0;
+    d->rootNode = nullptr;
 }
 
 void SftpFileSystemModel::handleSshConnectionFailure()
@@ -332,9 +344,13 @@ void SftpFileSystemModel::handleFileInfo(SftpJobId jobId, const QList<SftpFileIn
     if (filteredList.isEmpty())
         return;
 
-    // In theory beginInsertRows() should suffice, but that fails to have an effect
-    // if rowCount() returned 0 earlier.
-    emit layoutAboutToBeChanged();
+    if (parentNode->parent) {
+        QModelIndex parentIndex = createIndex(parentNode->parent->children.indexOf(parentNode), 0, parentNode);
+        beginInsertRows(parentIndex, rowCount(parentIndex), rowCount(parentIndex) + filteredList.count());
+    } else {
+        // root node
+        beginInsertRows(QModelIndex(), 0, 1);
+    }
 
     foreach (const SftpFileInfo &fileInfo, filteredList) {
         SftpFileNode *childNode;
@@ -350,11 +366,13 @@ void SftpFileSystemModel::handleFileInfo(SftpJobId jobId, const QList<SftpFileIn
         childNode->parent = parentNode;
         parentNode->children << childNode;
     }
-    emit layoutChanged(); // Should be endInsertRows(), see above.
+    endInsertRows();
 }
 
-void SftpFileSystemModel::handleSftpJobFinished(SftpJobId jobId, const QString &errorMessage)
+void SftpFileSystemModel::handleSftpJobFinished(SftpJobId jobId, const SftpError error, const QString &errorMessage)
 {
+    Q_UNUSED(error);
+
     if (jobId == d->statJobId) {
         d->statJobId = SftpInvalidJob;
         if (!errorMessage.isEmpty())

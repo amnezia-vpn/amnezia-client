@@ -1,29 +1,35 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
-#pragma once
+#ifndef SFTPOPERATION_P_H
+#define SFTPOPERATION_P_H
 
 #include "sftpdefs.h"
 
@@ -33,7 +39,7 @@
 #include <QSharedPointer>
 
 QT_BEGIN_NAMESPACE
-class QFile;
+class QIODevice;
 QT_END_NAMESPACE
 
 namespace QSsh {
@@ -61,6 +67,7 @@ private:
 };
 
 struct SftpUploadDir;
+struct SftpDownloadDir;
 
 struct SftpStatFile : public AbstractSftpOperation
 {
@@ -152,9 +159,12 @@ struct SftpListDir : public AbstractSftpOperationWithHandle
 {
     typedef QSharedPointer<SftpListDir> Ptr;
 
-    SftpListDir(SftpJobId jobId, const QString &path);
+    SftpListDir(SftpJobId jobId, const QString &path,
+        const QSharedPointer<SftpDownloadDir> &parentJob = QSharedPointer<SftpDownloadDir>());
     virtual Type type() const { return ListDir; }
     virtual SftpOutgoingPacket &initialPacket(SftpOutgoingPacket &packet);
+
+    const QSharedPointer<SftpDownloadDir> parentJob;
 };
 
 
@@ -174,13 +184,13 @@ struct AbstractSftpTransfer : public AbstractSftpOperationWithHandle
     typedef QSharedPointer<AbstractSftpTransfer> Ptr;
 
     AbstractSftpTransfer(SftpJobId jobId, const QString &remotePath,
-        const QSharedPointer<QFile> &localFile);
+        const QSharedPointer<QIODevice> &localFile);
     ~AbstractSftpTransfer();
     void calculateInFlightCount(quint32 chunkSize);
 
     static const int MaxInFlightCount;
 
-    const QSharedPointer<QFile> localFile;
+    const QSharedPointer<QIODevice> localFile;
     quint64 fileSize;
     quint64 offset;
     int inFlightCount;
@@ -191,12 +201,15 @@ struct SftpDownload : public AbstractSftpTransfer
 {
     typedef QSharedPointer<SftpDownload> Ptr;
     SftpDownload(SftpJobId jobId, const QString &remotePath,
-        const QSharedPointer<QFile> &localFile);
+        const QSharedPointer<QIODevice> &localFile, SftpOverwriteMode mode,
+        const QSharedPointer<SftpDownloadDir> &parentJob = QSharedPointer<SftpDownloadDir>());
     virtual Type type() const { return Download; }
     virtual SftpOutgoingPacket &initialPacket(SftpOutgoingPacket &packet);
 
     QMap<quint32, quint64> offsets;
     SftpJobId eofId;
+    SftpOverwriteMode mode;
+    const QSharedPointer<QSsh::Internal::SftpDownloadDir> parentJob;
 };
 
 struct SftpUploadFile : public AbstractSftpTransfer
@@ -204,7 +217,7 @@ struct SftpUploadFile : public AbstractSftpTransfer
     typedef QSharedPointer<SftpUploadFile> Ptr;
 
     SftpUploadFile(SftpJobId jobId, const QString &remotePath,
-        const QSharedPointer<QFile> &localFile, SftpOverwriteMode mode,
+        const QSharedPointer<QIODevice> &localFile, SftpOverwriteMode mode,
         const QSharedPointer<SftpUploadDir> &parentJob = QSharedPointer<SftpUploadDir>());
     virtual Type type() const { return UploadFile; }
     virtual SftpOutgoingPacket &initialPacket(SftpOutgoingPacket &packet);
@@ -240,5 +253,38 @@ struct SftpUploadDir
     QMap<SftpMakeDir::Ptr, Dir> mkdirsInProgress;
 };
 
+// Composite operation.
+struct SftpDownloadDir
+{
+    typedef QSharedPointer<SftpDownloadDir> Ptr;
+
+    struct Dir {
+        Dir() {}
+        Dir(const QString &l, const QString &r) : localDir(l), remoteDir(r) {}
+        QString localDir;
+        QString remoteDir;
+    };
+
+    SftpDownloadDir(SftpJobId jobId, SftpOverwriteMode mode)
+        : jobId(jobId), hasError(false), mode(mode) {}
+
+    ~SftpDownloadDir() {}
+
+    void setError()
+    {
+        hasError = true;
+        downloadsInProgress.clear();
+        lsdirsInProgress.clear();
+    }
+
+    const SftpJobId jobId;
+    bool hasError;
+    SftpOverwriteMode mode;
+    QList<SftpDownload::Ptr> downloadsInProgress;
+    QMap<SftpListDir::Ptr, Dir> lsdirsInProgress;
+};
+
 } // namespace Internal
 } // namespace QSsh
+
+#endif // SFTPOPERATION_P_H

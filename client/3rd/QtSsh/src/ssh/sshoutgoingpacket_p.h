@@ -1,29 +1,35 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
-#pragma once
+#ifndef SSHOUTGOINGPACKET_P_H
+#define SSHOUTGOINGPACKET_P_H
 
 #include "sshpacket_p.h"
 
@@ -53,7 +59,9 @@ public:
     void generateUserAuthByPasswordRequestPacket(const QByteArray &user,
         const QByteArray &service, const QByteArray &pwd);
     void generateUserAuthByPublicKeyRequestPacket(const QByteArray &user,
-        const QByteArray &service);
+        const QByteArray &service, const QByteArray &key, const QByteArray &signature);
+    void generateQueryPublicKeyPacket(const QByteArray &user, const QByteArray &service,
+                                      const QByteArray &publicKey);
     void generateUserAuthByKeyboardInteractiveRequestPacket(const QByteArray &user,
         const QByteArray &service);
     void generateUserAuthInfoResponsePacket(const QStringList &responses);
@@ -69,6 +77,8 @@ public:
     void generateCancelTcpIpForwardPacket(const QByteArray &bindAddress, quint32 bindPort);
     void generateEnvPacket(quint32 remoteChannel, const QByteArray &var,
         const QByteArray &value);
+    void generateX11ForwardingPacket(quint32 remoteChannel, const QByteArray &protocol,
+                                     const QByteArray &cookie, quint32 screenNumber);
     void generatePtyRequestPacket(quint32 remoteChannel,
         const SshPseudoTerminal &terminal);
     void generateExecPacket(quint32 remoteChannel, const QByteArray &command);
@@ -111,3 +121,5 @@ private:
 
 } // namespace Internal
 } // namespace QSsh
+
+#endif // SSHOUTGOINGPACKET_P_H

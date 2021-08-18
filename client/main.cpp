@@ -13,9 +13,13 @@
 
 #include "debug.h"
 #include "defines.h"
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 #define QAPPLICATION_CLASS QGuiApplication
 #include "singleapplication.h"
 #undef QAPPLICATION_CLASS
+#endif
+
 
 #ifdef Q_OS_WIN
 #include "Windows.h"
@@ -39,6 +43,7 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     SingleApplication app(argc, argv, true, SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
 
     if (!app.isPrimary()) {
@@ -47,6 +52,10 @@ int main(int argc, char *argv[])
         });
         return app.exec();
     }
+#else
+    QApplication app(argc, argv);
+#endif
+
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
 #endif
@@ -95,6 +104,27 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.rootContext()->setContextProperty("UiLogic", &uiLogic);
     engine.load(url);
+
+    // TODO - fix
+//#ifdef Q_OS_WIN
+//    if (parser.isSet("a")) mainWindow.showOnStartup();
+//    else mainWindow.show();
+//#else
+//    mainWindow.showOnStartup();
+//#endif
+
+
+     // TODO - fix
+//#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+//    if (app.isPrimary()) {
+//        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
+//            qDebug() << "Secondary instance started, showing this window instead";
+//            mainWindow.show();
+//            mainWindow.showNormal();
+//            mainWindow.raise();
+//        });
+//    }
+//#endif
 
     return app.exec();
 }
