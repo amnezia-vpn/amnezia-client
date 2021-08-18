@@ -1,13 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import "./"
 import QtGraphicalEffects 1.12
 import PageEnum 1.0
+import "../Controls"
+import "./"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     ImageButtonType {
         id: back
         x: 10

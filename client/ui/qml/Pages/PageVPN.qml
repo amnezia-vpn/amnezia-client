@@ -2,32 +2,33 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import PageEnum 1.0
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
+
     Image {
-        x: 20
-        y: 424
-        width: 325
-        height: 1
-        source: "qrc:/images/line.png"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 0
+        width: parent.width
+
+//        width: 380
+//        height: 325
+        source: "qrc:/images/background_connected.png"
     }
-    Text {
-        x: 20
-        y: 440
-        width: 281
-        height: 21
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 15
-        color: "#181922"
-        horizontalAlignment: Text.AlignLeft
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        text: qsTr("How to use VPN")
+
+    ImageButtonType {
+        x: parent.width - 40
+        y: 10
+        width: 31
+        height: 31
+        icon.source: "qrc:/images/settings_grey.png"
+        onClicked: {
+            UiLogic.goToPage(PageEnum.GeneralSettings)
+        }
     }
+
     LabelType {
         id: error_text
         x: 0
@@ -40,7 +41,7 @@ Item {
         text: UiLogic.labelErrorText
     }
     Text {
-        x: 0
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 250
         width: 380
         height: 31
@@ -53,16 +54,10 @@ Item {
         wrapMode: Text.Wrap
         text: UiLogic.labelStateText
     }
-    Image {
-        x: 0
-        y: 0
-        width: 380
-        height: 325
-        source: "qrc:/images/background_connected.png"
-    }
+
     BasicButtonType {
         id: button_connect
-        x: 150
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 200
         width: 80
         height: 40
@@ -82,76 +77,31 @@ Item {
         enabled: UiLogic.pushButtonConnectEnabled
     }
 
-    ImageButtonType {
-        x: 340
-        y: 10
-        width: 31
-        height: 31
-        icon.source: "qrc:/images/settings_grey.png"
-        onClicked: {
-            UiLogic.goToPage(PageEnum.GeneralSettings)
-        }
-    }
-    BasicButtonType {
-        id: button_add_site
-        x: 20
-        y: 560
-        width: 341
-        height: 40
-        text: qsTr("+ Add site")
-        enabled: UiLogic.pushButtonVpnAddSiteEnabled
-        background: Rectangle {
-            anchors.fill: parent
-            radius: 4
-            color: {
-                if (!button_add_site.enabled) {
-                    return "#484952"
-                }
-                if (button_add_site.containsMouse) {
-                    return "#282932"
-                }
-                return "#181922"
-            }
-        }
-
-        contentItem: Text {
-            anchors.fill: parent
-            font.family: "Lato"
-            font.styleName: "normal"
-            font.pixelSize: 16
-            color: "#D4D4D4"
-            text: button_add_site.text
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
-        antialiasing: true
-        onClicked: {
-            UiLogic.goToPage(PageEnum.Sites)
-        }
-    }
     Item {
         x: 0
-        y: 360
-        width: 380
+        anchors.bottom: line.top
+        anchors.bottomMargin: 10
+        width: parent.width
         height: 51
         Image {
-            x: 311
+            anchors.horizontalCenter: upload_label.horizontalCenter
             y: 10
             width: 15
             height: 15
             source: "qrc:/images/upload.png"
         }
         Image {
-            x: 53
+            anchors.horizontalCenter: download_label.horizontalCenter
             y: 10
             width: 15
             height: 15
             source: "qrc:/images/download.png"
         }
         Text {
+            id: download_label
             x: 0
             y: 20
-            width: 127
+            width: 130
             height: 30
             font.family: "Lato"
             font.styleName: "normal"
@@ -163,9 +113,10 @@ Item {
             text: UiLogic.labelSpeedReceivedText
         }
         Text {
-            x: 260
+            id: upload_label
+            x: parent.width - width
             y: 20
-            width: 118
+            width: 130
             height: 30
             font.family: "Lato"
             font.styleName: "normal"
@@ -177,9 +128,38 @@ Item {
             text: UiLogic.labelSpeedSentText
         }
     }
-    Item {
+
+    Rectangle {
+        id: line
         x: 20
-        y: 470
+        width: parent.width - 40
+        height: 1
+        anchors.bottom: conn_type_label.top
+        anchors.bottomMargin: 10
+        color: "#DDDDDD"
+    }
+
+    Text {
+        id: conn_type_label
+        x: 20
+        anchors.bottom: conn_type_group.top
+        anchors.bottomMargin: 10
+        width: 281
+        height: 21
+        font.family: "Lato"
+        font.styleName: "normal"
+        font.pixelSize: 15
+        color: "#181922"
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        wrapMode: Text.Wrap
+        text: qsTr("How to use VPN")
+    }
+
+    Item {
+        id: conn_type_group
+        x: 20
+        anchors.bottom: button_add_site.top
         width: 351
         height: 91
         enabled: UiLogic.widgetVpnModeEnabled
@@ -219,6 +199,45 @@ Item {
                 UiLogic.radioButtonVpnModeForwardSitesChecked = checked
                 UiLogic.onRadioButtonVpnModeForwardSitesToggled(checked)
             }
+        }
+    }
+
+    BasicButtonType {
+        id: button_add_site
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: parent.height - 60
+        //anchors.bottom: parent.bottom
+        width: parent.width - 40
+        height: 40
+        text: qsTr("+ Add site")
+        enabled: UiLogic.pushButtonVpnAddSiteEnabled
+        background: Rectangle {
+            anchors.fill: parent
+            radius: 4
+            color: {
+                if (!button_add_site.enabled) {
+                    return "#484952"
+                }
+                if (button_add_site.containsMouse) {
+                    return "#282932"
+                }
+                return "#181922"
+            }
+        }
+
+        contentItem: Text {
+            anchors.fill: parent
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            color: "#D4D4D4"
+            text: button_add_site.text
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+        antialiasing: true
+        onClicked: {
+            UiLogic.goToPage(PageEnum.Sites)
         }
     }
 }

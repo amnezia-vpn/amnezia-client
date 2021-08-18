@@ -1,12 +1,11 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
-
     Image {
         anchors.horizontalCenter: root.horizontalCenter
         width: GC.trW(150)

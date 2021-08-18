@@ -2,11 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import PageEnum 1.0
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     ImageButtonType {
         id: back_from_setup_wizard
         x: 10

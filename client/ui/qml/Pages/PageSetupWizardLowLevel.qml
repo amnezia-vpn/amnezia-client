@@ -1,11 +1,11 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     ImageButtonType {
         id: back_from_setup_wizard
         x: 10
@@ -35,33 +35,31 @@ Item {
         y: 70
         width: 361
         height: 561
-        CheckBoxType {
-            x: 30
-            y: 350
-            width: 301
-            height: 71
-            text: qsTr('Turn on mode "VPN for selected sites"')
-            checked: UiLogic.checkBoxSetupWizardVpnModeChecked
-            onCheckedChanged: {
-                UiLogic.checkBoxSetupWizardVpnModeChecked = checked
-            }
-        }
         LabelType {
             x: 30
             y: 10
             width: 321
             height: 341
-            text: qsTr('Optional.\n\nWe recommend to enable VPN mode "For selected sites" and add blocked sites you need to visit manually. If you will choose this option, you will need add every bloked site you want to visit to the access list. You may switch between modes later.\n\nPlease note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.')
+            verticalAlignment: Text.AlignTop
+            text: qsTr('AmneziaVPN will install OpenVPN protocol with public/private key pairs generated on server and client sides. You can also configure connection on your mobile device by copying exported ".ovpn" file to your device and setting up official OpenVPN client. We recommend do not use messengers for sending connection profile - it contains VPN private keys.')
+        }
+        LabelType {
+            x: 30
+            y: 400
+            width: 321
+            height: 71
+            text: qsTr('OpenVPN profile will be installed')
+            verticalAlignment: Text.AlignBottom
         }
         BlueButtonType {
-            id: vpn_mode_finish
+            id: next_button
             x: 30
             y: 490
             width: 301
             height: 40
             text: qsTr("Start configuring")
             onClicked: {
-                UiLogic.onPushButtonSetupWizardVpnModeFinishClicked()
+                UiLogic.onPushButtonSetupWizardLowFinishClicked()
             }
         }
     }

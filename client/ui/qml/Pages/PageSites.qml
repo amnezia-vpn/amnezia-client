@@ -1,13 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import "./"
 import Qt.labs.platform 1.0
 import QtQuick.Dialogs 1.0
+import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     Text {
         font.family: "Lato"
         font.styleName: "normal"

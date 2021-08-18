@@ -2,11 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import PageEnum 1.0
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     ImageButtonType {
         id: back
         x: 10
@@ -18,69 +18,56 @@ Item {
             UiLogic.closePage()
         }
     }
-    Image {
-        x: 10
-        y: 160
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 220
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 620
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 560
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 280
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 100
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 340
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
-        y: 400
-        width: 360
-        height: 1
-        source: "qrc:/images/line.png"
-    }
-    Image {
-        x: 10
+    Rectangle {
         y: 40
-        width: 360
+        x: 20
+        width: parent.width - 40
         height: 1
-        source: "qrc:/images/line.png"
+        color: "#DDDDDD"
     }
+    Rectangle {
+        y: 100
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+    Rectangle {
+        y: 160
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+    Rectangle {
+        y: 220
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+    Rectangle {
+        y: 280
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+    Rectangle {
+        y: 340
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+    Rectangle {
+        y: 400
+        x: 20
+        width: parent.width - 40
+        height: 1
+        color: "#DDDDDD"
+    }
+
     SettingButtonType {
         x: 30
         y: 355
@@ -101,17 +88,6 @@ Item {
         text: qsTr("App settings")
         onClicked: {
             UiLogic.goToPage(PageEnum.AppSettings)
-        }
-    }
-    SettingButtonType {
-        x: 30
-        y: 575
-        width: 330
-        height: 30
-        icon.source: "qrc:/images/settings.png"
-        text: qsTr("Exit")
-        onClicked: {
-            Qt.quit()
         }
     }
     SettingButtonType {
@@ -157,6 +133,18 @@ Item {
         enabled: UiLogic.pushButtonGeneralSettingsShareConnectionEnable
         onClicked: {
             UiLogic.onPushButtonGeneralSettingsShareConnectionClicked()
+        }
+    }
+    SettingButtonType {
+        x: 30
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        width: 330
+        height: 30
+        icon.source: "qrc:/images/settings.png"
+        text: qsTr("Exit")
+        onClicked: {
+            Qt.quit()
         }
     }
 }

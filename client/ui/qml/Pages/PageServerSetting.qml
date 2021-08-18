@@ -1,12 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import "./"
 import PageEnum 1.0
+import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
     enabled: UiLogic.pageServerSettingsEnabled
 
     ImageButtonType {
@@ -28,7 +28,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: qsTr("Server settings")
-        x: 10
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 35
         width: 361
         height: 31
@@ -50,7 +50,7 @@ Item {
         text: UiLogic.labelServerSettingsCurrentVpnProtocolText
     }
     LabelType {
-        x: 20
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 120
         width: 341
         height: 31
@@ -59,7 +59,7 @@ Item {
         text: UiLogic.labelServerSettingsServerText
     }
     LabelType {
-        x: 40
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 530
         width: 301
         height: 41
@@ -67,7 +67,6 @@ Item {
         visible: UiLogic.labelServerSettingsWaitInfoVisible
     }
     TextFieldType {
-//        x: 70
         anchors.horizontalCenter: parent.horizontalCenter
         y: 80
         width: 251

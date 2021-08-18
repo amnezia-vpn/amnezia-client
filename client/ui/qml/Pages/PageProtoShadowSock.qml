@@ -1,12 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import "./"
+import "../Controls"
+import "../Config"
 
 Item {
     id: root
-    width: GC.screenWidth
-    height: GC.screenHeight
-    enabled: UiLogic.pageProtoCloakEnabled
+    enabled: UiLogic.pageProtoShadowsocksEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -23,7 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
-        enabled: UiLogic.widgetProtoCloakEnabled
+        enabled: UiLogic.widgetProtoSsEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -32,19 +32,18 @@ Item {
             model: [
                 qsTr("chacha20-poly1305"),
                 qsTr("aes-256-gcm"),
-                qsTr("aes-192-gcm"),
                 qsTr("aes-128-gcm")
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (UiLogic.comboBoxProtoCloakCipherText === model[i]) {
+                    if (UiLogic.comboBoxProtoShadowsocksCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                UiLogic.comboBoxProtoCloakCipherText = currentText
+                UiLogic.comboBoxProtoShadowsocksCipherText = currentText
             }
         }
         LabelType {
@@ -56,7 +55,7 @@ Item {
         }
         LabelType {
             x: 30
-            y: 160
+            y: 110
             width: 151
             height: 31
             text: qsTr("Port")
@@ -68,61 +67,43 @@ Item {
             color: "#100A44"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            text: qsTr("Cloak Settings")
-            x: 20
+            text: qsTr("ShadowSocks Settings")
+            x: 30
             y: 0
             width: 340
             height: 30
         }
         LabelType {
-            x: 30
-            y: 110
-            width: 151
-            height: 31
-            text: qsTr("Fake Web Site")
-        }
-
-        LabelType {
-            id: label_proto_cloak_info
+            id: label_proto_shadowsocks_info
             x: 30
             y: 550
             width: 321
             height: 41
-            visible: UiLogic.labelProtoCloakInfoVisible
-            text: UiLogic.labelProtoCloakInfoText
+            visible: UiLogic.labelProtoShadowsocksInfoVisible
+            text: UiLogic.labelProtoShadowsocksInfoText
         }
         TextFieldType {
-            id: lineEdit_proto_cloak_port
-            x: 190
-            y: 160
-            width: 151
-            height: 31
-            text: UiLogic.lineEditProtoCloakPortText
-            onEditingFinished: {
-                UiLogic.lineEditProtoCloakPortText = text
-            }
-            enabled: UiLogic.lineEditProtoCloakPortEnabled
-        }
-        TextFieldType {
-            id: lineEdit_proto_cloak_site
+            id: lineEdit_proto_shadowsocks_port
             x: 190
             y: 110
             width: 151
             height: 31
-            text: UiLogic.lineEditProtoCloakSiteText
+            text: UiLogic.lineEditProtoShadowsocksPortText
             onEditingFinished: {
-                UiLogic.lineEditProtoCloakSiteText = text
+                UiLogic.lineEditProtoShadowsocksPortText = text
             }
+            enabled: UiLogic.lineEditProtoShadowsocksPortEnabled
         }
         ProgressBar {
-            id: progressBar_proto_cloak_reset
+            id: progressBar_proto_shadowsocks_reset
             anchors.horizontalCenter: parent.horizontalCenter
             y: 500
             width: 321
             height: 40
             from: 0
-            to: UiLogic.progressBarProtoCloakResetMaximium
-            value: UiLogic.progressBarProtoCloakResetValue
+            to: UiLogic.progressBarProtoShadowsocksResetMaximium
+            value: UiLogic.progressBarProtoShadowsocksResetValue
+            visible: UiLogic.progressBarProtoShadowsocksResetVisible
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -134,13 +115,12 @@ Item {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
                 Rectangle {
-                    width: progressBar_proto_cloak_reset.visualPosition * parent.width
+                    width: progressBar_proto_shadowsocks_reset.visualPosition * parent.width
                     height: parent.height
                     radius: 4
                     color: Qt.rgba(255, 255, 255, 0.15);
                 }
             }
-            visible: UiLogic.progressBarProtoCloakResetVisible
         }
         BlueButtonType {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -148,9 +128,9 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: UiLogic.pushButtonProtoCloakSaveVisible
+            visible: UiLogic.pushButtonProtoShadowsocksSaveVisible
             onClicked: {
-                UiLogic.onPushButtonProtoCloakSaveClicked()
+                UiLogic.onPushButtonProtoShadowsocksSaveClicked()
             }
         }
     }

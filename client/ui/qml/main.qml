@@ -1,12 +1,18 @@
 import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
 import PageEnum 1.0
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.1
 import "./"
+import "Pages"
+import "Config"
 
 Window {
+    Material.theme: Material.Dark
+    Material.accent: Material.Purple
+
     id: root
     visible: true
     width: GC.screenWidth
@@ -15,7 +21,7 @@ Window {
         UiLogic.onCloseWindow()
     }
 
-    flags: Qt.FramelessWindowHint
+    //flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
     function getPageComponent(page) {
         switch (page) {
@@ -232,16 +238,19 @@ Window {
 
     Rectangle {
         y: GC.isDesktop() ? titleBar.height : 0
-        width: GC.screenWidth
-        height: GC.screenHeight
+//        width: GC.screenWidth
+//        height: GC.screenHeight
+        anchors.fill: parent
         color: "white"
     }
 
     StackView {
         id: pageLoader
         y: GC.isDesktop() ? titleBar.height : 0
-        width: GC.screenWidth
-        height: GC.screenHeight
+//        width: GC.screenWidth
+//        height: GC.screenHeight
+        anchors.fill: parent
+
 //        initialItem: page_servers
         onCurrentItemChanged: {
             let pageEnum = root.getPageEnum(currentItem)

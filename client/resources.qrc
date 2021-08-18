@@ -3,7 +3,6 @@
         <file>translations/amneziavpn_ru.qm</file>
         <file>images/close.png</file>
         <file>images/settings.png</file>
-        <file>images/min.png</file>
         <file>images/favorites_disabled.png</file>
         <file>images/favorites_enabled.png</file>
         <file>images/favorites_hover.png</file>
@@ -30,11 +29,9 @@
         <file>fonts/Lato-Thin.ttf</file>
         <file>fonts/Lato-ThinItalic.ttf</file>
         <file>images/AmneziaVPN.png</file>
-        <file>images/line.png</file>
         <file>images/server_settings.png</file>
         <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
-        <file>images/background_connected.png</file>
         <file>server_scripts/setup_host_firewall.sh</file>
         <file>images/reload.png</file>
         <file>server_scripts/openvpn_cloak/Dockerfile</file>
@@ -68,40 +65,43 @@
         <file>server_scripts/wireguard/start.sh</file>
         <file>server_scripts/wireguard/template.conf</file>
         <file>ui/qml/main.qml</file>
-        <file>ui/qml/GlobalConfig.qml</file>
-        <file>ui/qml/qmldir</file>
         <file>ui/qml/TitleBar.qml</file>
-        <file>ui/qml/PageStart.qml</file>
-        <file>ui/qml/TextFieldType.qml</file>
-        <file>ui/qml/LabelType.qml</file>
-        <file>ui/qml/BasicButtonType.qml</file>
-        <file>ui/qml/ImageButtonType.qml</file>
-        <file>ui/qml/PageNewServer.qml</file>
-        <file>ui/qml/BlueButtonType.qml</file>
-        <file>ui/qml/PageSetupWizard.qml</file>
-        <file>ui/qml/RadioButtonType.qml</file>
-        <file>ui/qml/PageSetupWizardHighLevel.qml</file>
-        <file>ui/qml/PageSetupWizardVPNMode.qml</file>
-        <file>ui/qml/CheckBoxType.qml</file>
-        <file>ui/qml/PageSetupWizardMediumLevel.qml</file>
-        <file>ui/qml/PageSetupWizardLowLevel.qml</file>
-        <file>ui/qml/PageNewServerConfiguring.qml</file>
-        <file>ui/qml/PageNewServerProtocol.qml</file>
-        <file>ui/qml/ComboBoxType.qml</file>
-        <file>ui/qml/PageVPN.qml</file>
-        <file>ui/qml/PageSites.qml</file>
-        <file>ui/qml/PageGeneralSettings.qml</file>
-        <file>ui/qml/SettingButtonType.qml</file>
-        <file>ui/qml/PageServer.qml</file>
-        <file>ui/qml/PageAppSetting.qml</file>
-        <file>ui/qml/PageNetworkSetting.qml</file>
-        <file>ui/qml/PageServerSetting.qml</file>
-        <file>ui/qml/PageServerProtocols.qml</file>
-        <file>ui/qml/PageShareConnection.qml</file>
-        <file>ui/qml/PageProtoOpenVPN.qml</file>
-        <file>ui/qml/PageProtoShadowSock.qml</file>
-        <file>ui/qml/PageProtoCloak.qml</file>
-        <file>ui/qml/ShareConnectionContent.qml</file>
-        <file>ui/qml/ShareConnectionButtonType.qml</file>
+        <file>ui/qml/Pages/PageAppSetting.qml</file>
+        <file>ui/qml/Pages/PageGeneralSettings.qml</file>
+        <file>ui/qml/Pages/PageNetworkSetting.qml</file>
+        <file>ui/qml/Pages/PageNewServer.qml</file>
+        <file>ui/qml/Pages/PageNewServerConfiguring.qml</file>
+        <file>ui/qml/Pages/PageNewServerProtocol.qml</file>
+        <file>ui/qml/Pages/PageProtoCloak.qml</file>
+        <file>ui/qml/Pages/PageProtoOpenVPN.qml</file>
+        <file>ui/qml/Pages/PageProtoShadowSock.qml</file>
+        <file>ui/qml/Pages/PageServer.qml</file>
+        <file>ui/qml/Pages/PageServerProtocols.qml</file>
+        <file>ui/qml/Pages/PageServerSetting.qml</file>
+        <file>ui/qml/Pages/PageSetupWizard.qml</file>
+        <file>ui/qml/Pages/PageSetupWizardHighLevel.qml</file>
+        <file>ui/qml/Pages/PageSetupWizardLowLevel.qml</file>
+        <file>ui/qml/Pages/PageSetupWizardMediumLevel.qml</file>
+        <file>ui/qml/Pages/PageSetupWizardVPNMode.qml</file>
+        <file>ui/qml/Pages/PageShareConnection.qml</file>
+        <file>ui/qml/Pages/PageSites.qml</file>
+        <file>ui/qml/Pages/PageStart.qml</file>
+        <file>ui/qml/Pages/PageVPN.qml</file>
+        <file>ui/qml/Controls/BasicButtonType.qml</file>
+        <file>ui/qml/Controls/BlueButtonType.qml</file>
+        <file>ui/qml/Controls/CheckBoxType.qml</file>
+        <file>ui/qml/Controls/ComboBoxType.qml</file>
+        <file>ui/qml/Controls/ImageButtonType.qml</file>
+        <file>ui/qml/Controls/LabelType.qml</file>
+        <file>ui/qml/Controls/RadioButtonType.qml</file>
+        <file>ui/qml/Controls/SettingButtonType.qml</file>
+        <file>ui/qml/Controls/ShareConnectionButtonType.qml</file>
+        <file>ui/qml/Controls/ShareConnectionContent.qml</file>
+        <file>ui/qml/Controls/TextFieldType.qml</file>
+        <file>ui/qml/Pages/PageBase.qml</file>
+        <file>ui/qml/Config/GlobalConfig.qml</file>
+        <file>ui/qml/Config/qmldir</file>
+        <file>images/background_connected.png</file>
+        <file>images/background_connected@2x.png</file>
     </qresource>
 </RCC>
