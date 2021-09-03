@@ -28,7 +28,7 @@ Item {
         color: "#100A44"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignTop
-        text: UiLogic.labelSitesAddCustomText
+        text: SitesLogic.labelSitesAddCustomText
         x: 20
         y: 40
         width: 340
@@ -40,12 +40,12 @@ Item {
         width: 231
         height: 31
         placeholderText: qsTr("yousite.com or IP address")
-        text: UiLogic.lineEditSitesAddCustomText
+        text: SitesLogic.lineEditSitesAddCustomText
         onEditingFinished: {
-            UiLogic.lineEditSitesAddCustomText = text
+            SitesLogic.lineEditSitesAddCustomText = text
         }
         onAccepted: {
-            UiLogic.onPushButtonAddCustomSitesClicked()
+            SitesLogic.onPushButtonAddCustomSitesClicked()
         }
     }
     ImageButtonType {
@@ -68,7 +68,7 @@ Item {
         font.pixelSize: 24
         text: "+"
         onClicked: {
-            UiLogic.onPushButtonAddCustomSitesClicked()
+            SitesLogic.onPushButtonAddCustomSitesClicked()
         }
     }
     BlueButtonType {
@@ -80,7 +80,7 @@ Item {
         font.pixelSize: 16
         text: qsTr("Delete selected")
         onClicked: {
-            UiLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
+            SitesLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
         }
     }
 
@@ -117,7 +117,7 @@ Item {
         visible: false
         folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
         onAccepted: {
-            UiLogic.onPushButtonSitesImportClicked(fileUrl)
+            SitesLogic.onPushButtonSitesImportClicked(fileUrl)
         }
     }
     ListView {
@@ -129,7 +129,7 @@ Item {
         spacing: 1
         clip: true
         property int currentRow: -1
-        model: UiLogic.tableViewSitesModel
+        model: SitesLogic.tableViewSitesModel
 
         delegate: Item {
             implicitWidth: 170 * 2

@@ -50,7 +50,7 @@ using namespace PageEnumNS;
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
     m_frameWireguardSettingsVisible{false},
-    m_frameFireguardVisible{false},
+    m_frameWireguardVisible{false},
     m_frameNewServerSettingsParentWireguardVisible{false},
     m_radioButtonSetupWizardMediumChecked{true},
     m_lineEditSetupWizardHighWebsiteMaskingText{},
@@ -80,13 +80,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_radioButtonVpnModeForwardSitesChecked{false},
     m_radioButtonVpnModeExceptSitesChecked{false},
     m_pushButtonVpnAddSiteEnabled{true},
-    m_checkBoxAppSettingsAutostartChecked{false},
-    m_checkBoxAppSettingsAutoconnectChecked{false},
-    m_checkBoxAppSettingsStartMinimizedChecked{false},
-    m_lineEditNetworkSettingsDns1Text{},
-    m_lineEditNetworkSettingsDns2Text{},
-    m_labelAppSettingsVersionText{},
-    m_pushButtonGeneralSettingsShareConnectionEnable{},
+
     m_labelServerSettingsWaitInfoVisible{true},
     m_labelServerSettingsWaitInfoText{},
     m_pushButtonServerSettingsClearVisible{true},
@@ -118,11 +112,8 @@ UiLogic::UiLogic(QObject *parent) :
     m_radioButtonSetupWizardHighChecked{false},
     m_radioButtonSetupWizardLowChecked{false},
     m_checkBoxSetupWizardVpnModeChecked{false},
-    m_ipAddressValidatorRegex{Utils::ipAddressRegExp().pattern()},
     m_pushButtonConnectChecked{false},
-    m_labelSitesAddCustomText{},
-    m_tableViewSitesModel{nullptr},
-    m_lineEditSitesAddCustomText{},
+
     m_widgetProtoCloakEnabled{false},
     m_pushButtonProtoCloakSaveVisible{false},
     m_progressBarProtoCloakResetVisible{false},
@@ -243,7 +234,7 @@ UiLogic::UiLogic(QObject *parent) :
 void UiLogic::initalizeUiLogic()
 {
     setFrameWireguardSettingsVisible(false);
-    setFrameFireguardVisible(false);
+    setFrameWireguardVisible(false);
     setFrameNewServerSettingsParentWireguardVisible(false);
 
     setupTray();
@@ -310,8 +301,7 @@ void UiLogic::initalizeUiLogic()
 
 
 
-    sitesModels.insert(Settings::VpnOnlyForwardSites, new SitesModel(Settings::VpnOnlyForwardSites));
-    sitesModels.insert(Settings::VpnAllExceptSites, new SitesModel(Settings::VpnAllExceptSites));
+
     m_serverListModel = new ServersModel(this);
 }
 
@@ -328,16 +318,16 @@ void UiLogic::setFrameWireguardSettingsVisible(bool frameWireguardSettingsVisibl
     }
 }
 
-bool UiLogic::getFrameFireguardVisible() const
+bool UiLogic::getFrameWireguardVisible() const
 {
-    return m_frameFireguardVisible;
+    return m_frameWireguardVisible;
 }
 
-void UiLogic::setFrameFireguardVisible(bool frameFireguardVisible)
+void UiLogic::setFrameWireguardVisible(bool frameWireguardVisible)
 {
-    if (m_frameFireguardVisible != frameFireguardVisible) {
-        m_frameFireguardVisible = frameFireguardVisible;
-        emit frameFireguardVisibleChanged();
+    if (m_frameWireguardVisible != frameWireguardVisible) {
+        m_frameWireguardVisible = frameWireguardVisible;
+        emit frameWireguardVisibleChanged();
     }
 }
 
@@ -689,17 +679,22 @@ bool UiLogic::getRadioButtonVpnModeAllSitesChecked() const
     return m_radioButtonVpnModeAllSitesChecked;
 }
 
+bool UiLogic::getRadioButtonVpnModeForwardSitesChecked() const
+{
+    return m_radioButtonVpnModeForwardSitesChecked;
+}
+
+bool UiLogic::getRadioButtonVpnModeExceptSitesChecked() const
+{
+    return m_radioButtonVpnModeExceptSitesChecked;
+}
+
 void UiLogic::setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked)
 {
     if (m_radioButtonVpnModeAllSitesChecked != radioButtonVpnModeAllSitesChecked) {
         m_radioButtonVpnModeAllSitesChecked = radioButtonVpnModeAllSitesChecked;
         emit radioButtonVpnModeAllSitesCheckedChanged();
     }
-}
-
-bool UiLogic::getRadioButtonVpnModeForwardSitesChecked() const
-{
-    return m_radioButtonVpnModeForwardSitesChecked;
 }
 
 void UiLogic::setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeForwardSitesChecked)
@@ -710,11 +705,6 @@ void UiLogic::setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeFo
     }
 }
 
-bool UiLogic::getRadioButtonVpnModeExceptSitesChecked() const
-{
-    return m_radioButtonVpnModeExceptSitesChecked;
-}
-
 void UiLogic::setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExceptSitesChecked)
 {
     if (m_radioButtonVpnModeExceptSitesChecked != radioButtonVpnModeExceptSitesChecked) {
@@ -723,109 +713,11 @@ void UiLogic::setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExc
     }
 }
 
-bool UiLogic::getPushButtonVpnAddSiteEnabled() const
-{
-    return m_pushButtonVpnAddSiteEnabled;
-}
 
-void UiLogic::setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled)
-{
-    if (m_pushButtonVpnAddSiteEnabled != pushButtonVpnAddSiteEnabled) {
-        m_pushButtonVpnAddSiteEnabled = pushButtonVpnAddSiteEnabled;
-        emit pushButtonVpnAddSiteEnabledChanged();
-    }
-}
 
-bool UiLogic::getCheckBoxAppSettingsAutostartChecked() const
-{
-    return m_checkBoxAppSettingsAutostartChecked;
-}
 
-void UiLogic::setCheckBoxAppSettingsAutostartChecked(bool checkBoxAppSettingsAutostartChecked)
-{
-    if (m_checkBoxAppSettingsAutostartChecked != checkBoxAppSettingsAutostartChecked) {
-        m_checkBoxAppSettingsAutostartChecked = checkBoxAppSettingsAutostartChecked;
-        emit checkBoxAppSettingsAutostartCheckedChanged();
-    }
-}
 
-bool UiLogic::getCheckBoxAppSettingsAutoconnectChecked() const
-{
-    return m_checkBoxAppSettingsAutoconnectChecked;
-}
 
-void UiLogic::setCheckBoxAppSettingsAutoconnectChecked(bool checkBoxAppSettingsAutoconnectChecked)
-{
-    if (m_checkBoxAppSettingsAutoconnectChecked != checkBoxAppSettingsAutoconnectChecked) {
-        m_checkBoxAppSettingsAutoconnectChecked = checkBoxAppSettingsAutoconnectChecked;
-        emit checkBoxAppSettingsAutoconnectCheckedChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxAppSettingsStartMinimizedChecked() const
-{
-    return m_checkBoxAppSettingsStartMinimizedChecked;
-}
-
-void UiLogic::setCheckBoxAppSettingsStartMinimizedChecked(bool checkBoxAppSettingsStartMinimizedChecked)
-{
-    if (m_checkBoxAppSettingsStartMinimizedChecked != checkBoxAppSettingsStartMinimizedChecked) {
-        m_checkBoxAppSettingsStartMinimizedChecked = checkBoxAppSettingsStartMinimizedChecked;
-        emit checkBoxAppSettingsStartMinimizedCheckedChanged();
-    }
-}
-
-QString UiLogic::getLineEditNetworkSettingsDns1Text() const
-{
-    return m_lineEditNetworkSettingsDns1Text;
-}
-
-void UiLogic::setLineEditNetworkSettingsDns1Text(const QString &lineEditNetworkSettingsDns1Text)
-{
-    if (m_lineEditNetworkSettingsDns1Text != lineEditNetworkSettingsDns1Text) {
-        m_lineEditNetworkSettingsDns1Text = lineEditNetworkSettingsDns1Text;
-        emit lineEditNetworkSettingsDns1TextChanged();
-    }
-}
-
-QString UiLogic::getLineEditNetworkSettingsDns2Text() const
-{
-    return m_lineEditNetworkSettingsDns2Text;
-}
-
-void UiLogic::setLineEditNetworkSettingsDns2Text(const QString &lineEditNetworkSettingsDns2Text)
-{
-    if (m_lineEditNetworkSettingsDns2Text != lineEditNetworkSettingsDns2Text) {
-        m_lineEditNetworkSettingsDns2Text = lineEditNetworkSettingsDns2Text;
-        emit lineEditNetworkSettingsDns2TextChanged();
-    }
-}
-
-QString UiLogic::getLabelAppSettingsVersionText() const
-{
-    return m_labelAppSettingsVersionText;
-}
-
-void UiLogic::setLabelAppSettingsVersionText(const QString &labelAppSettingsVersionText)
-{
-    if (m_labelAppSettingsVersionText != labelAppSettingsVersionText) {
-        m_labelAppSettingsVersionText = labelAppSettingsVersionText;
-        emit labelAppSettingsVersionTextChanged();
-    }
-}
-
-bool UiLogic::getPushButtonGeneralSettingsShareConnectionEnable() const
-{
-    return m_pushButtonGeneralSettingsShareConnectionEnable;
-}
-
-void UiLogic::setPushButtonGeneralSettingsShareConnectionEnable(bool pushButtonGeneralSettingsShareConnectionEnable)
-{
-    if (m_pushButtonGeneralSettingsShareConnectionEnable != pushButtonGeneralSettingsShareConnectionEnable) {
-        m_pushButtonGeneralSettingsShareConnectionEnable = pushButtonGeneralSettingsShareConnectionEnable;
-        emit pushButtonGeneralSettingsShareConnectionEnableChanged();
-    }
-}
 
 bool UiLogic::getLabelServerSettingsWaitInfoVisible() const
 {
@@ -1229,10 +1121,7 @@ void UiLogic::setCheckBoxSetupWizardVpnModeChecked(bool checkBoxSetupWizardVpnMo
     }
 }
 
-QString UiLogic::getIpAddressValidatorRegex() const
-{
-    return m_ipAddressValidatorRegex;
-}
+
 
 bool UiLogic::getPushButtonConnectChecked() const
 {
@@ -1247,42 +1136,16 @@ void UiLogic::setPushButtonConnectChecked(bool pushButtonConnectChecked)
     }
 }
 
-QString UiLogic::getLabelSitesAddCustomText() const
+bool UiLogic::getPushButtonVpnAddSiteEnabled() const
 {
-    return m_labelSitesAddCustomText;
+    return m_pushButtonVpnAddSiteEnabled;
 }
 
-void UiLogic::setLabelSitesAddCustomText(const QString &labelSitesAddCustomText)
+void UiLogic::setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled)
 {
-    if (m_labelSitesAddCustomText != labelSitesAddCustomText) {
-        m_labelSitesAddCustomText = labelSitesAddCustomText;
-        emit labelSitesAddCustomTextChanged();
-    }
-}
-
-QObject* UiLogic::getTableViewSitesModel() const
-{
-    return m_tableViewSitesModel;
-}
-
-void UiLogic::setTableViewSitesModel(QObject* tableViewSitesModel)
-{
-    if (m_tableViewSitesModel != tableViewSitesModel) {
-        m_tableViewSitesModel = tableViewSitesModel;
-        emit tableViewSitesModelChanged();
-    }
-}
-
-QString UiLogic::getLineEditSitesAddCustomText() const
-{
-    return m_lineEditSitesAddCustomText;
-}
-
-void UiLogic::setLineEditSitesAddCustomText(const QString &lineEditSitesAddCustomText)
-{
-    if (m_lineEditSitesAddCustomText != lineEditSitesAddCustomText) {
-        m_lineEditSitesAddCustomText = lineEditSitesAddCustomText;
-        emit lineEditSitesAddCustomTextChanged();
+    if (m_pushButtonVpnAddSiteEnabled != pushButtonVpnAddSiteEnabled) {
+        m_pushButtonVpnAddSiteEnabled = pushButtonVpnAddSiteEnabled;
+        emit pushButtonVpnAddSiteEnabledChanged();
     }
 }
 
@@ -3679,123 +3542,7 @@ void UiLogic::onDisconnect()
 }
 
 
-void UiLogic::onPushButtonAddCustomSitesClicked()
-{
-    if (getRadioButtonVpnModeAllSitesChecked()) {
-        return;
-    }
-    Settings::RouteMode mode = m_settings.routeMode();
 
-    QString newSite = getLineEditSitesAddCustomText();
-
-    if (newSite.isEmpty()) return;
-    if (!newSite.contains(".")) return;
-
-    if (!Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-        // get domain name if it present
-        newSite.replace("https://", "");
-        newSite.replace("http://", "");
-        newSite.replace("ftp://", "");
-
-        newSite = newSite.split("/", QString::SkipEmptyParts).first();
-    }
-
-    const auto &cbProcess = [this, mode](const QString &newSite, const QString &ip) {
-        m_settings.addVpnSite(mode, newSite, ip);
-
-        if (!ip.isEmpty()) {
-            m_vpnConnection->addRoutes(QStringList() << ip);
-            m_vpnConnection->flushDns();
-        }
-        else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-            m_vpnConnection->addRoutes(QStringList() << newSite);
-            m_vpnConnection->flushDns();
-        }
-
-        updateSitesPage();
-    };
-
-    const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo){
-        const QList<QHostAddress> &addresses = hostInfo.addresses();
-        QString ipv4Addr;
-        for (const QHostAddress &addr: hostInfo.addresses()) {
-            if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                cbProcess(hostInfo.hostName(), addr.toString());
-                break;
-            }
-        }
-    };
-
-    setLineEditSitesAddCustomText("");
-
-    if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-        cbProcess(newSite, "");
-        return;
-    }
-    else {
-        cbProcess(newSite, "");
-        updateSitesPage();
-        QHostInfo::lookupHost(newSite, this, cbResolv);
-    }
-}
-
-void UiLogic::onPushButtonSitesDeleteClicked(int row)
-{
-    Settings::RouteMode mode = m_settings.routeMode();
-
-    auto siteModel = qobject_cast<SitesModel*> (getTableViewSitesModel());
-    if (!siteModel) {
-        return;
-    }
-    if (row < 0 || row >= siteModel->rowCount()) {
-        return;
-    }
-
-    {
-        QStringList sites;
-        sites.append(siteModel->data(row, 0).toString());
-        m_settings.removeVpnSites(mode, sites);
-    }
-
-    if (m_vpnConnection->connectionState() == VpnProtocol::Connected) {
-        QStringList ips;
-        ips.append(siteModel->data(row, 1).toString());
-        m_vpnConnection->deleteRoutes(ips);
-        m_vpnConnection->flushDns();
-    }
-
-    updateSitesPage();
-}
-
-void UiLogic::onPushButtonSitesImportClicked(const QString& fileName)
-{
-    QFile file(QUrl{fileName}.toLocalFile());
-    if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Can't open file " << QUrl{fileName}.toLocalFile();
-        return;
-    }
-
-    Settings::RouteMode mode = m_settings.routeMode();
-
-    QStringList ips;
-    while (!file.atEnd()) {
-        QString line = file.readLine();
-
-        int pos = 0;
-        QRegExp rx = Utils::ipAddressWithSubnetRegExp();
-        while ((pos = rx.indexIn(line, pos)) != -1) {
-            ips << rx.cap(0);
-            pos += rx.matchedLength();
-        }
-    }
-
-    m_settings.addVpnIps(mode, ips);
-
-    m_vpnConnection->addRoutes(QStringList() << ips);
-    m_vpnConnection->flushDns();
-
-    updateSitesPage();
-}
 
 void UiLogic::onPushButtonShareFullCopyClicked()
 {
@@ -3953,20 +3700,7 @@ void UiLogic::onPushButtonShareOpenvpnSaveClicked()
     save.commit();
 }
 
-void UiLogic::onPushButtonGeneralSettingsServerSettingsClicked()
-{
-    selectedServerIndex = m_settings.defaultServerIndex();
-    goToPage(Page::ServerSettings);
-}
 
-void UiLogic::onPushButtonGeneralSettingsShareConnectionClicked()
-{
-    selectedServerIndex = m_settings.defaultServerIndex();
-    selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
-
-    updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer);
-    goToPage(Page::ShareConnection);
-}
 
 void UiLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
 {
@@ -4191,21 +3925,7 @@ void UiLogic::updateStartPage()
     setPushButtonNewServerConnectVisible(true);
 }
 
-void UiLogic::updateSitesPage()
-{
-    Settings::RouteMode m = m_settings.routeMode();
-    if (m == Settings::VpnAllSites) return;
 
-    if (m == Settings::VpnOnlyForwardSites) {
-        setLabelSitesAddCustomText(tr("These sites will be opened using VPN"));
-    }
-    if (m == Settings::VpnAllExceptSites) {
-        setLabelSitesAddCustomText(tr("These sites will be excepted from VPN"));
-    }
-
-    setTableViewSitesModel(sitesModels.value(m));
-    sitesModels.value(m)->resetCache();
-}
 
 void UiLogic::updateVpnPage()
 {
@@ -4216,26 +3936,8 @@ void UiLogic::updateVpnPage()
     setPushButtonVpnAddSiteEnabled(mode != Settings::VpnAllSites);
 }
 
-void UiLogic::updateAppSettingsPage()
-{
-    setCheckBoxAppSettingsAutostartChecked(Autostart::isAutostart());
-    setCheckBoxAppSettingsAutoconnectChecked(m_settings.isAutoConnect());
-    setCheckBoxAppSettingsStartMinimizedChecked(m_settings.isStartMinimized());
 
-    setLineEditNetworkSettingsDns1Text(m_settings.primaryDns());
-    setLineEditNetworkSettingsDns2Text(m_settings.secondaryDns());
 
-    QString ver = QString("%1: %2 (%3)")
-            .arg(tr("Software version"))
-            .arg(QString(APP_MAJOR_VERSION))
-            .arg(__DATE__);
-    setLabelAppSettingsVersionText(ver);
-}
-
-void UiLogic::updateGeneralSettingPage()
-{
-    setPushButtonGeneralSettingsShareConnectionEnable(m_settings.haveAuthData(m_settings.defaultServerIndex()));
-}
 
 void UiLogic::updateServerPage()
 {
@@ -4293,56 +3995,7 @@ void UiLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
     }
 }
 
-void UiLogic::onPushButtonAppSettingsOpenLogsChecked()
-{
-    Debug::openLogsFolder();
-}
 
-void UiLogic::onCheckBoxAppSettingsAutostartToggled(bool checked)
-{
-    if (!checked) {
-        setCheckBoxAppSettingsAutoconnectChecked(false);
-    }
-    Autostart::setAutostart(checked);
-}
-
-void UiLogic::onCheckBoxAppSettingsAutoconnectToggled(bool checked)
-{
-    m_settings.setAutoConnect(checked);
-}
-
-void UiLogic::onCheckBoxAppSettingsStartMinimizedToggled(bool checked)
-{
-    m_settings.setStartMinimized(checked);
-}
-
-void UiLogic::onLineEditNetworkSettingsDns1EditFinished(const QString &text)
-{
-    QRegExp reg{getIpAddressValidatorRegex()};
-    if (reg.exactMatch(text)) {
-        m_settings.setPrimaryDns(text);
-    }
-}
-
-void UiLogic::onLineEditNetworkSettingsDns2EditFinished(const QString &text)
-{
-    QRegExp reg{getIpAddressValidatorRegex()};
-    if (reg.exactMatch(text)) {
-        m_settings.setSecondaryDns(text);
-    }
-}
-
-void UiLogic::onPushButtonNetworkSettingsResetdns1Clicked()
-{
-    m_settings.setPrimaryDns(m_settings.cloudFlareNs1);
-    updateAppSettingsPage();
-}
-
-void UiLogic::onPushButtonNetworkSettingsResetdns2Clicked()
-{
-    m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
-    updateAppSettingsPage();
-}
 
 void UiLogic::updateServersListPage()
 {

@@ -57,13 +57,13 @@ Item {
         y: 120
         width: 271
         height: 40
-        text: UiLogic.lineEditNetworkSettingsDns1Text
+        text: NetworkSettingsLogic.lineEditNetworkSettingsDns1Text
         onEditingFinished: {
-            UiLogic.lineEditNetworkSettingsDns1Text = text
-            UiLogic.onLineEditNetworkSettingsDns1EditFinished(text)
+            NetworkSettingsLogic.lineEditNetworkSettingsDns1Text = text
+            NetworkSettingsLogic.onLineEditNetworkSettingsDns1EditFinished(text)
         }
         validator: RegExpValidator {
-            regExp: UiLogic.ipAddressValidatorRegex
+            regExp: NetworkSettingsLogic.ipAddressValidatorRegex
         }
     }
     TextFieldType {
@@ -72,13 +72,13 @@ Item {
         y: 200
         width: 271
         height: 40
-        text: UiLogic.lineEditNetworkSettingsDns2Text
+        text: NetworkSettingsLogic.lineEditNetworkSettingsDns2Text
         onEditingFinished: {
-            UiLogic.lineEditNetworkSettingsDns2Text = text
-            UiLogic.onLineEditNetworkSettingsDns2EditFinished(text)
+            NetworkSettingsLogic.lineEditNetworkSettingsDns2Text = text
+            NetworkSettingsLogic.onLineEditNetworkSettingsDns2EditFinished(text)
         }
         validator: RegExpValidator {
-            regExp: UiLogic.ipAddressValidatorRegex
+            regExp: NetworkSettingsLogic.ipAddressValidatorRegex
         }
     }
     ImageButtonType {
@@ -89,7 +89,7 @@ Item {
         height: 24
         icon.source: "qrc:/images/reload.png"
         onClicked: {
-            UiLogic.onPushButtonNetworkSettingsResetdns1Clicked()
+            NetworkSettingsLogic.onPushButtonNetworkSettingsResetdns1Clicked()
         }
     }
     ImageButtonType {
@@ -100,7 +100,7 @@ Item {
         height: 24
         icon.source: "qrc:/images/reload.png"
         onClicked: {
-            UiLogic.onPushButtonNetworkSettingsResetdns2Clicked()
+            NetworkSettingsLogic.onPushButtonNetworkSettingsResetdns2Clicked()
         }
     }
 }

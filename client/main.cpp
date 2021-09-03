@@ -11,6 +11,22 @@
 #include "ui/uilogic.h"
 #include <QDebug>
 
+#include "ui/pages.h"
+
+#include "ui/pages_logic/AppSettingsLogic.h"
+#include "ui/pages_logic/GeneralSettingsLogic.h"
+#include "ui/pages_logic/NetworkSettingsLogic.h"
+#include "ui/pages_logic/NewServerLogic.h"
+#include "ui/pages_logic/ProtocolSettingsLogic.h"
+#include "ui/pages_logic/ServerListLogic.h"
+#include "ui/pages_logic/ServerSettingsLogic.h"
+#include "ui/pages_logic/ServerVpnProtocolsLogic.h"
+#include "ui/pages_logic/ShareConnectionLogic.h"
+#include "ui/pages_logic/SitesLogic.h"
+#include "ui/pages_logic/VpnLogic.h"
+#include "ui/pages_logic/WizardLogic.h"
+
+
 #include "debug.h"
 #include "defines.h"
 
@@ -93,16 +109,46 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-    UiLogic uiLogic;
+    UiLogic *uiLogic = new UiLogic;
+
+    AppSettingsLogic *appSettingsLogic = new AppSettingsLogic(uiLogic);
+    GeneralSettingsLogic *generalSettingsLogic = new GeneralSettingsLogic(uiLogic);
+    NetworkSettingsLogic *networkSettingsLogic = new NetworkSettingsLogic(uiLogic);
+    NewServerLogic *newServerLogic = new NewServerLogic(uiLogic);
+    ProtocolSettingsLogic *protocolSettingsLogic = new ProtocolSettingsLogic(uiLogic);
+    ServerListLogic *serverListLogic = new ServerListLogic(uiLogic);
+    ServerSettingsLogic *serverSettingsLogic = new ServerSettingsLogic(uiLogic);
+    ServerVpnProtocolsLogic *serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(uiLogic);
+    ShareConnectionLogic *shareConnectionLogic = new ShareConnectionLogic(uiLogic);
+    SitesLogic *sitesLogic = new SitesLogic(uiLogic);
+    VpnLogic *vpnLogic = new VpnLogic(uiLogic);
+    WizardLogic *wizardLogic = new WizardLogic(uiLogic);
+
     QQmlApplicationEngine engine;
-    UiLogic::declareQML();
+    PageEnumNS::declareQML();
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
-    engine.rootContext()->setContextProperty("UiLogic", &uiLogic);
+
+    engine.rootContext()->setContextProperty("UiLogic", uiLogic);
+
+    engine.rootContext()->setContextProperty("AppSettingsLogic", appSettingsLogic);
+    engine.rootContext()->setContextProperty("GeneralSettingsLogic", generalSettingsLogic);
+    engine.rootContext()->setContextProperty("NetworkSettingsLogic", networkSettingsLogic);
+    engine.rootContext()->setContextProperty("NewServerLogic", newServerLogic);
+    engine.rootContext()->setContextProperty("ProtocolSettingsLogic", protocolSettingsLogic);
+    engine.rootContext()->setContextProperty("ServerListLogic", serverListLogic);
+    engine.rootContext()->setContextProperty("ServerSettingsLogic", serverSettingsLogic);
+    engine.rootContext()->setContextProperty("ServerVpnProtocolsLogic", serverVpnProtocolsLogic);
+    engine.rootContext()->setContextProperty("ShareConnectionLogic", shareConnectionLogic);
+    engine.rootContext()->setContextProperty("SitesLogic", sitesLogic);
+    engine.rootContext()->setContextProperty("VpnLogic", vpnLogic);
+    engine.rootContext()->setContextProperty("WizardLogic", wizardLogic);
+
+
     engine.load(url);
 
     // TODO - fix

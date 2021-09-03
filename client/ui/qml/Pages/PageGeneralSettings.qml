@@ -109,7 +109,7 @@ Item {
         icon.source: "qrc:/images/server_settings.png"
         text: qsTr("Server management")
         onClicked: {
-            UiLogic.onPushButtonGeneralSettingsServerSettingsClicked()
+            GeneralSettingsLogic.onPushButtonGeneralSettingsServerSettingsClicked()
         }
     }
     SettingButtonType {
@@ -130,9 +130,9 @@ Item {
         height: 30
         icon.source: "qrc:/images/share.png"
         text: qsTr("Share connection")
-        enabled: UiLogic.pushButtonGeneralSettingsShareConnectionEnable
+        enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable
         onClicked: {
-            UiLogic.onPushButtonGeneralSettingsShareConnectionClicked()
+            GeneralSettingsLogic.onPushButtonGeneralSettingsShareConnectionClicked()
         }
     }
     SettingButtonType {

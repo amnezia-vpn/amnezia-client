@@ -6,30 +6,34 @@
 #include <functional>
 #include "3rd/QRCodeGenerator/QRCodeGenerator.h"
 
+#include "pages.h"
 #include "protocols/vpnprotocol.h"
 
 #include "settings.h"
-#include "sites_model.h"
 #include "serversmodel.h"
+
+class AppSettingsLogic;
+class GeneralSettingsLogic;
+class NetworkSettingsLogic;
+class NewServerLogic;
+class ProtocolSettingsLogic;
+class ServerListLogic;
+class ServerSettingsLogic;
+class ServerVpnProtocolsLogic;
+class ShareConnectionLogic;
+class SitesLogic;
+class VpnLogic;
+class WizardLogic;
 
 class VpnConnection;
 
-namespace PageEnumNS
-{
-Q_NAMESPACE
-enum Page {Start = 0, NewServer, NewServerProtocols, Vpn,
-           Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
-           GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
-           ServerVpnProtocols, ServersList, ShareConnection,  Sites,
-           OpenVpnSettings, ShadowSocksSettings, CloakSettings};
-Q_ENUM_NS(Page)
-}
+
 
 class UiLogic : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool frameWireguardSettingsVisible READ getFrameWireguardSettingsVisible WRITE setFrameWireguardSettingsVisible NOTIFY frameWireguardSettingsVisibleChanged)
-    Q_PROPERTY(bool frameFireguardVisible READ getFrameFireguardVisible WRITE setFrameFireguardVisible NOTIFY frameFireguardVisibleChanged)
+    Q_PROPERTY(bool frameWireguardVisible READ getFrameWireguardVisible WRITE setFrameWireguardVisible NOTIFY frameWireguardVisibleChanged)
     Q_PROPERTY(bool frameNewServerSettingsParentWireguardVisible READ getFrameNewServerSettingsParentWireguardVisible WRITE setFrameNewServerSettingsParentWireguardVisible NOTIFY frameNewServerSettingsParentWireguardVisibleChanged)
     Q_PROPERTY(bool radioButtonSetupWizardMediumChecked READ getRadioButtonSetupWizardMediumChecked WRITE setRadioButtonSetupWizardMediumChecked NOTIFY radioButtonSetupWizardMediumCheckedChanged)
     Q_PROPERTY(QString lineEditSetupWizardHighWebsiteMaskingText READ getLineEditSetupWizardHighWebsiteMaskingText WRITE setLineEditSetupWizardHighWebsiteMaskingText NOTIFY lineEditSetupWizardHighWebsiteMaskingTextChanged)
@@ -55,17 +59,7 @@ class UiLogic : public QObject
     Q_PROPERTY(double progressBarNewServerConnectionMaximum READ getProgressBarNewServerConnectionMaximum WRITE setProgressBarNewServerConnectionMaximum NOTIFY progressBarNewServerConnectionMaximumChanged)
     Q_PROPERTY(bool pushButtonBackFromStartVisible READ getPushButtonBackFromStartVisible WRITE setPushButtonBackFromStartVisible NOTIFY pushButtonBackFromStartVisibleChanged)
     Q_PROPERTY(bool pushButtonNewServerConnectVisible READ getPushButtonNewServerConnectVisible WRITE setPushButtonNewServerConnectVisible NOTIFY pushButtonNewServerConnectVisibleChanged)
-    Q_PROPERTY(bool radioButtonVpnModeAllSitesChecked READ getRadioButtonVpnModeAllSitesChecked WRITE setRadioButtonVpnModeAllSitesChecked NOTIFY radioButtonVpnModeAllSitesCheckedChanged)
-    Q_PROPERTY(bool radioButtonVpnModeForwardSitesChecked READ getRadioButtonVpnModeForwardSitesChecked WRITE setRadioButtonVpnModeForwardSitesChecked NOTIFY radioButtonVpnModeForwardSitesCheckedChanged)
-    Q_PROPERTY(bool radioButtonVpnModeExceptSitesChecked READ getRadioButtonVpnModeExceptSitesChecked WRITE setRadioButtonVpnModeExceptSitesChecked NOTIFY radioButtonVpnModeExceptSitesCheckedChanged)
-    Q_PROPERTY(bool pushButtonVpnAddSiteEnabled READ getPushButtonVpnAddSiteEnabled WRITE setPushButtonVpnAddSiteEnabled NOTIFY pushButtonVpnAddSiteEnabledChanged)
-    Q_PROPERTY(bool checkBoxAppSettingsAutostartChecked READ getCheckBoxAppSettingsAutostartChecked WRITE setCheckBoxAppSettingsAutostartChecked NOTIFY checkBoxAppSettingsAutostartCheckedChanged)
-    Q_PROPERTY(bool checkBoxAppSettingsAutoconnectChecked READ getCheckBoxAppSettingsAutoconnectChecked WRITE setCheckBoxAppSettingsAutoconnectChecked NOTIFY checkBoxAppSettingsAutoconnectCheckedChanged)
-    Q_PROPERTY(bool checkBoxAppSettingsStartMinimizedChecked READ getCheckBoxAppSettingsStartMinimizedChecked WRITE setCheckBoxAppSettingsStartMinimizedChecked NOTIFY checkBoxAppSettingsStartMinimizedCheckedChanged)
-    Q_PROPERTY(QString lineEditNetworkSettingsDns1Text READ getLineEditNetworkSettingsDns1Text WRITE setLineEditNetworkSettingsDns1Text NOTIFY lineEditNetworkSettingsDns1TextChanged)
-    Q_PROPERTY(QString lineEditNetworkSettingsDns2Text READ getLineEditNetworkSettingsDns2Text WRITE setLineEditNetworkSettingsDns2Text NOTIFY lineEditNetworkSettingsDns2TextChanged)
-    Q_PROPERTY(QString labelAppSettingsVersionText READ getLabelAppSettingsVersionText WRITE setLabelAppSettingsVersionText NOTIFY labelAppSettingsVersionTextChanged)
-    Q_PROPERTY(bool pushButtonGeneralSettingsShareConnectionEnable READ getPushButtonGeneralSettingsShareConnectionEnable WRITE setPushButtonGeneralSettingsShareConnectionEnable NOTIFY pushButtonGeneralSettingsShareConnectionEnableChanged)
+
     Q_PROPERTY(bool labelServerSettingsWaitInfoVisible READ getLabelServerSettingsWaitInfoVisible WRITE setLabelServerSettingsWaitInfoVisible NOTIFY labelServerSettingsWaitInfoVisibleChanged)
     Q_PROPERTY(QString labelServerSettingsWaitInfoText READ getLabelServerSettingsWaitInfoText WRITE setLabelServerSettingsWaitInfoText NOTIFY labelServerSettingsWaitInfoTextChanged)
     Q_PROPERTY(bool pushButtonServerSettingsClearVisible READ getPushButtonServerSettingsClearVisible WRITE setPushButtonServerSettingsClearVisible NOTIFY pushButtonServerSettingsClearVisibleChanged)
@@ -97,11 +91,8 @@ class UiLogic : public QObject
     Q_PROPERTY(bool radioButtonSetupWizardHighChecked READ getRadioButtonSetupWizardHighChecked WRITE setRadioButtonSetupWizardHighChecked NOTIFY radioButtonSetupWizardHighCheckedChanged)
     Q_PROPERTY(bool radioButtonSetupWizardLowChecked READ getRadioButtonSetupWizardLowChecked WRITE setRadioButtonSetupWizardLowChecked NOTIFY radioButtonSetupWizardLowCheckedChanged)
     Q_PROPERTY(bool checkBoxSetupWizardVpnModeChecked READ getCheckBoxSetupWizardVpnModeChecked WRITE setCheckBoxSetupWizardVpnModeChecked NOTIFY checkBoxSetupWizardVpnModeCheckedChanged)
-    Q_PROPERTY(QString ipAddressValidatorRegex READ getIpAddressValidatorRegex CONSTANT)
+
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
-    Q_PROPERTY(QString labelSitesAddCustomText READ getLabelSitesAddCustomText WRITE setLabelSitesAddCustomText NOTIFY labelSitesAddCustomTextChanged)
-    Q_PROPERTY(QObject* tableViewSitesModel READ getTableViewSitesModel NOTIFY tableViewSitesModelChanged)
-    Q_PROPERTY(QString lineEditSitesAddCustomText READ getLineEditSitesAddCustomText WRITE setLineEditSitesAddCustomText NOTIFY lineEditSitesAddCustomTextChanged)
     Q_PROPERTY(bool widgetProtoCloakEnabled READ getWidgetProtoCloakEnabled WRITE setWidgetProtoCloakEnabled NOTIFY widgetProtoCloakEnabledChanged)
     Q_PROPERTY(bool pushButtonProtoCloakSaveVisible READ getPushButtonProtoCloakSaveVisible WRITE setPushButtonProtoCloakSaveVisible NOTIFY pushButtonProtoCloakSaveVisibleChanged)
     Q_PROPERTY(bool progressBarProtoCloakResetVisible READ getProgressBarProtoCloakResetVisible WRITE setProgressBarProtoCloakResetVisible NOTIFY progressBarProtoCloakResetVisibleChanged)
@@ -213,25 +204,37 @@ class UiLogic : public QObject
     Q_PROPERTY(QString pushButtonServerSettingsClearClientCacheText READ getPushButtonServerSettingsClearClientCacheText WRITE setPushButtonServerSettingsClearClientCacheText NOTIFY pushButtonServerSettingsClearClientCacheTextChanged)
 
 
+    Q_PROPERTY(bool pushButtonVpnAddSiteEnabled READ getPushButtonVpnAddSiteEnabled WRITE setPushButtonVpnAddSiteEnabled NOTIFY pushButtonVpnAddSiteEnabledChanged)
+
+    Q_PROPERTY(bool radioButtonVpnModeAllSitesChecked READ getRadioButtonVpnModeAllSitesChecked WRITE setRadioButtonVpnModeAllSitesChecked NOTIFY radioButtonVpnModeAllSitesCheckedChanged)
+    Q_PROPERTY(bool radioButtonVpnModeForwardSitesChecked READ getRadioButtonVpnModeForwardSitesChecked WRITE setRadioButtonVpnModeForwardSitesChecked NOTIFY radioButtonVpnModeForwardSitesCheckedChanged)
+    Q_PROPERTY(bool radioButtonVpnModeExceptSitesChecked READ getRadioButtonVpnModeExceptSitesChecked WRITE setRadioButtonVpnModeExceptSitesChecked NOTIFY radioButtonVpnModeExceptSitesCheckedChanged)
+
 public:
     explicit UiLogic(QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
 
+    friend class AppSettingsLogic;
+    friend class GeneralSettingsLogic;
+    friend class NetworkSettingsLogic;
+    friend class NewServerLogic;
+    friend class ProtocolSettingsLogic;
+    friend class ServerListLogic;
+    friend class ServerSettingsLogic;
+    friend class ServerVpnProtocolsLogic;
+    friend class ShareConnectionLogic;
+    friend class SitesLogic;
+    friend class VpnLogic;
+    friend class WizardLogic;
+
     Q_INVOKABLE void initalizeUiLogic();
-    static void declareQML() {
-        qmlRegisterUncreatableMetaObject(
-                    PageEnumNS::staticMetaObject,
-                    "PageEnum",
-                    1, 0,
-                    "PageEnum",
-                    "Error: only enums"
-                    );
-    }
+
+
     bool getFrameWireguardSettingsVisible() const;
     void setFrameWireguardSettingsVisible(bool frameWireguardSettingsVisible);
-    bool getFrameFireguardVisible() const;
-    void setFrameFireguardVisible(bool frameFireguardVisible);
+    bool getFrameWireguardVisible() const;
+    void setFrameWireguardVisible(bool frameWireguardVisible);
     bool getFrameNewServerSettingsParentWireguardVisible() const;
     void setFrameNewServerSettingsParentWireguardVisible(bool frameNewServerSettingsParentWireguardVisible);
     bool getRadioButtonSetupWizardMediumChecked() const;
@@ -282,28 +285,9 @@ public:
     void setPushButtonNewServerConnectVisible(bool pushButtonNewServerConnectVisible);
     bool getPushButtonNewServerConnectKeyChecked() const;
     void setPushButtonNewServerConnectKeyChecked(bool pushButtonNewServerConnectKeyChecked);
-    bool getRadioButtonVpnModeAllSitesChecked() const;
-    void setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked);
-    bool getRadioButtonVpnModeForwardSitesChecked() const;
-    void setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeForwardSitesChecked);
-    bool getRadioButtonVpnModeExceptSitesChecked() const;
-    void setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExceptSitesChecked);
-    bool getPushButtonVpnAddSiteEnabled() const;
-    void setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled);
-    bool getCheckBoxAppSettingsAutostartChecked() const;
-    void setCheckBoxAppSettingsAutostartChecked(bool checkBoxAppSettingsAutostartChecked);
-    bool getCheckBoxAppSettingsAutoconnectChecked() const;
-    void setCheckBoxAppSettingsAutoconnectChecked(bool checkBoxAppSettingsAutoconnectChecked);
-    bool getCheckBoxAppSettingsStartMinimizedChecked() const;
-    void setCheckBoxAppSettingsStartMinimizedChecked(bool checkBoxAppSettingsStartMinimizedChecked);
-    QString getLineEditNetworkSettingsDns1Text() const;
-    void setLineEditNetworkSettingsDns1Text(const QString &lineEditNetworkSettingsDns1Text);
-    QString getLineEditNetworkSettingsDns2Text() const;
-    void setLineEditNetworkSettingsDns2Text(const QString &lineEditNetworkSettingsDns2Text);
-    QString getLabelAppSettingsVersionText() const;
-    void setLabelAppSettingsVersionText(const QString &labelAppSettingsVersionText);
-    bool getPushButtonGeneralSettingsShareConnectionEnable() const;
-    void setPushButtonGeneralSettingsShareConnectionEnable(bool pushButtonGeneralSettingsShareConnectionEnable);
+
+
+
     bool getLabelServerSettingsWaitInfoVisible() const;
     void setLabelServerSettingsWaitInfoVisible(bool labelServerSettingsWaitInfoVisible);
     QString getLabelServerSettingsWaitInfoText() const;
@@ -366,15 +350,10 @@ public:
     void setRadioButtonSetupWizardLowChecked(bool radioButtonSetupWizardLowChecked);
     bool getCheckBoxSetupWizardVpnModeChecked() const;
     void setCheckBoxSetupWizardVpnModeChecked(bool checkBoxSetupWizardVpnModeChecked);
-    QString getIpAddressValidatorRegex() const;
+
     bool getPushButtonConnectChecked() const;
     void setPushButtonConnectChecked(bool pushButtonConnectChecked);
-    QString getLabelSitesAddCustomText() const;
-    void setLabelSitesAddCustomText(const QString &labelSitesAddCustomText);
-    QObject* getTableViewSitesModel() const;
-    void setTableViewSitesModel(QObject *tableViewSitesModel);
-    QString getLineEditSitesAddCustomText() const;
-    void setLineEditSitesAddCustomText(const QString &lineEditSitesAddCustomText);
+
     bool getWidgetProtoCloakEnabled() const;
     void setWidgetProtoCloakEnabled(bool widgetProtoCloakEnabled);
     bool getPushButtonProtoCloakSaveVisible() const;
@@ -593,13 +572,19 @@ public:
     QString getPushButtonServerSettingsClearClientCacheText() const;
     void setPushButtonServerSettingsClearClientCacheText(const QString &pushButtonServerSettingsClearClientCacheText);
 
+    bool getRadioButtonVpnModeAllSitesChecked() const;
+    void setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked);
+    bool getRadioButtonVpnModeForwardSitesChecked() const;
+    void setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeForwardSitesChecked);
+    bool getRadioButtonVpnModeExceptSitesChecked() const;
+    void setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExceptSitesChecked);
+    bool getPushButtonVpnAddSiteEnabled() const;
+    void setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled);
 
     Q_INVOKABLE void updateWizardHighPage();
     Q_INVOKABLE void updateNewServerProtocolsPage();
     Q_INVOKABLE void updateStartPage();
     Q_INVOKABLE void updateVpnPage();
-    Q_INVOKABLE void updateAppSettingsPage();
-    Q_INVOKABLE void updateGeneralSettingPage();
     Q_INVOKABLE void updateServerPage();
 
     Q_INVOKABLE void onPushButtonNewServerConnect();
@@ -609,18 +594,11 @@ public:
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeExceptSitesToggled(bool checked);
-    Q_INVOKABLE void onPushButtonAppSettingsOpenLogsChecked();
-    Q_INVOKABLE void onCheckBoxAppSettingsAutostartToggled(bool checked);
-    Q_INVOKABLE void onCheckBoxAppSettingsAutoconnectToggled(bool checked);
-    Q_INVOKABLE void onCheckBoxAppSettingsStartMinimizedToggled(bool checked);
-    Q_INVOKABLE void onLineEditNetworkSettingsDns1EditFinished(const QString& text);
-    Q_INVOKABLE void onLineEditNetworkSettingsDns2EditFinished(const QString& text);
-    Q_INVOKABLE void onPushButtonNetworkSettingsResetdns1Clicked();
-    Q_INVOKABLE void onPushButtonNetworkSettingsResetdns2Clicked();
+
     Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
-    Q_INVOKABLE void onPushButtonAddCustomSitesClicked();
-    Q_INVOKABLE void onPushButtonSitesDeleteClicked(int row);
-    Q_INVOKABLE void onPushButtonSitesImportClicked(const QString &fileName);
+
+
+
     Q_INVOKABLE void onPushButtonShareFullCopyClicked();
     Q_INVOKABLE void onPushButtonShareFullSaveClicked();
     Q_INVOKABLE void onPushButtonShareAmneziaCopyClicked();
@@ -631,8 +609,7 @@ public:
     Q_INVOKABLE void onPushButtonShareAmneziaGenerateClicked();
     Q_INVOKABLE void onPushButtonShareOpenvpnGenerateClicked();
     Q_INVOKABLE void onPushButtonShareOpenvpnSaveClicked();
-    Q_INVOKABLE void onPushButtonGeneralSettingsServerSettingsClicked();
-    Q_INVOKABLE void onPushButtonGeneralSettingsShareConnectionClicked();
+
     Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
@@ -651,13 +628,12 @@ public:
     Q_INVOKABLE void onPushButtonForgetServer();
     Q_INVOKABLE void onPushButtonServerSettingsClearClientCacheClicked();
     Q_INVOKABLE void onLineEditServerSettingsDescriptionEditingFinished();
-    Q_INVOKABLE void updateSitesPage();
     Q_INVOKABLE void updateServersListPage();
     Q_INVOKABLE void updateProtocolsPage();
 
 signals:
     void frameWireguardSettingsVisibleChanged();
-    void frameFireguardVisibleChanged();
+    void frameWireguardVisibleChanged();
     void frameNewServerSettingsParentWireguardVisibleChanged();
     void radioButtonSetupWizardMediumCheckedChanged();
     void lineEditSetupWizardHighWebsiteMaskingTextChanged();
@@ -687,15 +663,11 @@ signals:
     void radioButtonVpnModeForwardSitesCheckedChanged();
     void radioButtonVpnModeExceptSitesCheckedChanged();
     void pushButtonVpnAddSiteEnabledChanged();
-    void checkBoxAppSettingsAutostartCheckedChanged();
-    void checkBoxAppSettingsAutoconnectCheckedChanged();
-    void checkBoxAppSettingsStartMinimizedCheckedChanged();
-    void lineEditNetworkSettingsDns1TextChanged();
-    void lineEditNetworkSettingsDns2TextChanged();
-    void labelAppSettingsVersionTextChanged();
-    void pushButtonGeneralSettingsShareConnectionEnableChanged();
+
     void labelServerSettingsWaitInfoVisibleChanged();
     void labelServerSettingsWaitInfoTextChanged();
+
+
     void pushButtonServerSettingsClearVisibleChanged();
     void pushButtonServerSettingsClearClientCacheVisibleChanged();
     void pushButtonServerSettingsShareFullVisibleChanged();
@@ -726,9 +698,7 @@ signals:
     void radioButtonSetupWizardLowCheckedChanged();
     void checkBoxSetupWizardVpnModeCheckedChanged();
     void pushButtonConnectCheckedChanged();
-    void labelSitesAddCustomTextChanged();
-    void tableViewSitesModelChanged();
-    void lineEditSitesAddCustomTextChanged();
+
     void widgetProtoCloakEnabledChanged();
     void pushButtonProtoCloakSaveVisibleChanged();
     void progressBarProtoCloakResetVisibleChanged();
@@ -861,7 +831,7 @@ signals:
 
 private:
     bool m_frameWireguardSettingsVisible;
-    bool m_frameFireguardVisible;
+    bool m_frameWireguardVisible;
     bool m_frameNewServerSettingsParentWireguardVisible;
     bool m_radioButtonSetupWizardMediumChecked;
     QString m_lineEditSetupWizardHighWebsiteMaskingText;
@@ -891,13 +861,7 @@ private:
     bool m_radioButtonVpnModeForwardSitesChecked;
     bool m_radioButtonVpnModeExceptSitesChecked;
     bool m_pushButtonVpnAddSiteEnabled;
-    bool m_checkBoxAppSettingsAutostartChecked;
-    bool m_checkBoxAppSettingsAutoconnectChecked;
-    bool m_checkBoxAppSettingsStartMinimizedChecked;
-    QString m_lineEditNetworkSettingsDns1Text;
-    QString m_lineEditNetworkSettingsDns2Text;
-    QString m_labelAppSettingsVersionText;
-    bool m_pushButtonGeneralSettingsShareConnectionEnable;
+
     bool m_labelServerSettingsWaitInfoVisible;
     QString m_labelServerSettingsWaitInfoText;
     bool m_pushButtonServerSettingsClearVisible;
@@ -929,11 +893,9 @@ private:
     bool m_radioButtonSetupWizardHighChecked;
     bool m_radioButtonSetupWizardLowChecked;
     bool m_checkBoxSetupWizardVpnModeChecked;
-    QString m_ipAddressValidatorRegex;
+
     bool m_pushButtonConnectChecked;
-    QString m_labelSitesAddCustomText;
-    QObject* m_tableViewSitesModel;
-    QString m_lineEditSitesAddCustomText;
+
     bool m_widgetProtoCloakEnabled;
     bool m_pushButtonProtoCloakSaveVisible;
     bool m_progressBarProtoCloakResetVisible;
@@ -1094,7 +1056,7 @@ private:
     void setTrayIcon(const QString &iconPath);
 
     void setupNewServerConnections();
-    void setupSitesPageConnections();
+   // void setupSitesPageConnections();
     void setupProtocolsPageConnections();
 
     void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
@@ -1116,7 +1078,6 @@ private:
     VpnConnection* m_vpnConnection;
     Settings m_settings;
 
-    QMap<Settings::RouteMode, SitesModel *> sitesModels;
 
     //    QRegExpValidator m_ipAddressValidator;
     //    QRegExpValidator m_ipAddressPortValidator;

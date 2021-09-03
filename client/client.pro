@@ -33,6 +33,19 @@ HEADERS  += \
     protocols/shadowsocksvpnprotocol.h \
    protocols/wireguardprotocol.h \
     settings.h \
+    ui/pages.h \
+    ui/pages_logic/AppSettingsLogic.h \
+    ui/pages_logic/GeneralSettingsLogic.h \
+    ui/pages_logic/NetworkSettingsLogic.h \
+    ui/pages_logic/NewServerLogic.h \
+    ui/pages_logic/ProtocolSettingsLogic.h \
+    ui/pages_logic/ServerListLogic.h \
+    ui/pages_logic/ServerSettingsLogic.h \
+    ui/pages_logic/ServerVpnProtocolsLogic.h \
+    ui/pages_logic/ShareConnectionLogic.h \
+    ui/pages_logic/SitesLogic.h \
+    ui/pages_logic/VpnLogic.h \
+    ui/pages_logic/WizardLogic.h \
     ui/serversmodel.h \
     ui/uilogic.h \
    ui/qautostart.h \
@@ -62,6 +75,18 @@ SOURCES  += \
     protocols/shadowsocksvpnprotocol.cpp \
    protocols/wireguardprotocol.cpp \
     settings.cpp \
+    ui/pages_logic/AppSettingsLogic.cpp \
+    ui/pages_logic/GeneralSettingsLogic.cpp \
+    ui/pages_logic/NetworkSettingsLogic.cpp \
+    ui/pages_logic/NewServerLogic.cpp \
+    ui/pages_logic/ProtocolSettingsLogic.cpp \
+    ui/pages_logic/ServerListLogic.cpp \
+    ui/pages_logic/ServerSettingsLogic.cpp \
+    ui/pages_logic/ServerVpnProtocolsLogic.cpp \
+    ui/pages_logic/ShareConnectionLogic.cpp \
+    ui/pages_logic/SitesLogic.cpp \
+    ui/pages_logic/VpnLogic.cpp \
+    ui/pages_logic/WizardLogic.cpp \
     ui/serversmodel.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \

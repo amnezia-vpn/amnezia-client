@@ -156,7 +156,7 @@ Window {
                 UiLogic.progressBarNewServerConfiguringValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
-                UiLogic.updateGeneralSettingPage();
+                GeneralSettingsLogic.updateGeneralSettingPage();
             }
             if (page === PageEnum.ServersList) {
                 UiLogic.updateServersListPage();
@@ -172,13 +172,13 @@ Window {
                 UiLogic.updateProtocolsPage()
             }
             if (page === PageEnum.AppSettings) {
-                UiLogic.updateAppSettingsPage()
+                AppSettingsLogic.updateAppSettingsPage()
             }
             if (page === PageEnum.NetworkSettings) {
-                UiLogic.updateAppSettingsPage()
+                NetworkSettingsLogic.updateNetworkSettingsPage()
             }
             if (page === PageEnum.Sites) {
-                UiLogic.updateSitesPage()
+                SitesLogic.updateSitesPage()
             }
             if (page === PageEnum.Vpn) {
                 UiLogic.updateVpnPage()

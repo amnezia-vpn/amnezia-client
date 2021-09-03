@@ -388,7 +388,7 @@ Item {
                 border.width: 1
                 border.color: "lightgray"
                 radius: 2
-                visible: UiLogic.frameFireguardVisible
+                visible: UiLogic.frameWireguardVisible
                 Item {
                     x: 5
                     y: 5
