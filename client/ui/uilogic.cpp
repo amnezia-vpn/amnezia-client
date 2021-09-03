@@ -81,14 +81,8 @@ UiLogic::UiLogic(QObject *parent) :
     m_radioButtonVpnModeExceptSitesChecked{false},
     m_pushButtonVpnAddSiteEnabled{true},
 
-    m_labelServerSettingsWaitInfoVisible{true},
-    m_labelServerSettingsWaitInfoText{},
-    m_pushButtonServerSettingsClearVisible{true},
-    m_pushButtonServerSettingsClearClientCacheVisible{true},
-    m_pushButtonServerSettingsShareFullVisible{true},
-    m_labelServerSettingsServerText{},
-    m_lineEditServerSettingsDescriptionText{},
-    m_labelServerSettingsCurrentVpnProtocolText{},
+
+
     m_currentPageValue{0},
     m_trayIconUrl{},
     m_trayActionDisconnectEnabled{true},
@@ -162,8 +156,6 @@ UiLogic::UiLogic(QObject *parent) :
     m_pushButtonNewServerConnectEnabled{},
     m_pushButtonNewServerConnectText{tr("Connect")},
     m_dialogConnectErrorText{},
-    m_pageServerSettingsEnabled{true},
-    m_pushButtonServerSettingsClearText{tr("Clear server from Amnezia software")},
     m_pageShareAmneziaVisible{true},
     m_pageShareOpenvpnVisible{true},
     m_pageShareShadowsocksVisible{true},
@@ -221,8 +213,6 @@ UiLogic::UiLogic(QObject *parent) :
     m_labelProtoCloakInfoText{},
     m_progressBarProtoCloakResetValue{0},
     m_progressBarProtoCloakResetMaximium{100},
-    m_serverListModel{nullptr},
-    m_pushButtonServerSettingsClearClientCacheText{tr("Clear client cached profile")},
     m_vpnConnection(nullptr)
 {
     m_vpnConnection = new VpnConnection(this);
@@ -302,7 +292,6 @@ void UiLogic::initalizeUiLogic()
 
 
 
-    m_serverListModel = new ServersModel(this);
 }
 
 bool UiLogic::getFrameWireguardSettingsVisible() const
@@ -719,109 +708,6 @@ void UiLogic::setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExc
 
 
 
-bool UiLogic::getLabelServerSettingsWaitInfoVisible() const
-{
-    return m_labelServerSettingsWaitInfoVisible;
-}
-
-void UiLogic::setLabelServerSettingsWaitInfoVisible(bool labelServerSettingsWaitInfoVisible)
-{
-    if (m_labelServerSettingsWaitInfoVisible != labelServerSettingsWaitInfoVisible) {
-        m_labelServerSettingsWaitInfoVisible = labelServerSettingsWaitInfoVisible;
-        emit labelServerSettingsWaitInfoVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelServerSettingsWaitInfoText() const
-{
-    return m_labelServerSettingsWaitInfoText;
-}
-
-void UiLogic::setLabelServerSettingsWaitInfoText(const QString &labelServerSettingsWaitInfoText)
-{
-    if (m_labelServerSettingsWaitInfoText != labelServerSettingsWaitInfoText) {
-        m_labelServerSettingsWaitInfoText = labelServerSettingsWaitInfoText;
-        emit labelServerSettingsWaitInfoTextChanged();
-    }
-}
-
-bool UiLogic::getPushButtonServerSettingsClearVisible() const
-{
-    return m_pushButtonServerSettingsClearVisible;
-}
-
-void UiLogic::setPushButtonServerSettingsClearVisible(bool pushButtonServerSettingsClearVisible)
-{
-    if (m_pushButtonServerSettingsClearVisible != pushButtonServerSettingsClearVisible) {
-        m_pushButtonServerSettingsClearVisible = pushButtonServerSettingsClearVisible;
-        emit pushButtonServerSettingsClearVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonServerSettingsClearClientCacheVisible() const
-{
-    return m_pushButtonServerSettingsClearClientCacheVisible;
-}
-
-void UiLogic::setPushButtonServerSettingsClearClientCacheVisible(bool pushButtonServerSettingsClearClientCacheVisible)
-{
-    if (m_pushButtonServerSettingsClearClientCacheVisible != pushButtonServerSettingsClearClientCacheVisible) {
-        m_pushButtonServerSettingsClearClientCacheVisible = pushButtonServerSettingsClearClientCacheVisible;
-        emit pushButtonServerSettingsClearClientCacheVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonServerSettingsShareFullVisible() const
-{
-    return m_pushButtonServerSettingsShareFullVisible;
-}
-
-void UiLogic::setPushButtonServerSettingsShareFullVisible(bool pushButtonServerSettingsShareFullVisible)
-{
-    if (m_pushButtonServerSettingsShareFullVisible != pushButtonServerSettingsShareFullVisible) {
-        m_pushButtonServerSettingsShareFullVisible = pushButtonServerSettingsShareFullVisible;
-        emit pushButtonServerSettingsShareFullVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelServerSettingsServerText() const
-{
-    return m_labelServerSettingsServerText;
-}
-
-void UiLogic::setLabelServerSettingsServerText(const QString &labelServerSettingsServerText)
-{
-    if (m_labelServerSettingsServerText != labelServerSettingsServerText) {
-        m_labelServerSettingsServerText = labelServerSettingsServerText;
-        emit labelServerSettingsServerTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditServerSettingsDescriptionText() const
-{
-    return m_lineEditServerSettingsDescriptionText;
-}
-
-void UiLogic::setLineEditServerSettingsDescriptionText(const QString &lineEditServerSettingsDescriptionText)
-{
-    if (m_lineEditServerSettingsDescriptionText != lineEditServerSettingsDescriptionText) {
-        m_lineEditServerSettingsDescriptionText = lineEditServerSettingsDescriptionText;
-        emit lineEditServerSettingsDescriptionTextChanged();
-    }
-}
-
-QString UiLogic::getLabelServerSettingsCurrentVpnProtocolText() const
-{
-    return m_labelServerSettingsCurrentVpnProtocolText;
-}
-
-void UiLogic::setLabelServerSettingsCurrentVpnProtocolText(const QString &labelServerSettingsCurrentVpnProtocolText)
-{
-    if (m_labelServerSettingsCurrentVpnProtocolText != labelServerSettingsCurrentVpnProtocolText) {
-        m_labelServerSettingsCurrentVpnProtocolText = labelServerSettingsCurrentVpnProtocolText;
-        emit labelServerSettingsCurrentVpnProtocolTextChanged();
-    }
-}
 QString UiLogic::getComboBoxProtoCloakCipherText() const
 {
     return m_comboBoxProtoCloakCipherText;
@@ -1771,31 +1657,8 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
     }
 }
 
-bool UiLogic::getPageServerSettingsEnabled() const
-{
-    return m_pageServerSettingsEnabled;
-}
 
-void UiLogic::setPageServerSettingsEnabled(bool pageServerSettingsEnabled)
-{
-    if (m_pageServerSettingsEnabled != pageServerSettingsEnabled) {
-        m_pageServerSettingsEnabled = pageServerSettingsEnabled;
-        emit pageServerSettingsEnabledChanged();
-    }
-}
 
-QString UiLogic::getPushButtonServerSettingsClearText() const
-{
-    return m_pushButtonServerSettingsClearText;
-}
-
-void UiLogic::setPushButtonServerSettingsClearText(const QString &pushButtonServerSettingsClearText)
-{
-    if (m_pushButtonServerSettingsClearText != pushButtonServerSettingsClearText) {
-        m_pushButtonServerSettingsClearText = pushButtonServerSettingsClearText;
-        emit pushButtonServerSettingsClearTextChanged();
-    }
-}
 
 bool UiLogic::getPageShareAmneziaVisible() const
 {
@@ -2534,23 +2397,7 @@ void UiLogic::setProgressBarProtoCloakResetMaximium(int progressBarProtoCloakRes
     }
 }
 
-QString UiLogic::getPushButtonServerSettingsClearClientCacheText() const
-{
-    return m_pushButtonServerSettingsClearClientCacheText;
-}
 
-void UiLogic::setPushButtonServerSettingsClearClientCacheText(const QString &pushButtonServerSettingsClearClientCacheText)
-{
-    if (m_pushButtonServerSettingsClearClientCacheText != pushButtonServerSettingsClearClientCacheText) {
-        m_pushButtonServerSettingsClearClientCacheText = pushButtonServerSettingsClearClientCacheText;
-        emit pushButtonServerSettingsClearClientCacheTextChanged();
-    }
-}
-
-QObject* UiLogic::getServerListModel() const
-{
-    return m_serverListModel;
-}
 
 UiLogic::~UiLogic()
 {
@@ -2650,23 +2497,7 @@ void UiLogic::onCloseWindow()
     }
 }
 
-void UiLogic::onServerListPushbuttonDefaultClicked(int index)
-{
-    m_settings.setDefaultServer(index);
-    updateServersListPage();
-}
 
-void UiLogic::onServerListPushbuttonSettingsClicked(int index)
-{
-    selectedServerIndex = index;
-    goToPage(Page::ServerSettings);
-}
-
-void UiLogic::onPushButtonServerSettingsShareFullClicked()
-{
-    updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), DockerContainer::None);
-    goToPage(Page::ShareConnection);
-}
 
 //void UiLogic::showEvent(QShowEvent *event)
 //{
@@ -3145,89 +2976,6 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
     return ErrorCode::NoError;
 }
 
-void UiLogic::onPushButtonClearServer()
-{
-    setPageServerSettingsEnabled(false);
-    setPushButtonServerSettingsClearText(tr("Uninstalling Amnezia software..."));
-
-    if (m_settings.defaultServerIndex() == selectedServerIndex) {
-        onDisconnect();
-    }
-
-    ErrorCode e = ServerController::removeAllContainers(m_settings.serverCredentials(selectedServerIndex));
-    ServerController::disconnectFromHost(m_settings.serverCredentials(selectedServerIndex));
-    if (e) {
-        setDialogConnectErrorText(
-                    tr("Error occurred while configuring server.") + "\n" +
-                    errorString(e) + "\n" +
-                    tr("See logs for details."));
-        emit showConnectErrorDialog();
-    }
-    else {
-        setLabelServerSettingsWaitInfoVisible(true);
-        setLabelServerSettingsWaitInfoText(tr("Amnezia server successfully uninstalled"));
-    }
-
-    m_settings.setContainers(selectedServerIndex, {});
-    m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::None);
-
-    setPageServerSettingsEnabled(true);
-    setPushButtonServerSettingsClearText(tr("Clear server from Amnezia software"));
-}
-
-void UiLogic::onPushButtonForgetServer()
-{
-    if (m_settings.defaultServerIndex() == selectedServerIndex && m_vpnConnection->isConnected()) {
-        onDisconnect();
-    }
-    m_settings.removeServer(selectedServerIndex);
-
-    if (m_settings.defaultServerIndex() == selectedServerIndex) {
-        m_settings.setDefaultServer(0);
-    }
-    else if (m_settings.defaultServerIndex() > selectedServerIndex) {
-        m_settings.setDefaultServer(m_settings.defaultServerIndex() - 1);
-    }
-
-    if (m_settings.serversCount() == 0) {
-        m_settings.setDefaultServer(-1);
-    }
-
-
-    selectedServerIndex = -1;
-
-    updateServersListPage();
-
-    if (m_settings.serversCount() == 0) {
-        setStartPage(Page::Start);
-    }
-    else {
-        closePage();
-    }
-}
-
-void UiLogic::onPushButtonServerSettingsClearClientCacheClicked()
-{
-    setPushButtonServerSettingsClearClientCacheText(tr("Cache cleared"));
-
-    const auto &containers = m_settings.containers(selectedServerIndex);
-    for (DockerContainer container: containers.keys()) {
-        m_settings.clearLastConnectionConfig(selectedServerIndex, container);
-    }
-
-    QTimer::singleShot(3000, this, [this]() {
-        setPushButtonServerSettingsClearClientCacheText(tr("Clear client cached profile"));
-    });
-}
-
-void UiLogic::onLineEditServerSettingsDescriptionEditingFinished()
-{
-    const QString &newText = getLineEditServerSettingsDescriptionText();
-    QJsonObject server = m_settings.server(selectedServerIndex);
-    server.insert(config_key::description, newText);
-    m_settings.editServer(selectedServerIndex, server);
-    updateServersListPage();
-}
 
 void UiLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
 {
@@ -3939,24 +3687,7 @@ void UiLogic::updateVpnPage()
 
 
 
-void UiLogic::updateServerPage()
-{
-    setLabelServerSettingsWaitInfoVisible(false);
-    setLabelServerSettingsWaitInfoText("");
-    setPushButtonServerSettingsClearVisible(m_settings.haveAuthData(selectedServerIndex));
-    setPushButtonServerSettingsClearClientCacheVisible(m_settings.haveAuthData(selectedServerIndex));
-    setPushButtonServerSettingsShareFullVisible(m_settings.haveAuthData(selectedServerIndex));
-    QJsonObject server = m_settings.server(selectedServerIndex);
-    QString port = server.value(config_key::port).toString();
-    setLabelServerSettingsServerText(QString("%1@%2%3%4")
-                                     .arg(server.value(config_key::userName).toString())
-                                     .arg(server.value(config_key::hostName).toString())
-                                     .arg(port.isEmpty() ? "" : ":")
-                                     .arg(port));
-    setLineEditServerSettingsDescriptionText(server.value(config_key::description).toString());
-    QString selectedContainerName = m_settings.defaultContainerName(selectedServerIndex);
-    setLabelServerSettingsCurrentVpnProtocolText(tr("Protocol: ") + selectedContainerName);
-}
+
 
 
 void UiLogic::onPushButtonSetupWizardVpnModeFinishClicked()
@@ -3997,24 +3728,6 @@ void UiLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
 
 
 
-void UiLogic::updateServersListPage()
-{
-    const QJsonArray &servers = m_settings.serversArray();
-    int defaultServer = m_settings.defaultServerIndex();
-    std::vector<ServerModelContent> serverListContent;
-    for(int i = 0; i < servers.size(); i++) {
-        ServerModelContent c;
-        auto server = servers.at(i).toObject();
-        c.desc = server.value(config_key::description).toString();
-        c.address = server.value(config_key::hostName).toString();
-        if (c.desc.isEmpty()) {
-            c.desc = c.address;
-        }
-        c.isDefault = (i == defaultServer);
-        serverListContent.push_back(c);
-    }
-    m_serverListModel->setContent(serverListContent);
-}
 
 void UiLogic::updateProtocolsPage()
 {

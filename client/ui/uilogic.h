@@ -10,7 +10,6 @@
 #include "protocols/vpnprotocol.h"
 
 #include "settings.h"
-#include "serversmodel.h"
 
 class AppSettingsLogic;
 class GeneralSettingsLogic;
@@ -60,14 +59,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pushButtonBackFromStartVisible READ getPushButtonBackFromStartVisible WRITE setPushButtonBackFromStartVisible NOTIFY pushButtonBackFromStartVisibleChanged)
     Q_PROPERTY(bool pushButtonNewServerConnectVisible READ getPushButtonNewServerConnectVisible WRITE setPushButtonNewServerConnectVisible NOTIFY pushButtonNewServerConnectVisibleChanged)
 
-    Q_PROPERTY(bool labelServerSettingsWaitInfoVisible READ getLabelServerSettingsWaitInfoVisible WRITE setLabelServerSettingsWaitInfoVisible NOTIFY labelServerSettingsWaitInfoVisibleChanged)
-    Q_PROPERTY(QString labelServerSettingsWaitInfoText READ getLabelServerSettingsWaitInfoText WRITE setLabelServerSettingsWaitInfoText NOTIFY labelServerSettingsWaitInfoTextChanged)
-    Q_PROPERTY(bool pushButtonServerSettingsClearVisible READ getPushButtonServerSettingsClearVisible WRITE setPushButtonServerSettingsClearVisible NOTIFY pushButtonServerSettingsClearVisibleChanged)
-    Q_PROPERTY(bool pushButtonServerSettingsClearClientCacheVisible READ getPushButtonServerSettingsClearClientCacheVisible WRITE setPushButtonServerSettingsClearClientCacheVisible NOTIFY pushButtonServerSettingsClearClientCacheVisibleChanged)
-    Q_PROPERTY(bool pushButtonServerSettingsShareFullVisible READ getPushButtonServerSettingsShareFullVisible WRITE setPushButtonServerSettingsShareFullVisible NOTIFY pushButtonServerSettingsShareFullVisibleChanged)
-    Q_PROPERTY(QString labelServerSettingsServerText READ getLabelServerSettingsServerText WRITE setLabelServerSettingsServerText NOTIFY labelServerSettingsServerTextChanged)
-    Q_PROPERTY(QString lineEditServerSettingsDescriptionText READ getLineEditServerSettingsDescriptionText WRITE setLineEditServerSettingsDescriptionText NOTIFY lineEditServerSettingsDescriptionTextChanged)
-    Q_PROPERTY(QString labelServerSettingsCurrentVpnProtocolText READ getLabelServerSettingsCurrentVpnProtocolText WRITE setLabelServerSettingsCurrentVpnProtocolText NOTIFY labelServerSettingsCurrentVpnProtocolTextChanged)
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
     Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
@@ -141,8 +132,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pushButtonNewServerConnectEnabled READ getPushButtonNewServerConnectEnabled WRITE setPushButtonNewServerConnectEnabled NOTIFY pushButtonNewServerConnectEnabledChanged)
     Q_PROPERTY(QString pushButtonNewServerConnectText READ getPushButtonNewServerConnectText WRITE setPushButtonNewServerConnectText NOTIFY pushButtonNewServerConnectTextChanged)
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
-    Q_PROPERTY(bool pageServerSettingsEnabled READ getPageServerSettingsEnabled WRITE setPageServerSettingsEnabled NOTIFY pageServerSettingsEnabledChanged)
-    Q_PROPERTY(QString pushButtonServerSettingsClearText READ getPushButtonServerSettingsClearText WRITE setPushButtonServerSettingsClearText NOTIFY pushButtonServerSettingsClearTextChanged)
     Q_PROPERTY(bool pageShareAmneziaVisible READ getPageShareAmneziaVisible WRITE setPageShareAmneziaVisible NOTIFY pageShareAmneziaVisibleChanged)
     Q_PROPERTY(bool pageShareOpenvpnVisible READ getPageShareOpenvpnVisible WRITE setPageShareOpenvpnVisible NOTIFY pageShareOpenvpnVisibleChanged)
     Q_PROPERTY(bool pageShareShadowsocksVisible READ getPageShareShadowsocksVisible WRITE setPageShareShadowsocksVisible NOTIFY pageShareShadowsocksVisibleChanged)
@@ -200,8 +189,6 @@ class UiLogic : public QObject
     Q_PROPERTY(QString labelProtoCloakInfoText READ getLabelProtoCloakInfoText WRITE setLabelProtoCloakInfoText NOTIFY labelProtoCloakInfoTextChanged)
     Q_PROPERTY(int progressBarProtoCloakResetValue READ getProgressBarProtoCloakResetValue WRITE setProgressBarProtoCloakResetValue NOTIFY progressBarProtoCloakResetValueChanged)
     Q_PROPERTY(int progressBarProtoCloakResetMaximium READ getProgressBarProtoCloakResetMaximium WRITE setProgressBarProtoCloakResetMaximium NOTIFY progressBarProtoCloakResetMaximiumChanged)
-    Q_PROPERTY(QObject* serverListModel READ getServerListModel CONSTANT)
-    Q_PROPERTY(QString pushButtonServerSettingsClearClientCacheText READ getPushButtonServerSettingsClearClientCacheText WRITE setPushButtonServerSettingsClearClientCacheText NOTIFY pushButtonServerSettingsClearClientCacheTextChanged)
 
 
     Q_PROPERTY(bool pushButtonVpnAddSiteEnabled READ getPushButtonVpnAddSiteEnabled WRITE setPushButtonVpnAddSiteEnabled NOTIFY pushButtonVpnAddSiteEnabledChanged)
@@ -288,22 +275,8 @@ public:
 
 
 
-    bool getLabelServerSettingsWaitInfoVisible() const;
-    void setLabelServerSettingsWaitInfoVisible(bool labelServerSettingsWaitInfoVisible);
-    QString getLabelServerSettingsWaitInfoText() const;
-    void setLabelServerSettingsWaitInfoText(const QString &labelServerSettingsWaitInfoText);
-    bool getPushButtonServerSettingsClearVisible() const;
-    void setPushButtonServerSettingsClearVisible(bool pushButtonServerSettingsClearVisible);
-    bool getPushButtonServerSettingsClearClientCacheVisible() const;
-    void setPushButtonServerSettingsClearClientCacheVisible(bool pushButtonServerSettingsClearClientCacheVisible);
-    bool getPushButtonServerSettingsShareFullVisible() const;
-    void setPushButtonServerSettingsShareFullVisible(bool pushButtonServerSettingsShareFullVisible);
-    QString getLabelServerSettingsServerText() const;
-    void setLabelServerSettingsServerText(const QString &labelServerSettingsServerText);
-    QString getLineEditServerSettingsDescriptionText() const;
-    void setLineEditServerSettingsDescriptionText(const QString &lineEditServerSettingsDescriptionText);
-    QString getLabelServerSettingsCurrentVpnProtocolText() const;
-    void setLabelServerSettingsCurrentVpnProtocolText(const QString &labelServerSettingsCurrentVpnProtocolText);
+
+
     int getCurrentPageValue() const;
     void setCurrentPageValue(int currentPageValue);
     QString getTrayIconUrl() const;
@@ -450,10 +423,8 @@ public:
     void setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText);
     QString getDialogConnectErrorText() const;
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
-    bool getPageServerSettingsEnabled() const;
-    void setPageServerSettingsEnabled(bool pageServerSettingsEnabled);
-    QString getPushButtonServerSettingsClearText() const;
-    void setPushButtonServerSettingsClearText(const QString &pushButtonServerSettingsClearText);
+
+
     bool getPageShareAmneziaVisible() const;
     void setPageShareAmneziaVisible(bool pageShareAmneziaVisible);
     bool getPageShareOpenvpnVisible() const;
@@ -568,9 +539,6 @@ public:
     void setProgressBarProtoCloakResetValue(int progressBarProtoCloakResetValue);
     int getProgressBarProtoCloakResetMaximium() const;
     void setProgressBarProtoCloakResetMaximium(int progressBarProtoCloakResetMaximium);
-    QObject* getServerListModel() const;
-    QString getPushButtonServerSettingsClearClientCacheText() const;
-    void setPushButtonServerSettingsClearClientCacheText(const QString &pushButtonServerSettingsClearClientCacheText);
 
     bool getRadioButtonVpnModeAllSitesChecked() const;
     void setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked);
@@ -585,7 +553,6 @@ public:
     Q_INVOKABLE void updateNewServerProtocolsPage();
     Q_INVOKABLE void updateStartPage();
     Q_INVOKABLE void updateVpnPage();
-    Q_INVOKABLE void updateServerPage();
 
     Q_INVOKABLE void onPushButtonNewServerConnect();
     Q_INVOKABLE void onPushButtonNewServerImport();
@@ -621,14 +588,11 @@ public:
     Q_INVOKABLE void onPushButtonProtoShadowsocksSaveClicked();
     Q_INVOKABLE void onPushButtonProtoCloakSaveClicked();
     Q_INVOKABLE void onCloseWindow();
-    Q_INVOKABLE void onServerListPushbuttonDefaultClicked(int index);
-    Q_INVOKABLE void onServerListPushbuttonSettingsClicked(int index);
-    Q_INVOKABLE void onPushButtonServerSettingsShareFullClicked();
-    Q_INVOKABLE void onPushButtonClearServer();
-    Q_INVOKABLE void onPushButtonForgetServer();
-    Q_INVOKABLE void onPushButtonServerSettingsClearClientCacheClicked();
-    Q_INVOKABLE void onLineEditServerSettingsDescriptionEditingFinished();
-    Q_INVOKABLE void updateServersListPage();
+
+
+
+
+
     Q_INVOKABLE void updateProtocolsPage();
 
 signals:
@@ -664,16 +628,8 @@ signals:
     void radioButtonVpnModeExceptSitesCheckedChanged();
     void pushButtonVpnAddSiteEnabledChanged();
 
-    void labelServerSettingsWaitInfoVisibleChanged();
-    void labelServerSettingsWaitInfoTextChanged();
 
 
-    void pushButtonServerSettingsClearVisibleChanged();
-    void pushButtonServerSettingsClearClientCacheVisibleChanged();
-    void pushButtonServerSettingsShareFullVisibleChanged();
-    void labelServerSettingsServerTextChanged();
-    void lineEditServerSettingsDescriptionTextChanged();
-    void labelServerSettingsCurrentVpnProtocolTextChanged();
     void currentPageValueChanged();
     void trayIconUrlChanged();
     void trayActionDisconnectEnabledChanged();
@@ -747,8 +703,6 @@ signals:
     void pushButtonNewServerConnectEnabledChanged();
     void pushButtonNewServerConnectTextChanged();
     void dialogConnectErrorTextChanged();
-    void pageServerSettingsEnabledChanged();
-    void pushButtonServerSettingsClearTextChanged();
     void pageShareAmneziaVisibleChanged();
     void pageShareOpenvpnVisibleChanged();
     void pageShareShadowsocksVisibleChanged();
@@ -806,7 +760,6 @@ signals:
     void labelProtoCloakInfoTextChanged();
     void progressBarProtoCloakResetValueChanged();
     void progressBarProtoCloakResetMaximiumChanged();
-    void pushButtonServerSettingsClearClientCacheTextChanged();
 
     void goToPage(int page, bool reset = true, bool slide = true);
     void closePage();
@@ -862,14 +815,8 @@ private:
     bool m_radioButtonVpnModeExceptSitesChecked;
     bool m_pushButtonVpnAddSiteEnabled;
 
-    bool m_labelServerSettingsWaitInfoVisible;
-    QString m_labelServerSettingsWaitInfoText;
-    bool m_pushButtonServerSettingsClearVisible;
-    bool m_pushButtonServerSettingsClearClientCacheVisible;
-    bool m_pushButtonServerSettingsShareFullVisible;
-    QString m_labelServerSettingsServerText;
-    QString m_lineEditServerSettingsDescriptionText;
-    QString m_labelServerSettingsCurrentVpnProtocolText;
+
+
     int m_currentPageValue;
     QString m_trayIconUrl;
     bool m_trayActionDisconnectEnabled;
@@ -944,8 +891,6 @@ private:
     bool m_pushButtonNewServerConnectEnabled;
     QString m_pushButtonNewServerConnectText;
     QString m_dialogConnectErrorText;
-    bool m_pageServerSettingsEnabled;
-    QString m_pushButtonServerSettingsClearText;
     bool m_pageShareAmneziaVisible;
     bool m_pageShareOpenvpnVisible;
     bool m_pageShareShadowsocksVisible;
@@ -1003,8 +948,6 @@ private:
     QString m_labelProtoCloakInfoText;
     int m_progressBarProtoCloakResetValue;
     int m_progressBarProtoCloakResetMaximium;
-    ServersModel* m_serverListModel;
-    QString m_pushButtonServerSettingsClearClientCacheText;
 
 private slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);

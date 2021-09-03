@@ -48,7 +48,7 @@ Item {
         y: 90
         width: 340
         height: 501
-        model: UiLogic.serverListModel
+        model: ServerListLogic.serverListModel
         spacing: 5
         delegate: Item {
             height: 60
@@ -133,7 +133,7 @@ Item {
                 icon.source: checked ? "qrc:/images/check.png"
                                      : "qrc:/images/uncheck.png"
                 onClicked: {
-                    UiLogic.onServerListPushbuttonDefaultClicked(index)
+                    ServerListLogic.onServerListPushbuttonDefaultClicked(index)
                 }
                 checked: is_default
                 enabled: !is_default
@@ -146,7 +146,7 @@ Item {
                 height: 24
                 icon.source: "qrc:/images/settings.png"
                 onClicked: {
-                    UiLogic.onServerListPushbuttonSettingsClicked(index)
+                    ServerListLogic.onServerListPushbuttonSettingsClicked(index)
                 }
                 OpacityAnimator {
                     id: mouseEnterAni

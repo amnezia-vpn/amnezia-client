@@ -7,7 +7,7 @@ import "../Config"
 
 Item {
     id: root
-    enabled: UiLogic.pageServerSettingsEnabled
+    enabled: ServerSettingsLogic.pageServerSettingsEnabled
 
     ImageButtonType {
         id: back
@@ -47,7 +47,7 @@ Item {
         height: 31
         font.pixelSize: 20
         horizontalAlignment: Text.AlignHCenter
-        text: UiLogic.labelServerSettingsCurrentVpnProtocolText
+        text: ServerSettingsLogic.labelServerSettingsCurrentVpnProtocolText
     }
     LabelType {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -56,25 +56,25 @@ Item {
         height: 31
         font.pixelSize: 20
         horizontalAlignment: Text.AlignHCenter
-        text: UiLogic.labelServerSettingsServerText
+        text: ServerSettingsLogic.labelServerSettingsServerText
     }
     LabelType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 530
         width: 301
         height: 41
-        text: UiLogic.labelServerSettingsWaitInfoText
-        visible: UiLogic.labelServerSettingsWaitInfoVisible
+        text: ServerSettingsLogic.labelServerSettingsWaitInfoText
+        visible: ServerSettingsLogic.labelServerSettingsWaitInfoVisible
     }
     TextFieldType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 80
         width: 251
         height: 31
-        text: UiLogic.lineEditServerSettingsDescriptionText
+        text: UiLoServerSettingsLogicgic.lineEditServerSettingsDescriptionText
         onEditingFinished: {
-            UiLogic.lineEditServerSettingsDescriptionText = text
-            UiLogic.onLineEditServerSettingsDescriptionEditingFinished()
+            ServerSettingsLogic.lineEditServerSettingsDescriptionText = text
+            ServerSettingsLogic.onLineEditServerSettingsDescriptionEditingFinished()
         }
     }
     BlueButtonType {
@@ -82,10 +82,10 @@ Item {
         y: 410
         width: 300
         height: 40
-        text: UiLogic.pushButtonServerSettingsClearText
-        visible: UiLogic.pushButtonServerSettingsClearVisible
+        text: ServerSettingsLogic.pushButtonServerSettingsClearText
+        visible: ServerSettingsLogic.pushButtonServerSettingsClearVisible
         onClicked: {
-            UiLogic.onPushButtonClearServer()
+            ServerSettingsLogic.onPushButtonServerSettingsClearServer()
         }
     }
     BlueButtonType {
@@ -93,10 +93,10 @@ Item {
         y: 350
         width: 300
         height: 40
-        text: UiLogic.pushButtonServerSettingsClearClientCacheText
-        visible: UiLogic.pushButtonServerSettingsClearClientCacheVisible
+        text: ServerSettingsLogic.pushButtonServerSettingsClearClientCacheText
+        visible: ServerSettingsLogic.pushButtonServerSettingsClearClientCacheVisible
         onClicked: {
-            UiLogic.onPushButtonServerSettingsClearClientCacheClicked()
+            ServerSettingsLogic.onPushButtonServerSettingsClearClientCacheClicked()
         }
     }
     BlueButtonType {
@@ -106,7 +106,7 @@ Item {
         height: 40
         text: qsTr("Forget this server")
         onClicked: {
-            UiLogic.onPushButtonForgetServer()
+            ServerSettingsLogic.onPushButtonServerSettingsForgetServer()
         }
     }
     BlueButtonType {
@@ -116,7 +116,7 @@ Item {
         height: 40
         text: qsTr("VPN protocols")
         onClicked: {
-            UiLogic.goToPage(PageEnum.ServerVpnProtocols)
+            ServerSettingsLogic.goToPage(PageEnum.ServerVpnProtocols)
         }
     }
     BlueButtonType {
@@ -125,9 +125,9 @@ Item {
         width: 300
         height: 40
         text: qsTr("Share Server (FULL ACCESS)")
-        visible: UiLogic.pushButtonServerSettingsShareFullVisible
+        visible: ServerSettingsLogic.pushButtonServerSettingsShareFullVisible
         onClicked: {
-            UiLogic.onPushButtonServerSettingsShareFullClicked()
+            ServerSettingsLogic.onPushButtonServerSettingsShareFullClicked()
         }
     }
 }

@@ -75,7 +75,7 @@
         <file>ui/qml/Pages/PageProtoCloak.qml</file>
         <file>ui/qml/Pages/PageProtoOpenVPN.qml</file>
         <file>ui/qml/Pages/PageProtoShadowSock.qml</file>
-        <file>ui/qml/Pages/PageServer.qml</file>
+        <file>ui/qml/Pages/PageServerList.qml</file>
         <file>ui/qml/Pages/PageServerProtocols.qml</file>
         <file>ui/qml/Pages/PageServerSetting.qml</file>
         <file>ui/qml/Pages/PageSetupWizard.qml</file>

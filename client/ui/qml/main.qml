@@ -117,7 +117,7 @@ Window {
         if (item instanceof PageServerProtocols) {
             return PageEnum.ServerVpnProtocols
         }
-        if (item instanceof PageServer) {
+        if (item instanceof PageServerList) {
             return PageEnum.ServersList
         }
         if (item instanceof PageShareConnection) {
@@ -143,7 +143,7 @@ Window {
         console.debug(pageComponent)
         if (reset) {
             if (page === PageEnum.ServerSettings) {
-                UiLogic.updateServerPage();
+                ServerSettingsLogic.updateServerSettingsPage();
             }
             if (page === PageEnum.ShareConnection) {}
             if (page === PageEnum.Wizard) {
@@ -159,7 +159,7 @@ Window {
                 GeneralSettingsLogic.updateGeneralSettingPage();
             }
             if (page === PageEnum.ServersList) {
-                UiLogic.updateServersListPage();
+                ServerListLogic.updateServersListPage();
             }
             if (page === PageEnum.Start) {
                 UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
@@ -303,7 +303,7 @@ Window {
     }
     Component {
         id: page_servers
-        PageServer {}
+        PageServerList {}
     }
     Component {
         id: page_app_settings

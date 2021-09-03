@@ -1,5 +1,6 @@
 ﻿#include <QDebug>
 #include <QDesktopServices>
+#include <QFile>
 #include <QHostInfo>
 
 
