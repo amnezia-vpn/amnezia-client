@@ -34,9 +34,9 @@ Item {
                 share_shadowshock,
                 share_cloak
             ]
-            property int currentIndex: UiLogic.toolBoxShareConnectionCurrentIndex
+            property int currentIndex: ShareConnectionLogic.toolBoxShareConnectionCurrentIndex
             onCurrentIndexChanged: {
-                UiLogic.toolBoxShareConnectionCurrentIndex = currentIndex
+                ShareConnectionLogic.toolBoxShareConnectionCurrentIndex = currentIndex
                 for (let i = 0; i < contentList.length; ++i) {
                     if (i == currentIndex) {
                         contentList[i].active = true
@@ -58,7 +58,7 @@ Item {
                     id: full_access
                     x: 0
                     text: qsTr("Full access")
-                    visible: UiLogic.pageShareFullAccessVisible
+                    visible: ShareConnectionLogic.pageShareFullAccessVisible
                     content: Component {
                         Item {
                             width: 360
@@ -82,9 +82,9 @@ Item {
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: UiLogic.pushButtonShareFullCopyText
+                                text: ShareConnectionLogic.pushButtonShareFullCopyText
                                 onClicked: {
-                                    UiLogic.onPushButtonShareFullCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareFullCopyClicked()
                                 }
                             }
                             ShareConnectionButtonType {
@@ -94,7 +94,7 @@ Item {
                                 height: 40
                                 text: qsTr("Save file")
                                 onClicked: {
-                                    UiLogic.onPushButtonShareFullSaveClicked()
+                                    ShareConnectionLogic.onPushButtonShareFullSaveClicked()
                                 }
                             }
                             TextFieldType {
@@ -103,9 +103,9 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
-                                text: UiLogic.textEditShareFullCodeText
+                                text: ShareConnectionLogic.textEditShareFullCodeText
                                 onEditingFinished: {
-                                    UiLogic.textEditShareFullCodeText = text
+                                    ShareConnectionLogic.textEditShareFullCodeText = text
                                 }
                             }
                         }
@@ -123,7 +123,7 @@ Item {
                     id: share_amezia
                     x: 0
                     text: qsTr("Share for Amnezia client")
-                    visible: UiLogic.pageShareAmneziaVisible
+                    visible: ShareConnectionLogic.pageShareAmneziaVisible
                     content: Component {
                         Item {
                             width: 360
@@ -147,21 +147,21 @@ Item {
                                 y: 180
                                 width: 341
                                 height: 40
-                                text: UiLogic.pushButtonShareAmneziaCopyText
+                                text: ShareConnectionLogic.pushButtonShareAmneziaCopyText
                                 onClicked: {
-                                    UiLogic.onPushButtonShareAmneziaCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareAmneziaCopyClicked()
                                 }
-                                enabled: UiLogic.pushButtonShareAmneziaCopyEnabled
+                                enabled: ShareConnectionLogic.pushButtonShareAmneziaCopyEnabled
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: UiLogic.pushButtonShareAmneziaGenerateText
-                                enabled: UiLogic.pushButtonShareAmneziaGenerateEnabled
+                                text: ShareConnectionLogic.pushButtonShareAmneziaGenerateText
+                                enabled: ShareConnectionLogic.pushButtonShareAmneziaGenerateEnabled
                                 onClicked: {
-                                    UiLogic.onPushButtonShareAmneziaGenerateClicked()
+                                    ShareConnectionLogic.onPushButtonShareAmneziaGenerateClicked()
                                 }
                             }
                             ShareConnectionButtonType {
@@ -171,7 +171,7 @@ Item {
                                 height: 40
                                 text: qsTr("Save file")
                                 onClicked: {
-                                    UiLogic.onPushButtonShareAmneziaSaveClicked()
+                                    ShareConnectionLogic.onPushButtonShareAmneziaSaveClicked()
                                 }
                             }
                             TextFieldType {
@@ -180,9 +180,9 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
-                                text: UiLogic.textEditShareAmneziaCodeText
+                                text: ShareConnectionLogic.textEditShareAmneziaCodeText
                                 onEditingFinished: {
-                                    UiLogic.textEditShareAmneziaCodeText = text
+                                    ShareConnectionLogic.textEditShareAmneziaCodeText = text
                                 }
                             }
                         }
@@ -200,7 +200,7 @@ Item {
                     id: share_openvpn
                     x: 0
                     text: qsTr("Share for OpenVPN client")
-                    visible: UiLogic.pageShareOpenvpnVisible
+                    visible: ShareConnectionLogic.pageShareOpenvpnVisible
                     content: Component {
                         Item {
                             width: 360
@@ -210,10 +210,10 @@ Item {
                                 y: 180
                                 width: 341
                                 height: 40
-                                text: UiLogic.pushButtonShareOpenvpnCopyText
-                                enabled: UiLogic.pushButtonShareOpenvpnCopyEnabled
+                                text: ShareConnectionLogic.pushButtonShareOpenvpnCopyText
+                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnCopyEnabled
                                 onClicked: {
-                                    UiLogic.onPushButtonShareOpenvpnCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenvpnCopyClicked()
                                 }
                             }
                             ShareConnectionButtonType {
@@ -221,11 +221,11 @@ Item {
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: UiLogic.pushButtonShareOpenvpnGenerateText
+                                text: ShareConnectionLogic.pushButtonShareOpenvpnGenerateText
                                 onClicked: {
-                                    UiLogic.onPushButtonShareOpenvpnGenerateClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenvpnGenerateClicked()
                                 }
-                                enabled: UiLogic.pushButtonShareOpenvpnGenerateEnabled
+                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnGenerateEnabled
                             }
                             ShareConnectionButtonType {
                                 x: 10
@@ -233,9 +233,9 @@ Item {
                                 width: 341
                                 height: 40
                                 text: qsTr("Save file")
-                                enabled: UiLogic.pushButtonShareOpenvpnSaveEnabled
+                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnSaveEnabled
                                 onClicked: {
-                                    UiLogic.onPushButtonShareOpenvpnSaveClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenvpnSaveClicked()
                                 }
                             }
                             TextFieldType {
@@ -244,9 +244,9 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
-                                text: UiLogic.textEditShareOpenvpnCodeText
+                                text: ShareConnectionLogic.textEditShareOpenvpnCodeText
                                 onEditingFinished: {
-                                    UiLogic.textEditShareOpenvpnCodeText = text
+                                    ShareConnectionLogic.textEditShareOpenvpnCodeText = text
                                 }
                             }
                         }
@@ -264,7 +264,7 @@ Item {
                     id: share_shadowshock
                     x: 0
                     text: qsTr("Share for ShadowSocks client")
-                    visible: UiLogic.pageShareShadowsocksVisible
+                    visible: ShareConnectionLogic.pageShareShadowsocksVisible
                     content: Component {
                         Item {
                             width: 360
@@ -309,28 +309,28 @@ Item {
                                 y: 70
                                 width: 100
                                 height: 20
-                                text: UiLogic.labelShareSsPasswordText
+                                text: ShareConnectionLogic.labelShareSsPasswordText
                             }
                             LabelType {
                                 x: 130
                                 y: 10
                                 width: 100
                                 height: 20
-                                text: UiLogic.labelShareSsServerText
+                                text: ShareConnectionLogic.labelShareSsServerText
                             }
                             LabelType {
                                 x: 130
                                 y: 50
                                 width: 100
                                 height: 20
-                                text: UiLogic.labelShareSsMethodText
+                                text: ShareConnectionLogic.labelShareSsMethodText
                             }
                             LabelType {
                                 x: 130
                                 y: 30
                                 width: 100
                                 height: 20
-                                text: UiLogic.labelShareSsPortText
+                                text: ShareConnectionLogic.labelShareSsPortText
                             }
                             Image {
                                 id: label_share_ss_qr_code
@@ -338,17 +338,17 @@ Item {
                                 y: 235
                                 width: 200
                                 height: 200
-                                source: UiLogic.labelShareSsQrCodeText == "" ? "" : "data:image/png;base64," + UiLogic.labelShareSsQrCodeText
+                                source: ShareConnectionLogic.labelShareSsQrCodeText === "" ? "" : "data:image/png;base64," + UiLogic.labelShareSsQrCodeText
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 180
                                 width: 331
                                 height: 40
-                                text: UiLogic.pushButtonShareSsCopyText
-                                enabled: UiLogic.pushButtonShareSsCopyEnabled
+                                text: ShareConnectionLogic.pushButtonShareSsCopyText
+                                enabled: ShareConnectionLogic.pushButtonShareSsCopyEnabled
                                 onClicked: {
-                                    UiLogic.onPushButtonShareSsCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareSsCopyClicked()
                                 }
                             }
                             TextFieldType {
@@ -357,9 +357,9 @@ Item {
                                 width: 331
                                 height: 100
                                 horizontalAlignment: Text.AlignHCenter
-                                text: UiLogic.lineEditShareSsStringText
+                                text: ShareConnectionLogic.lineEditShareSsStringText
                                 onEditingFinished: {
-                                    UiLogic.lineEditShareSsStringText = text
+                                    ShareConnectionLogic.lineEditShareSsStringText = text
                                 }
                             }
                         }
@@ -377,7 +377,7 @@ Item {
                     id: share_cloak
                     x: 0
                     text: qsTr("Share for Cloak client")
-                    visible: UiLogic.pageShareCloakVisible
+                    visible: ShareConnectionLogic.pageShareCloakVisible
                     content: Component {
                         Item {
                             width: 360
@@ -387,10 +387,10 @@ Item {
                                 y: 290
                                 width: 331
                                 height: 40
-                                text: UiLogic.pushButtonShareCloakCopyText
-                                enabled: UiLogic.pushButtonShareCloakCopyEnabled
+                                text: ShareConnectionLogic.pushButtonShareCloakCopyText
+                                enabled: ShareConnectionLogic.pushButtonShareCloakCopyEnabled
                                 onClicked: {
-                                    UiLogic.onPushButtonShareCloakCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareCloakCopyClicked()
                                 }
                             }
                             TextInput {
@@ -398,9 +398,9 @@ Item {
                                 y: 30
                                 width: 331
                                 height: 100
-                                text: UiLogic.plainTextEditShareCloakText
+                                text: ShareConnectionLogic.plainTextEditShareCloakText
                                 onEditingFinished: {
-                                    UiLogic.plainTextEditShareCloakText = text
+                                    ShareConnectionLogic.plainTextEditShareCloakText = text
                                 }
                             }
                         }
