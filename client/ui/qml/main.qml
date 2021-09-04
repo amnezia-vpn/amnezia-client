@@ -162,8 +162,8 @@ Window {
                 ServerListLogic.updateServersListPage();
             }
             if (page === PageEnum.Start) {
-                UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-                UiLogic.updateStartPage();
+                StartPageLogic.pushButtonBackFromStartVisible = !pageLoader.empty
+                StartPageLogic.updateStartPage();
             }
             if (page === PageEnum.NewServerProtocols) {
                 UiLogic.updateNewServerProtocolsPage()

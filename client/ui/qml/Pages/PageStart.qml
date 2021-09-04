@@ -97,9 +97,9 @@ Item {
                 width: 300
                 height: 40
                 placeholderText: "vpn://..."
-                text: UiLogic.lineEditStartExistingCodeText
+                text: StartPageLogic.lineEditStartExistingCodeText
                 onEditingFinished: {
-                    UiLogic.lineEditStartExistingCodeText = text
+                    StartPageLogic.lineEditStartExistingCodeText = text
                 }
             }
             BlueButtonType {
@@ -110,7 +110,7 @@ Item {
                 height: 40
                 text: qsTr("Connect")
                 onClicked: {
-                    UiLogic.onPushButtonNewServerImport()
+                    StartPageLogic.onPushButtonNewServerImport()
                 }
             }
         }
@@ -165,8 +165,8 @@ Item {
                 y: 390
                 width: 301
                 height: 41
-                text: UiLogic.labelNewServerWaitInfoText
-                visible: UiLogic.labelNewServerWaitInfoVisible
+                text: StartPageLogic.labelNewServerWaitInfoText
+                visible: StartPageLogic.labelNewServerWaitInfoVisible
                 wrapMode: Text.Wrap
             }
             TextFieldType {
@@ -175,9 +175,9 @@ Item {
                 y: 100
                 width: 300
                 height: 40
-                text: UiLogic.lineEditNewServerIpText
+                text: StartPageLogic.lineEditNewServerIpText
                 onEditingFinished: {
-                    UiLogic.lineEditNewServerIpText = text
+                    StartPageLogic.lineEditNewServerIpText = text
                 }
             }
             TextFieldType {
@@ -186,9 +186,9 @@ Item {
                 y: 180
                 width: 300
                 height: 40
-                text: UiLogic.lineEditNewServerLoginText
+                text: StartPageLogic.lineEditNewServerLoginText
                 onEditingFinished: {
-                    UiLogic.lineEditNewServerLoginText = text
+                    StartPageLogic.lineEditNewServerLoginText = text
                 }
             }
             TextFieldType {
@@ -198,9 +198,9 @@ Item {
                 width: 300
                 height: 40
                 echoMode: TextInput.Password
-                text: UiLogic.lineEditNewServerPasswordText
+                text: StartPageLogic.lineEditNewServerPasswordText
                 onEditingFinished: {
-                    UiLogic.lineEditNewServerPasswordText = text
+                    StartPageLogic.lineEditNewServerPasswordText = text
                 }
             }
             BlueButtonType {
@@ -209,12 +209,12 @@ Item {
                 y: 350
                 width: 301
                 height: 40
-                text: UiLogic.pushButtonNewServerConnectText
-                visible: UiLogic.pushButtonNewServerConnectVisible
+                text: StartPageLogic.pushButtonNewServerConnectText
+                visible: StartPageLogic.pushButtonNewServerConnectVisible
                 onClicked: {
-                    UiLogic.onPushButtonNewServerConnect()
+                    StartPageLogic.onPushButtonNewServerConnect()
                 }
-                enabled: UiLogic.pushButtonNewServerConnectEnabled
+                enabled: StartPageLogic.pushButtonNewServerConnectEnabled
             }
             BasicButtonType {
                 id: new_sever_connect_key
@@ -239,9 +239,9 @@ Item {
                 }
                 antialiasing: true
                 checkable: true
-                checked: UiLogic.pushButtonNewServerConnectKeyChecked
+                checked: StartPageLogic.pushButtonNewServerConnectKeyChecked
                 onCheckedChanged: {
-                    UiLogic.pushButtonNewServerConnectKeyChecked = checked
+                    StartPageLogic.pushButtonNewServerConnectKeyChecked = checked
                     label_new_server_password.text = checked ? qsTr("Private key") : qsTr("Password")
                     new_sever_connect_key.text = checked ? qsTr("Connect using SSH password") : qsTr("Connect using SSH key")
                     new_server_password.visible = !checked
@@ -285,9 +285,9 @@ Item {
                 echoMode: TextInput.Password
                 font.pixelSize: 9
                 verticalAlignment: Text.AlignTop
-                text: UiLogic.textEditNewServerSshKeyText
+                text: StartPageLogic.textEditNewServerSshKeyText
                 onEditingFinished: {
-                    UiLogic.textEditNewServerSshKeyText = text
+                    StartPageLogic.textEditNewServerSshKeyText = text
                 }
                 visible: false
             }
@@ -301,7 +301,7 @@ Item {
         width: 26
         height: 20
         icon.source: "qrc:/images/arrow_left.png"
-        visible: UiLogic.pushButtonBackFromStartVisible
+        visible: StartPageLogic.pushButtonBackFromStartVisible
         onClicked: {
             UiLogic.closePage()
         }

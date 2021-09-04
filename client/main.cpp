@@ -23,6 +23,7 @@
 #include "ui/pages_logic/ServerVpnProtocolsLogic.h"
 #include "ui/pages_logic/ShareConnectionLogic.h"
 #include "ui/pages_logic/SitesLogic.h"
+#include "ui/pages_logic/StartPageLogic.h"
 #include "ui/pages_logic/VpnLogic.h"
 #include "ui/pages_logic/WizardLogic.h"
 
@@ -121,6 +122,7 @@ int main(int argc, char *argv[])
     ServerVpnProtocolsLogic *serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(uiLogic);
     ShareConnectionLogic *shareConnectionLogic = new ShareConnectionLogic(uiLogic);
     SitesLogic *sitesLogic = new SitesLogic(uiLogic);
+    StartPageLogic *startPageLogic = new StartPageLogic(uiLogic);
     VpnLogic *vpnLogic = new VpnLogic(uiLogic);
     WizardLogic *wizardLogic = new WizardLogic(uiLogic);
 
@@ -145,9 +147,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("ServerVpnProtocolsLogic", serverVpnProtocolsLogic);
     engine.rootContext()->setContextProperty("ShareConnectionLogic", shareConnectionLogic);
     engine.rootContext()->setContextProperty("SitesLogic", sitesLogic);
+    engine.rootContext()->setContextProperty("StartPageLogic", startPageLogic);
     engine.rootContext()->setContextProperty("VpnLogic", vpnLogic);
     engine.rootContext()->setContextProperty("WizardLogic", wizardLogic);
-
 
     engine.load(url);
 

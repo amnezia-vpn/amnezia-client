@@ -44,6 +44,7 @@ HEADERS  += \
     ui/pages_logic/ServerVpnProtocolsLogic.h \
     ui/pages_logic/ShareConnectionLogic.h \
     ui/pages_logic/SitesLogic.h \
+    ui/pages_logic/StartPageLogic.h \
     ui/pages_logic/VpnLogic.h \
     ui/pages_logic/WizardLogic.h \
     ui/serversmodel.h \
@@ -85,6 +86,7 @@ SOURCES  += \
     ui/pages_logic/ServerVpnProtocolsLogic.cpp \
     ui/pages_logic/ShareConnectionLogic.cpp \
     ui/pages_logic/SitesLogic.cpp \
+    ui/pages_logic/StartPageLogic.cpp \
     ui/pages_logic/VpnLogic.cpp \
     ui/pages_logic/WizardLogic.cpp \
     ui/serversmodel.cpp \

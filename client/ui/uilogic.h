@@ -20,6 +20,7 @@ class ServerSettingsLogic;
 class ServerVpnProtocolsLogic;
 class ShareConnectionLogic;
 class SitesLogic;
+class StartPageLogic;
 class VpnLogic;
 class WizardLogic;
 
@@ -45,18 +46,7 @@ class UiLogic : public QObject
     Q_PROPERTY(QString comboBoxNewServerSsCipherText READ getComboBoxNewServerSsCipherText WRITE setComboBoxNewServerSsCipherText NOTIFY comboBoxNewServerSsCipherTextChanged)
     Q_PROPERTY(QString lineEditNewServerOpenvpnPortText READ getlineEditNewServerOpenvpnPortText WRITE setLineEditNewServerOpenvpnPortText NOTIFY lineEditNewServerOpenvpnPortTextChanged)
     Q_PROPERTY(QString comboBoxNewServerOpenvpnProtoText READ getComboBoxNewServerOpenvpnProtoText WRITE setComboBoxNewServerOpenvpnProtoText NOTIFY comboBoxNewServerOpenvpnProtoTextChanged)
-    Q_PROPERTY(bool pushButtonNewServerConnectKeyChecked READ getPushButtonNewServerConnectKeyChecked WRITE setPushButtonNewServerConnectKeyChecked NOTIFY pushButtonNewServerConnectKeyCheckedChanged)
-    Q_PROPERTY(QString lineEditStartExistingCodeText READ getLineEditStartExistingCodeText WRITE setLineEditStartExistingCodeText NOTIFY lineEditStartExistingCodeTextChanged)
-    Q_PROPERTY(QString textEditNewServerSshKeyText READ getTextEditNewServerSshKeyText WRITE setTextEditNewServerSshKeyText NOTIFY textEditNewServerSshKeyTextChanged)
-    Q_PROPERTY(QString lineEditNewServerIpText READ getLineEditNewServerIpText WRITE setLineEditNewServerIpText NOTIFY lineEditNewServerIpTextChanged)
-    Q_PROPERTY(QString lineEditNewServerPasswordText READ getLineEditNewServerPasswordText WRITE setLineEditNewServerPasswordText NOTIFY lineEditNewServerPasswordTextChanged)
-    Q_PROPERTY(QString lineEditNewServerLoginText READ getLineEditNewServerLoginText WRITE setLineEditNewServerLoginText NOTIFY lineEditNewServerLoginTextChanged)
-    Q_PROPERTY(bool labelNewServerWaitInfoVisible READ getLabelNewServerWaitInfoVisible WRITE setLabelNewServerWaitInfoVisible NOTIFY labelNewServerWaitInfoVisibleChanged)
-    Q_PROPERTY(QString labelNewServerWaitInfoText READ getLabelNewServerWaitInfoText WRITE setLabelNewServerWaitInfoText NOTIFY labelNewServerWaitInfoTextChanged)
-    Q_PROPERTY(double progressBarNewServerConnectionMinimum READ getProgressBarNewServerConnectionMinimum WRITE setProgressBarNewServerConnectionMinimum NOTIFY progressBarNewServerConnectionMinimumChanged)
-    Q_PROPERTY(double progressBarNewServerConnectionMaximum READ getProgressBarNewServerConnectionMaximum WRITE setProgressBarNewServerConnectionMaximum NOTIFY progressBarNewServerConnectionMaximumChanged)
-    Q_PROPERTY(bool pushButtonBackFromStartVisible READ getPushButtonBackFromStartVisible WRITE setPushButtonBackFromStartVisible NOTIFY pushButtonBackFromStartVisibleChanged)
-    Q_PROPERTY(bool pushButtonNewServerConnectVisible READ getPushButtonNewServerConnectVisible WRITE setPushButtonNewServerConnectVisible NOTIFY pushButtonNewServerConnectVisibleChanged)
+
 
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
@@ -128,8 +118,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pushButtonConnectEnabled READ getPushButtonConnectEnabled WRITE setPushButtonConnectEnabled NOTIFY pushButtonConnectEnabledChanged)
     Q_PROPERTY(bool widgetVpnModeEnabled READ getWidgetVpnModeEnabled WRITE setWidgetVpnModeEnabled NOTIFY widgetVpnModeEnabledChanged)
     Q_PROPERTY(QString labelErrorText READ getLabelErrorText WRITE setLabelErrorText NOTIFY labelErrorTextChanged)
-    Q_PROPERTY(bool pushButtonNewServerConnectEnabled READ getPushButtonNewServerConnectEnabled WRITE setPushButtonNewServerConnectEnabled NOTIFY pushButtonNewServerConnectEnabledChanged)
-    Q_PROPERTY(QString pushButtonNewServerConnectText READ getPushButtonNewServerConnectText WRITE setPushButtonNewServerConnectText NOTIFY pushButtonNewServerConnectTextChanged)
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
     Q_PROPERTY(bool pageNewServerConfiguringEnabled READ getPageNewServerConfiguringEnabled WRITE setPageNewServerConfiguringEnabled NOTIFY pageNewServerConfiguringEnabledChanged)
     Q_PROPERTY(bool labelNewServerConfiguringWaitInfoVisible READ getLabelNewServerConfiguringWaitInfoVisible WRITE setLabelNewServerConfiguringWaitInfoVisible NOTIFY labelNewServerConfiguringWaitInfoVisibleChanged)
@@ -181,6 +169,7 @@ public:
     friend class ServerVpnProtocolsLogic;
     friend class ShareConnectionLogic;
     friend class SitesLogic;
+    friend class StartPageLogic;
     friend class VpnLogic;
     friend class WizardLogic;
 
@@ -217,31 +206,6 @@ public:
     void setLineEditNewServerOpenvpnPortText(const QString &lineEditNewServerOpenvpnPortText);
     QString getComboBoxNewServerOpenvpnProtoText() const;
     void setComboBoxNewServerOpenvpnProtoText(const QString &comboBoxNewServerOpenvpnProtoText);
-    QString getLineEditStartExistingCodeText() const;
-    void setLineEditStartExistingCodeText(const QString &lineEditStartExistingCodeText);
-    QString getTextEditNewServerSshKeyText() const;
-    void setTextEditNewServerSshKeyText(const QString &textEditNewServerSshKeyText);
-    QString getLineEditNewServerIpText() const;
-    void setLineEditNewServerIpText(const QString &lineEditNewServerIpText);
-    QString getLineEditNewServerPasswordText() const;
-    void setLineEditNewServerPasswordText(const QString &lineEditNewServerPasswordText);
-    QString getLineEditNewServerLoginText() const;
-    void setLineEditNewServerLoginText(const QString &lineEditNewServerLoginText);
-    bool getLabelNewServerWaitInfoVisible() const;
-    void setLabelNewServerWaitInfoVisible(bool labelNewServerWaitInfoVisible);
-    QString getLabelNewServerWaitInfoText() const;
-    void setLabelNewServerWaitInfoText(const QString &labelNewServerWaitInfoText);
-    double getProgressBarNewServerConnectionMinimum() const;
-    void setProgressBarNewServerConnectionMinimum(double progressBarNewServerConnectionMinimum);
-    double getProgressBarNewServerConnectionMaximum() const;
-    void setProgressBarNewServerConnectionMaximum(double progressBarNewServerConnectionMaximum);
-    bool getPushButtonBackFromStartVisible() const;
-    void setPushButtonBackFromStartVisible(bool pushButtonBackFromStartVisible);
-    bool getPushButtonNewServerConnectVisible() const;
-    void setPushButtonNewServerConnectVisible(bool pushButtonNewServerConnectVisible);
-    bool getPushButtonNewServerConnectKeyChecked() const;
-    void setPushButtonNewServerConnectKeyChecked(bool pushButtonNewServerConnectKeyChecked);
-
 
 
 
@@ -386,10 +350,8 @@ public:
     void setWidgetVpnModeEnabled(bool widgetVpnModeEnabled);
     QString getLabelErrorText() const;
     void setLabelErrorText(const QString &labelErrorText);
-    bool getPushButtonNewServerConnectEnabled() const;
-    void setPushButtonNewServerConnectEnabled(bool pushButtonNewServerConnectEnabled);
-    QString getPushButtonNewServerConnectText() const;
-    void setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText);
+
+
     QString getDialogConnectErrorText() const;
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
@@ -461,11 +423,9 @@ public:
 
     Q_INVOKABLE void updateWizardHighPage();
     Q_INVOKABLE void updateNewServerProtocolsPage();
-    Q_INVOKABLE void updateStartPage();
     Q_INVOKABLE void updateVpnPage();
 
-    Q_INVOKABLE void onPushButtonNewServerConnect();
-    Q_INVOKABLE void onPushButtonNewServerImport();
+
     Q_INVOKABLE void onPushButtonSetupWizardVpnModeFinishClicked();
     Q_INVOKABLE void onPushButtonSetupWizardLowFinishClicked();
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
@@ -512,18 +472,8 @@ signals:
     void comboBoxNewServerSsCipherTextChanged();
     void lineEditNewServerOpenvpnPortTextChanged();
     void comboBoxNewServerOpenvpnProtoTextChanged();
-    void pushButtonNewServerConnectKeyCheckedChanged();
-    void lineEditStartExistingCodeTextChanged();
-    void textEditNewServerSshKeyTextChanged();
-    void lineEditNewServerIpTextChanged();
-    void lineEditNewServerPasswordTextChanged();
-    void lineEditNewServerLoginTextChanged();
-    void labelNewServerWaitInfoVisibleChanged();
-    void labelNewServerWaitInfoTextChanged();
-    void progressBarNewServerConnectionMinimumChanged();
-    void progressBarNewServerConnectionMaximumChanged();
-    void pushButtonBackFromStartVisibleChanged();
-    void pushButtonNewServerConnectVisibleChanged();
+
+
     void radioButtonVpnModeAllSitesCheckedChanged();
     void radioButtonVpnModeForwardSitesCheckedChanged();
     void radioButtonVpnModeExceptSitesCheckedChanged();
@@ -601,8 +551,7 @@ signals:
     void pushButtonConnectEnabledChanged();
     void widgetVpnModeEnabledChanged();
     void labelErrorTextChanged();
-    void pushButtonNewServerConnectEnabledChanged();
-    void pushButtonNewServerConnectTextChanged();
+
     void dialogConnectErrorTextChanged();
 
     void pageNewServerConfiguringEnabledChanged();
@@ -670,18 +619,9 @@ private:
     QString m_comboBoxNewServerSsCipherText;
     QString m_lineEditNewServerOpenvpnPortText;
     QString m_comboBoxNewServerOpenvpnProtoText;
-    bool m_pushButtonNewServerConnectKeyChecked;
-    QString m_lineEditStartExistingCodeText;
-    QString m_textEditNewServerSshKeyText;
-    QString m_lineEditNewServerIpText;
-    QString m_lineEditNewServerPasswordText;
-    QString m_lineEditNewServerLoginText;
-    bool m_labelNewServerWaitInfoVisible;
-    QString m_labelNewServerWaitInfoText;
-    double m_progressBarNewServerConnectionMinimum;
-    double m_progressBarNewServerConnectionMaximum;
-    bool m_pushButtonBackFromStartVisible;
-    bool m_pushButtonNewServerConnectVisible;
+
+
+
     bool m_radioButtonVpnModeAllSitesChecked;
     bool m_radioButtonVpnModeForwardSitesChecked;
     bool m_radioButtonVpnModeExceptSitesChecked;
@@ -760,8 +700,6 @@ private:
     bool m_pushButtonConnectEnabled;
     bool m_widgetVpnModeEnabled;
     QString m_labelErrorText;
-    bool m_pushButtonNewServerConnectEnabled;
-    QString m_pushButtonNewServerConnectText;
     QString m_dialogConnectErrorText;
 
     bool m_pageNewServerConfiguringEnabled;
