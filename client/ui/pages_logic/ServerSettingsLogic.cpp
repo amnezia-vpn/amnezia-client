@@ -299,6 +299,7 @@ void ServerSettingsLogic::setPushButtonServerSettingsClearClientCacheText(const 
 
 void ServerSettingsLogic::onPushButtonServerSettingsShareFullClicked()
 {
-    m_uiLogic->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), DockerContainer::None);
+    // TODO_REFACT
+    // m_uiLogic->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), DockerContainer::None);
     m_uiLogic->goToPage(Page::ShareConnection);
 }

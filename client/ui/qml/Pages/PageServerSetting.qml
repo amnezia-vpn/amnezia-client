@@ -71,7 +71,7 @@ Item {
         y: 80
         width: 251
         height: 31
-        text: UiLoServerSettingsLogicgic.lineEditServerSettingsDescriptionText
+        text: ServerSettingsLogic.lineEditServerSettingsDescriptionText
         onEditingFinished: {
             ServerSettingsLogic.lineEditServerSettingsDescriptionText = text
             ServerSettingsLogic.onLineEditServerSettingsDescriptionEditingFinished()
@@ -116,7 +116,7 @@ Item {
         height: 40
         text: qsTr("VPN protocols")
         onClicked: {
-            ServerSettingsLogic.goToPage(PageEnum.ServerVpnProtocols)
+            UiLogic.goToPage(PageEnum.ServerVpnProtocols)
         }
     }
     BlueButtonType {

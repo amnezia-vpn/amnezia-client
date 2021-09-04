@@ -61,6 +61,7 @@ void GeneralSettingsLogic::onPushButtonGeneralSettingsShareConnectionClicked()
     m_uiLogic->selectedServerIndex = m_settings.defaultServerIndex();
     m_uiLogic->selectedDockerContainer = m_settings.defaultContainer(m_uiLogic->selectedServerIndex);
 
-    m_uiLogic->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer);
+    // TODO_REFACT
+    //m_uiLogic->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer);
     m_uiLogic->goToPage(Page::ShareConnection);
 }

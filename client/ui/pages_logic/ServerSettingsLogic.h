@@ -10,6 +10,7 @@ class ServerSettingsLogic : public QObject
 {
     Q_OBJECT
 
+public:
     Q_INVOKABLE void updateServerSettingsPage();
 
     Q_PROPERTY(bool pageServerSettingsEnabled READ getPageServerSettingsEnabled WRITE setPageServerSettingsEnabled NOTIFY pageServerSettingsEnabledChanged)
