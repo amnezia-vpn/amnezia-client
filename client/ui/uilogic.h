@@ -34,8 +34,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool frameWireguardSettingsVisible READ getFrameWireguardSettingsVisible WRITE setFrameWireguardSettingsVisible NOTIFY frameWireguardSettingsVisibleChanged)
     Q_PROPERTY(bool frameWireguardVisible READ getFrameWireguardVisible WRITE setFrameWireguardVisible NOTIFY frameWireguardVisibleChanged)
     Q_PROPERTY(bool frameNewServerSettingsParentWireguardVisible READ getFrameNewServerSettingsParentWireguardVisible WRITE setFrameNewServerSettingsParentWireguardVisible NOTIFY frameNewServerSettingsParentWireguardVisibleChanged)
-    Q_PROPERTY(bool radioButtonSetupWizardMediumChecked READ getRadioButtonSetupWizardMediumChecked WRITE setRadioButtonSetupWizardMediumChecked NOTIFY radioButtonSetupWizardMediumCheckedChanged)
-    Q_PROPERTY(QString lineEditSetupWizardHighWebsiteMaskingText READ getLineEditSetupWizardHighWebsiteMaskingText WRITE setLineEditSetupWizardHighWebsiteMaskingText NOTIFY lineEditSetupWizardHighWebsiteMaskingTextChanged)
     Q_PROPERTY(double progressBarNewServerConfiguringValue READ getProgressBarNewServerConfiguringValue WRITE setProgressBarNewServerConfiguringValue NOTIFY progressBarNewServerConfiguringValueChanged)
     Q_PROPERTY(bool pushButtonNewServerSettingsCloakChecked READ getPushButtonNewServerSettingsCloakChecked WRITE setPushButtonNewServerSettingsCloakChecked NOTIFY pushButtonNewServerSettingsCloakCheckedChanged)
     Q_PROPERTY(bool pushButtonNewServerSettingsSsChecked READ getPushButtonNewServerSettingsSsChecked WRITE setPushButtonNewServerSettingsSsChecked NOTIFY pushButtonNewServerSettingsSsCheckedChanged)
@@ -68,9 +66,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool checkBoxProtoOpenvpnBlockDnsChecked READ getCheckBoxProtoOpenvpnBlockDnsChecked WRITE setCheckBoxProtoOpenvpnBlockDnsChecked NOTIFY checkBoxProtoOpenvpnBlockDnsCheckedChanged)
     Q_PROPERTY(QString lineEditProtoOpenvpnPortText READ getLineEditProtoOpenvpnPortText WRITE setLineEditProtoOpenvpnPortText NOTIFY lineEditProtoOpenvpnPortTextChanged)
     Q_PROPERTY(bool checkBoxProtoOpenvpnTlsAuthChecked READ getCheckBoxProtoOpenvpnTlsAuthChecked WRITE setCheckBoxProtoOpenvpnTlsAuthChecked NOTIFY checkBoxProtoOpenvpnTlsAuthCheckedChanged)
-    Q_PROPERTY(bool radioButtonSetupWizardHighChecked READ getRadioButtonSetupWizardHighChecked WRITE setRadioButtonSetupWizardHighChecked NOTIFY radioButtonSetupWizardHighCheckedChanged)
-    Q_PROPERTY(bool radioButtonSetupWizardLowChecked READ getRadioButtonSetupWizardLowChecked WRITE setRadioButtonSetupWizardLowChecked NOTIFY radioButtonSetupWizardLowCheckedChanged)
-    Q_PROPERTY(bool checkBoxSetupWizardVpnModeChecked READ getCheckBoxSetupWizardVpnModeChecked WRITE setCheckBoxSetupWizardVpnModeChecked NOTIFY checkBoxSetupWizardVpnModeCheckedChanged)
 
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
     Q_PROPERTY(bool widgetProtoCloakEnabled READ getWidgetProtoCloakEnabled WRITE setWidgetProtoCloakEnabled NOTIFY widgetProtoCloakEnabledChanged)
@@ -182,10 +177,6 @@ public:
     void setFrameWireguardVisible(bool frameWireguardVisible);
     bool getFrameNewServerSettingsParentWireguardVisible() const;
     void setFrameNewServerSettingsParentWireguardVisible(bool frameNewServerSettingsParentWireguardVisible);
-    bool getRadioButtonSetupWizardMediumChecked() const;
-    void setRadioButtonSetupWizardMediumChecked(bool radioButtonSetupWizardMediumChecked);
-    QString getLineEditSetupWizardHighWebsiteMaskingText() const;
-    void setLineEditSetupWizardHighWebsiteMaskingText(const QString &lineEditSetupWizardHighWebsiteMaskingText);
     double getProgressBarNewServerConfiguringValue() const;
     void setProgressBarNewServerConfiguringValue(double progressBarNewServerConfiguringValue);
     bool getPushButtonNewServerSettingsCloakChecked() const;
@@ -250,12 +241,6 @@ public:
     void setLineEditProtoOpenvpnPortText(const QString &lineEditProtoOpenvpnPortText);
     bool getCheckBoxProtoOpenvpnTlsAuthChecked() const;
     void setCheckBoxProtoOpenvpnTlsAuthChecked(bool checkBoxProtoOpenvpnTlsAuthChecked);
-    bool getRadioButtonSetupWizardHighChecked() const;
-    void setRadioButtonSetupWizardHighChecked(bool radioButtonSetupWizardHighChecked);
-    bool getRadioButtonSetupWizardLowChecked() const;
-    void setRadioButtonSetupWizardLowChecked(bool radioButtonSetupWizardLowChecked);
-    bool getCheckBoxSetupWizardVpnModeChecked() const;
-    void setCheckBoxSetupWizardVpnModeChecked(bool checkBoxSetupWizardVpnModeChecked);
 
     bool getPushButtonConnectChecked() const;
     void setPushButtonConnectChecked(bool pushButtonConnectChecked);
@@ -421,13 +406,11 @@ public:
     bool getPushButtonVpnAddSiteEnabled() const;
     void setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled);
 
-    Q_INVOKABLE void updateWizardHighPage();
     Q_INVOKABLE void updateNewServerProtocolsPage();
     Q_INVOKABLE void updateVpnPage();
 
 
-    Q_INVOKABLE void onPushButtonSetupWizardVpnModeFinishClicked();
-    Q_INVOKABLE void onPushButtonSetupWizardLowFinishClicked();
+
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeExceptSitesToggled(bool checked);
@@ -460,8 +443,7 @@ signals:
     void frameWireguardSettingsVisibleChanged();
     void frameWireguardVisibleChanged();
     void frameNewServerSettingsParentWireguardVisibleChanged();
-    void radioButtonSetupWizardMediumCheckedChanged();
-    void lineEditSetupWizardHighWebsiteMaskingTextChanged();
+
     void progressBarNewServerConfiguringValueChanged();
     void pushButtonNewServerSettingsCloakCheckedChanged();
     void pushButtonNewServerSettingsSsCheckedChanged();
@@ -501,9 +483,8 @@ signals:
     void checkBoxProtoOpenvpnBlockDnsCheckedChanged();
     void lineEditProtoOpenvpnPortTextChanged();
     void checkBoxProtoOpenvpnTlsAuthCheckedChanged();
-    void radioButtonSetupWizardHighCheckedChanged();
-    void radioButtonSetupWizardLowCheckedChanged();
-    void checkBoxSetupWizardVpnModeCheckedChanged();
+
+
     void pushButtonConnectCheckedChanged();
 
     void widgetProtoCloakEnabledChanged();
@@ -607,8 +588,7 @@ private:
     bool m_frameWireguardSettingsVisible;
     bool m_frameWireguardVisible;
     bool m_frameNewServerSettingsParentWireguardVisible;
-    bool m_radioButtonSetupWizardMediumChecked;
-    QString m_lineEditSetupWizardHighWebsiteMaskingText;
+
     double m_progressBarNewServerConfiguringValue;
     bool m_pushButtonNewServerSettingsCloakChecked;
     bool m_pushButtonNewServerSettingsSsChecked;
@@ -649,9 +629,7 @@ private:
     bool m_checkBoxProtoOpenvpnBlockDnsChecked;
     QString m_lineEditProtoOpenvpnPortText;
     bool m_checkBoxProtoOpenvpnTlsAuthChecked;
-    bool m_radioButtonSetupWizardHighChecked;
-    bool m_radioButtonSetupWizardLowChecked;
-    bool m_checkBoxSetupWizardVpnModeChecked;
+
 
     bool m_pushButtonConnectChecked;
 
@@ -794,9 +772,37 @@ private:
     QJsonObject getCloakConfigFromPage(QJsonObject oldConfig);
 
     QMap<DockerContainer, QJsonObject> getInstallConfigsFromProtocolsPage() const;
-    QMap<DockerContainer, QJsonObject> getInstallConfigsFromWizardPage() const;
+
+public:
+    AppSettingsLogic *appSettingsLogic() { return m_appSettingsLogic;}
+    GeneralSettingsLogic *generalSettingsLogic() { return m_generalSettingsLogic;}
+    NetworkSettingsLogic *networkSettingsLogic() { return m_networkSettingsLogic;}
+    NewServerLogic *newServerLogic() { return m_newServerLogic;}
+    ProtocolSettingsLogic *protocolSettingsLogic() { return m_protocolSettingsLogic;}
+    ServerListLogic *serverListLogic() { return m_serverListLogic;}
+    ServerSettingsLogic *serverSettingsLogic() { return m_serverSettingsLogic;}
+    ServerVpnProtocolsLogic *serverVpnProtocolsLogic() { return m_serverVpnProtocolsLogic;}
+    ShareConnectionLogic *shareConnectionLogic() { return m_shareConnectionLogic;}
+    SitesLogic *sitesLogic() { return m_sitesLogic;}
+    StartPageLogic *startPageLogic() { return m_startPageLogic;}
+    VpnLogic *vpnLogic() { return m_vpnLogic;}
+    WizardLogic *wizardLogic() { return m_wizardLogic;}
 
 private:
+    AppSettingsLogic *m_appSettingsLogic;
+    GeneralSettingsLogic *m_generalSettingsLogic;
+    NetworkSettingsLogic *m_networkSettingsLogic;
+    NewServerLogic *m_newServerLogic;
+    ProtocolSettingsLogic *m_protocolSettingsLogic;
+    ServerListLogic *m_serverListLogic;
+    ServerSettingsLogic *m_serverSettingsLogic;
+    ServerVpnProtocolsLogic *m_serverVpnProtocolsLogic;
+    ShareConnectionLogic *m_shareConnectionLogic;
+    SitesLogic *m_sitesLogic;
+    StartPageLogic *m_startPageLogic;
+    VpnLogic *m_vpnLogic;
+    WizardLogic *m_wizardLogic;
+
     VpnConnection* m_vpnConnection;
     Settings m_settings;
 

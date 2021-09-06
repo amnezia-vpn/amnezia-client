@@ -1,4 +1,4 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
@@ -44,6 +44,20 @@
 #include "ui/macos_util.h"
 #endif
 
+#include "pages_logic/AppSettingsLogic.h"
+#include "pages_logic/GeneralSettingsLogic.h"
+#include "pages_logic/NetworkSettingsLogic.h"
+#include "pages_logic/NewServerLogic.h"
+#include "pages_logic/ProtocolSettingsLogic.h"
+#include "pages_logic/ServerListLogic.h"
+#include "pages_logic/ServerSettingsLogic.h"
+#include "pages_logic/ServerVpnProtocolsLogic.h"
+#include "pages_logic/ShareConnectionLogic.h"
+#include "pages_logic/SitesLogic.h"
+#include "pages_logic/StartPageLogic.h"
+#include "pages_logic/VpnLogic.h"
+#include "pages_logic/WizardLogic.h"
+
 using namespace amnezia;
 using namespace PageEnumNS;
 
@@ -52,8 +66,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_frameWireguardSettingsVisible{false},
     m_frameWireguardVisible{false},
     m_frameNewServerSettingsParentWireguardVisible{false},
-    m_radioButtonSetupWizardMediumChecked{true},
-    m_lineEditSetupWizardHighWebsiteMaskingText{},
+
     m_progressBarNewServerConfiguringValue{0},
     m_pushButtonNewServerSettingsCloakChecked{false},
     m_pushButtonNewServerSettingsSsChecked{false},
@@ -91,9 +104,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_checkBoxProtoOpenvpnBlockDnsChecked{false},
     m_lineEditProtoOpenvpnPortText{},
     m_checkBoxProtoOpenvpnTlsAuthChecked{false},
-    m_radioButtonSetupWizardHighChecked{false},
-    m_radioButtonSetupWizardLowChecked{false},
-    m_checkBoxSetupWizardVpnModeChecked{false},
+
     m_pushButtonConnectChecked{false},
 
     m_widgetProtoCloakEnabled{false},
@@ -172,6 +183,22 @@ UiLogic::UiLogic(QObject *parent) :
     m_vpnConnection(nullptr)
 {
     m_vpnConnection = new VpnConnection(this);
+
+    m_appSettingsLogic = new AppSettingsLogic(this);
+    m_generalSettingsLogic = new GeneralSettingsLogic(this);
+    m_networkSettingsLogic = new NetworkSettingsLogic(this);
+    m_newServerLogic = new NewServerLogic(this);
+    m_protocolSettingsLogic = new ProtocolSettingsLogic(this);
+    m_serverListLogic = new ServerListLogic(this);
+    m_serverSettingsLogic = new ServerSettingsLogic(this);
+    m_serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(this);
+    m_shareConnectionLogic = new ShareConnectionLogic(this);
+    m_sitesLogic = new SitesLogic(this);
+    m_startPageLogic = new StartPageLogic(this);
+    m_vpnLogic = new VpnLogic(this);
+    m_wizardLogic = new WizardLogic(this);
+
+
     connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
     connect(m_vpnConnection, SIGNAL(vpnProtocolError(amnezia::ErrorCode)), this, SLOT(onVpnProtocolError(amnezia::ErrorCode)));
@@ -288,23 +315,7 @@ void UiLogic::setFrameNewServerSettingsParentWireguardVisible(bool frameNewServe
     }
 }
 
-bool UiLogic::getRadioButtonSetupWizardMediumChecked() const
-{
-    return m_radioButtonSetupWizardMediumChecked;
-}
 
-void UiLogic::setRadioButtonSetupWizardMediumChecked(bool radioButtonSetupWizardMediumChecked)
-{
-    if (m_radioButtonSetupWizardMediumChecked != radioButtonSetupWizardMediumChecked) {
-        m_radioButtonSetupWizardMediumChecked = radioButtonSetupWizardMediumChecked;
-        emit radioButtonSetupWizardMediumCheckedChanged();
-    }
-}
-
-void UiLogic::updateWizardHighPage()
-{
-    setLineEditSetupWizardHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
-}
 
 void UiLogic::updateNewServerProtocolsPage()
 {
@@ -452,18 +463,7 @@ void UiLogic::setProgressBarNewServerConfiguringValue(double progressBarNewServe
     }
 }
 
-QString UiLogic::getLineEditSetupWizardHighWebsiteMaskingText() const
-{
-    return m_lineEditSetupWizardHighWebsiteMaskingText;
-}
 
-void UiLogic::setLineEditSetupWizardHighWebsiteMaskingText(const QString &lineEditSetupWizardHighWebsiteMaskingText)
-{
-    if (m_lineEditSetupWizardHighWebsiteMaskingText != lineEditSetupWizardHighWebsiteMaskingText) {
-        m_lineEditSetupWizardHighWebsiteMaskingText = lineEditSetupWizardHighWebsiteMaskingText;
-        emit lineEditSetupWizardHighWebsiteMaskingTextChanged();
-    }
-}
 
 
 
@@ -774,44 +774,7 @@ void UiLogic::setCheckBoxProtoOpenvpnTlsAuthChecked(bool checkBoxProtoOpenvpnTls
     }
 }
 
-bool UiLogic::getRadioButtonSetupWizardHighChecked() const
-{
-    return m_radioButtonSetupWizardHighChecked;
-}
 
-void UiLogic::setRadioButtonSetupWizardHighChecked(bool radioButtonSetupWizardHighChecked)
-{
-    if (m_radioButtonSetupWizardHighChecked != radioButtonSetupWizardHighChecked) {
-        m_radioButtonSetupWizardHighChecked = radioButtonSetupWizardHighChecked;
-        emit radioButtonSetupWizardHighCheckedChanged();
-    }
-}
-
-bool UiLogic::getRadioButtonSetupWizardLowChecked() const
-{
-    return m_radioButtonSetupWizardLowChecked;
-}
-
-void UiLogic::setRadioButtonSetupWizardLowChecked(bool radioButtonSetupWizardLowChecked)
-{
-    if (m_radioButtonSetupWizardLowChecked != radioButtonSetupWizardLowChecked) {
-        m_radioButtonSetupWizardLowChecked = radioButtonSetupWizardLowChecked;
-        emit radioButtonSetupWizardLowCheckedChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxSetupWizardVpnModeChecked() const
-{
-    return m_checkBoxSetupWizardVpnModeChecked;
-}
-
-void UiLogic::setCheckBoxSetupWizardVpnModeChecked(bool checkBoxSetupWizardVpnModeChecked)
-{
-    if (m_checkBoxSetupWizardVpnModeChecked != checkBoxSetupWizardVpnModeChecked) {
-        m_checkBoxSetupWizardVpnModeChecked = checkBoxSetupWizardVpnModeChecked;
-        emit checkBoxSetupWizardVpnModeCheckedChanged();
-    }
-}
 
 
 
@@ -1959,37 +1922,6 @@ QMap<DockerContainer, QJsonObject> UiLogic::getInstallConfigsFromProtocolsPage()
     return containers;
 }
 
-QMap<DockerContainer, QJsonObject> UiLogic::getInstallConfigsFromWizardPage() const
-{
-    QJsonObject cloakConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
-        { config_key::cloak, QJsonObject {
-                { config_key::site, getLineEditSetupWizardHighWebsiteMaskingText() }}
-        }
-    };
-    QJsonObject ssConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverShadowSocks) }
-    };
-    QJsonObject openVpnConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpn) }
-    };
-
-    QMap<DockerContainer, QJsonObject> containers;
-
-    if (getRadioButtonSetupWizardHighChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
-    }
-
-    if (getRadioButtonSetupWizardMediumChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
-    }
-
-    if (getRadioButtonSetupWizardLowChecked()) {
-        containers.insert(DockerContainer::OpenVpn, openVpnConfig);
-    }
-
-    return containers;
-}
 
 void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers)
 {
@@ -2454,8 +2386,7 @@ void UiLogic::setupProtocolsPageConnections()
         DockerContainer container = containers.at(i);
 
         connect(this, buttonClickedFunc, [this, container](bool){
-            // TODO_REFACT
-            //updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), container);
+            shareConnectionLogic()->updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), container);
             goToPage(Page::ShareConnection);
         });
     }
@@ -2784,20 +2715,7 @@ void UiLogic::updateVpnPage()
 
 
 
-void UiLogic::onPushButtonSetupWizardVpnModeFinishClicked()
-{
-    installServer(getInstallConfigsFromWizardPage());
-    if (getCheckBoxSetupWizardVpnModeChecked()) {
-        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
-    } else {
-        m_settings.setRouteMode(Settings::VpnAllSites);
-    }
-}
 
-void UiLogic::onPushButtonSetupWizardLowFinishClicked()
-{
-    installServer(getInstallConfigsFromWizardPage());
-}
 
 void UiLogic::onRadioButtonVpnModeAllSitesToggled(bool checked)
 {

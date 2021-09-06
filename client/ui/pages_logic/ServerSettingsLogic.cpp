@@ -1,31 +1,9 @@
-﻿//#include <QApplication>
-//#include <QClipboard>
-//#include <QDebug>
-//#include <QDesktopServices>
-//#include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
-//#include <QTimer>
-//#include <QRegularExpression>
-//#include <QSaveFile>
-
-
-#include "defines.h"
 #include "ServerSettingsLogic.h"
-#include "utils.h"
 #include "vpnconnection.h"
-#include <functional>
 
 #include "../uilogic.h"
+#include "ServerListLogic.h"
+#include "ShareConnectionLogic.h"
 
 #include "core/errorstrings.h"
 #include <core/servercontroller.h>
@@ -132,7 +110,7 @@ void ServerSettingsLogic::onPushButtonServerSettingsForgetServer()
 
     m_uiLogic->selectedServerIndex = -1;
 
-    // TODO_REFACT updateServersListPage();
+    m_uiLogic->serverListLogic()->updateServersListPage();
 
     if (m_settings.serversCount() == 0) {
         m_uiLogic->setStartPage(Page::Start);
@@ -281,7 +259,7 @@ void ServerSettingsLogic::onLineEditServerSettingsDescriptionEditingFinished()
     QJsonObject server = m_settings.server(m_uiLogic->selectedServerIndex);
     server.insert(config_key::description, newText);
     m_settings.editServer(m_uiLogic->selectedServerIndex, server);
-    // TODO_REFACT updateServersListPage();
+    m_uiLogic->serverListLogic()->updateServersListPage();
 }
 
 QString ServerSettingsLogic::getPushButtonServerSettingsClearClientCacheText() const
@@ -299,7 +277,6 @@ void ServerSettingsLogic::setPushButtonServerSettingsClearClientCacheText(const 
 
 void ServerSettingsLogic::onPushButtonServerSettingsShareFullClicked()
 {
-    // TODO_REFACT
-    // m_uiLogic->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), DockerContainer::None);
+    m_uiLogic->shareConnectionLogic()->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), DockerContainer::None);
     m_uiLogic->goToPage(Page::ShareConnection);
 }

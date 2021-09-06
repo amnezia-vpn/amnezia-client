@@ -112,19 +112,19 @@ int main(int argc, char *argv[])
 
     UiLogic *uiLogic = new UiLogic;
 
-    AppSettingsLogic *appSettingsLogic = new AppSettingsLogic(uiLogic);
-    GeneralSettingsLogic *generalSettingsLogic = new GeneralSettingsLogic(uiLogic);
-    NetworkSettingsLogic *networkSettingsLogic = new NetworkSettingsLogic(uiLogic);
-    NewServerLogic *newServerLogic = new NewServerLogic(uiLogic);
-    ProtocolSettingsLogic *protocolSettingsLogic = new ProtocolSettingsLogic(uiLogic);
-    ServerListLogic *serverListLogic = new ServerListLogic(uiLogic);
-    ServerSettingsLogic *serverSettingsLogic = new ServerSettingsLogic(uiLogic);
-    ServerVpnProtocolsLogic *serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(uiLogic);
-    ShareConnectionLogic *shareConnectionLogic = new ShareConnectionLogic(uiLogic);
-    SitesLogic *sitesLogic = new SitesLogic(uiLogic);
-    StartPageLogic *startPageLogic = new StartPageLogic(uiLogic);
-    VpnLogic *vpnLogic = new VpnLogic(uiLogic);
-    WizardLogic *wizardLogic = new WizardLogic(uiLogic);
+//    AppSettingsLogic *appSettingsLogic = new AppSettingsLogic(uiLogic);
+//    GeneralSettingsLogic *generalSettingsLogic = new GeneralSettingsLogic(uiLogic);
+//    NetworkSettingsLogic *networkSettingsLogic = new NetworkSettingsLogic(uiLogic);
+//    NewServerLogic *newServerLogic = new NewServerLogic(uiLogic);
+//    ProtocolSettingsLogic *protocolSettingsLogic = new ProtocolSettingsLogic(uiLogic);
+//    ServerListLogic *serverListLogic = new ServerListLogic(uiLogic);
+//    ServerSettingsLogic *serverSettingsLogic = new ServerSettingsLogic(uiLogic);
+//    ServerVpnProtocolsLogic *serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(uiLogic);
+//    ShareConnectionLogic *shareConnectionLogic = new ShareConnectionLogic(uiLogic);
+//    SitesLogic *sitesLogic = new SitesLogic(uiLogic);
+//    StartPageLogic *startPageLogic = new StartPageLogic(uiLogic);
+//    VpnLogic *vpnLogic = new VpnLogic(uiLogic);
+//    WizardLogic *wizardLogic = new WizardLogic(uiLogic);
 
     QQmlApplicationEngine engine;
     PageEnumNS::declareQML();
@@ -137,19 +137,19 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("UiLogic", uiLogic);
 
-    engine.rootContext()->setContextProperty("AppSettingsLogic", appSettingsLogic);
-    engine.rootContext()->setContextProperty("GeneralSettingsLogic", generalSettingsLogic);
-    engine.rootContext()->setContextProperty("NetworkSettingsLogic", networkSettingsLogic);
-    engine.rootContext()->setContextProperty("NewServerLogic", newServerLogic);
-    engine.rootContext()->setContextProperty("ProtocolSettingsLogic", protocolSettingsLogic);
-    engine.rootContext()->setContextProperty("ServerListLogic", serverListLogic);
-    engine.rootContext()->setContextProperty("ServerSettingsLogic", serverSettingsLogic);
-    engine.rootContext()->setContextProperty("ServerVpnProtocolsLogic", serverVpnProtocolsLogic);
-    engine.rootContext()->setContextProperty("ShareConnectionLogic", shareConnectionLogic);
-    engine.rootContext()->setContextProperty("SitesLogic", sitesLogic);
-    engine.rootContext()->setContextProperty("StartPageLogic", startPageLogic);
-    engine.rootContext()->setContextProperty("VpnLogic", vpnLogic);
-    engine.rootContext()->setContextProperty("WizardLogic", wizardLogic);
+    engine.rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
+    engine.rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
+    engine.rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
+    engine.rootContext()->setContextProperty("NewServerLogic", uiLogic->newServerLogic());
+    engine.rootContext()->setContextProperty("ProtocolSettingsLogic", uiLogic->protocolSettingsLogic());
+    engine.rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
+    engine.rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
+    engine.rootContext()->setContextProperty("ServerVpnProtocolsLogic", uiLogic->serverVpnProtocolsLogic());
+    engine.rootContext()->setContextProperty("ShareConnectionLogic", uiLogic->shareConnectionLogic());
+    engine.rootContext()->setContextProperty("SitesLogic", uiLogic->sitesLogic());
+    engine.rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
+    engine.rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
+    engine.rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
 
     engine.load(url);
 
