@@ -72,9 +72,6 @@
         <file>ui/qml/Pages/PageNewServer.qml</file>
         <file>ui/qml/Pages/PageNewServerConfiguring.qml</file>
         <file>ui/qml/Pages/PageNewServerProtocol.qml</file>
-        <file>ui/qml/Pages/PageProtoCloak.qml</file>
-        <file>ui/qml/Pages/PageProtoOpenVPN.qml</file>
-        <file>ui/qml/Pages/PageProtoShadowSock.qml</file>
         <file>ui/qml/Pages/PageServerList.qml</file>
         <file>ui/qml/Pages/PageServerProtocols.qml</file>
         <file>ui/qml/Pages/PageServerSetting.qml</file>
@@ -103,5 +100,8 @@
         <file>ui/qml/Config/qmldir</file>
         <file>images/background_connected.png</file>
         <file>images/background_connected@2x.png</file>
+        <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoShadowSock.qml</file>
     </qresource>
 </RCC>

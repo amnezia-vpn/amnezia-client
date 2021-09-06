@@ -7,6 +7,7 @@ import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.1
 import "./"
 import "Pages"
+import "Pages/Protocols"
 import "Config"
 
 Window {
