@@ -63,7 +63,7 @@ Item {
             y: 360
             width: 301
             height: 41
-            text: UiLogic.lineEditSetupWizardHighWebsiteMaskingText
+            text: WizardLogic.lineEditSetupWizardHighWebsiteMaskingText
             onEditingFinished: {
                 let _text = website_masking.text
                 _text.replace("http://", "");
@@ -72,7 +72,7 @@ Item {
                     return
                 }
                 _text = _text.split("/").first();
-                UiLogic.lineEditSetupWizardHighWebsiteMaskingText = _text
+                WizardLogic.lineEditSetupWizardHighWebsiteMaskingText = _text
             }
             onAccepted: {
                 next_button.clicked()

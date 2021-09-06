@@ -89,9 +89,9 @@ Item {
             width: 331
             height: 25
             text: qsTr("High censorship level")
-            checked: UiLogic.radioButtonSetupWizardHighChecked
+            checked: WizardLogic.radioButtonSetupWizardHighChecked
             onCheckedChanged: {
-                UiLogic.radioButtonSetupWizardHighChecked = checked
+                WizardLogic.radioButtonSetupWizardHighChecked = checked
             }
         }
         RadioButtonType {
@@ -101,9 +101,9 @@ Item {
             width: 331
             height: 25
             text: qsTr("Low censorship level")
-            checked: UiLogic.radioButtonSetupWizardLowChecked
+            checked: WizardLogic.radioButtonSetupWizardLowChecked
             onCheckedChanged: {
-                UiLogic.radioButtonSetupWizardLowChecked = checked
+                WizardLogic.radioButtonSetupWizardLowChecked = checked
             }
         }
         RadioButtonType {
@@ -113,9 +113,9 @@ Item {
             width: 331
             height: 25
             text: qsTr("Medium censorship level")
-            checked: UiLogic.radioButtonSetupWizardMediumChecked
+            checked: WizardLogic.radioButtonSetupWizardMediumChecked
             onCheckedChanged: {
-                UiLogic.radioButtonSetupWizardMediumChecked = checked
+                WizardLogic.radioButtonSetupWizardMediumChecked = checked
             }
         }
     }

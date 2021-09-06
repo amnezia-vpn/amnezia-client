@@ -1,45 +1,16 @@
-﻿//#include <QApplication>
-//#include <QClipboard>
-//#include <QDebug>
-//#include <QDesktopServices>
-//#include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
-//#include <QTimer>
-//#include <QRegularExpression>
-//#include <QSaveFile>
-
-
-
-//#include "debug.h"
-//#include "defines.h"
 #include "StartPageLogic.h"
 #include "core/errorstrings.h"
-//#include "utils.h"
-//#include "vpnconnection.h"
-//#include <functional>
-
 #include "configurators/ssh_configurator.h"
+#include "../uilogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
-
-#include "../uilogic.h"
 
 
 StartPageLogic::StartPageLogic(UiLogic *uiLogic, QObject *parent):
     QObject(parent),
     m_uiLogic(uiLogic),
-    m_pushButtonNewServerConnectEnabled{},
+    m_pushButtonNewServerConnectEnabled{true},
     m_pushButtonNewServerConnectText{tr("Connect")},
     m_pushButtonNewServerConnectKeyChecked{false},
     m_lineEditStartExistingCodeText{},

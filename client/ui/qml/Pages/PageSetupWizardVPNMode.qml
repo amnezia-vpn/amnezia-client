@@ -41,9 +41,9 @@ Item {
             width: 301
             height: 71
             text: qsTr('Turn on mode "VPN for selected sites"')
-            checked: UiLogic.checkBoxSetupWizardVpnModeChecked
+            checked: WizardLogic.checkBoxSetupWizardVpnModeChecked
             onCheckedChanged: {
-                UiLogic.checkBoxSetupWizardVpnModeChecked = checked
+                WizardLogic.checkBoxSetupWizardVpnModeChecked = checked
             }
         }
         LabelType {
@@ -61,7 +61,7 @@ Item {
             height: 40
             text: qsTr("Start configuring")
             onClicked: {
-                UiLogic.onPushButtonSetupWizardVpnModeFinishClicked()
+                WizardLogic.onPushButtonSetupWizardVpnModeFinishClicked()
             }
         }
     }
