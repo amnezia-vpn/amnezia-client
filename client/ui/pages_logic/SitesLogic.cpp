@@ -1,8 +1,7 @@
-﻿#include <QDebug>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QFile>
 #include <QHostInfo>
-
 
 #include "SitesLogic.h"
 #include "utils.h"
@@ -11,7 +10,6 @@
 
 #include "../uilogic.h"
 #include "../sites_model.h"
-
 
 using namespace amnezia;
 using namespace PageEnumNS;

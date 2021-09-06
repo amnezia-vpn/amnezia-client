@@ -1,23 +1,12 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QBuffer>
 #include <QClipboard>
-//#include <QDesktopServices>
 #include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
 #include <QTimer>
-//#include <QRegularExpression>
 #include <QSaveFile>
 #include <QStandardPaths>
+
+#include "ShareConnectionLogic.h"
 
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -25,25 +14,13 @@
 #include "configurators/shadowsocks_configurator.h"
 #include "configurators/ssh_configurator.h"
 
-//#include "core/servercontroller.h"
-//#include "core/server_defs.h"
-//#include "core/errorstrings.h"
-
-//#include "protocols/protocols_defs.h"
-//#include "protocols/shadowsocksvpnprotocol.h"
-
-//#include "debug.h"
 #include "defines.h"
-#include "ShareConnectionLogic.h"
-//#include "utils.h"
-//#include "vpnconnection.h"
 #include <functional>
 
 #include "../uilogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
-
 
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *uiLogic, QObject *parent):
     QObject(parent),

@@ -1,31 +1,10 @@
-﻿//#include <QApplication>
-//#include <QClipboard>
-//#include <QDebug>
-//#include <QDesktopServices>
-//#include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
-//#include <QTimer>
-//#include <QRegularExpression>
-//#include <QSaveFile>
+#include "NetworkSettingsLogic.h"
 
 #include "defines.h"
-#include "NetworkSettingsLogic.h"
 #include "utils.h"
-
 
 using namespace amnezia;
 using namespace PageEnumNS;
-
 
 NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *uiLogic, QObject *parent):
     QObject(parent),

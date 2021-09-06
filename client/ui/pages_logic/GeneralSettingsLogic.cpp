@@ -1,10 +1,10 @@
 #include "GeneralSettingsLogic.h"
+
 #include "../uilogic.h"
 #include "ShareConnectionLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
-
 
 GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *uiLogic, QObject *parent):
     QObject(parent),
