@@ -1,41 +1,5 @@
-//#include <QApplication>
-//#include <QClipboard>
-//#include <QDebug>
-//#include <QDesktopServices>
-//#include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
-//#include <QTimer>
-//#include <QRegularExpression>
-//#include <QSaveFile>
-
-//#include "configurators/cloak_configurator.h"
-//#include "configurators/vpn_configurator.h"
-//#include "configurators/openvpn_configurator.h"
-//#include "configurators/shadowsocks_configurator.h"
-//#include "configurators/ssh_configurator.h"
-
-#include "core/servercontroller.h"
-//#include "core/server_defs.h"
-//#include "core/errorstrings.h"
-
-//#include "protocols/protocols_defs.h"
-//#include "protocols/shadowsocksvpnprotocol.h"
-
-#include "debug.h"
-#include "defines.h"
 #include "OpenVpnLogic.h"
-#include "utils.h"
-#include "vpnconnection.h"
+#include "core/servercontroller.h"
 #include <functional>
 #include "../../uilogic.h"
 

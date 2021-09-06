@@ -173,7 +173,7 @@ Item {
                         text: qsTr("ShadowSocks settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            UiLogic.pushButtonProtoCloakOpenvpnContSsConfigClicked()
+                            UiLogic.onPushButtonProtoCloakOpenvpnContSsConfigClicked()
                         }
                     }
                     SettingButtonType {

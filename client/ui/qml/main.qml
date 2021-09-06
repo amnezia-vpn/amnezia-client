@@ -130,7 +130,7 @@ Window {
         if (item instanceof PageProtoOpenVPN) {
             return PageEnum.OpenVpnSettings
         }
-        if (item instanceof PageProtoShadowSock) {
+        if (item instanceof PageProtoShadowSocks) {
             return PageEnum.ShadowSocksSettings
         }
         if (item instanceof PageProtoCloak) {
@@ -332,7 +332,7 @@ Window {
     }
     Component {
         id: page_proto_shadowsocks
-        PageProtoShadowSock {}
+        PageProtoShadowSocks {}
     }
     Component {
         id: page_proto_cloak

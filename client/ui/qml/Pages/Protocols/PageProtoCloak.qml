@@ -6,7 +6,7 @@ import "../../Config"
 
 Item {
     id: root
-    enabled: UiLogic.pageProtoCloakEnabled
+    enabled: CloakLogic.pageProtoCloakEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -23,7 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
-        enabled: UiLogic.widgetProtoCloakEnabled
+        enabled: CloakLogic.widgetProtoCloakEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -37,14 +37,14 @@ Item {
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (UiLogic.comboBoxProtoCloakCipherText === model[i]) {
+                    if (CloakLogic.comboBoxProtoCloakCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                UiLogic.comboBoxProtoCloakCipherText = currentText
+                CloakLogic.comboBoxProtoCloakCipherText = currentText
             }
         }
         LabelType {
@@ -88,8 +88,8 @@ Item {
             y: 550
             width: 321
             height: 41
-            visible: UiLogic.labelProtoCloakInfoVisible
-            text: UiLogic.labelProtoCloakInfoText
+            visible: CloakLogic.labelProtoCloakInfoVisible
+            text: CloakLogic.labelProtoCloakInfoText
         }
         TextFieldType {
             id: lineEdit_proto_cloak_port
@@ -97,11 +97,11 @@ Item {
             y: 160
             width: 151
             height: 31
-            text: UiLogic.lineEditProtoCloakPortText
+            text: CloakLogic.lineEditProtoCloakPortText
             onEditingFinished: {
-                UiLogic.lineEditProtoCloakPortText = text
+                CloakLogic.lineEditProtoCloakPortText = text
             }
-            enabled: UiLogic.lineEditProtoCloakPortEnabled
+            enabled: CloakLogic.lineEditProtoCloakPortEnabled
         }
         TextFieldType {
             id: lineEdit_proto_cloak_site
@@ -109,9 +109,9 @@ Item {
             y: 110
             width: 151
             height: 31
-            text: UiLogic.lineEditProtoCloakSiteText
+            text: CloakLogic.lineEditProtoCloakSiteText
             onEditingFinished: {
-                UiLogic.lineEditProtoCloakSiteText = text
+                CloakLogic.lineEditProtoCloakSiteText = text
             }
         }
         ProgressBar {
@@ -121,8 +121,8 @@ Item {
             width: 321
             height: 40
             from: 0
-            to: UiLogic.progressBarProtoCloakResetMaximium
-            value: UiLogic.progressBarProtoCloakResetValue
+            to: CloakLogic.progressBarProtoCloakResetMaximium
+            value: CloakLogic.progressBarProtoCloakResetValue
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -140,7 +140,7 @@ Item {
                     color: Qt.rgba(255, 255, 255, 0.15);
                 }
             }
-            visible: UiLogic.progressBarProtoCloakResetVisible
+            visible: CloakLogic.progressBarProtoCloakResetVisible
         }
         BlueButtonType {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -148,9 +148,9 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: UiLogic.pushButtonProtoCloakSaveVisible
+            visible: CloakLogic.pushButtonProtoCloakSaveVisible
             onClicked: {
-                UiLogic.onPushButtonProtoCloakSaveClicked()
+                CloakLogic.onPushButtonProtoCloakSaveClicked()
             }
         }
     }

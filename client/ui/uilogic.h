@@ -56,21 +56,8 @@ class UiLogic : public QObject
     Q_PROPERTY(bool checkBoxNewServerCloakChecked READ getCheckBoxNewServerCloakChecked WRITE setCheckBoxNewServerCloakChecked NOTIFY checkBoxNewServerCloakCheckedChanged)
     Q_PROPERTY(bool checkBoxNewServerSsChecked READ getCheckBoxNewServerSsChecked WRITE setCheckBoxNewServerSsChecked NOTIFY checkBoxNewServerSsCheckedChanged)
     Q_PROPERTY(bool checkBoxNewServerOpenvpnChecked READ getCheckBoxNewServerOpenvpnChecked WRITE setCheckBoxNewServerOpenvpnChecked NOTIFY checkBoxNewServerOpenvpnCheckedChanged)
-    Q_PROPERTY(QString comboBoxProtoCloakCipherText READ getComboBoxProtoCloakCipherText WRITE setComboBoxProtoCloakCipherText NOTIFY comboBoxProtoCloakCipherTextChanged)
-    Q_PROPERTY(QString lineEditProtoCloakSiteText READ getLineEditProtoCloakSiteText WRITE setLineEditProtoCloakSiteText NOTIFY lineEditProtoCloakSiteTextChanged)
-    Q_PROPERTY(QString lineEditProtoCloakPortText READ getLineEditProtoCloakPortText WRITE setLineEditProtoCloakPortText NOTIFY lineEditProtoCloakPortTextChanged)
-    Q_PROPERTY(QString comboBoxProtoShadowsocksCipherText READ getComboBoxProtoShadowsocksCipherText WRITE setComboBoxProtoShadowsocksCipherText NOTIFY comboBoxProtoShadowsocksCipherTextChanged)
-    Q_PROPERTY(QString lineEditProtoShadowsocksPortText READ getLineEditProtoShadowsocksPortText WRITE setLineEditProtoShadowsocksPortText NOTIFY lineEditProtoShadowsocksPortTextChanged)
 
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
-    Q_PROPERTY(bool widgetProtoCloakEnabled READ getWidgetProtoCloakEnabled WRITE setWidgetProtoCloakEnabled NOTIFY widgetProtoCloakEnabledChanged)
-    Q_PROPERTY(bool pushButtonProtoCloakSaveVisible READ getPushButtonProtoCloakSaveVisible WRITE setPushButtonProtoCloakSaveVisible NOTIFY pushButtonProtoCloakSaveVisibleChanged)
-    Q_PROPERTY(bool progressBarProtoCloakResetVisible READ getProgressBarProtoCloakResetVisible WRITE setProgressBarProtoCloakResetVisible NOTIFY progressBarProtoCloakResetVisibleChanged)
-    Q_PROPERTY(bool lineEditProtoCloakPortEnabled READ getLineEditProtoCloakPortEnabled WRITE setLineEditProtoCloakPortEnabled NOTIFY lineEditProtoCloakPortEnabledChanged)
-    Q_PROPERTY(bool widgetProtoSsEnabled READ getWidgetProtoSsEnabled WRITE setWidgetProtoSsEnabled NOTIFY widgetProtoSsEnabledChanged)
-    Q_PROPERTY(bool pushButtonProtoShadowsocksSaveVisible READ getPushButtonProtoShadowsocksSaveVisible WRITE setPushButtonProtoShadowsocksSaveVisible NOTIFY pushButtonProtoShadowsocksSaveVisibleChanged)
-    Q_PROPERTY(bool progressBarProtoShadowsocksResetVisible READ getProgressBarProtoShadowsocksResetVisible WRITE setProgressBarProtoShadowsocksResetVisible NOTIFY progressBarProtoShadowsocksResetVisibleChanged)
-    Q_PROPERTY(bool lineEditProtoShadowsocksPortEnabled READ getLineEditProtoShadowsocksPortEnabled WRITE setLineEditProtoShadowsocksPortEnabled NOTIFY lineEditProtoShadowsocksPortEnabledChanged)
     Q_PROPERTY(bool pushButtonProtoOpenvpnContInstallChecked READ getPushButtonProtoOpenvpnContInstallChecked WRITE setPushButtonProtoOpenvpnContInstallChecked NOTIFY pushButtonProtoOpenvpnContInstallCheckedChanged)
     Q_PROPERTY(bool pushButtonProtoSsOpenvpnContInstallChecked READ getPushButtonProtoSsOpenvpnContInstallChecked WRITE setPushButtonProtoSsOpenvpnContInstallChecked NOTIFY pushButtonProtoSsOpenvpnContInstallCheckedChanged)
     Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContInstallChecked READ getPushButtonProtoCloakOpenvpnContInstallChecked WRITE setPushButtonProtoCloakOpenvpnContInstallChecked NOTIFY pushButtonProtoCloakOpenvpnContInstallCheckedChanged)
@@ -112,16 +99,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pageServerProtocolsEnabled READ getPageServerProtocolsEnabled WRITE setPageServerProtocolsEnabled NOTIFY pageServerProtocolsEnabledChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallValue READ getProgressBarProtocolsContainerReinstallValue WRITE setProgressBarProtocolsContainerReinstallValue NOTIFY progressBarProtocolsContainerReinstallValueChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallMaximium READ getProgressBarProtocolsContainerReinstallMaximium WRITE setProgressBarProtocolsContainerReinstallMaximium NOTIFY progressBarProtocolsContainerReinstallMaximiumChanged)
-    Q_PROPERTY(bool pageProtoShadowsocksEnabled READ getPageProtoShadowsocksEnabled WRITE setPageProtoShadowsocksEnabled NOTIFY pageProtoShadowsocksEnabledChanged)
-    Q_PROPERTY(bool labelProtoShadowsocksInfoVisible READ getLabelProtoShadowsocksInfoVisible WRITE setLabelProtoShadowsocksInfoVisible NOTIFY labelProtoShadowsocksInfoVisibleChanged)
-    Q_PROPERTY(QString labelProtoShadowsocksInfoText READ getLabelProtoShadowsocksInfoText WRITE setLabelProtoShadowsocksInfoText NOTIFY labelProtoShadowsocksInfoTextChanged)
-    Q_PROPERTY(int progressBarProtoShadowsocksResetValue READ getProgressBarProtoShadowsocksResetValue WRITE setProgressBarProtoShadowsocksResetValue NOTIFY progressBarProtoShadowsocksResetValueChanged)
-    Q_PROPERTY(int progressBarProtoShadowsocksResetMaximium READ getProgressBarProtoShadowsocksResetMaximium WRITE setProgressBarProtoShadowsocksResetMaximium NOTIFY progressBarProtoShadowsocksResetMaximiumChanged)
-    Q_PROPERTY(bool pageProtoCloakEnabled READ getPageProtoCloakEnabled WRITE setPageProtoCloakEnabled NOTIFY pageProtoCloakEnabledChanged)
-    Q_PROPERTY(bool labelProtoCloakInfoVisible READ getLabelProtoCloakInfoVisible WRITE setLabelProtoCloakInfoVisible NOTIFY labelProtoCloakInfoVisibleChanged)
-    Q_PROPERTY(QString labelProtoCloakInfoText READ getLabelProtoCloakInfoText WRITE setLabelProtoCloakInfoText NOTIFY labelProtoCloakInfoTextChanged)
-    Q_PROPERTY(int progressBarProtoCloakResetValue READ getProgressBarProtoCloakResetValue WRITE setProgressBarProtoCloakResetValue NOTIFY progressBarProtoCloakResetValueChanged)
-    Q_PROPERTY(int progressBarProtoCloakResetMaximium READ getProgressBarProtoCloakResetMaximium WRITE setProgressBarProtoCloakResetMaximium NOTIFY progressBarProtoCloakResetMaximiumChanged)
 
 
     Q_PROPERTY(bool pushButtonVpnAddSiteEnabled READ getPushButtonVpnAddSiteEnabled WRITE setPushButtonVpnAddSiteEnabled NOTIFY pushButtonVpnAddSiteEnabledChanged)
@@ -200,36 +177,11 @@ public:
     void setCheckBoxNewServerSsChecked(bool checkBoxNewServerSsChecked);
     bool getCheckBoxNewServerOpenvpnChecked() const;
     void setCheckBoxNewServerOpenvpnChecked(bool checkBoxNewServerOpenvpnChecked);
-    QString getComboBoxProtoCloakCipherText() const;
-    void setComboBoxProtoCloakCipherText(const QString &comboBoxProtoCloakCipherText);
-    QString getLineEditProtoCloakSiteText() const;
-    void setLineEditProtoCloakSiteText(const QString &lineEditProtoCloakSiteText);
-    QString getLineEditProtoCloakPortText() const;
-    void setLineEditProtoCloakPortText(const QString &lineEditProtoCloakPortText);
-    QString getComboBoxProtoShadowsocksCipherText() const;
-    void setComboBoxProtoShadowsocksCipherText(const QString &comboBoxProtoShadowsocksCipherText);
-    QString getLineEditProtoShadowsocksPortText() const;
-    void setLineEditProtoShadowsocksPortText(const QString &lineEditProtoShadowsocksPortText);
+
 
     bool getPushButtonConnectChecked() const;
     void setPushButtonConnectChecked(bool pushButtonConnectChecked);
 
-    bool getWidgetProtoCloakEnabled() const;
-    void setWidgetProtoCloakEnabled(bool widgetProtoCloakEnabled);
-    bool getPushButtonProtoCloakSaveVisible() const;
-    void setPushButtonProtoCloakSaveVisible(bool pushButtonProtoCloakSaveVisible);
-    bool getProgressBarProtoCloakResetVisible() const;
-    void setProgressBarProtoCloakResetVisible(bool progressBarProtoCloakResetVisible);
-    bool getLineEditProtoCloakPortEnabled() const;
-    void setLineEditProtoCloakPortEnabled(bool lineEditProtoCloakPortEnabled);
-    bool getWidgetProtoSsEnabled() const;
-    void setWidgetProtoSsEnabled(bool widgetProtoSsEnabled);
-    bool getPushButtonProtoShadowsocksSaveVisible() const;
-    void setPushButtonProtoShadowsocksSaveVisible(bool pushButtonProtoShadowsocksSaveVisible);
-    bool getProgressBarProtoShadowsocksResetVisible() const;
-    void setProgressBarProtoShadowsocksResetVisible(bool progressBarProtoShadowsocksResetVisible);
-    bool getLineEditProtoShadowsocksPortEnabled() const;
-    void setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsocksPortEnabled);
 
     bool getPushButtonProtoOpenvpnContInstallChecked() const;
     void setPushButtonProtoOpenvpnContInstallChecked(bool pushButtonProtoOpenvpnContInstallChecked);
@@ -318,26 +270,7 @@ public:
     void setProgressBarProtocolsContainerReinstallValue(int progressBarProtocolsContainerReinstallValue);
     int getProgressBarProtocolsContainerReinstallMaximium() const;
     void setProgressBarProtocolsContainerReinstallMaximium(int progressBarProtocolsContainerReinstallMaximium);
-    bool getPageProtoShadowsocksEnabled() const;
-    void setPageProtoShadowsocksEnabled(bool pageProtoShadowsocksEnabled);
-    bool getLabelProtoShadowsocksInfoVisible() const;
-    void setLabelProtoShadowsocksInfoVisible(bool labelProtoShadowsocksInfoVisible);
-    QString getLabelProtoShadowsocksInfoText() const;
-    void setLabelProtoShadowsocksInfoText(const QString &labelProtoShadowsocksInfoText);
-    int getProgressBarProtoShadowsocksResetValue() const;
-    void setProgressBarProtoShadowsocksResetValue(int progressBarProtoShadowsocksResetValue);
-    int getProgressBarProtoShadowsocksResetMaximium() const;
-    void setProgressBarProtoShadowsocksResetMaximium(int progressBarProtoShadowsocksResetMaximium);
-    bool getPageProtoCloakEnabled() const;
-    void setPageProtoCloakEnabled(bool pageProtoCloakEnabled);
-    bool getLabelProtoCloakInfoVisible() const;
-    void setLabelProtoCloakInfoVisible(bool labelProtoCloakInfoVisible);
-    QString getLabelProtoCloakInfoText() const;
-    void setLabelProtoCloakInfoText(const QString &labelProtoCloakInfoText);
-    int getProgressBarProtoCloakResetValue() const;
-    void setProgressBarProtoCloakResetValue(int progressBarProtoCloakResetValue);
-    int getProgressBarProtoCloakResetMaximium() const;
-    void setProgressBarProtoCloakResetMaximium(int progressBarProtoCloakResetMaximium);
+
 
     bool getRadioButtonVpnModeAllSitesChecked() const;
     void setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked);
@@ -351,32 +284,22 @@ public:
     Q_INVOKABLE void updateNewServerProtocolsPage();
     Q_INVOKABLE void updateVpnPage();
 
-
-
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeExceptSitesToggled(bool checked);
 
     Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
 
-
-
-
-
     Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
+
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContSsConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContCloakConfigClicked();
 
-    Q_INVOKABLE void onPushButtonProtoShadowsocksSaveClicked();
-    Q_INVOKABLE void onPushButtonProtoCloakSaveClicked();
+
     Q_INVOKABLE void onCloseWindow();
-
-
-
-
 
     Q_INVOKABLE void updateProtocolsPage();
 
@@ -411,24 +334,13 @@ signals:
     void checkBoxNewServerCloakCheckedChanged();
     void checkBoxNewServerSsCheckedChanged();
     void checkBoxNewServerOpenvpnCheckedChanged();
-    void comboBoxProtoCloakCipherTextChanged();
-    void lineEditProtoCloakSiteTextChanged();
-    void lineEditProtoCloakPortTextChanged();
-    void comboBoxProtoShadowsocksCipherTextChanged();
-    void lineEditProtoShadowsocksPortTextChanged();
+
+
 
 
 
     void pushButtonConnectCheckedChanged();
 
-    void widgetProtoCloakEnabledChanged();
-    void pushButtonProtoCloakSaveVisibleChanged();
-    void progressBarProtoCloakResetVisibleChanged();
-    void lineEditProtoCloakPortEnabledChanged();
-    void widgetProtoSsEnabledChanged();
-    void pushButtonProtoShadowsocksSaveVisibleChanged();
-    void progressBarProtoShadowsocksResetVisibleChanged();
-    void lineEditProtoShadowsocksPortEnabledChanged();
 
     void pushButtonProtoOpenvpnContInstallCheckedChanged();
     void pushButtonProtoSsOpenvpnContInstallCheckedChanged();
@@ -474,16 +386,8 @@ signals:
     void progressBarProtocolsContainerReinstallValueChanged();
     void progressBarProtocolsContainerReinstallMaximiumChanged();
 
-    void pageProtoShadowsocksEnabledChanged();
-    void labelProtoShadowsocksInfoVisibleChanged();
-    void labelProtoShadowsocksInfoTextChanged();
-    void progressBarProtoShadowsocksResetValueChanged();
-    void progressBarProtoShadowsocksResetMaximiumChanged();
-    void pageProtoCloakEnabledChanged();
-    void labelProtoCloakInfoVisibleChanged();
-    void labelProtoCloakInfoTextChanged();
-    void progressBarProtoCloakResetValueChanged();
-    void progressBarProtoCloakResetMaximiumChanged();
+
+
 
     void goToPage(int page, bool reset = true, bool slide = true);
     void closePage();
@@ -538,24 +442,14 @@ private:
     bool m_checkBoxNewServerCloakChecked;
     bool m_checkBoxNewServerSsChecked;
     bool m_checkBoxNewServerOpenvpnChecked;
-    QString m_comboBoxProtoCloakCipherText;
-    QString m_lineEditProtoCloakSiteText;
-    QString m_lineEditProtoCloakPortText;
-    QString m_comboBoxProtoShadowsocksCipherText;
-    QString m_lineEditProtoShadowsocksPortText;
+
+
 
 
 
     bool m_pushButtonConnectChecked;
 
-    bool m_widgetProtoCloakEnabled;
-    bool m_pushButtonProtoCloakSaveVisible;
-    bool m_progressBarProtoCloakResetVisible;
-    bool m_lineEditProtoCloakPortEnabled;
-    bool m_widgetProtoSsEnabled;
-    bool m_pushButtonProtoShadowsocksSaveVisible;
-    bool m_progressBarProtoShadowsocksResetVisible;
-    bool m_lineEditProtoShadowsocksPortEnabled;
+
 
     bool m_pushButtonProtoOpenvpnContInstallChecked;
     bool m_pushButtonProtoSsOpenvpnContInstallChecked;
@@ -600,16 +494,7 @@ private:
     int m_progressBarProtocolsContainerReinstallValue;
     int m_progressBarProtocolsContainerReinstallMaximium;
 
-    bool m_pageProtoShadowsocksEnabled;
-    bool m_labelProtoShadowsocksInfoVisible;
-    QString m_labelProtoShadowsocksInfoText;
-    int m_progressBarProtoShadowsocksResetValue;
-    int m_progressBarProtoShadowsocksResetMaximium;
-    bool m_pageProtoCloakEnabled;
-    bool m_labelProtoCloakInfoVisible;
-    QString m_labelProtoCloakInfoText;
-    int m_progressBarProtoCloakResetValue;
-    int m_progressBarProtoCloakResetMaximium;
+
 
 private slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -664,13 +549,9 @@ private:
    // void setupSitesPageConnections();
     void setupProtocolsPageConnections();
 
-    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
-    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
 
 
 
-    QJsonObject getShadowSocksConfigFromPage(QJsonObject oldConfig);
-    QJsonObject getCloakConfigFromPage(QJsonObject oldConfig);
 
     QMap<DockerContainer, QJsonObject> getInstallConfigsFromProtocolsPage() const;
 

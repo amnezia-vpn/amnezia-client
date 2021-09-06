@@ -96,23 +96,12 @@ UiLogic::UiLogic(QObject *parent) :
     m_checkBoxNewServerCloakChecked{true},
     m_checkBoxNewServerSsChecked{false},
     m_checkBoxNewServerOpenvpnChecked{false},
-    m_comboBoxProtoCloakCipherText{"chacha20-poly1305"},
-    m_lineEditProtoCloakSiteText{"tile.openstreetmap.org"},
-    m_lineEditProtoCloakPortText{},
-    m_comboBoxProtoShadowsocksCipherText{"chacha20-poly1305"},
-    m_lineEditProtoShadowsocksPortText{},
+
+
 
 
     m_pushButtonConnectChecked{false},
 
-    m_widgetProtoCloakEnabled{false},
-    m_pushButtonProtoCloakSaveVisible{false},
-    m_progressBarProtoCloakResetVisible{false},
-    m_lineEditProtoCloakPortEnabled{false},
-    m_widgetProtoSsEnabled{false},
-    m_pushButtonProtoShadowsocksSaveVisible{false},
-    m_progressBarProtoShadowsocksResetVisible{false},
-    m_lineEditProtoShadowsocksPortEnabled{false},
 
     m_pushButtonProtoOpenvpnContInstallChecked{false},
     m_pushButtonProtoSsOpenvpnContInstallChecked{false},
@@ -156,16 +145,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
 
-    m_pageProtoShadowsocksEnabled{true},
-    m_labelProtoShadowsocksInfoVisible{true},
-    m_labelProtoShadowsocksInfoText{},
-    m_progressBarProtoShadowsocksResetValue{0},
-    m_progressBarProtoShadowsocksResetMaximium{100},
-    m_pageProtoCloakEnabled{true},
-    m_labelProtoCloakInfoVisible{true},
-    m_labelProtoCloakInfoText{},
-    m_progressBarProtoCloakResetValue{0},
-    m_progressBarProtoCloakResetMaximium{100},
+
     m_vpnConnection(nullptr)
 {
     m_vpnConnection = new VpnConnection(this);
@@ -503,44 +483,7 @@ void UiLogic::setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExc
 
 
 
-QString UiLogic::getComboBoxProtoCloakCipherText() const
-{
-    return m_comboBoxProtoCloakCipherText;
-}
 
-void UiLogic::setComboBoxProtoCloakCipherText(const QString &comboBoxProtoCloakCipherText)
-{
-    if (m_comboBoxProtoCloakCipherText != comboBoxProtoCloakCipherText) {
-        m_comboBoxProtoCloakCipherText = comboBoxProtoCloakCipherText;
-        emit comboBoxProtoCloakCipherTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditProtoCloakPortText() const
-{
-    return m_lineEditProtoCloakPortText;
-}
-
-void UiLogic::setLineEditProtoCloakPortText(const QString &lineEditProtoCloakPortText)
-{
-    if (m_lineEditProtoCloakPortText != lineEditProtoCloakPortText) {
-        m_lineEditProtoCloakPortText = lineEditProtoCloakPortText;
-        emit lineEditProtoCloakPortTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditProtoCloakSiteText() const
-{
-    return m_lineEditProtoCloakSiteText;
-}
-
-void UiLogic::setLineEditProtoCloakSiteText(const QString &lineEditProtoCloakSiteText)
-{
-    if (m_lineEditProtoCloakSiteText != lineEditProtoCloakSiteText) {
-        m_lineEditProtoCloakSiteText = lineEditProtoCloakSiteText;
-        emit lineEditProtoCloakSiteTextChanged();
-    }
-}
 
 int UiLogic::getCurrentPageValue() const
 {
@@ -633,31 +576,7 @@ void UiLogic::setCheckBoxNewServerOpenvpnChecked(bool checkBoxNewServerOpenvpnCh
     }
 }
 
-QString UiLogic::getComboBoxProtoShadowsocksCipherText() const
-{
-    return m_comboBoxProtoShadowsocksCipherText;
-}
 
-void UiLogic::setComboBoxProtoShadowsocksCipherText(const QString &comboBoxProtoShadowsocksCipherText)
-{
-    if (m_comboBoxProtoShadowsocksCipherText != comboBoxProtoShadowsocksCipherText) {
-        m_comboBoxProtoShadowsocksCipherText = comboBoxProtoShadowsocksCipherText;
-        emit comboBoxProtoShadowsocksCipherTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditProtoShadowsocksPortText() const
-{
-    return m_lineEditProtoShadowsocksPortText;
-}
-
-void UiLogic::setLineEditProtoShadowsocksPortText(const QString &lineEditProtoShadowsocksPortText)
-{
-    if (m_lineEditProtoShadowsocksPortText != lineEditProtoShadowsocksPortText) {
-        m_lineEditProtoShadowsocksPortText = lineEditProtoShadowsocksPortText;
-        emit lineEditProtoShadowsocksPortTextChanged();
-    }
-}
 
 
 
@@ -691,108 +610,10 @@ void UiLogic::setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled)
     }
 }
 
-bool UiLogic::getWidgetProtoCloakEnabled() const
-{
-    return m_widgetProtoCloakEnabled;
-}
 
-void UiLogic::setWidgetProtoCloakEnabled(bool widgetProtoCloakEnabled)
-{
-    if (m_widgetProtoCloakEnabled != widgetProtoCloakEnabled) {
-        m_widgetProtoCloakEnabled = widgetProtoCloakEnabled;
-        emit widgetProtoCloakEnabledChanged();
-    }
-}
 
-bool UiLogic::getPushButtonProtoCloakSaveVisible() const
-{
-    return m_pushButtonProtoCloakSaveVisible;
-}
 
-void UiLogic::setPushButtonProtoCloakSaveVisible(bool pushButtonProtoCloakSaveVisible)
-{
-    if (m_pushButtonProtoCloakSaveVisible != pushButtonProtoCloakSaveVisible) {
-        m_pushButtonProtoCloakSaveVisible = pushButtonProtoCloakSaveVisible;
-        emit pushButtonProtoCloakSaveVisibleChanged();
-    }
-}
 
-bool UiLogic::getProgressBarProtoCloakResetVisible() const
-{
-    return m_progressBarProtoCloakResetVisible;
-}
-
-void UiLogic::setProgressBarProtoCloakResetVisible(bool progressBarProtoCloakResetVisible)
-{
-    if (m_progressBarProtoCloakResetVisible != progressBarProtoCloakResetVisible) {
-        m_progressBarProtoCloakResetVisible = progressBarProtoCloakResetVisible;
-        emit progressBarProtoCloakResetVisibleChanged();
-    }
-}
-
-bool UiLogic::getLineEditProtoCloakPortEnabled() const
-{
-    return m_lineEditProtoCloakPortEnabled;
-}
-
-void UiLogic::setLineEditProtoCloakPortEnabled(bool lineEditProtoCloakPortEnabled)
-{
-    if (m_lineEditProtoCloakPortEnabled != lineEditProtoCloakPortEnabled) {
-        m_lineEditProtoCloakPortEnabled = lineEditProtoCloakPortEnabled;
-        emit lineEditProtoCloakPortEnabledChanged();
-    }
-}
-bool UiLogic::getWidgetProtoSsEnabled() const
-{
-    return m_widgetProtoSsEnabled;
-}
-
-void UiLogic::setWidgetProtoSsEnabled(bool widgetProtoSsEnabled)
-{
-    if (m_widgetProtoSsEnabled != widgetProtoSsEnabled) {
-        m_widgetProtoSsEnabled = widgetProtoSsEnabled;
-        emit widgetProtoSsEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoShadowsocksSaveVisible() const
-{
-    return m_pushButtonProtoShadowsocksSaveVisible;
-}
-
-void UiLogic::setPushButtonProtoShadowsocksSaveVisible(bool pushButtonProtoShadowsocksSaveVisible)
-{
-    if (m_pushButtonProtoShadowsocksSaveVisible != pushButtonProtoShadowsocksSaveVisible) {
-        m_pushButtonProtoShadowsocksSaveVisible = pushButtonProtoShadowsocksSaveVisible;
-        emit pushButtonProtoShadowsocksSaveVisibleChanged();
-    }
-}
-
-bool UiLogic::getProgressBarProtoShadowsocksResetVisible() const
-{
-    return m_progressBarProtoShadowsocksResetVisible;
-}
-
-void UiLogic::setProgressBarProtoShadowsocksResetVisible(bool progressBarProtoShadowsocksResetVisible)
-{
-    if (m_progressBarProtoShadowsocksResetVisible != progressBarProtoShadowsocksResetVisible) {
-        m_progressBarProtoShadowsocksResetVisible = progressBarProtoShadowsocksResetVisible;
-        emit progressBarProtoShadowsocksResetVisibleChanged();
-    }
-}
-
-bool UiLogic::getLineEditProtoShadowsocksPortEnabled() const
-{
-    return m_lineEditProtoShadowsocksPortEnabled;
-}
-
-void UiLogic::setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsocksPortEnabled)
-{
-    if (m_lineEditProtoShadowsocksPortEnabled != lineEditProtoShadowsocksPortEnabled) {
-        m_lineEditProtoShadowsocksPortEnabled = lineEditProtoShadowsocksPortEnabled;
-        emit lineEditProtoShadowsocksPortEnabledChanged();
-    }
-}
 
 
 
@@ -1336,135 +1157,9 @@ void UiLogic::setProgressBarProtocolsContainerReinstallMaximium(int progressBarP
 }
 
 
-bool UiLogic::getPageProtoShadowsocksEnabled() const
-{
-    return m_pageProtoShadowsocksEnabled;
-}
 
-void UiLogic::setPageProtoShadowsocksEnabled(bool pageProtoShadowsocksEnabled)
-{
-    if (m_pageProtoShadowsocksEnabled != pageProtoShadowsocksEnabled) {
-        m_pageProtoShadowsocksEnabled = pageProtoShadowsocksEnabled;
-        emit pageProtoShadowsocksEnabledChanged();
-    }
-}
 
-bool UiLogic::getLabelProtoShadowsocksInfoVisible() const
-{
-    return m_labelProtoShadowsocksInfoVisible;
-}
 
-void UiLogic::setLabelProtoShadowsocksInfoVisible(bool labelProtoShadowsocksInfoVisible)
-{
-    if (m_labelProtoShadowsocksInfoVisible != labelProtoShadowsocksInfoVisible) {
-        m_labelProtoShadowsocksInfoVisible = labelProtoShadowsocksInfoVisible;
-        emit labelProtoShadowsocksInfoVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelProtoShadowsocksInfoText() const
-{
-    return m_labelProtoShadowsocksInfoText;
-}
-
-void UiLogic::setLabelProtoShadowsocksInfoText(const QString &labelProtoShadowsocksInfoText)
-{
-    if (m_labelProtoShadowsocksInfoText != labelProtoShadowsocksInfoText) {
-        m_labelProtoShadowsocksInfoText = labelProtoShadowsocksInfoText;
-        emit labelProtoShadowsocksInfoTextChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoShadowsocksResetValue() const
-{
-    return m_progressBarProtoShadowsocksResetValue;
-}
-
-void UiLogic::setProgressBarProtoShadowsocksResetValue(int progressBarProtoShadowsocksResetValue)
-{
-    if (m_progressBarProtoShadowsocksResetValue != progressBarProtoShadowsocksResetValue) {
-        m_progressBarProtoShadowsocksResetValue = progressBarProtoShadowsocksResetValue;
-        emit progressBarProtoShadowsocksResetValueChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoShadowsocksResetMaximium() const
-{
-    return m_progressBarProtoShadowsocksResetMaximium;
-}
-
-void UiLogic::setProgressBarProtoShadowsocksResetMaximium(int progressBarProtoShadowsocksResetMaximium)
-{
-    if (m_progressBarProtoShadowsocksResetMaximium != progressBarProtoShadowsocksResetMaximium) {
-        m_progressBarProtoShadowsocksResetMaximium = progressBarProtoShadowsocksResetMaximium;
-        emit progressBarProtoShadowsocksResetMaximiumChanged();
-    }
-}
-
-bool UiLogic::getPageProtoCloakEnabled() const
-{
-    return m_pageProtoCloakEnabled;
-}
-
-void UiLogic::setPageProtoCloakEnabled(bool pageProtoCloakEnabled)
-{
-    if (m_pageProtoCloakEnabled != pageProtoCloakEnabled) {
-        m_pageProtoCloakEnabled = pageProtoCloakEnabled;
-        emit pageProtoCloakEnabledChanged();
-    }
-}
-
-bool UiLogic::getLabelProtoCloakInfoVisible() const
-{
-    return m_labelProtoCloakInfoVisible;
-}
-
-void UiLogic::setLabelProtoCloakInfoVisible(bool labelProtoCloakInfoVisible)
-{
-    if (m_labelProtoCloakInfoVisible != labelProtoCloakInfoVisible) {
-        m_labelProtoCloakInfoVisible = labelProtoCloakInfoVisible;
-        emit labelProtoCloakInfoVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelProtoCloakInfoText() const
-{
-    return m_labelProtoCloakInfoText;
-}
-
-void UiLogic::setLabelProtoCloakInfoText(const QString &labelProtoCloakInfoText)
-{
-    if (m_labelProtoCloakInfoText != labelProtoCloakInfoText) {
-        m_labelProtoCloakInfoText = labelProtoCloakInfoText;
-        emit labelProtoCloakInfoTextChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoCloakResetValue() const
-{
-    return m_progressBarProtoCloakResetValue;
-}
-
-void UiLogic::setProgressBarProtoCloakResetValue(int progressBarProtoCloakResetValue)
-{
-    if (m_progressBarProtoCloakResetValue != progressBarProtoCloakResetValue) {
-        m_progressBarProtoCloakResetValue = progressBarProtoCloakResetValue;
-        emit progressBarProtoCloakResetValueChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoCloakResetMaximium() const
-{
-    return m_progressBarProtoCloakResetMaximium;
-}
-
-void UiLogic::setProgressBarProtoCloakResetMaximium(int progressBarProtoCloakResetMaximium)
-{
-    if (m_progressBarProtoCloakResetMaximium != progressBarProtoCloakResetMaximium) {
-        m_progressBarProtoCloakResetMaximium = progressBarProtoCloakResetMaximium;
-        emit progressBarProtoCloakResetMaximiumChanged();
-    }
-}
 
 
 
@@ -2222,136 +1917,14 @@ void UiLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
 void UiLogic::onPushButtonProtoSsOpenvpnContSsConfigClicked()
 {
     selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
+    shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
                           selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
     goToPage(Page::ShadowSocksSettings);
 }
 
-void UiLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
-                      selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::OpenVpnSettings);
-}
 
-void UiLogic::onPushButtonProtoCloakOpenvpnContSsConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
-                          selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::ShadowSocksSettings);
-}
 
-void UiLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    updateCloakPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak),
-                    selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::CloakSettings);
-}
 
-void UiLogic::onPushButtonProtoShadowsocksSaveClicked()
-{
-    QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks);
-    protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
-
-    QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
-    QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::shadowsocks, protocolConfig);
-    PageFunc page_proto_shadowsocks;
-    page_proto_shadowsocks.setEnabledFunc = [this] (bool enabled) -> void {
-        setPageProtoShadowsocksEnabled(enabled);
-    };
-    ButtonFunc pushButton_proto_shadowsocks_save;
-    pushButton_proto_shadowsocks_save.setVisibleFunc = [this] (bool visible) ->void {
-        setPushButtonProtoShadowsocksSaveVisible(visible);
-    };
-    LabelFunc label_proto_shadowsocks_info;
-    label_proto_shadowsocks_info.setVisibleFunc = [this] (bool visible) ->void {
-        setLabelProtoShadowsocksInfoVisible(visible);
-    };
-    label_proto_shadowsocks_info.setTextFunc = [this] (const QString& text) ->void {
-        setLabelProtoShadowsocksInfoText(text);
-    };
-    ProgressFunc progressBar_proto_shadowsocks_reset;
-    progressBar_proto_shadowsocks_reset.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarProtoShadowsocksResetVisible(visible);
-    };
-    progressBar_proto_shadowsocks_reset.setValueFunc = [this] (int value) ->void {
-        setProgressBarProtoShadowsocksResetValue(value);
-    };
-    progressBar_proto_shadowsocks_reset.getValueFunc = [this] (void) -> int {
-        return getProgressBarProtoShadowsocksResetValue();
-    };
-    progressBar_proto_shadowsocks_reset.getMaximiumFunc = [this] (void) -> int {
-        return getProgressBarProtoShadowsocksResetMaximium();
-    };
-
-    ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
-    },
-    page_proto_shadowsocks, progressBar_proto_shadowsocks_reset,
-    pushButton_proto_shadowsocks_save, label_proto_shadowsocks_info);
-
-    if (!e) {
-        m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
-    }
-    qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
-}
-
-void UiLogic::onPushButtonProtoCloakSaveClicked()
-{
-    QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak);
-    protocolConfig = getCloakConfigFromPage(protocolConfig);
-
-    QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
-    QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::cloak, protocolConfig);
-
-    PageFunc page_proto_cloak;
-    page_proto_cloak.setEnabledFunc = [this] (bool enabled) -> void {
-        setPageProtoCloakEnabled(enabled);
-    };
-    ButtonFunc pushButton_proto_cloak_save;
-    pushButton_proto_cloak_save.setVisibleFunc = [this] (bool visible) ->void {
-        setPushButtonProtoCloakSaveVisible(visible);
-    };
-    LabelFunc label_proto_cloak_info;
-    label_proto_cloak_info.setVisibleFunc = [this] (bool visible) ->void {
-        setLabelProtoCloakInfoVisible(visible);
-    };
-    label_proto_cloak_info.setTextFunc = [this] (const QString& text) ->void {
-        setLabelProtoCloakInfoText(text);
-    };
-    ProgressFunc progressBar_proto_cloak_reset;
-    progressBar_proto_cloak_reset.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarProtoCloakResetVisible(visible);
-    };
-    progressBar_proto_cloak_reset.setValueFunc = [this] (int value) ->void {
-        setProgressBarProtoCloakResetValue(value);
-    };
-    progressBar_proto_cloak_reset.getValueFunc = [this] (void) -> int {
-        return getProgressBarProtoCloakResetValue();
-    };
-    progressBar_proto_cloak_reset.getMaximiumFunc = [this] (void) -> int {
-        return getProgressBarProtoCloakResetMaximium();
-    };
-
-    ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
-    },
-    page_proto_cloak, progressBar_proto_cloak_reset,
-    pushButton_proto_cloak_save, label_proto_cloak_info);
-
-    if (!e) {
-        m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
-    }
-
-    qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
-}
 
 
 void UiLogic::updateVpnPage()
@@ -2465,54 +2038,26 @@ void UiLogic::updateProtocolsPage()
 }
 
 
-
-void UiLogic::updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
+void UiLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
 {
-    setWidgetProtoSsEnabled(haveAuthData);
-    setPushButtonProtoShadowsocksSaveVisible(haveAuthData);
-    setProgressBarProtoShadowsocksResetVisible(haveAuthData);
-
-    setComboBoxProtoShadowsocksCipherText(ssConfig.value(config_key::cipher).
-                                          toString(protocols::shadowsocks::defaultCipher));
-
-    setLineEditProtoShadowsocksPortText(ssConfig.value(config_key::port).
-                                        toString(protocols::shadowsocks::defaultPort));
-
-    setLineEditProtoShadowsocksPortEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
+    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+                      selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
+    goToPage(Page::OpenVpnSettings);
 }
 
-void UiLogic::updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
+void UiLogic::onPushButtonProtoCloakOpenvpnContSsConfigClicked()
 {
-    setWidgetProtoCloakEnabled(haveAuthData);
-    setPushButtonProtoCloakSaveVisible(haveAuthData);
-    setProgressBarProtoCloakResetVisible(haveAuthData);
-
-    setComboBoxProtoCloakCipherText(ckConfig.value(config_key::cipher).
-                                    toString(protocols::cloak::defaultCipher));
-
-    setLineEditProtoCloakSiteText(ckConfig.value(config_key::site).
-                                  toString(protocols::cloak::defaultRedirSite));
-
-    setLineEditProtoCloakPortText(ckConfig.value(config_key::port).
-                                  toString(protocols::cloak::defaultPort));
-
-    setLineEditProtoCloakPortEnabled(container == DockerContainer::OpenVpnOverCloak);
+    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+    shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
+                          selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
+    goToPage(Page::ShadowSocksSettings);
 }
 
-
-QJsonObject UiLogic::getShadowSocksConfigFromPage(QJsonObject oldConfig)
+void UiLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
 {
-    oldConfig.insert(config_key::cipher, getComboBoxProtoShadowsocksCipherText());
-    oldConfig.insert(config_key::port, getLineEditProtoShadowsocksPortText());
-
-    return oldConfig;
-}
-
-QJsonObject UiLogic::getCloakConfigFromPage(QJsonObject oldConfig)
-{
-    oldConfig.insert(config_key::cipher, getComboBoxProtoCloakCipherText());
-    oldConfig.insert(config_key::site, getLineEditProtoCloakSiteText());
-    oldConfig.insert(config_key::port, getLineEditProtoCloakPortText());
-
-    return oldConfig;
+    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+    cloakLogic()->updateCloakPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak),
+                    selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
+    goToPage(Page::CloakSettings);
 }

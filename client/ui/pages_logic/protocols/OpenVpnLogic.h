@@ -36,6 +36,9 @@ public:
     Q_PROPERTY(int progressBarProtoOpenvpnResetValue READ getProgressBarProtoOpenvpnResetValue WRITE setProgressBarProtoOpenvpnResetValue NOTIFY progressBarProtoOpenvpnResetValueChanged)
     Q_PROPERTY(int progressBarProtoOpenvpnResetMaximium READ getProgressBarProtoOpenvpnResetMaximium WRITE setProgressBarProtoOpenvpnResetMaximium NOTIFY progressBarProtoOpenvpnResetMaximiumChanged)
 
+    Q_INVOKABLE void onCheckBoxProtoOpenvpnAutoEncryptionClicked();
+    Q_INVOKABLE void onPushButtonProtoOpenvpnSaveClicked();
+
 public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~OpenVpnLogic() = default;
@@ -90,9 +93,6 @@ public:
     void setProgressBarProtoOpenvpnResetValue(int progressBarProtoOpenvpnResetValue);
     int getProgressBarProtoOpenvpnResetMaximium() const;
     void setProgressBarProtoOpenvpnResetMaximium(int progressBarProtoOpenvpnResetMaximium);
-
-    Q_INVOKABLE void onCheckBoxProtoOpenvpnAutoEncryptionClicked();
-    Q_INVOKABLE void onPushButtonProtoOpenvpnSaveClicked();
 
 signals:
     void lineEditProtoOpenvpnSubnetTextChanged();
