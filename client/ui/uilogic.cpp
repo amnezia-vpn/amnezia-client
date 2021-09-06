@@ -58,6 +58,11 @@
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
 
+#include "pages_logic/protocols/CloakLogic.h"
+#include "pages_logic/protocols/OpenVpnLogic.h"
+#include "pages_logic/protocols/ShadowSocksLogic.h"
+
+
 using namespace amnezia;
 using namespace PageEnumNS;
 
@@ -96,14 +101,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_lineEditProtoCloakPortText{},
     m_comboBoxProtoShadowsocksCipherText{"chacha20-poly1305"},
     m_lineEditProtoShadowsocksPortText{},
-    m_lineEditProtoOpenvpnSubnetText{},
-    m_radioButtonProtoOpenvpnUdpChecked{false},
-    m_checkBoxProtoOpenvpnAutoEncryptionChecked{},
-    m_comboBoxProtoOpenvpnCipherText{"AES-256-GCM"},
-    m_comboBoxProtoOpenvpnHashText{"SHA512"},
-    m_checkBoxProtoOpenvpnBlockDnsChecked{false},
-    m_lineEditProtoOpenvpnPortText{},
-    m_checkBoxProtoOpenvpnTlsAuthChecked{false},
+
 
     m_pushButtonConnectChecked{false},
 
@@ -115,13 +113,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_pushButtonProtoShadowsocksSaveVisible{false},
     m_progressBarProtoShadowsocksResetVisible{false},
     m_lineEditProtoShadowsocksPortEnabled{false},
-    m_widgetProtoOpenvpnEnabled{false},
-    m_pushButtonProtoOpenvpnSaveVisible{false},
-    m_progressBarProtoOpenvpnResetVisible{false},
-    m_radioButtonProtoOpenvpnUdpEnabled{false},
-    m_radioButtonProtoOpenvpnTcpEnabled{false},
-    m_radioButtonProtoOpenvpnTcpChecked{false},
-    m_lineEditProtoOpenvpnPortEnabled{false},
+
     m_pushButtonProtoOpenvpnContInstallChecked{false},
     m_pushButtonProtoSsOpenvpnContInstallChecked{false},
     m_pushButtonProtoCloakOpenvpnContInstallChecked{false},
@@ -163,13 +155,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_pageServerProtocolsEnabled{true},
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
-    m_comboBoxProtoOpenvpnCipherEnabled{true},
-    m_comboBoxProtoOpenvpnHashEnabled{true},
-    m_pageProtoOpenvpnEnabled{true},
-    m_labelProtoOpenvpnInfoVisible{true},
-    m_labelProtoOpenvpnInfoText{},
-    m_progressBarProtoOpenvpnResetValue{0},
-    m_progressBarProtoOpenvpnResetMaximium{100},
+
     m_pageProtoShadowsocksEnabled{true},
     m_labelProtoShadowsocksInfoVisible{true},
     m_labelProtoShadowsocksInfoText{},
@@ -198,6 +184,9 @@ UiLogic::UiLogic(QObject *parent) :
     m_vpnLogic = new VpnLogic(this);
     m_wizardLogic = new WizardLogic(this);
 
+    m_openVpnLogic = new OpenVpnLogic(this);
+    m_shadowSocksLogic = new ShadowSocksLogic(this);
+    m_cloakLogic = new CloakLogic(this);
 
     connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
@@ -670,109 +659,7 @@ void UiLogic::setLineEditProtoShadowsocksPortText(const QString &lineEditProtoSh
     }
 }
 
-QString UiLogic::getLineEditProtoOpenvpnSubnetText() const
-{
-    return m_lineEditProtoOpenvpnSubnetText;
-}
 
-void UiLogic::setLineEditProtoOpenvpnSubnetText(const QString &lineEditProtoOpenvpnSubnetText)
-{
-    if (m_lineEditProtoOpenvpnSubnetText != lineEditProtoOpenvpnSubnetText) {
-        m_lineEditProtoOpenvpnSubnetText = lineEditProtoOpenvpnSubnetText;
-        emit lineEditProtoOpenvpnSubnetTextChanged();
-    }
-}
-
-bool UiLogic::getRadioButtonProtoOpenvpnUdpChecked() const
-{
-    return m_radioButtonProtoOpenvpnUdpChecked;
-}
-
-void UiLogic::setRadioButtonProtoOpenvpnUdpChecked(bool radioButtonProtoOpenvpnUdpChecked)
-{
-    if (m_radioButtonProtoOpenvpnUdpChecked != radioButtonProtoOpenvpnUdpChecked) {
-        m_radioButtonProtoOpenvpnUdpChecked = radioButtonProtoOpenvpnUdpChecked;
-        emit radioButtonProtoOpenvpnUdpCheckedChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxProtoOpenvpnAutoEncryptionChecked() const
-{
-    return m_checkBoxProtoOpenvpnAutoEncryptionChecked;
-}
-
-void UiLogic::setCheckBoxProtoOpenvpnAutoEncryptionChecked(bool checkBoxProtoOpenvpnAutoEncryptionChecked)
-{
-    if (m_checkBoxProtoOpenvpnAutoEncryptionChecked != checkBoxProtoOpenvpnAutoEncryptionChecked) {
-        m_checkBoxProtoOpenvpnAutoEncryptionChecked = checkBoxProtoOpenvpnAutoEncryptionChecked;
-        emit checkBoxProtoOpenvpnAutoEncryptionCheckedChanged();
-    }
-}
-
-QString UiLogic::getComboBoxProtoOpenvpnCipherText() const
-{
-    return m_comboBoxProtoOpenvpnCipherText;
-}
-
-void UiLogic::setComboBoxProtoOpenvpnCipherText(const QString &comboBoxProtoOpenvpnCipherText)
-{
-    if (m_comboBoxProtoOpenvpnCipherText != comboBoxProtoOpenvpnCipherText) {
-        m_comboBoxProtoOpenvpnCipherText = comboBoxProtoOpenvpnCipherText;
-        emit comboBoxProtoOpenvpnCipherTextChanged();
-    }
-}
-
-QString UiLogic::getComboBoxProtoOpenvpnHashText() const
-{
-    return m_comboBoxProtoOpenvpnHashText;
-}
-
-void UiLogic::setComboBoxProtoOpenvpnHashText(const QString &comboBoxProtoOpenvpnHashText)
-{
-    if (m_comboBoxProtoOpenvpnHashText != comboBoxProtoOpenvpnHashText) {
-        m_comboBoxProtoOpenvpnHashText = comboBoxProtoOpenvpnHashText;
-        emit comboBoxProtoOpenvpnHashTextChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxProtoOpenvpnBlockDnsChecked() const
-{
-    return m_checkBoxProtoOpenvpnBlockDnsChecked;
-}
-
-void UiLogic::setCheckBoxProtoOpenvpnBlockDnsChecked(bool checkBoxProtoOpenvpnBlockDnsChecked)
-{
-    if (m_checkBoxProtoOpenvpnBlockDnsChecked != checkBoxProtoOpenvpnBlockDnsChecked) {
-        m_checkBoxProtoOpenvpnBlockDnsChecked = checkBoxProtoOpenvpnBlockDnsChecked;
-        emit checkBoxProtoOpenvpnBlockDnsCheckedChanged();
-    }
-}
-
-QString UiLogic::getLineEditProtoOpenvpnPortText() const
-{
-    return m_lineEditProtoOpenvpnPortText;
-}
-
-void UiLogic::setLineEditProtoOpenvpnPortText(const QString &lineEditProtoOpenvpnPortText)
-{
-    if (m_lineEditProtoOpenvpnPortText != lineEditProtoOpenvpnPortText) {
-        m_lineEditProtoOpenvpnPortText = lineEditProtoOpenvpnPortText;
-        emit lineEditProtoOpenvpnPortTextChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxProtoOpenvpnTlsAuthChecked() const
-{
-    return m_checkBoxProtoOpenvpnTlsAuthChecked;
-}
-
-void UiLogic::setCheckBoxProtoOpenvpnTlsAuthChecked(bool checkBoxProtoOpenvpnTlsAuthChecked)
-{
-    if (m_checkBoxProtoOpenvpnTlsAuthChecked != checkBoxProtoOpenvpnTlsAuthChecked) {
-        m_checkBoxProtoOpenvpnTlsAuthChecked = checkBoxProtoOpenvpnTlsAuthChecked;
-        emit checkBoxProtoOpenvpnTlsAuthCheckedChanged();
-    }
-}
 
 
 
@@ -907,96 +794,7 @@ void UiLogic::setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsoc
     }
 }
 
-bool UiLogic::getWidgetProtoOpenvpnEnabled() const
-{
-    return m_widgetProtoOpenvpnEnabled;
-}
 
-void UiLogic::setWidgetProtoOpenvpnEnabled(bool widgetProtoOpenvpnEnabled)
-{
-    if (m_widgetProtoOpenvpnEnabled != widgetProtoOpenvpnEnabled) {
-        m_widgetProtoOpenvpnEnabled = widgetProtoOpenvpnEnabled;
-        emit widgetProtoOpenvpnEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoOpenvpnSaveVisible() const
-{
-    return m_pushButtonProtoOpenvpnSaveVisible;
-}
-
-void UiLogic::setPushButtonProtoOpenvpnSaveVisible(bool pushButtonProtoOpenvpnSaveVisible)
-{
-    if (m_pushButtonProtoOpenvpnSaveVisible != pushButtonProtoOpenvpnSaveVisible) {
-        m_pushButtonProtoOpenvpnSaveVisible = pushButtonProtoOpenvpnSaveVisible;
-        emit pushButtonProtoOpenvpnSaveVisibleChanged();
-    }
-}
-
-bool UiLogic::getProgressBarProtoOpenvpnResetVisible() const
-{
-    return m_progressBarProtoOpenvpnResetVisible;
-}
-
-void UiLogic::setProgressBarProtoOpenvpnResetVisible(bool progressBarProtoOpenvpnResetVisible)
-{
-    if (m_progressBarProtoOpenvpnResetVisible != progressBarProtoOpenvpnResetVisible) {
-        m_progressBarProtoOpenvpnResetVisible = progressBarProtoOpenvpnResetVisible;
-        emit progressBarProtoOpenvpnResetVisibleChanged();
-    }
-}
-
-bool UiLogic::getRadioButtonProtoOpenvpnUdpEnabled() const
-{
-    return m_radioButtonProtoOpenvpnUdpEnabled;
-}
-
-void UiLogic::setRadioButtonProtoOpenvpnUdpEnabled(bool radioButtonProtoOpenvpnUdpEnabled)
-{
-    if (m_radioButtonProtoOpenvpnUdpEnabled != radioButtonProtoOpenvpnUdpEnabled) {
-        m_radioButtonProtoOpenvpnUdpEnabled = radioButtonProtoOpenvpnUdpEnabled;
-        emit radioButtonProtoOpenvpnUdpEnabledChanged();
-    }
-}
-
-bool UiLogic::getRadioButtonProtoOpenvpnTcpEnabled() const
-{
-    return m_radioButtonProtoOpenvpnTcpEnabled;
-}
-
-void UiLogic::setRadioButtonProtoOpenvpnTcpEnabled(bool radioButtonProtoOpenvpnTcpEnabled)
-{
-    if (m_radioButtonProtoOpenvpnTcpEnabled != radioButtonProtoOpenvpnTcpEnabled) {
-        m_radioButtonProtoOpenvpnTcpEnabled = radioButtonProtoOpenvpnTcpEnabled;
-        emit radioButtonProtoOpenvpnTcpEnabledChanged();
-    }
-}
-
-bool UiLogic::getRadioButtonProtoOpenvpnTcpChecked() const
-{
-    return m_radioButtonProtoOpenvpnTcpChecked;
-}
-
-void UiLogic::setRadioButtonProtoOpenvpnTcpChecked(bool radioButtonProtoOpenvpnTcpChecked)
-{
-    if (m_radioButtonProtoOpenvpnTcpChecked != radioButtonProtoOpenvpnTcpChecked) {
-        m_radioButtonProtoOpenvpnTcpChecked = radioButtonProtoOpenvpnTcpChecked;
-        emit radioButtonProtoOpenvpnTcpCheckedChanged();
-    }
-}
-
-bool UiLogic::getLineEditProtoOpenvpnPortEnabled() const
-{
-    return m_lineEditProtoOpenvpnPortEnabled;
-}
-
-void UiLogic::setLineEditProtoOpenvpnPortEnabled(bool lineEditProtoOpenvpnPortEnabled)
-{
-    if (m_lineEditProtoOpenvpnPortEnabled != lineEditProtoOpenvpnPortEnabled) {
-        m_lineEditProtoOpenvpnPortEnabled = lineEditProtoOpenvpnPortEnabled;
-        emit lineEditProtoOpenvpnPortEnabledChanged();
-    }
-}
 
 bool UiLogic::getPushButtonProtoOpenvpnContInstallChecked() const
 {
@@ -1537,95 +1335,7 @@ void UiLogic::setProgressBarProtocolsContainerReinstallMaximium(int progressBarP
     }
 }
 
-bool UiLogic::getComboBoxProtoOpenvpnCipherEnabled() const
-{
-    return m_comboBoxProtoOpenvpnCipherEnabled;
-}
 
-void UiLogic::setComboBoxProtoOpenvpnCipherEnabled(bool comboBoxProtoOpenvpnCipherEnabled)
-{
-    if (m_comboBoxProtoOpenvpnCipherEnabled != comboBoxProtoOpenvpnCipherEnabled) {
-        m_comboBoxProtoOpenvpnCipherEnabled = comboBoxProtoOpenvpnCipherEnabled;
-        emit comboBoxProtoOpenvpnCipherEnabledChanged();
-    }
-}
-
-bool UiLogic::getComboBoxProtoOpenvpnHashEnabled() const
-{
-    return m_comboBoxProtoOpenvpnHashEnabled;
-}
-
-void UiLogic::setComboBoxProtoOpenvpnHashEnabled(bool comboBoxProtoOpenvpnHashEnabled)
-{
-    if (m_comboBoxProtoOpenvpnHashEnabled != comboBoxProtoOpenvpnHashEnabled) {
-        m_comboBoxProtoOpenvpnHashEnabled = comboBoxProtoOpenvpnHashEnabled;
-        emit comboBoxProtoOpenvpnHashEnabledChanged();
-    }
-}
-bool UiLogic::getPageProtoOpenvpnEnabled() const
-{
-    return m_pageProtoOpenvpnEnabled;
-}
-
-void UiLogic::setPageProtoOpenvpnEnabled(bool pageProtoOpenvpnEnabled)
-{
-    if (m_pageProtoOpenvpnEnabled != pageProtoOpenvpnEnabled) {
-        m_pageProtoOpenvpnEnabled = pageProtoOpenvpnEnabled;
-        emit pageProtoOpenvpnEnabledChanged();
-    }
-}
-
-bool UiLogic::getLabelProtoOpenvpnInfoVisible() const
-{
-    return m_labelProtoOpenvpnInfoVisible;
-}
-
-void UiLogic::setLabelProtoOpenvpnInfoVisible(bool labelProtoOpenvpnInfoVisible)
-{
-    if (m_labelProtoOpenvpnInfoVisible != labelProtoOpenvpnInfoVisible) {
-        m_labelProtoOpenvpnInfoVisible = labelProtoOpenvpnInfoVisible;
-        emit labelProtoOpenvpnInfoVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelProtoOpenvpnInfoText() const
-{
-    return m_labelProtoOpenvpnInfoText;
-}
-
-void UiLogic::setLabelProtoOpenvpnInfoText(const QString &labelProtoOpenvpnInfoText)
-{
-    if (m_labelProtoOpenvpnInfoText != labelProtoOpenvpnInfoText) {
-        m_labelProtoOpenvpnInfoText = labelProtoOpenvpnInfoText;
-        emit labelProtoOpenvpnInfoTextChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoOpenvpnResetValue() const
-{
-    return m_progressBarProtoOpenvpnResetValue;
-}
-
-void UiLogic::setProgressBarProtoOpenvpnResetValue(int progressBarProtoOpenvpnResetValue)
-{
-    if (m_progressBarProtoOpenvpnResetValue != progressBarProtoOpenvpnResetValue) {
-        m_progressBarProtoOpenvpnResetValue = progressBarProtoOpenvpnResetValue;
-        emit progressBarProtoOpenvpnResetValueChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtoOpenvpnResetMaximium() const
-{
-    return m_progressBarProtoOpenvpnResetMaximium;
-}
-
-void UiLogic::setProgressBarProtoOpenvpnResetMaximium(int progressBarProtoOpenvpnResetMaximium)
-{
-    if (m_progressBarProtoOpenvpnResetMaximium != progressBarProtoOpenvpnResetMaximium) {
-        m_progressBarProtoOpenvpnResetMaximium = progressBarProtoOpenvpnResetMaximium;
-        emit progressBarProtoOpenvpnResetMaximiumChanged();
-    }
-}
 bool UiLogic::getPageProtoShadowsocksEnabled() const
 {
     return m_pageProtoShadowsocksEnabled;
@@ -1690,6 +1400,7 @@ void UiLogic::setProgressBarProtoShadowsocksResetMaximium(int progressBarProtoSh
         emit progressBarProtoShadowsocksResetMaximiumChanged();
     }
 }
+
 bool UiLogic::getPageProtoCloakEnabled() const
 {
     return m_pageProtoCloakEnabled;
@@ -2495,7 +2206,7 @@ void UiLogic::onDisconnect()
 void UiLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
 {
     selectedDockerContainer = DockerContainer::OpenVpn;
-    updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
                       selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
     goToPage(Page::OpenVpnSettings);
 }
@@ -2503,7 +2214,7 @@ void UiLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
 void UiLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
 {
     selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
                       selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
     goToPage(Page::OpenVpnSettings);
 }
@@ -2519,7 +2230,7 @@ void UiLogic::onPushButtonProtoSsOpenvpnContSsConfigClicked()
 void UiLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
 {
     selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
+    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
                       selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
     goToPage(Page::OpenVpnSettings);
 }
@@ -2538,63 +2249,6 @@ void UiLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
     updateCloakPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak),
                     selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
     goToPage(Page::CloakSettings);
-}
-
-void UiLogic::onCheckBoxProtoOpenvpnAutoEncryptionClicked()
-{
-    setComboBoxProtoOpenvpnCipherEnabled(!getCheckBoxProtoOpenvpnAutoEncryptionChecked());
-    setComboBoxProtoOpenvpnHashEnabled(!getCheckBoxProtoOpenvpnAutoEncryptionChecked());
-}
-
-void UiLogic::onPushButtonProtoOpenvpnSaveClicked()
-{
-    QJsonObject protocolConfig = m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn);
-    protocolConfig = getOpenVpnConfigFromPage(protocolConfig);
-
-    QJsonObject containerConfig = m_settings.containerConfig(selectedServerIndex, selectedDockerContainer);
-    QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::openvpn, protocolConfig);
-
-    PageFunc page_proto_openvpn;
-    page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {
-        setPageProtoOpenvpnEnabled(enabled);
-    };
-    ButtonFunc pushButton_proto_openvpn_save;
-    pushButton_proto_openvpn_save.setVisibleFunc = [this] (bool visible) ->void {
-        setPushButtonProtoOpenvpnSaveVisible(visible);
-    };
-    LabelFunc label_proto_openvpn_info;
-    label_proto_openvpn_info.setVisibleFunc = [this] (bool visible) ->void {
-        setLabelProtoOpenvpnInfoVisible(visible);
-    };
-    label_proto_openvpn_info.setTextFunc = [this] (const QString& text) ->void {
-        setLabelProtoOpenvpnInfoText(text);
-    };
-    ProgressFunc progressBar_proto_openvpn_reset;
-    progressBar_proto_openvpn_reset.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarProtoOpenvpnResetVisible(visible);
-    };
-    progressBar_proto_openvpn_reset.setValueFunc = [this] (int value) ->void {
-        setProgressBarProtoOpenvpnResetValue(value);
-    };
-    progressBar_proto_openvpn_reset.getValueFunc = [this] (void) -> int {
-        return getProgressBarProtoOpenvpnResetValue();
-    };
-    progressBar_proto_openvpn_reset.getMaximiumFunc = [this] (void) -> int {
-        return getProgressBarProtoOpenvpnResetMaximium();
-    };
-
-    ErrorCode e = doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer, containerConfig, newContainerConfig);
-    },
-    page_proto_openvpn, progressBar_proto_openvpn_reset,
-    pushButton_proto_openvpn_save, label_proto_openvpn_info);
-
-    if (!e) {
-        m_settings.setContainerConfig(selectedServerIndex, selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(selectedServerIndex, selectedDockerContainer);
-    }
-    qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
 }
 
 void UiLogic::onPushButtonProtoShadowsocksSaveClicked()
@@ -2622,7 +2276,7 @@ void UiLogic::onPushButtonProtoShadowsocksSaveClicked()
     };
     ProgressFunc progressBar_proto_shadowsocks_reset;
     progressBar_proto_shadowsocks_reset.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarProtoOpenvpnResetVisible(visible);
+        setProgressBarProtoShadowsocksResetVisible(visible);
     };
     progressBar_proto_shadowsocks_reset.setValueFunc = [this] (int value) ->void {
         setProgressBarProtoShadowsocksResetValue(value);
@@ -2810,50 +2464,7 @@ void UiLogic::updateProtocolsPage()
     }
 }
 
-void UiLogic::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
-{
-    setWidgetProtoOpenvpnEnabled(haveAuthData);
-    setPushButtonProtoOpenvpnSaveVisible(haveAuthData);
-    setProgressBarProtoOpenvpnResetVisible(haveAuthData);
 
-    setRadioButtonProtoOpenvpnUdpEnabled(true);
-    setRadioButtonProtoOpenvpnTcpEnabled(true);
-
-    setLineEditProtoOpenvpnSubnetText(openvpnConfig.value(config_key::subnet_address).
-                                      toString(protocols::openvpn::defaultSubnetAddress));
-
-    QString trasnsport = openvpnConfig.value(config_key::transport_proto).
-            toString(protocols::openvpn::defaultTransportProto);
-
-    setRadioButtonProtoOpenvpnUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
-    setRadioButtonProtoOpenvpnTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
-
-    setComboBoxProtoOpenvpnCipherText(openvpnConfig.value(config_key::cipher).
-                                      toString(protocols::openvpn::defaultCipher));
-
-    setComboBoxProtoOpenvpnHashText(openvpnConfig.value(config_key::hash).
-                                    toString(protocols::openvpn::defaultHash));
-
-    bool blockOutsideDns = openvpnConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
-    setCheckBoxProtoOpenvpnBlockDnsChecked(blockOutsideDns);
-
-    bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    setCheckBoxProtoOpenvpnAutoEncryptionChecked(!isNcpDisabled);
-
-    bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    setCheckBoxProtoOpenvpnTlsAuthChecked(isTlsAuth);
-
-    if (container == DockerContainer::OpenVpnOverShadowSocks) {
-        setRadioButtonProtoOpenvpnUdpEnabled(false);
-        setRadioButtonProtoOpenvpnTcpEnabled(false);
-        setRadioButtonProtoOpenvpnTcpChecked(true);
-    }
-
-    setLineEditProtoOpenvpnPortText(openvpnConfig.value(config_key::port).
-                                    toString(protocols::openvpn::defaultPort));
-
-    setLineEditProtoOpenvpnPortEnabled(container == DockerContainer::OpenVpn);
-}
 
 void UiLogic::updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
 {
@@ -2888,18 +2499,6 @@ void UiLogic::updateCloakPage(const QJsonObject &ckConfig, DockerContainer conta
     setLineEditProtoCloakPortEnabled(container == DockerContainer::OpenVpnOverCloak);
 }
 
-QJsonObject UiLogic::getOpenVpnConfigFromPage(QJsonObject oldConfig)
-{
-    oldConfig.insert(config_key::subnet_address, getLineEditProtoOpenvpnSubnetText());
-    oldConfig.insert(config_key::transport_proto, getRadioButtonProtoOpenvpnUdpChecked() ? protocols::UDP : protocols::TCP);
-    oldConfig.insert(config_key::ncp_disable, ! getCheckBoxProtoOpenvpnAutoEncryptionChecked());
-    oldConfig.insert(config_key::cipher, getComboBoxProtoOpenvpnCipherText());
-    oldConfig.insert(config_key::hash, getComboBoxProtoOpenvpnHashText());
-    oldConfig.insert(config_key::block_outside_dns, getCheckBoxProtoOpenvpnBlockDnsChecked());
-    oldConfig.insert(config_key::port, getLineEditProtoOpenvpnPortText());
-    oldConfig.insert(config_key::tls_auth, getCheckBoxProtoOpenvpnTlsAuthChecked());
-    return oldConfig;
-}
 
 QJsonObject UiLogic::getShadowSocksConfigFromPage(QJsonObject oldConfig)
 {

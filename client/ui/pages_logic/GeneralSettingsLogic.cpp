@@ -1,7 +1,7 @@
 #include "GeneralSettingsLogic.h"
+#include "ShareConnectionLogic.h"
 
 #include "../uilogic.h"
-#include "ShareConnectionLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;

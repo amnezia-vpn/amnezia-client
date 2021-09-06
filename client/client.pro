@@ -47,6 +47,9 @@ HEADERS  += \
     ui/pages_logic/StartPageLogic.h \
     ui/pages_logic/VpnLogic.h \
     ui/pages_logic/WizardLogic.h \
+   ui/pages_logic/protocols/CloakLogic.h \
+   ui/pages_logic/protocols/OpenVpnLogic.h \
+   ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/serversmodel.h \
     ui/uilogic.h \
    ui/qautostart.h \
@@ -89,6 +92,9 @@ SOURCES  += \
     ui/pages_logic/StartPageLogic.cpp \
     ui/pages_logic/VpnLogic.cpp \
     ui/pages_logic/WizardLogic.cpp \
+   ui/pages_logic/protocols/CloakLogic.cpp \
+   ui/pages_logic/protocols/OpenVpnLogic.cpp \
+   ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/serversmodel.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \

@@ -24,8 +24,11 @@ class StartPageLogic;
 class VpnLogic;
 class WizardLogic;
 
-class VpnConnection;
+class OpenVpnLogic;
+class ShadowSocksLogic;
+class CloakLogic;
 
+class VpnConnection;
 
 
 class UiLogic : public QObject
@@ -58,14 +61,6 @@ class UiLogic : public QObject
     Q_PROPERTY(QString lineEditProtoCloakPortText READ getLineEditProtoCloakPortText WRITE setLineEditProtoCloakPortText NOTIFY lineEditProtoCloakPortTextChanged)
     Q_PROPERTY(QString comboBoxProtoShadowsocksCipherText READ getComboBoxProtoShadowsocksCipherText WRITE setComboBoxProtoShadowsocksCipherText NOTIFY comboBoxProtoShadowsocksCipherTextChanged)
     Q_PROPERTY(QString lineEditProtoShadowsocksPortText READ getLineEditProtoShadowsocksPortText WRITE setLineEditProtoShadowsocksPortText NOTIFY lineEditProtoShadowsocksPortTextChanged)
-    Q_PROPERTY(QString lineEditProtoOpenvpnSubnetText READ getLineEditProtoOpenvpnSubnetText WRITE setLineEditProtoOpenvpnSubnetText NOTIFY lineEditProtoOpenvpnSubnetTextChanged)
-    Q_PROPERTY(bool radioButtonProtoOpenvpnUdpChecked READ getRadioButtonProtoOpenvpnUdpChecked WRITE setRadioButtonProtoOpenvpnUdpChecked NOTIFY radioButtonProtoOpenvpnUdpCheckedChanged)
-    Q_PROPERTY(bool checkBoxProtoOpenvpnAutoEncryptionChecked READ getCheckBoxProtoOpenvpnAutoEncryptionChecked WRITE setCheckBoxProtoOpenvpnAutoEncryptionChecked NOTIFY checkBoxProtoOpenvpnAutoEncryptionCheckedChanged)
-    Q_PROPERTY(QString comboBoxProtoOpenvpnCipherText READ getComboBoxProtoOpenvpnCipherText WRITE setComboBoxProtoOpenvpnCipherText NOTIFY comboBoxProtoOpenvpnCipherTextChanged)
-    Q_PROPERTY(QString comboBoxProtoOpenvpnHashText READ getComboBoxProtoOpenvpnHashText WRITE setComboBoxProtoOpenvpnHashText NOTIFY comboBoxProtoOpenvpnHashTextChanged)
-    Q_PROPERTY(bool checkBoxProtoOpenvpnBlockDnsChecked READ getCheckBoxProtoOpenvpnBlockDnsChecked WRITE setCheckBoxProtoOpenvpnBlockDnsChecked NOTIFY checkBoxProtoOpenvpnBlockDnsCheckedChanged)
-    Q_PROPERTY(QString lineEditProtoOpenvpnPortText READ getLineEditProtoOpenvpnPortText WRITE setLineEditProtoOpenvpnPortText NOTIFY lineEditProtoOpenvpnPortTextChanged)
-    Q_PROPERTY(bool checkBoxProtoOpenvpnTlsAuthChecked READ getCheckBoxProtoOpenvpnTlsAuthChecked WRITE setCheckBoxProtoOpenvpnTlsAuthChecked NOTIFY checkBoxProtoOpenvpnTlsAuthCheckedChanged)
 
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
     Q_PROPERTY(bool widgetProtoCloakEnabled READ getWidgetProtoCloakEnabled WRITE setWidgetProtoCloakEnabled NOTIFY widgetProtoCloakEnabledChanged)
@@ -76,13 +71,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pushButtonProtoShadowsocksSaveVisible READ getPushButtonProtoShadowsocksSaveVisible WRITE setPushButtonProtoShadowsocksSaveVisible NOTIFY pushButtonProtoShadowsocksSaveVisibleChanged)
     Q_PROPERTY(bool progressBarProtoShadowsocksResetVisible READ getProgressBarProtoShadowsocksResetVisible WRITE setProgressBarProtoShadowsocksResetVisible NOTIFY progressBarProtoShadowsocksResetVisibleChanged)
     Q_PROPERTY(bool lineEditProtoShadowsocksPortEnabled READ getLineEditProtoShadowsocksPortEnabled WRITE setLineEditProtoShadowsocksPortEnabled NOTIFY lineEditProtoShadowsocksPortEnabledChanged)
-    Q_PROPERTY(bool widgetProtoOpenvpnEnabled READ getWidgetProtoOpenvpnEnabled WRITE setWidgetProtoOpenvpnEnabled NOTIFY widgetProtoOpenvpnEnabledChanged)
-    Q_PROPERTY(bool pushButtonProtoOpenvpnSaveVisible READ getPushButtonProtoOpenvpnSaveVisible WRITE setPushButtonProtoOpenvpnSaveVisible NOTIFY pushButtonProtoOpenvpnSaveVisibleChanged)
-    Q_PROPERTY(bool progressBarProtoOpenvpnResetVisible READ getProgressBarProtoOpenvpnResetVisible WRITE setProgressBarProtoOpenvpnResetVisible NOTIFY progressBarProtoOpenvpnResetVisibleChanged)
-    Q_PROPERTY(bool radioButtonProtoOpenvpnUdpEnabled READ getRadioButtonProtoOpenvpnUdpEnabled WRITE setRadioButtonProtoOpenvpnUdpEnabled NOTIFY radioButtonProtoOpenvpnUdpEnabledChanged)
-    Q_PROPERTY(bool radioButtonProtoOpenvpnTcpEnabled READ getRadioButtonProtoOpenvpnTcpEnabled WRITE setRadioButtonProtoOpenvpnTcpEnabled NOTIFY radioButtonProtoOpenvpnTcpEnabledChanged)
-    Q_PROPERTY(bool radioButtonProtoOpenvpnTcpChecked READ getRadioButtonProtoOpenvpnTcpChecked WRITE setRadioButtonProtoOpenvpnTcpChecked NOTIFY radioButtonProtoOpenvpnTcpCheckedChanged)
-    Q_PROPERTY(bool lineEditProtoOpenvpnPortEnabled READ getLineEditProtoOpenvpnPortEnabled WRITE setLineEditProtoOpenvpnPortEnabled NOTIFY lineEditProtoOpenvpnPortEnabledChanged)
     Q_PROPERTY(bool pushButtonProtoOpenvpnContInstallChecked READ getPushButtonProtoOpenvpnContInstallChecked WRITE setPushButtonProtoOpenvpnContInstallChecked NOTIFY pushButtonProtoOpenvpnContInstallCheckedChanged)
     Q_PROPERTY(bool pushButtonProtoSsOpenvpnContInstallChecked READ getPushButtonProtoSsOpenvpnContInstallChecked WRITE setPushButtonProtoSsOpenvpnContInstallChecked NOTIFY pushButtonProtoSsOpenvpnContInstallCheckedChanged)
     Q_PROPERTY(bool pushButtonProtoCloakOpenvpnContInstallChecked READ getPushButtonProtoCloakOpenvpnContInstallChecked WRITE setPushButtonProtoCloakOpenvpnContInstallChecked NOTIFY pushButtonProtoCloakOpenvpnContInstallCheckedChanged)
@@ -124,13 +112,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool pageServerProtocolsEnabled READ getPageServerProtocolsEnabled WRITE setPageServerProtocolsEnabled NOTIFY pageServerProtocolsEnabledChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallValue READ getProgressBarProtocolsContainerReinstallValue WRITE setProgressBarProtocolsContainerReinstallValue NOTIFY progressBarProtocolsContainerReinstallValueChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallMaximium READ getProgressBarProtocolsContainerReinstallMaximium WRITE setProgressBarProtocolsContainerReinstallMaximium NOTIFY progressBarProtocolsContainerReinstallMaximiumChanged)
-    Q_PROPERTY(bool comboBoxProtoOpenvpnCipherEnabled READ getComboBoxProtoOpenvpnCipherEnabled WRITE setComboBoxProtoOpenvpnCipherEnabled NOTIFY comboBoxProtoOpenvpnCipherEnabledChanged)
-    Q_PROPERTY(bool comboBoxProtoOpenvpnHashEnabled READ getComboBoxProtoOpenvpnHashEnabled WRITE setComboBoxProtoOpenvpnHashEnabled NOTIFY comboBoxProtoOpenvpnHashEnabledChanged)
-    Q_PROPERTY(bool pageProtoOpenvpnEnabled READ getPageProtoOpenvpnEnabled WRITE setPageProtoOpenvpnEnabled NOTIFY pageProtoOpenvpnEnabledChanged)
-    Q_PROPERTY(bool labelProtoOpenvpnInfoVisible READ getLabelProtoOpenvpnInfoVisible WRITE setLabelProtoOpenvpnInfoVisible NOTIFY labelProtoOpenvpnInfoVisibleChanged)
-    Q_PROPERTY(QString labelProtoOpenvpnInfoText READ getLabelProtoOpenvpnInfoText WRITE setLabelProtoOpenvpnInfoText NOTIFY labelProtoOpenvpnInfoTextChanged)
-    Q_PROPERTY(int progressBarProtoOpenvpnResetValue READ getProgressBarProtoOpenvpnResetValue WRITE setProgressBarProtoOpenvpnResetValue NOTIFY progressBarProtoOpenvpnResetValueChanged)
-    Q_PROPERTY(int progressBarProtoOpenvpnResetMaximium READ getProgressBarProtoOpenvpnResetMaximium WRITE setProgressBarProtoOpenvpnResetMaximium NOTIFY progressBarProtoOpenvpnResetMaximiumChanged)
     Q_PROPERTY(bool pageProtoShadowsocksEnabled READ getPageProtoShadowsocksEnabled WRITE setPageProtoShadowsocksEnabled NOTIFY pageProtoShadowsocksEnabledChanged)
     Q_PROPERTY(bool labelProtoShadowsocksInfoVisible READ getLabelProtoShadowsocksInfoVisible WRITE setLabelProtoShadowsocksInfoVisible NOTIFY labelProtoShadowsocksInfoVisibleChanged)
     Q_PROPERTY(QString labelProtoShadowsocksInfoText READ getLabelProtoShadowsocksInfoText WRITE setLabelProtoShadowsocksInfoText NOTIFY labelProtoShadowsocksInfoTextChanged)
@@ -167,6 +148,10 @@ public:
     friend class StartPageLogic;
     friend class VpnLogic;
     friend class WizardLogic;
+
+    friend class OpenVpnLogic;
+    friend class ShadowSocksLogic;
+    friend class CloakLogic;
 
     Q_INVOKABLE void initalizeUiLogic();
 
@@ -225,22 +210,6 @@ public:
     void setComboBoxProtoShadowsocksCipherText(const QString &comboBoxProtoShadowsocksCipherText);
     QString getLineEditProtoShadowsocksPortText() const;
     void setLineEditProtoShadowsocksPortText(const QString &lineEditProtoShadowsocksPortText);
-    QString getLineEditProtoOpenvpnSubnetText() const;
-    void setLineEditProtoOpenvpnSubnetText(const QString &lineEditProtoOpenvpnSubnetText);
-    bool getRadioButtonProtoOpenvpnUdpChecked() const;
-    void setRadioButtonProtoOpenvpnUdpChecked(bool radioButtonProtoOpenvpnUdpChecked);
-    bool getCheckBoxProtoOpenvpnAutoEncryptionChecked() const;
-    void setCheckBoxProtoOpenvpnAutoEncryptionChecked(bool checkBoxProtoOpenvpnAutoEncryptionChecked);
-    QString getComboBoxProtoOpenvpnCipherText() const;
-    void setComboBoxProtoOpenvpnCipherText(const QString &comboBoxProtoOpenvpnCipherText);
-    QString getComboBoxProtoOpenvpnHashText() const;
-    void setComboBoxProtoOpenvpnHashText(const QString &comboBoxProtoOpenvpnHashText);
-    bool getCheckBoxProtoOpenvpnBlockDnsChecked() const;
-    void setCheckBoxProtoOpenvpnBlockDnsChecked(bool checkBoxProtoOpenvpnBlockDnsChecked);
-    QString getLineEditProtoOpenvpnPortText() const;
-    void setLineEditProtoOpenvpnPortText(const QString &lineEditProtoOpenvpnPortText);
-    bool getCheckBoxProtoOpenvpnTlsAuthChecked() const;
-    void setCheckBoxProtoOpenvpnTlsAuthChecked(bool checkBoxProtoOpenvpnTlsAuthChecked);
 
     bool getPushButtonConnectChecked() const;
     void setPushButtonConnectChecked(bool pushButtonConnectChecked);
@@ -261,20 +230,7 @@ public:
     void setProgressBarProtoShadowsocksResetVisible(bool progressBarProtoShadowsocksResetVisible);
     bool getLineEditProtoShadowsocksPortEnabled() const;
     void setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsocksPortEnabled);
-    bool getWidgetProtoOpenvpnEnabled() const;
-    void setWidgetProtoOpenvpnEnabled(bool widgetProtoOpenvpnEnabled);
-    bool getPushButtonProtoOpenvpnSaveVisible() const;
-    void setPushButtonProtoOpenvpnSaveVisible(bool pushButtonProtoOpenvpnSaveVisible);
-    bool getProgressBarProtoOpenvpnResetVisible() const;
-    void setProgressBarProtoOpenvpnResetVisible(bool progressBarProtoOpenvpnResetVisible);
-    bool getRadioButtonProtoOpenvpnUdpEnabled() const;
-    void setRadioButtonProtoOpenvpnUdpEnabled(bool radioButtonProtoOpenvpnUdpEnabled);
-    bool getRadioButtonProtoOpenvpnTcpEnabled() const;
-    void setRadioButtonProtoOpenvpnTcpEnabled(bool radioButtonProtoOpenvpnTcpEnabled);
-    bool getRadioButtonProtoOpenvpnTcpChecked() const;
-    void setRadioButtonProtoOpenvpnTcpChecked(bool radioButtonProtoOpenvpnTcpChecked);
-    bool getLineEditProtoOpenvpnPortEnabled() const;
-    void setLineEditProtoOpenvpnPortEnabled(bool lineEditProtoOpenvpnPortEnabled);
+
     bool getPushButtonProtoOpenvpnContInstallChecked() const;
     void setPushButtonProtoOpenvpnContInstallChecked(bool pushButtonProtoOpenvpnContInstallChecked);
     bool getPushButtonProtoSsOpenvpnContInstallChecked() const;
@@ -362,20 +318,6 @@ public:
     void setProgressBarProtocolsContainerReinstallValue(int progressBarProtocolsContainerReinstallValue);
     int getProgressBarProtocolsContainerReinstallMaximium() const;
     void setProgressBarProtocolsContainerReinstallMaximium(int progressBarProtocolsContainerReinstallMaximium);
-    bool getComboBoxProtoOpenvpnCipherEnabled() const;
-    void setComboBoxProtoOpenvpnCipherEnabled(bool comboBoxProtoOpenvpnCipherEnabled);
-    bool getComboBoxProtoOpenvpnHashEnabled() const;
-    void setComboBoxProtoOpenvpnHashEnabled(bool comboBoxProtoOpenvpnHashEnabled);
-    bool getPageProtoOpenvpnEnabled() const;
-    void setPageProtoOpenvpnEnabled(bool pageProtoOpenvpnEnabled);
-    bool getLabelProtoOpenvpnInfoVisible() const;
-    void setLabelProtoOpenvpnInfoVisible(bool labelProtoOpenvpnInfoVisible);
-    QString getLabelProtoOpenvpnInfoText() const;
-    void setLabelProtoOpenvpnInfoText(const QString &labelProtoOpenvpnInfoText);
-    int getProgressBarProtoOpenvpnResetValue() const;
-    void setProgressBarProtoOpenvpnResetValue(int progressBarProtoOpenvpnResetValue);
-    int getProgressBarProtoOpenvpnResetMaximium() const;
-    void setProgressBarProtoOpenvpnResetMaximium(int progressBarProtoOpenvpnResetMaximium);
     bool getPageProtoShadowsocksEnabled() const;
     void setPageProtoShadowsocksEnabled(bool pageProtoShadowsocksEnabled);
     bool getLabelProtoShadowsocksInfoVisible() const;
@@ -427,8 +369,7 @@ public:
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContSsConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContCloakConfigClicked();
-    Q_INVOKABLE void onCheckBoxProtoOpenvpnAutoEncryptionClicked();
-    Q_INVOKABLE void onPushButtonProtoOpenvpnSaveClicked();
+
     Q_INVOKABLE void onPushButtonProtoShadowsocksSaveClicked();
     Q_INVOKABLE void onPushButtonProtoCloakSaveClicked();
     Q_INVOKABLE void onCloseWindow();
@@ -475,14 +416,7 @@ signals:
     void lineEditProtoCloakPortTextChanged();
     void comboBoxProtoShadowsocksCipherTextChanged();
     void lineEditProtoShadowsocksPortTextChanged();
-    void lineEditProtoOpenvpnSubnetTextChanged();
-    void radioButtonProtoOpenvpnUdpCheckedChanged();
-    void checkBoxProtoOpenvpnAutoEncryptionCheckedChanged();
-    void comboBoxProtoOpenvpnCipherTextChanged();
-    void comboBoxProtoOpenvpnHashTextChanged();
-    void checkBoxProtoOpenvpnBlockDnsCheckedChanged();
-    void lineEditProtoOpenvpnPortTextChanged();
-    void checkBoxProtoOpenvpnTlsAuthCheckedChanged();
+
 
 
     void pushButtonConnectCheckedChanged();
@@ -495,13 +429,7 @@ signals:
     void pushButtonProtoShadowsocksSaveVisibleChanged();
     void progressBarProtoShadowsocksResetVisibleChanged();
     void lineEditProtoShadowsocksPortEnabledChanged();
-    void widgetProtoOpenvpnEnabledChanged();
-    void pushButtonProtoOpenvpnSaveVisibleChanged();
-    void progressBarProtoOpenvpnResetVisibleChanged();
-    void radioButtonProtoOpenvpnUdpEnabledChanged();
-    void radioButtonProtoOpenvpnTcpEnabledChanged();
-    void radioButtonProtoOpenvpnTcpCheckedChanged();
-    void lineEditProtoOpenvpnPortEnabledChanged();
+
     void pushButtonProtoOpenvpnContInstallCheckedChanged();
     void pushButtonProtoSsOpenvpnContInstallCheckedChanged();
     void pushButtonProtoCloakOpenvpnContInstallCheckedChanged();
@@ -545,13 +473,7 @@ signals:
     void pageServerProtocolsEnabledChanged();
     void progressBarProtocolsContainerReinstallValueChanged();
     void progressBarProtocolsContainerReinstallMaximiumChanged();
-    void comboBoxProtoOpenvpnCipherEnabledChanged();
-    void comboBoxProtoOpenvpnHashEnabledChanged();
-    void pageProtoOpenvpnEnabledChanged();
-    void labelProtoOpenvpnInfoVisibleChanged();
-    void labelProtoOpenvpnInfoTextChanged();
-    void progressBarProtoOpenvpnResetValueChanged();
-    void progressBarProtoOpenvpnResetMaximiumChanged();
+
     void pageProtoShadowsocksEnabledChanged();
     void labelProtoShadowsocksInfoVisibleChanged();
     void labelProtoShadowsocksInfoTextChanged();
@@ -621,14 +543,7 @@ private:
     QString m_lineEditProtoCloakPortText;
     QString m_comboBoxProtoShadowsocksCipherText;
     QString m_lineEditProtoShadowsocksPortText;
-    QString m_lineEditProtoOpenvpnSubnetText;
-    bool m_radioButtonProtoOpenvpnUdpChecked;
-    bool m_checkBoxProtoOpenvpnAutoEncryptionChecked;
-    QString m_comboBoxProtoOpenvpnCipherText;
-    QString m_comboBoxProtoOpenvpnHashText;
-    bool m_checkBoxProtoOpenvpnBlockDnsChecked;
-    QString m_lineEditProtoOpenvpnPortText;
-    bool m_checkBoxProtoOpenvpnTlsAuthChecked;
+
 
 
     bool m_pushButtonConnectChecked;
@@ -641,13 +556,7 @@ private:
     bool m_pushButtonProtoShadowsocksSaveVisible;
     bool m_progressBarProtoShadowsocksResetVisible;
     bool m_lineEditProtoShadowsocksPortEnabled;
-    bool m_widgetProtoOpenvpnEnabled;
-    bool m_pushButtonProtoOpenvpnSaveVisible;
-    bool m_progressBarProtoOpenvpnResetVisible;
-    bool m_radioButtonProtoOpenvpnUdpEnabled;
-    bool m_radioButtonProtoOpenvpnTcpEnabled;
-    bool m_radioButtonProtoOpenvpnTcpChecked;
-    bool m_lineEditProtoOpenvpnPortEnabled;
+
     bool m_pushButtonProtoOpenvpnContInstallChecked;
     bool m_pushButtonProtoSsOpenvpnContInstallChecked;
     bool m_pushButtonProtoCloakOpenvpnContInstallChecked;
@@ -690,13 +599,7 @@ private:
     bool m_pageServerProtocolsEnabled;
     int m_progressBarProtocolsContainerReinstallValue;
     int m_progressBarProtocolsContainerReinstallMaximium;
-    bool m_comboBoxProtoOpenvpnCipherEnabled;
-    bool m_comboBoxProtoOpenvpnHashEnabled;
-    bool m_pageProtoOpenvpnEnabled;
-    bool m_labelProtoOpenvpnInfoVisible;
-    QString m_labelProtoOpenvpnInfoText;
-    int m_progressBarProtoOpenvpnResetValue;
-    int m_progressBarProtoOpenvpnResetMaximium;
+
     bool m_pageProtoShadowsocksEnabled;
     bool m_labelProtoShadowsocksInfoVisible;
     QString m_labelProtoShadowsocksInfoText;
@@ -761,32 +664,34 @@ private:
    // void setupSitesPageConnections();
     void setupProtocolsPageConnections();
 
-    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
     void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
     void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
 
 
 
-    QJsonObject getOpenVpnConfigFromPage(QJsonObject oldConfig);
     QJsonObject getShadowSocksConfigFromPage(QJsonObject oldConfig);
     QJsonObject getCloakConfigFromPage(QJsonObject oldConfig);
 
     QMap<DockerContainer, QJsonObject> getInstallConfigsFromProtocolsPage() const;
 
 public:
-    AppSettingsLogic *appSettingsLogic() { return m_appSettingsLogic;}
-    GeneralSettingsLogic *generalSettingsLogic() { return m_generalSettingsLogic;}
-    NetworkSettingsLogic *networkSettingsLogic() { return m_networkSettingsLogic;}
-    NewServerLogic *newServerLogic() { return m_newServerLogic;}
-    ProtocolSettingsLogic *protocolSettingsLogic() { return m_protocolSettingsLogic;}
-    ServerListLogic *serverListLogic() { return m_serverListLogic;}
-    ServerSettingsLogic *serverSettingsLogic() { return m_serverSettingsLogic;}
-    ServerVpnProtocolsLogic *serverVpnProtocolsLogic() { return m_serverVpnProtocolsLogic;}
-    ShareConnectionLogic *shareConnectionLogic() { return m_shareConnectionLogic;}
-    SitesLogic *sitesLogic() { return m_sitesLogic;}
-    StartPageLogic *startPageLogic() { return m_startPageLogic;}
-    VpnLogic *vpnLogic() { return m_vpnLogic;}
-    WizardLogic *wizardLogic() { return m_wizardLogic;}
+    AppSettingsLogic *appSettingsLogic()                { return m_appSettingsLogic; }
+    GeneralSettingsLogic *generalSettingsLogic()        { return m_generalSettingsLogic; }
+    NetworkSettingsLogic *networkSettingsLogic()        { return m_networkSettingsLogic; }
+    NewServerLogic *newServerLogic()                    { return m_newServerLogic; }
+    ProtocolSettingsLogic *protocolSettingsLogic()      { return m_protocolSettingsLogic; }
+    ServerListLogic *serverListLogic()                  { return m_serverListLogic; }
+    ServerSettingsLogic *serverSettingsLogic()          { return m_serverSettingsLogic; }
+    ServerVpnProtocolsLogic *serverVpnProtocolsLogic()  { return m_serverVpnProtocolsLogic; }
+    ShareConnectionLogic *shareConnectionLogic()        { return m_shareConnectionLogic; }
+    SitesLogic *sitesLogic()                            { return m_sitesLogic; }
+    StartPageLogic *startPageLogic()                    { return m_startPageLogic; }
+    VpnLogic *vpnLogic()                                { return m_vpnLogic; }
+    WizardLogic *wizardLogic()                          { return m_wizardLogic; }
+
+    OpenVpnLogic *openVpnLogic()                        { return m_openVpnLogic; }
+    ShadowSocksLogic *shadowSocksLogic()                { return m_shadowSocksLogic; }
+    CloakLogic *cloakLogic()                            { return m_cloakLogic; }
 
 private:
     AppSettingsLogic *m_appSettingsLogic;
@@ -802,6 +707,10 @@ private:
     StartPageLogic *m_startPageLogic;
     VpnLogic *m_vpnLogic;
     WizardLogic *m_wizardLogic;
+
+    OpenVpnLogic *m_openVpnLogic;
+    ShadowSocksLogic *m_shadowSocksLogic;
+    CloakLogic *m_cloakLogic;
 
     VpnConnection* m_vpnConnection;
     Settings m_settings;

@@ -27,6 +27,11 @@
 #include "ui/pages_logic/VpnLogic.h"
 #include "ui/pages_logic/WizardLogic.h"
 
+#include "ui/pages_logic/protocols/CloakLogic.h"
+#include "ui/pages_logic/protocols/OpenVpnLogic.h"
+#include "ui/pages_logic/protocols/ShadowSocksLogic.h"
+
+#include "ui/uilogic.h"
 
 #include "debug.h"
 #include "defines.h"
@@ -150,6 +155,10 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
     engine.rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
     engine.rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
+
+    engine.rootContext()->setContextProperty("OpenVpnLogic", uiLogic->openVpnLogic());
+    engine.rootContext()->setContextProperty("ShadowSocksLogic", uiLogic->shadowSocksLogic());
+    engine.rootContext()->setContextProperty("CloakLogic", uiLogic->cloakLogic());
 
     engine.load(url);
 
