@@ -16,7 +16,7 @@
 #include "ui/pages_logic/AppSettingsLogic.h"
 #include "ui/pages_logic/GeneralSettingsLogic.h"
 #include "ui/pages_logic/NetworkSettingsLogic.h"
-#include "ui/pages_logic/NewServerLogic.h"
+#include "ui/pages_logic/NewServerProtocolsLogic.h"
 #include "ui/pages_logic/ProtocolSettingsLogic.h"
 #include "ui/pages_logic/ServerListLogic.h"
 #include "ui/pages_logic/ServerSettingsLogic.h"
@@ -117,20 +117,6 @@ int main(int argc, char *argv[])
 
     UiLogic *uiLogic = new UiLogic;
 
-//    AppSettingsLogic *appSettingsLogic = new AppSettingsLogic(uiLogic);
-//    GeneralSettingsLogic *generalSettingsLogic = new GeneralSettingsLogic(uiLogic);
-//    NetworkSettingsLogic *networkSettingsLogic = new NetworkSettingsLogic(uiLogic);
-//    NewServerLogic *newServerLogic = new NewServerLogic(uiLogic);
-//    ProtocolSettingsLogic *protocolSettingsLogic = new ProtocolSettingsLogic(uiLogic);
-//    ServerListLogic *serverListLogic = new ServerListLogic(uiLogic);
-//    ServerSettingsLogic *serverSettingsLogic = new ServerSettingsLogic(uiLogic);
-//    ServerVpnProtocolsLogic *serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(uiLogic);
-//    ShareConnectionLogic *shareConnectionLogic = new ShareConnectionLogic(uiLogic);
-//    SitesLogic *sitesLogic = new SitesLogic(uiLogic);
-//    StartPageLogic *startPageLogic = new StartPageLogic(uiLogic);
-//    VpnLogic *vpnLogic = new VpnLogic(uiLogic);
-//    WizardLogic *wizardLogic = new WizardLogic(uiLogic);
-
     QQmlApplicationEngine engine;
     PageEnumNS::declareQML();
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
@@ -145,7 +131,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
     engine.rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
     engine.rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
-    engine.rootContext()->setContextProperty("NewServerLogic", uiLogic->newServerLogic());
+    engine.rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
     engine.rootContext()->setContextProperty("ProtocolSettingsLogic", uiLogic->protocolSettingsLogic());
     engine.rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
     engine.rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());

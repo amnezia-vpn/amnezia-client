@@ -71,7 +71,7 @@
         <file>ui/qml/Pages/PageNetworkSetting.qml</file>
         <file>ui/qml/Pages/PageNewServer.qml</file>
         <file>ui/qml/Pages/PageNewServerConfiguring.qml</file>
-        <file>ui/qml/Pages/PageNewServerProtocol.qml</file>
+        <file>ui/qml/Pages/PageNewServerProtocols.qml</file>
         <file>ui/qml/Pages/PageServerList.qml</file>
         <file>ui/qml/Pages/PageServerProtocols.qml</file>
         <file>ui/qml/Pages/PageServerSetting.qml</file>

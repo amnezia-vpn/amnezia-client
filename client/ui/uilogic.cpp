@@ -47,7 +47,7 @@
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
-#include "pages_logic/NewServerLogic.h"
+#include "pages_logic/NewServerProtocolsLogic.h"
 #include "pages_logic/ProtocolSettingsLogic.h"
 #include "pages_logic/ServerListLogic.h"
 #include "pages_logic/ServerSettingsLogic.h"
@@ -153,7 +153,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
     m_networkSettingsLogic = new NetworkSettingsLogic(this);
-    m_newServerLogic = new NewServerLogic(this);
+    m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
     m_protocolSettingsLogic = new ProtocolSettingsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);

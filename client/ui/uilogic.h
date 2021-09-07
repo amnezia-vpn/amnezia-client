@@ -13,7 +13,7 @@
 class AppSettingsLogic;
 class GeneralSettingsLogic;
 class NetworkSettingsLogic;
-class NewServerLogic;
+class NewServerProtocolsLogic;
 class ProtocolSettingsLogic;
 class ServerListLogic;
 class ServerSettingsLogic;
@@ -36,26 +36,12 @@ class UiLogic : public QObject
     Q_OBJECT
     Q_PROPERTY(bool frameWireguardSettingsVisible READ getFrameWireguardSettingsVisible WRITE setFrameWireguardSettingsVisible NOTIFY frameWireguardSettingsVisibleChanged)
     Q_PROPERTY(bool frameWireguardVisible READ getFrameWireguardVisible WRITE setFrameWireguardVisible NOTIFY frameWireguardVisibleChanged)
-    Q_PROPERTY(bool frameNewServerSettingsParentWireguardVisible READ getFrameNewServerSettingsParentWireguardVisible WRITE setFrameNewServerSettingsParentWireguardVisible NOTIFY frameNewServerSettingsParentWireguardVisibleChanged)
-    Q_PROPERTY(double progressBarNewServerConfiguringValue READ getProgressBarNewServerConfiguringValue WRITE setProgressBarNewServerConfiguringValue NOTIFY progressBarNewServerConfiguringValueChanged)
-    Q_PROPERTY(bool pushButtonNewServerSettingsCloakChecked READ getPushButtonNewServerSettingsCloakChecked WRITE setPushButtonNewServerSettingsCloakChecked NOTIFY pushButtonNewServerSettingsCloakCheckedChanged)
-    Q_PROPERTY(bool pushButtonNewServerSettingsSsChecked READ getPushButtonNewServerSettingsSsChecked WRITE setPushButtonNewServerSettingsSsChecked NOTIFY pushButtonNewServerSettingsSsCheckedChanged)
-    Q_PROPERTY(bool pushButtonNewServerSettingsOpenvpnChecked READ getPushButtonNewServerSettingsOpenvpnChecked WRITE setPushButtonNewServerSettingsOpenvpnChecked NOTIFY pushButtonNewServerSettingsOpenvpnCheckedChanged)
-    Q_PROPERTY(QString lineEditNewServerCloakPortText READ getLineEditNewServerCloakPortText WRITE setLineEditNewServerCloakPortText NOTIFY lineEditNewServerCloakPortTextChanged)
-    Q_PROPERTY(QString lineEditNewServerCloakSiteText READ getLineEditNewServerCloakSiteText WRITE setLineEditNewServerCloakSiteText NOTIFY lineEditNewServerCloakSiteTextChanged)
-    Q_PROPERTY(QString lineEditNewServerSsPortText READ getLineEditNewServerSsPortText WRITE setLineEditNewServerSsPortText NOTIFY lineEditNewServerSsPortTextChanged)
-    Q_PROPERTY(QString comboBoxNewServerSsCipherText READ getComboBoxNewServerSsCipherText WRITE setComboBoxNewServerSsCipherText NOTIFY comboBoxNewServerSsCipherTextChanged)
-    Q_PROPERTY(QString lineEditNewServerOpenvpnPortText READ getlineEditNewServerOpenvpnPortText WRITE setLineEditNewServerOpenvpnPortText NOTIFY lineEditNewServerOpenvpnPortTextChanged)
-    Q_PROPERTY(QString comboBoxNewServerOpenvpnProtoText READ getComboBoxNewServerOpenvpnProtoText WRITE setComboBoxNewServerOpenvpnProtoText NOTIFY comboBoxNewServerOpenvpnProtoTextChanged)
 
 
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
     Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
     Q_PROPERTY(bool trayActionConnectEnabled READ getTrayActionConnectEnabled WRITE setTrayActionConnectEnabled NOTIFY trayActionConnectEnabledChanged)
-    Q_PROPERTY(bool checkBoxNewServerCloakChecked READ getCheckBoxNewServerCloakChecked WRITE setCheckBoxNewServerCloakChecked NOTIFY checkBoxNewServerCloakCheckedChanged)
-    Q_PROPERTY(bool checkBoxNewServerSsChecked READ getCheckBoxNewServerSsChecked WRITE setCheckBoxNewServerSsChecked NOTIFY checkBoxNewServerSsCheckedChanged)
-    Q_PROPERTY(bool checkBoxNewServerOpenvpnChecked READ getCheckBoxNewServerOpenvpnChecked WRITE setCheckBoxNewServerOpenvpnChecked NOTIFY checkBoxNewServerOpenvpnCheckedChanged)
 
     Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
     Q_PROPERTY(bool pushButtonProtoOpenvpnContInstallChecked READ getPushButtonProtoOpenvpnContInstallChecked WRITE setPushButtonProtoOpenvpnContInstallChecked NOTIFY pushButtonProtoOpenvpnContInstallCheckedChanged)
@@ -89,13 +75,6 @@ class UiLogic : public QObject
     Q_PROPERTY(bool widgetVpnModeEnabled READ getWidgetVpnModeEnabled WRITE setWidgetVpnModeEnabled NOTIFY widgetVpnModeEnabledChanged)
     Q_PROPERTY(QString labelErrorText READ getLabelErrorText WRITE setLabelErrorText NOTIFY labelErrorTextChanged)
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
-    Q_PROPERTY(bool pageNewServerConfiguringEnabled READ getPageNewServerConfiguringEnabled WRITE setPageNewServerConfiguringEnabled NOTIFY pageNewServerConfiguringEnabledChanged)
-    Q_PROPERTY(bool labelNewServerConfiguringWaitInfoVisible READ getLabelNewServerConfiguringWaitInfoVisible WRITE setLabelNewServerConfiguringWaitInfoVisible NOTIFY labelNewServerConfiguringWaitInfoVisibleChanged)
-    Q_PROPERTY(QString labelNewServerConfiguringWaitInfoText READ getLabelNewServerConfiguringWaitInfoText WRITE setLabelNewServerConfiguringWaitInfoText NOTIFY labelNewServerConfiguringWaitInfoTextChanged)
-    Q_PROPERTY(bool progressBarNewServerConfiguringVisible READ getProgressBarNewServerConfiguringVisible WRITE setProgressBarNewServerConfiguringVisible NOTIFY progressBarNewServerConfiguringVisibleChanged)
-    Q_PROPERTY(int progressBarNewServerConfiguringMaximium READ getProgressBarNewServerConfiguringMaximium WRITE setProgressBarNewServerConfiguringMaximium NOTIFY progressBarNewServerConfiguringMaximiumChanged)
-    Q_PROPERTY(bool progressBarNewServerConfiguringTextVisible READ getProgressBarNewServerConfiguringTextVisible WRITE setProgressBarNewServerConfiguringTextVisible NOTIFY progressBarNewServerConfiguringTextVisibleChanged)
-    Q_PROPERTY(QString progressBarNewServerConfiguringText READ getProgressBarNewServerConfiguringText WRITE setProgressBarNewServerConfiguringText NOTIFY progressBarNewServerConfiguringTextChanged)
     Q_PROPERTY(bool pageServerProtocolsEnabled READ getPageServerProtocolsEnabled WRITE setPageServerProtocolsEnabled NOTIFY pageServerProtocolsEnabledChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallValue READ getProgressBarProtocolsContainerReinstallValue WRITE setProgressBarProtocolsContainerReinstallValue NOTIFY progressBarProtocolsContainerReinstallValueChanged)
     Q_PROPERTY(int progressBarProtocolsContainerReinstallMaximium READ getProgressBarProtocolsContainerReinstallMaximium WRITE setProgressBarProtocolsContainerReinstallMaximium NOTIFY progressBarProtocolsContainerReinstallMaximiumChanged)
@@ -115,7 +94,7 @@ public:
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
     friend class NetworkSettingsLogic;
-    friend class NewServerLogic;
+    friend class NewServerProtocolsLogic;
     friend class ProtocolSettingsLogic;
     friend class ServerListLogic;
     friend class ServerSettingsLogic;
@@ -559,7 +538,7 @@ public:
     AppSettingsLogic *appSettingsLogic()                { return m_appSettingsLogic; }
     GeneralSettingsLogic *generalSettingsLogic()        { return m_generalSettingsLogic; }
     NetworkSettingsLogic *networkSettingsLogic()        { return m_networkSettingsLogic; }
-    NewServerLogic *newServerLogic()                    { return m_newServerLogic; }
+    NewServerProtocolsLogic *newServerProtocolsLogic()  { return m_newServerProtocolsLogic; }
     ProtocolSettingsLogic *protocolSettingsLogic()      { return m_protocolSettingsLogic; }
     ServerListLogic *serverListLogic()                  { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()          { return m_serverSettingsLogic; }
@@ -578,7 +557,7 @@ private:
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;
-    NewServerLogic *m_newServerLogic;
+    NewServerProtocolsLogic *m_newServerProtocolsLogic;
     ProtocolSettingsLogic *m_protocolSettingsLogic;
     ServerListLogic *m_serverListLogic;
     ServerSettingsLogic *m_serverSettingsLogic;

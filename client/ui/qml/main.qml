@@ -79,7 +79,7 @@ Window {
         if (item instanceof PageNewServer) {
             return PageEnum.NewServer
         }
-        if (item instanceof PageNewServerProtocol) {
+        if (item instanceof PageNewServerProtocols) {
             return PageEnum.NewServerProtocols
         }
         if (item instanceof PageSetupWizard) {
@@ -288,7 +288,7 @@ Window {
     }
     Component {
         id: page_new_server_protocols
-        PageNewServerProtocol {}
+        PageNewServerProtocols {}
     }
     Component {
         id: page_vpn
