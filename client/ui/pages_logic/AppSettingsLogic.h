@@ -1,12 +1,11 @@
 #ifndef APP_SETTINGS_LOGIC_H
 #define APP_SETTINGS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class AppSettingsLogic : public QObject
+class AppSettingsLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -55,9 +54,6 @@ private slots:
 
 
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-
     bool m_checkBoxAppSettingsAutostartChecked;
     bool m_checkBoxAppSettingsAutoconnectChecked;
     bool m_checkBoxAppSettingsStartMinimizedChecked;

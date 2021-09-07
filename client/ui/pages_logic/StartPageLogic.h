@@ -1,12 +1,11 @@
 #ifndef START_PAGE_LOGIC_H
 #define START_PAGE_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class StartPageLogic : public QObject
+class StartPageLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -80,12 +79,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_pushButtonNewServerConnectEnabled;
     QString m_pushButtonNewServerConnectText;
     bool m_pushButtonNewServerConnectKeyChecked;

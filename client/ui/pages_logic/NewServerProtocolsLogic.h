@@ -1,12 +1,11 @@
 #ifndef NEW_SERVER_PROTOCOLS_LOGIC_H
 #define NEW_SERVER_PROTOCOLS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class NewServerProtocolsLogic : public QObject
+class NewServerProtocolsLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -96,12 +95,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_frameNewServerSettingsParentWireguardVisible;
 
     bool m_pushButtonNewServerSettingsCloakChecked;

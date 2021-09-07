@@ -6,9 +6,8 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-ShadowSocksLogic::ShadowSocksLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_widgetProtoSsEnabled{false},
     m_comboBoxProtoShadowsocksCipherText{"chacha20-poly1305"},
     m_lineEditProtoShadowsocksPortText{},
@@ -192,10 +191,10 @@ void ShadowSocksLogic::setWidgetProtoSsEnabled(bool widgetProtoSsEnabled)
 
 void ShadowSocksLogic::onPushButtonProtoShadowsocksSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, Protocol::ShadowSocks);
+    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks);
     protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings.containerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(config_key::shadowsocks, protocolConfig);
     UiLogic::PageFunc page_proto_shadowsocks;
@@ -227,15 +226,15 @@ void ShadowSocksLogic::onPushButtonProtoShadowsocksSaveClicked()
         return getProgressBarProtoShadowsocksResetMaximium();
     };
 
-    ErrorCode e = m_uiLogic->doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer, containerConfig, newContainerConfig);
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+        return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_shadowsocks, progressBar_proto_shadowsocks_reset,
     pushButton_proto_shadowsocks_save, label_proto_shadowsocks_info);
 
     if (!e) {
-        m_settings.setContainerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
+        m_settings.clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     }
-    qDebug() << "Protocol saved with code:" << e << "for" << m_uiLogic->selectedServerIndex << m_uiLogic->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
 }

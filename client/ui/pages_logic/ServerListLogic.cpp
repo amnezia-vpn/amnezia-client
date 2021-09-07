@@ -3,12 +3,8 @@
 #include "vpnconnection.h"
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-ServerListLogic::ServerListLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_serverListModel{new ServersModel(this)}
 {
 
@@ -27,8 +23,8 @@ void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
 {
-    m_uiLogic->selectedServerIndex = index;
-    m_uiLogic->goToPage(Page::ServerSettings);
+    uiLogic()->selectedServerIndex = index;
+    uiLogic()->goToPage(Page::ServerSettings);
 }
 
 void ServerListLogic::updateServersListPage()

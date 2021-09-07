@@ -1,12 +1,8 @@
 #include "NewServerProtocolsLogic.h"
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_pushButtonNewServerSettingsCloakChecked{false},
     m_pushButtonNewServerSettingsSsChecked{false},
     m_pushButtonNewServerSettingsOpenvpnChecked{false},
@@ -26,7 +22,7 @@ NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *uiLogic, QObject *pare
     setFrameNewServerSettingsParentWireguardVisible(false);
 
     connect(this, &NewServerProtocolsLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
-        m_uiLogic->installServer(getInstallConfigsFromProtocolsPage());
+        uiLogic()->installServer(getInstallConfigsFromProtocolsPage());
     });
 }
 

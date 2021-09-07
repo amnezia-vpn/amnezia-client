@@ -1,11 +1,7 @@
 #include "NewServerConfiguringLogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-NewServerConfiguringLogic::NewServerConfiguringLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+NewServerConfiguringLogic::NewServerConfiguringLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_progressBarNewServerConfiguringValue{0},
     m_pageNewServerConfiguringEnabled{true},
     m_labelNewServerConfiguringWaitInfoVisible{true},

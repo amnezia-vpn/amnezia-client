@@ -3,12 +3,8 @@
 
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic)
+GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent)
 {
 
 }
@@ -33,15 +29,15 @@ void GeneralSettingsLogic::setPushButtonGeneralSettingsShareConnectionEnable(boo
 
 void GeneralSettingsLogic::onPushButtonGeneralSettingsServerSettingsClicked()
 {
-    m_uiLogic->selectedServerIndex = m_settings.defaultServerIndex();
-    m_uiLogic->goToPage(Page::ServerSettings);
+    uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
+    uiLogic()->goToPage(Page::ServerSettings);
 }
 
 void GeneralSettingsLogic::onPushButtonGeneralSettingsShareConnectionClicked()
 {
-    m_uiLogic->selectedServerIndex = m_settings.defaultServerIndex();
-    m_uiLogic->selectedDockerContainer = m_settings.defaultContainer(m_uiLogic->selectedServerIndex);
+    uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
+    uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
 
-    m_uiLogic->shareConnectionLogic()->updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer);
-    m_uiLogic->goToPage(Page::ShareConnection);
+    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer);
+    uiLogic()->goToPage(Page::ShareConnection);
 }

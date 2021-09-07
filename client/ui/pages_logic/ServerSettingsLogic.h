@@ -1,12 +1,11 @@
 #ifndef SERVER_SETTINGS_LOGIC_H
 #define SERVER_SETTINGS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class ServerSettingsLogic : public QObject
+class ServerSettingsLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -81,12 +80,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_pageServerSettingsEnabled;
     bool m_labelServerSettingsWaitInfoVisible;
     bool m_pushButtonServerSettingsClearVisible;

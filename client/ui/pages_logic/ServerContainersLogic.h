@@ -1,12 +1,11 @@
 #ifndef SERVER_CONTAINERS_LOGIC_H
 #define SERVER_CONTAINERS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class ServerContainersLogic : public QObject
+class ServerContainersLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -48,6 +47,10 @@ public:
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContSsConfigClicked();
     Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContCloakConfigClicked();
+
+    Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
 
 public:
     explicit ServerContainersLogic(UiLogic *uiLogic, QObject *parent = nullptr);
@@ -168,12 +171,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_pageServerContainersEnabled;
     int m_progressBarProtocolsContainerReinstallValue;
     int m_progressBarProtocolsContainerReinstallMaximium;

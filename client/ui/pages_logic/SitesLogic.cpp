@@ -4,6 +4,7 @@
 #include <QHostInfo>
 
 #include "SitesLogic.h"
+#include "VpnLogic.h"
 #include "utils.h"
 #include "vpnconnection.h"
 #include <functional>
@@ -11,13 +12,8 @@
 #include "../uilogic.h"
 #include "../sites_model.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-
-SitesLogic::SitesLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+SitesLogic::SitesLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_labelSitesAddCustomText{},
     m_tableViewSitesModel{nullptr},
     m_lineEditSitesAddCustomText{}
@@ -83,7 +79,7 @@ void SitesLogic::setLineEditSitesAddCustomText(const QString &lineEditSitesAddCu
 
 void SitesLogic::onPushButtonAddCustomSitesClicked()
 {
-    if (m_uiLogic->getRadioButtonVpnModeAllSitesChecked()) {
+    if (uiLogic()->vpnLogic()->getRadioButtonVpnModeAllSitesChecked()) {
         return;
     }
     Settings::RouteMode mode = m_settings.routeMode();
@@ -106,12 +102,12 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         m_settings.addVpnSite(mode, newSite, ip);
 
         if (!ip.isEmpty()) {
-            m_uiLogic->m_vpnConnection->addRoutes(QStringList() << ip);
-            m_uiLogic->m_vpnConnection->flushDns();
+            uiLogic()->m_vpnConnection->addRoutes(QStringList() << ip);
+            uiLogic()->m_vpnConnection->flushDns();
         }
         else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-            m_uiLogic->m_vpnConnection->addRoutes(QStringList() << newSite);
-            m_uiLogic->m_vpnConnection->flushDns();
+            uiLogic()->m_vpnConnection->addRoutes(QStringList() << newSite);
+            uiLogic()->m_vpnConnection->flushDns();
         }
 
         updateSitesPage();
@@ -159,11 +155,11 @@ void SitesLogic::onPushButtonSitesDeleteClicked(int row)
         m_settings.removeVpnSites(mode, sites);
     }
 
-    if (m_uiLogic->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+    if (uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
         QStringList ips;
         ips.append(siteModel->data(row, 1).toString());
-        m_uiLogic->m_vpnConnection->deleteRoutes(ips);
-        m_uiLogic->m_vpnConnection->flushDns();
+        uiLogic()->m_vpnConnection->deleteRoutes(ips);
+        uiLogic()->m_vpnConnection->flushDns();
     }
 
     updateSitesPage();
@@ -193,8 +189,8 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
 
     m_settings.addVpnIps(mode, ips);
 
-    m_uiLogic->m_vpnConnection->addRoutes(QStringList() << ips);
-    m_uiLogic->m_vpnConnection->flushDns();
+    uiLogic()->m_vpnConnection->addRoutes(QStringList() << ips);
+    uiLogic()->m_vpnConnection->flushDns();
 
     updateSitesPage();
 }

@@ -1,12 +1,11 @@
 #ifndef SHADOWSOCKS_LOGIC_H
 #define SHADOWSOCKS_LOGIC_H
 
-#include "../../pages.h"
-#include "settings.h"
+#include "../PageLogicBase.h"
 
 class UiLogic;
 
-class ShadowSocksLogic : public QObject
+class ShadowSocksLogic : public PageLogicBase
 {
     Q_OBJECT
 

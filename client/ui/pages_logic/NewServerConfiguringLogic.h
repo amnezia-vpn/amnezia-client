@@ -1,12 +1,11 @@
 #ifndef NEW_SERVER_CONFIGURING_LOGIC_H
 #define NEW_SERVER_CONFIGURING_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class NewServerConfiguringLogic : public QObject
+class NewServerConfiguringLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -58,12 +57,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     double m_progressBarNewServerConfiguringValue;
     bool m_pageNewServerConfiguringEnabled;
     bool m_labelNewServerConfiguringWaitInfoVisible;

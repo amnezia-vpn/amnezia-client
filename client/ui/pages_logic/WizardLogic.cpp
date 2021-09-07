@@ -1,12 +1,8 @@
 #include "WizardLogic.h"
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-WizardLogic::WizardLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+WizardLogic::WizardLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_radioButtonSetupWizardHighChecked{false},
     m_radioButtonSetupWizardMediumChecked{true},
     m_radioButtonSetupWizardLowChecked{false},
@@ -120,7 +116,7 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 
 void WizardLogic::onPushButtonSetupWizardVpnModeFinishClicked()
 {
-    m_uiLogic->installServer(getInstallConfigsFromWizardPage());
+    uiLogic()->installServer(getInstallConfigsFromWizardPage());
     if (getCheckBoxSetupWizardVpnModeChecked()) {
         m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
@@ -130,5 +126,5 @@ void WizardLogic::onPushButtonSetupWizardVpnModeFinishClicked()
 
 void WizardLogic::onPushButtonSetupWizardLowFinishClicked()
 {
-    m_uiLogic->installServer(getInstallConfigsFromWizardPage());
+    uiLogic()->installServer(getInstallConfigsFromWizardPage());
 }

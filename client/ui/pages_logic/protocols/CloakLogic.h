@@ -1,12 +1,11 @@
 #ifndef CLOAK_LOGIC_H
 #define CLOAK_LOGIC_H
 
-#include "../../pages.h"
-#include "settings.h"
+#include "../PageLogicBase.h"
 
 class UiLogic;
 
-class CloakLogic : public QObject
+class CloakLogic : public PageLogicBase
 {
     Q_OBJECT
 

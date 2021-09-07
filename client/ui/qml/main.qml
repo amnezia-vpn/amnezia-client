@@ -182,7 +182,7 @@ Window {
                 SitesLogic.updateSitesPage()
             }
             if (page === PageEnum.Vpn) {
-                UiLogic.updateVpnPage()
+                VpnLogic.updateVpnPage()
             }
             UiLogic.pushButtonNewServerConnectKeyChecked = false
         }

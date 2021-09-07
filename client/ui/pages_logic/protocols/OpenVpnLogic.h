@@ -1,12 +1,11 @@
 #ifndef OPENVPN_LOGIC_H
 #define OPENVPN_LOGIC_H
 
-#include "../../pages.h"
-#include "settings.h"
+#include "../PageLogicBase.h"
 
 class UiLogic;
 
-class OpenVpnLogic : public QObject
+class OpenVpnLogic : public PageLogicBase
 {
     Q_OBJECT
 

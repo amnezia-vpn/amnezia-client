@@ -3,12 +3,8 @@
 #include "configurators/ssh_configurator.h"
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-StartPageLogic::StartPageLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_pushButtonNewServerConnectEnabled{true},
     m_pushButtonNewServerConnectText{tr("Connect")},
     m_pushButtonNewServerConnectKeyChecked{false},
@@ -199,7 +195,7 @@ void StartPageLogic::onPushButtonNewServerConnect()
     if (getPushButtonNewServerConnectKeyChecked()){
         QString key = getTextEditNewServerSshKeyText();
         if (key.startsWith("ssh-rsa")) {
-            emit m_uiLogic->showPublicKeyWarning();
+            emit uiLogic()->showPublicKeyWarning();
             return;
         }
 
@@ -241,8 +237,8 @@ void StartPageLogic::onPushButtonNewServerConnect()
     setPushButtonNewServerConnectEnabled(true);
     setPushButtonNewServerConnectText(tr("Connect"));
 
-    m_uiLogic->installCredentials = serverCredentials;
-    if (ok) m_uiLogic->goToPage(Page::NewServer);
+    uiLogic()->installCredentials = serverCredentials;
+    if (ok) uiLogic()->goToPage(Page::NewServer);
 }
 
 void StartPageLogic::onPushButtonNewServerImport()
@@ -286,7 +282,7 @@ void StartPageLogic::onPushButtonNewServerImport()
         m_settings.addServer(o);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
 
-        m_uiLogic->setStartPage(Page::Vpn);
+        uiLogic()->setStartPage(Page::Vpn);
     }
     else {
         qDebug() << "Failed to import profile";
@@ -295,9 +291,9 @@ void StartPageLogic::onPushButtonNewServerImport()
     }
 
     if (!o.contains(config_key::containers)) {
-        m_uiLogic->selectedServerIndex = m_settings.defaultServerIndex();
-        m_uiLogic->selectedDockerContainer = m_settings.defaultContainer(m_uiLogic->selectedServerIndex);
-        m_uiLogic->goToPage(Page::ServerContainers);
+        uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
+        uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
+        uiLogic()->goToPage(Page::ServerContainers);
     }
 }
 

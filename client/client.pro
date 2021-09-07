@@ -39,7 +39,7 @@ HEADERS  += \
     ui/pages_logic/NetworkSettingsLogic.h \
    ui/pages_logic/NewServerConfiguringLogic.h \
    ui/pages_logic/NewServerProtocolsLogic.h \
-    ui/pages_logic/ProtocolSettingsLogic.h \
+    ui/pages_logic/PageLogicBase.h \
     ui/pages_logic/ServerContainersLogic.h \
     ui/pages_logic/ServerListLogic.h \
     ui/pages_logic/ServerSettingsLogic.h \
@@ -85,7 +85,7 @@ SOURCES  += \
     ui/pages_logic/NetworkSettingsLogic.cpp \
    ui/pages_logic/NewServerConfiguringLogic.cpp \
    ui/pages_logic/NewServerProtocolsLogic.cpp \
-    ui/pages_logic/ProtocolSettingsLogic.cpp \
+    ui/pages_logic/PageLogicBase.cpp \
     ui/pages_logic/ServerContainersLogic.cpp \
     ui/pages_logic/ServerListLogic.cpp \
     ui/pages_logic/ServerSettingsLogic.cpp \

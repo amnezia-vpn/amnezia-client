@@ -6,9 +6,8 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-OpenVpnLogic::OpenVpnLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_lineEditProtoOpenvpnSubnetText{},
     m_radioButtonProtoOpenvpnUdpChecked{false},
     m_checkBoxProtoOpenvpnAutoEncryptionChecked{},
@@ -375,10 +374,10 @@ void OpenVpnLogic::onCheckBoxProtoOpenvpnAutoEncryptionClicked()
 
 void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, Protocol::OpenVpn);
+    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn);
     protocolConfig = getOpenVpnConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings.containerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(config_key::openvpn, protocolConfig);
 
@@ -411,17 +410,17 @@ void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
         return getProgressBarProtoOpenvpnResetMaximium();
     };
 
-    ErrorCode e = m_uiLogic->doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer, containerConfig, newContainerConfig);
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+        return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_openvpn, progressBar_proto_openvpn_reset,
     pushButton_proto_openvpn_save, label_proto_openvpn_info);
 
     if (!e) {
-        m_settings.setContainerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
+        m_settings.clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     }
-    qDebug() << "Protocol saved with code:" << e << "for" << m_uiLogic->selectedServerIndex << m_uiLogic->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
 }
 
 QJsonObject OpenVpnLogic::getOpenVpnConfigFromPage(QJsonObject oldConfig)

@@ -1,12 +1,11 @@
 #ifndef WIZARD_LOGIC_H
 #define WIZARD_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class WizardLogic : public QObject
+class WizardLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -55,10 +54,6 @@ private slots:
 
 
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_radioButtonSetupWizardHighChecked;
     bool m_radioButtonSetupWizardMediumChecked;
     bool m_radioButtonSetupWizardLowChecked;

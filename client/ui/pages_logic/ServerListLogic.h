@@ -1,13 +1,12 @@
 #ifndef SERVER_LIST_LOGIC_H
 #define SERVER_LIST_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 #include "../serversmodel.h"
 
 class UiLogic;
 
-class ServerListLogic : public QObject
+class ServerListLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -35,12 +34,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     ServersModel* m_serverListModel;
 
 };

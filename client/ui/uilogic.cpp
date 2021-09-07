@@ -49,7 +49,6 @@
 #include "pages_logic/NetworkSettingsLogic.h"
 #include "pages_logic/NewServerConfiguringLogic.h"
 #include "pages_logic/NewServerProtocolsLogic.h"
-#include "pages_logic/ProtocolSettingsLogic.h"
 #include "pages_logic/ServerListLogic.h"
 #include "pages_logic/ServerSettingsLogic.h"
 #include "pages_logic/ServerContainersLogic.h"
@@ -69,33 +68,10 @@ using namespace PageEnumNS;
 
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
-    m_radioButtonVpnModeAllSitesChecked{true},
-    m_radioButtonVpnModeForwardSitesChecked{false},
-    m_radioButtonVpnModeExceptSitesChecked{false},
-    m_pushButtonVpnAddSiteEnabled{true},
-
-
-
     m_currentPageValue{0},
     m_trayIconUrl{},
     m_trayActionDisconnectEnabled{true},
     m_trayActionConnectEnabled{true},
-
-
-
-
-
-
-    m_pushButtonConnectChecked{false},
-
-
-
-    m_labelSpeedReceivedText{tr("0 Mbps")},
-    m_labelSpeedSentText{tr("0 Mbps")},
-    m_labelStateText{},
-    m_pushButtonConnectEnabled{false},
-    m_widgetVpnModeEnabled{false},
-    m_labelErrorText{tr("Error text")},
     m_dialogConnectErrorText{},
     m_vpnConnection(nullptr)
 {
@@ -106,7 +82,6 @@ UiLogic::UiLogic(QObject *parent) :
     m_networkSettingsLogic = new NetworkSettingsLogic(this);
     m_newServerConfiguringLogic = new NewServerConfiguringLogic(this);
     m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
-    m_protocolSettingsLogic = new ProtocolSettingsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);
     m_serverVpnProtocolsLogic = new ServerContainersLogic(this);
@@ -119,16 +94,11 @@ UiLogic::UiLogic(QObject *parent) :
     m_openVpnLogic = new OpenVpnLogic(this);
     m_shadowSocksLogic = new ShadowSocksLogic(this);
     m_cloakLogic = new CloakLogic(this);
-
-    connect(m_vpnConnection, SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
-    connect(m_vpnConnection, SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
-    connect(m_vpnConnection, SIGNAL(vpnProtocolError(amnezia::ErrorCode)), this, SLOT(onVpnProtocolError(amnezia::ErrorCode)));
 }
 
 void UiLogic::initalizeUiLogic()
 {
     setupTray();
-    setLabelErrorText("");
 
 
     //    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
@@ -161,14 +131,8 @@ void UiLogic::initalizeUiLogic()
 
 
 
-    onConnectionStateChanged(VpnProtocol::Disconnected);
+    vpnLogic()->onConnectionStateChanged(VpnProtocol::Disconnected);
 
-    if (m_settings.isAutoConnect() && m_settings.defaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this](){
-            setPushButtonConnectEnabled(false);
-            onConnect();
-        });
-    }
 
     //    m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
     //    m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
@@ -190,44 +154,7 @@ void UiLogic::initalizeUiLogic()
 
 }
 
-bool UiLogic::getRadioButtonVpnModeAllSitesChecked() const
-{
-    return m_radioButtonVpnModeAllSitesChecked;
-}
 
-bool UiLogic::getRadioButtonVpnModeForwardSitesChecked() const
-{
-    return m_radioButtonVpnModeForwardSitesChecked;
-}
-
-bool UiLogic::getRadioButtonVpnModeExceptSitesChecked() const
-{
-    return m_radioButtonVpnModeExceptSitesChecked;
-}
-
-void UiLogic::setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked)
-{
-    if (m_radioButtonVpnModeAllSitesChecked != radioButtonVpnModeAllSitesChecked) {
-        m_radioButtonVpnModeAllSitesChecked = radioButtonVpnModeAllSitesChecked;
-        emit radioButtonVpnModeAllSitesCheckedChanged();
-    }
-}
-
-void UiLogic::setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeForwardSitesChecked)
-{
-    if (m_radioButtonVpnModeForwardSitesChecked != radioButtonVpnModeForwardSitesChecked) {
-        m_radioButtonVpnModeForwardSitesChecked = radioButtonVpnModeForwardSitesChecked;
-        emit radioButtonVpnModeForwardSitesCheckedChanged();
-    }
-}
-
-void UiLogic::setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExceptSitesChecked)
-{
-    if (m_radioButtonVpnModeExceptSitesChecked != radioButtonVpnModeExceptSitesChecked) {
-        m_radioButtonVpnModeExceptSitesChecked = radioButtonVpnModeExceptSitesChecked;
-        emit radioButtonVpnModeExceptSitesCheckedChanged();
-    }
-}
 
 
 
@@ -299,118 +226,7 @@ void UiLogic::setTrayActionConnectEnabled(bool trayActionConnectEnabled)
 
 
 
-bool UiLogic::getPushButtonConnectChecked() const
-{
-    return m_pushButtonConnectChecked;
-}
 
-void UiLogic::setPushButtonConnectChecked(bool pushButtonConnectChecked)
-{
-    if (m_pushButtonConnectChecked != pushButtonConnectChecked) {
-        m_pushButtonConnectChecked = pushButtonConnectChecked;
-        emit pushButtonConnectCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonVpnAddSiteEnabled() const
-{
-    return m_pushButtonVpnAddSiteEnabled;
-}
-
-void UiLogic::setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled)
-{
-    if (m_pushButtonVpnAddSiteEnabled != pushButtonVpnAddSiteEnabled) {
-        m_pushButtonVpnAddSiteEnabled = pushButtonVpnAddSiteEnabled;
-        emit pushButtonVpnAddSiteEnabledChanged();
-    }
-}
-
-
-
-
-
-
-
-
-
-
-QString UiLogic::getLabelSpeedReceivedText() const
-{
-    return m_labelSpeedReceivedText;
-}
-
-void UiLogic::setLabelSpeedReceivedText(const QString &labelSpeedReceivedText)
-{
-    if (m_labelSpeedReceivedText != labelSpeedReceivedText) {
-        m_labelSpeedReceivedText = labelSpeedReceivedText;
-        emit labelSpeedReceivedTextChanged();
-    }
-}
-
-QString UiLogic::getLabelSpeedSentText() const
-{
-    return m_labelSpeedSentText;
-}
-
-void UiLogic::setLabelSpeedSentText(const QString &labelSpeedSentText)
-{
-    if (m_labelSpeedSentText != labelSpeedSentText) {
-        m_labelSpeedSentText = labelSpeedSentText;
-        emit labelSpeedSentTextChanged();
-    }
-}
-
-QString UiLogic::getLabelStateText() const
-{
-    return m_labelStateText;
-}
-
-void UiLogic::setLabelStateText(const QString &labelStateText)
-{
-    if (m_labelStateText != labelStateText) {
-        m_labelStateText = labelStateText;
-        emit labelStateTextChanged();
-    }
-}
-
-bool UiLogic::getPushButtonConnectEnabled() const
-{
-    return m_pushButtonConnectEnabled;
-}
-
-void UiLogic::setPushButtonConnectEnabled(bool pushButtonConnectEnabled)
-{
-    if (m_pushButtonConnectEnabled != pushButtonConnectEnabled) {
-        m_pushButtonConnectEnabled = pushButtonConnectEnabled;
-        emit pushButtonConnectEnabledChanged();
-    }
-}
-
-bool UiLogic::getWidgetVpnModeEnabled() const
-{
-    return m_widgetVpnModeEnabled;
-}
-
-void UiLogic::setWidgetVpnModeEnabled(bool widgetVpnModeEnabled)
-{
-    if (m_widgetVpnModeEnabled != widgetVpnModeEnabled) {
-        m_widgetVpnModeEnabled = widgetVpnModeEnabled;
-        emit widgetVpnModeEnabledChanged();
-    }
-}
-
-QString UiLogic::getLabelErrorText() const
-{
-    return m_labelErrorText;
-}
-
-void UiLogic::setLabelErrorText(const QString &labelErrorText)
-{
-    if (m_labelErrorText != labelErrorText) {
-        m_labelErrorText = labelErrorText;
-        emit labelErrorTextChanged();
-    }
-}
 
 
 QString UiLogic::getDialogConnectErrorText() const
@@ -802,78 +618,6 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
     return ErrorCode::NoError;
 }
 
-
-void UiLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
-{
-    setLabelSpeedReceivedText(VpnConnection::bytesPerSecToText(receivedData));
-    setLabelSpeedSentText(VpnConnection::bytesPerSecToText(sentData));
-}
-
-void UiLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
-{
-    qDebug() << "UiLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
-
-    bool pushButtonConnectEnabled = false;
-    bool radioButtonsModeEnabled = false;
-    setLabelStateText(VpnProtocol::textConnectionState(state));
-
-    setTrayState(state);
-
-    switch (state) {
-    case VpnProtocol::Disconnected:
-        onBytesChanged(0,0);
-        setPushButtonConnectChecked(false);
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
-        break;
-    case VpnProtocol::Preparing:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
-        break;
-    case VpnProtocol::Connecting:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
-        break;
-    case VpnProtocol::Connected:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = false;
-        break;
-    case VpnProtocol::Disconnecting:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
-        break;
-    case VpnProtocol::Reconnecting:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = false;
-        break;
-    case VpnProtocol::Error:
-        setPushButtonConnectEnabled(false);
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
-        break;
-    case VpnProtocol::Unknown:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
-    }
-
-    setPushButtonConnectEnabled(pushButtonConnectEnabled);
-    setWidgetVpnModeEnabled(radioButtonsModeEnabled);
-}
-
-void UiLogic::onVpnProtocolError(ErrorCode errorCode)
-{
-    setLabelErrorText(errorString(errorCode));
-}
-
-void UiLogic::onPushButtonConnectClicked(bool checked)
-{
-    if (checked) {
-        onConnect();
-    } else {
-        onDisconnect();
-    }
-}
-
 void UiLogic::setupTray()
 {
     setTrayState(VpnProtocol::Disconnected);
@@ -933,120 +677,5 @@ void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
 
 }
 
-void UiLogic::onConnect()
-{
-    int serverIndex = m_settings.defaultServerIndex();
-    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
-    DockerContainer container = m_settings.defaultContainer(serverIndex);
-
-    if (m_settings.containers(serverIndex).isEmpty()) {
-        setLabelErrorText(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
-        setPushButtonConnectChecked(false);
-        return;
-    }
-
-    if (container == DockerContainer::None) {
-        setLabelErrorText(tr("VPN Protocol not choosen"));
-        setPushButtonConnectChecked(false);
-        return;
-    }
-
-
-    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-    onConnectWorker(serverIndex, credentials, container, containerConfig);
-}
-
-void UiLogic::onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
-{
-    setLabelErrorText("");
-    setPushButtonConnectChecked(true);
-    qApp->processEvents();
-
-    ErrorCode errorCode = m_vpnConnection->connectToVpn(
-                serverIndex, credentials, container, containerConfig
-                );
-
-    if (errorCode) {
-        //ui->pushButton_connect->setChecked(false);
-        setDialogConnectErrorText(errorString(errorCode));
-        emit showConnectErrorDialog();
-        return;
-    }
-
-    setPushButtonConnectEnabled(false);
-}
-
-void UiLogic::onDisconnect()
-{
-    setPushButtonConnectChecked(false);
-    m_vpnConnection->disconnectFromVpn();
-}
-
-
-
-
-
-
-
-
-void UiLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpn;
-    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
-                      selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::OpenVpnSettings);
-}
-
-void UiLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
-                      selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::OpenVpnSettings);
-}
-
-void UiLogic::onPushButtonProtoSsOpenvpnContSsConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
-                          selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::ShadowSocksSettings);
-}
-
-
-
-
-
-
-void UiLogic::updateVpnPage()
-{
-    Settings::RouteMode mode = m_settings.routeMode();
-    setRadioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);
-    setRadioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
-    setRadioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
-    setPushButtonVpnAddSiteEnabled(mode != Settings::VpnAllSites);
-}
-
-
-void UiLogic::onRadioButtonVpnModeAllSitesToggled(bool checked)
-{
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllSites);
-    }
-}
-
-void UiLogic::onRadioButtonVpnModeForwardSitesToggled(bool checked)
-{
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
-    }
-}
-
-void UiLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
-{
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllExceptSites);
-    }
-}
 
 

@@ -1,12 +1,11 @@
 #ifndef GENERAL_SETTINGS_LOGIC_H
 #define GENERAL_SETTINGS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class GeneralSettingsLogic : public QObject
+class GeneralSettingsLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -37,12 +36,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     bool m_pushButtonGeneralSettingsShareConnectionEnable;
 
 };

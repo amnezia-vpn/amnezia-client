@@ -15,7 +15,6 @@ class GeneralSettingsLogic;
 class NetworkSettingsLogic;
 class NewServerProtocolsLogic;
 class NewServerConfiguringLogic;
-class ProtocolSettingsLogic;
 class ServerListLogic;
 class ServerSettingsLogic;
 class ServerContainersLogic;
@@ -41,23 +40,7 @@ class UiLogic : public QObject
     Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
     Q_PROPERTY(bool trayActionConnectEnabled READ getTrayActionConnectEnabled WRITE setTrayActionConnectEnabled NOTIFY trayActionConnectEnabledChanged)
 
-    Q_PROPERTY(bool pushButtonConnectChecked READ getPushButtonConnectChecked WRITE setPushButtonConnectChecked NOTIFY pushButtonConnectCheckedChanged)
-
-
-    Q_PROPERTY(QString labelSpeedReceivedText READ getLabelSpeedReceivedText WRITE setLabelSpeedReceivedText NOTIFY labelSpeedReceivedTextChanged)
-    Q_PROPERTY(QString labelSpeedSentText READ getLabelSpeedSentText WRITE setLabelSpeedSentText NOTIFY labelSpeedSentTextChanged)
-    Q_PROPERTY(QString labelStateText READ getLabelStateText WRITE setLabelStateText NOTIFY labelStateTextChanged)
-    Q_PROPERTY(bool pushButtonConnectEnabled READ getPushButtonConnectEnabled WRITE setPushButtonConnectEnabled NOTIFY pushButtonConnectEnabledChanged)
-    Q_PROPERTY(bool widgetVpnModeEnabled READ getWidgetVpnModeEnabled WRITE setWidgetVpnModeEnabled NOTIFY widgetVpnModeEnabledChanged)
-    Q_PROPERTY(QString labelErrorText READ getLabelErrorText WRITE setLabelErrorText NOTIFY labelErrorTextChanged)
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
-
-
-    Q_PROPERTY(bool pushButtonVpnAddSiteEnabled READ getPushButtonVpnAddSiteEnabled WRITE setPushButtonVpnAddSiteEnabled NOTIFY pushButtonVpnAddSiteEnabledChanged)
-
-    Q_PROPERTY(bool radioButtonVpnModeAllSitesChecked READ getRadioButtonVpnModeAllSitesChecked WRITE setRadioButtonVpnModeAllSitesChecked NOTIFY radioButtonVpnModeAllSitesCheckedChanged)
-    Q_PROPERTY(bool radioButtonVpnModeForwardSitesChecked READ getRadioButtonVpnModeForwardSitesChecked WRITE setRadioButtonVpnModeForwardSitesChecked NOTIFY radioButtonVpnModeForwardSitesCheckedChanged)
-    Q_PROPERTY(bool radioButtonVpnModeExceptSitesChecked READ getRadioButtonVpnModeExceptSitesChecked WRITE setRadioButtonVpnModeExceptSitesChecked NOTIFY radioButtonVpnModeExceptSitesCheckedChanged)
 
 public:
     explicit UiLogic(QObject *parent = nullptr);
@@ -69,7 +52,6 @@ public:
     friend class NetworkSettingsLogic;
     friend class NewServerConfiguringLogic;
     friend class NewServerProtocolsLogic;
-    friend class ProtocolSettingsLogic;
     friend class ServerListLogic;
     friend class ServerSettingsLogic;
     friend class ServerContainersLogic;
@@ -84,6 +66,7 @@ public:
     friend class CloakLogic;
 
     Q_INVOKABLE void initalizeUiLogic();
+    Q_INVOKABLE void onCloseWindow();
 
 
     int getCurrentPageValue() const;
@@ -95,95 +78,14 @@ public:
     bool getTrayActionConnectEnabled() const;
     void setTrayActionConnectEnabled(bool trayActionConnectEnabled);
 
-
-
-
-
-    bool getPushButtonConnectChecked() const;
-    void setPushButtonConnectChecked(bool pushButtonConnectChecked);
-
-
-
-
-    QString getLabelSpeedReceivedText() const;
-    void setLabelSpeedReceivedText(const QString &labelSpeedReceivedText);
-    QString getLabelSpeedSentText() const;
-    void setLabelSpeedSentText(const QString &labelSpeedSentText);
-    QString getLabelStateText() const;
-    void setLabelStateText(const QString &labelStateText);
-    bool getPushButtonConnectEnabled() const;
-    void setPushButtonConnectEnabled(bool pushButtonConnectEnabled);
-    bool getWidgetVpnModeEnabled() const;
-    void setWidgetVpnModeEnabled(bool widgetVpnModeEnabled);
-    QString getLabelErrorText() const;
-    void setLabelErrorText(const QString &labelErrorText);
-
-
     QString getDialogConnectErrorText() const;
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
-
-
-
-
-
-
-    bool getRadioButtonVpnModeAllSitesChecked() const;
-    void setRadioButtonVpnModeAllSitesChecked(bool radioButtonVpnModeAllSitesChecked);
-    bool getRadioButtonVpnModeForwardSitesChecked() const;
-    void setRadioButtonVpnModeForwardSitesChecked(bool radioButtonVpnModeForwardSitesChecked);
-    bool getRadioButtonVpnModeExceptSitesChecked() const;
-    void setRadioButtonVpnModeExceptSitesChecked(bool radioButtonVpnModeExceptSitesChecked);
-    bool getPushButtonVpnAddSiteEnabled() const;
-    void setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled);
-
-    Q_INVOKABLE void updateVpnPage();
-
-    Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
-    Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
-    Q_INVOKABLE void onRadioButtonVpnModeExceptSitesToggled(bool checked);
-
-    Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
-
-    Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
-
-    Q_INVOKABLE void onCloseWindow();
-
 signals:
-
-    void radioButtonVpnModeAllSitesCheckedChanged();
-    void radioButtonVpnModeForwardSitesCheckedChanged();
-    void radioButtonVpnModeExceptSitesCheckedChanged();
-    void pushButtonVpnAddSiteEnabledChanged();
-
-
-
     void currentPageValueChanged();
     void trayIconUrlChanged();
     void trayActionDisconnectEnabledChanged();
     void trayActionConnectEnabledChanged();
-
-
-
-
-
-
-
-
-    void pushButtonConnectCheckedChanged();
-
-
-
-
-    void labelSpeedReceivedTextChanged();
-    void labelSpeedSentTextChanged();
-    void labelStateTextChanged();
-    void pushButtonConnectEnabledChanged();
-    void widgetVpnModeEnabledChanged();
-    void labelErrorTextChanged();
-
     void dialogConnectErrorTextChanged();
 
 
@@ -196,50 +98,16 @@ signals:
     void hide();
 
 private:
-
-    bool m_radioButtonVpnModeAllSitesChecked;
-    bool m_radioButtonVpnModeForwardSitesChecked;
-    bool m_radioButtonVpnModeExceptSitesChecked;
-    bool m_pushButtonVpnAddSiteEnabled;
-
-
-
     int m_currentPageValue;
     QString m_trayIconUrl;
     bool m_trayActionDisconnectEnabled;
     bool m_trayActionConnectEnabled;
 
-
-
-
-
-
-
-    bool m_pushButtonConnectChecked;
-
-
-
-
-
-    QString m_labelSpeedReceivedText;
-    QString m_labelSpeedSentText;
-    QString m_labelStateText;
-    bool m_pushButtonConnectEnabled;
-    bool m_widgetVpnModeEnabled;
-    QString m_labelErrorText;
     QString m_dialogConnectErrorText;
 
 private slots:
-    void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(VpnProtocol::ConnectionState state);
-    void onVpnProtocolError(amnezia::ErrorCode errorCode);
-
     void installServer(const QMap<DockerContainer, QJsonObject> &containers);
     void setTrayState(VpnProtocol::ConnectionState state);
-    void onConnect();
-    void onConnectWorker(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
-    void onDisconnect();
-
 
 private:
     PageEnumNS::Page currentPage();
@@ -285,7 +153,6 @@ public:
     NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
     NewServerConfiguringLogic *newServerConfiguringLogic()  { return m_newServerConfiguringLogic; }
     NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
-    ProtocolSettingsLogic *protocolSettingsLogic()          { return m_protocolSettingsLogic; }
     ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
     ServerContainersLogic *serverVpnProtocolsLogic()      { return m_serverVpnProtocolsLogic; }
@@ -305,7 +172,6 @@ private:
     NetworkSettingsLogic *m_networkSettingsLogic;
     NewServerConfiguringLogic *m_newServerConfiguringLogic;
     NewServerProtocolsLogic *m_newServerProtocolsLogic;
-    ProtocolSettingsLogic *m_protocolSettingsLogic;
     ServerListLogic *m_serverListLogic;
     ServerSettingsLogic *m_serverSettingsLogic;
     ServerContainersLogic *m_serverVpnProtocolsLogic;

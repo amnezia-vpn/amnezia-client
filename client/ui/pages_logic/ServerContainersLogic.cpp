@@ -9,12 +9,8 @@
 
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-ServerContainersLogic::ServerContainersLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_pageServerContainersEnabled{true},
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
@@ -646,4 +642,28 @@ void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked(
     uiLogic()->cloakLogic()->updateCloakPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak),
                     uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
     uiLogic()->goToPage(Page::CloakSettings);
+}
+
+void ServerContainersLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
+{
+    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpn;
+    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
+                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+    uiLogic()->goToPage(Page::OpenVpnSettings);
+}
+
+void ServerContainersLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
+{
+    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
+                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+    uiLogic()->goToPage(Page::OpenVpnSettings);
+}
+
+void ServerContainersLogic::onPushButtonProtoSsOpenvpnContSsConfigClicked()
+{
+    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+    uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
+                          uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+    uiLogic()->goToPage(Page::ShadowSocksSettings);
 }

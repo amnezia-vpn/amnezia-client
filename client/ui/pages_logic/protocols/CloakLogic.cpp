@@ -6,9 +6,8 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-CloakLogic::CloakLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_comboBoxProtoCloakCipherText{"chacha20-poly1305"},
     m_lineEditProtoCloakSiteText{"tile.openstreetmap.org"},
     m_lineEditProtoCloakPortText{},
@@ -213,10 +212,10 @@ void CloakLogic::setProgressBarProtoCloakResetMaximium(int progressBarProtoCloak
 
 void CloakLogic::onPushButtonProtoCloakSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, Protocol::Cloak);
+    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak);
     protocolConfig = getCloakConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings.containerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(config_key::cloak, protocolConfig);
 
@@ -249,16 +248,16 @@ void CloakLogic::onPushButtonProtoCloakSaveClicked()
         return getProgressBarProtoCloakResetMaximium();
     };
 
-    ErrorCode e = m_uiLogic->doInstallAction([this, containerConfig, newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer, containerConfig, newContainerConfig);
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+        return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_cloak, progressBar_proto_cloak_reset,
     pushButton_proto_cloak_save, label_proto_cloak_info);
 
     if (!e) {
-        m_settings.setContainerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
+        m_settings.clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     }
 
-    qDebug() << "Protocol saved with code:" << e << "for" << m_uiLogic->selectedServerIndex << m_uiLogic->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
 }

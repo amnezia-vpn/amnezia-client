@@ -3,12 +3,8 @@
 #include "defines.h"
 #include "utils.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_ipAddressValidatorRegex{Utils::ipAddressRegExp().pattern()}
 {
 

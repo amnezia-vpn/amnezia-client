@@ -1,12 +1,11 @@
 #ifndef NETWORK_SETTINGS_LOGIC_H
 #define NETWORK_SETTINGS_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 
-class NetworkSettingsLogic : public QObject
+class NetworkSettingsLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -48,12 +47,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     QString m_lineEditNetworkSettingsDns1Text;
     QString m_lineEditNetworkSettingsDns2Text;
 

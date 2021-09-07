@@ -19,12 +19,8 @@
 
 #include "../uilogic.h"
 
-using namespace amnezia;
-using namespace PageEnumNS;
-
-ShareConnectionLogic::ShareConnectionLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_pageShareAmneziaVisible{true},
     m_pageShareOpenvpnVisible{true},
     m_pageShareShadowsocksVisible{true},
@@ -57,7 +53,7 @@ ShareConnectionLogic::ShareConnectionLogic(UiLogic *uiLogic, QObject *parent):
     m_pushButtonShareOpenvpnGenerateText{tr("Generate config")}
 {
     // TODO consider move to Component.onCompleted
-    updateSharingPage(m_uiLogic->selectedServerIndex, m_settings.serverCredentials(m_uiLogic->selectedServerIndex), m_uiLogic->selectedDockerContainer);
+    updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer);
 }
 
 
@@ -533,15 +529,15 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
     setPushButtonShareAmneziaGenerateText(tr("Generating..."));
     qApp->processEvents();
 
-    ServerCredentials credentials = m_settings.serverCredentials(m_uiLogic->selectedServerIndex);
-    QJsonObject containerConfig = m_settings.containerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
-    containerConfig.insert(config_key::container, containerToString(m_uiLogic->selectedDockerContainer));
+    ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
+    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    containerConfig.insert(config_key::container, containerToString(uiLogic()->selectedDockerContainer));
 
     ErrorCode e = ErrorCode::NoError;
-    for (Protocol p: amnezia::protocolsForContainer(m_uiLogic->selectedDockerContainer)) {
-        QJsonObject protoConfig = m_settings.protocolConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer, p);
+    for (Protocol p: amnezia::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
+        QJsonObject protoConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p);
 
-        QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, m_uiLogic->selectedDockerContainer, containerConfig, p, &e);
+        QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, p, &e);
         if (e) {
             cfg = "Error generating config";
             break;
@@ -553,12 +549,12 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 
     QByteArray ba;
     if (!e) {
-        QJsonObject serverConfig = m_settings.server(m_uiLogic->selectedServerIndex);
+        QJsonObject serverConfig = m_settings.server(uiLogic()->selectedServerIndex);
         serverConfig.remove(config_key::userName);
         serverConfig.remove(config_key::password);
         serverConfig.remove(config_key::port);
         serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
-        serverConfig.insert(config_key::defaultContainer, containerToString(m_uiLogic->selectedDockerContainer));
+        serverConfig.insert(config_key::defaultContainer, containerToString(uiLogic()->selectedDockerContainer));
 
 
         ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
@@ -580,11 +576,11 @@ void ShareConnectionLogic::onPushButtonShareOpenvpnGenerateClicked()
     setPushButtonShareOpenvpnSaveEnabled(false);
     setPushButtonShareOpenvpnGenerateText(tr("Generating..."));
 
-    ServerCredentials credentials = m_settings.serverCredentials(m_uiLogic->selectedServerIndex);
-    const QJsonObject &containerConfig = m_settings.containerConfig(m_uiLogic->selectedServerIndex, m_uiLogic->selectedDockerContainer);
+    ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
+    const QJsonObject &containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
 
     ErrorCode e = ErrorCode::NoError;
-    QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, m_uiLogic->selectedDockerContainer, containerConfig, &e);
+    QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
     cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
 
     setTextEditShareOpenvpnCodeText(cfg);
@@ -610,8 +606,8 @@ void ShareConnectionLogic::onPushButtonShareOpenvpnSaveClicked()
 void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCredentials &credentials,
                                 DockerContainer container)
 {
-    m_uiLogic->selectedDockerContainer = container;
-    m_uiLogic->selectedServerIndex = serverIndex;
+    uiLogic()->selectedDockerContainer = container;
+    uiLogic()->selectedServerIndex = serverIndex;
 
     //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
@@ -708,7 +704,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     if (container == DockerContainer::None) {
         setPageShareFullAccessVisible(true);
 
-        const QJsonObject &server = m_settings.server(m_uiLogic->selectedServerIndex);
+        const QJsonObject &server = m_settings.server(uiLogic()->selectedServerIndex);
 
         QByteArray ba = QJsonDocument(server).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 

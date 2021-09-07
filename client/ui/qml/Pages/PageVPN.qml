@@ -38,7 +38,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.Wrap
-        text: UiLogic.labelErrorText
+        text: VpnLogic.labelErrorText
     }
     Text {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -52,7 +52,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.Wrap
-        text: UiLogic.labelStateText
+        text: VpnLogic.labelStateText
     }
 
     BasicButtonType {
@@ -62,10 +62,10 @@ Item {
         width: 80
         height: 40
         checkable: true
-        checked: UiLogic.pushButtonConnectChecked
+        checked: VpnLogic.pushButtonConnectChecked
         onCheckedChanged: {
-            UiLogic.pushButtonConnectChecked = checked
-            UiLogic.onPushButtonConnectClicked(checked)
+            VpnLogic.pushButtonConnectChecked = checked
+            VpnLogic.onPushButtonConnectClicked(checked)
         }
         background: Image {
             anchors.fill: parent
@@ -74,7 +74,7 @@ Item {
         }
         contentItem: Item {}
         antialiasing: true
-        enabled: UiLogic.pushButtonConnectEnabled
+        enabled: VpnLogic.pushButtonConnectEnabled
     }
 
     Item {
@@ -110,7 +110,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.Wrap
-            text: UiLogic.labelSpeedReceivedText
+            text: VpnLogic.labelSpeedReceivedText
         }
         Text {
             id: upload_label
@@ -125,7 +125,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.Wrap
-            text: UiLogic.labelSpeedSentText
+            text: VpnLogic.labelSpeedSentText
         }
     }
 
@@ -162,18 +162,18 @@ Item {
         anchors.bottom: button_add_site.top
         width: 351
         height: 91
-        enabled: UiLogic.widgetVpnModeEnabled
+        enabled: VpnLogic.widgetVpnModeEnabled
         RadioButtonType {
             x: 0
             y: 0
             width: 341
             height: 19
-            checked: UiLogic.radioButtonVpnModeAllSitesChecked
+            checked: VpnLogic.radioButtonVpnModeAllSitesChecked
             text: qsTr("For all connections")
             onCheckedChanged: {
-                UiLogic.radioButtonVpnModeAllSitesChecked = checked
+                VpnLogic.radioButtonVpnModeAllSitesChecked = checked
                 button_add_site.enabled = !checked
-                UiLogic.onRadioButtonVpnModeAllSitesToggled(checked)
+                VpnLogic.onRadioButtonVpnModeAllSitesToggled(checked)
             }
         }
         RadioButtonType {
@@ -182,10 +182,10 @@ Item {
             width: 341
             height: 19
             text: qsTr("Except selected sites")
-            checked: UiLogic.radioButtonVpnModeExceptSitesChecked
+            checked: VpnLogic.radioButtonVpnModeExceptSitesChecked
             onCheckedChanged: {
-                UiLogic.radioButtonVpnModeExceptSitesChecked = checked
-                UiLogic.onRadioButtonVpnModeExceptSitesToggled(checked)
+                VpnLogic.radioButtonVpnModeExceptSitesChecked = checked
+                VpnLogic.onRadioButtonVpnModeExceptSitesToggled(checked)
             }
         }
         RadioButtonType {
@@ -194,10 +194,10 @@ Item {
             width: 341
             height: 19
             text: qsTr("For selected sites")
-            checked: UiLogic.radioButtonVpnModeForwardSitesChecked
+            checked: VpnLogic.radioButtonVpnModeForwardSitesChecked
             onCheckedChanged: {
-                UiLogic.radioButtonVpnModeForwardSitesChecked = checked
-                UiLogic.onRadioButtonVpnModeForwardSitesToggled(checked)
+                VpnLogic.radioButtonVpnModeForwardSitesChecked = checked
+                VpnLogic.onRadioButtonVpnModeForwardSitesToggled(checked)
             }
         }
     }
@@ -210,7 +210,7 @@ Item {
         width: parent.width - 40
         height: 40
         text: qsTr("+ Add site")
-        enabled: UiLogic.pushButtonVpnAddSiteEnabled
+        enabled: VpnLogic.pushButtonVpnAddSiteEnabled
         background: Rectangle {
             anchors.fill: parent
             radius: 4

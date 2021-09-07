@@ -1,13 +1,12 @@
 #ifndef SHARE_CONNECTION_LOGIC_H
 #define SHARE_CONNECTION_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 #include "3rd/QRCodeGenerator/QRCodeGenerator.h"
 
 class UiLogic;
 
-class ShareConnectionLogic: public QObject
+class ShareConnectionLogic: public PageLogicBase
 {
     Q_OBJECT
 
@@ -162,12 +161,7 @@ private:
 private slots:
 
 
-
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     CQR_Encode m_qrEncode;
 
     bool m_pageShareAmneziaVisible;

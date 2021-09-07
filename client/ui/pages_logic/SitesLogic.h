@@ -1,13 +1,12 @@
 #ifndef SITES_LOGIC_H
 #define SITES_LOGIC_H
 
-#include "../pages.h"
-#include "settings.h"
+#include "PageLogicBase.h"
 
 class UiLogic;
 class SitesModel;
 
-class SitesLogic : public QObject
+class SitesLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -48,10 +47,6 @@ private slots:
 
 
 private:
-    Settings m_settings;
-    UiLogic *m_uiLogic;
-    UiLogic *uiLogic() const { return m_uiLogic; }
-
     QString m_labelSitesAddCustomText;
     QObject* m_tableViewSitesModel;
     QString m_lineEditSitesAddCustomText;

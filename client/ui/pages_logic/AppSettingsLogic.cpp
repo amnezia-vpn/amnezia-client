@@ -7,9 +7,8 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-AppSettingsLogic::AppSettingsLogic(UiLogic *uiLogic, QObject *parent):
-    QObject(parent),
-    m_uiLogic(uiLogic),
+AppSettingsLogic::AppSettingsLogic(UiLogic *logic, QObject *parent):
+    PageLogicBase(logic, parent),
     m_checkBoxAppSettingsAutostartChecked{false},
     m_checkBoxAppSettingsAutoconnectChecked{false},
     m_checkBoxAppSettingsStartMinimizedChecked{false}
