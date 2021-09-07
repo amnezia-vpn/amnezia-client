@@ -73,8 +73,8 @@
         <file>ui/qml/Pages/PageNewServerConfiguring.qml</file>
         <file>ui/qml/Pages/PageNewServerProtocols.qml</file>
         <file>ui/qml/Pages/PageServerList.qml</file>
-        <file>ui/qml/Pages/PageServerProtocols.qml</file>
-        <file>ui/qml/Pages/PageServerSetting.qml</file>
+        <file>ui/qml/Pages/PageServerContainers.qml</file>
+        <file>ui/qml/Pages/PageServerSettings.qml</file>
         <file>ui/qml/Pages/PageSetupWizard.qml</file>
         <file>ui/qml/Pages/PageSetupWizardHighLevel.qml</file>
         <file>ui/qml/Pages/PageSetupWizardLowLevel.qml</file>

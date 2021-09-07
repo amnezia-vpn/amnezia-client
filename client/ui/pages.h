@@ -10,7 +10,7 @@ Q_NAMESPACE
 enum Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
-           ServerVpnProtocols, ServersList, ShareConnection,  Sites,
+           ServerContainers, ServersList, ShareConnection,  Sites,
            OpenVpnSettings, ShadowSocksSettings, CloakSettings};
 Q_ENUM_NS(Page)
 

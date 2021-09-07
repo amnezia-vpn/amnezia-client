@@ -40,9 +40,9 @@ HEADERS  += \
    ui/pages_logic/NewServerConfiguringLogic.h \
    ui/pages_logic/NewServerProtocolsLogic.h \
     ui/pages_logic/ProtocolSettingsLogic.h \
+    ui/pages_logic/ServerContainersLogic.h \
     ui/pages_logic/ServerListLogic.h \
     ui/pages_logic/ServerSettingsLogic.h \
-    ui/pages_logic/ServerVpnProtocolsLogic.h \
     ui/pages_logic/ShareConnectionLogic.h \
     ui/pages_logic/SitesLogic.h \
     ui/pages_logic/StartPageLogic.h \
@@ -86,9 +86,9 @@ SOURCES  += \
    ui/pages_logic/NewServerConfiguringLogic.cpp \
    ui/pages_logic/NewServerProtocolsLogic.cpp \
     ui/pages_logic/ProtocolSettingsLogic.cpp \
+    ui/pages_logic/ServerContainersLogic.cpp \
     ui/pages_logic/ServerListLogic.cpp \
     ui/pages_logic/ServerSettingsLogic.cpp \
-    ui/pages_logic/ServerVpnProtocolsLogic.cpp \
     ui/pages_logic/ShareConnectionLogic.cpp \
     ui/pages_logic/SitesLogic.cpp \
     ui/pages_logic/StartPageLogic.cpp \

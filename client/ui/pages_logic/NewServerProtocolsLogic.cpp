@@ -1,4 +1,5 @@
 #include "NewServerProtocolsLogic.h"
+#include "../uilogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -24,6 +25,9 @@ NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *uiLogic, QObject *pare
 {
     setFrameNewServerSettingsParentWireguardVisible(false);
 
+    connect(this, &NewServerProtocolsLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
+        m_uiLogic->installServer(getInstallConfigsFromProtocolsPage());
+    });
 }
 
 bool NewServerProtocolsLogic::getFrameNewServerSettingsParentWireguardVisible() const

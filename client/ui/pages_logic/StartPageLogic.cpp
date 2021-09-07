@@ -297,7 +297,7 @@ void StartPageLogic::onPushButtonNewServerImport()
     if (!o.contains(config_key::containers)) {
         m_uiLogic->selectedServerIndex = m_settings.defaultServerIndex();
         m_uiLogic->selectedDockerContainer = m_settings.defaultContainer(m_uiLogic->selectedServerIndex);
-        m_uiLogic->goToPage(Page::ServerVpnProtocols);
+        m_uiLogic->goToPage(Page::ServerContainers);
     }
 }
 

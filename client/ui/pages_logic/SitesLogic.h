@@ -50,6 +50,7 @@ private slots:
 private:
     Settings m_settings;
     UiLogic *m_uiLogic;
+    UiLogic *uiLogic() const { return m_uiLogic; }
 
     QString m_labelSitesAddCustomText;
     QObject* m_tableViewSitesModel;

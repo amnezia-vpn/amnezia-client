@@ -116,7 +116,7 @@ Item {
         height: 40
         text: qsTr("VPN protocols")
         onClicked: {
-            UiLogic.goToPage(PageEnum.ServerVpnProtocols)
+            UiLogic.goToPage(PageEnum.ServerContainers)
         }
     }
     BlueButtonType {

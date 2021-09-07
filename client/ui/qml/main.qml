@@ -54,8 +54,8 @@ Window {
             return page_network_settings
         case PageEnum.ServerSettings:
             return page_server_settings
-        case PageEnum.ServerVpnProtocols:
-            return page_server_protocols
+        case PageEnum.ServerContainers:
+            return page_server_containers
         case PageEnum.ServersList:
             return page_servers
         case PageEnum.ShareConnection:
@@ -112,11 +112,11 @@ Window {
         if (item instanceof PageNetworkSetting) {
             return PageEnum.NetworkSettings
         }
-        if (item instanceof PageServerSetting) {
+        if (item instanceof PageServerSettings) {
             return PageEnum.ServerSettings
         }
-        if (item instanceof PageServerProtocols) {
-            return PageEnum.ServerVpnProtocols
+        if (item instanceof PageServerContainers) {
+            return PageEnum.ServerContainers
         }
         if (item instanceof PageServerList) {
             return PageEnum.ServersList
@@ -169,8 +169,8 @@ Window {
             if (page === PageEnum.NewServerProtocols) {
                 NewServerProtocolsLogic.updateNewServerProtocolsPage()
             }
-            if (page === PageEnum.ServerVpnProtocols) {
-                UiLogic.updateProtocolsPage()
+            if (page === PageEnum.ServerContainers) {
+                ServerContainersLogic.updateServerContainersPage()
             }
             if (page === PageEnum.AppSettings) {
                 AppSettingsLogic.updateAppSettingsPage()
@@ -316,11 +316,11 @@ Window {
     }
     Component {
         id: page_server_settings
-        PageServerSetting {}
+        PageServerSettings {}
     }
     Component {
-        id: page_server_protocols
-        PageServerProtocols {}
+        id: page_server_containers
+        PageServerContainers {}
     }
     Component {
         id: page_share_connection

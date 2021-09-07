@@ -84,6 +84,7 @@ private slots:
 private:
     Settings m_settings;
     UiLogic *m_uiLogic;
+    UiLogic *uiLogic() const { return m_uiLogic; }
 
     bool m_pushButtonNewServerConnectEnabled;
     QString m_pushButtonNewServerConnectText;

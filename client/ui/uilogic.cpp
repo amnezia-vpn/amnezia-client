@@ -52,7 +52,7 @@
 #include "pages_logic/ProtocolSettingsLogic.h"
 #include "pages_logic/ServerListLogic.h"
 #include "pages_logic/ServerSettingsLogic.h"
-#include "pages_logic/ServerVpnProtocolsLogic.h"
+#include "pages_logic/ServerContainersLogic.h"
 #include "pages_logic/ShareConnectionLogic.h"
 #include "pages_logic/SitesLogic.h"
 #include "pages_logic/StartPageLogic.h"
@@ -69,10 +69,6 @@ using namespace PageEnumNS;
 
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
-    m_frameWireguardSettingsVisible{false},
-    m_frameWireguardVisible{false},
-
-
     m_radioButtonVpnModeAllSitesChecked{true},
     m_radioButtonVpnModeForwardSitesChecked{false},
     m_radioButtonVpnModeExceptSitesChecked{false},
@@ -93,30 +89,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_pushButtonConnectChecked{false},
 
 
-    m_pushButtonProtoOpenvpnContInstallChecked{false},
-    m_pushButtonProtoSsOpenvpnContInstallChecked{false},
-    m_pushButtonProtoCloakOpenvpnContInstallChecked{false},
-    m_pushButtonProtoWireguardContInstallChecked{false},
-    m_pushButtonProtoOpenvpnContInstallEnabled{false},
-    m_pushButtonProtoSsOpenvpnContInstallEnabled{false},
-    m_pushButtonProtoCloakOpenvpnContInstallEnabled{false},
-    m_pushButtonProtoWireguardContInstallEnabled{false},
-    m_pushButtonProtoOpenvpnContDefaultChecked{false},
-    m_pushButtonProtoSsOpenvpnContDefaultChecked{false},
-    m_pushButtonProtoCloakOpenvpnContDefaultChecked{false},
-    m_pushButtonProtoWireguardContDefaultChecked{false},
-    m_pushButtonProtoOpenvpnContDefaultVisible{true},
-    m_pushButtonProtoSsOpenvpnContDefaultVisible{false},
-    m_pushButtonProtoCloakOpenvpnContDefaultVisible{false},
-    m_pushButtonProtoWireguardContDefaultVisible{false},
-    m_pushButtonProtoOpenvpnContShareVisible{false},
-    m_pushButtonProtoSsOpenvpnContShareVisible{false},
-    m_pushButtonProtoCloakOpenvpnContShareVisible{false},
-    m_pushButtonProtoWireguardContShareVisible{false},
-    m_frameOpenvpnSettingsVisible{true},
-    m_frameOpenvpnSsSettingsVisible{true},
-    m_frameOpenvpnSsCloakSettingsVisible{true},
-    m_progressBarProtocolsContainerReinstallVisible{false},
+
     m_labelSpeedReceivedText{tr("0 Mbps")},
     m_labelSpeedSentText{tr("0 Mbps")},
     m_labelStateText{},
@@ -124,15 +97,6 @@ UiLogic::UiLogic(QObject *parent) :
     m_widgetVpnModeEnabled{false},
     m_labelErrorText{tr("Error text")},
     m_dialogConnectErrorText{},
-
-
-
-
-    m_pageServerProtocolsEnabled{true},
-    m_progressBarProtocolsContainerReinstallValue{0},
-    m_progressBarProtocolsContainerReinstallMaximium{100},
-
-
     m_vpnConnection(nullptr)
 {
     m_vpnConnection = new VpnConnection(this);
@@ -145,7 +109,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_protocolSettingsLogic = new ProtocolSettingsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);
-    m_serverVpnProtocolsLogic = new ServerVpnProtocolsLogic(this);
+    m_serverVpnProtocolsLogic = new ServerContainersLogic(this);
     m_shareConnectionLogic = new ShareConnectionLogic(this);
     m_sitesLogic = new SitesLogic(this);
     m_startPageLogic = new StartPageLogic(this);
@@ -163,13 +127,7 @@ UiLogic::UiLogic(QObject *parent) :
 
 void UiLogic::initalizeUiLogic()
 {
-    setFrameWireguardSettingsVisible(false);
-    setFrameWireguardVisible(false);
-
     setupTray();
-    setupNewServerConnections();
-    setupProtocolsPageConnections();
-
     setLabelErrorText("");
 
 
@@ -231,40 +189,6 @@ void UiLogic::initalizeUiLogic()
 
 
 }
-
-bool UiLogic::getFrameWireguardSettingsVisible() const
-{
-    return m_frameWireguardSettingsVisible;
-}
-
-void UiLogic::setFrameWireguardSettingsVisible(bool frameWireguardSettingsVisible)
-{
-    if (m_frameWireguardSettingsVisible != frameWireguardSettingsVisible) {
-        m_frameWireguardSettingsVisible = frameWireguardSettingsVisible;
-        emit frameWireguardSettingsVisibleChanged();
-    }
-}
-
-bool UiLogic::getFrameWireguardVisible() const
-{
-    return m_frameWireguardVisible;
-}
-
-void UiLogic::setFrameWireguardVisible(bool frameWireguardVisible)
-{
-    if (m_frameWireguardVisible != frameWireguardVisible) {
-        m_frameWireguardVisible = frameWireguardVisible;
-        emit frameWireguardVisibleChanged();
-    }
-}
-
-
-
-
-
-
-
-
 
 bool UiLogic::getRadioButtonVpnModeAllSitesChecked() const
 {
@@ -408,317 +332,7 @@ void UiLogic::setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled)
 
 
 
-bool UiLogic::getPushButtonProtoOpenvpnContInstallChecked() const
-{
-    return m_pushButtonProtoOpenvpnContInstallChecked;
-}
 
-void UiLogic::setPushButtonProtoOpenvpnContInstallChecked(bool pushButtonProtoOpenvpnContInstallChecked)
-{
-    if (m_pushButtonProtoOpenvpnContInstallChecked != pushButtonProtoOpenvpnContInstallChecked) {
-        m_pushButtonProtoOpenvpnContInstallChecked = pushButtonProtoOpenvpnContInstallChecked;
-        emit pushButtonProtoOpenvpnContInstallCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoSsOpenvpnContInstallChecked() const
-{
-    return m_pushButtonProtoSsOpenvpnContInstallChecked;
-}
-
-void UiLogic::setPushButtonProtoSsOpenvpnContInstallChecked(bool pushButtonProtoSsOpenvpnContInstallChecked)
-{
-    if (m_pushButtonProtoSsOpenvpnContInstallChecked != pushButtonProtoSsOpenvpnContInstallChecked) {
-        m_pushButtonProtoSsOpenvpnContInstallChecked = pushButtonProtoSsOpenvpnContInstallChecked;
-        emit pushButtonProtoSsOpenvpnContInstallCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoCloakOpenvpnContInstallChecked() const
-{
-    return m_pushButtonProtoCloakOpenvpnContInstallChecked;
-}
-
-void UiLogic::setPushButtonProtoCloakOpenvpnContInstallChecked(bool pushButtonProtoCloakOpenvpnContInstallChecked)
-{
-    if (m_pushButtonProtoCloakOpenvpnContInstallChecked != pushButtonProtoCloakOpenvpnContInstallChecked) {
-        m_pushButtonProtoCloakOpenvpnContInstallChecked = pushButtonProtoCloakOpenvpnContInstallChecked;
-        emit pushButtonProtoCloakOpenvpnContInstallCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoWireguardContInstallChecked() const
-{
-    return m_pushButtonProtoWireguardContInstallChecked;
-}
-
-void UiLogic::setPushButtonProtoWireguardContInstallChecked(bool pushButtonProtoWireguardContInstallChecked)
-{
-    if (m_pushButtonProtoWireguardContInstallChecked != pushButtonProtoWireguardContInstallChecked) {
-        m_pushButtonProtoWireguardContInstallChecked = pushButtonProtoWireguardContInstallChecked;
-        emit pushButtonProtoWireguardContInstallCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoOpenvpnContInstallEnabled() const
-{
-    return m_pushButtonProtoOpenvpnContInstallEnabled;
-}
-
-void UiLogic::setPushButtonProtoOpenvpnContInstallEnabled(bool pushButtonProtoOpenvpnContInstallEnabled)
-{
-    if (m_pushButtonProtoOpenvpnContInstallEnabled != pushButtonProtoOpenvpnContInstallEnabled) {
-        m_pushButtonProtoOpenvpnContInstallEnabled = pushButtonProtoOpenvpnContInstallEnabled;
-        emit pushButtonProtoOpenvpnContInstallEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoSsOpenvpnContInstallEnabled() const
-{
-    return m_pushButtonProtoSsOpenvpnContInstallEnabled;
-}
-
-void UiLogic::setPushButtonProtoSsOpenvpnContInstallEnabled(bool pushButtonProtoSsOpenvpnContInstallEnabled)
-{
-    if (m_pushButtonProtoSsOpenvpnContInstallEnabled != pushButtonProtoSsOpenvpnContInstallEnabled) {
-        m_pushButtonProtoSsOpenvpnContInstallEnabled = pushButtonProtoSsOpenvpnContInstallEnabled;
-        emit pushButtonProtoSsOpenvpnContInstallEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoCloakOpenvpnContInstallEnabled() const
-{
-    return m_pushButtonProtoCloakOpenvpnContInstallEnabled;
-}
-
-void UiLogic::setPushButtonProtoCloakOpenvpnContInstallEnabled(bool pushButtonProtoCloakOpenvpnContInstallEnabled)
-{
-    if (m_pushButtonProtoCloakOpenvpnContInstallEnabled != pushButtonProtoCloakOpenvpnContInstallEnabled) {
-        m_pushButtonProtoCloakOpenvpnContInstallEnabled = pushButtonProtoCloakOpenvpnContInstallEnabled;
-        emit pushButtonProtoCloakOpenvpnContInstallEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoWireguardContInstallEnabled() const
-{
-    return m_pushButtonProtoWireguardContInstallEnabled;
-}
-
-void UiLogic::setPushButtonProtoWireguardContInstallEnabled(bool pushButtonProtoWireguardContInstallEnabled)
-{
-    if (m_pushButtonProtoWireguardContInstallEnabled != pushButtonProtoWireguardContInstallEnabled) {
-        m_pushButtonProtoWireguardContInstallEnabled = pushButtonProtoWireguardContInstallEnabled;
-        emit pushButtonProtoWireguardContInstallEnabledChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoOpenvpnContDefaultChecked() const
-{
-    return m_pushButtonProtoOpenvpnContDefaultChecked;
-}
-
-void UiLogic::setPushButtonProtoOpenvpnContDefaultChecked(bool pushButtonProtoOpenvpnContDefaultChecked)
-{
-    if (m_pushButtonProtoOpenvpnContDefaultChecked != pushButtonProtoOpenvpnContDefaultChecked) {
-        m_pushButtonProtoOpenvpnContDefaultChecked = pushButtonProtoOpenvpnContDefaultChecked;
-        emit pushButtonProtoOpenvpnContDefaultCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoSsOpenvpnContDefaultChecked() const
-{
-    return m_pushButtonProtoSsOpenvpnContDefaultChecked;
-}
-
-void UiLogic::setPushButtonProtoSsOpenvpnContDefaultChecked(bool pushButtonProtoSsOpenvpnContDefaultChecked)
-{
-    if (m_pushButtonProtoSsOpenvpnContDefaultChecked != pushButtonProtoSsOpenvpnContDefaultChecked) {
-        m_pushButtonProtoSsOpenvpnContDefaultChecked = pushButtonProtoSsOpenvpnContDefaultChecked;
-        emit pushButtonProtoSsOpenvpnContDefaultCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoCloakOpenvpnContDefaultChecked() const
-{
-    return m_pushButtonProtoCloakOpenvpnContDefaultChecked;
-}
-
-void UiLogic::setPushButtonProtoCloakOpenvpnContDefaultChecked(bool pushButtonProtoCloakOpenvpnContDefaultChecked)
-{
-    if (m_pushButtonProtoCloakOpenvpnContDefaultChecked != pushButtonProtoCloakOpenvpnContDefaultChecked) {
-        m_pushButtonProtoCloakOpenvpnContDefaultChecked = pushButtonProtoCloakOpenvpnContDefaultChecked;
-        emit pushButtonProtoCloakOpenvpnContDefaultCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoWireguardContDefaultChecked() const
-{
-    return m_pushButtonProtoWireguardContDefaultChecked;
-}
-
-void UiLogic::setPushButtonProtoWireguardContDefaultChecked(bool pushButtonProtoWireguardContDefaultChecked)
-{
-    if (m_pushButtonProtoWireguardContDefaultChecked != pushButtonProtoWireguardContDefaultChecked) {
-        m_pushButtonProtoWireguardContDefaultChecked = pushButtonProtoWireguardContDefaultChecked;
-        emit pushButtonProtoWireguardContDefaultCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoOpenvpnContDefaultVisible() const
-{
-    return m_pushButtonProtoOpenvpnContDefaultVisible;
-}
-
-void UiLogic::setPushButtonProtoOpenvpnContDefaultVisible(bool pushButtonProtoOpenvpnContDefaultVisible)
-{
-    if (m_pushButtonProtoOpenvpnContDefaultVisible != pushButtonProtoOpenvpnContDefaultVisible) {
-        m_pushButtonProtoOpenvpnContDefaultVisible = pushButtonProtoOpenvpnContDefaultVisible;
-        emit pushButtonProtoOpenvpnContDefaultVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoSsOpenvpnContDefaultVisible() const
-{
-    return m_pushButtonProtoSsOpenvpnContDefaultVisible;
-}
-
-void UiLogic::setPushButtonProtoSsOpenvpnContDefaultVisible(bool pushButtonProtoSsOpenvpnContDefaultVisible)
-{
-    if (m_pushButtonProtoSsOpenvpnContDefaultVisible != pushButtonProtoSsOpenvpnContDefaultVisible) {
-        m_pushButtonProtoSsOpenvpnContDefaultVisible = pushButtonProtoSsOpenvpnContDefaultVisible;
-        emit pushButtonProtoSsOpenvpnContDefaultVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoCloakOpenvpnContDefaultVisible() const
-{
-    return m_pushButtonProtoCloakOpenvpnContDefaultVisible;
-}
-
-void UiLogic::setPushButtonProtoCloakOpenvpnContDefaultVisible(bool pushButtonProtoCloakOpenvpnContDefaultVisible)
-{
-    if (m_pushButtonProtoCloakOpenvpnContDefaultVisible != pushButtonProtoCloakOpenvpnContDefaultVisible) {
-        m_pushButtonProtoCloakOpenvpnContDefaultVisible = pushButtonProtoCloakOpenvpnContDefaultVisible;
-        emit pushButtonProtoCloakOpenvpnContDefaultVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoWireguardContDefaultVisible() const
-{
-    return m_pushButtonProtoWireguardContDefaultVisible;
-}
-
-void UiLogic::setPushButtonProtoWireguardContDefaultVisible(bool pushButtonProtoWireguardContDefaultVisible)
-{
-    if (m_pushButtonProtoWireguardContDefaultVisible != pushButtonProtoWireguardContDefaultVisible) {
-        m_pushButtonProtoWireguardContDefaultVisible = pushButtonProtoWireguardContDefaultVisible;
-        emit pushButtonProtoWireguardContDefaultVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoOpenvpnContShareVisible() const
-{
-    return m_pushButtonProtoOpenvpnContShareVisible;
-}
-
-void UiLogic::setPushButtonProtoOpenvpnContShareVisible(bool pushButtonProtoOpenvpnContShareVisible)
-{
-    if (m_pushButtonProtoOpenvpnContShareVisible != pushButtonProtoOpenvpnContShareVisible) {
-        m_pushButtonProtoOpenvpnContShareVisible = pushButtonProtoOpenvpnContShareVisible;
-        emit pushButtonProtoOpenvpnContShareVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoSsOpenvpnContShareVisible() const
-{
-    return m_pushButtonProtoSsOpenvpnContShareVisible;
-}
-
-void UiLogic::setPushButtonProtoSsOpenvpnContShareVisible(bool pushButtonProtoSsOpenvpnContShareVisible)
-{
-    if (m_pushButtonProtoSsOpenvpnContShareVisible != pushButtonProtoSsOpenvpnContShareVisible) {
-        m_pushButtonProtoSsOpenvpnContShareVisible = pushButtonProtoSsOpenvpnContShareVisible;
-        emit pushButtonProtoSsOpenvpnContShareVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoCloakOpenvpnContShareVisible() const
-{
-    return m_pushButtonProtoCloakOpenvpnContShareVisible;
-}
-
-void UiLogic::setPushButtonProtoCloakOpenvpnContShareVisible(bool pushButtonProtoCloakOpenvpnContShareVisible)
-{
-    if (m_pushButtonProtoCloakOpenvpnContShareVisible != pushButtonProtoCloakOpenvpnContShareVisible) {
-        m_pushButtonProtoCloakOpenvpnContShareVisible = pushButtonProtoCloakOpenvpnContShareVisible;
-        emit pushButtonProtoCloakOpenvpnContShareVisibleChanged();
-    }
-}
-
-bool UiLogic::getPushButtonProtoWireguardContShareVisible() const
-{
-    return m_pushButtonProtoWireguardContShareVisible;
-}
-
-void UiLogic::setPushButtonProtoWireguardContShareVisible(bool pushButtonProtoWireguardContShareVisible)
-{
-    if (m_pushButtonProtoWireguardContShareVisible != pushButtonProtoWireguardContShareVisible) {
-        m_pushButtonProtoWireguardContShareVisible = pushButtonProtoWireguardContShareVisible;
-        emit pushButtonProtoWireguardContShareVisibleChanged();
-    }
-}
-
-bool UiLogic::getFrameOpenvpnSettingsVisible() const
-{
-    return m_frameOpenvpnSettingsVisible;
-}
-
-void UiLogic::setFrameOpenvpnSettingsVisible(bool frameOpenvpnSettingsVisible)
-{
-    if (m_frameOpenvpnSettingsVisible != frameOpenvpnSettingsVisible) {
-        m_frameOpenvpnSettingsVisible = frameOpenvpnSettingsVisible;
-        emit frameOpenvpnSettingsVisibleChanged();
-    }
-}
-
-bool UiLogic::getFrameOpenvpnSsSettingsVisible() const
-{
-    return m_frameOpenvpnSsSettingsVisible;
-}
-
-void UiLogic::setFrameOpenvpnSsSettingsVisible(bool frameOpenvpnSsSettingsVisible)
-{
-    if (m_frameOpenvpnSsSettingsVisible != frameOpenvpnSsSettingsVisible) {
-        m_frameOpenvpnSsSettingsVisible = frameOpenvpnSsSettingsVisible;
-        emit frameOpenvpnSsSettingsVisibleChanged();
-    }
-}
-
-bool UiLogic::getFrameOpenvpnSsCloakSettingsVisible() const
-{
-    return m_frameOpenvpnSsCloakSettingsVisible;
-}
-
-void UiLogic::setFrameOpenvpnSsCloakSettingsVisible(bool frameOpenvpnSsCloakSettingsVisible)
-{
-    if (m_frameOpenvpnSsCloakSettingsVisible != frameOpenvpnSsCloakSettingsVisible) {
-        m_frameOpenvpnSsCloakSettingsVisible = frameOpenvpnSsCloakSettingsVisible;
-        emit frameOpenvpnSsCloakSettingsVisibleChanged();
-    }
-}
-
-bool UiLogic::getProgressBarProtocolsContainerReinstallVisible() const
-{
-    return m_progressBarProtocolsContainerReinstallVisible;
-}
-
-void UiLogic::setProgressBarProtocolsContainerReinstallVisible(bool progressBarProtocolsContainerReinstallVisible)
-{
-    if (m_progressBarProtocolsContainerReinstallVisible != progressBarProtocolsContainerReinstallVisible) {
-        m_progressBarProtocolsContainerReinstallVisible = progressBarProtocolsContainerReinstallVisible;
-        emit progressBarProtocolsContainerReinstallVisibleChanged();
-    }
-}
 
 QString UiLogic::getLabelSpeedReceivedText() const
 {
@@ -813,58 +427,6 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
 }
 
 
-
-
-
-
-
-
-bool UiLogic::getPageServerProtocolsEnabled() const
-{
-    return m_pageServerProtocolsEnabled;
-}
-
-void UiLogic::setPageServerProtocolsEnabled(bool pageServerProtocolsEnabled)
-{
-    if (m_pageServerProtocolsEnabled != pageServerProtocolsEnabled) {
-        m_pageServerProtocolsEnabled = pageServerProtocolsEnabled;
-        emit pageServerProtocolsEnabledChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtocolsContainerReinstallValue() const
-{
-    return m_progressBarProtocolsContainerReinstallValue;
-}
-
-void UiLogic::setProgressBarProtocolsContainerReinstallValue(int progressBarProtocolsContainerReinstallValue)
-{
-    if (m_progressBarProtocolsContainerReinstallValue != progressBarProtocolsContainerReinstallValue) {
-        m_progressBarProtocolsContainerReinstallValue = progressBarProtocolsContainerReinstallValue;
-        emit progressBarProtocolsContainerReinstallValueChanged();
-    }
-}
-
-int UiLogic::getProgressBarProtocolsContainerReinstallMaximium() const
-{
-    return m_progressBarProtocolsContainerReinstallMaximium;
-}
-
-void UiLogic::setProgressBarProtocolsContainerReinstallMaximium(int progressBarProtocolsContainerReinstallMaximium)
-{
-    if (m_progressBarProtocolsContainerReinstallMaximium != progressBarProtocolsContainerReinstallMaximium) {
-        m_progressBarProtocolsContainerReinstallMaximium = progressBarProtocolsContainerReinstallMaximium;
-        emit progressBarProtocolsContainerReinstallMaximiumChanged();
-    }
-}
-
-
-
-
-
-
-
-
 UiLogic::~UiLogic()
 {
     hide();
@@ -932,7 +494,7 @@ void UiLogic::showOnStartup()
 //    case Qt::Key_P:
 //        selectedServerIndex = m_settings.defaultServerIndex();
 //        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
-//        goToPage(Page::ServerVpnProtocols);
+//        goToPage(Page::ServerContainers);
 //        break;
 //    case Qt::Key_T:
 //        SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
@@ -1327,139 +889,6 @@ PageEnumNS::Page UiLogic::currentPage()
     return static_cast<PageEnumNS::Page>(getCurrentPageValue());
 }
 
-void UiLogic::setupNewServerConnections()
-{
-    connect(newServerProtocolsLogic(), &NewServerProtocolsLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
-        installServer(newServerProtocolsLogic()->getInstallConfigsFromProtocolsPage());
-    });
-}
-
-void UiLogic::setupProtocolsPageConnections()
-{
-    QJsonObject openvpnConfig;
-
-    // all containers
-    QList<DockerContainer> containers {
-        DockerContainer::OpenVpn,
-                DockerContainer::OpenVpnOverShadowSocks,
-                DockerContainer::OpenVpnOverCloak,
-                DockerContainer::WireGuard
-    };
-    using ButtonClickedFunc = void (UiLogic::*)(bool);
-    using ButtonSetEnabledFunc = std::function<void(bool)>;
-
-    // default buttons
-    QList<ButtonClickedFunc> defaultButtonClickedSig {
-        &UiLogic::pushButtonProtoOpenvpnContDefaultClicked,
-                &UiLogic::pushButtonProtoSsOpenvpnContDefaultClicked,
-                &UiLogic::pushButtonProtoCloakOpenvpnContDefaultClicked,
-                &UiLogic::pushButtonProtoWireguardContDefaultClicked
-    };
-
-    for (int i = 0; i < containers.size(); ++i) {
-        connect(this, defaultButtonClickedSig.at(i), [this, containers, i](bool){
-            qDebug() << "clmm" << i;
-            m_settings.setDefaultContainer(selectedServerIndex, containers.at(i));
-            updateProtocolsPage();
-        });
-    }
-
-    // install buttons
-    QList<ButtonClickedFunc> installButtonsClickedSig {
-        &UiLogic::pushButtonProtoOpenvpnContInstallClicked,
-                &UiLogic::pushButtonProtoSsOpenvpnContInstallClicked,
-                &UiLogic::pushButtonProtoCloakOpenvpnContInstallClicked,
-                &UiLogic::pushButtonProtoWireguardContInstallClicked,
-    };
-    QList<ButtonSetEnabledFunc> installButtonsSetEnabledFunc {
-        [this] (bool enabled) -> void {
-            setPushButtonProtoOpenvpnContInstallEnabled(enabled);
-        },
-        [this] (bool enabled) -> void {
-            setPushButtonProtoSsOpenvpnContInstallEnabled(enabled);
-        },
-        [this] (bool enabled) -> void {
-            setPushButtonProtoCloakOpenvpnContInstallEnabled(enabled);
-        },
-        [this] (bool enabled) -> void {
-            setPushButtonProtoWireguardContInstallEnabled(enabled);
-        },
-    };
-
-    for (int i = 0; i < containers.size(); ++i) {
-        ButtonClickedFunc buttonClickedFunc = installButtonsClickedSig.at(i);
-        ButtonSetEnabledFunc buttonSetEnabledFunc = installButtonsSetEnabledFunc.at(i);
-        DockerContainer container = containers.at(i);
-
-        connect(this, buttonClickedFunc, [this, container, buttonSetEnabledFunc](bool checked){
-            if (checked) {
-                PageFunc page_server_protocols;
-                page_server_protocols.setEnabledFunc = [this] (bool enabled) -> void {
-                    setPageServerProtocolsEnabled(enabled);
-                };
-                ButtonFunc no_button;
-                LabelFunc no_label;
-                ProgressFunc progressBar_protocols_container_reinstall;
-                progressBar_protocols_container_reinstall.setVisibleFunc = [this] (bool visible) ->void {
-                    setProgressBarProtocolsContainerReinstallVisible(visible);
-                };
-                progressBar_protocols_container_reinstall.setValueFunc = [this] (int value) ->void {
-                    setProgressBarProtocolsContainerReinstallValue(value);
-                };
-                progressBar_protocols_container_reinstall.getValueFunc = [this] (void) -> int {
-                    return getProgressBarProtocolsContainerReinstallValue();
-                };
-                progressBar_protocols_container_reinstall.getMaximiumFunc = [this] (void) -> int {
-                    return getProgressBarProtocolsContainerReinstallMaximium();
-                };
-
-                ErrorCode e = doInstallAction([this, container](){
-                    return ServerController::setupContainer(m_settings.serverCredentials(selectedServerIndex), container);
-                },
-                page_server_protocols, progressBar_protocols_container_reinstall,
-                no_button, no_label);
-
-                if (!e) {
-                    m_settings.setContainerConfig(selectedServerIndex, container, QJsonObject());
-                    m_settings.setDefaultContainer(selectedServerIndex, container);
-                }
-            }
-            else {
-                buttonSetEnabledFunc(false);
-                ErrorCode e = ServerController::removeContainer(m_settings.serverCredentials(selectedServerIndex), container);
-                m_settings.removeContainerConfig(selectedServerIndex, container);
-                buttonSetEnabledFunc(true);
-
-                if (m_settings.defaultContainer(selectedServerIndex) == container) {
-                    const auto &c = m_settings.containers(selectedServerIndex);
-                    if (c.isEmpty()) m_settings.setDefaultContainer(selectedServerIndex, DockerContainer::None);
-                    else m_settings.setDefaultContainer(selectedServerIndex, c.keys().first());
-                }
-            }
-
-            updateProtocolsPage();
-        });
-    }
-
-    // share buttons
-    QList<ButtonClickedFunc> shareButtonsClickedSig {
-        &UiLogic::pushButtonProtoOpenvpnContShareClicked,
-                &UiLogic::pushButtonProtoSsOpenvpnContShareClicked,
-                &UiLogic::pushButtonProtoCloakOpenvpnContShareClicked,
-                &UiLogic::pushButtonProtoWireguardContShareClicked,
-    };
-
-    for (int i = 0; i < containers.size(); ++i) {
-        ButtonClickedFunc buttonClickedFunc = shareButtonsClickedSig.at(i);
-        DockerContainer container = containers.at(i);
-
-        connect(this, buttonClickedFunc, [this, container](bool){
-            shareConnectionLogic()->updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), container);
-            goToPage(Page::ShareConnection);
-        });
-    }
-}
-
 void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
 {
     QString resourcesPath = "qrc:/images/tray/%1";
@@ -1599,13 +1028,6 @@ void UiLogic::updateVpnPage()
 }
 
 
-
-
-
-
-
-
-
 void UiLogic::onRadioButtonVpnModeAllSitesToggled(bool checked)
 {
     if (checked) {
@@ -1628,98 +1050,3 @@ void UiLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
 }
 
 
-
-
-void UiLogic::updateProtocolsPage()
-{
-    setProgressBarProtocolsContainerReinstallVisible(false);
-
-    auto containers = m_settings.containers(selectedServerIndex);
-    DockerContainer defaultContainer = m_settings.defaultContainer(selectedServerIndex);
-    bool haveAuthData = m_settings.haveAuthData(selectedServerIndex);
-
-    // all containers
-    QList<DockerContainer> allContainers {
-        DockerContainer::OpenVpn,
-                DockerContainer::OpenVpnOverShadowSocks,
-                DockerContainer::OpenVpnOverCloak,
-                DockerContainer::WireGuard
-    };
-
-    using SetVisibleFunc = std::function<void(bool)>;
-    using SetCheckedFunc = std::function<void(bool)>;
-    using SetEnabledFunc = std::function<void(bool)>;
-    QList<SetCheckedFunc> installButtonsCheckedFunc {
-        [this](bool checked) ->void {setPushButtonProtoOpenvpnContInstallChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoSsOpenvpnContInstallChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoCloakOpenvpnContInstallChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoWireguardContInstallChecked(checked);},
-    };
-    QList<SetEnabledFunc> installButtonsEnabledFunc {
-        [this](bool enabled) ->void {setPushButtonProtoOpenvpnContInstallEnabled(enabled);},
-        [this](bool enabled) ->void {setPushButtonProtoSsOpenvpnContInstallEnabled(enabled);},
-        [this](bool enabled) ->void {setPushButtonProtoCloakOpenvpnContInstallEnabled(enabled);},
-        [this](bool enabled) ->void {setPushButtonProtoWireguardContInstallEnabled(enabled);},
-    };
-
-    QList<SetCheckedFunc> defaultButtonsCheckedFunc {
-        [this](bool checked) ->void {setPushButtonProtoOpenvpnContDefaultChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoSsOpenvpnContDefaultChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoCloakOpenvpnContDefaultChecked(checked);},
-        [this](bool checked) ->void {setPushButtonProtoWireguardContDefaultChecked(checked);},
-    };
-    QList<SetVisibleFunc> defaultButtonsVisibleFunc {
-        [this](bool visible) ->void {setPushButtonProtoOpenvpnContDefaultVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoSsOpenvpnContDefaultVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoCloakOpenvpnContDefaultVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoWireguardContDefaultVisible(visible);},
-    };
-
-    QList<SetVisibleFunc> shareButtonsVisibleFunc {
-        [this](bool visible) ->void {setPushButtonProtoOpenvpnContShareVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoSsOpenvpnContShareVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoCloakOpenvpnContShareVisible(visible);},
-        [this](bool visible) ->void {setPushButtonProtoWireguardContShareVisible(visible);},
-    };
-
-    QList<SetVisibleFunc> framesVisibleFunc {
-        [this](bool visible) ->void {setFrameOpenvpnSettingsVisible(visible);},
-        [this](bool visible) ->void {setFrameOpenvpnSsSettingsVisible(visible);},
-        [this](bool visible) ->void {setFrameOpenvpnSsCloakSettingsVisible(visible);},
-        [this](bool visible) ->void {setFrameWireguardSettingsVisible(visible);},
-    };
-
-    for (int i = 0; i < allContainers.size(); ++i) {
-        defaultButtonsCheckedFunc.at(i)(defaultContainer == allContainers.at(i));
-        defaultButtonsVisibleFunc.at(i)(haveAuthData && containers.contains(allContainers.at(i)));
-        shareButtonsVisibleFunc.at(i)(haveAuthData && containers.contains(allContainers.at(i)));
-        installButtonsCheckedFunc.at(i)(containers.contains(allContainers.at(i)));
-        installButtonsEnabledFunc.at(i)(haveAuthData);
-        framesVisibleFunc.at(i)(containers.contains(allContainers.at(i)));
-    }
-}
-
-
-void UiLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    m_openVpnLogic->updateOpenVpnPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::OpenVpn),
-                      selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::OpenVpnSettings);
-}
-
-void UiLogic::onPushButtonProtoCloakOpenvpnContSsConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::ShadowSocks),
-                          selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::ShadowSocksSettings);
-}
-
-void UiLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
-{
-    selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    cloakLogic()->updateCloakPage(m_settings.protocolConfig(selectedServerIndex, selectedDockerContainer, Protocol::Cloak),
-                    selectedDockerContainer, m_settings.haveAuthData(selectedServerIndex));
-    goToPage(Page::CloakSettings);
-}

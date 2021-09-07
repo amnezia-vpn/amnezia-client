@@ -52,6 +52,7 @@ private slots:
 private:
     Settings m_settings;
     UiLogic *m_uiLogic;
+    UiLogic *uiLogic() const { return m_uiLogic; }
 
     QString m_lineEditNetworkSettingsDns1Text;
     QString m_lineEditNetworkSettingsDns2Text;
