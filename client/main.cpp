@@ -16,6 +16,7 @@
 #include "ui/pages_logic/AppSettingsLogic.h"
 #include "ui/pages_logic/GeneralSettingsLogic.h"
 #include "ui/pages_logic/NetworkSettingsLogic.h"
+#include "ui/pages_logic/NewServerConfiguringLogic.h"
 #include "ui/pages_logic/NewServerProtocolsLogic.h"
 #include "ui/pages_logic/ProtocolSettingsLogic.h"
 #include "ui/pages_logic/ServerListLogic.h"
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
     engine.rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
     engine.rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
+    engine.rootContext()->setContextProperty("NewServerConfiguringLogic", uiLogic->newServerConfiguringLogic());
     engine.rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
     engine.rootContext()->setContextProperty("ProtocolSettingsLogic", uiLogic->protocolSettingsLogic());
     engine.rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());

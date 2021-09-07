@@ -14,6 +14,7 @@ class AppSettingsLogic;
 class GeneralSettingsLogic;
 class NetworkSettingsLogic;
 class NewServerProtocolsLogic;
+class NewServerConfiguringLogic;
 class ProtocolSettingsLogic;
 class ServerListLogic;
 class ServerSettingsLogic;
@@ -94,6 +95,7 @@ public:
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
     friend class NetworkSettingsLogic;
+    friend class NewServerConfiguringLogic;
     friend class NewServerProtocolsLogic;
     friend class ProtocolSettingsLogic;
     friend class ServerListLogic;
@@ -116,28 +118,7 @@ public:
     void setFrameWireguardSettingsVisible(bool frameWireguardSettingsVisible);
     bool getFrameWireguardVisible() const;
     void setFrameWireguardVisible(bool frameWireguardVisible);
-    bool getFrameNewServerSettingsParentWireguardVisible() const;
-    void setFrameNewServerSettingsParentWireguardVisible(bool frameNewServerSettingsParentWireguardVisible);
-    double getProgressBarNewServerConfiguringValue() const;
-    void setProgressBarNewServerConfiguringValue(double progressBarNewServerConfiguringValue);
-    bool getPushButtonNewServerSettingsCloakChecked() const;
-    void setPushButtonNewServerSettingsCloakChecked(bool pushButtonNewServerSettingsCloakChecked);
-    bool getPushButtonNewServerSettingsSsChecked() const;
-    void setPushButtonNewServerSettingsSsChecked(bool pushButtonNewServerSettingsSsChecked);
-    bool getPushButtonNewServerSettingsOpenvpnChecked() const;
-    void setPushButtonNewServerSettingsOpenvpnChecked(bool pushButtonNewServerSettingsOpenvpnChecked);
-    QString getLineEditNewServerCloakPortText() const;
-    void setLineEditNewServerCloakPortText(const QString &lineEditNewServerCloakPortText);
-    QString getLineEditNewServerCloakSiteText() const;
-    void setLineEditNewServerCloakSiteText(const QString &lineEditNewServerCloakSiteText);
-    QString getLineEditNewServerSsPortText() const;
-    void setLineEditNewServerSsPortText(const QString &lineEditNewServerSsPortText);
-    QString getComboBoxNewServerSsCipherText() const;
-    void setComboBoxNewServerSsCipherText(const QString &comboBoxNewServerSsCipherText);
-    QString getlineEditNewServerOpenvpnPortText() const;
-    void setLineEditNewServerOpenvpnPortText(const QString &lineEditNewServerOpenvpnPortText);
-    QString getComboBoxNewServerOpenvpnProtoText() const;
-    void setComboBoxNewServerOpenvpnProtoText(const QString &comboBoxNewServerOpenvpnProtoText);
+
 
 
 
@@ -150,12 +131,9 @@ public:
     void setTrayActionDisconnectEnabled(bool trayActionDisconnectEnabled);
     bool getTrayActionConnectEnabled() const;
     void setTrayActionConnectEnabled(bool trayActionConnectEnabled);
-    bool getCheckBoxNewServerCloakChecked() const;
-    void setCheckBoxNewServerCloakChecked(bool checkBoxNewServerCloakChecked);
-    bool getCheckBoxNewServerSsChecked() const;
-    void setCheckBoxNewServerSsChecked(bool checkBoxNewServerSsChecked);
-    bool getCheckBoxNewServerOpenvpnChecked() const;
-    void setCheckBoxNewServerOpenvpnChecked(bool checkBoxNewServerOpenvpnChecked);
+
+
+
 
 
     bool getPushButtonConnectChecked() const;
@@ -229,20 +207,7 @@ public:
 
 
 
-    bool getPageNewServerConfiguringEnabled() const;
-    void setPageNewServerConfiguringEnabled(bool pageNewServerConfiguringEnabled);
-    bool getLabelNewServerConfiguringWaitInfoVisible() const;
-    void setLabelNewServerConfiguringWaitInfoVisible(bool labelNewServerConfiguringWaitInfoVisible);
-    QString getLabelNewServerConfiguringWaitInfoText() const;
-    void setLabelNewServerConfiguringWaitInfoText(const QString &labelNewServerConfiguringWaitInfoText);
-    bool getProgressBarNewServerConfiguringVisible() const;
-    void setProgressBarNewServerConfiguringVisible(bool progressBarNewServerConfiguringVisible);
-    int getProgressBarNewServerConfiguringMaximium() const;
-    void setProgressBarNewServerConfiguringMaximium(int progressBarNewServerConfiguringMaximium);
-    bool getProgressBarNewServerConfiguringTextVisible() const;
-    void setProgressBarNewServerConfiguringTextVisible(bool progressBarNewServerConfiguringTextVisible);
-    QString getProgressBarNewServerConfiguringText() const;
-    void setProgressBarNewServerConfiguringText(const QString &progressBarNewServerConfiguringText);
+
     bool getPageServerProtocolsEnabled() const;
     void setPageServerProtocolsEnabled(bool pageServerProtocolsEnabled);
     int getProgressBarProtocolsContainerReinstallValue() const;
@@ -260,7 +225,6 @@ public:
     bool getPushButtonVpnAddSiteEnabled() const;
     void setPushButtonVpnAddSiteEnabled(bool pushButtonVpnAddSiteEnabled);
 
-    Q_INVOKABLE void updateNewServerProtocolsPage();
     Q_INVOKABLE void updateVpnPage();
 
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
@@ -285,18 +249,7 @@ public:
 signals:
     void frameWireguardSettingsVisibleChanged();
     void frameWireguardVisibleChanged();
-    void frameNewServerSettingsParentWireguardVisibleChanged();
 
-    void progressBarNewServerConfiguringValueChanged();
-    void pushButtonNewServerSettingsCloakCheckedChanged();
-    void pushButtonNewServerSettingsSsCheckedChanged();
-    void pushButtonNewServerSettingsOpenvpnCheckedChanged();
-    void lineEditNewServerCloakPortTextChanged();
-    void lineEditNewServerCloakSiteTextChanged();
-    void lineEditNewServerSsPortTextChanged();
-    void comboBoxNewServerSsCipherTextChanged();
-    void lineEditNewServerOpenvpnPortTextChanged();
-    void comboBoxNewServerOpenvpnProtoTextChanged();
 
 
     void radioButtonVpnModeAllSitesCheckedChanged();
@@ -310,9 +263,9 @@ signals:
     void trayIconUrlChanged();
     void trayActionDisconnectEnabledChanged();
     void trayActionConnectEnabledChanged();
-    void checkBoxNewServerCloakCheckedChanged();
-    void checkBoxNewServerSsCheckedChanged();
-    void checkBoxNewServerOpenvpnCheckedChanged();
+
+
+
 
 
 
@@ -354,13 +307,7 @@ signals:
 
     void dialogConnectErrorTextChanged();
 
-    void pageNewServerConfiguringEnabledChanged();
-    void labelNewServerConfiguringWaitInfoVisibleChanged();
-    void labelNewServerConfiguringWaitInfoTextChanged();
-    void progressBarNewServerConfiguringVisibleChanged();
-    void progressBarNewServerConfiguringMaximiumChanged();
-    void progressBarNewServerConfiguringTextVisibleChanged();
-    void progressBarNewServerConfiguringTextChanged();
+
     void pageServerProtocolsEnabledChanged();
     void progressBarProtocolsContainerReinstallValueChanged();
     void progressBarProtocolsContainerReinstallMaximiumChanged();
@@ -371,7 +318,6 @@ signals:
     void goToPage(int page, bool reset = true, bool slide = true);
     void closePage();
     void setStartPage(int page, bool slide = true);
-    void pushButtonNewServerConnectConfigureClicked();
     void showPublicKeyWarning();
     void showConnectErrorDialog();
     void show();
@@ -392,18 +338,7 @@ signals:
 private:
     bool m_frameWireguardSettingsVisible;
     bool m_frameWireguardVisible;
-    bool m_frameNewServerSettingsParentWireguardVisible;
 
-    double m_progressBarNewServerConfiguringValue;
-    bool m_pushButtonNewServerSettingsCloakChecked;
-    bool m_pushButtonNewServerSettingsSsChecked;
-    bool m_pushButtonNewServerSettingsOpenvpnChecked;
-    QString m_lineEditNewServerCloakPortText;
-    QString m_lineEditNewServerCloakSiteText;
-    QString m_lineEditNewServerSsPortText;
-    QString m_comboBoxNewServerSsCipherText;
-    QString m_lineEditNewServerOpenvpnPortText;
-    QString m_comboBoxNewServerOpenvpnProtoText;
 
 
 
@@ -418,9 +353,8 @@ private:
     QString m_trayIconUrl;
     bool m_trayActionDisconnectEnabled;
     bool m_trayActionConnectEnabled;
-    bool m_checkBoxNewServerCloakChecked;
-    bool m_checkBoxNewServerSsChecked;
-    bool m_checkBoxNewServerOpenvpnChecked;
+
+
 
 
 
@@ -462,13 +396,7 @@ private:
     QString m_labelErrorText;
     QString m_dialogConnectErrorText;
 
-    bool m_pageNewServerConfiguringEnabled;
-    bool m_labelNewServerConfiguringWaitInfoVisible;
-    QString m_labelNewServerConfiguringWaitInfoText;
-    bool m_progressBarNewServerConfiguringVisible;
-    int m_progressBarNewServerConfiguringMaximium;
-    bool m_progressBarNewServerConfiguringTextVisible;
-    QString m_progressBarNewServerConfiguringText;
+
     bool m_pageServerProtocolsEnabled;
     int m_progressBarProtocolsContainerReinstallValue;
     int m_progressBarProtocolsContainerReinstallMaximium;
@@ -532,31 +460,32 @@ private:
 
 
 
-    QMap<DockerContainer, QJsonObject> getInstallConfigsFromProtocolsPage() const;
 
 public:
-    AppSettingsLogic *appSettingsLogic()                { return m_appSettingsLogic; }
-    GeneralSettingsLogic *generalSettingsLogic()        { return m_generalSettingsLogic; }
-    NetworkSettingsLogic *networkSettingsLogic()        { return m_networkSettingsLogic; }
-    NewServerProtocolsLogic *newServerProtocolsLogic()  { return m_newServerProtocolsLogic; }
-    ProtocolSettingsLogic *protocolSettingsLogic()      { return m_protocolSettingsLogic; }
-    ServerListLogic *serverListLogic()                  { return m_serverListLogic; }
-    ServerSettingsLogic *serverSettingsLogic()          { return m_serverSettingsLogic; }
-    ServerVpnProtocolsLogic *serverVpnProtocolsLogic()  { return m_serverVpnProtocolsLogic; }
-    ShareConnectionLogic *shareConnectionLogic()        { return m_shareConnectionLogic; }
-    SitesLogic *sitesLogic()                            { return m_sitesLogic; }
-    StartPageLogic *startPageLogic()                    { return m_startPageLogic; }
-    VpnLogic *vpnLogic()                                { return m_vpnLogic; }
-    WizardLogic *wizardLogic()                          { return m_wizardLogic; }
+    AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
+    GeneralSettingsLogic *generalSettingsLogic()            { return m_generalSettingsLogic; }
+    NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
+    NewServerConfiguringLogic *newServerConfiguringLogic()  { return m_newServerConfiguringLogic; }
+    NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
+    ProtocolSettingsLogic *protocolSettingsLogic()          { return m_protocolSettingsLogic; }
+    ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
+    ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
+    ServerVpnProtocolsLogic *serverVpnProtocolsLogic()      { return m_serverVpnProtocolsLogic; }
+    ShareConnectionLogic *shareConnectionLogic()            { return m_shareConnectionLogic; }
+    SitesLogic *sitesLogic()                                { return m_sitesLogic; }
+    StartPageLogic *startPageLogic()                        { return m_startPageLogic; }
+    VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
+    WizardLogic *wizardLogic()                              { return m_wizardLogic; }
 
-    OpenVpnLogic *openVpnLogic()                        { return m_openVpnLogic; }
-    ShadowSocksLogic *shadowSocksLogic()                { return m_shadowSocksLogic; }
-    CloakLogic *cloakLogic()                            { return m_cloakLogic; }
+    OpenVpnLogic *openVpnLogic()                            { return m_openVpnLogic; }
+    ShadowSocksLogic *shadowSocksLogic()                    { return m_shadowSocksLogic; }
+    CloakLogic *cloakLogic()                                { return m_cloakLogic; }
 
 private:
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;
+    NewServerConfiguringLogic *m_newServerConfiguringLogic;
     NewServerProtocolsLogic *m_newServerProtocolsLogic;
     ProtocolSettingsLogic *m_protocolSettingsLogic;
     ServerListLogic *m_serverListLogic;

@@ -23,8 +23,6 @@ public:
     Q_PROPERTY(QString lineEditNewServerLoginText READ getLineEditNewServerLoginText WRITE setLineEditNewServerLoginText NOTIFY lineEditNewServerLoginTextChanged)
     Q_PROPERTY(bool labelNewServerWaitInfoVisible READ getLabelNewServerWaitInfoVisible WRITE setLabelNewServerWaitInfoVisible NOTIFY labelNewServerWaitInfoVisibleChanged)
     Q_PROPERTY(QString labelNewServerWaitInfoText READ getLabelNewServerWaitInfoText WRITE setLabelNewServerWaitInfoText NOTIFY labelNewServerWaitInfoTextChanged)
-    Q_PROPERTY(double progressBarNewServerConnectionMinimum READ getProgressBarNewServerConnectionMinimum WRITE setProgressBarNewServerConnectionMinimum NOTIFY progressBarNewServerConnectionMinimumChanged)
-    Q_PROPERTY(double progressBarNewServerConnectionMaximum READ getProgressBarNewServerConnectionMaximum WRITE setProgressBarNewServerConnectionMaximum NOTIFY progressBarNewServerConnectionMaximumChanged)
     Q_PROPERTY(bool pushButtonBackFromStartVisible READ getPushButtonBackFromStartVisible WRITE setPushButtonBackFromStartVisible NOTIFY pushButtonBackFromStartVisibleChanged)
     Q_PROPERTY(bool pushButtonNewServerConnectVisible READ getPushButtonNewServerConnectVisible WRITE setPushButtonNewServerConnectVisible NOTIFY pushButtonNewServerConnectVisibleChanged)
 
@@ -58,10 +56,6 @@ public:
     void setLabelNewServerWaitInfoVisible(bool labelNewServerWaitInfoVisible);
     QString getLabelNewServerWaitInfoText() const;
     void setLabelNewServerWaitInfoText(const QString &labelNewServerWaitInfoText);
-    double getProgressBarNewServerConnectionMinimum() const;
-    void setProgressBarNewServerConnectionMinimum(double progressBarNewServerConnectionMinimum);
-    double getProgressBarNewServerConnectionMaximum() const;
-    void setProgressBarNewServerConnectionMaximum(double progressBarNewServerConnectionMaximum);
 
     QString getPushButtonNewServerConnectText() const;
     void setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText);
@@ -75,8 +69,6 @@ signals:
     void lineEditNewServerLoginTextChanged();
     void labelNewServerWaitInfoVisibleChanged();
     void labelNewServerWaitInfoTextChanged();
-    void progressBarNewServerConnectionMinimumChanged();
-    void progressBarNewServerConnectionMaximumChanged();
     void pushButtonBackFromStartVisibleChanged();
     void pushButtonNewServerConnectVisibleChanged();
     void pushButtonNewServerConnectEnabledChanged();
@@ -103,8 +95,6 @@ private:
     QString m_lineEditNewServerLoginText;
     bool m_labelNewServerWaitInfoVisible;
     QString m_labelNewServerWaitInfoText;
-    double m_progressBarNewServerConnectionMinimum;
-    double m_progressBarNewServerConnectionMaximum;
     bool m_pushButtonBackFromStartVisible;
     bool m_pushButtonNewServerConnectVisible;
 };

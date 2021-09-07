@@ -6,7 +6,7 @@ import "../Config"
 
 Item {
     id: root
-    enabled: UiLogic.pageNewServerConfiguringEnabled
+    enabled: NewServerConfiguringLogic.pageNewServerConfiguringEnabled
     Text {
         font.family: "Lato"
         font.styleName: "normal"
@@ -32,8 +32,8 @@ Item {
         y: 560
         width: 301
         height: 41
-        text: UiLogic.labelNewServerConfiguringWaitInfoText
-        visible: UiLogic.labelNewServerConfiguringWaitInfoVisible
+        text: NewServerConfiguringLogic.labelNewServerConfiguringWaitInfoText
+        visible: NewServerConfiguringLogic.labelNewServerConfiguringWaitInfoVisible
     }
     ProgressBar {
         id: pr
@@ -42,9 +42,9 @@ Item {
         width: 301
         height: 40
         from: 0
-        to: UiLogic.progressBarNewServerConfiguringMaximium
-        value: UiLogic.progressBarNewServerConfiguringValue
-        visible: UiLogic.progressBarNewServerConfiguringVisible
+        to: NewServerConfiguringLogic.progressBarNewServerConfiguringMaximium
+        value: NewServerConfiguringLogic.progressBarNewServerConfiguringValue
+        visible: NewServerConfiguringLogic.progressBarNewServerConfiguringVisible
         background: Rectangle {
             implicitWidth: parent.width
             implicitHeight: parent.height
@@ -65,13 +65,13 @@ Item {
 
         LabelType {
             anchors.fill: parent
-            text: UiLogic.progressBarNewServerConfiguringText
+            text: NewServerConfiguringLogic.progressBarNewServerConfiguringText
             horizontalAlignment: Text.AlignHCenter
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             color: "#D4D4D4"
-            visible: UiLogic.progressBarNewServerConfiguringTextVisible
+            visible: NewServerConfiguringLogic.progressBarNewServerConfiguringTextVisible
         }
     }
 }

@@ -19,8 +19,6 @@ StartPageLogic::StartPageLogic(UiLogic *uiLogic, QObject *parent):
     m_lineEditNewServerLoginText{},
     m_labelNewServerWaitInfoVisible{true},
     m_labelNewServerWaitInfoText{},
-    m_progressBarNewServerConnectionMinimum{0},
-    m_progressBarNewServerConnectionMaximum{100},
     m_pushButtonBackFromStartVisible{true},
     m_pushButtonNewServerConnectVisible{true}
 {
@@ -38,8 +36,6 @@ void StartPageLogic::updateStartPage()
 
     setLabelNewServerWaitInfoVisible(false);
     setLabelNewServerWaitInfoText("");
-    setProgressBarNewServerConnectionMinimum(0);
-    setProgressBarNewServerConnectionMaximum(300);
     setPushButtonNewServerConnectVisible(true);
 }
 
@@ -144,32 +140,6 @@ void StartPageLogic::setLabelNewServerWaitInfoText(const QString &labelNewServer
     if (m_labelNewServerWaitInfoText != labelNewServerWaitInfoText) {
         m_labelNewServerWaitInfoText = labelNewServerWaitInfoText;
         emit labelNewServerWaitInfoTextChanged();
-    }
-}
-
-double StartPageLogic::getProgressBarNewServerConnectionMinimum() const
-{
-    return m_progressBarNewServerConnectionMinimum;
-}
-
-void StartPageLogic::setProgressBarNewServerConnectionMinimum(double progressBarNewServerConnectionMinimum)
-{
-    if (m_progressBarNewServerConnectionMinimum != progressBarNewServerConnectionMinimum) {
-        m_progressBarNewServerConnectionMinimum = progressBarNewServerConnectionMinimum;
-        emit progressBarNewServerConnectionMinimumChanged();
-    }
-}
-
-double StartPageLogic::getProgressBarNewServerConnectionMaximum() const
-{
-    return m_progressBarNewServerConnectionMaximum;
-}
-
-void StartPageLogic::setProgressBarNewServerConnectionMaximum(double progressBarNewServerConnectionMaximum)
-{
-    if (m_progressBarNewServerConnectionMaximum != progressBarNewServerConnectionMaximum) {
-        m_progressBarNewServerConnectionMaximum = progressBarNewServerConnectionMaximum;
-        emit progressBarNewServerConnectionMaximumChanged();
     }
 }
 

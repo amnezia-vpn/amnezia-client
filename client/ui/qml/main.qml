@@ -167,7 +167,7 @@ Window {
                 StartPageLogic.updateStartPage();
             }
             if (page === PageEnum.NewServerProtocols) {
-                UiLogic.updateNewServerProtocolsPage()
+                NewServerProtocolsLogic.updateNewServerProtocolsPage()
             }
             if (page === PageEnum.ServerVpnProtocols) {
                 UiLogic.updateProtocolsPage()

@@ -47,6 +47,7 @@
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
+#include "pages_logic/NewServerConfiguringLogic.h"
 #include "pages_logic/NewServerProtocolsLogic.h"
 #include "pages_logic/ProtocolSettingsLogic.h"
 #include "pages_logic/ServerListLogic.h"
@@ -70,18 +71,8 @@ UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
     m_frameWireguardSettingsVisible{false},
     m_frameWireguardVisible{false},
-    m_frameNewServerSettingsParentWireguardVisible{false},
 
-    m_progressBarNewServerConfiguringValue{0},
-    m_pushButtonNewServerSettingsCloakChecked{false},
-    m_pushButtonNewServerSettingsSsChecked{false},
-    m_pushButtonNewServerSettingsOpenvpnChecked{false},
-    m_lineEditNewServerCloakPortText{},
-    m_lineEditNewServerCloakSiteText{},
-    m_lineEditNewServerSsPortText{},
-    m_comboBoxNewServerSsCipherText{"chacha20-ietf-poly1305"},
-    m_lineEditNewServerOpenvpnPortText{},
-    m_comboBoxNewServerOpenvpnProtoText{"udp"},
+
     m_radioButtonVpnModeAllSitesChecked{true},
     m_radioButtonVpnModeForwardSitesChecked{false},
     m_radioButtonVpnModeExceptSitesChecked{false},
@@ -93,9 +84,8 @@ UiLogic::UiLogic(QObject *parent) :
     m_trayIconUrl{},
     m_trayActionDisconnectEnabled{true},
     m_trayActionConnectEnabled{true},
-    m_checkBoxNewServerCloakChecked{true},
-    m_checkBoxNewServerSsChecked{false},
-    m_checkBoxNewServerOpenvpnChecked{false},
+
+
 
 
 
@@ -134,13 +124,10 @@ UiLogic::UiLogic(QObject *parent) :
     m_widgetVpnModeEnabled{false},
     m_labelErrorText{tr("Error text")},
     m_dialogConnectErrorText{},
-    m_pageNewServerConfiguringEnabled{true},
-    m_labelNewServerConfiguringWaitInfoVisible{true},
-    m_labelNewServerConfiguringWaitInfoText{tr("Please wait, configuring process may take up to 5 minutes")},
-    m_progressBarNewServerConfiguringVisible{true},
-    m_progressBarNewServerConfiguringMaximium{100},
-    m_progressBarNewServerConfiguringTextVisible{true},
-    m_progressBarNewServerConfiguringText{tr("Configuring...")},
+
+
+
+
     m_pageServerProtocolsEnabled{true},
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
@@ -153,6 +140,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
     m_networkSettingsLogic = new NetworkSettingsLogic(this);
+    m_newServerConfiguringLogic = new NewServerConfiguringLogic(this);
     m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
     m_protocolSettingsLogic = new ProtocolSettingsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
@@ -177,7 +165,6 @@ void UiLogic::initalizeUiLogic()
 {
     setFrameWireguardSettingsVisible(false);
     setFrameWireguardVisible(false);
-    setFrameNewServerSettingsParentWireguardVisible(false);
 
     setupTray();
     setupNewServerConnections();
@@ -271,166 +258,7 @@ void UiLogic::setFrameWireguardVisible(bool frameWireguardVisible)
     }
 }
 
-bool UiLogic::getFrameNewServerSettingsParentWireguardVisible() const
-{
-    return m_frameNewServerSettingsParentWireguardVisible;
-}
 
-void UiLogic::setFrameNewServerSettingsParentWireguardVisible(bool frameNewServerSettingsParentWireguardVisible)
-{
-    if (m_frameNewServerSettingsParentWireguardVisible != frameNewServerSettingsParentWireguardVisible) {
-        m_frameNewServerSettingsParentWireguardVisible = frameNewServerSettingsParentWireguardVisible;
-        emit frameNewServerSettingsParentWireguardVisibleChanged();
-    }
-}
-
-
-
-void UiLogic::updateNewServerProtocolsPage()
-{
-    setPushButtonNewServerSettingsCloakChecked(true);
-    setPushButtonNewServerSettingsCloakChecked(false);
-    setPushButtonNewServerSettingsSsChecked(true);
-    setPushButtonNewServerSettingsSsChecked(false);
-    setLineEditNewServerCloakPortText(amnezia::protocols::cloak::defaultPort);
-    setLineEditNewServerCloakSiteText(amnezia::protocols::cloak::defaultRedirSite);
-    setLineEditNewServerSsPortText(amnezia::protocols::shadowsocks::defaultPort);
-    setComboBoxNewServerSsCipherText(amnezia::protocols::shadowsocks::defaultCipher);
-    setLineEditNewServerOpenvpnPortText(amnezia::protocols::openvpn::defaultPort);
-    setComboBoxNewServerOpenvpnProtoText(amnezia::protocols::openvpn::defaultTransportProto);
-}
-
-
-
-QString UiLogic::getComboBoxNewServerOpenvpnProtoText() const
-{
-    return m_comboBoxNewServerOpenvpnProtoText;
-}
-
-void UiLogic::setComboBoxNewServerOpenvpnProtoText(const QString &comboBoxNewServerOpenvpnProtoText)
-{
-    if (m_comboBoxNewServerOpenvpnProtoText != comboBoxNewServerOpenvpnProtoText) {
-        m_comboBoxNewServerOpenvpnProtoText = comboBoxNewServerOpenvpnProtoText;
-        emit comboBoxNewServerOpenvpnProtoTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditNewServerCloakSiteText() const
-{
-    return m_lineEditNewServerCloakSiteText;
-}
-
-void UiLogic::setLineEditNewServerCloakSiteText(const QString &lineEditNewServerCloakSiteText)
-{
-    if (m_lineEditNewServerCloakSiteText != lineEditNewServerCloakSiteText) {
-        m_lineEditNewServerCloakSiteText = lineEditNewServerCloakSiteText;
-        emit lineEditNewServerCloakSiteTextChanged();
-    }
-}
-
-QString UiLogic::getLineEditNewServerSsPortText() const
-{
-    return m_lineEditNewServerSsPortText;
-}
-
-void UiLogic::setLineEditNewServerSsPortText(const QString &lineEditNewServerSsPortText)
-{
-    if (m_lineEditNewServerSsPortText != lineEditNewServerSsPortText) {
-        m_lineEditNewServerSsPortText = lineEditNewServerSsPortText;
-        emit lineEditNewServerSsPortTextChanged();
-    }
-}
-
-QString UiLogic::getComboBoxNewServerSsCipherText() const
-{
-    return m_comboBoxNewServerSsCipherText;
-}
-
-void UiLogic::setComboBoxNewServerSsCipherText(const QString &comboBoxNewServerSsCipherText)
-{
-    if (m_comboBoxNewServerSsCipherText != comboBoxNewServerSsCipherText) {
-        m_comboBoxNewServerSsCipherText = comboBoxNewServerSsCipherText;
-        emit comboBoxNewServerSsCipherTextChanged();
-    }
-}
-
-QString UiLogic::getlineEditNewServerOpenvpnPortText() const
-{
-    return m_lineEditNewServerOpenvpnPortText;
-}
-
-void UiLogic::setLineEditNewServerOpenvpnPortText(const QString &lineEditNewServerOpenvpnPortText)
-{
-    if (m_lineEditNewServerOpenvpnPortText != lineEditNewServerOpenvpnPortText) {
-        m_lineEditNewServerOpenvpnPortText = lineEditNewServerOpenvpnPortText;
-        emit lineEditNewServerOpenvpnPortTextChanged();
-    }
-}
-
-bool UiLogic::getPushButtonNewServerSettingsSsChecked() const
-{
-    return m_pushButtonNewServerSettingsSsChecked;
-}
-
-void UiLogic::setPushButtonNewServerSettingsSsChecked(bool pushButtonNewServerSettingsSsChecked)
-{
-    if (m_pushButtonNewServerSettingsSsChecked != pushButtonNewServerSettingsSsChecked) {
-        m_pushButtonNewServerSettingsSsChecked = pushButtonNewServerSettingsSsChecked;
-        emit pushButtonNewServerSettingsSsCheckedChanged();
-    }
-}
-
-bool UiLogic::getPushButtonNewServerSettingsOpenvpnChecked() const
-{
-    return m_pushButtonNewServerSettingsOpenvpnChecked;
-}
-
-void UiLogic::setPushButtonNewServerSettingsOpenvpnChecked(bool pushButtonNewServerSettingsOpenvpnChecked)
-{
-    if (m_pushButtonNewServerSettingsOpenvpnChecked != pushButtonNewServerSettingsOpenvpnChecked) {
-        m_pushButtonNewServerSettingsOpenvpnChecked = pushButtonNewServerSettingsOpenvpnChecked;
-        emit pushButtonNewServerSettingsOpenvpnCheckedChanged();
-    }
-}
-
-QString UiLogic::getLineEditNewServerCloakPortText() const
-{
-    return m_lineEditNewServerCloakPortText;
-}
-
-void UiLogic::setLineEditNewServerCloakPortText(const QString &lineEditNewServerCloakPortText)
-{
-    if (m_lineEditNewServerCloakPortText != lineEditNewServerCloakPortText) {
-        m_lineEditNewServerCloakPortText = lineEditNewServerCloakPortText;
-        emit lineEditNewServerCloakPortTextChanged();
-    }
-}
-
-bool UiLogic::getPushButtonNewServerSettingsCloakChecked() const
-{
-    return m_pushButtonNewServerSettingsCloakChecked;
-}
-
-void UiLogic::setPushButtonNewServerSettingsCloakChecked(bool pushButtonNewServerSettingsCloakChecked)
-{
-    if (m_pushButtonNewServerSettingsCloakChecked != pushButtonNewServerSettingsCloakChecked) {
-        m_pushButtonNewServerSettingsCloakChecked = pushButtonNewServerSettingsCloakChecked;
-        emit pushButtonNewServerSettingsCloakCheckedChanged();
-    }
-}
-
-double UiLogic::getProgressBarNewServerConfiguringValue() const
-{
-    return m_progressBarNewServerConfiguringValue;
-}
-
-void UiLogic::setProgressBarNewServerConfiguringValue(double progressBarNewServerConfiguringValue)
-{
-    if (m_progressBarNewServerConfiguringValue != progressBarNewServerConfiguringValue) {
-        m_progressBarNewServerConfiguringValue = progressBarNewServerConfiguringValue;
-        emit progressBarNewServerConfiguringValueChanged();
-    }
-}
 
 
 
@@ -537,44 +365,7 @@ void UiLogic::setTrayActionConnectEnabled(bool trayActionConnectEnabled)
     }
 }
 
-bool UiLogic::getCheckBoxNewServerCloakChecked() const
-{
-    return m_checkBoxNewServerCloakChecked;
-}
 
-void UiLogic::setCheckBoxNewServerCloakChecked(bool checkBoxNewServerCloakChecked)
-{
-    if (m_checkBoxNewServerCloakChecked != checkBoxNewServerCloakChecked) {
-        m_checkBoxNewServerCloakChecked = checkBoxNewServerCloakChecked;
-        emit checkBoxNewServerCloakCheckedChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxNewServerSsChecked() const
-{
-    return m_checkBoxNewServerSsChecked;
-}
-
-void UiLogic::setCheckBoxNewServerSsChecked(bool checkBoxNewServerSsChecked)
-{
-    if (m_checkBoxNewServerSsChecked != checkBoxNewServerSsChecked) {
-        m_checkBoxNewServerSsChecked = checkBoxNewServerSsChecked;
-        emit checkBoxNewServerSsCheckedChanged();
-    }
-}
-
-bool UiLogic::getCheckBoxNewServerOpenvpnChecked() const
-{
-    return m_checkBoxNewServerOpenvpnChecked;
-}
-
-void UiLogic::setCheckBoxNewServerOpenvpnChecked(bool checkBoxNewServerOpenvpnChecked)
-{
-    if (m_checkBoxNewServerOpenvpnChecked != checkBoxNewServerOpenvpnChecked) {
-        m_checkBoxNewServerOpenvpnChecked = checkBoxNewServerOpenvpnChecked;
-        emit checkBoxNewServerOpenvpnCheckedChanged();
-    }
-}
 
 
 
@@ -1026,96 +817,7 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
 
 
 
-bool UiLogic::getPageNewServerConfiguringEnabled() const
-{
-    return m_pageNewServerConfiguringEnabled;
-}
 
-void UiLogic::setPageNewServerConfiguringEnabled(bool pageNewServerConfiguringEnabled)
-{
-    if (m_pageNewServerConfiguringEnabled != pageNewServerConfiguringEnabled) {
-        m_pageNewServerConfiguringEnabled = pageNewServerConfiguringEnabled;
-        emit pageNewServerConfiguringEnabledChanged();
-    }
-}
-
-bool UiLogic::getLabelNewServerConfiguringWaitInfoVisible() const
-{
-    return m_labelNewServerConfiguringWaitInfoVisible;
-}
-
-void UiLogic::setLabelNewServerConfiguringWaitInfoVisible(bool labelNewServerConfiguringWaitInfoVisible)
-{
-    if (m_labelNewServerConfiguringWaitInfoVisible != labelNewServerConfiguringWaitInfoVisible) {
-        m_labelNewServerConfiguringWaitInfoVisible = labelNewServerConfiguringWaitInfoVisible;
-        emit labelNewServerConfiguringWaitInfoVisibleChanged();
-    }
-}
-
-QString UiLogic::getLabelNewServerConfiguringWaitInfoText() const
-{
-    return m_labelNewServerConfiguringWaitInfoText;
-}
-
-void UiLogic::setLabelNewServerConfiguringWaitInfoText(const QString &labelNewServerConfiguringWaitInfoText)
-{
-    if (m_labelNewServerConfiguringWaitInfoText != labelNewServerConfiguringWaitInfoText) {
-        m_labelNewServerConfiguringWaitInfoText = labelNewServerConfiguringWaitInfoText;
-        emit labelNewServerConfiguringWaitInfoTextChanged();
-    }
-}
-
-bool UiLogic::getProgressBarNewServerConfiguringVisible() const
-{
-    return m_progressBarNewServerConfiguringVisible;
-}
-
-void UiLogic::setProgressBarNewServerConfiguringVisible(bool progressBarNewServerConfiguringVisible)
-{
-    if (m_progressBarNewServerConfiguringVisible != progressBarNewServerConfiguringVisible) {
-        m_progressBarNewServerConfiguringVisible = progressBarNewServerConfiguringVisible;
-        emit progressBarNewServerConfiguringVisibleChanged();
-    }
-}
-
-int UiLogic::getProgressBarNewServerConfiguringMaximium() const
-{
-    return m_progressBarNewServerConfiguringMaximium;
-}
-
-void UiLogic::setProgressBarNewServerConfiguringMaximium(int progressBarNewServerConfiguringMaximium)
-{
-    if (m_progressBarNewServerConfiguringMaximium != progressBarNewServerConfiguringMaximium) {
-        m_progressBarNewServerConfiguringMaximium = progressBarNewServerConfiguringMaximium;
-        emit progressBarNewServerConfiguringMaximiumChanged();
-    }
-}
-
-bool UiLogic::getProgressBarNewServerConfiguringTextVisible() const
-{
-    return m_progressBarNewServerConfiguringTextVisible;
-}
-
-void UiLogic::setProgressBarNewServerConfiguringTextVisible(bool progressBarNewServerConfiguringTextVisible)
-{
-    if (m_progressBarNewServerConfiguringTextVisible != progressBarNewServerConfiguringTextVisible) {
-        m_progressBarNewServerConfiguringTextVisible = progressBarNewServerConfiguringTextVisible;
-        emit progressBarNewServerConfiguringTextVisibleChanged();
-    }
-}
-
-QString UiLogic::getProgressBarNewServerConfiguringText() const
-{
-    return m_progressBarNewServerConfiguringText;
-}
-
-void UiLogic::setProgressBarNewServerConfiguringText(const QString &progressBarNewServerConfiguringText)
-{
-    if (m_progressBarNewServerConfiguringText != progressBarNewServerConfiguringText) {
-        m_progressBarNewServerConfiguringText = progressBarNewServerConfiguringText;
-        emit progressBarNewServerConfiguringTextChanged();
-    }
-}
 
 bool UiLogic::getPageServerProtocolsEnabled() const
 {
@@ -1287,46 +989,6 @@ void UiLogic::onCloseWindow()
 //}
 
 
-QMap<DockerContainer, QJsonObject> UiLogic::getInstallConfigsFromProtocolsPage() const
-{
-    QJsonObject cloakConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
-        { config_key::cloak, QJsonObject {
-                { config_key::port, getLineEditNewServerCloakPortText() },
-                { config_key::site, getLineEditNewServerCloakSiteText() }}
-        }
-    };
-    QJsonObject ssConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverShadowSocks) },
-        { config_key::shadowsocks, QJsonObject {
-                { config_key::port, getLineEditNewServerSsPortText() },
-                { config_key::cipher, getComboBoxNewServerSsCipherText() }}
-        }
-    };
-    QJsonObject openVpnConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpn) },
-        { config_key::openvpn, QJsonObject {
-                { config_key::port, getlineEditNewServerOpenvpnPortText() },
-                { config_key::transport_proto, getComboBoxNewServerOpenvpnProtoText() }}
-        }
-    };
-
-    QMap<DockerContainer, QJsonObject> containers;
-
-    if (getCheckBoxNewServerCloakChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
-    }
-
-    if (getCheckBoxNewServerSsChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
-    }
-
-    if (getCheckBoxNewServerOpenvpnChecked()) {
-        containers.insert(DockerContainer::OpenVpn, openVpnConfig);
-    }
-
-    return containers;
-}
 
 
 void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers)
@@ -1341,34 +1003,34 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
 
     PageFunc page_new_server_configuring;
     page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
-        setPageNewServerConfiguringEnabled(enabled);
+        newServerConfiguringLogic()->setPageNewServerConfiguringEnabled(enabled);
     };
     ButtonFunc no_button;
     LabelFunc label_new_server_configuring_wait_info;
     label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
-        setLabelNewServerConfiguringWaitInfoText(text);
+        newServerConfiguringLogic()->setLabelNewServerConfiguringWaitInfoText(text);
     };
     label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
-        setLabelNewServerConfiguringWaitInfoVisible(visible);
+        newServerConfiguringLogic()->setLabelNewServerConfiguringWaitInfoVisible(visible);
     };
     ProgressFunc progressBar_new_server_configuring;
     progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarNewServerConfiguringVisible(visible);
+        newServerConfiguringLogic()->setProgressBarNewServerConfiguringVisible(visible);
     };
     progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
-        setProgressBarNewServerConfiguringValue(value);
+        newServerConfiguringLogic()->setProgressBarNewServerConfiguringValue(value);
     };
     progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
-        return getProgressBarNewServerConfiguringValue();
+        return newServerConfiguringLogic()->getProgressBarNewServerConfiguringValue();
     };
     progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
-        return getProgressBarNewServerConfiguringMaximium();
+        return newServerConfiguringLogic()->getProgressBarNewServerConfiguringMaximium();
     };
     progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarNewServerConfiguringTextVisible(visible);
+        newServerConfiguringLogic()->setProgressBarNewServerConfiguringTextVisible(visible);
     };
     progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
-        setProgressBarNewServerConfiguringText(text);
+        newServerConfiguringLogic()->setProgressBarNewServerConfiguringText(text);
     };
     bool ok = installContainers(installCredentials, containers,
                                 page_new_server_configuring,
@@ -1667,8 +1329,8 @@ PageEnumNS::Page UiLogic::currentPage()
 
 void UiLogic::setupNewServerConnections()
 {
-    connect(this, &UiLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
-        installServer(getInstallConfigsFromProtocolsPage());
+    connect(newServerProtocolsLogic(), &NewServerProtocolsLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
+        installServer(newServerProtocolsLogic()->getInstallConfigsFromProtocolsPage());
     });
 }
 
