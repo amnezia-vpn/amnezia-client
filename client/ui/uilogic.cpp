@@ -381,34 +381,34 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
 
     PageFunc page_new_server_configuring;
     page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
-        newServerConfiguringLogic()->setPageNewServerConfiguringEnabled(enabled);
+        newServerConfiguringLogic()->set_pageEnabled(enabled);
     };
     ButtonFunc no_button;
     LabelFunc label_new_server_configuring_wait_info;
     label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
-        newServerConfiguringLogic()->setLabelNewServerConfiguringWaitInfoText(text);
+        newServerConfiguringLogic()->set_labelWaitInfoText(text);
     };
     label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->setLabelNewServerConfiguringWaitInfoVisible(visible);
+        newServerConfiguringLogic()->set_labelWaitInfoVisible(visible);
     };
     ProgressFunc progressBar_new_server_configuring;
     progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->setProgressBarNewServerConfiguringVisible(visible);
+        newServerConfiguringLogic()->set_progressBarVisible(visible);
     };
     progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
-        newServerConfiguringLogic()->setProgressBarNewServerConfiguringValue(value);
+        newServerConfiguringLogic()->set_progressBarValue(value);
     };
     progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
-        return newServerConfiguringLogic()->getProgressBarNewServerConfiguringValue();
+        return newServerConfiguringLogic()->progressBarValue();
     };
     progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
-        return newServerConfiguringLogic()->getProgressBarNewServerConfiguringMaximium();
+        return newServerConfiguringLogic()->progressBarMaximium();
     };
     progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->setProgressBarNewServerConfiguringTextVisible(visible);
+        newServerConfiguringLogic()->set_progressBarTextVisible(visible);
     };
     progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
-        newServerConfiguringLogic()->setProgressBarNewServerConfiguringText(text);
+        newServerConfiguringLogic()->set_progressBarText(text);
     };
     bool ok = installContainers(installCredentials, containers,
                                 page_new_server_configuring,

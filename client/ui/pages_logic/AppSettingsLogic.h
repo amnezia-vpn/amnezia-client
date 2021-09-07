@@ -8,57 +8,26 @@ class UiLogic;
 class AppSettingsLogic : public PageLogicBase
 {
     Q_OBJECT
+    AUTO_PROPERTY(bool, checkBoxAutostartChecked)
+    AUTO_PROPERTY(bool, checkBoxAutoConnectChecked)
+    AUTO_PROPERTY(bool, checkBoxStartMinimizedChecked)
+    AUTO_PROPERTY(QString, labelVersionText)
 
 public:
-    Q_INVOKABLE void updateAppSettingsPage();
+    Q_INVOKABLE void updatePage() override;
 
-    Q_PROPERTY(bool checkBoxAppSettingsAutostartChecked READ getCheckBoxAppSettingsAutostartChecked WRITE setCheckBoxAppSettingsAutostartChecked NOTIFY checkBoxAppSettingsAutostartCheckedChanged)
-    Q_PROPERTY(bool checkBoxAppSettingsAutoconnectChecked READ getCheckBoxAppSettingsAutoconnectChecked WRITE setCheckBoxAppSettingsAutoconnectChecked NOTIFY checkBoxAppSettingsAutoconnectCheckedChanged)
-    Q_PROPERTY(bool checkBoxAppSettingsStartMinimizedChecked READ getCheckBoxAppSettingsStartMinimizedChecked WRITE setCheckBoxAppSettingsStartMinimizedChecked NOTIFY checkBoxAppSettingsStartMinimizedCheckedChanged)
-
-    Q_PROPERTY(QString labelAppSettingsVersionText READ getLabelAppSettingsVersionText WRITE setLabelAppSettingsVersionText NOTIFY labelAppSettingsVersionTextChanged)
-
-    Q_INVOKABLE void onCheckBoxAppSettingsAutostartToggled(bool checked);
-    Q_INVOKABLE void onCheckBoxAppSettingsAutoconnectToggled(bool checked);
-    Q_INVOKABLE void onCheckBoxAppSettingsStartMinimizedToggled(bool checked);
-
-    Q_INVOKABLE void onPushButtonAppSettingsOpenLogsChecked();
+    Q_INVOKABLE void onCheckBoxAutostartToggled(bool checked);
+    Q_INVOKABLE void onCheckBoxAutoconnectToggled(bool checked);
+    Q_INVOKABLE void onCheckBoxStartMinimizedToggled(bool checked);
+    Q_INVOKABLE void onPushButtonOpenLogsClicked();
 
 public:
     explicit AppSettingsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~AppSettingsLogic() = default;
 
-
-    bool getCheckBoxAppSettingsAutostartChecked() const;
-    void setCheckBoxAppSettingsAutostartChecked(bool checkBoxAppSettingsAutostartChecked);
-    bool getCheckBoxAppSettingsAutoconnectChecked() const;
-    void setCheckBoxAppSettingsAutoconnectChecked(bool checkBoxAppSettingsAutoconnectChecked);
-    bool getCheckBoxAppSettingsStartMinimizedChecked() const;
-    void setCheckBoxAppSettingsStartMinimizedChecked(bool checkBoxAppSettingsStartMinimizedChecked);
-
-    QString getLabelAppSettingsVersionText() const;
-    void setLabelAppSettingsVersionText(const QString &labelAppSettingsVersionText);
-
 signals:
-    void checkBoxAppSettingsAutostartCheckedChanged();
-    void checkBoxAppSettingsAutoconnectCheckedChanged();
-    void checkBoxAppSettingsStartMinimizedCheckedChanged();
-
-    void labelAppSettingsVersionTextChanged();
 
 private:
-
-
-private slots:
-
-
-
-private:
-    bool m_checkBoxAppSettingsAutostartChecked;
-    bool m_checkBoxAppSettingsAutoconnectChecked;
-    bool m_checkBoxAppSettingsStartMinimizedChecked;
-
-    QString m_labelAppSettingsVersionText;
 
 };
 #endif // APP_SETTINGS_LOGIC_H

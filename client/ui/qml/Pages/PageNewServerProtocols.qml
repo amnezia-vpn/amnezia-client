@@ -36,8 +36,8 @@ Item {
         y: 570
         width: 301
         height: 40
-        from: NewServerProtocolsLogic.progressBarNewServerConnectionMinimum
-        to: NewServerProtocolsLogic.progressBarNewServerConnectionMaximum
+        from: NewServerProtocolsLogic.progressBarConnectionMinimum
+        to: NewServerProtocolsLogic.progressBarConnectionMaximum
         value: 0
         background: Rectangle {
             implicitWidth: parent.width
@@ -74,7 +74,7 @@ Item {
         height: 40
         text: qsTr("Setup server")
         onClicked: {
-            NewServerProtocolsLogic.pushButtonNewServerConnectConfigureClicked()
+            NewServerProtocolsLogic.pushButtonConnectConfigureClicked()
         }
     }
     ScrollView {
@@ -120,9 +120,9 @@ Item {
                         TextFieldType {
                             width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
                             height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
-                            text: NewServerProtocolsLogic.lineEditNewServerCloakPortText
+                            text: NewServerProtocolsLogic.lineEditCloakPortText
                             onEditingFinished: {
-                                NewServerProtocolsLogic.lineEditNewServerCloakPortText = text
+                                NewServerProtocolsLogic.lineEditCloakPortText = text
                             }
                         }
                         LabelType {
@@ -133,9 +133,9 @@ Item {
                         TextFieldType {
                             width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
                             height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
-                            text: NewServerProtocolsLogic.lineEditNewServerCloakSiteText
+                            text: NewServerProtocolsLogic.lineEditCloakSiteText
                             onEditingFinished: {
-                                NewServerProtocolsLogic.lineEditNewServerCloakSiteText = text
+                                NewServerProtocolsLogic.lineEditCloakSiteText = text
                             }
                         }
                     }
@@ -151,9 +151,9 @@ Item {
                         text: qsTr("OpenVPN and ShadowSocks\n with masking using Cloak plugin")
                         height: parent.height
                         width: 308
-                        checked: NewServerProtocolsLogic.checkBoxNewServerCloakChecked
+                        checked: NewServerProtocolsLogic.checkBoxCloakChecked
                         onCheckedChanged: {
-                            NewServerProtocolsLogic.checkBoxNewServerCloakChecked = checked
+                            NewServerProtocolsLogic.checkBoxCloakChecked = checked
                         }
                     }
                     ImageButtonType {
@@ -162,9 +162,9 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
                         checkable: true
-                        checked: NewServerProtocolsLogic.pushButtonNewServerSettingsCloakChecked
+                        checked: NewServerProtocolsLogic.pushButtonSettingsCloakChecked
                         onCheckedChanged: {
-                            NewServerProtocolsLogic.pushButtonNewServerSettingsCloakChecked = checked
+                            NewServerProtocolsLogic.pushButtonSettingsCloakChecked = checked
                             if (checked) {
                                 frame_new_server_setting_cloak.visible = true
                             } else {
@@ -209,9 +209,9 @@ Item {
                         TextFieldType {
                             width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
                             height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
-                            text: NewServerProtocolsLogic.lineEditNewServerSsPortText
+                            text: NewServerProtocolsLogic.lineEditSsPortText
                             onEditingFinished: {
-                                NewServerProtocolsLogic.lineEditNewServerSsPortText = text
+                                NewServerProtocolsLogic.lineEditSsPortText = text
                             }
                         }
                         LabelType {
@@ -231,14 +231,14 @@ Item {
                             ]
                             currentIndex: {
                                 for (let i = 0; i < model.length; ++i) {
-                                    if (NewServerProtocolsLogic.comboBoxNewServerSsCipherText === model[i]) {
+                                    if (NewServerProtocolsLogic.comboBoxSsCipherText === model[i]) {
                                         return i
                                     }
                                 }
                                 return -1
                             }
                             onCurrentTextChanged: {
-                                NewServerProtocolsLogic.comboBoxNewServerSsCipherText = currentText
+                                NewServerProtocolsLogic.comboBoxSsCipherText = currentText
                             }
                         }
                     }
@@ -254,9 +254,9 @@ Item {
                         text: qsTr("ShadowSocks")
                         height: parent.height
                         width: 308
-                        checked: NewServerProtocolsLogic.checkBoxNewServerSsChecked
+                        checked: NewServerProtocolsLogic.checkBoxSsChecked
                         onCheckedChanged:  {
-                            NewServerProtocolsLogic.checkBoxNewServerSsChecked = checked
+                            NewServerProtocolsLogic.checkBoxSsChecked = checked
                         }
                     }
                     ImageButtonType {
@@ -264,10 +264,10 @@ Item {
                         height: 35
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
-                        checked: NewServerProtocolsLogic.pushButtonNewServerSettingsSsChecked
+                        checked: NewServerProtocolsLogic.pushButtonSettingsSsChecked
                         checkable: true
                         onCheckedChanged: {
-                            NewServerProtocolsLogic.pushButtonNewServerSettingsSsChecked = checked
+                            NewServerProtocolsLogic.pushButtonSettingsSsChecked = checked
                             if (checked) {
                                 frame_new_server_settings_ss.visible = true
                             } else {
@@ -312,9 +312,9 @@ Item {
                         TextFieldType {
                             width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
                             height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
-                            text: NewServerProtocolsLogic.lineEditNewServerOpenvpnPortText
+                            text: NewServerProtocolsLogic.lineEditOpenvpnPortText
                             onEditingFinished: {
-                                NewServerProtocolsLogic.lineEditNewServerOpenvpnPortText = text
+                                NewServerProtocolsLogic.lineEditOpenvpnPortText = text
                             }
                         }
                         LabelType {
@@ -331,14 +331,14 @@ Item {
                             ]
                             currentIndex: {
                                 for (let i = 0; i < model.length; ++i) {
-                                    if (NewServerProtocolsLogic.comboBoxNewServerOpenvpnProtoText === model[i]) {
+                                    if (NewServerProtocolsLogic.comboBoxOpenvpnProtoText === model[i]) {
                                         return i
                                     }
                                 }
                                 return -1
                             }
                             onCurrentTextChanged: {
-                                NewServerProtocolsLogic.comboBoxNewServerOpenvpnProtoText = currentText
+                                NewServerProtocolsLogic.comboBoxOpenvpnProtoText = currentText
                             }
                         }
                     }
@@ -354,9 +354,9 @@ Item {
                         text: qsTr("OpenVPN")
                         height: parent.height
                         width: 308
-                        checked: NewServerProtocolsLogic.checkBoxNewServerOpenvpnChecked
+                        checked: NewServerProtocolsLogic.checkBoxOpenvpnChecked
                         onCheckedChanged: {
-                            NewServerProtocolsLogic.checkBoxNewServerOpenvpnChecked = checked
+                            NewServerProtocolsLogic.checkBoxOpenvpnChecked = checked
                         }
                     }
                     ImageButtonType {
@@ -364,10 +364,10 @@ Item {
                         height: 35
                         anchors.verticalCenter: parent.verticalCenter
                         icon.source: "qrc:/images/settings.png"
-                        checked: NewServerProtocolsLogic.pushButtonNewServerSettingsOpenvpnChecked
+                        checked: NewServerProtocolsLogic.pushButtonSettingsOpenvpnChecked
                         checkable: true
                         onCheckedChanged: {
-                            NewServerProtocolsLogic.pushButtonNewServerSettingsOpenvpnChecked = checked
+                            NewServerProtocolsLogic.pushButtonSettingsOpenvpnChecked = checked
                             if (checked) {
                                 frame_new_server_settings_openvpn.visible = true
                             } else {
@@ -379,7 +379,7 @@ Item {
             }
             Rectangle {
                 id: frame_new_server_settings_parent_wireguard
-                visible: NewServerProtocolsLogic.frameNewServerSettingsParentWireguardVisible
+                visible: NewServerProtocolsLogic.frameSettingsParentWireguardVisible
                 x: 5
                 y: 5
                 width: 368

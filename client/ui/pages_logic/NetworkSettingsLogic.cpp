@@ -10,39 +10,13 @@ NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void NetworkSettingsLogic::updateNetworkSettingsPage()
+void NetworkSettingsLogic::updatePage()
 {
-    setLineEditNetworkSettingsDns1Text(m_settings.primaryDns());
-    setLineEditNetworkSettingsDns2Text(m_settings.secondaryDns());
+    set_lineEditDns1Text(m_settings.primaryDns());
+    set_lineEditDns2Text(m_settings.secondaryDns());
 }
 
-QString NetworkSettingsLogic::getLineEditNetworkSettingsDns1Text() const
-{
-    return m_lineEditNetworkSettingsDns1Text;
-}
-
-void NetworkSettingsLogic::setLineEditNetworkSettingsDns1Text(const QString &lineEditNetworkSettingsDns1Text)
-{
-    if (m_lineEditNetworkSettingsDns1Text != lineEditNetworkSettingsDns1Text) {
-        m_lineEditNetworkSettingsDns1Text = lineEditNetworkSettingsDns1Text;
-        emit lineEditNetworkSettingsDns1TextChanged();
-    }
-}
-
-QString NetworkSettingsLogic::getLineEditNetworkSettingsDns2Text() const
-{
-    return m_lineEditNetworkSettingsDns2Text;
-}
-
-void NetworkSettingsLogic::setLineEditNetworkSettingsDns2Text(const QString &lineEditNetworkSettingsDns2Text)
-{
-    if (m_lineEditNetworkSettingsDns2Text != lineEditNetworkSettingsDns2Text) {
-        m_lineEditNetworkSettingsDns2Text = lineEditNetworkSettingsDns2Text;
-        emit lineEditNetworkSettingsDns2TextChanged();
-    }
-}
-
-void NetworkSettingsLogic::onLineEditNetworkSettingsDns1EditFinished(const QString &text)
+void NetworkSettingsLogic::onLineEditDns1EditFinished(const QString &text)
 {
     QRegExp reg{getIpAddressValidatorRegex()};
     if (reg.exactMatch(text)) {
@@ -50,7 +24,7 @@ void NetworkSettingsLogic::onLineEditNetworkSettingsDns1EditFinished(const QStri
     }
 }
 
-void NetworkSettingsLogic::onLineEditNetworkSettingsDns2EditFinished(const QString &text)
+void NetworkSettingsLogic::onLineEditDns2EditFinished(const QString &text)
 {
     QRegExp reg{getIpAddressValidatorRegex()};
     if (reg.exactMatch(text)) {
@@ -58,16 +32,16 @@ void NetworkSettingsLogic::onLineEditNetworkSettingsDns2EditFinished(const QStri
     }
 }
 
-void NetworkSettingsLogic::onPushButtonNetworkSettingsResetdns1Clicked()
+void NetworkSettingsLogic::onPushButtonResetDns1Clicked()
 {
     m_settings.setPrimaryDns(m_settings.cloudFlareNs1);
-    updateNetworkSettingsPage();
+    updatePage();
 }
 
-void NetworkSettingsLogic::onPushButtonNetworkSettingsResetdns2Clicked()
+void NetworkSettingsLogic::onPushButtonResetDns2Clicked()
 {
     m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
-    updateNetworkSettingsPage();
+    updatePage();
 }
 
 QString NetworkSettingsLogic::getIpAddressValidatorRegex() const

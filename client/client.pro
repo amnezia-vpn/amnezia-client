@@ -51,6 +51,7 @@ HEADERS  += \
    ui/pages_logic/protocols/CloakLogic.h \
    ui/pages_logic/protocols/OpenVpnLogic.h \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
+    ui/property_helper.h \
     ui/serversmodel.h \
     ui/uilogic.h \
    ui/qautostart.h \

@@ -3,243 +3,45 @@
 
 NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_pushButtonNewServerSettingsCloakChecked{false},
-    m_pushButtonNewServerSettingsSsChecked{false},
-    m_pushButtonNewServerSettingsOpenvpnChecked{false},
-    m_lineEditNewServerCloakPortText{},
-    m_lineEditNewServerCloakSiteText{},
-    m_lineEditNewServerSsPortText{},
-    m_comboBoxNewServerSsCipherText{"chacha20-ietf-poly1305"},
-    m_lineEditNewServerOpenvpnPortText{},
-    m_comboBoxNewServerOpenvpnProtoText{"udp"},
-    m_frameNewServerSettingsParentWireguardVisible{false},
-    m_checkBoxNewServerCloakChecked{true},
-    m_checkBoxNewServerSsChecked{false},
-    m_checkBoxNewServerOpenvpnChecked{false},
-    m_progressBarNewServerConnectionMinimum{0},
-    m_progressBarNewServerConnectionMaximum{100}
+    m_pushButtonSettingsCloakChecked{false},
+    m_pushButtonSettingsSsChecked{false},
+    m_pushButtonSettingsOpenvpnChecked{false},
+    m_lineEditCloakPortText{},
+    m_lineEditCloakSiteText{},
+    m_lineEditSsPortText{},
+    m_comboBoxSsCipherText{"chacha20-ietf-poly1305"},
+    m_lineEditOpenvpnPortText{},
+    m_comboBoxOpenvpnProtoText{"udp"},
+    m_frameSettingsParentWireguardVisible{false},
+    m_checkBoxCloakChecked{true},
+    m_checkBoxSsChecked{false},
+    m_checkBoxOpenvpnChecked{false},
+    m_progressBarConnectionMinimum{0},
+    m_progressBarConnectionMaximum{100}
 {
-    setFrameNewServerSettingsParentWireguardVisible(false);
+    set_frameSettingsParentWireguardVisible(false);
 
-    connect(this, &NewServerProtocolsLogic::pushButtonNewServerConnectConfigureClicked, this, [this](){
+    connect(this, &NewServerProtocolsLogic::pushButtonConnectConfigureClicked, this, [this](){
         uiLogic()->installServer(getInstallConfigsFromProtocolsPage());
     });
 }
 
-bool NewServerProtocolsLogic::getFrameNewServerSettingsParentWireguardVisible() const
+
+void NewServerProtocolsLogic::updatePage()
 {
-    return m_frameNewServerSettingsParentWireguardVisible;
-}
+    set_progressBarConnectionMinimum(0);
+    set_progressBarConnectionMaximum(300);
 
-void NewServerProtocolsLogic::setFrameNewServerSettingsParentWireguardVisible(bool frameNewServerSettingsParentWireguardVisible)
-{
-    if (m_frameNewServerSettingsParentWireguardVisible != frameNewServerSettingsParentWireguardVisible) {
-        m_frameNewServerSettingsParentWireguardVisible = frameNewServerSettingsParentWireguardVisible;
-        emit frameNewServerSettingsParentWireguardVisibleChanged();
-    }
-}
-
-
-
-void NewServerProtocolsLogic::updateNewServerProtocolsPage()
-{
-    setProgressBarNewServerConnectionMinimum(0);
-    setProgressBarNewServerConnectionMaximum(300);
-
-    setPushButtonNewServerSettingsCloakChecked(true);
-    setPushButtonNewServerSettingsCloakChecked(false);
-    setPushButtonNewServerSettingsSsChecked(true);
-    setPushButtonNewServerSettingsSsChecked(false);
-    setLineEditNewServerCloakPortText(amnezia::protocols::cloak::defaultPort);
-    setLineEditNewServerCloakSiteText(amnezia::protocols::cloak::defaultRedirSite);
-    setLineEditNewServerSsPortText(amnezia::protocols::shadowsocks::defaultPort);
-    setComboBoxNewServerSsCipherText(amnezia::protocols::shadowsocks::defaultCipher);
-    setLineEditNewServerOpenvpnPortText(amnezia::protocols::openvpn::defaultPort);
-    setComboBoxNewServerOpenvpnProtoText(amnezia::protocols::openvpn::defaultTransportProto);
-}
-
-
-
-QString NewServerProtocolsLogic::getComboBoxNewServerOpenvpnProtoText() const
-{
-    return m_comboBoxNewServerOpenvpnProtoText;
-}
-
-void NewServerProtocolsLogic::setComboBoxNewServerOpenvpnProtoText(const QString &comboBoxNewServerOpenvpnProtoText)
-{
-    if (m_comboBoxNewServerOpenvpnProtoText != comboBoxNewServerOpenvpnProtoText) {
-        m_comboBoxNewServerOpenvpnProtoText = comboBoxNewServerOpenvpnProtoText;
-        emit comboBoxNewServerOpenvpnProtoTextChanged();
-    }
-}
-
-QString NewServerProtocolsLogic::getLineEditNewServerCloakSiteText() const
-{
-    return m_lineEditNewServerCloakSiteText;
-}
-
-void NewServerProtocolsLogic::setLineEditNewServerCloakSiteText(const QString &lineEditNewServerCloakSiteText)
-{
-    if (m_lineEditNewServerCloakSiteText != lineEditNewServerCloakSiteText) {
-        m_lineEditNewServerCloakSiteText = lineEditNewServerCloakSiteText;
-        emit lineEditNewServerCloakSiteTextChanged();
-    }
-}
-
-QString NewServerProtocolsLogic::getLineEditNewServerSsPortText() const
-{
-    return m_lineEditNewServerSsPortText;
-}
-
-void NewServerProtocolsLogic::setLineEditNewServerSsPortText(const QString &lineEditNewServerSsPortText)
-{
-    if (m_lineEditNewServerSsPortText != lineEditNewServerSsPortText) {
-        m_lineEditNewServerSsPortText = lineEditNewServerSsPortText;
-        emit lineEditNewServerSsPortTextChanged();
-    }
-}
-
-QString NewServerProtocolsLogic::getComboBoxNewServerSsCipherText() const
-{
-    return m_comboBoxNewServerSsCipherText;
-}
-
-void NewServerProtocolsLogic::setComboBoxNewServerSsCipherText(const QString &comboBoxNewServerSsCipherText)
-{
-    if (m_comboBoxNewServerSsCipherText != comboBoxNewServerSsCipherText) {
-        m_comboBoxNewServerSsCipherText = comboBoxNewServerSsCipherText;
-        emit comboBoxNewServerSsCipherTextChanged();
-    }
-}
-
-QString NewServerProtocolsLogic::getlineEditNewServerOpenvpnPortText() const
-{
-    return m_lineEditNewServerOpenvpnPortText;
-}
-
-void NewServerProtocolsLogic::setLineEditNewServerOpenvpnPortText(const QString &lineEditNewServerOpenvpnPortText)
-{
-    if (m_lineEditNewServerOpenvpnPortText != lineEditNewServerOpenvpnPortText) {
-        m_lineEditNewServerOpenvpnPortText = lineEditNewServerOpenvpnPortText;
-        emit lineEditNewServerOpenvpnPortTextChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getPushButtonNewServerSettingsSsChecked() const
-{
-    return m_pushButtonNewServerSettingsSsChecked;
-}
-
-void NewServerProtocolsLogic::setPushButtonNewServerSettingsSsChecked(bool pushButtonNewServerSettingsSsChecked)
-{
-    if (m_pushButtonNewServerSettingsSsChecked != pushButtonNewServerSettingsSsChecked) {
-        m_pushButtonNewServerSettingsSsChecked = pushButtonNewServerSettingsSsChecked;
-        emit pushButtonNewServerSettingsSsCheckedChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getPushButtonNewServerSettingsOpenvpnChecked() const
-{
-    return m_pushButtonNewServerSettingsOpenvpnChecked;
-}
-
-void NewServerProtocolsLogic::setPushButtonNewServerSettingsOpenvpnChecked(bool pushButtonNewServerSettingsOpenvpnChecked)
-{
-    if (m_pushButtonNewServerSettingsOpenvpnChecked != pushButtonNewServerSettingsOpenvpnChecked) {
-        m_pushButtonNewServerSettingsOpenvpnChecked = pushButtonNewServerSettingsOpenvpnChecked;
-        emit pushButtonNewServerSettingsOpenvpnCheckedChanged();
-    }
-}
-
-QString NewServerProtocolsLogic::getLineEditNewServerCloakPortText() const
-{
-    return m_lineEditNewServerCloakPortText;
-}
-
-void NewServerProtocolsLogic::setLineEditNewServerCloakPortText(const QString &lineEditNewServerCloakPortText)
-{
-    if (m_lineEditNewServerCloakPortText != lineEditNewServerCloakPortText) {
-        m_lineEditNewServerCloakPortText = lineEditNewServerCloakPortText;
-        emit lineEditNewServerCloakPortTextChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getPushButtonNewServerSettingsCloakChecked() const
-{
-    return m_pushButtonNewServerSettingsCloakChecked;
-}
-
-void NewServerProtocolsLogic::setPushButtonNewServerSettingsCloakChecked(bool pushButtonNewServerSettingsCloakChecked)
-{
-    if (m_pushButtonNewServerSettingsCloakChecked != pushButtonNewServerSettingsCloakChecked) {
-        m_pushButtonNewServerSettingsCloakChecked = pushButtonNewServerSettingsCloakChecked;
-        emit pushButtonNewServerSettingsCloakCheckedChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getCheckBoxNewServerCloakChecked() const
-{
-    return m_checkBoxNewServerCloakChecked;
-}
-
-void NewServerProtocolsLogic::setCheckBoxNewServerCloakChecked(bool checkBoxNewServerCloakChecked)
-{
-    if (m_checkBoxNewServerCloakChecked != checkBoxNewServerCloakChecked) {
-        m_checkBoxNewServerCloakChecked = checkBoxNewServerCloakChecked;
-        emit checkBoxNewServerCloakCheckedChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getCheckBoxNewServerSsChecked() const
-{
-    return m_checkBoxNewServerSsChecked;
-}
-
-void NewServerProtocolsLogic::setCheckBoxNewServerSsChecked(bool checkBoxNewServerSsChecked)
-{
-    if (m_checkBoxNewServerSsChecked != checkBoxNewServerSsChecked) {
-        m_checkBoxNewServerSsChecked = checkBoxNewServerSsChecked;
-        emit checkBoxNewServerSsCheckedChanged();
-    }
-}
-
-bool NewServerProtocolsLogic::getCheckBoxNewServerOpenvpnChecked() const
-{
-    return m_checkBoxNewServerOpenvpnChecked;
-}
-
-void NewServerProtocolsLogic::setCheckBoxNewServerOpenvpnChecked(bool checkBoxNewServerOpenvpnChecked)
-{
-    if (m_checkBoxNewServerOpenvpnChecked != checkBoxNewServerOpenvpnChecked) {
-        m_checkBoxNewServerOpenvpnChecked = checkBoxNewServerOpenvpnChecked;
-        emit checkBoxNewServerOpenvpnCheckedChanged();
-    }
-}
-
-double NewServerProtocolsLogic::getProgressBarNewServerConnectionMinimum() const
-{
-    return m_progressBarNewServerConnectionMinimum;
-}
-
-void NewServerProtocolsLogic::setProgressBarNewServerConnectionMinimum(double progressBarNewServerConnectionMinimum)
-{
-    if (m_progressBarNewServerConnectionMinimum != progressBarNewServerConnectionMinimum) {
-        m_progressBarNewServerConnectionMinimum = progressBarNewServerConnectionMinimum;
-        emit progressBarNewServerConnectionMinimumChanged();
-    }
-}
-
-double NewServerProtocolsLogic::getProgressBarNewServerConnectionMaximum() const
-{
-    return m_progressBarNewServerConnectionMaximum;
-}
-
-void NewServerProtocolsLogic::setProgressBarNewServerConnectionMaximum(double progressBarNewServerConnectionMaximum)
-{
-    if (m_progressBarNewServerConnectionMaximum != progressBarNewServerConnectionMaximum) {
-        m_progressBarNewServerConnectionMaximum = progressBarNewServerConnectionMaximum;
-        emit progressBarNewServerConnectionMaximumChanged();
-    }
+    set_pushButtonSettingsCloakChecked(true);
+    set_pushButtonSettingsCloakChecked(false);
+    set_pushButtonSettingsSsChecked(true);
+    set_pushButtonSettingsSsChecked(false);
+    set_lineEditCloakPortText(amnezia::protocols::cloak::defaultPort);
+    set_lineEditCloakSiteText(amnezia::protocols::cloak::defaultRedirSite);
+    set_lineEditSsPortText(amnezia::protocols::shadowsocks::defaultPort);
+    set_comboBoxSsCipherText(amnezia::protocols::shadowsocks::defaultCipher);
+    set_lineEditOpenvpnPortText(amnezia::protocols::openvpn::defaultPort);
+    set_comboBoxOpenvpnProtoText(amnezia::protocols::openvpn::defaultTransportProto);
 }
 
 QMap<DockerContainer, QJsonObject> NewServerProtocolsLogic::getInstallConfigsFromProtocolsPage() const
@@ -247,36 +49,36 @@ QMap<DockerContainer, QJsonObject> NewServerProtocolsLogic::getInstallConfigsFro
     QJsonObject cloakConfig {
         { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
         { config_key::cloak, QJsonObject {
-                { config_key::port, getLineEditNewServerCloakPortText() },
-                { config_key::site, getLineEditNewServerCloakSiteText() }}
+                { config_key::port, lineEditCloakPortText() },
+                { config_key::site, lineEditCloakSiteText() }}
         }
     };
     QJsonObject ssConfig {
         { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverShadowSocks) },
         { config_key::shadowsocks, QJsonObject {
-                { config_key::port, getLineEditNewServerSsPortText() },
-                { config_key::cipher, getComboBoxNewServerSsCipherText() }}
+                { config_key::port, lineEditSsPortText() },
+                { config_key::cipher, comboBoxSsCipherText() }}
         }
     };
     QJsonObject openVpnConfig {
         { config_key::container, amnezia::containerToString(DockerContainer::OpenVpn) },
         { config_key::openvpn, QJsonObject {
-                { config_key::port, getlineEditNewServerOpenvpnPortText() },
-                { config_key::transport_proto, getComboBoxNewServerOpenvpnProtoText() }}
+                { config_key::port, lineEditOpenvpnPortText() },
+                { config_key::transport_proto, comboBoxOpenvpnProtoText() }}
         }
     };
 
     QMap<DockerContainer, QJsonObject> containers;
 
-    if (getCheckBoxNewServerCloakChecked()) {
+    if (checkBoxCloakChecked()) {
         containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
     }
 
-    if (getCheckBoxNewServerSsChecked()) {
+    if (checkBoxSsChecked()) {
         containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
     }
 
-    if (getCheckBoxNewServerOpenvpnChecked()) {
+    if (checkBoxOpenvpnChecked()) {
         containers.insert(DockerContainer::OpenVpn, openVpnConfig);
     }
 

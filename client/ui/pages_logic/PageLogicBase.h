@@ -1,8 +1,9 @@
 #ifndef PAGE_LOGIC_BASE_H
 #define PAGE_LOGIC_BASE_H
 
-#include "../pages.h"
 #include "settings.h"
+#include "../pages.h"
+#include "../property_helper.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -17,7 +18,7 @@ public:
     explicit PageLogicBase(UiLogic *uiLogic, QObject *parent = nullptr);
     ~PageLogicBase() = default;
 
-    Q_INVOKABLE void updatePage() {}
+    Q_INVOKABLE virtual void updatePage() {}
 
 protected:
     UiLogic *uiLogic() const { return m_uiLogic; }

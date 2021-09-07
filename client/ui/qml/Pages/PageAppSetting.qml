@@ -36,10 +36,10 @@ PageBase {
         width: 211
         height: 31
         text: qsTr("Auto connect")
-        checked: AppSettingsLogic.checkBoxAppSettingsAutoconnectChecked
+        checked: AppSettingsLogic.checkBoxAutoConnectChecked
         onCheckedChanged: {
-            AppSettingsLogic.checkBoxAppSettingsAutoconnectChecked = checked
-            AppSettingsLogic.onCheckBoxAppSettingsAutoconnectToggled(checked)
+            AppSettingsLogic.checkBoxAutoConnectChecked = checked
+            AppSettingsLogic.onCheckBoxAutoconnectToggled(checked)
         }
     }
     CheckBoxType {
@@ -48,10 +48,10 @@ PageBase {
         width: 211
         height: 31
         text: qsTr("Auto start")
-        checked: AppSettingsLogic.checkBoxAppSettingsAutostartChecked
+        checked: AppSettingsLogic.checkBoxAutostartChecked
         onCheckedChanged: {
-            AppSettingsLogic.checkBoxAppSettingsAutostartChecked = checked
-            AppSettingsLogic.onCheckBoxAppSettingsAutostartToggled(checked)
+            AppSettingsLogic.checkBoxAutostartChecked = checked
+            AppSettingsLogic.onCheckBoxAutostartToggled(checked)
         }
     }
     CheckBoxType {
@@ -60,10 +60,10 @@ PageBase {
         width: 211
         height: 31
         text: qsTr("Start minimized")
-        checked: AppSettingsLogic.checkBoxAppSettingsStartMinimizedChecked
+        checked: AppSettingsLogic.checkBoxStartMinimizedChecked
         onCheckedChanged: {
-            AppSettingsLogic.checkBoxAppSettingsStartMinimizedChecked = checked
-            AppSettingsLogic.onCheckBoxAppSettingsStartMinimizedToggled(checked)
+            AppSettingsLogic.checkBoxStartMinimizedChecked = checked
+            AppSettingsLogic.onCheckBoxStartMinimizedToggled(checked)
         }
     }
     Image {
@@ -78,7 +78,7 @@ PageBase {
         y: 240
         width: 281
         height: 21
-        text: AppSettingsLogic.labelAppSettingsVersionText
+        text: AppSettingsLogic.labelVersionText
     }
     BlueButtonType {
         x: 30
@@ -97,7 +97,7 @@ PageBase {
         height: 41
         text: qsTr("Open logs folder")
         onClicked: {
-            AppSettingsLogic.onPushButtonAppSettingsOpenLogsChecked()
+            AppSettingsLogic.onPushButtonOpenLogsClicked()
         }
     }
 }

@@ -154,7 +154,7 @@ Window {
                 UiLogic.updateWizardHighPage();
             }
             if (page === PageEnum.ServerConfiguring) {
-                UiLogic.progressBarNewServerConfiguringValue = 0;
+                UiLogic.progressBarValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
                 GeneralSettingsLogic.updateGeneralSettingPage();
@@ -167,16 +167,16 @@ Window {
                 StartPageLogic.updateStartPage();
             }
             if (page === PageEnum.NewServerProtocols) {
-                NewServerProtocolsLogic.updateNewServerProtocolsPage()
+                NewServerProtocolsLogic.updatePage()
             }
             if (page === PageEnum.ServerContainers) {
                 ServerContainersLogic.updateServerContainersPage()
             }
             if (page === PageEnum.AppSettings) {
-                AppSettingsLogic.updateAppSettingsPage()
+                AppSettingsLogic.updatePage()
             }
             if (page === PageEnum.NetworkSettings) {
-                NetworkSettingsLogic.updateNetworkSettingsPage()
+                NetworkSettingsLogic.updatePage()
             }
             if (page === PageEnum.Sites) {
                 SitesLogic.updateSitesPage()

@@ -11,20 +11,7 @@ GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent):
 
 void GeneralSettingsLogic::updateGeneralSettingPage()
 {
-    setPushButtonGeneralSettingsShareConnectionEnable(m_settings.haveAuthData(m_settings.defaultServerIndex()));
-}
-
-bool GeneralSettingsLogic::getPushButtonGeneralSettingsShareConnectionEnable() const
-{
-    return m_pushButtonGeneralSettingsShareConnectionEnable;
-}
-
-void GeneralSettingsLogic::setPushButtonGeneralSettingsShareConnectionEnable(bool pushButtonGeneralSettingsShareConnectionEnable)
-{
-    if (m_pushButtonGeneralSettingsShareConnectionEnable != pushButtonGeneralSettingsShareConnectionEnable) {
-        m_pushButtonGeneralSettingsShareConnectionEnable = pushButtonGeneralSettingsShareConnectionEnable;
-        emit pushButtonGeneralSettingsShareConnectionEnableChanged();
-    }
+    set_pushButtonGeneralSettingsShareConnectionEnable(m_settings.haveAuthData(m_settings.defaultServerIndex()));
 }
 
 void GeneralSettingsLogic::onPushButtonGeneralSettingsServerSettingsClicked()

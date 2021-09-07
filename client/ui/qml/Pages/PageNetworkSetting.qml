@@ -57,10 +57,10 @@ Item {
         y: 120
         width: 271
         height: 40
-        text: NetworkSettingsLogic.lineEditNetworkSettingsDns1Text
+        text: NetworkSettingsLogic.lineEditDns1Text
         onEditingFinished: {
-            NetworkSettingsLogic.lineEditNetworkSettingsDns1Text = text
-            NetworkSettingsLogic.onLineEditNetworkSettingsDns1EditFinished(text)
+            NetworkSettingsLogic.lineEditDns1Text = text
+            NetworkSettingsLogic.onLineEditDns1EditFinished(text)
         }
         validator: RegExpValidator {
             regExp: NetworkSettingsLogic.ipAddressValidatorRegex
@@ -72,10 +72,10 @@ Item {
         y: 200
         width: 271
         height: 40
-        text: NetworkSettingsLogic.lineEditNetworkSettingsDns2Text
+        text: NetworkSettingsLogic.lineEditDns2Text
         onEditingFinished: {
-            NetworkSettingsLogic.lineEditNetworkSettingsDns2Text = text
-            NetworkSettingsLogic.onLineEditNetworkSettingsDns2EditFinished(text)
+            NetworkSettingsLogic.lineEditDns2Text = text
+            NetworkSettingsLogic.onLineEditDns2EditFinished(text)
         }
         validator: RegExpValidator {
             regExp: NetworkSettingsLogic.ipAddressValidatorRegex
@@ -89,7 +89,7 @@ Item {
         height: 24
         icon.source: "qrc:/images/reload.png"
         onClicked: {
-            NetworkSettingsLogic.onPushButtonNetworkSettingsResetdns1Clicked()
+            NetworkSettingsLogic.onPushButtonResetDns1Clicked()
         }
     }
     ImageButtonType {
@@ -100,7 +100,7 @@ Item {
         height: 24
         icon.source: "qrc:/images/reload.png"
         onClicked: {
-            NetworkSettingsLogic.onPushButtonNetworkSettingsResetdns2Clicked()
+            NetworkSettingsLogic.onPushButtonResetDns2Clicked()
         }
     }
 }

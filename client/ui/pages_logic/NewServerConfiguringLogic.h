@@ -9,63 +9,18 @@ class NewServerConfiguringLogic : public PageLogicBase
 {
     Q_OBJECT
 
-public:
-    Q_PROPERTY(double progressBarNewServerConfiguringValue READ getProgressBarNewServerConfiguringValue WRITE setProgressBarNewServerConfiguringValue NOTIFY progressBarNewServerConfiguringValueChanged)
-    Q_PROPERTY(bool pageNewServerConfiguringEnabled READ getPageNewServerConfiguringEnabled WRITE setPageNewServerConfiguringEnabled NOTIFY pageNewServerConfiguringEnabledChanged)
-    Q_PROPERTY(bool labelNewServerConfiguringWaitInfoVisible READ getLabelNewServerConfiguringWaitInfoVisible WRITE setLabelNewServerConfiguringWaitInfoVisible NOTIFY labelNewServerConfiguringWaitInfoVisibleChanged)
-    Q_PROPERTY(QString labelNewServerConfiguringWaitInfoText READ getLabelNewServerConfiguringWaitInfoText WRITE setLabelNewServerConfiguringWaitInfoText NOTIFY labelNewServerConfiguringWaitInfoTextChanged)
-    Q_PROPERTY(bool progressBarNewServerConfiguringVisible READ getProgressBarNewServerConfiguringVisible WRITE setProgressBarNewServerConfiguringVisible NOTIFY progressBarNewServerConfiguringVisibleChanged)
-    Q_PROPERTY(int progressBarNewServerConfiguringMaximium READ getProgressBarNewServerConfiguringMaximium WRITE setProgressBarNewServerConfiguringMaximium NOTIFY progressBarNewServerConfiguringMaximiumChanged)
-    Q_PROPERTY(bool progressBarNewServerConfiguringTextVisible READ getProgressBarNewServerConfiguringTextVisible WRITE setProgressBarNewServerConfiguringTextVisible NOTIFY progressBarNewServerConfiguringTextVisibleChanged)
-    Q_PROPERTY(QString progressBarNewServerConfiguringText READ getProgressBarNewServerConfiguringText WRITE setProgressBarNewServerConfiguringText NOTIFY progressBarNewServerConfiguringTextChanged)
+    AUTO_PROPERTY(double, progressBarValue)
+    AUTO_PROPERTY(bool, pageEnabled)
+    AUTO_PROPERTY(bool, labelWaitInfoVisible)
+    AUTO_PROPERTY(QString, labelWaitInfoText)
+    AUTO_PROPERTY(bool, progressBarVisible)
+    AUTO_PROPERTY(int, progressBarMaximium)
+    AUTO_PROPERTY(bool, progressBarTextVisible)
+    AUTO_PROPERTY(QString, progressBarText)
 
 public:
     explicit NewServerConfiguringLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~NewServerConfiguringLogic() = default;
-
-    double getProgressBarNewServerConfiguringValue() const;
-    void setProgressBarNewServerConfiguringValue(double progressBarNewServerConfiguringValue);
-
-    bool getPageNewServerConfiguringEnabled() const;
-    void setPageNewServerConfiguringEnabled(bool pageNewServerConfiguringEnabled);
-    bool getLabelNewServerConfiguringWaitInfoVisible() const;
-    void setLabelNewServerConfiguringWaitInfoVisible(bool labelNewServerConfiguringWaitInfoVisible);
-    QString getLabelNewServerConfiguringWaitInfoText() const;
-    void setLabelNewServerConfiguringWaitInfoText(const QString &labelNewServerConfiguringWaitInfoText);
-    bool getProgressBarNewServerConfiguringVisible() const;
-    void setProgressBarNewServerConfiguringVisible(bool progressBarNewServerConfiguringVisible);
-    int getProgressBarNewServerConfiguringMaximium() const;
-    void setProgressBarNewServerConfiguringMaximium(int progressBarNewServerConfiguringMaximium);
-    bool getProgressBarNewServerConfiguringTextVisible() const;
-    void setProgressBarNewServerConfiguringTextVisible(bool progressBarNewServerConfiguringTextVisible);
-    QString getProgressBarNewServerConfiguringText() const;
-    void setProgressBarNewServerConfiguringText(const QString &progressBarNewServerConfiguringText);
-
-signals:
-    void progressBarNewServerConfiguringValueChanged();
-    void pageNewServerConfiguringEnabledChanged();
-    void labelNewServerConfiguringWaitInfoVisibleChanged();
-    void labelNewServerConfiguringWaitInfoTextChanged();
-    void progressBarNewServerConfiguringVisibleChanged();
-    void progressBarNewServerConfiguringMaximiumChanged();
-    void progressBarNewServerConfiguringTextVisibleChanged();
-    void progressBarNewServerConfiguringTextChanged();
-
-private:
-
-
-private slots:
-
-
-private:
-    double m_progressBarNewServerConfiguringValue;
-    bool m_pageNewServerConfiguringEnabled;
-    bool m_labelNewServerConfiguringWaitInfoVisible;
-    QString m_labelNewServerConfiguringWaitInfoText;
-    bool m_progressBarNewServerConfiguringVisible;
-    int m_progressBarNewServerConfiguringMaximium;
-    bool m_progressBarNewServerConfiguringTextVisible;
-    QString m_progressBarNewServerConfiguringText;
 
 };
 #endif // NEW_SERVER_CONFIGURING_LOGIC_H

@@ -6,7 +6,7 @@ import "../Config"
 
 Item {
     id: root
-    enabled: NewServerConfiguringLogic.pageNewServerConfiguringEnabled
+    enabled: NewServerConfiguringLogic.pageEnabled
     Text {
         font.family: "Lato"
         font.styleName: "normal"
@@ -32,8 +32,8 @@ Item {
         y: 560
         width: 301
         height: 41
-        text: NewServerConfiguringLogic.labelNewServerConfiguringWaitInfoText
-        visible: NewServerConfiguringLogic.labelNewServerConfiguringWaitInfoVisible
+        text: NewServerConfiguringLogic.labelWaitInfoText
+        visible: NewServerConfiguringLogic.labelWaitInfoVisible
     }
     ProgressBar {
         id: pr
@@ -42,9 +42,9 @@ Item {
         width: 301
         height: 40
         from: 0
-        to: NewServerConfiguringLogic.progressBarNewServerConfiguringMaximium
-        value: NewServerConfiguringLogic.progressBarNewServerConfiguringValue
-        visible: NewServerConfiguringLogic.progressBarNewServerConfiguringVisible
+        to: NewServerConfiguringLogic.progressBarMaximium
+        value: NewServerConfiguringLogic.progressBarValue
+        visible: NewServerConfiguringLogic.progressBarVisible
         background: Rectangle {
             implicitWidth: parent.width
             implicitHeight: parent.height
@@ -65,13 +65,13 @@ Item {
 
         LabelType {
             anchors.fill: parent
-            text: NewServerConfiguringLogic.progressBarNewServerConfiguringText
+            text: NewServerConfiguringLogic.progressBarText
             horizontalAlignment: Text.AlignHCenter
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             color: "#D4D4D4"
-            visible: NewServerConfiguringLogic.progressBarNewServerConfiguringTextVisible
+            visible: NewServerConfiguringLogic.progressBarTextVisible
         }
     }
 }
