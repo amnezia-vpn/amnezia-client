@@ -128,7 +128,7 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: ShadowSocksLogic.pushButtonProtoShadowsocksSaveVisible
+            visible: ShadowSocksLogic.pushButtonShadowsocksSaveVisible
             onClicked: {
                 ShadowSocksLogic.onPushButtonProtoShadowsocksSaveClicked()
             }

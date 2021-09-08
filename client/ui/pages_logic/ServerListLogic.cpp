@@ -1,6 +1,7 @@
 #include "ServerListLogic.h"
 
 #include "vpnconnection.h"
+#include "../serversmodel.h"
 #include "../uilogic.h"
 
 ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
@@ -8,11 +9,6 @@ ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
     m_serverListModel{new ServersModel(this)}
 {
 
-}
-
-QObject* ServerListLogic::getServerListModel() const
-{
-    return m_serverListModel;
 }
 
 void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
@@ -43,5 +39,5 @@ void ServerListLogic::updateServersListPage()
         c.isDefault = (i == defaultServer);
         serverListContent.push_back(c);
     }
-    m_serverListModel->setContent(serverListContent);
+    qobject_cast<ServersModel*>(m_serverListModel)->setContent(serverListContent);
 }

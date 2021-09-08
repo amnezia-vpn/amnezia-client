@@ -148,7 +148,7 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: CloakLogic.pushButtonProtoCloakSaveVisible
+            visible: CloakLogic.pushButtonCloakSaveVisible
             onClicked: {
                 CloakLogic.onPushButtonProtoCloakSaveClicked()
             }

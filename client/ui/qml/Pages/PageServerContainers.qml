@@ -6,7 +6,7 @@ import "../Config"
 
 Item {
     id: root
-    enabled: ServerContainersLogic.pageServerContainersEnabled
+    enabled: ServerContainersLogic.pageEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -105,15 +105,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoCloakOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonCloakOpenvpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoCloakOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonCloakOpenvpnContDefaultChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoCloakOpenvpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonProtoCloakOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonCloakOpenvpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -123,7 +123,7 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonProtoCloakOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonCloakOpenvpnContShareVisible
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoCloakOpenvpnContShareClicked(false)
                         }
@@ -136,14 +136,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoCloakOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonCloakOpenvpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoCloakOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonCloakOpenvpnContInstallChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoCloakOpenvpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonProtoCloakOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonCloakOpenvpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -217,15 +217,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoSsOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonSsOpenvpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoSsOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonSsOpenvpnContDefaultChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoSsOpenvpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonProtoSsOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonSsOpenvpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -235,7 +235,7 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonProtoSsOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonSsOpenvpnContShareVisible
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoSsOpenvpnContShareClicked(false)
                         }
@@ -248,14 +248,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoSsOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonSsOpenvpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoSsOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonSsOpenvpnContInstallChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoSsOpenvpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonProtoSsOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonSsOpenvpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -318,15 +318,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonOpenvpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonOpenvpnContDefaultChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoOpenvpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonProtoOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonOpenvpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -336,7 +336,7 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonProtoOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonOpenvpnContShareVisible
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoOpenvpnContShareClicked(false)
                         }
@@ -349,14 +349,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonOpenvpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonOpenvpnContInstallChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoOpenvpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonProtoOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonOpenvpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -408,15 +408,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoWireguardContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonWireguardContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoWireguardContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonWireguardContDefaultChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoWireguardContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonProtoWireguardContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonWireguardContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -426,7 +426,7 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonProtoWireguardContShareVisible
+                        visible: ServerContainersLogic.pushButtonWireguardContShareVisible
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoWireguardContShareClicked(false)
                         }
@@ -439,14 +439,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonProtoWireguardContInstallChecked
+                        checked: ServerContainersLogic.pushButtonWireguardContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonProtoWireguardContInstallChecked = checked
+                            ServerContainersLogic.pushButtonWireguardContInstallChecked = checked
                         }
                         onClicked: {
                             ServerContainersLogic.onPushButtonProtoWireguardContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonProtoWireguardContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonWireguardContInstallEnabled
                     }
                 }
                 Rectangle {

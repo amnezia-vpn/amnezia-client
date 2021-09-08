@@ -25,9 +25,5 @@ public:
     explicit AppSettingsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~AppSettingsLogic() = default;
 
-signals:
-
-private:
-
 };
 #endif // APP_SETTINGS_LOGIC_H

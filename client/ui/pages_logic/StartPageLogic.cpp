@@ -23,177 +23,47 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
 
 void StartPageLogic::updateStartPage()
 {
-    setLineEditStartExistingCodeText("");
-    setTextEditNewServerSshKeyText("");
-    setLineEditNewServerIpText("");
-    setLineEditNewServerPasswordText("");
-    setTextEditNewServerSshKeyText("");
-    setLineEditNewServerLoginText("");
+    set_lineEditStartExistingCodeText("");
+    set_textEditNewServerSshKeyText("");
+    set_lineEditNewServerIpText("");
+    set_lineEditNewServerPasswordText("");
+    set_textEditNewServerSshKeyText("");
+    set_lineEditNewServerLoginText("");
 
-    setLabelNewServerWaitInfoVisible(false);
-    setLabelNewServerWaitInfoText("");
-    setPushButtonNewServerConnectVisible(true);
-}
-
-bool StartPageLogic::getPushButtonNewServerConnectKeyChecked() const
-{
-    return m_pushButtonNewServerConnectKeyChecked;
-}
-
-void StartPageLogic::setPushButtonNewServerConnectKeyChecked(bool pushButtonNewServerConnectKeyChecked)
-{
-    if (m_pushButtonNewServerConnectKeyChecked != pushButtonNewServerConnectKeyChecked) {
-        m_pushButtonNewServerConnectKeyChecked = pushButtonNewServerConnectKeyChecked;
-        emit pushButtonNewServerConnectKeyCheckedChanged();
-    }
-}
-
-QString StartPageLogic::getLineEditStartExistingCodeText() const
-{
-    return m_lineEditStartExistingCodeText;
-}
-
-void StartPageLogic::setLineEditStartExistingCodeText(const QString &lineEditStartExistingCodeText)
-{
-    if (m_lineEditStartExistingCodeText != lineEditStartExistingCodeText) {
-        m_lineEditStartExistingCodeText = lineEditStartExistingCodeText;
-        emit lineEditStartExistingCodeTextChanged();
-    }
-}
-
-QString StartPageLogic::getTextEditNewServerSshKeyText() const
-{
-    return m_textEditNewServerSshKeyText;
-}
-
-void StartPageLogic::setTextEditNewServerSshKeyText(const QString &textEditNewServerSshKeyText)
-{
-    if (m_textEditNewServerSshKeyText != textEditNewServerSshKeyText) {
-        m_textEditNewServerSshKeyText = textEditNewServerSshKeyText;
-        emit textEditNewServerSshKeyTextChanged();
-    }
-}
-
-QString StartPageLogic::getLineEditNewServerIpText() const
-{
-    return m_lineEditNewServerIpText;
-}
-
-void StartPageLogic::setLineEditNewServerIpText(const QString &lineEditNewServerIpText)
-{
-    if (m_lineEditNewServerIpText != lineEditNewServerIpText) {
-        m_lineEditNewServerIpText = lineEditNewServerIpText;
-        emit lineEditNewServerIpTextChanged();
-    }
-}
-
-QString StartPageLogic::getLineEditNewServerPasswordText() const
-{
-    return m_lineEditNewServerPasswordText;
-}
-
-void StartPageLogic::setLineEditNewServerPasswordText(const QString &lineEditNewServerPasswordText)
-{
-    if (m_lineEditNewServerPasswordText != lineEditNewServerPasswordText) {
-        m_lineEditNewServerPasswordText = lineEditNewServerPasswordText;
-        emit lineEditNewServerPasswordTextChanged();
-    }
-}
-
-QString StartPageLogic::getLineEditNewServerLoginText() const
-{
-    return m_lineEditNewServerLoginText;
-}
-
-void StartPageLogic::setLineEditNewServerLoginText(const QString &lineEditNewServerLoginText)
-{
-    if (m_lineEditNewServerLoginText != lineEditNewServerLoginText) {
-        m_lineEditNewServerLoginText = lineEditNewServerLoginText;
-        emit lineEditNewServerLoginTextChanged();
-    }
-}
-
-bool StartPageLogic::getLabelNewServerWaitInfoVisible() const
-{
-    return m_labelNewServerWaitInfoVisible;
-}
-
-void StartPageLogic::setLabelNewServerWaitInfoVisible(bool labelNewServerWaitInfoVisible)
-{
-    if (m_labelNewServerWaitInfoVisible != labelNewServerWaitInfoVisible) {
-        m_labelNewServerWaitInfoVisible = labelNewServerWaitInfoVisible;
-        emit labelNewServerWaitInfoVisibleChanged();
-    }
-}
-
-QString StartPageLogic::getLabelNewServerWaitInfoText() const
-{
-    return m_labelNewServerWaitInfoText;
-}
-
-void StartPageLogic::setLabelNewServerWaitInfoText(const QString &labelNewServerWaitInfoText)
-{
-    if (m_labelNewServerWaitInfoText != labelNewServerWaitInfoText) {
-        m_labelNewServerWaitInfoText = labelNewServerWaitInfoText;
-        emit labelNewServerWaitInfoTextChanged();
-    }
-}
-
-bool StartPageLogic::getPushButtonNewServerConnectVisible() const
-{
-    return m_pushButtonNewServerConnectVisible;
-}
-
-void StartPageLogic::setPushButtonNewServerConnectVisible(bool pushButtonNewServerConnectVisible)
-{
-    if (m_pushButtonNewServerConnectVisible != pushButtonNewServerConnectVisible) {
-        m_pushButtonNewServerConnectVisible = pushButtonNewServerConnectVisible;
-        emit pushButtonNewServerConnectVisibleChanged();
-    }
-}
-
-bool StartPageLogic::getPushButtonBackFromStartVisible() const
-{
-    return m_pushButtonBackFromStartVisible;
-}
-
-void StartPageLogic::setPushButtonBackFromStartVisible(bool pushButtonBackFromStartVisible)
-{
-    if (m_pushButtonBackFromStartVisible != pushButtonBackFromStartVisible) {
-        m_pushButtonBackFromStartVisible = pushButtonBackFromStartVisible;
-        emit pushButtonBackFromStartVisibleChanged();
-    }
+    set_labelNewServerWaitInfoVisible(false);
+    set_labelNewServerWaitInfoText("");
+    set_pushButtonNewServerConnectVisible(true);
 }
 
 void StartPageLogic::onPushButtonNewServerConnect()
 {
-    if (getPushButtonNewServerConnectKeyChecked()){
-        if (getLineEditNewServerIpText().isEmpty() ||
-                getLineEditNewServerLoginText().isEmpty() ||
-                getTextEditNewServerSshKeyText().isEmpty() ) {
-            setLabelNewServerWaitInfoText(tr("Please fill in all fields"));
+    if (pushButtonNewServerConnectKeyChecked()){
+        if (lineEditNewServerIpText().isEmpty() ||
+                lineEditNewServerLoginText().isEmpty() ||
+                textEditNewServerSshKeyText().isEmpty() ) {
+            set_labelNewServerWaitInfoText(tr("Please fill in all fields"));
             return;
         }
     }
     else {
-        if (getLineEditNewServerIpText().isEmpty() ||
-                getLineEditNewServerLoginText().isEmpty() ||
-                getLineEditNewServerPasswordText().isEmpty() ) {
-            setLabelNewServerWaitInfoText(tr("Please fill in all fields"));
+        if (lineEditNewServerIpText().isEmpty() ||
+                lineEditNewServerLoginText().isEmpty() ||
+                lineEditNewServerPasswordText().isEmpty() ) {
+            set_labelNewServerWaitInfoText(tr("Please fill in all fields"));
             return;
         }
     }
     qDebug() << "UiLogic::onPushButtonNewServerConnect checking new server";
 
     ServerCredentials serverCredentials;
-    serverCredentials.hostName = getLineEditNewServerIpText();
+    serverCredentials.hostName = lineEditNewServerIpText();
     if (serverCredentials.hostName.contains(":")) {
         serverCredentials.port = serverCredentials.hostName.split(":").at(1).toInt();
         serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
     }
-    serverCredentials.userName = getLineEditNewServerLoginText();
-    if (getPushButtonNewServerConnectKeyChecked()){
-        QString key = getTextEditNewServerSshKeyText();
+    serverCredentials.userName = lineEditNewServerLoginText();
+    if (pushButtonNewServerConnectKeyChecked()){
+        QString key = textEditNewServerSshKeyText();
         if (key.startsWith("ssh-rsa")) {
             emit uiLogic()->showPublicKeyWarning();
             return;
@@ -206,11 +76,11 @@ void StartPageLogic::onPushButtonNewServerConnect()
         serverCredentials.password = key;
     }
     else {
-        serverCredentials.password = getLineEditNewServerPasswordText();
+        serverCredentials.password = lineEditNewServerPasswordText();
     }
 
-    setPushButtonNewServerConnectEnabled(false);
-    setPushButtonNewServerConnectText(tr("Connecting..."));
+    set_pushButtonNewServerConnectEnabled(false);
+    set_pushButtonNewServerConnectText(tr("Connecting..."));
 
     ErrorCode e = ErrorCode::NoError;
 #ifdef Q_DEBUG
@@ -221,21 +91,21 @@ void StartPageLogic::onPushButtonNewServerConnect()
 
     bool ok = true;
     if (e) {
-        setLabelNewServerWaitInfoVisible(true);
-        setLabelNewServerWaitInfoText(errorString(e));
+        set_labelNewServerWaitInfoVisible(true);
+        set_labelNewServerWaitInfoText(errorString(e));
         ok = false;
     }
     else {
         if (output.contains("Please login as the user")) {
             output.replace("\n", "");
-            setLabelNewServerWaitInfoVisible(true);
-            setLabelNewServerWaitInfoText(output);
+            set_labelNewServerWaitInfoVisible(true);
+            set_labelNewServerWaitInfoText(output);
             ok = false;
         }
     }
 
-    setPushButtonNewServerConnectEnabled(true);
-    setPushButtonNewServerConnectText(tr("Connect"));
+    set_pushButtonNewServerConnectEnabled(true);
+    set_pushButtonNewServerConnectText(tr("Connect"));
 
     uiLogic()->installCredentials = serverCredentials;
     if (ok) uiLogic()->goToPage(Page::NewServer);
@@ -243,7 +113,7 @@ void StartPageLogic::onPushButtonNewServerConnect()
 
 void StartPageLogic::onPushButtonNewServerImport()
 {
-    QString s = getLineEditStartExistingCodeText();
+    QString s = lineEditStartExistingCodeText();
     s.replace("vpn://", "");
     QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)).object();
 
@@ -294,31 +164,5 @@ void StartPageLogic::onPushButtonNewServerImport()
         uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
         uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
         uiLogic()->goToPage(Page::ServerContainers);
-    }
-}
-
-bool StartPageLogic::getPushButtonNewServerConnectEnabled() const
-{
-    return m_pushButtonNewServerConnectEnabled;
-}
-
-void StartPageLogic::setPushButtonNewServerConnectEnabled(bool pushButtonNewServerConnectEnabled)
-{
-    if (m_pushButtonNewServerConnectEnabled != pushButtonNewServerConnectEnabled) {
-        m_pushButtonNewServerConnectEnabled = pushButtonNewServerConnectEnabled;
-        emit pushButtonNewServerConnectEnabledChanged();
-    }
-}
-
-QString StartPageLogic::getPushButtonNewServerConnectText() const
-{
-    return m_pushButtonNewServerConnectText;
-}
-
-void StartPageLogic::setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText)
-{
-    if (m_pushButtonNewServerConnectText != pushButtonNewServerConnectText) {
-        m_pushButtonNewServerConnectText = pushButtonNewServerConnectText;
-        emit pushButtonNewServerConnectTextChanged();
     }
 }

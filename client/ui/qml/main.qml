@@ -157,7 +157,7 @@ Window {
                 UiLogic.progressBarValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
-                GeneralSettingsLogic.updateGeneralSettingPage();
+                GeneralSettingsLogic.updatePage();
             }
             if (page === PageEnum.ServersList) {
                 ServerListLogic.updateServersListPage();

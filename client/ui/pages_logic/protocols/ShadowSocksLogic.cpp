@@ -11,7 +11,7 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
     m_widgetProtoSsEnabled{false},
     m_comboBoxProtoShadowsocksCipherText{"chacha20-poly1305"},
     m_lineEditProtoShadowsocksPortText{},
-    m_pushButtonProtoShadowsocksSaveVisible{false},
+    m_pushButtonShadowsocksSaveVisible{false},
     m_progressBarProtoShadowsocksResetVisible{false},
     m_lineEditProtoShadowsocksPortEnabled{false},
     m_pageProtoShadowsocksEnabled{true},
@@ -25,168 +25,25 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
 
 void ShadowSocksLogic::updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
 {
-    setWidgetProtoSsEnabled(haveAuthData);
-    setPushButtonProtoShadowsocksSaveVisible(haveAuthData);
-    setProgressBarProtoShadowsocksResetVisible(haveAuthData);
+    set_widgetProtoSsEnabled(haveAuthData);
+    set_pushButtonShadowsocksSaveVisible(haveAuthData);
+    set_progressBarProtoShadowsocksResetVisible(haveAuthData);
 
-    setComboBoxProtoShadowsocksCipherText(ssConfig.value(config_key::cipher).
+    set_comboBoxProtoShadowsocksCipherText(ssConfig.value(config_key::cipher).
                                           toString(protocols::shadowsocks::defaultCipher));
 
-    setLineEditProtoShadowsocksPortText(ssConfig.value(config_key::port).
+    set_lineEditProtoShadowsocksPortText(ssConfig.value(config_key::port).
                                         toString(protocols::shadowsocks::defaultPort));
 
-    setLineEditProtoShadowsocksPortEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
+    set_lineEditProtoShadowsocksPortEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
 }
 
 QJsonObject ShadowSocksLogic::getShadowSocksConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::cipher, getComboBoxProtoShadowsocksCipherText());
-    oldConfig.insert(config_key::port, getLineEditProtoShadowsocksPortText());
+    oldConfig.insert(config_key::cipher, comboBoxProtoShadowsocksCipherText());
+    oldConfig.insert(config_key::port, lineEditProtoShadowsocksPortText());
 
     return oldConfig;
-}
-
-QString ShadowSocksLogic::getComboBoxProtoShadowsocksCipherText() const
-{
-    return m_comboBoxProtoShadowsocksCipherText;
-}
-
-void ShadowSocksLogic::setComboBoxProtoShadowsocksCipherText(const QString &comboBoxProtoShadowsocksCipherText)
-{
-    if (m_comboBoxProtoShadowsocksCipherText != comboBoxProtoShadowsocksCipherText) {
-        m_comboBoxProtoShadowsocksCipherText = comboBoxProtoShadowsocksCipherText;
-        emit comboBoxProtoShadowsocksCipherTextChanged();
-    }
-}
-
-QString ShadowSocksLogic::getLineEditProtoShadowsocksPortText() const
-{
-    return m_lineEditProtoShadowsocksPortText;
-}
-
-void ShadowSocksLogic::setLineEditProtoShadowsocksPortText(const QString &lineEditProtoShadowsocksPortText)
-{
-    if (m_lineEditProtoShadowsocksPortText != lineEditProtoShadowsocksPortText) {
-        m_lineEditProtoShadowsocksPortText = lineEditProtoShadowsocksPortText;
-        emit lineEditProtoShadowsocksPortTextChanged();
-    }
-}
-
-bool ShadowSocksLogic::getPushButtonProtoShadowsocksSaveVisible() const
-{
-    return m_pushButtonProtoShadowsocksSaveVisible;
-}
-
-void ShadowSocksLogic::setPushButtonProtoShadowsocksSaveVisible(bool pushButtonProtoShadowsocksSaveVisible)
-{
-    if (m_pushButtonProtoShadowsocksSaveVisible != pushButtonProtoShadowsocksSaveVisible) {
-        m_pushButtonProtoShadowsocksSaveVisible = pushButtonProtoShadowsocksSaveVisible;
-        emit pushButtonProtoShadowsocksSaveVisibleChanged();
-    }
-}
-
-bool ShadowSocksLogic::getProgressBarProtoShadowsocksResetVisible() const
-{
-    return m_progressBarProtoShadowsocksResetVisible;
-}
-
-void ShadowSocksLogic::setProgressBarProtoShadowsocksResetVisible(bool progressBarProtoShadowsocksResetVisible)
-{
-    if (m_progressBarProtoShadowsocksResetVisible != progressBarProtoShadowsocksResetVisible) {
-        m_progressBarProtoShadowsocksResetVisible = progressBarProtoShadowsocksResetVisible;
-        emit progressBarProtoShadowsocksResetVisibleChanged();
-    }
-}
-
-bool ShadowSocksLogic::getLineEditProtoShadowsocksPortEnabled() const
-{
-    return m_lineEditProtoShadowsocksPortEnabled;
-}
-
-void ShadowSocksLogic::setLineEditProtoShadowsocksPortEnabled(bool lineEditProtoShadowsocksPortEnabled)
-{
-    if (m_lineEditProtoShadowsocksPortEnabled != lineEditProtoShadowsocksPortEnabled) {
-        m_lineEditProtoShadowsocksPortEnabled = lineEditProtoShadowsocksPortEnabled;
-        emit lineEditProtoShadowsocksPortEnabledChanged();
-    }
-}
-
-bool ShadowSocksLogic::getPageProtoShadowsocksEnabled() const
-{
-    return m_pageProtoShadowsocksEnabled;
-}
-
-void ShadowSocksLogic::setPageProtoShadowsocksEnabled(bool pageProtoShadowsocksEnabled)
-{
-    if (m_pageProtoShadowsocksEnabled != pageProtoShadowsocksEnabled) {
-        m_pageProtoShadowsocksEnabled = pageProtoShadowsocksEnabled;
-        emit pageProtoShadowsocksEnabledChanged();
-    }
-}
-
-bool ShadowSocksLogic::getLabelProtoShadowsocksInfoVisible() const
-{
-    return m_labelProtoShadowsocksInfoVisible;
-}
-
-void ShadowSocksLogic::setLabelProtoShadowsocksInfoVisible(bool labelProtoShadowsocksInfoVisible)
-{
-    if (m_labelProtoShadowsocksInfoVisible != labelProtoShadowsocksInfoVisible) {
-        m_labelProtoShadowsocksInfoVisible = labelProtoShadowsocksInfoVisible;
-        emit labelProtoShadowsocksInfoVisibleChanged();
-    }
-}
-
-QString ShadowSocksLogic::getLabelProtoShadowsocksInfoText() const
-{
-    return m_labelProtoShadowsocksInfoText;
-}
-
-void ShadowSocksLogic::setLabelProtoShadowsocksInfoText(const QString &labelProtoShadowsocksInfoText)
-{
-    if (m_labelProtoShadowsocksInfoText != labelProtoShadowsocksInfoText) {
-        m_labelProtoShadowsocksInfoText = labelProtoShadowsocksInfoText;
-        emit labelProtoShadowsocksInfoTextChanged();
-    }
-}
-
-int ShadowSocksLogic::getProgressBarProtoShadowsocksResetValue() const
-{
-    return m_progressBarProtoShadowsocksResetValue;
-}
-
-void ShadowSocksLogic::setProgressBarProtoShadowsocksResetValue(int progressBarProtoShadowsocksResetValue)
-{
-    if (m_progressBarProtoShadowsocksResetValue != progressBarProtoShadowsocksResetValue) {
-        m_progressBarProtoShadowsocksResetValue = progressBarProtoShadowsocksResetValue;
-        emit progressBarProtoShadowsocksResetValueChanged();
-    }
-}
-
-int ShadowSocksLogic::getProgressBarProtoShadowsocksResetMaximium() const
-{
-    return m_progressBarProtoShadowsocksResetMaximium;
-}
-
-void ShadowSocksLogic::setProgressBarProtoShadowsocksResetMaximium(int progressBarProtoShadowsocksResetMaximium)
-{
-    if (m_progressBarProtoShadowsocksResetMaximium != progressBarProtoShadowsocksResetMaximium) {
-        m_progressBarProtoShadowsocksResetMaximium = progressBarProtoShadowsocksResetMaximium;
-        emit progressBarProtoShadowsocksResetMaximiumChanged();
-    }
-}
-
-bool ShadowSocksLogic::getWidgetProtoSsEnabled() const
-{
-    return m_widgetProtoSsEnabled;
-}
-
-void ShadowSocksLogic::setWidgetProtoSsEnabled(bool widgetProtoSsEnabled)
-{
-    if (m_widgetProtoSsEnabled != widgetProtoSsEnabled) {
-        m_widgetProtoSsEnabled = widgetProtoSsEnabled;
-        emit widgetProtoSsEnabledChanged();
-    }
 }
 
 void ShadowSocksLogic::onPushButtonProtoShadowsocksSaveClicked()
@@ -199,31 +56,31 @@ void ShadowSocksLogic::onPushButtonProtoShadowsocksSaveClicked()
     newContainerConfig.insert(config_key::shadowsocks, protocolConfig);
     UiLogic::PageFunc page_proto_shadowsocks;
     page_proto_shadowsocks.setEnabledFunc = [this] (bool enabled) -> void {
-        setPageProtoShadowsocksEnabled(enabled);
+        set_pageProtoShadowsocksEnabled(enabled);
     };
     UiLogic::ButtonFunc pushButton_proto_shadowsocks_save;
     pushButton_proto_shadowsocks_save.setVisibleFunc = [this] (bool visible) ->void {
-        setPushButtonProtoShadowsocksSaveVisible(visible);
+        set_pushButtonShadowsocksSaveVisible(visible);
     };
     UiLogic::LabelFunc label_proto_shadowsocks_info;
     label_proto_shadowsocks_info.setVisibleFunc = [this] (bool visible) ->void {
-        setLabelProtoShadowsocksInfoVisible(visible);
+        set_labelProtoShadowsocksInfoVisible(visible);
     };
     label_proto_shadowsocks_info.setTextFunc = [this] (const QString& text) ->void {
-        setLabelProtoShadowsocksInfoText(text);
+        set_labelProtoShadowsocksInfoText(text);
     };
     UiLogic::ProgressFunc progressBar_proto_shadowsocks_reset;
     progressBar_proto_shadowsocks_reset.setVisibleFunc = [this] (bool visible) ->void {
-        setProgressBarProtoShadowsocksResetVisible(visible);
+        set_progressBarProtoShadowsocksResetVisible(visible);
     };
     progressBar_proto_shadowsocks_reset.setValueFunc = [this] (int value) ->void {
-        setProgressBarProtoShadowsocksResetValue(value);
+        set_progressBarProtoShadowsocksResetValue(value);
     };
     progressBar_proto_shadowsocks_reset.getValueFunc = [this] (void) -> int {
-        return getProgressBarProtoShadowsocksResetValue();
+        return progressBarProtoShadowsocksResetValue();
     };
     progressBar_proto_shadowsocks_reset.getMaximiumFunc = [this] (void) -> int {
-        return getProgressBarProtoShadowsocksResetMaximium();
+        return progressBarProtoShadowsocksResetMaximium();
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){

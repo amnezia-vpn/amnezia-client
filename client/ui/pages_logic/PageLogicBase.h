@@ -13,6 +13,7 @@ class UiLogic;
 class PageLogicBase : public QObject
 {
     Q_OBJECT
+    AUTO_PROPERTY(bool, pageEnabled)
 
 public:
     explicit PageLogicBase(UiLogic *uiLogic, QObject *parent = nullptr);
@@ -25,14 +26,6 @@ protected:
 
     Settings m_settings;
     UiLogic *m_uiLogic;
-
-signals:
-
-private slots:
-
-
-private:
-
 
 };
 #endif // PAGE_LOGIC_BASE_H

@@ -12,7 +12,7 @@ class GeneralSettingsLogic : public PageLogicBase
     AUTO_PROPERTY(bool, pushButtonGeneralSettingsShareConnectionEnable)
 
 public:
-    Q_INVOKABLE void updateGeneralSettingPage();
+    Q_INVOKABLE void updatePage() override;
     Q_INVOKABLE void onPushButtonGeneralSettingsServerSettingsClicked();
     Q_INVOKABLE void onPushButtonGeneralSettingsShareConnectionClicked();
 

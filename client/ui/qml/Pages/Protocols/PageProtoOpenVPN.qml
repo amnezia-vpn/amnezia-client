@@ -268,7 +268,7 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: OpenVpnLogic.pushButtonProtoOpenvpnSaveVisible
+            visible: OpenVpnLogic.pushButtonOpenvpnSaveVisible
             onClicked: {
                 OpenVpnLogic.onPushButtonProtoOpenvpnSaveClicked()
             }

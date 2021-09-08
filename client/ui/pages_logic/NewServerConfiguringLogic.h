@@ -10,7 +10,6 @@ class NewServerConfiguringLogic : public PageLogicBase
     Q_OBJECT
 
     AUTO_PROPERTY(double, progressBarValue)
-    AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(bool, labelWaitInfoVisible)
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, progressBarVisible)

@@ -3,7 +3,6 @@
 NewServerConfiguringLogic::NewServerConfiguringLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_progressBarValue{0},
-    m_pageEnabled{true},
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{tr("Please wait, configuring process may take up to 5 minutes")},
     m_progressBarVisible{true},

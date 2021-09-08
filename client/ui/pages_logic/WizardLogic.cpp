@@ -12,74 +12,9 @@ WizardLogic::WizardLogic(UiLogic *logic, QObject *parent):
 
 }
 
-bool WizardLogic::getRadioButtonSetupWizardMediumChecked() const
-{
-    return m_radioButtonSetupWizardMediumChecked;
-}
-
-void WizardLogic::setRadioButtonSetupWizardMediumChecked(bool radioButtonSetupWizardMediumChecked)
-{
-    if (m_radioButtonSetupWizardMediumChecked != radioButtonSetupWizardMediumChecked) {
-        m_radioButtonSetupWizardMediumChecked = radioButtonSetupWizardMediumChecked;
-        emit radioButtonSetupWizardMediumCheckedChanged();
-    }
-}
-
 void WizardLogic::updateWizardHighPage()
 {
-    setLineEditSetupWizardHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
-}
-
-QString WizardLogic::getLineEditSetupWizardHighWebsiteMaskingText() const
-{
-    return m_lineEditSetupWizardHighWebsiteMaskingText;
-}
-
-void WizardLogic::setLineEditSetupWizardHighWebsiteMaskingText(const QString &lineEditSetupWizardHighWebsiteMaskingText)
-{
-    if (m_lineEditSetupWizardHighWebsiteMaskingText != lineEditSetupWizardHighWebsiteMaskingText) {
-        m_lineEditSetupWizardHighWebsiteMaskingText = lineEditSetupWizardHighWebsiteMaskingText;
-        emit lineEditSetupWizardHighWebsiteMaskingTextChanged();
-    }
-}
-
-bool WizardLogic::getRadioButtonSetupWizardHighChecked() const
-{
-    return m_radioButtonSetupWizardHighChecked;
-}
-
-void WizardLogic::setRadioButtonSetupWizardHighChecked(bool radioButtonSetupWizardHighChecked)
-{
-    if (m_radioButtonSetupWizardHighChecked != radioButtonSetupWizardHighChecked) {
-        m_radioButtonSetupWizardHighChecked = radioButtonSetupWizardHighChecked;
-        emit radioButtonSetupWizardHighCheckedChanged();
-    }
-}
-
-bool WizardLogic::getRadioButtonSetupWizardLowChecked() const
-{
-    return m_radioButtonSetupWizardLowChecked;
-}
-
-void WizardLogic::setRadioButtonSetupWizardLowChecked(bool radioButtonSetupWizardLowChecked)
-{
-    if (m_radioButtonSetupWizardLowChecked != radioButtonSetupWizardLowChecked) {
-        m_radioButtonSetupWizardLowChecked = radioButtonSetupWizardLowChecked;
-        emit radioButtonSetupWizardLowCheckedChanged();
-    }
-}
-
-bool WizardLogic::getCheckBoxSetupWizardVpnModeChecked() const
-{
-    return m_checkBoxSetupWizardVpnModeChecked;
-}
-
-void WizardLogic::setCheckBoxSetupWizardVpnModeChecked(bool checkBoxSetupWizardVpnModeChecked)
-{
-    if (m_checkBoxSetupWizardVpnModeChecked != checkBoxSetupWizardVpnModeChecked) {
-        m_checkBoxSetupWizardVpnModeChecked = checkBoxSetupWizardVpnModeChecked;
-        emit checkBoxSetupWizardVpnModeCheckedChanged();
-    }
+    set_lineEditSetupWizardHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
 }
 
 QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const
@@ -87,7 +22,7 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
     QJsonObject cloakConfig {
         { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
         { config_key::cloak, QJsonObject {
-                { config_key::site, getLineEditSetupWizardHighWebsiteMaskingText() }}
+                { config_key::site, lineEditSetupWizardHighWebsiteMaskingText() }}
         }
     };
     QJsonObject ssConfig {
@@ -99,15 +34,15 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 
     QMap<DockerContainer, QJsonObject> containers;
 
-    if (getRadioButtonSetupWizardHighChecked()) {
+    if (radioButtonSetupWizardHighChecked()) {
         containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
     }
 
-    if (getRadioButtonSetupWizardMediumChecked()) {
+    if (radioButtonSetupWizardMediumChecked()) {
         containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
     }
 
-    if (getRadioButtonSetupWizardLowChecked()) {
+    if (radioButtonSetupWizardLowChecked()) {
         containers.insert(DockerContainer::OpenVpn, openVpnConfig);
     }
 
@@ -117,7 +52,7 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 void WizardLogic::onPushButtonSetupWizardVpnModeFinishClicked()
 {
     uiLogic()->installServer(getInstallConfigsFromWizardPage());
-    if (getCheckBoxSetupWizardVpnModeChecked()) {
+    if (checkBoxSetupWizardVpnModeChecked()) {
         m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
         m_settings.setRouteMode(Settings::VpnAllSites);

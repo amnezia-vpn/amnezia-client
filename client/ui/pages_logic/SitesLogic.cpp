@@ -28,63 +28,24 @@ void SitesLogic::updateSitesPage()
     if (m == Settings::VpnAllSites) return;
 
     if (m == Settings::VpnOnlyForwardSites) {
-        setLabelSitesAddCustomText(tr("These sites will be opened using VPN"));
+        set_labelSitesAddCustomText(tr("These sites will be opened using VPN"));
     }
     if (m == Settings::VpnAllExceptSites) {
-        setLabelSitesAddCustomText(tr("These sites will be excepted from VPN"));
+        set_labelSitesAddCustomText(tr("These sites will be excepted from VPN"));
     }
 
-    setTableViewSitesModel(sitesModels.value(m));
+    set_tableViewSitesModel(sitesModels.value(m));
     sitesModels.value(m)->resetCache();
-}
-
-QString SitesLogic::getLabelSitesAddCustomText() const
-{
-    return m_labelSitesAddCustomText;
-}
-
-void SitesLogic::setLabelSitesAddCustomText(const QString &labelSitesAddCustomText)
-{
-    if (m_labelSitesAddCustomText != labelSitesAddCustomText) {
-        m_labelSitesAddCustomText = labelSitesAddCustomText;
-        emit labelSitesAddCustomTextChanged();
-    }
-}
-
-QObject* SitesLogic::getTableViewSitesModel() const
-{
-    return m_tableViewSitesModel;
-}
-
-void SitesLogic::setTableViewSitesModel(QObject* tableViewSitesModel)
-{
-    if (m_tableViewSitesModel != tableViewSitesModel) {
-        m_tableViewSitesModel = tableViewSitesModel;
-        emit tableViewSitesModelChanged();
-    }
-}
-
-QString SitesLogic::getLineEditSitesAddCustomText() const
-{
-    return m_lineEditSitesAddCustomText;
-}
-
-void SitesLogic::setLineEditSitesAddCustomText(const QString &lineEditSitesAddCustomText)
-{
-    if (m_lineEditSitesAddCustomText != lineEditSitesAddCustomText) {
-        m_lineEditSitesAddCustomText = lineEditSitesAddCustomText;
-        emit lineEditSitesAddCustomTextChanged();
-    }
 }
 
 void SitesLogic::onPushButtonAddCustomSitesClicked()
 {
-    if (uiLogic()->vpnLogic()->getRadioButtonVpnModeAllSitesChecked()) {
+    if (uiLogic()->vpnLogic()->radioButtonVpnModeAllSitesChecked()) {
         return;
     }
     Settings::RouteMode mode = m_settings.routeMode();
 
-    QString newSite = getLineEditSitesAddCustomText();
+    QString newSite = lineEditSitesAddCustomText();
 
     if (newSite.isEmpty()) return;
     if (!newSite.contains(".")) return;
@@ -124,7 +85,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         }
     };
 
-    setLineEditSitesAddCustomText("");
+    set_lineEditSitesAddCustomText("");
 
     if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
         cbProcess(newSite, "");
@@ -141,7 +102,7 @@ void SitesLogic::onPushButtonSitesDeleteClicked(int row)
 {
     Settings::RouteMode mode = m_settings.routeMode();
 
-    auto siteModel = qobject_cast<SitesModel*> (getTableViewSitesModel());
+    auto siteModel = qobject_cast<SitesModel*> (tableViewSitesModel());
     if (!siteModel) {
         return;
     }
