@@ -110,7 +110,7 @@ Item {
                 height: 40
                 text: qsTr("Connect")
                 onClicked: {
-                    StartPageLogic.onPushButtonNewServerImport()
+                    StartPageLogic.onPushButtonImport()
                 }
             }
         }
@@ -165,8 +165,8 @@ Item {
                 y: 390
                 width: 301
                 height: 41
-                text: StartPageLogic.labelNewServerWaitInfoText
-                visible: StartPageLogic.labelNewServerWaitInfoVisible
+                text: StartPageLogic.labelWaitInfoText
+                visible: StartPageLogic.labelWaitInfoVisible
                 wrapMode: Text.Wrap
             }
             TextFieldType {
@@ -175,9 +175,9 @@ Item {
                 y: 100
                 width: 300
                 height: 40
-                text: StartPageLogic.lineEditNewServerIpText
+                text: StartPageLogic.lineEditIpText
                 onEditingFinished: {
-                    StartPageLogic.lineEditNewServerIpText = text
+                    StartPageLogic.lineEditIpText = text
                 }
             }
             TextFieldType {
@@ -186,9 +186,9 @@ Item {
                 y: 180
                 width: 300
                 height: 40
-                text: StartPageLogic.lineEditNewServerLoginText
+                text: StartPageLogic.lineEditLoginText
                 onEditingFinished: {
-                    StartPageLogic.lineEditNewServerLoginText = text
+                    StartPageLogic.lineEditLoginText = text
                 }
             }
             TextFieldType {
@@ -198,9 +198,9 @@ Item {
                 width: 300
                 height: 40
                 echoMode: TextInput.Password
-                text: StartPageLogic.lineEditNewServerPasswordText
+                text: StartPageLogic.lineEditPasswordText
                 onEditingFinished: {
-                    StartPageLogic.lineEditNewServerPasswordText = text
+                    StartPageLogic.lineEditPasswordText = text
                 }
             }
             BlueButtonType {
@@ -209,12 +209,12 @@ Item {
                 y: 350
                 width: 301
                 height: 40
-                text: StartPageLogic.pushButtonNewServerConnectText
-                visible: StartPageLogic.pushButtonNewServerConnectVisible
+                text: StartPageLogic.pushButtonConnectText
+                visible: StartPageLogic.pushButtonConnectVisible
                 onClicked: {
-                    StartPageLogic.onPushButtonNewServerConnect()
+                    StartPageLogic.onPushButtonConnect()
                 }
-                enabled: StartPageLogic.pushButtonNewServerConnectEnabled
+                enabled: StartPageLogic.pushButtonConnectEnabled
             }
             BasicButtonType {
                 id: new_sever_connect_key
@@ -239,9 +239,9 @@ Item {
                 }
                 antialiasing: true
                 checkable: true
-                checked: StartPageLogic.pushButtonNewServerConnectKeyChecked
+                checked: StartPageLogic.pushButtonConnectKeyChecked
                 onCheckedChanged: {
-                    StartPageLogic.pushButtonNewServerConnectKeyChecked = checked
+                    StartPageLogic.pushButtonConnectKeyChecked = checked
                     label_new_server_password.text = checked ? qsTr("Private key") : qsTr("Password")
                     new_sever_connect_key.text = checked ? qsTr("Connect using SSH password") : qsTr("Connect using SSH key")
                     new_server_password.visible = !checked
@@ -285,9 +285,9 @@ Item {
                 echoMode: TextInput.Password
                 font.pixelSize: 9
                 verticalAlignment: Text.AlignTop
-                text: StartPageLogic.textEditNewServerSshKeyText
+                text: StartPageLogic.textEditSshKeyText
                 onEditingFinished: {
-                    StartPageLogic.textEditNewServerSshKeyText = text
+                    StartPageLogic.textEditSshKeyText = text
                 }
                 visible: false
             }

@@ -9,34 +9,34 @@ class OpenVpnLogic : public PageLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(QString, lineEditProtoOpenvpnSubnetText)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenvpnUdpChecked)
-    AUTO_PROPERTY(bool, checkBoxProtoOpenvpnAutoEncryptionChecked)
-    AUTO_PROPERTY(QString, comboBoxProtoOpenvpnCipherText)
-    AUTO_PROPERTY(QString, comboBoxProtoOpenvpnHashText)
-    AUTO_PROPERTY(bool, checkBoxProtoOpenvpnBlockDnsChecked)
-    AUTO_PROPERTY(QString, lineEditProtoOpenvpnPortText)
-    AUTO_PROPERTY(bool, checkBoxProtoOpenvpnTlsAuthChecked)
+    AUTO_PROPERTY(QString, lineEditProtoOpenVpnSubnetText)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnUdpChecked)
+    AUTO_PROPERTY(bool, checkBoxProtoOpenVpnAutoEncryptionChecked)
+    AUTO_PROPERTY(QString, comboBoxProtoOpenVpnCipherText)
+    AUTO_PROPERTY(QString, comboBoxProtoOpenVpnHashText)
+    AUTO_PROPERTY(bool, checkBoxProtoOpenVpnBlockDnsChecked)
+    AUTO_PROPERTY(QString, lineEditProtoOpenVpnPortText)
+    AUTO_PROPERTY(bool, checkBoxProtoOpenVpnTlsAuthChecked)
 
-    AUTO_PROPERTY(bool, widgetProtoOpenvpnEnabled)
+    AUTO_PROPERTY(bool, widgetProtoOpenVpnEnabled)
     AUTO_PROPERTY(bool, pushButtonOpenvpnSaveVisible)
-    AUTO_PROPERTY(bool, progressBarProtoOpenvpnResetVisible)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenvpnUdpEnabled)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenvpnTcpEnabled)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenvpnTcpChecked)
-    AUTO_PROPERTY(bool, lineEditProtoOpenvpnPortEnabled)
+    AUTO_PROPERTY(bool, progressBarProtoOpenVpnResetVisible)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnUdpEnabled)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpEnabled)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpChecked)
+    AUTO_PROPERTY(bool, lineEditProtoOpenVpnPortEnabled)
 
-    AUTO_PROPERTY(bool, comboBoxProtoOpenvpnCipherEnabled)
-    AUTO_PROPERTY(bool, comboBoxProtoOpenvpnHashEnabled)
-    AUTO_PROPERTY(bool, pageProtoOpenvpnEnabled)
-    AUTO_PROPERTY(bool, labelProtoOpenvpnInfoVisible)
-    AUTO_PROPERTY(QString, labelProtoOpenvpnInfoText)
-    AUTO_PROPERTY(int, progressBarProtoOpenvpnResetValue)
-    AUTO_PROPERTY(int, progressBarProtoOpenvpnResetMaximium)
+    AUTO_PROPERTY(bool, comboBoxProtoOpenVpnCipherEnabled)
+    AUTO_PROPERTY(bool, comboBoxProtoOpenVpnHashEnabled)
+    AUTO_PROPERTY(bool, pageProtoOpenVpnEnabled)
+    AUTO_PROPERTY(bool, labelProtoOpenVpnInfoVisible)
+    AUTO_PROPERTY(QString, labelProtoOpenVpnInfoText)
+    AUTO_PROPERTY(int, progressBarProtoOpenVpnResetValue)
+    AUTO_PROPERTY(int, progressBarProtoOpenVpnResetMaximium)
 
 public:
-    Q_INVOKABLE void onCheckBoxProtoOpenvpnAutoEncryptionClicked();
-    Q_INVOKABLE void onPushButtonProtoOpenvpnSaveClicked();
+    Q_INVOKABLE void onCheckBoxProtoOpenVpnAutoEncryptionClicked();
+    Q_INVOKABLE void onPushButtonProtoOpenVpnSaveClicked();
 
 public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);

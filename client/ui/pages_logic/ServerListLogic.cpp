@@ -14,7 +14,7 @@ ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
 void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 {
     m_settings.setDefaultServer(index);
-    updateServersListPage();
+    updatePage();
 }
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
@@ -23,7 +23,7 @@ void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
     uiLogic()->goToPage(Page::ServerSettings);
 }
 
-void ServerListLogic::updateServersListPage()
+void ServerListLogic::updatePage()
 {
     const QJsonArray &servers = m_settings.serversArray();
     int defaultServer = m_settings.defaultServerIndex();

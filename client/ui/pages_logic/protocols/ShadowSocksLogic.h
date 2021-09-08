@@ -9,20 +9,20 @@ class ShadowSocksLogic : public PageLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(bool, widgetProtoSsEnabled)
-    AUTO_PROPERTY(QString, comboBoxProtoShadowsocksCipherText)
-    AUTO_PROPERTY(QString, lineEditProtoShadowsocksPortText)
-    AUTO_PROPERTY(bool, pushButtonShadowsocksSaveVisible)
-    AUTO_PROPERTY(bool, progressBarProtoShadowsocksResetVisible)
-    AUTO_PROPERTY(bool, lineEditProtoShadowsocksPortEnabled)
-    AUTO_PROPERTY(bool, pageProtoShadowsocksEnabled)
-    AUTO_PROPERTY(bool, labelProtoShadowsocksInfoVisible)
-    AUTO_PROPERTY(QString, labelProtoShadowsocksInfoText)
-    AUTO_PROPERTY(int, progressBarProtoShadowsocksResetValue)
-    AUTO_PROPERTY(int, progressBarProtoShadowsocksResetMaximium)
+    AUTO_PROPERTY(bool, widgetProtoShadowSocksEnabled)
+    AUTO_PROPERTY(QString, comboBoxProtoShadowSocksCipherText)
+    AUTO_PROPERTY(QString, lineEditProtoShadowSocksPortText)
+    AUTO_PROPERTY(bool, pushButtonShadowSocksSaveVisible)
+    AUTO_PROPERTY(bool, progressBarProtoShadowSocksResetVisible)
+    AUTO_PROPERTY(bool, lineEditProtoShadowSocksPortEnabled)
+    AUTO_PROPERTY(bool, pageProtoShadowSocksEnabled)
+    AUTO_PROPERTY(bool, labelProtoShadowSocksInfoVisible)
+    AUTO_PROPERTY(QString, labelProtoShadowSocksInfoText)
+    AUTO_PROPERTY(int, progressBarProtoShadowSocksResetValue)
+    AUTO_PROPERTY(int, progressBarProtoShadowSocksResetMaximium)
 
 public:
-    Q_INVOKABLE void onPushButtonProtoShadowsocksSaveClicked();
+    Q_INVOKABLE void onPushButtonProtoShadowSocksSaveClicked();
 
 public:
     explicit ShadowSocksLogic(UiLogic *uiLogic, QObject *parent = nullptr);

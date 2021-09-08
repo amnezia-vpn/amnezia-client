@@ -144,27 +144,28 @@ Window {
         console.debug(pageComponent)
         if (reset) {
             if (page === PageEnum.ServerSettings) {
-                ServerSettingsLogic.updateServerSettingsPage();
+                ServerSettingsLogic.updatePage();
             }
-            if (page === PageEnum.ShareConnection) {}
+            if (page === PageEnum.ShareConnection) {
+            }
             if (page === PageEnum.Wizard) {
-                UiLogic.radioButtonSetupWizardMediumChecked = true
+                WizardLogic.radioButtonMediumChecked = true
             }
             if (page === PageEnum.WizardHigh) {
-                UiLogic.updateWizardHighPage();
+                WizardLogic.updatePage();
             }
             if (page === PageEnum.ServerConfiguring) {
-                UiLogic.progressBarValue = 0;
+                ServerConfiguringLogic.progressBarValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
                 GeneralSettingsLogic.updatePage();
             }
             if (page === PageEnum.ServersList) {
-                ServerListLogic.updateServersListPage();
+                ServerListLogic.updatePage();
             }
             if (page === PageEnum.Start) {
                 StartPageLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-                StartPageLogic.updateStartPage();
+                StartPageLogic.updatePage();
             }
             if (page === PageEnum.NewServerProtocols) {
                 NewServerProtocolsLogic.updatePage()
@@ -184,7 +185,6 @@ Window {
             if (page === PageEnum.Vpn) {
                 VpnLogic.updateVpnPage()
             }
-            UiLogic.pushButtonNewServerConnectKeyChecked = false
         }
         if (slide) {
             pageLoader.push(pageComponent, {}, StackView.PushTransition)
@@ -210,7 +210,7 @@ Window {
         }
         if (page === PageEnum.Start) {
             UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-            UiLogic.updateStartPage();
+            UiLogic.updatePage();
         }
     }
 

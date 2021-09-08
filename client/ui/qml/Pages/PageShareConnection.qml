@@ -200,7 +200,7 @@ Item {
                     id: share_openvpn
                     x: 0
                     text: qsTr("Share for OpenVPN client")
-                    visible: ShareConnectionLogic.pageShareOpenvpnVisible
+                    visible: ShareConnectionLogic.pageShareOpenVpnVisible
                     content: Component {
                         Item {
                             width: 360
@@ -210,10 +210,10 @@ Item {
                                 y: 180
                                 width: 341
                                 height: 40
-                                text: ShareConnectionLogic.pushButtonShareOpenvpnCopyText
-                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnCopyEnabled
+                                text: ShareConnectionLogic.pushButtonShareOpenVpnCopyText
+                                enabled: ShareConnectionLogic.pushButtonShareOpenVpnCopyEnabled
                                 onClicked: {
-                                    ShareConnectionLogic.onPushButtonShareOpenvpnCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenVpnCopyClicked()
                                 }
                             }
                             ShareConnectionButtonType {
@@ -221,11 +221,11 @@ Item {
                                 y: 130
                                 width: 341
                                 height: 40
-                                text: ShareConnectionLogic.pushButtonShareOpenvpnGenerateText
+                                text: ShareConnectionLogic.pushButtonShareOpenVpnGenerateText
                                 onClicked: {
-                                    ShareConnectionLogic.onPushButtonShareOpenvpnGenerateClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenVpnGenerateClicked()
                                 }
-                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnGenerateEnabled
+                                enabled: ShareConnectionLogic.pushButtonShareOpenVpnGenerateEnabled
                             }
                             ShareConnectionButtonType {
                                 x: 10
@@ -233,9 +233,9 @@ Item {
                                 width: 341
                                 height: 40
                                 text: qsTr("Save file")
-                                enabled: ShareConnectionLogic.pushButtonShareOpenvpnSaveEnabled
+                                enabled: ShareConnectionLogic.pushButtonShareOpenVpnSaveEnabled
                                 onClicked: {
-                                    ShareConnectionLogic.onPushButtonShareOpenvpnSaveClicked()
+                                    ShareConnectionLogic.onPushButtonShareOpenVpnSaveClicked()
                                 }
                             }
                             TextFieldType {
@@ -244,9 +244,9 @@ Item {
                                 width: 341
                                 height: 100
                                 verticalAlignment: Text.AlignTop
-                                text: ShareConnectionLogic.textEditShareOpenvpnCodeText
+                                text: ShareConnectionLogic.textEditShareOpenVpnCodeText
                                 onEditingFinished: {
-                                    ShareConnectionLogic.textEditShareOpenvpnCodeText = text
+                                    ShareConnectionLogic.textEditShareOpenVpnCodeText = text
                                 }
                             }
                         }
@@ -264,7 +264,7 @@ Item {
                     id: share_shadowshock
                     x: 0
                     text: qsTr("Share for ShadowSocks client")
-                    visible: ShareConnectionLogic.pageShareShadowsocksVisible
+                    visible: ShareConnectionLogic.pageShareShadowSocksVisible
                     content: Component {
                         Item {
                             width: 360
@@ -309,28 +309,28 @@ Item {
                                 y: 70
                                 width: 100
                                 height: 20
-                                text: ShareConnectionLogic.labelShareSsPasswordText
+                                text: ShareConnectionLogic.labelShareShadowSocksPasswordText
                             }
                             LabelType {
                                 x: 130
                                 y: 10
                                 width: 100
                                 height: 20
-                                text: ShareConnectionLogic.labelShareSsServerText
+                                text: ShareConnectionLogic.labelShareShadowSocksServerText
                             }
                             LabelType {
                                 x: 130
                                 y: 50
                                 width: 100
                                 height: 20
-                                text: ShareConnectionLogic.labelShareSsMethodText
+                                text: ShareConnectionLogic.labelShareShadowSocksMethodText
                             }
                             LabelType {
                                 x: 130
                                 y: 30
                                 width: 100
                                 height: 20
-                                text: ShareConnectionLogic.labelShareSsPortText
+                                text: ShareConnectionLogic.labelShareShadowSocksPortText
                             }
                             Image {
                                 id: label_share_ss_qr_code
@@ -338,17 +338,17 @@ Item {
                                 y: 235
                                 width: 200
                                 height: 200
-                                source: ShareConnectionLogic.labelShareSsQrCodeText === "" ? "" : "data:image/png;base64," + UiLogic.labelShareSsQrCodeText
+                                source: ShareConnectionLogic.labelShareShadowSocksQrCodeText === "" ? "" : "data:image/png;base64," + UiLogic.labelShareShadowSocksQrCodeText
                             }
                             ShareConnectionButtonType {
                                 x: 10
                                 y: 180
                                 width: 331
                                 height: 40
-                                text: ShareConnectionLogic.pushButtonShareSsCopyText
-                                enabled: ShareConnectionLogic.pushButtonShareSsCopyEnabled
+                                text: ShareConnectionLogic.pushButtonShareShadowSocksCopyText
+                                enabled: ShareConnectionLogic.pushButtonShareShadowSocksCopyEnabled
                                 onClicked: {
-                                    ShareConnectionLogic.onPushButtonShareSsCopyClicked()
+                                    ShareConnectionLogic.onPushButtonShareShadowSocksCopyClicked()
                                 }
                             }
                             TextFieldType {
@@ -357,9 +357,9 @@ Item {
                                 width: 331
                                 height: 100
                                 horizontalAlignment: Text.AlignHCenter
-                                text: ShareConnectionLogic.lineEditShareSsStringText
+                                text: ShareConnectionLogic.lineEditShareShadowSocksStringText
                                 onEditingFinished: {
-                                    ShareConnectionLogic.lineEditShareSsStringText = text
+                                    ShareConnectionLogic.lineEditShareShadowSocksStringText = text
                                 }
                             }
                         }

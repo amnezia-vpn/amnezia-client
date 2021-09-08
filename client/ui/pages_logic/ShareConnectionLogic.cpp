@@ -22,35 +22,35 @@
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_pageShareAmneziaVisible{true},
-    m_pageShareOpenvpnVisible{true},
-    m_pageShareShadowsocksVisible{true},
+    m_pageShareOpenVpnVisible{true},
+    m_pageShareShadowSocksVisible{true},
     m_pageShareCloakVisible{true},
     m_pageShareFullAccessVisible{true},
-    m_textEditShareOpenvpnCodeText{},
-    m_pushButtonShareOpenvpnCopyEnabled{false},
-    m_pushButtonShareOpenvpnSaveEnabled{false},
+    m_textEditShareOpenVpnCodeText{},
+    m_pushButtonShareOpenVpnCopyEnabled{false},
+    m_pushButtonShareOpenVpnSaveEnabled{false},
     m_toolBoxShareConnectionCurrentIndex{-1},
-    m_pushButtonShareSsCopyEnabled{false},
-    m_lineEditShareSsStringText{},
-    m_labelShareSsQrCodeText{},
-    m_labelShareSsServerText{},
-    m_labelShareSsPortText{},
-    m_labelShareSsMethodText{},
-    m_labelShareSsPasswordText{},
+    m_pushButtonShareShadowSocksCopyEnabled{false},
+    m_lineEditShareShadowSocksStringText{},
+    m_labelShareShadowSocksQrCodeText{},
+    m_labelShareShadowSocksServerText{},
+    m_labelShareShadowSocksPortText{},
+    m_labelShareShadowSocksMethodText{},
+    m_labelShareShadowSocksPasswordText{},
     m_plainTextEditShareCloakText{},
     m_pushButtonShareCloakCopyEnabled{false},
     m_textEditShareFullCodeText{},
     m_textEditShareAmneziaCodeText{},
     m_pushButtonShareFullCopyText{tr("Copy")},
     m_pushButtonShareAmneziaCopyText{tr("Copy")},
-    m_pushButtonShareOpenvpnCopyText{tr("Copy")},
-    m_pushButtonShareSsCopyText{tr("Copy")},
+    m_pushButtonShareOpenVpnCopyText{tr("Copy")},
+    m_pushButtonShareShadowSocksCopyText{tr("Copy")},
     m_pushButtonShareCloakCopyText{tr("Copy")},
     m_pushButtonShareAmneziaGenerateEnabled{true},
     m_pushButtonShareAmneziaCopyEnabled{true},
     m_pushButtonShareAmneziaGenerateText{tr("Generate config")},
-    m_pushButtonShareOpenvpnGenerateEnabled{true},
-    m_pushButtonShareOpenvpnGenerateText{tr("Generate config")}
+    m_pushButtonShareOpenVpnGenerateEnabled{true},
+    m_pushButtonShareOpenVpnGenerateText{tr("Generate config")}
 {
     // TODO consider move to Component.onCompleted
     updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer);
@@ -103,23 +103,23 @@ void ShareConnectionLogic::onPushButtonShareAmneziaSaveClicked()
     save.commit();
 }
 
-void ShareConnectionLogic::onPushButtonShareOpenvpnCopyClicked()
+void ShareConnectionLogic::onPushButtonShareOpenVpnCopyClicked()
 {
-    QGuiApplication::clipboard()->setText(textEditShareOpenvpnCodeText());
-    set_pushButtonShareOpenvpnCopyText(tr("Copied"));
+    QGuiApplication::clipboard()->setText(textEditShareOpenVpnCodeText());
+    set_pushButtonShareOpenVpnCopyText(tr("Copied"));
 
     QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareOpenvpnCopyText(tr("Copy"));
+        set_pushButtonShareOpenVpnCopyText(tr("Copy"));
     });
 }
 
-void ShareConnectionLogic::onPushButtonShareSsCopyClicked()
+void ShareConnectionLogic::onPushButtonShareShadowSocksCopyClicked()
 {
-    QGuiApplication::clipboard()->setText(lineEditShareSsStringText());
-    set_pushButtonShareSsCopyText(tr("Copied"));
+    QGuiApplication::clipboard()->setText(lineEditShareShadowSocksStringText());
+    set_pushButtonShareShadowSocksCopyText(tr("Copied"));
 
     QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareSsCopyText(tr("Copy"));
+        set_pushButtonShareShadowSocksCopyText(tr("Copy"));
     });
 }
 
@@ -180,12 +180,12 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
     set_pushButtonShareAmneziaGenerateText(tr("Generate config"));
 }
 
-void ShareConnectionLogic::onPushButtonShareOpenvpnGenerateClicked()
+void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 {
-    set_pushButtonShareOpenvpnGenerateEnabled(false);
-    set_pushButtonShareOpenvpnCopyEnabled(false);
-    set_pushButtonShareOpenvpnSaveEnabled(false);
-    set_pushButtonShareOpenvpnGenerateText(tr("Generating..."));
+    set_pushButtonShareOpenVpnGenerateEnabled(false);
+    set_pushButtonShareOpenVpnCopyEnabled(false);
+    set_pushButtonShareOpenVpnSaveEnabled(false);
+    set_pushButtonShareOpenVpnGenerateText(tr("Generating..."));
 
     ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
     const QJsonObject &containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
@@ -194,22 +194,22 @@ void ShareConnectionLogic::onPushButtonShareOpenvpnGenerateClicked()
     QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
     cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
 
-    set_textEditShareOpenvpnCodeText(cfg);
+    set_textEditShareOpenVpnCodeText(cfg);
 
-    set_pushButtonShareOpenvpnGenerateEnabled(true);
-    set_pushButtonShareOpenvpnCopyEnabled(true);
-    set_pushButtonShareOpenvpnSaveEnabled(true);
-    set_pushButtonShareOpenvpnGenerateText(tr("Generate config"));
+    set_pushButtonShareOpenVpnGenerateEnabled(true);
+    set_pushButtonShareOpenVpnCopyEnabled(true);
+    set_pushButtonShareOpenVpnSaveEnabled(true);
+    set_pushButtonShareOpenVpnGenerateText(tr("Generate config"));
 }
 
-void ShareConnectionLogic::onPushButtonShareOpenvpnSaveClicked()
+void ShareConnectionLogic::onPushButtonShareOpenVpnSaveClicked()
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save OpenVPN config"),
                                                     QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.ovpn");
 
     QSaveFile save(fileName);
     save.open(QIODevice::WriteOnly);
-    save.write(textEditShareOpenvpnCodeText().toUtf8());
+    save.write(textEditShareOpenVpnCodeText().toUtf8());
     save.commit();
 }
 
@@ -223,8 +223,8 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
     set_pageShareAmneziaVisible(false);
-    set_pageShareOpenvpnVisible(false);
-    set_pageShareShadowsocksVisible(false);
+    set_pageShareOpenVpnVisible(false);
+    set_pageShareShadowSocksVisible(false);
     set_pageShareCloakVisible(false);
     set_pageShareFullAccessVisible(false);
 
@@ -238,12 +238,12 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
 
     if (container == DockerContainer::OpenVpn) {
         set_pageShareAmneziaVisible(true);
-        set_pageShareOpenvpnVisible(true);
+        set_pageShareOpenVpnVisible(true);
 
         QString cfg = tr("Press Generate config");
-        set_textEditShareOpenvpnCodeText(cfg);
-        set_pushButtonShareOpenvpnCopyEnabled(false);
-        set_pushButtonShareOpenvpnSaveEnabled(false);
+        set_textEditShareOpenVpnCodeText(cfg);
+        set_pushButtonShareOpenVpnCopyEnabled(false);
+        set_pushButtonShareOpenVpnSaveEnabled(false);
 
         set_toolBoxShareConnectionCurrentIndex(share_openvpn);
     }
@@ -251,7 +251,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     if (container == DockerContainer::OpenVpnOverShadowSocks ||
             container == DockerContainer::OpenVpnOverCloak) {
         set_pageShareAmneziaVisible(true);
-        set_pageShareShadowsocksVisible(true);
+        set_pageShareShadowSocksVisible(true);
 
         QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
         QString cfg = protoConfig.value(config_key::last_config).toString();
@@ -262,7 +262,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
             ErrorCode e = ErrorCode::NoError;
             cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
 
-            set_pushButtonShareSsCopyEnabled(true);
+            set_pushButtonShareShadowSocksCopyEnabled(true);
         }
 
         QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
@@ -274,15 +274,15 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
                 .arg(ssConfig.value("server_port").toString());
 
         ssString = "ss://" + ssString.toUtf8().toBase64();
-        set_lineEditShareSsStringText(ssString);
+        set_lineEditShareShadowSocksStringText(ssString);
         updateQRCodeImage(ssString, [this](const QString& labelText) ->void {
-            set_labelShareSsQrCodeText(labelText);
+            set_labelShareShadowSocksQrCodeText(labelText);
         });
 
-        set_labelShareSsServerText(ssConfig.value("server").toString());
-        set_labelShareSsPortText(ssConfig.value("server_port").toString());
-        set_labelShareSsMethodText(ssConfig.value("method").toString());
-        set_labelShareSsPasswordText(ssConfig.value("password").toString());
+        set_labelShareShadowSocksServerText(ssConfig.value("server").toString());
+        set_labelShareShadowSocksPortText(ssConfig.value("server_port").toString());
+        set_labelShareShadowSocksMethodText(ssConfig.value("method").toString());
+        set_labelShareShadowSocksPasswordText(ssConfig.value("password").toString());
 
         set_toolBoxShareConnectionCurrentIndex(share_shadowshock);
     }

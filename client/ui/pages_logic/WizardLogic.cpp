@@ -3,18 +3,18 @@
 
 WizardLogic::WizardLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_radioButtonSetupWizardHighChecked{false},
-    m_radioButtonSetupWizardMediumChecked{true},
-    m_radioButtonSetupWizardLowChecked{false},
-    m_lineEditSetupWizardHighWebsiteMaskingText{},
-    m_checkBoxSetupWizardVpnModeChecked{false}
+    m_radioButtonHighChecked{false},
+    m_radioButtonMediumChecked{true},
+    m_radioButtonLowChecked{false},
+    m_lineEditHighWebsiteMaskingText{},
+    m_checkBoxVpnModeChecked{false}
 {
 
 }
 
-void WizardLogic::updateWizardHighPage()
+void WizardLogic::updatePage()
 {
-    set_lineEditSetupWizardHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
+    set_lineEditHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
 }
 
 QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const
@@ -22,7 +22,7 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
     QJsonObject cloakConfig {
         { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
         { config_key::cloak, QJsonObject {
-                { config_key::site, lineEditSetupWizardHighWebsiteMaskingText() }}
+                { config_key::site, lineEditHighWebsiteMaskingText() }}
         }
     };
     QJsonObject ssConfig {
@@ -34,32 +34,32 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 
     QMap<DockerContainer, QJsonObject> containers;
 
-    if (radioButtonSetupWizardHighChecked()) {
+    if (radioButtonHighChecked()) {
         containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
     }
 
-    if (radioButtonSetupWizardMediumChecked()) {
+    if (radioButtonMediumChecked()) {
         containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
     }
 
-    if (radioButtonSetupWizardLowChecked()) {
+    if (radioButtonLowChecked()) {
         containers.insert(DockerContainer::OpenVpn, openVpnConfig);
     }
 
     return containers;
 }
 
-void WizardLogic::onPushButtonSetupWizardVpnModeFinishClicked()
+void WizardLogic::onPushButtonVpnModeFinishClicked()
 {
     uiLogic()->installServer(getInstallConfigsFromWizardPage());
-    if (checkBoxSetupWizardVpnModeChecked()) {
+    if (checkBoxVpnModeChecked()) {
         m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
         m_settings.setRouteMode(Settings::VpnAllSites);
     }
 }
 
-void WizardLogic::onPushButtonSetupWizardLowFinishClicked()
+void WizardLogic::onPushButtonLowFinishClicked()
 {
     uiLogic()->installServer(getInstallConfigsFromWizardPage());
 }

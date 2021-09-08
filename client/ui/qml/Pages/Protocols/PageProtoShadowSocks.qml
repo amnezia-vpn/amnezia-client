@@ -6,7 +6,7 @@ import "../../Config"
 
 Item {
     id: root
-    enabled: ShadowSocksLogic.pageProtoShadowsocksEnabled
+    enabled: ShadowSocksLogic.pageProtoShadowSocksEnabled
     ImageButtonType {
         id: back
         x: 10
@@ -23,7 +23,7 @@ Item {
         y: 40
         width: 380
         height: 600
-        enabled: ShadowSocksLogic.widgetProtoSsEnabled
+        enabled: ShadowSocksLogic.widgetProtoShadowSocksEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -36,14 +36,14 @@ Item {
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (ShadowSocksLogic.comboBoxProtoShadowsocksCipherText === model[i]) {
+                    if (ShadowSocksLogic.comboBoxProtoShadowSocksCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                ShadowSocksLogic.comboBoxProtoShadowsocksCipherText = currentText
+                ShadowSocksLogic.comboBoxProtoShadowSocksCipherText = currentText
             }
         }
         LabelType {
@@ -79,8 +79,8 @@ Item {
             y: 550
             width: 321
             height: 41
-            visible: ShadowSocksLogic.labelProtoShadowsocksInfoVisible
-            text: ShadowSocksLogic.labelProtoShadowsocksInfoText
+            visible: ShadowSocksLogic.labelProtoShadowSocksInfoVisible
+            text: ShadowSocksLogic.labelProtoShadowSocksInfoText
         }
         TextFieldType {
             id: lineEdit_proto_shadowsocks_port
@@ -88,11 +88,11 @@ Item {
             y: 110
             width: 151
             height: 31
-            text: ShadowSocksLogic.lineEditProtoShadowsocksPortText
+            text: ShadowSocksLogic.lineEditProtoShadowSocksPortText
             onEditingFinished: {
-                ShadowSocksLogic.lineEditProtoShadowsocksPortText = text
+                ShadowSocksLogic.lineEditProtoShadowSocksPortText = text
             }
-            enabled: ShadowSocksLogic.lineEditProtoShadowsocksPortEnabled
+            enabled: ShadowSocksLogic.lineEditProtoShadowSocksPortEnabled
         }
         ProgressBar {
             id: progressBar_proto_shadowsocks_reset
@@ -101,9 +101,9 @@ Item {
             width: 321
             height: 40
             from: 0
-            to: ShadowSocksLogic.progressBarProtoShadowsocksResetMaximium
-            value: ShadowSocksLogic.progressBarProtoShadowsocksResetValue
-            visible: ShadowSocksLogic.progressBarProtoShadowsocksResetVisible
+            to: ShadowSocksLogic.progressBarProtoShadowSocksResetMaximium
+            value: ShadowSocksLogic.progressBarProtoShadowSocksResetValue
+            visible: ShadowSocksLogic.progressBarProtoShadowSocksResetVisible
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -128,9 +128,9 @@ Item {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: ShadowSocksLogic.pushButtonShadowsocksSaveVisible
+            visible: ShadowSocksLogic.pushButtonShadowSocksSaveVisible
             onClicked: {
-                ShadowSocksLogic.onPushButtonProtoShadowsocksSaveClicked()
+                ShadowSocksLogic.onPushButtonProtoShadowSocksSaveClicked()
             }
         }
     }

@@ -5,65 +5,67 @@
 
 StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_pushButtonNewServerConnectEnabled{true},
-    m_pushButtonNewServerConnectText{tr("Connect")},
-    m_pushButtonNewServerConnectKeyChecked{false},
+    m_pushButtonConnectEnabled{true},
+    m_pushButtonConnectText{tr("Connect")},
+    m_pushButtonConnectKeyChecked{false},
     m_lineEditStartExistingCodeText{},
-    m_textEditNewServerSshKeyText{},
-    m_lineEditNewServerIpText{},
-    m_lineEditNewServerPasswordText{},
-    m_lineEditNewServerLoginText{},
-    m_labelNewServerWaitInfoVisible{true},
-    m_labelNewServerWaitInfoText{},
+    m_textEditSshKeyText{},
+    m_lineEditIpText{},
+    m_lineEditPasswordText{},
+    m_lineEditLoginText{},
+    m_labelWaitInfoVisible{true},
+    m_labelWaitInfoText{},
     m_pushButtonBackFromStartVisible{true},
-    m_pushButtonNewServerConnectVisible{true}
+    m_pushButtonConnectVisible{true}
 {
 
 }
 
-void StartPageLogic::updateStartPage()
+void StartPageLogic::updatePage()
 {
     set_lineEditStartExistingCodeText("");
-    set_textEditNewServerSshKeyText("");
-    set_lineEditNewServerIpText("");
-    set_lineEditNewServerPasswordText("");
-    set_textEditNewServerSshKeyText("");
-    set_lineEditNewServerLoginText("");
+    set_textEditSshKeyText("");
+    set_lineEditIpText("");
+    set_lineEditPasswordText("");
+    set_textEditSshKeyText("");
+    set_lineEditLoginText("");
 
-    set_labelNewServerWaitInfoVisible(false);
-    set_labelNewServerWaitInfoText("");
-    set_pushButtonNewServerConnectVisible(true);
+    set_labelWaitInfoVisible(false);
+    set_labelWaitInfoText("");
+    set_pushButtonConnectVisible(true);
+
+    set_pushButtonConnectKeyChecked(false);
 }
 
-void StartPageLogic::onPushButtonNewServerConnect()
+void StartPageLogic::onPushButtonConnect()
 {
-    if (pushButtonNewServerConnectKeyChecked()){
-        if (lineEditNewServerIpText().isEmpty() ||
-                lineEditNewServerLoginText().isEmpty() ||
-                textEditNewServerSshKeyText().isEmpty() ) {
-            set_labelNewServerWaitInfoText(tr("Please fill in all fields"));
+    if (pushButtonConnectKeyChecked()){
+        if (lineEditIpText().isEmpty() ||
+                lineEditLoginText().isEmpty() ||
+                textEditSshKeyText().isEmpty() ) {
+            set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
     }
     else {
-        if (lineEditNewServerIpText().isEmpty() ||
-                lineEditNewServerLoginText().isEmpty() ||
-                lineEditNewServerPasswordText().isEmpty() ) {
-            set_labelNewServerWaitInfoText(tr("Please fill in all fields"));
+        if (lineEditIpText().isEmpty() ||
+                lineEditLoginText().isEmpty() ||
+                lineEditPasswordText().isEmpty() ) {
+            set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
     }
-    qDebug() << "UiLogic::onPushButtonNewServerConnect checking new server";
+    qDebug() << "UiLogic::onPushButtonConnect checking new server";
 
     ServerCredentials serverCredentials;
-    serverCredentials.hostName = lineEditNewServerIpText();
+    serverCredentials.hostName = lineEditIpText();
     if (serverCredentials.hostName.contains(":")) {
         serverCredentials.port = serverCredentials.hostName.split(":").at(1).toInt();
         serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
     }
-    serverCredentials.userName = lineEditNewServerLoginText();
-    if (pushButtonNewServerConnectKeyChecked()){
-        QString key = textEditNewServerSshKeyText();
+    serverCredentials.userName = lineEditLoginText();
+    if (pushButtonConnectKeyChecked()){
+        QString key = textEditSshKeyText();
         if (key.startsWith("ssh-rsa")) {
             emit uiLogic()->showPublicKeyWarning();
             return;
@@ -76,11 +78,11 @@ void StartPageLogic::onPushButtonNewServerConnect()
         serverCredentials.password = key;
     }
     else {
-        serverCredentials.password = lineEditNewServerPasswordText();
+        serverCredentials.password = lineEditPasswordText();
     }
 
-    set_pushButtonNewServerConnectEnabled(false);
-    set_pushButtonNewServerConnectText(tr("Connecting..."));
+    set_pushButtonConnectEnabled(false);
+    set_pushButtonConnectText(tr("Connecting..."));
 
     ErrorCode e = ErrorCode::NoError;
 #ifdef Q_DEBUG
@@ -91,27 +93,27 @@ void StartPageLogic::onPushButtonNewServerConnect()
 
     bool ok = true;
     if (e) {
-        set_labelNewServerWaitInfoVisible(true);
-        set_labelNewServerWaitInfoText(errorString(e));
+        set_labelWaitInfoVisible(true);
+        set_labelWaitInfoText(errorString(e));
         ok = false;
     }
     else {
         if (output.contains("Please login as the user")) {
             output.replace("\n", "");
-            set_labelNewServerWaitInfoVisible(true);
-            set_labelNewServerWaitInfoText(output);
+            set_labelWaitInfoVisible(true);
+            set_labelWaitInfoText(output);
             ok = false;
         }
     }
 
-    set_pushButtonNewServerConnectEnabled(true);
-    set_pushButtonNewServerConnectText(tr("Connect"));
+    set_pushButtonConnectEnabled(true);
+    set_pushButtonConnectText(tr("Connect"));
 
     uiLogic()->installCredentials = serverCredentials;
     if (ok) uiLogic()->goToPage(Page::NewServer);
 }
 
-void StartPageLogic::onPushButtonNewServerImport()
+void StartPageLogic::onPushButtonImport()
 {
     QString s = lineEditStartExistingCodeText();
     s.replace("vpn://", "");

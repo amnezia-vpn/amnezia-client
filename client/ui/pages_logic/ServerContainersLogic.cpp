@@ -13,25 +13,25 @@ ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
-    m_pushButtonOpenvpnContInstallChecked{false},
-    m_pushButtonSsOpenvpnContInstallChecked{false},
-    m_pushButtonCloakOpenvpnContInstallChecked{false},
+    m_pushButtonOpenVpnContInstallChecked{false},
+    m_pushButtonSsOpenVpnContInstallChecked{false},
+    m_pushButtonCloakOpenVpnContInstallChecked{false},
     m_pushButtonWireguardContInstallChecked{false},
-    m_pushButtonOpenvpnContInstallEnabled{false},
-    m_pushButtonSsOpenvpnContInstallEnabled{false},
-    m_pushButtonCloakOpenvpnContInstallEnabled{false},
+    m_pushButtonOpenVpnContInstallEnabled{false},
+    m_pushButtonSsOpenVpnContInstallEnabled{false},
+    m_pushButtonCloakOpenVpnContInstallEnabled{false},
     m_pushButtonWireguardContInstallEnabled{false},
-    m_pushButtonOpenvpnContDefaultChecked{false},
-    m_pushButtonSsOpenvpnContDefaultChecked{false},
-    m_pushButtonCloakOpenvpnContDefaultChecked{false},
+    m_pushButtonOpenVpnContDefaultChecked{false},
+    m_pushButtonSsOpenVpnContDefaultChecked{false},
+    m_pushButtonCloakOpenVpnContDefaultChecked{false},
     m_pushButtonWireguardContDefaultChecked{false},
-    m_pushButtonOpenvpnContDefaultVisible{true},
-    m_pushButtonSsOpenvpnContDefaultVisible{false},
-    m_pushButtonCloakOpenvpnContDefaultVisible{false},
+    m_pushButtonOpenVpnContDefaultVisible{true},
+    m_pushButtonSsOpenVpnContDefaultVisible{false},
+    m_pushButtonCloakOpenVpnContDefaultVisible{false},
     m_pushButtonWireguardContDefaultVisible{false},
-    m_pushButtonOpenvpnContShareVisible{false},
-    m_pushButtonSsOpenvpnContShareVisible{false},
-    m_pushButtonCloakOpenvpnContShareVisible{false},
+    m_pushButtonOpenVpnContShareVisible{false},
+    m_pushButtonSsOpenVpnContShareVisible{false},
+    m_pushButtonCloakOpenVpnContShareVisible{false},
     m_pushButtonWireguardContShareVisible{false},
     m_frameOpenvpnSettingsVisible{true},
     m_frameOpenvpnSsSettingsVisible{true},
@@ -66,35 +66,35 @@ void ServerContainersLogic::updateServerContainersPage()
     using SetCheckedFunc = std::function<void(bool)>;
     using SetEnabledFunc = std::function<void(bool)>;
     QList<SetCheckedFunc> installButtonsCheckedFunc {
-        [this](bool checked) ->void {set_pushButtonOpenvpnContInstallChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonSsOpenvpnContInstallChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonCloakOpenvpnContInstallChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonOpenVpnContInstallChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonSsOpenVpnContInstallChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonCloakOpenVpnContInstallChecked(checked);},
         [this](bool checked) ->void {set_pushButtonWireguardContInstallChecked(checked);},
     };
     QList<SetEnabledFunc> installButtonsEnabledFunc {
-        [this](bool enabled) ->void {set_pushButtonOpenvpnContInstallEnabled(enabled);},
-        [this](bool enabled) ->void {set_pushButtonSsOpenvpnContInstallEnabled(enabled);},
-        [this](bool enabled) ->void {set_pushButtonCloakOpenvpnContInstallEnabled(enabled);},
+        [this](bool enabled) ->void {set_pushButtonOpenVpnContInstallEnabled(enabled);},
+        [this](bool enabled) ->void {set_pushButtonSsOpenVpnContInstallEnabled(enabled);},
+        [this](bool enabled) ->void {set_pushButtonCloakOpenVpnContInstallEnabled(enabled);},
         [this](bool enabled) ->void {set_pushButtonWireguardContInstallEnabled(enabled);},
     };
 
     QList<SetCheckedFunc> defaultButtonsCheckedFunc {
-        [this](bool checked) ->void {set_pushButtonOpenvpnContDefaultChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonSsOpenvpnContDefaultChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonCloakOpenvpnContDefaultChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonOpenVpnContDefaultChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonSsOpenVpnContDefaultChecked(checked);},
+        [this](bool checked) ->void {set_pushButtonCloakOpenVpnContDefaultChecked(checked);},
         [this](bool checked) ->void {set_pushButtonWireguardContDefaultChecked(checked);},
     };
     QList<SetVisibleFunc> defaultButtonsVisibleFunc {
-        [this](bool visible) ->void {set_pushButtonOpenvpnContDefaultVisible(visible);},
-        [this](bool visible) ->void {set_pushButtonSsOpenvpnContDefaultVisible(visible);},
-        [this](bool visible) ->void {set_pushButtonCloakOpenvpnContDefaultVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonOpenVpnContDefaultVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonSsOpenVpnContDefaultVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonCloakOpenVpnContDefaultVisible(visible);},
         [this](bool visible) ->void {set_pushButtonWireguardContDefaultVisible(visible);},
     };
 
     QList<SetVisibleFunc> shareButtonsVisibleFunc {
-        [this](bool visible) ->void {set_pushButtonOpenvpnContShareVisible(visible);},
-        [this](bool visible) ->void {set_pushButtonSsOpenvpnContShareVisible(visible);},
-        [this](bool visible) ->void {set_pushButtonCloakOpenvpnContShareVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonOpenVpnContShareVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonSsOpenVpnContShareVisible(visible);},
+        [this](bool visible) ->void {set_pushButtonCloakOpenVpnContShareVisible(visible);},
         [this](bool visible) ->void {set_pushButtonWireguardContShareVisible(visible);},
     };
 
@@ -132,9 +132,9 @@ void ServerContainersLogic::setupProtocolsPageConnections()
 
     // default buttons
     QList<ButtonClickedFunc> defaultButtonClickedSig {
-        &ServerContainersLogic::pushButtonOpenvpnContDefaultClicked,
-                &ServerContainersLogic::pushButtonSsOpenvpnContDefaultClicked,
-                &ServerContainersLogic::pushButtonCloakOpenvpnContDefaultClicked,
+        &ServerContainersLogic::pushButtonOpenVpnContDefaultClicked,
+                &ServerContainersLogic::pushButtonSsOpenVpnContDefaultClicked,
+                &ServerContainersLogic::pushButtonCloakOpenVpnContDefaultClicked,
                 &ServerContainersLogic::pushButtonWireguardContDefaultClicked
     };
 
@@ -148,20 +148,20 @@ void ServerContainersLogic::setupProtocolsPageConnections()
 
     // install buttons
     QList<ButtonClickedFunc> installButtonsClickedSig {
-        &ServerContainersLogic::pushButtonOpenvpnContInstallClicked,
-                &ServerContainersLogic::pushButtonSsOpenvpnContInstallClicked,
-                &ServerContainersLogic::pushButtonCloakOpenvpnContInstallClicked,
+        &ServerContainersLogic::pushButtonOpenVpnContInstallClicked,
+                &ServerContainersLogic::pushButtonSsOpenVpnContInstallClicked,
+                &ServerContainersLogic::pushButtonCloakOpenVpnContInstallClicked,
                 &ServerContainersLogic::pushButtonWireguardContInstallClicked,
     };
     QList<ButtonSetEnabledFunc> installButtonsSetEnabledFunc {
         [this] (bool enabled) -> void {
-            set_pushButtonOpenvpnContInstallEnabled(enabled);
+            set_pushButtonOpenVpnContInstallEnabled(enabled);
         },
         [this] (bool enabled) -> void {
-            set_pushButtonSsOpenvpnContInstallEnabled(enabled);
+            set_pushButtonSsOpenVpnContInstallEnabled(enabled);
         },
         [this] (bool enabled) -> void {
-            set_pushButtonCloakOpenvpnContInstallEnabled(enabled);
+            set_pushButtonCloakOpenVpnContInstallEnabled(enabled);
         },
         [this] (bool enabled) -> void {
             set_pushButtonWireguardContInstallEnabled(enabled);
@@ -225,9 +225,9 @@ void ServerContainersLogic::setupProtocolsPageConnections()
 
     // share buttons
     QList<ButtonClickedFunc> shareButtonsClickedSig {
-        &ServerContainersLogic::pushButtonOpenvpnContShareClicked,
-                &ServerContainersLogic::pushButtonSsOpenvpnContShareClicked,
-                &ServerContainersLogic::pushButtonCloakOpenvpnContShareClicked,
+        &ServerContainersLogic::pushButtonOpenVpnContShareClicked,
+                &ServerContainersLogic::pushButtonSsOpenVpnContShareClicked,
+                &ServerContainersLogic::pushButtonCloakOpenVpnContShareClicked,
                 &ServerContainersLogic::pushButtonWireguardContShareClicked,
     };
 
@@ -242,7 +242,7 @@ void ServerContainersLogic::setupProtocolsPageConnections()
     }
 }
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
+void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
     uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
@@ -250,7 +250,7 @@ void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicke
     uiLogic()->goToPage(Page::OpenVpnSettings);
 }
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContSsConfigClicked()
+void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContSsConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
     uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
@@ -258,7 +258,7 @@ void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContSsConfigClicked()
     uiLogic()->goToPage(Page::ShadowSocksSettings);
 }
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
+void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContCloakConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
     uiLogic()->cloakLogic()->updateCloakPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak),
@@ -266,7 +266,7 @@ void ServerContainersLogic::onPushButtonProtoCloakOpenvpnContCloakConfigClicked(
     uiLogic()->goToPage(Page::CloakSettings);
 }
 
-void ServerContainersLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
+void ServerContainersLogic::onPushButtonProtoOpenVpnContOpenvpnConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpn;
     uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
@@ -274,7 +274,7 @@ void ServerContainersLogic::onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
     uiLogic()->goToPage(Page::OpenVpnSettings);
 }
 
-void ServerContainersLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
+void ServerContainersLogic::onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
     uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
@@ -282,7 +282,7 @@ void ServerContainersLogic::onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
     uiLogic()->goToPage(Page::OpenVpnSettings);
 }
 
-void ServerContainersLogic::onPushButtonProtoSsOpenvpnContSsConfigClicked()
+void ServerContainersLogic::onPushButtonProtoSsOpenVpnContSsConfigClicked()
 {
     uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
     uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),

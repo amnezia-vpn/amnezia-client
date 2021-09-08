@@ -8,84 +8,84 @@ using namespace PageEnumNS;
 
 OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_lineEditProtoOpenvpnSubnetText{},
-    m_radioButtonProtoOpenvpnUdpChecked{false},
-    m_checkBoxProtoOpenvpnAutoEncryptionChecked{},
-    m_comboBoxProtoOpenvpnCipherText{"AES-256-GCM"},
-    m_comboBoxProtoOpenvpnHashText{"SHA512"},
-    m_checkBoxProtoOpenvpnBlockDnsChecked{false},
-    m_lineEditProtoOpenvpnPortText{},
-    m_checkBoxProtoOpenvpnTlsAuthChecked{false},
-    m_widgetProtoOpenvpnEnabled{false},
+    m_lineEditProtoOpenVpnSubnetText{},
+    m_radioButtonProtoOpenVpnUdpChecked{false},
+    m_checkBoxProtoOpenVpnAutoEncryptionChecked{},
+    m_comboBoxProtoOpenVpnCipherText{"AES-256-GCM"},
+    m_comboBoxProtoOpenVpnHashText{"SHA512"},
+    m_checkBoxProtoOpenVpnBlockDnsChecked{false},
+    m_lineEditProtoOpenVpnPortText{},
+    m_checkBoxProtoOpenVpnTlsAuthChecked{false},
+    m_widgetProtoOpenVpnEnabled{false},
     m_pushButtonOpenvpnSaveVisible{false},
-    m_progressBarProtoOpenvpnResetVisible{false},
-    m_radioButtonProtoOpenvpnUdpEnabled{false},
-    m_radioButtonProtoOpenvpnTcpEnabled{false},
-    m_radioButtonProtoOpenvpnTcpChecked{false},
-    m_lineEditProtoOpenvpnPortEnabled{false},
-    m_comboBoxProtoOpenvpnCipherEnabled{true},
-    m_comboBoxProtoOpenvpnHashEnabled{true},
-    m_pageProtoOpenvpnEnabled{true},
-    m_labelProtoOpenvpnInfoVisible{true},
-    m_labelProtoOpenvpnInfoText{},
-    m_progressBarProtoOpenvpnResetValue{0},
-    m_progressBarProtoOpenvpnResetMaximium{100}
+    m_progressBarProtoOpenVpnResetVisible{false},
+    m_radioButtonProtoOpenVpnUdpEnabled{false},
+    m_radioButtonProtoOpenVpnTcpEnabled{false},
+    m_radioButtonProtoOpenVpnTcpChecked{false},
+    m_lineEditProtoOpenVpnPortEnabled{false},
+    m_comboBoxProtoOpenVpnCipherEnabled{true},
+    m_comboBoxProtoOpenVpnHashEnabled{true},
+    m_pageProtoOpenVpnEnabled{true},
+    m_labelProtoOpenVpnInfoVisible{true},
+    m_labelProtoOpenVpnInfoText{},
+    m_progressBarProtoOpenVpnResetValue{0},
+    m_progressBarProtoOpenVpnResetMaximium{100}
 {
 
 }
 
 void OpenVpnLogic::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {
-    set_widgetProtoOpenvpnEnabled(haveAuthData);
+    set_widgetProtoOpenVpnEnabled(haveAuthData);
     set_pushButtonOpenvpnSaveVisible(haveAuthData);
-    set_progressBarProtoOpenvpnResetVisible(haveAuthData);
+    set_progressBarProtoOpenVpnResetVisible(haveAuthData);
 
-    set_radioButtonProtoOpenvpnUdpEnabled(true);
-    set_radioButtonProtoOpenvpnTcpEnabled(true);
+    set_radioButtonProtoOpenVpnUdpEnabled(true);
+    set_radioButtonProtoOpenVpnTcpEnabled(true);
 
-    set_lineEditProtoOpenvpnSubnetText(openvpnConfig.value(config_key::subnet_address).
+    set_lineEditProtoOpenVpnSubnetText(openvpnConfig.value(config_key::subnet_address).
                                       toString(protocols::openvpn::defaultSubnetAddress));
 
     QString trasnsport = openvpnConfig.value(config_key::transport_proto).
             toString(protocols::openvpn::defaultTransportProto);
 
-    set_radioButtonProtoOpenvpnUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
-    set_radioButtonProtoOpenvpnTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
+    set_radioButtonProtoOpenVpnUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
+    set_radioButtonProtoOpenVpnTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
 
-    set_comboBoxProtoOpenvpnCipherText(openvpnConfig.value(config_key::cipher).
+    set_comboBoxProtoOpenVpnCipherText(openvpnConfig.value(config_key::cipher).
                                       toString(protocols::openvpn::defaultCipher));
 
-    set_comboBoxProtoOpenvpnHashText(openvpnConfig.value(config_key::hash).
+    set_comboBoxProtoOpenVpnHashText(openvpnConfig.value(config_key::hash).
                                     toString(protocols::openvpn::defaultHash));
 
     bool blockOutsideDns = openvpnConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
-    set_checkBoxProtoOpenvpnBlockDnsChecked(blockOutsideDns);
+    set_checkBoxProtoOpenVpnBlockDnsChecked(blockOutsideDns);
 
     bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    set_checkBoxProtoOpenvpnAutoEncryptionChecked(!isNcpDisabled);
+    set_checkBoxProtoOpenVpnAutoEncryptionChecked(!isNcpDisabled);
 
     bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    set_checkBoxProtoOpenvpnTlsAuthChecked(isTlsAuth);
+    set_checkBoxProtoOpenVpnTlsAuthChecked(isTlsAuth);
 
     if (container == DockerContainer::OpenVpnOverShadowSocks) {
-        set_radioButtonProtoOpenvpnUdpEnabled(false);
-        set_radioButtonProtoOpenvpnTcpEnabled(false);
-        set_radioButtonProtoOpenvpnTcpChecked(true);
+        set_radioButtonProtoOpenVpnUdpEnabled(false);
+        set_radioButtonProtoOpenVpnTcpEnabled(false);
+        set_radioButtonProtoOpenVpnTcpChecked(true);
     }
 
-    set_lineEditProtoOpenvpnPortText(openvpnConfig.value(config_key::port).
+    set_lineEditProtoOpenVpnPortText(openvpnConfig.value(config_key::port).
                                     toString(protocols::openvpn::defaultPort));
 
-    set_lineEditProtoOpenvpnPortEnabled(container == DockerContainer::OpenVpn);
+    set_lineEditProtoOpenVpnPortEnabled(container == DockerContainer::OpenVpn);
 }
 
-void OpenVpnLogic::onCheckBoxProtoOpenvpnAutoEncryptionClicked()
+void OpenVpnLogic::onCheckBoxProtoOpenVpnAutoEncryptionClicked()
 {
-    set_comboBoxProtoOpenvpnCipherEnabled(!checkBoxProtoOpenvpnAutoEncryptionChecked());
-    set_comboBoxProtoOpenvpnHashEnabled(!checkBoxProtoOpenvpnAutoEncryptionChecked());
+    set_comboBoxProtoOpenVpnCipherEnabled(!checkBoxProtoOpenVpnAutoEncryptionChecked());
+    set_comboBoxProtoOpenVpnHashEnabled(!checkBoxProtoOpenVpnAutoEncryptionChecked());
 }
 
-void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
+void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn);
     protocolConfig = getOpenVpnConfigFromPage(protocolConfig);
@@ -96,7 +96,7 @@ void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
 
     UiLogic::PageFunc page_proto_openvpn;
     page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {
-        set_pageProtoOpenvpnEnabled(enabled);
+        set_pageProtoOpenVpnEnabled(enabled);
     };
     UiLogic::ButtonFunc pushButton_proto_openvpn_save;
     pushButton_proto_openvpn_save.setVisibleFunc = [this] (bool visible) ->void {
@@ -104,23 +104,23 @@ void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
     };
     UiLogic::LabelFunc label_proto_openvpn_info;
     label_proto_openvpn_info.setVisibleFunc = [this] (bool visible) ->void {
-        set_labelProtoOpenvpnInfoVisible(visible);
+        set_labelProtoOpenVpnInfoVisible(visible);
     };
     label_proto_openvpn_info.setTextFunc = [this] (const QString& text) ->void {
-        set_labelProtoOpenvpnInfoText(text);
+        set_labelProtoOpenVpnInfoText(text);
     };
     UiLogic::ProgressFunc progressBar_proto_openvpn_reset;
     progressBar_proto_openvpn_reset.setVisibleFunc = [this] (bool visible) ->void {
-        set_progressBarProtoOpenvpnResetVisible(visible);
+        set_progressBarProtoOpenVpnResetVisible(visible);
     };
     progressBar_proto_openvpn_reset.setValueFunc = [this] (int value) ->void {
-        set_progressBarProtoOpenvpnResetValue(value);
+        set_progressBarProtoOpenVpnResetValue(value);
     };
     progressBar_proto_openvpn_reset.getValueFunc = [this] (void) -> int {
-        return progressBarProtoOpenvpnResetValue();
+        return progressBarProtoOpenVpnResetValue();
     };
     progressBar_proto_openvpn_reset.getMaximiumFunc = [this] (void) -> int {
-        return progressBarProtoOpenvpnResetMaximium();
+        return progressBarProtoOpenVpnResetMaximium();
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
@@ -138,13 +138,13 @@ void OpenVpnLogic::onPushButtonProtoOpenvpnSaveClicked()
 
 QJsonObject OpenVpnLogic::getOpenVpnConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::subnet_address, lineEditProtoOpenvpnSubnetText());
-    oldConfig.insert(config_key::transport_proto, radioButtonProtoOpenvpnUdpChecked() ? protocols::UDP : protocols::TCP);
-    oldConfig.insert(config_key::ncp_disable, ! checkBoxProtoOpenvpnAutoEncryptionChecked());
-    oldConfig.insert(config_key::cipher, comboBoxProtoOpenvpnCipherText());
-    oldConfig.insert(config_key::hash, comboBoxProtoOpenvpnHashText());
-    oldConfig.insert(config_key::block_outside_dns, checkBoxProtoOpenvpnBlockDnsChecked());
-    oldConfig.insert(config_key::port, lineEditProtoOpenvpnPortText());
-    oldConfig.insert(config_key::tls_auth, checkBoxProtoOpenvpnTlsAuthChecked());
+    oldConfig.insert(config_key::subnet_address, lineEditProtoOpenVpnSubnetText());
+    oldConfig.insert(config_key::transport_proto, radioButtonProtoOpenVpnUdpChecked() ? protocols::UDP : protocols::TCP);
+    oldConfig.insert(config_key::ncp_disable, ! checkBoxProtoOpenVpnAutoEncryptionChecked());
+    oldConfig.insert(config_key::cipher, comboBoxProtoOpenVpnCipherText());
+    oldConfig.insert(config_key::hash, comboBoxProtoOpenVpnHashText());
+    oldConfig.insert(config_key::block_outside_dns, checkBoxProtoOpenVpnBlockDnsChecked());
+    oldConfig.insert(config_key::port, lineEditProtoOpenVpnPortText());
+    oldConfig.insert(config_key::tls_auth, checkBoxProtoOpenVpnTlsAuthChecked());
     return oldConfig;
 }

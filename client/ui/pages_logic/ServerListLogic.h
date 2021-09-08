@@ -12,7 +12,7 @@ class ServerListLogic : public PageLogicBase
     READONLY_PROPERTY(QObject *, serverListModel)
 
 public:
-    Q_INVOKABLE void updateServersListPage();
+    Q_INVOKABLE void updatePage() override;
     Q_INVOKABLE void onServerListPushbuttonDefaultClicked(int index);
     Q_INVOKABLE void onServerListPushbuttonSettingsClicked(int index);
 

@@ -105,15 +105,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonCloakOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonCloakOpenVpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonCloakOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonCloakOpenVpnContDefaultChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContDefaultClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonCloakOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonCloakOpenVpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -123,9 +123,9 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonCloakOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonCloakOpenVpnContShareVisible
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContShareClicked(false)
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContShareClicked(false)
                         }
                     }
                     ImageButtonType {
@@ -136,14 +136,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonCloakOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonCloakOpenVpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonCloakOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonCloakOpenVpnContInstallChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContInstallClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonCloakOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonCloakOpenVpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -162,7 +162,7 @@ Item {
                         text: qsTr("OpenVPN settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked()
                         }
                     }
                     SettingButtonType {
@@ -173,7 +173,7 @@ Item {
                         text: qsTr("ShadowSocks settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContSsConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContSsConfigClicked()
                         }
                     }
                     SettingButtonType {
@@ -184,7 +184,7 @@ Item {
                         text: qsTr("Cloak settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoCloakOpenvpnContCloakConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContCloakConfigClicked()
                         }
                     }
                 }
@@ -217,15 +217,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonSsOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonSsOpenVpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonSsOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonSsOpenVpnContDefaultChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoSsOpenvpnContDefaultClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonSsOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonSsOpenVpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -235,9 +235,9 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonSsOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonSsOpenVpnContShareVisible
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoSsOpenvpnContShareClicked(false)
+                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContShareClicked(false)
                         }
                     }
                     ImageButtonType {
@@ -248,14 +248,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonSsOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonSsOpenVpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonSsOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonSsOpenVpnContInstallChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoSsOpenvpnContInstallClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonSsOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonSsOpenVpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -274,7 +274,7 @@ Item {
                         text: qsTr("OpenVPN settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked()
                         }
                     }
                     SettingButtonType {
@@ -285,7 +285,7 @@ Item {
                         text: qsTr("ShadowSocks settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoSsOpenvpnContSsConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContSsConfigClicked()
                         }
                     }
                 }
@@ -318,15 +318,15 @@ Item {
                         icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                         width: 24
                         height: 24
-                        checked: ServerContainersLogic.pushButtonOpenvpnContDefaultChecked
+                        checked: ServerContainersLogic.pushButtonOpenVpnContDefaultChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonOpenvpnContDefaultChecked = checked
+                            ServerContainersLogic.pushButtonOpenVpnContDefaultChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoOpenvpnContDefaultClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoOpenVpnContDefaultClicked(checked)
                         }
 
-                        visible: ServerContainersLogic.pushButtonOpenvpnContDefaultVisible
+                        visible: ServerContainersLogic.pushButtonOpenVpnContDefaultVisible
                     }
 
                     ImageButtonType {
@@ -336,9 +336,9 @@ Item {
                         icon.source: "qrc:/images/share.png"
                         width: 24
                         height: 24
-                        visible: ServerContainersLogic.pushButtonOpenvpnContShareVisible
+                        visible: ServerContainersLogic.pushButtonOpenVpnContShareVisible
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoOpenvpnContShareClicked(false)
+                            ServerContainersLogic.onPushButtonProtoOpenVpnContShareClicked(false)
                         }
                     }
                     ImageButtonType {
@@ -349,14 +349,14 @@ Item {
                                              : "qrc:/images/connect_button_disconnected.png"
                         width: 36
                         height: 24
-                        checked: ServerContainersLogic.pushButtonOpenvpnContInstallChecked
+                        checked: ServerContainersLogic.pushButtonOpenVpnContInstallChecked
                         onCheckedChanged: {
-                            ServerContainersLogic.pushButtonOpenvpnContInstallChecked = checked
+                            ServerContainersLogic.pushButtonOpenVpnContInstallChecked = checked
                         }
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoOpenvpnContInstallClicked(checked)
+                            ServerContainersLogic.onPushButtonProtoOpenVpnContInstallClicked(checked)
                         }
-                        enabled: ServerContainersLogic.pushButtonOpenvpnContInstallEnabled
+                        enabled: ServerContainersLogic.pushButtonOpenVpnContInstallEnabled
                     }
                 }
                 Rectangle {
@@ -375,7 +375,7 @@ Item {
                         text: qsTr("OpenVPN settings")
                         icon.source: "qrc:/images/settings.png"
                         onClicked: {
-                            ServerContainersLogic.onPushButtonProtoOpenvpnContOpenvpnConfigClicked()
+                            ServerContainersLogic.onPushButtonProtoOpenVpnContOpenvpnConfigClicked()
                         }
                     }
                 }

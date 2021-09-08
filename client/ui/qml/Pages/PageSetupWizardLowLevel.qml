@@ -59,7 +59,7 @@ Item {
             height: 40
             text: qsTr("Start configuring")
             onClicked: {
-                WizardLogic.onPushButtonSetupWizardLowFinishClicked()
+                WizardLogic.onPushButtonLowFinishClicked()
             }
         }
     }

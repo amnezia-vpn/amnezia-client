@@ -9,31 +9,28 @@ class StartPageLogic : public PageLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(bool, pushButtonNewServerConnectEnabled)
-    AUTO_PROPERTY(bool, pushButtonNewServerConnectKeyChecked)
-    AUTO_PROPERTY(QString, pushButtonNewServerConnectText)
+    AUTO_PROPERTY(bool, pushButtonConnectEnabled)
+    AUTO_PROPERTY(bool, pushButtonConnectKeyChecked)
+    AUTO_PROPERTY(QString, pushButtonConnectText)
     AUTO_PROPERTY(QString, lineEditStartExistingCodeText)
-    AUTO_PROPERTY(QString, textEditNewServerSshKeyText)
-    AUTO_PROPERTY(QString, lineEditNewServerIpText)
-    AUTO_PROPERTY(QString, lineEditNewServerPasswordText)
-    AUTO_PROPERTY(QString, lineEditNewServerLoginText)
-    AUTO_PROPERTY(bool, labelNewServerWaitInfoVisible)
-    AUTO_PROPERTY(QString, labelNewServerWaitInfoText)
+    AUTO_PROPERTY(QString, textEditSshKeyText)
+    AUTO_PROPERTY(QString, lineEditIpText)
+    AUTO_PROPERTY(QString, lineEditPasswordText)
+    AUTO_PROPERTY(QString, lineEditLoginText)
+    AUTO_PROPERTY(bool, labelWaitInfoVisible)
+    AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
-    AUTO_PROPERTY(bool, pushButtonNewServerConnectVisible)
+    AUTO_PROPERTY(bool, pushButtonConnectVisible)
 
 public:
-    Q_INVOKABLE void updateStartPage();
+    Q_INVOKABLE void updatePage() override;
 
-    Q_INVOKABLE void onPushButtonNewServerConnect();
-    Q_INVOKABLE void onPushButtonNewServerImport();
+    Q_INVOKABLE void onPushButtonConnect();
+    Q_INVOKABLE void onPushButtonImport();
 
 public:
     explicit StartPageLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~StartPageLogic() = default;
-
-    QString getPushButtonNewServerConnectText() const;
-    void setPushButtonNewServerConnectText(const QString &pushButtonNewServerConnectText);
 
 };
 #endif // START_PAGE_LOGIC_H

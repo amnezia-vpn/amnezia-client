@@ -12,25 +12,25 @@ class ServerContainersLogic : public PageLogicBase
     AUTO_PROPERTY(int, progressBarProtocolsContainerReinstallValue)
     AUTO_PROPERTY(int, progressBarProtocolsContainerReinstallMaximium)
 
-    AUTO_PROPERTY(bool, pushButtonOpenvpnContInstallChecked)
-    AUTO_PROPERTY(bool, pushButtonSsOpenvpnContInstallChecked)
-    AUTO_PROPERTY(bool, pushButtonCloakOpenvpnContInstallChecked)
+    AUTO_PROPERTY(bool, pushButtonOpenVpnContInstallChecked)
+    AUTO_PROPERTY(bool, pushButtonSsOpenVpnContInstallChecked)
+    AUTO_PROPERTY(bool, pushButtonCloakOpenVpnContInstallChecked)
     AUTO_PROPERTY(bool, pushButtonWireguardContInstallChecked)
-    AUTO_PROPERTY(bool, pushButtonOpenvpnContInstallEnabled)
-    AUTO_PROPERTY(bool, pushButtonSsOpenvpnContInstallEnabled)
-    AUTO_PROPERTY(bool, pushButtonCloakOpenvpnContInstallEnabled)
+    AUTO_PROPERTY(bool, pushButtonOpenVpnContInstallEnabled)
+    AUTO_PROPERTY(bool, pushButtonSsOpenVpnContInstallEnabled)
+    AUTO_PROPERTY(bool, pushButtonCloakOpenVpnContInstallEnabled)
     AUTO_PROPERTY(bool, pushButtonWireguardContInstallEnabled)
-    AUTO_PROPERTY(bool, pushButtonOpenvpnContDefaultChecked)
-    AUTO_PROPERTY(bool, pushButtonSsOpenvpnContDefaultChecked)
-    AUTO_PROPERTY(bool, pushButtonCloakOpenvpnContDefaultChecked)
+    AUTO_PROPERTY(bool, pushButtonOpenVpnContDefaultChecked)
+    AUTO_PROPERTY(bool, pushButtonSsOpenVpnContDefaultChecked)
+    AUTO_PROPERTY(bool, pushButtonCloakOpenVpnContDefaultChecked)
     AUTO_PROPERTY(bool, pushButtonWireguardContDefaultChecked)
-    AUTO_PROPERTY(bool, pushButtonOpenvpnContDefaultVisible)
-    AUTO_PROPERTY(bool, pushButtonSsOpenvpnContDefaultVisible)
-    AUTO_PROPERTY(bool, pushButtonCloakOpenvpnContDefaultVisible)
+    AUTO_PROPERTY(bool, pushButtonOpenVpnContDefaultVisible)
+    AUTO_PROPERTY(bool, pushButtonSsOpenVpnContDefaultVisible)
+    AUTO_PROPERTY(bool, pushButtonCloakOpenVpnContDefaultVisible)
     AUTO_PROPERTY(bool, pushButtonWireguardContDefaultVisible)
-    AUTO_PROPERTY(bool, pushButtonOpenvpnContShareVisible)
-    AUTO_PROPERTY(bool, pushButtonSsOpenvpnContShareVisible)
-    AUTO_PROPERTY(bool, pushButtonCloakOpenvpnContShareVisible)
+    AUTO_PROPERTY(bool, pushButtonOpenVpnContShareVisible)
+    AUTO_PROPERTY(bool, pushButtonSsOpenVpnContShareVisible)
+    AUTO_PROPERTY(bool, pushButtonCloakOpenVpnContShareVisible)
     AUTO_PROPERTY(bool, pushButtonWireguardContShareVisible)
     AUTO_PROPERTY(bool, frameOpenvpnSettingsVisible)
     AUTO_PROPERTY(bool, frameOpenvpnSsSettingsVisible)
@@ -43,12 +43,12 @@ class ServerContainersLogic : public PageLogicBase
 public:
     Q_INVOKABLE void updateServerContainersPage();
 
-    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContSsConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoCloakOpenvpnContCloakConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoOpenvpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenvpnContSsConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContSsConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContCloakConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoOpenVpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked();
+    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContSsConfigClicked();
 
 public:
     explicit ServerContainersLogic(UiLogic *uiLogic, QObject *parent = nullptr);
@@ -57,17 +57,17 @@ public:
     void setupProtocolsPageConnections();
 
 signals:
-    void pushButtonOpenvpnContDefaultClicked(bool checked);
-    void pushButtonSsOpenvpnContDefaultClicked(bool checked);
-    void pushButtonCloakOpenvpnContDefaultClicked(bool checked);
+    void pushButtonOpenVpnContDefaultClicked(bool checked);
+    void pushButtonSsOpenVpnContDefaultClicked(bool checked);
+    void pushButtonCloakOpenVpnContDefaultClicked(bool checked);
     void pushButtonWireguardContDefaultClicked(bool checked);
-    void pushButtonOpenvpnContInstallClicked(bool checked);
-    void pushButtonSsOpenvpnContInstallClicked(bool checked);
-    void pushButtonCloakOpenvpnContInstallClicked(bool checked);
+    void pushButtonOpenVpnContInstallClicked(bool checked);
+    void pushButtonSsOpenVpnContInstallClicked(bool checked);
+    void pushButtonCloakOpenVpnContInstallClicked(bool checked);
     void pushButtonWireguardContInstallClicked(bool checked);
-    void pushButtonOpenvpnContShareClicked(bool checked);
-    void pushButtonSsOpenvpnContShareClicked(bool checked);
-    void pushButtonCloakOpenvpnContShareClicked(bool checked);
+    void pushButtonOpenVpnContShareClicked(bool checked);
+    void pushButtonSsOpenVpnContShareClicked(bool checked);
+    void pushButtonCloakOpenVpnContShareClicked(bool checked);
     void pushButtonWireguardContShareClicked(bool checked);
 
 };

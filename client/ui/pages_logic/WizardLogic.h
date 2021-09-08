@@ -9,16 +9,16 @@ class WizardLogic : public PageLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(bool, radioButtonSetupWizardHighChecked)
-    AUTO_PROPERTY(bool, radioButtonSetupWizardMediumChecked)
-    AUTO_PROPERTY(bool, radioButtonSetupWizardLowChecked)
-    AUTO_PROPERTY(bool, checkBoxSetupWizardVpnModeChecked)
-    AUTO_PROPERTY(QString, lineEditSetupWizardHighWebsiteMaskingText)
+    AUTO_PROPERTY(bool, radioButtonHighChecked)
+    AUTO_PROPERTY(bool, radioButtonMediumChecked)
+    AUTO_PROPERTY(bool, radioButtonLowChecked)
+    AUTO_PROPERTY(bool, checkBoxVpnModeChecked)
+    AUTO_PROPERTY(QString, lineEditHighWebsiteMaskingText)
 
 public:
-    Q_INVOKABLE void updateWizardHighPage();
-    Q_INVOKABLE void onPushButtonSetupWizardVpnModeFinishClicked();
-    Q_INVOKABLE void onPushButtonSetupWizardLowFinishClicked();
+    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onPushButtonVpnModeFinishClicked();
+    Q_INVOKABLE void onPushButtonLowFinishClicked();
 
 public:
     explicit WizardLogic(UiLogic *uiLogic, QObject *parent = nullptr);
