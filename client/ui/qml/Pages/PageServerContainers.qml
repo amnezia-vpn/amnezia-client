@@ -7,16 +7,8 @@ import "../Config"
 Item {
     id: root
     enabled: ServerContainersLogic.pageEnabled
-    ImageButtonType {
+    BackButton {
         id: back
-        x: 10
-        y: 10
-        width: 26
-        height: 20
-        icon.source: "qrc:/images/arrow_left.png"
-        onClicked: {
-            UiLogic.closePage()
-        }
     }
     Text {
         font.family: "Lato"

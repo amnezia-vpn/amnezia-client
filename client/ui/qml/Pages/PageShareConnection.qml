@@ -6,18 +6,9 @@ import "../Config"
 
 Item {
     id: root
-    ImageButtonType {
+    BackButton {
         id: back
-        x: 10
-        y: 10
-        width: 26
-        height: 20
-        icon.source: "qrc:/images/arrow_left.png"
-        onClicked: {
-            UiLogic.closePage()
-        }
     }
-
     ScrollView {
         x: 10
         y: 40

@@ -8,6 +8,9 @@ import "../Config"
 
 Item {
     id: root
+    BackButton {
+        id: back
+    }
     Text {
         font.family: "Lato"
         font.styleName: "normal"
@@ -46,17 +49,6 @@ Item {
         }
         onAccepted: {
             SitesLogic.onPushButtonAddCustomSitesClicked()
-        }
-    }
-    ImageButtonType {
-        id: back
-        x: 10
-        y: 10
-        width: 26
-        height: 20
-        icon.source: "qrc:/images/arrow_left.png"
-        onClicked: {
-            UiLogic.closePage()
         }
     }
     BlueButtonType {

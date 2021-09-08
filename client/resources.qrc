@@ -103,5 +103,6 @@
         <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
+        <file>ui/qml/Controls/BackButton.qml</file>
     </qresource>
 </RCC>

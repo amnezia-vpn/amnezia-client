@@ -6,6 +6,9 @@ import "../Config"
 
 Item {
     id: root
+    BackButton {
+        id: back_from_start
+    }
     Image {
         anchors.horizontalCenter: root.horizontalCenter
         width: GC.trW(150)
@@ -292,18 +295,4 @@ Item {
                 visible: false
             }
         }
-
-
-    ImageButtonType {
-        id: back_from_start
-        x: 10
-        y: 10
-        width: 26
-        height: 20
-        icon.source: "qrc:/images/arrow_left.png"
-        visible: StartPageLogic.pushButtonBackFromStartVisible
-        onClicked: {
-            UiLogic.closePage()
-        }
-    }
 }
