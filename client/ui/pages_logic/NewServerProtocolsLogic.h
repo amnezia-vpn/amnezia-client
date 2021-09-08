@@ -21,7 +21,7 @@ class NewServerProtocolsLogic : public PageLogicBase
     AUTO_PROPERTY(QString, comboBoxOpenvpnProtoText)
     AUTO_PROPERTY(bool, checkBoxCloakChecked)
     AUTO_PROPERTY(bool, checkBoxSsChecked)
-    AUTO_PROPERTY(bool, checkBoxOpenvpnChecked)
+    AUTO_PROPERTY(bool, checkBoxOpenVpnChecked)
     AUTO_PROPERTY(double, progressBarConnectionMinimum)
     AUTO_PROPERTY(double, progressBarConnectionMaximum)
 
@@ -35,7 +35,7 @@ public:
     QMap<DockerContainer, QJsonObject> getInstallConfigsFromProtocolsPage() const;
 
 signals:
-    void pushButtonConnectConfigureClicked();
+    void pushButtonConfigureClicked();
 
 };
 #endif // NEW_SERVER_PROTOCOLS_LOGIC_H

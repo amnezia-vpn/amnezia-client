@@ -39,6 +39,8 @@ void StartPageLogic::updatePage()
 
 void StartPageLogic::onPushButtonConnect()
 {
+//    uiLogic()->goToPage(Page::NewServer);
+//    return;
     if (pushButtonConnectKeyChecked()){
         if (lineEditIpText().isEmpty() ||
                 lineEditLoginText().isEmpty() ||

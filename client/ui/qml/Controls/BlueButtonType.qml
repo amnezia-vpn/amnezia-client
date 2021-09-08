@@ -4,6 +4,11 @@ import QtQuick.Controls 2.12
 
 BasicButtonType {
     id: root
+    width: parent.width - 80
+    height: 40
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.topMargin: 20
+
     background: Rectangle {
         anchors.fill: parent
         radius: 4

@@ -7,29 +7,11 @@ import "../Config"
 
 Item {
     id: root
-    ImageButtonType {
+    BackButton {
         id: back_from_setup_wizard
-        x: 10
-        y: 10
-        width: 26
-        height: 20
-        icon.source: "qrc:/images/arrow_left.png"
-        onClicked: {
-            UiLogic.closePage()
-        }
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("Setup Wizard")
-        x: 10
-        y: 35
-        width: 361
-        height: 31
     }
     Item {
         x: 10

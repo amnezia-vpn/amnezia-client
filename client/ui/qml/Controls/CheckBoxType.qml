@@ -20,5 +20,6 @@ CheckBox {
         color: "#181922"
         verticalAlignment: Text.AlignVCenter
         leftPadding: root.indicator.width + root.spacing
+        wrapMode: Text.Wrap
     }
 }

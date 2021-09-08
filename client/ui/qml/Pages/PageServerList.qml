@@ -11,22 +11,15 @@ Item {
     BackButton {
         id: back
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
+    Caption {
+        id: caption
         text: qsTr("Servers list")
-        x: 50
-        y: 30
-        width: 171
-        height: 40
     }
     ImageButtonType {
         x: 240
         y: 39
+        anchors.left: caption.right
+        anchors.leftMargin: 10
         width: 24
         height: 24
         icon.source: "qrc:/images/plus.png"

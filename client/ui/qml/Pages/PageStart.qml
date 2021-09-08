@@ -9,20 +9,28 @@ Item {
     BackButton {
         id: back_from_start
     }
-    Image {
-        anchors.horizontalCenter: root.horizontalCenter
-        width: GC.trW(150)
-        height: GC.trH(22)
-        y: GC.trY(590)
-        source: "qrc:/images/AmneziaVPN.png"
+
+    Caption {
+        id: caption
+        text: start_switch_page.checked ?
+                  qsTr("Setup your server to use VPN") :
+                  qsTr("Connect to the already created VPN server")
+    }
+
+    Logo {
+        id: logo
     }
 
     BasicButtonType {
         id: start_switch_page
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 530
-        width: 301
+        anchors.bottom: logo.top
+        anchors.bottomMargin: 10
+
+        width: parent.width - 80
         height: 40
+        anchors.topMargin: 20
+
         text: qsTr("Set up your own server")
         checked: false
         checkable: true
@@ -60,239 +68,203 @@ Item {
 
     }
 
+    Item {
+        id: page_start_import
+        width: parent.width
+        anchors.top: caption.bottom
+        anchors.bottom: start_switch_page.top
+        anchors.bottomMargin: 10
 
-        Item {
-            id: page_start_import
-            width: 380
-            height: 481
-            x: 0
-            y: 35
-            visible: true
-            Text {
-                x: 0
-                y: 20
-                width: 381
-                height: 71
+        visible: true
+
+        LabelType {
+            id: label_connection_code
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            text: qsTr("Connection code")
+        }
+        TextFieldType {
+            id: lineEdit_start_existing_code
+            anchors.top: label_connection_code.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            placeholderText: "vpn://..."
+            text: StartPageLogic.lineEditStartExistingCodeText
+            onEditingFinished: {
+                StartPageLogic.lineEditStartExistingCodeText = text
+            }
+        }
+        BlueButtonType {
+            id: new_sever_import
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 210
+            anchors.top: lineEdit_start_existing_code.bottom
+            anchors.topMargin: 40
+            text: qsTr("Connect")
+            onClicked: {
+                StartPageLogic.onPushButtonImport()
+            }
+        }
+    }
+
+
+    Item {
+        id: page_start_new_server
+        width: parent.width
+        anchors.top: caption.bottom
+        anchors.bottom: start_switch_page.top
+        anchors.bottomMargin: 10
+
+        visible: false
+
+        BasicButtonType {
+            id: new_sever_get_info
+            width: parent.width - 80
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 5
+
+            text: qsTr("Where to get connection data →")
+            background: Item {
+                anchors.fill: parent
+            }
+
+            contentItem: Text {
+                anchors.fill: parent
                 font.family: "Lato"
                 font.styleName: "normal"
-                font.pixelSize: 24
-                font.bold: true
-                color: "#100A44"
+                font.pixelSize: 16
+                color: "#15CDCB";
+                text: new_sever_get_info.text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                text: qsTr("Connect to the already created VPN server")
-                wrapMode: Text.Wrap
             }
-            LabelType {
-                x: 40
-                y: 110
-                width: 301
-                height: 21
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                text: qsTr("Connection code")
-                wrapMode: Text.Wrap
+            antialiasing: true
+            checkable: true
+            checked: true
+            onClicked: {
+                Qt.openUrlExternally("https://amnezia.org")
             }
-            TextFieldType {
-                id: lineEdit_start_existing_code
-                x: 40
-                y: 140
-                width: 300
-                height: 40
-                placeholderText: "vpn://..."
-                text: StartPageLogic.lineEditStartExistingCodeText
-                onEditingFinished: {
-                    StartPageLogic.lineEditStartExistingCodeText = text
-                }
-            }
-            BlueButtonType {
-                id: new_sever_import
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 210
-                width: 301
-                height: 40
-                text: qsTr("Connect")
-                onClicked: {
-                    StartPageLogic.onPushButtonImport()
-                }
+        }
+        LabelType {
+            id: label_server_ip
+            x: 40
+            anchors.top: new_sever_get_info.bottom
+            text: qsTr("Server IP address")
+        }
+        TextFieldType {
+            id: new_server_ip
+            anchors.top: label_server_ip.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: StartPageLogic.lineEditIpText
+            onEditingFinished: {
+                StartPageLogic.lineEditIpText = text
             }
         }
 
+        LabelType {
+            id:label_login
+            x: 40
+            anchors.top: new_server_ip.bottom
+            text: qsTr("Login to connect via SSH")
+        }
+        TextFieldType {
+            id: new_server_login
+            anchors.top: label_login.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: StartPageLogic.lineEditLoginText
+            onEditingFinished: {
+                StartPageLogic.lineEditLoginText = text
+            }
+        }
 
-        Item {
-            id: page_start_new_server
-            width: 380
-            height: 481
-            x: 0
-            y: 35
+        LabelType {
+            id: label_new_server_password
+            x: 40
+            anchors.top: new_server_login.bottom
+            text: qsTr("Password")
+        }
+        TextFieldType {
+            id: new_server_password
+            anchors.top: label_new_server_password.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            echoMode: TextInput.Password
+            text: StartPageLogic.lineEditPasswordText
+            onEditingFinished: {
+                StartPageLogic.lineEditPasswordText = text
+            }
+        }
+        TextFieldType {
+            id: new_server_ssh_key
+            anchors.top: label_new_server_password.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            height: 71
+            echoMode: TextInput.Password
+            font.pixelSize: 9
+            verticalAlignment: Text.AlignTop
+            text: StartPageLogic.textEditSshKeyText
+            onEditingFinished: {
+                StartPageLogic.textEditSshKeyText = text
+            }
             visible: false
-            Label {
-                x:10
-                y:0
-                width: 361
-                height: 31
+        }
+
+        LabelType {
+            x: 40
+            y: 390
+            width: 301
+            height: 41
+            text: StartPageLogic.labelWaitInfoText
+            visible: StartPageLogic.labelWaitInfoVisible
+            wrapMode: Text.Wrap
+        }
+
+
+
+        BlueButtonType {
+            id: new_sever_connect
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: new_server_ssh_key.bottom
+
+            text: StartPageLogic.pushButtonConnectText
+            visible: StartPageLogic.pushButtonConnectVisible
+            onClicked: {
+                StartPageLogic.onPushButtonConnect()
+            }
+            enabled: StartPageLogic.pushButtonConnectEnabled
+        }
+        BasicButtonType {
+            id: new_sever_connect_key
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: new_sever_connect.bottom
+
+            width: 281
+            height: 21
+            text: qsTr("Connect using SSH key")
+            background: Item {
+                anchors.fill: parent
+            }
+
+            contentItem: Text {
+                anchors.fill: parent
                 font.family: "Lato"
                 font.styleName: "normal"
-                font.pixelSize: 24
-                font.bold: true
-                color: "#100A44"
+                font.pixelSize: 16
+                color: "#15CDCB";
+                text: new_sever_connect_key.text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                text: qsTr("Setup your server to use VPN")
-                wrapMode: Text.Wrap
             }
-            LabelType {
-                x: 40
-                y: 70
-                width: 171
-                height: 21
-                text: qsTr("Server IP address")
-            }
-            LabelType {
-                x: 40
-                y: 150
-                width: 261
-                height: 21
-                text: qsTr("Login to connect via SSH")
-            }
-            LabelType {
-                id: label_new_server_password
-                x: 40
-                y: 230
-                width: 171
-                height: 21
-                text: qsTr("Password")
-            }
-            LabelType {
-                x: 40
-                y: 390
-                width: 301
-                height: 41
-                text: StartPageLogic.labelWaitInfoText
-                visible: StartPageLogic.labelWaitInfoVisible
-                wrapMode: Text.Wrap
-            }
-            TextFieldType {
-                id: new_server_ip
-                x: 40
-                y: 100
-                width: 300
-                height: 40
-                text: StartPageLogic.lineEditIpText
-                onEditingFinished: {
-                    StartPageLogic.lineEditIpText = text
-                }
-            }
-            TextFieldType {
-                id: new_server_login
-                x: 40
-                y: 180
-                width: 300
-                height: 40
-                text: StartPageLogic.lineEditLoginText
-                onEditingFinished: {
-                    StartPageLogic.lineEditLoginText = text
-                }
-            }
-            TextFieldType {
-                id: new_server_password
-                x: 40
-                y: 260
-                width: 300
-                height: 40
-                echoMode: TextInput.Password
-                text: StartPageLogic.lineEditPasswordText
-                onEditingFinished: {
-                    StartPageLogic.lineEditPasswordText = text
-                }
-            }
-            BlueButtonType {
-                id: new_sever_connect
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 350
-                width: 301
-                height: 40
-                text: StartPageLogic.pushButtonConnectText
-                visible: StartPageLogic.pushButtonConnectVisible
-                onClicked: {
-                    StartPageLogic.onPushButtonConnect()
-                }
-                enabled: StartPageLogic.pushButtonConnectEnabled
-            }
-            BasicButtonType {
-                id: new_sever_connect_key
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 450
-                width: 281
-                height: 21
-                text: qsTr("Connect using SSH key")
-                background: Item {
-                    anchors.fill: parent
-                }
-
-                contentItem: Text {
-                    anchors.fill: parent
-                    font.family: "Lato"
-                    font.styleName: "normal"
-                    font.pixelSize: 16
-                    color: "#15CDCB";
-                    text: new_sever_connect_key.text
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                antialiasing: true
-                checkable: true
-                checked: StartPageLogic.pushButtonConnectKeyChecked
-                onCheckedChanged: {
-                    StartPageLogic.pushButtonConnectKeyChecked = checked
-                    label_new_server_password.text = checked ? qsTr("Private key") : qsTr("Password")
-                    new_sever_connect_key.text = checked ? qsTr("Connect using SSH password") : qsTr("Connect using SSH key")
-                    new_server_password.visible = !checked
-                    new_server_ssh_key.visible = checked
-                }
-            }
-            BasicButtonType {
-                id: new_sever_get_info
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 40
-                width: 281
-                height: 21
-                text: qsTr("Where to get connection data →")
-                background: Item {
-                    anchors.fill: parent
-                }
-
-                contentItem: Text {
-                    anchors.fill: parent
-                    font.family: "Lato"
-                    font.styleName: "normal"
-                    font.pixelSize: 16
-                    color: "#15CDCB";
-                    text: new_sever_get_info.text
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                antialiasing: true
-                checkable: true
-                checked: true
-                onClicked: {
-                    Qt.openUrlExternally("https://amnezia.org")
-                }
-            }
-            TextFieldType {
-                id: new_server_ssh_key
-                x: 40
-                y: 260
-                width: 300
-                height: 71
-                echoMode: TextInput.Password
-                font.pixelSize: 9
-                verticalAlignment: Text.AlignTop
-                text: StartPageLogic.textEditSshKeyText
-                onEditingFinished: {
-                    StartPageLogic.textEditSshKeyText = text
-                }
-                visible: false
+            antialiasing: true
+            checkable: true
+            checked: StartPageLogic.pushButtonConnectKeyChecked
+            onCheckedChanged: {
+                StartPageLogic.pushButtonConnectKeyChecked = checked
+                label_new_server_password.text = checked ? qsTr("Private key") : qsTr("Password")
+                new_sever_connect_key.text = checked ? qsTr("Connect using SSH password") : qsTr("Connect using SSH key")
+                new_server_password.visible = !checked
+                new_server_ssh_key.visible = checked
             }
         }
+    }
 }

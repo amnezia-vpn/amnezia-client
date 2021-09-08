@@ -15,13 +15,13 @@ NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *logic, QObject *parent
     m_frameSettingsParentWireguardVisible{false},
     m_checkBoxCloakChecked{true},
     m_checkBoxSsChecked{false},
-    m_checkBoxOpenvpnChecked{false},
+    m_checkBoxOpenVpnChecked{false},
     m_progressBarConnectionMinimum{0},
     m_progressBarConnectionMaximum{100}
 {
     set_frameSettingsParentWireguardVisible(false);
 
-    connect(this, &NewServerProtocolsLogic::pushButtonConnectConfigureClicked, this, [this](){
+    connect(this, &NewServerProtocolsLogic::pushButtonConfigureClicked, this, [this](){
         uiLogic()->installServer(getInstallConfigsFromProtocolsPage());
     });
 }
@@ -78,7 +78,7 @@ QMap<DockerContainer, QJsonObject> NewServerProtocolsLogic::getInstallConfigsFro
         containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
     }
 
-    if (checkBoxOpenvpnChecked()) {
+    if (checkBoxOpenVpnChecked()) {
         containers.insert(DockerContainer::OpenVpn, openVpnConfig);
     }
 

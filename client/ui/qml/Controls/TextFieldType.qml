@@ -4,7 +4,11 @@ import QtQuick.Controls 2.12
 TextField {
     id: root
     property bool error: false
-//    font.
+
+    width: parent.width - 80
+    height: 40
+    anchors.topMargin: 5
+
     selectionColor: "darkgray"
     font.pixelSize: 16
     color: "#333333"

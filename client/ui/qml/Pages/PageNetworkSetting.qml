@@ -9,18 +9,8 @@ Item {
     BackButton {
         id: back
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("DNS Servers")
-        x: 10
-        y: 35
-        width: 361
-        height: 31
     }
     Image {
         anchors.horizontalCenter: root.horizontalCenter

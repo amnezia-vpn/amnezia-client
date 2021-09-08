@@ -10,18 +10,8 @@ Item {
     BackButton {
         id: back_from_setup_wizard
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("Setup your server to use VPN")
-        x: 10
-        y: 35
-        width: 361
-        height: 31
     }
     Item {
         x: 10

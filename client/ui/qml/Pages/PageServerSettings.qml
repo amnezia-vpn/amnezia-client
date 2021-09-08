@@ -12,18 +12,9 @@ Item {
     BackButton {
         id: back
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("Server settings")
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 35
-        width: 361
-        height: 31
     }
     Image {
         anchors.horizontalCenter: root.horizontalCenter

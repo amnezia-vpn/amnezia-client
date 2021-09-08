@@ -104,5 +104,8 @@
         <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
         <file>ui/qml/Controls/BackButton.qml</file>
+        <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
+        <file>ui/qml/Controls/Caption.qml</file>
+        <file>ui/qml/Controls/Logo.qml</file>
     </qresource>
 </RCC>

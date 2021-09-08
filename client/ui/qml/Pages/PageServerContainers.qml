@@ -10,18 +10,8 @@ Item {
     BackButton {
         id: back
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("Protocols")
-        x: 10
-        y: 35
-        width: 361
-        height: 31
     }
     ProgressBar {
         id: progress_bar

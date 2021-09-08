@@ -10,65 +10,49 @@ Item {
     BackButton {
         id: back_from_new_server
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
+        id: caption
         text: qsTr("Setup your server to use VPN")
-        x: 10
-        y: 35
-        width: 361
-        height: 31
     }
     LabelType {
+        id: labelWizard
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: qsTr("If you want easily configure your server just run Wizard")
-        wrapMode: Text.Wrap
-        x: 40
-        y: 100
-        width: 301
-        height: 41
-    }
-    LabelType {
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        text: qsTr("Press configure manually to choose VPN protocols you want to install")
-        wrapMode: Text.Wrap
-        x: 40
-        y: 260
-        width: 301
-        height: 41
+        width: parent.width - 80
+        anchors.top: caption.bottom
+        anchors.topMargin: 30
     }
     BlueButtonType {
+        id: pushButtonWizard
         text: qsTr("Run Setup Wizard")
-        y: 150
-        width: 301
-        height: 40
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: labelWizard.bottom
+        anchors.topMargin: 10
         onClicked: {
             UiLogic.goToPage(PageEnum.Wizard);
         }
     }
+    LabelType {
+        id: labelManual
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: qsTr("Press configure manually to choose VPN protocols you want to install")
+
+        width: parent.width - 80
+        anchors.top: pushButtonWizard.bottom
+        anchors.topMargin: 40
+    }
+
     BlueButtonType {
         text: qsTr("Configure VPN protocols manually")
-        y: 310
-        width: 301
-        height: 40
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: labelManual.bottom
+        anchors.topMargin: 10
         onClicked: {
             UiLogic.goToPage(PageEnum.NewServerProtocols);
         }
     }
 
-    Image {
-        anchors.horizontalCenter: root.horizontalCenter
-        width: GC.trW(150)
-        height: GC.trH(22)
-        y: GC.trY(590)
-        source: "qrc:/images/AmneziaVPN.png"
+    Logo {
     }
 }

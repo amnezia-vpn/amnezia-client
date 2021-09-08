@@ -7,18 +7,8 @@ import "../Config"
 Item {
     id: root
     enabled: NewServerConfiguringLogic.pageEnabled
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 24
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    Caption {
         text: qsTr("Configuring...")
-        x: 0
-        y: 35
-        width: 381
-        height: 31
     }
     LabelType {
         x: 30
