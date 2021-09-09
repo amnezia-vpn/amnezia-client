@@ -28,7 +28,7 @@
 #include "core/server_defs.h"
 #include "core/errorstrings.h"
 
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 #include "protocols/shadowsocksvpnprotocol.h"
 
 #include "ui/qautostart.h"
@@ -72,9 +72,9 @@ UiLogic::UiLogic(QObject *parent) :
     m_trayIconUrl{},
     m_trayActionDisconnectEnabled{true},
     m_trayActionConnectEnabled{true},
-    m_dialogConnectErrorText{},
-    m_vpnConnection(nullptr)
+    m_dialogConnectErrorText{}
 {
+    m_allContainersModel = new AllContainersModel(this);
     m_vpnConnection = new VpnConnection(this);
 
     m_appSettingsLogic = new AppSettingsLogic(this);

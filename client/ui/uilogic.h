@@ -5,8 +5,11 @@
 #include <QQmlEngine>
 #include <functional>
 
+#include "property_helper.h"
 #include "pages.h"
 #include "protocols/vpnprotocol.h"
+#include "containers/containers_defs.h"
+#include "models/all_containers_model.h"
 
 #include "settings.h"
 
@@ -34,6 +37,8 @@ class VpnConnection;
 class UiLogic : public QObject
 {
     Q_OBJECT
+
+    READONLY_PROPERTY(QObject *, allContainersModel)
 
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)

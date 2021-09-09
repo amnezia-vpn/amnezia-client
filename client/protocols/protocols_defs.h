@@ -126,22 +126,8 @@ Protocol protoFromString(QString proto);
 QString protoToString(Protocol proto);
 
 
-enum class DockerContainer {
-    None,
-    OpenVpn,
-    OpenVpnOverShadowSocks,
-    OpenVpnOverCloak,
-    WireGuard
-};
-
-DockerContainer containerFromString(const QString &container);
-QString containerToString(DockerContainer container);
-
-QVector<Protocol> protocolsForContainer(DockerContainer container);
-
 } // namespace amnezia
 
 QDebug operator<<(QDebug debug, const amnezia::Protocol &p);
-QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c);
 
 #endif // PROTOCOLS_DEFS_H

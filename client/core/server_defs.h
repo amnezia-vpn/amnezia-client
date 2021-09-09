@@ -2,7 +2,7 @@
 #define SERVER_DEFS_H
 
 #include <QObject>
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 namespace amnezia {
 namespace server {

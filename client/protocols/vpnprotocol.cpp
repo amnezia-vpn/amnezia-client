@@ -3,7 +3,7 @@
 
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
     : QObject(parent),

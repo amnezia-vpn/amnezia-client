@@ -1,4 +1,4 @@
-#include "serversmodel.h"
+#include "servers_model.h"
 
 ServersModel::ServersModel(QObject *parent) :
     QAbstractListModel(parent)

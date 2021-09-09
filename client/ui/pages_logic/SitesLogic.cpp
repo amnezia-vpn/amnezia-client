@@ -10,7 +10,7 @@
 #include <functional>
 
 #include "../uilogic.h"
-#include "../sites_model.h"
+#include "../models/sites_model.h"
 
 SitesLogic::SitesLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),

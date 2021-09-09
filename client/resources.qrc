@@ -107,5 +107,6 @@
         <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
         <file>ui/qml/Controls/Caption.qml</file>
         <file>ui/qml/Controls/Logo.qml</file>
+        <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
     </qresource>
 </RCC>

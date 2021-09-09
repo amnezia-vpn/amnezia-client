@@ -3,7 +3,7 @@
 #include "utils.h"
 
 #include <QDebug>
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";

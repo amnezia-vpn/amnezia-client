@@ -1,7 +1,7 @@
 #include "ServerListLogic.h"
 
 #include "vpnconnection.h"
-#include "../serversmodel.h"
+#include "../models/servers_model.h"
 #include "../uilogic.h"
 
 ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):

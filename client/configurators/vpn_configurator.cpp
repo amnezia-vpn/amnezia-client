@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,

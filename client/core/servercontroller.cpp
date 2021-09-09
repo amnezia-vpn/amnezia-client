@@ -14,7 +14,7 @@
 #include "sftpchannel.h"
 #include "sshconnectionmanager.h"
 
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 #include "server_defs.h"
 #include "scripts_registry.h"
 #include "utils.h"

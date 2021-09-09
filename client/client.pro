@@ -18,6 +18,7 @@ HEADERS  += \
    configurators/ssh_configurator.h \
    configurators/vpn_configurator.h \
    configurators/wireguard_configurator.h \
+    containers/containers_defs.h \
     core/defs.h \
     core/errorstrings.h \
     core/ipcclient.h \
@@ -33,6 +34,7 @@ HEADERS  += \
     protocols/shadowsocksvpnprotocol.h \
    protocols/wireguardprotocol.h \
     settings.h \
+    ui/models/all_containers_model.h \
     ui/pages.h \
     ui/pages_logic/AppSettingsLogic.h \
     ui/pages_logic/GeneralSettingsLogic.h \
@@ -52,10 +54,10 @@ HEADERS  += \
    ui/pages_logic/protocols/OpenVpnLogic.h \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
-    ui/serversmodel.h \
+    ui/models/servers_model.h \
     ui/uilogic.h \
    ui/qautostart.h \
-   ui/sites_model.h \
+   ui/models/sites_model.h \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
@@ -67,6 +69,7 @@ SOURCES  += \
    configurators/ssh_configurator.cpp \
    configurators/vpn_configurator.cpp \
    configurators/wireguard_configurator.cpp \
+    containers/containers_defs.cpp \
    core/errorstrings.cpp \
     core/ipcclient.cpp \
     configurators/openvpn_configurator.cpp \
@@ -81,6 +84,7 @@ SOURCES  += \
     protocols/shadowsocksvpnprotocol.cpp \
    protocols/wireguardprotocol.cpp \
     settings.cpp \
+    ui/models/all_containers_model.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
     ui/pages_logic/GeneralSettingsLogic.cpp \
     ui/pages_logic/NetworkSettingsLogic.cpp \
@@ -98,10 +102,10 @@ SOURCES  += \
    ui/pages_logic/protocols/CloakLogic.cpp \
    ui/pages_logic/protocols/OpenVpnLogic.cpp \
    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
-    ui/serversmodel.cpp \
+    ui/models/servers_model.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \
-   ui/sites_model.cpp \
+   ui/models/sites_model.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \

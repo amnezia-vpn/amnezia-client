@@ -3,7 +3,7 @@
 
 #include "openvpnprotocol.h"
 #include "QProcess"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 class ShadowSocksVpnProtocol : public OpenVpnProtocol
 {

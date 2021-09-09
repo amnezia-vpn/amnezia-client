@@ -9,7 +9,7 @@
 #include "sftpdefs.h"
 
 #include "core/server_defs.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
 #include "utils.h"
 

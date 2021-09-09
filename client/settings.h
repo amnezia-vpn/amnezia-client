@@ -10,7 +10,7 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 using namespace amnezia;
 
