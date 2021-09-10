@@ -50,6 +50,9 @@ void ServerContainersLogic::updateServerContainersPage()
 {
     set_progressBarProtocolsContainerReinstallVisible(false);
 
+    ContainersModel *model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
+    model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
+
     auto containers = m_settings.containers(uiLogic()->selectedServerIndex);
     DockerContainer defaultContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
     bool haveAuthData = m_settings.haveAuthData(uiLogic()->selectedServerIndex);

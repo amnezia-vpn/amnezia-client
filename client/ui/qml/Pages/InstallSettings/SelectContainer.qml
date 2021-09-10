@@ -8,6 +8,7 @@ Drawer {
     id: root
     signal containerSelected(int id)
     property alias selectedIndex: tb.currentIndex
+    property var filter: function (item){ return item.is_vpn_role }
 
     z: -3
 
@@ -19,10 +20,6 @@ Drawer {
 
     modal: true
     interactive: true
-
-    onClosed: {
-        tb.currentIndex = -1
-    }
 
     Flickable {
         clip: true
@@ -54,9 +51,18 @@ Drawer {
                 spacing: 1
                 clip: true
                 interactive: false
-                model: UiLogic.allContainersModel
+                model: UiLogic.containersModel
 
                 delegate: Item {
+                    required property int index
+
+                    required property string name_role
+                    required property string desc_role
+                    required property bool is_vpn_role
+                    required property bool is_other_role
+                    required property bool is_installed_role
+
+                    visible: filter(this)
                     implicitWidth: 170 * 2
                     implicitHeight: 30
                     Item {
@@ -79,8 +85,8 @@ Drawer {
                         }
                         Text {
                             id: text_name
-                            text: name
-                            font.pointSize: 12
+                            text: name_role
+                            font.pixelSize: 16
                             anchors.fill: parent
                             leftPadding: 10
                             verticalAlignment: Text.AlignVCenter
@@ -116,7 +122,7 @@ Drawer {
 //                clip: true
 //                interactive: false
 //                property int currentRow: -1
-//                model: UiLogic.allContainersModel
+//                model: UiLogic.containersModel
 
 //                delegate: Item {
 //                    implicitWidth: 170 * 2
@@ -142,7 +148,7 @@ Drawer {
 //                        Text {
 //                            id: text_name_other
 //                            text: name
-//                            font.pointSize: 12
+//                            font.pixelSize: 16
 //                            anchors.fill: parent
 //                            leftPadding: 10
 //                            verticalAlignment: Text.AlignVCenter

@@ -1,36 +1,39 @@
-#ifndef ALL_CONTAINERS_MODEL_H
-#define ALL_CONTAINERS_MODEL_H
+#ifndef CONTAINERS_MODEL_H
+#define CONTAINERS_MODEL_H
 
 #include <QAbstractListModel>
 #include <QJsonObject>
 #include <vector>
 #include <utility>
 
+#include "settings.h"
 #include "containers/containers_defs.h"
 
-class AllContainersModel : public QAbstractListModel
+class ContainersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    AllContainersModel(QObject *parent = nullptr);
+    ContainersModel(QObject *parent = nullptr);
 public:
     enum SiteRoles {
         NameRole = Qt::UserRole + 1,
         DescRole,
-        TypeRole,
-        InstalledRole
+        isVpnTypeRole,
+        isOtherTypeRole,
+        isInstalledRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    void setServerData(const QJsonObject &server);
+    void setSelectedServerIndex(int index);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QJsonObject m_serverData;
+    int m_selectedServerIndex;
+    Settings m_settings;
 };
 
-#endif // ALL_CONTAINERS_MODEL_H
+#endif // CONTAINERS_MODEL_H

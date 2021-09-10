@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.3
 import "./"
 import "../Controls"
 import "../Config"
@@ -17,6 +18,7 @@ Item {
 
     BlueButtonType {
         id: pushButtonConfigure
+        enabled: container_selector.selectedIndex > 0
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height - 60
         width: parent.width - 40
@@ -27,7 +29,7 @@ Item {
         }
     }
 
-    RoundButton {
+    BlueButtonType {
         id: pb_add_container
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: caption.bottom
@@ -35,31 +37,63 @@ Item {
 
         width: parent.width - 40
         height: 40
-        text: qsTr("Add protocol")
-        font.pointSize: 12
-        onClicked: drawer_menu.visible ? drawer_menu.close() : drawer_menu.open()
+        text: qsTr("Select protocol container")
+        font.pixelSize: 16
+        onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
 
     }
 
     SelectContainer {
-        id: drawer_menu
+        id: container_selector
+        //filter: function (){ return is_vpn_role }
     }
+
+    Column {
+        id: c1
+        visible: container_selector.selectedIndex > 0
+        width: parent.width
+        anchors.top: pb_add_container.bottom
+        anchors.topMargin: 10
+
+        Caption {
+            font.pixelSize: 22
+            text: UiLogic.containerName(container_selector.selectedIndex)
+        }
+
+        Text {
+            width: parent.width
+            anchors.topMargin: 10
+            padding: 10
+
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            color: "#181922"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+
+            text: UiLogic.containerDesc(container_selector.selectedIndex)
+        }
+    }
+
+
 
     Rectangle {
         id: frame_settings
+        visible: container_selector.selectedIndex > 0
         width: parent.width
-        anchors.top: pb_add_container.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: c1.bottom
         anchors.topMargin: 10
 
         border.width: 1
         border.color: "lightgray"
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
-        visible: false
         radius: 2
         Grid {
-            id: container
+            id: grid
+            visible: container_selector.selectedIndex > 0
             anchors.fill: parent
             columns: 2
             horizontalItemAlignment: Grid.AlignHCenter
@@ -71,12 +105,10 @@ Item {
 
             LabelType {
                 width: 130
-                height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
                 text: qsTr("Port (TCP/UDP)")
             }
             TextFieldType {
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
                 text: NewServerProtocolsLogic.lineEditOpenvpnPortText
                 onEditingFinished: {
                     NewServerProtocolsLogic.lineEditOpenvpnPortText = text
@@ -84,12 +116,10 @@ Item {
             }
             LabelType {
                 width: 130
-                height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
                 text: qsTr("Protocol")
             }
             ComboBoxType {
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                height: (parent.height - parent.spacing - parent.topPadding * 2) / 2
                 model: [
                     qsTr("udp"),
                     qsTr("tcp"),

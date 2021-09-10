@@ -74,7 +74,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_trayActionConnectEnabled{true},
     m_dialogConnectErrorText{}
 {
-    m_allContainersModel = new AllContainersModel(this);
+    m_containersModel = new ContainersModel(this);
     m_vpnConnection = new VpnConnection(this);
 
     m_appSettingsLogic = new AppSettingsLogic(this);
@@ -122,6 +122,11 @@ void UiLogic::initalizeUiLogic()
     if (m_settings.defaultServerIndex() >= 0 && m_settings.serversCount() > 0) {
         goToPage(Page::Vpn, true, false);
     }
+
+    selectedServerIndex = m_settings.defaultServerIndex();
+    goToPage(Page::ServerContainers, true, false);
+    //goToPage(Page::NewServerProtocols, true, false);
+
 
     //    //ui->pushButton_general_settings_exit->hide();
 
@@ -339,6 +344,17 @@ void UiLogic::onCloseWindow()
     else {
         hide();
     }
+}
+
+QString UiLogic::containerName(int container)
+{
+    return amnezia::containerHumanNames().value(static_cast<DockerContainer>(container));
+}
+
+QString UiLogic::containerDesc(int container)
+{
+    return amnezia::containerDescriptions().value(static_cast<DockerContainer>(container));
+
 }
 
 

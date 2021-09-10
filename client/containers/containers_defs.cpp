@@ -46,6 +46,7 @@ QVector<amnezia::Protocol> amnezia::protocolsForContainer(amnezia::DockerContain
 QVector<amnezia::DockerContainer> amnezia::allContainers()
 {
     return QVector<amnezia::DockerContainer> {
+        DockerContainer::None,
         DockerContainer::OpenVpn,
         DockerContainer::OpenVpnOverShadowSocks,
         DockerContainer::OpenVpnOverCloak,

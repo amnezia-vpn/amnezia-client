@@ -36,3 +36,30 @@ QVector<amnezia::Protocol> amnezia::allProtocols()
     };
 }
 
+
+QMap<amnezia::Protocol, QString> amnezia::protocolHumanNames()
+{
+    return {
+        {Protocol::OpenVpn, "OpenVPN"},
+        {Protocol::ShadowSocks, "ShadowSocks"},
+        {Protocol::Cloak, "Cloak"},
+        {Protocol::WireGuard, "WireGuard"}
+    };
+}
+
+QMap<amnezia::Protocol, QString> amnezia::protocolDescriptions()
+{
+    return {};
+}
+
+bool amnezia::isProtocolVpnType(Protocol p)
+{
+    switch (p) {
+    case Protocol::Any :          return false;
+    case Protocol::OpenVpn :      return true;
+    case Protocol::Cloak :        return true;
+    case Protocol::ShadowSocks :  return true;
+    case Protocol::WireGuard :    return true;
+    default:                      return false;
+    }
+}

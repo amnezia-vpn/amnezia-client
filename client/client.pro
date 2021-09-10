@@ -34,7 +34,8 @@ HEADERS  += \
     protocols/shadowsocksvpnprotocol.h \
    protocols/wireguardprotocol.h \
     settings.h \
-    ui/models/all_containers_model.h \
+    ui/models/containers_model.h \
+    ui/models/protocols_model.h \
     ui/pages.h \
     ui/pages_logic/AppSettingsLogic.h \
     ui/pages_logic/GeneralSettingsLogic.h \
@@ -84,7 +85,8 @@ SOURCES  += \
     protocols/shadowsocksvpnprotocol.cpp \
    protocols/wireguardprotocol.cpp \
     settings.cpp \
-    ui/models/all_containers_model.cpp \
+    ui/models/containers_model.cpp \
+    ui/models/protocols_model.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
     ui/pages_logic/GeneralSettingsLogic.cpp \
     ui/pages_logic/NetworkSettingsLogic.cpp \

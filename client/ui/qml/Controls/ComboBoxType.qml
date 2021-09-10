@@ -5,5 +5,7 @@ ComboBox {
     id: root
     font.family: "Lato"
     font.styleName: "normal"
-    font.pixelSize: 13
+    font.pixelSize: 16
+
+    popup.font.pixelSize: 16
 }

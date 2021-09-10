@@ -9,7 +9,7 @@
 #include "pages.h"
 #include "protocols/vpnprotocol.h"
 #include "containers/containers_defs.h"
-#include "models/all_containers_model.h"
+#include "models/containers_model.h"
 
 #include "settings.h"
 
@@ -38,7 +38,7 @@ class UiLogic : public QObject
 {
     Q_OBJECT
 
-    READONLY_PROPERTY(QObject *, allContainersModel)
+    READONLY_PROPERTY(QObject *, containersModel)
 
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
@@ -72,6 +72,10 @@ public:
 
     Q_INVOKABLE void initalizeUiLogic();
     Q_INVOKABLE void onCloseWindow();
+
+    Q_INVOKABLE QString containerName(int container);
+    Q_INVOKABLE QString containerDesc(int container);
+
 
 
     int getCurrentPageValue() const;

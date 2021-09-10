@@ -12,7 +12,7 @@ BasicButtonType {
     background: Rectangle {
         anchors.fill: parent
         radius: 4
-        color: root.containsMouse ? "#211966" : "#100A44"
+        color: root.enabled ? (root.containsMouse ? "#211966" : "#100A44") : "#888888"
     }
     font.pixelSize: 16
     contentItem: Text {

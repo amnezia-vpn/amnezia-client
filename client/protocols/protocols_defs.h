@@ -125,6 +125,9 @@ QVector<Protocol> allProtocols();
 Protocol protoFromString(QString proto);
 QString protoToString(Protocol proto);
 
+QMap<Protocol, QString> protocolHumanNames();
+QMap<Protocol, QString> protocolDescriptions();
+bool isProtocolVpnType(Protocol p);
 
 } // namespace amnezia
 
