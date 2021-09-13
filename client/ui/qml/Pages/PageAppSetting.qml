@@ -1,11 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import PageEnum 1.0
 import "./"
 import "../Controls"
 import "../Config"
 
 PageBase {
     id: root
+    page: PageEnum.AppSettings
+    logic: AppSettingsLogic
+
     BackButton {
         id: back
     }

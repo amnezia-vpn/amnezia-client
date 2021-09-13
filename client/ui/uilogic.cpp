@@ -98,6 +98,7 @@ UiLogic::UiLogic(QObject *parent) :
 
 void UiLogic::initalizeUiLogic()
 {
+    qDebug() << "UiLogic::initalizeUiLogic()";
     setupTray();
 
 

@@ -5,8 +5,11 @@ import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.GeneralSettings
+    logic: GeneralSettingsLogic
+
     BackButton {
         id: back
     }

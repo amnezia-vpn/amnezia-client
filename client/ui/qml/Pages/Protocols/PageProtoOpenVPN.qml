@@ -1,11 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import "./"
+import PageEnum 1.0
+import "../"
 import "../../Controls"
 import "../../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.OpenVpnSettings
+    logic: OpenVpnLogic
+
     enabled: OpenVpnLogic.pageProtoOpenVpnEnabled
     BackButton {
         id: back

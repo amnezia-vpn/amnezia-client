@@ -5,8 +5,10 @@ import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.Vpn
+    logic: VpnLogic
 
     Image {
         anchors.horizontalCenter: parent.horizontalCenter

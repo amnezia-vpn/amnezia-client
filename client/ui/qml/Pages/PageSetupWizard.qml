@@ -5,8 +5,11 @@ import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.Wizard
+    logic: WizardLogic
+
     BackButton {
         id: back_from_setup_wizard
     }

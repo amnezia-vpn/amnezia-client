@@ -1,11 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import PageEnum 1.0
 import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.WizardVpnMode
+    logic: WizardLogic
+
     BackButton {
         id: back_from_setup_wizard
     }

@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 import PageEnum 1.0
 import Qt.labs.platform 1.1
+import Qt.labs.folderlistmodel 2.12
 import QtQuick.Dialogs 1.1
 import "./"
 import "Pages"
@@ -11,8 +12,7 @@ import "Pages/Protocols"
 import "Config"
 
 Window  {
-    Material.theme: Material.Dark
-    Material.accent: Material.Purple
+    property var pages: ({})
 
     id: root
     visible: true
@@ -26,124 +26,8 @@ Window  {
 
     //flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
-    function getPageComponent(page) {
-        switch (page) {
-        case PageEnum.Start:
-            return page_start;
-        case PageEnum.NewServer:
-            return page_new_server
-        case PageEnum.NewServerProtocols:
-            return page_new_server_protocols
-        case PageEnum.Wizard:
-            return page_setup_wizard
-        case PageEnum.WizardHigh:
-            return page_setup_wizard_high_level
-        case PageEnum.WizardLow:
-            return page_setup_wizard_low_level
-        case PageEnum.WizardMedium:
-            return page_setup_wizard_medium_level
-        case PageEnum.WizardVpnMode:
-            return page_setup_wizard_vpn_mode
-        case PageEnum.ServerConfiguring:
-            return page_new_server_configuring
-        case PageEnum.Vpn:
-            return page_vpn
-        case PageEnum.GeneralSettings:
-            return page_general_settings
-        case PageEnum.AppSettings:
-            return page_app_settings
-        case PageEnum.NetworkSettings:
-            return page_network_settings
-        case PageEnum.ServerSettings:
-            return page_server_settings
-        case PageEnum.ServerContainers:
-            return page_server_containers
-        case PageEnum.ServersList:
-            return page_servers
-        case PageEnum.ShareConnection:
-            return page_share_connection
-        case PageEnum.Sites:
-            return page_sites
-        case PageEnum.OpenVpnSettings:
-            return page_proto_openvpn
-        case PageEnum.ShadowSocksSettings:
-            return page_proto_shadowsocks
-        case PageEnum.CloakSettings:
-            return page_proto_cloak
-        }
-        return undefined;
-    }
-
-    function getPageEnum(item) {
-        if (item instanceof PageStart) {
-            return PageEnum.Start
-        }
-        if (item instanceof PageNewServer) {
-            return PageEnum.NewServer
-        }
-        if (item instanceof PageNewServerProtocols) {
-            return PageEnum.NewServerProtocols
-        }
-        if (item instanceof PageSetupWizard) {
-            return PageEnum.Wizard
-        }
-        if (item instanceof PageSetupWizardHighLevel) {
-            return PageEnum.WizardHigh
-        }
-        if (item instanceof PageSetupWizardLowLevel) {
-            return PageEnum.WizardLow
-        }
-        if (item instanceof PageSetupWizardMediumLevel) {
-            return PageEnum.WizardMedium
-        }
-        if (item instanceof PageSetupWizardVPNMode) {
-            return PageEnum.WizardVpnMode
-        }
-        if (item instanceof PageNewServerConfiguring) {
-            return PageEnum.ServerConfiguring
-        }
-        if (item instanceof PageVPN) {
-            return PageEnum.Vpn
-        }
-        if (item instanceof PageGeneralSettings) {
-            return PageEnum.GeneralSettings
-        }
-        if (item instanceof PageAppSetting) {
-            return PageEnum.AppSettings
-        }
-        if (item instanceof PageNetworkSetting) {
-            return PageEnum.NetworkSettings
-        }
-        if (item instanceof PageServerSettings) {
-            return PageEnum.ServerSettings
-        }
-        if (item instanceof PageServerContainers) {
-            return PageEnum.ServerContainers
-        }
-        if (item instanceof PageServerList) {
-            return PageEnum.ServersList
-        }
-        if (item instanceof PageShareConnection) {
-            return PageEnum.ShareConnection
-        }
-        if (item instanceof PageSites) {
-            return PageEnum.Sites
-        }
-        if (item instanceof PageProtoOpenVPN) {
-            return PageEnum.OpenVpnSettings
-        }
-        if (item instanceof PageProtoShadowSocks) {
-            return PageEnum.ShadowSocksSettings
-        }
-        if (item instanceof PageProtoCloak) {
-            return PageEnum.CloakSettings
-        }
-        return PageEnum.Start
-    }
 
     function gotoPage(page, reset, slide) {
-        let pageComponent = getPageComponent(page)
-        console.debug(pageComponent)
         if (reset) {
             if (page === PageEnum.ServerSettings) {
                 ServerSettingsLogic.updatePage();
@@ -189,9 +73,9 @@ Window  {
             }
         }
         if (slide) {
-            pageLoader.push(pageComponent, {}, StackView.PushTransition)
+            pageLoader.push(pages[page], {}, StackView.PushTransition)
         } else {
-            pageLoader.push(pageComponent, {}, StackView.Immediate)
+            pageLoader.push(pages[page], {}, StackView.Immediate)
         }
     }
 
@@ -204,11 +88,10 @@ Window  {
 
     function set_start_page(page, slide) {
         pageLoader.clear()
-        let pageComponent = getPageComponent(page)
         if (slide) {
-            pageLoader.push(pageComponent, {}, StackView.PushTransition)
+            pageLoader.push(pages[page], {}, StackView.PushTransition)
         } else {
-            pageLoader.push(pageComponent, {}, StackView.Immediate)
+            pageLoader.push(pages[page], {}, StackView.Immediate)
         }
         if (page === PageEnum.Start) {
             UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
@@ -253,8 +136,7 @@ Window  {
 
 //        initialItem: page_servers
         onCurrentItemChanged: {
-            let pageEnum = root.getPageEnum(currentItem)
-            UiLogic.currentPageValue = pageEnum
+            UiLogic.currentPageValue = currentItem.page
         }
 
         Keys.onReleased: {
@@ -277,95 +159,64 @@ Window  {
         }
 
     }
-    Component {
-        id: page_start
-        PageStart {}
-    }
-    Component {
-        id: page_new_server
-        PageNewServer {}
-    }
-    Component {
-        id: page_setup_wizard
-        PageSetupWizard {}
-    }
-    Component {
-        id: page_setup_wizard_high_level
-        PageSetupWizardHighLevel {}
-    }
-    Component {
-        id: page_setup_wizard_vpn_mode
-        PageSetupWizardVPNMode {}
-    }
-    Component {
-        id: page_setup_wizard_medium_level
-        PageSetupWizardMediumLevel {}
-    }
-    Component {
-        id: page_setup_wizard_low_level
-        PageSetupWizardLowLevel {}
-    }
-    Component {
-        id: page_new_server_protocols
-        PageNewServerProtocols {}
-    }
-    Component {
-        id: page_vpn
-        PageVPN {}
-    }
-    Component {
-        id: page_sites
-        PageSites {}
-    }
-    Component {
-        id: page_general_settings
-        PageGeneralSettings {}
-    }
-    Component {
-        id: page_servers
-        PageServerList {}
-    }
-    Component {
-        id: page_app_settings
-        PageAppSetting {}
-    }
-    Component {
-        id: page_network_settings
-        PageNetworkSetting {}
-    }
-    Component {
-        id: page_server_settings
-        PageServerSettings {}
-    }
-    Component {
-        id: page_server_containers
-        PageServerContainers {}
-    }
-    Component {
-        id: page_share_connection
-        PageShareConnection {}
-    }
-    Component {
-        id: page_proto_openvpn
-        PageProtoOpenVPN {}
-    }
-    Component {
-        id: page_proto_shadowsocks
-        PageProtoShadowSocks {}
-    }
-    Component {
-        id: page_proto_cloak
-        PageProtoCloak {}
-    }
-    Component {
-        id: page_new_server_configuring
-        PageNewServerConfiguring {}
+
+    FolderListModel {
+        id: folderModelPages
+        folder: "qrc:/ui/qml/Pages/"
+        nameFilters: ["*.qml"]
+        showDirs: false
+
+        onStatusChanged: if (status == FolderListModel.Ready) {
+                             for (var i=0; i<folderModelPages.count; i++) {
+                                 createPagesObjects(folderModelPages.get(i, "filePath"));
+                             }
+                             UiLogic.initalizeUiLogic()
+                         }
     }
 
-    Component.onCompleted: {
-        UiLogic.initalizeUiLogic()
+    FolderListModel {
+        id: folderModelProtocols
+        folder: "qrc:/ui/qml/Pages/Protocols/"
+        nameFilters: ["*.qml"]
+        showDirs: false
+
+        onStatusChanged: if (status == FolderListModel.Ready) {
+                             for (var i=0; i<folderModelProtocols.count; i++) {
+                                 createPagesObjects(folderModelProtocols.get(i, "filePath"));
+                             }
+        }
     }
 
+    function createPagesObjects(file) {
+        var c = Qt.createComponent("qrc" + file);
+
+        var finishCreation = function (component){
+            if (component.status == Component.Ready) {
+                var obj = component.createObject(root);
+                if (obj == null) {
+                    console.debug("Error creating object " + component.url);
+                }
+                else {
+                    obj.visible = false
+                    pages[obj.page] = obj
+
+                }
+            } else if (component.status == Component.Error) {
+                console.debug("Error loading component:", component.errorString());
+            }
+        }
+
+        var lambdaFunc = function(){
+            finishCreation(c)
+        }
+
+        if (c.status == Component.Ready)
+            finishCreation(c);
+        else {
+            console.debug("Warning: Pages components are not ready");
+            c.statusChanged.connect(lambdaFunc);
+        }
+    }
 
     Connections {
         target: UiLogic

@@ -5,8 +5,11 @@ import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.ServerSettings
+    logic: ServerSettingsLogic
+
     enabled: ServerSettingsLogic.pageEnabled
 
     BackButton {

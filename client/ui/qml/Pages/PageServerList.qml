@@ -6,8 +6,11 @@ import "../Controls"
 import "./"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.ServersList
+    logic: ServerListLogic
+
     BackButton {
         id: back
     }

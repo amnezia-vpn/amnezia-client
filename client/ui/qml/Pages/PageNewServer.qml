@@ -5,8 +5,11 @@ import "./"
 import "../Controls"
 import "../Config"
 
-Item {
+PageBase {
     id: root
+    page: PageEnum.NewServer
+    //logic: {}
+
     BackButton {
         id: back_from_new_server
     }
