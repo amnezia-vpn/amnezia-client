@@ -10,7 +10,7 @@ import "Pages"
 import "Pages/Protocols"
 import "Config"
 
-Window {
+Window  {
     Material.theme: Material.Dark
     Material.accent: Material.Purple
 
@@ -18,7 +18,9 @@ Window {
     visible: true
     width: GC.screenWidth
     height: GC.isDesktop() ? GC.screenHeight + titleBar.height : GC.screenHeight
+    Keys.enabled: true
     onClosing: {
+        console.debug("QML onClosing signal")
         UiLogic.onCloseWindow()
     }
 
@@ -239,8 +241,6 @@ Window {
 
     Rectangle {
         y: GC.isDesktop() ? titleBar.height : 0
-//        width: GC.screenWidth
-//        height: GC.screenHeight
         anchors.fill: parent
         color: "white"
     }
@@ -248,15 +248,34 @@ Window {
     StackView {
         id: pageLoader
         y: GC.isDesktop() ? titleBar.height : 0
-//        width: GC.screenWidth
-//        height: GC.screenHeight
         anchors.fill: parent
+        focus: true
 
 //        initialItem: page_servers
         onCurrentItemChanged: {
             let pageEnum = root.getPageEnum(currentItem)
             UiLogic.currentPageValue = pageEnum
         }
+
+        Keys.onReleased: {
+            if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+                console.debug("Back button captured")
+                if (UiLogic.currentPageValue !== PageEnum.VPN &&
+                        UiLogic.currentPageValue !== PageEnum.ServerConfiguring &&
+                        !(UiLogic.currentPageValue === PageEnum.Start && pageLoader.depth < 2)) {
+                    close_page();
+                }
+
+
+                // TODO: fix
+                //if (ui->stackedWidget_main->currentWidget()->isEnabled()) {
+                //    closePage();
+                //}
+
+                event.accepted = true
+            }
+        }
+
     }
     Component {
         id: page_start
@@ -452,5 +471,4 @@ Window {
         text: UiLogic.dialogConnectErrorText
         visible: false
     }
-
 }
