@@ -23,7 +23,9 @@ private:
     static QString cloakExecPath();
 
 private:
+#ifndef Q_OS_IOS
     QProcess m_ckProcess;
+#endif
     QTemporaryFile m_cloakCfgFile;
     QMetaObject::Connection m_errorHandlerConnection;
 };

@@ -41,6 +41,8 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
     program = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS/wg";
 #endif
 
+#ifndef Q_OS_IOS
+
     // Priv
     {
         QProcess p;
@@ -76,7 +78,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
         connData.clientPubKey.replace("\r", "");
         connData.clientPubKey.replace("\n", "");
     }
-
+#endif
     return connData;
 }
 

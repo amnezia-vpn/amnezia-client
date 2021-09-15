@@ -20,11 +20,14 @@ ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
     qDebug() << "ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol";
     ShadowSocksVpnProtocol::stop();
     QThread::msleep(200);
+#ifndef Q_OS_IOS
     m_ssProcess.close();
+#endif
 }
 
 ErrorCode ShadowSocksVpnProtocol::start()
 {
+#ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ss-local", false))) {
         Utils::killProcessByName(Utils::executable("ss-local", false));
     }
@@ -77,6 +80,9 @@ ErrorCode ShadowSocksVpnProtocol::start()
         return OpenVpnProtocol::start();
     }
     else return ErrorCode::ShadowSocksExecutableMissing;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 void ShadowSocksVpnProtocol::stop()
@@ -84,7 +90,9 @@ void ShadowSocksVpnProtocol::stop()
     OpenVpnProtocol::stop();
 
     qDebug() << "ShadowSocksVpnProtocol::stop()";
+#ifndef Q_OS_IOS
     m_ssProcess.terminate();
+#endif
 
 #ifdef Q_OS_WIN
     Utils::signalCtrl(m_ssProcess.processId(), CTRL_C_EVENT);

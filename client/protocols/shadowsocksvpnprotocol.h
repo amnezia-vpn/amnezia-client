@@ -24,7 +24,9 @@ private:
     static QString shadowSocksExecPath();
 
 private:
+#ifndef Q_OS_IOS
     QProcess m_ssProcess;
+#endif
     QTemporaryFile m_shadowSocksCfgFile;
 };
 

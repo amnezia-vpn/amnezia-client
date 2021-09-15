@@ -1,0 +1,18 @@
+#include <QtCore>
+#include <QString>
+
+class IpcInterface
+{
+    SLOT( int createPrivilegedProcess() ); // return local pid
+    //SIGNAL(sendMessage(const QByteArray &message));
+
+    // Route functions
+    SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
+    SLOT( bool clearSavedRoutes() );
+    SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
+    SLOT( void flushDns() );
+
+    SLOT( bool checkAndInstallDriver() );
+    SLOT( QStringList getTapList() );
+};
+

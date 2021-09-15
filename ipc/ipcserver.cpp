@@ -48,15 +48,15 @@ int IpcServer::createPrivilegedProcess()
         qDebug() << "QRemoteObjectHost::destroyed";
     });
 
-    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
-        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
-//        if (m_processes.contains(pid)) {
-//            m_processes[pid].ipcProcess.reset();
-//            m_processes[pid].serverNode.reset();
-//            m_processes[pid].localServer.reset();
-//            m_processes.remove(pid);
-//        }
-    });
+//    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
+//        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
+////        if (m_processes.contains(pid)) {
+////            m_processes[pid].ipcProcess.reset();
+////            m_processes[pid].serverNode.reset();
+////            m_processes[pid].localServer.reset();
+////            m_processes.remove(pid);
+////        }
+//    });
 
     m_processes.insert(m_localpid, pd);
 

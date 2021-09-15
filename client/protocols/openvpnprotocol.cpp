@@ -77,9 +77,11 @@ ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
 
 void OpenVpnProtocol::killOpenVpnProcess()
 {
+#ifndef Q_OS_IOS
     if (m_openVpnProcess){
         m_openVpnProcess->close();
     }
+#endif
 }
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
@@ -151,6 +153,7 @@ QString OpenVpnProtocol::openVpnExecPath() const
 
 ErrorCode OpenVpnProtocol::start()
 {
+#ifndef Q_OS_IOS
     //qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
@@ -214,6 +217,9 @@ ErrorCode OpenVpnProtocol::start()
     //startTimeoutTimer();
 
     return ErrorCode::NoError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 bool OpenVpnProtocol::sendTermSignal()

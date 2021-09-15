@@ -73,4 +73,5 @@ include(../src/qtservice.pri)
 
 INCLUDEPATH += "$$PWD/../../client"
 
-REPC_SOURCE += ../../ipc/ipcinterface.rep
+REPC_SOURCE += ../../ipc/ipc_interface.rep
+!ios: REPC_SOURCE += ../../ipc/ipc_process_interface.rep

@@ -47,6 +47,7 @@ QProcessEnvironment OpenVpnConfigurator::prepareEnv()
 
 ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 {
+#ifndef Q_OS_IOS
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -72,10 +73,14 @@ ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
 
     if (p.exitCode() == 0) return ErrorCode::NoError;
     else return ErrorCode::EasyRsaError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &clientId)
 {
+#ifndef Q_OS_IOS
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -108,6 +113,9 @@ ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &client
 
     if (p.exitCode() == 0) return ErrorCode::NoError;
     else return ErrorCode::EasyRsaError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 

@@ -24,7 +24,7 @@ win32 {
    }
 }
 
-macx {
+macx:!ios {
     message("macOS build")
     INCLUDEPATH += $$PWD/macos
     HEADERS += $$PWD/macos/botan_all.h
@@ -51,3 +51,9 @@ android {
    }
 }
 
+ios: {
+    message("ios build")
+    INCLUDEPATH += $$PWD/ios
+    HEADERS += $$PWD/ios/botan_all.h
+    SOURCES += $$PWD/ios/botan_all.cpp
+}

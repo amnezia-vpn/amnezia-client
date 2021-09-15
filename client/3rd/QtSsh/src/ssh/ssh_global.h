@@ -32,6 +32,18 @@
 #define SSH_GLOBAL_H
 
 #include <QtGlobal>
+#include <QObject>
+
+#ifdef Q_OS_IOS
+class QProcess {
+public:
+    QProcess(QObject *){}
+enum ProcessChannel {
+    StandardOutput,
+    StandardError
+};
+};
+#endif
 
 #ifdef _MSC_VER
 // For static cmake building removing dll export/import

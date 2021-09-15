@@ -46,6 +46,7 @@ SshX11InfoRetriever::SshX11InfoRetriever(const QString &displayName, QObject *pa
       m_xauthProc(new QProcess(this)),
       m_xauthFile(new QTemporaryFile(this))
 {
+#ifndef Q_OS_IOS
     connect(m_xauthProc, &QProcess::errorOccurred, this,
         [this] {
             if (m_xauthProc->error() == QProcess::FailedToStart) {
@@ -133,10 +134,12 @@ SshX11InfoRetriever::SshX11InfoRetriever(const QString &displayName, QObject *pa
             }
         }
     );
+#endif
 }
 
 void SshX11InfoRetriever::start()
 {
+#ifndef Q_OS_IOS
     if (!m_xauthFile->open()) {
         emitFailure(tr("Could not create temporary file: %1").arg(m_xauthFile->errorString()));
         return;
@@ -147,6 +150,7 @@ void SshX11InfoRetriever::start()
                            m_xauthFile->fileName(),
                            QStringLiteral("generate"),
                            m_displayName, QString::fromLatin1(xauthProtocol())});
+#endif
 }
 
 void SshX11InfoRetriever::emitFailure(const QString &reason)

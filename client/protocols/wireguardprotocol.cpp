@@ -26,6 +26,7 @@ WireguardProtocol::~WireguardProtocol()
 
 void WireguardProtocol::stop()
 {
+#ifndef Q_OS_IOS
     if (!QFileInfo::exists(wireguardExecPath())) {
         qCritical() << "Wireguard executable missing!";
         setLastError(ErrorCode::ExecutableMissing);
@@ -67,6 +68,7 @@ void WireguardProtocol::stop()
     m_wireguardStopProcess->start();
 
     setConnectionState(VpnProtocol::Disconnected);
+#endif
 }
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
@@ -131,6 +133,7 @@ QString WireguardProtocol::wireguardExecPath() const
 
 ErrorCode WireguardProtocol::start()
 {
+#ifndef Q_OS_IOS
     if (!m_isConfigLoaded) {
         setLastError(ErrorCode::ConfigMissing);
         return lastError();
@@ -208,6 +211,9 @@ ErrorCode WireguardProtocol::start()
     m_wireguardStartProcess->start();
 
     return ErrorCode::NoError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 void WireguardProtocol::updateVpnGateway(const QString &line)

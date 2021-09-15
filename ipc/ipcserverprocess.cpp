@@ -1,6 +1,8 @@
 #include "ipcserverprocess.h"
 #include <QProcess>
 
+#ifndef Q_OS_IOS
+
 IpcServerProcess::IpcServerProcess(QObject *parent) :
     IpcProcessInterfaceSource(parent),
     m_process(QSharedPointer<QProcess>(new QProcess()))
@@ -103,3 +105,5 @@ QByteArray IpcServerProcess::readAllStandardOutput()
 {
     return m_process->readAllStandardOutput();
 }
+
+#endif

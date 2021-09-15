@@ -99,6 +99,8 @@ bool Utils::processIsRunning(const QString& fileName)
 
     }
     return false;
+#elif defined(Q_OS_IOS)
+    return false;
 #else
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
@@ -161,10 +163,12 @@ bool Utils::checkIpSubnetFormat(const QString &ip)
 }
 
 void Utils::killProcessByName(const QString &name)
-{
+{           
     qDebug().noquote() << "Kill process" << name;
 #ifdef Q_OS_WIN
     QProcess::execute(QString("taskkill /im %1 /f").arg(name));
+#elif defined Q_OS_IOS
+    return;
 #else
     QProcess::execute(QString("pkill %1").arg(name));
 #endif

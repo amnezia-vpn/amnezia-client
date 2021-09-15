@@ -5,7 +5,15 @@
 #include <QObject>
 
 #include "ipc.h"
-#include "rep_ipcinterface_replica.h"
+#include "rep_ipc_interface_replica.h"
+
+#ifndef Q_OS_IOS
+#include "rep_ipc_process_interface_replica.h"
+#else
+class IpcProcessInterfaceReplica {
+
+};
+#endif
 
 class IpcClient : public QObject
 {

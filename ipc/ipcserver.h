@@ -8,7 +8,7 @@
 #include "ipc.h"
 #include "ipcserverprocess.h"
 
-#include "rep_ipcinterface_source.h"
+#include "rep_ipc_interface_source.h"
 
 class IpcServer : public IpcInterfaceSource
 {

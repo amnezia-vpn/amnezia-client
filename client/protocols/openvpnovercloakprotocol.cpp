@@ -20,11 +20,14 @@ OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
     qDebug() << "OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol";
     OpenVpnOverCloakProtocol::stop();
     QThread::msleep(200);
+#ifndef Q_OS_IOS
     m_ckProcess.close();
+#endif
 }
 
 ErrorCode OpenVpnOverCloakProtocol::start()
 {
+#ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
         Utils::killProcessByName(Utils::executable("ck-client", false));
     }
@@ -79,6 +82,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         return OpenVpnProtocol::start();
     }
     else return ErrorCode::CloakExecutableMissing;
+#endif
 }
 
 void OpenVpnOverCloakProtocol::stop()
@@ -92,7 +96,9 @@ void OpenVpnOverCloakProtocol::stop()
     Utils::signalCtrl(m_ckProcess.processId(), CTRL_C_EVENT);
 #endif
 
+#ifndef Q_OS_IOS
     m_ckProcess.terminate();
+#endif
 }
 
 QString OpenVpnOverCloakProtocol::cloakExecPath()

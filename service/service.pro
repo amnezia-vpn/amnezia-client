@@ -1,5 +1,7 @@
-TEMPLATE=subdirs
-CONFIG += ordered
-include(common.pri)
-qtservice-uselib:SUBDIRS=buildlib
-SUBDIRS+=server
+!ios {
+    TEMPLATE=subdirs
+    CONFIG += ordered
+    include(common.pri)
+    qtservice-uselib:SUBDIRS=buildlib
+    SUBDIRS+=server
+}

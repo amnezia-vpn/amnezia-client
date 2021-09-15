@@ -4,6 +4,8 @@ TARGET = AmneziaVPN
 TEMPLATE = app
 #CONFIG += console
 
+ios:CONFIG += static
+
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
@@ -162,10 +164,11 @@ macx {
     HEADERS  += ui/macos_util.h
     SOURCES  += ui/macos_util.mm
 
-    LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit
+    LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
 }
 
-REPC_REPLICA += ../ipc/ipcinterface.rep
+REPC_REPLICA += ../ipc/ipc_interface.rep
+!ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
 
 DISTFILES += \
    android/AndroidManifest.xml
