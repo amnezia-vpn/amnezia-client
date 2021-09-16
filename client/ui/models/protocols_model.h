@@ -26,8 +26,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    void setSelectedServerIndex(int index);
-    void setSelectedDockerContainer(DockerContainer c);
+    Q_INVOKABLE void setSelectedServerIndex(int index);
+    Q_INVOKABLE void setSelectedDockerContainer(amnezia::DockerContainer c);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

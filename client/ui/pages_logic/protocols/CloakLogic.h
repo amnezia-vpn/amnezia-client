@@ -1,11 +1,11 @@
 #ifndef CLOAK_LOGIC_H
 #define CLOAK_LOGIC_H
 
-#include "../PageLogicBase.h"
+#include "PageProtocolLogicBase.h"
 
 class UiLogic;
 
-class CloakLogic : public PageLogicBase
+class CloakLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
@@ -29,8 +29,8 @@ public:
     explicit CloakLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~CloakLogic() = default;
 
-    void updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData);
-    QJsonObject getCloakConfigFromPage(QJsonObject oldConfig);
+    void updateProtocolPage (const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData) override;
+    QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:
     Settings m_settings;

@@ -1,11 +1,11 @@
 #ifndef OPENVPN_LOGIC_H
 #define OPENVPN_LOGIC_H
 
-#include "../PageLogicBase.h"
+#include "PageProtocolLogicBase.h"
 
 class UiLogic;
 
-class OpenVpnLogic : public PageLogicBase
+class OpenVpnLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
@@ -42,8 +42,8 @@ public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~OpenVpnLogic() = default;
 
-    void updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData);
-    QJsonObject getOpenVpnConfigFromPage(QJsonObject oldConfig);
+    void updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData) override;
+    QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:
     Settings m_settings;

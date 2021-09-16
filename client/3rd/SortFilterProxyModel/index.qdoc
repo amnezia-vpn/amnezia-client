@@ -1,0 +1,27 @@
+/*!
+    \page index.html overview
+
+    \title SortFilterProxyModel QML Module
+
+    SortFilterProxyModel is an implementation of QSortFilterProxyModel conveniently exposed for QML.
+    \annotatedlist SortFilterProxyModel
+
+    \section1 Filters
+    \annotatedlist Filters
+
+    \section2 Related attached types
+    \annotatedlist FilterAttached
+
+    \section1 Sorters
+    \annotatedlist Sorters
+
+    \section2 Related attached types
+    \annotatedlist SorterAttached
+
+    \section1 ProxyRoles
+    \annotatedlist ProxyRoles
+*/
+
+/*!
+    \qmlmodule SortFilterProxyModel
+*/

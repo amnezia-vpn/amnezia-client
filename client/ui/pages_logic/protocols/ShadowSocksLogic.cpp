@@ -7,7 +7,7 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
+    PageProtocolLogicBase(logic, parent),
     m_widgetProtoShadowSocksEnabled{false},
     m_comboBoxProtoShadowSocksCipherText{"chacha20-poly1305"},
     m_lineEditProtoShadowSocksPortText{},
@@ -23,7 +23,7 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void ShadowSocksLogic::updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
+void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
 {
     set_widgetProtoShadowSocksEnabled(haveAuthData);
     set_pushButtonShadowSocksSaveVisible(haveAuthData);
@@ -38,7 +38,7 @@ void ShadowSocksLogic::updateShadowSocksPage(const QJsonObject &ssConfig, Docker
     set_lineEditProtoShadowSocksPortEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
 }
 
-QJsonObject ShadowSocksLogic::getShadowSocksConfigFromPage(QJsonObject oldConfig)
+QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
     oldConfig.insert(config_key::cipher, comboBoxProtoShadowSocksCipherText());
     oldConfig.insert(config_key::port, lineEditProtoShadowSocksPortText());

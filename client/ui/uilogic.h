@@ -9,7 +9,9 @@
 #include "pages.h"
 #include "protocols/vpnprotocol.h"
 #include "containers/containers_defs.h"
+
 #include "models/containers_model.h"
+#include "models/protocols_model.h"
 
 #include "settings.h"
 
@@ -27,6 +29,7 @@ class StartPageLogic;
 class VpnLogic;
 class WizardLogic;
 
+class PageProtocolLogicBase;
 class OpenVpnLogic;
 class ShadowSocksLogic;
 class CloakLogic;
@@ -39,6 +42,7 @@ class UiLogic : public QObject
     Q_OBJECT
 
     READONLY_PROPERTY(QObject *, containersModel)
+    READONLY_PROPERTY(QObject *, protocolsModel)
 
     Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
@@ -66,6 +70,7 @@ public:
     friend class VpnLogic;
     friend class WizardLogic;
 
+    friend class PageProtocolLogicBase;
     friend class OpenVpnLogic;
     friend class ShadowSocksLogic;
     friend class CloakLogic;
@@ -175,6 +180,8 @@ public:
     ShadowSocksLogic *shadowSocksLogic()                    { return m_shadowSocksLogic; }
     CloakLogic *cloakLogic()                                { return m_cloakLogic; }
 
+    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(amnezia::Protocol p) { return m_protocolLogicMap->value(p); }
+
 private:
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
@@ -193,6 +200,8 @@ private:
     OpenVpnLogic *m_openVpnLogic;
     ShadowSocksLogic *m_shadowSocksLogic;
     CloakLogic *m_cloakLogic;
+
+    QMap<Protocol, PageProtocolLogicBase *> *m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
     Settings m_settings;

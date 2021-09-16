@@ -3,6 +3,8 @@ import QtQuick.Controls 2.12
 
 BasicButtonType {
     id: root
+    property alias textItem: textItem
+
     background: Item {}
     contentItem: Item {
         anchors.fill: parent
@@ -12,6 +14,7 @@ BasicButtonType {
             anchors.verticalCenter: parent.verticalCenter
         }
         Text {
+            id: textItem
             anchors.fill: parent
             leftPadding: 30
             text: root.text

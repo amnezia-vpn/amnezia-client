@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -34,7 +35,6 @@ PageBase {
     }
     SelectContainer {
         id: container_selector
-        filter: function (item){ return ! item.is_installed_role &&  (item.is_vpn_role || item.is_other_role)}
     }
 
     Flickable {
@@ -60,64 +60,168 @@ PageBase {
 
             }
 
+            SortFilterProxyModel {
+                id: proxyContainersModel
+                sourceModel: UiLogic.containersModel
+                filters: ValueFilter {
+                    roleName: "is_installed_role"
+                    value: true
+                }
+            }
+
+            SortFilterProxyModel {
+                id: proxyProtocolsModel
+                sourceModel: UiLogic.protocolsModel
+                filters: ValueFilter {
+                    roleName: "is_installed_role"
+                    value: true
+                }
+            }
+
+
             ListView {
-                id: tb
+                id: tb_c
                 x: 10
                 width: parent.width - 40
-                height: contentItem.height
-
-                spacing: 1
+                height: tb_c.contentItem.height
+                currentIndex: -1
+                spacing: 5
                 clip: true
                 interactive: false
-                model: UiLogic.containersModel
+                model: proxyContainersModel
 
                 delegate: Item {
-                    required property int index
-
-                    required property string name_role
-                    required property string desc_role
-                    required property bool is_vpn_role
-                    required property bool is_other_role
-                    required property bool is_installed_role
-
-                    visible: true
-                    implicitWidth: 170 * 2
-                    implicitHeight: 30
+                    implicitWidth: tb_c.width - 10
+                    implicitHeight: c_item.height
                     Item {
+                        id: c_item
                         width: parent.width
-                        height: 30
+                        height: lb_container_name.height + tb_p.height
                         anchors.left: parent.left
-                        id: c1
                         Rectangle {
                             anchors.top: parent.top
                             width: parent.width
                             height: 1
                             color: "lightgray"
-                            visible: index !== tb.currentIndex
+                            visible: index !== tb_c.currentIndex
                         }
                         Rectangle {
-                            anchors.fill: parent
-                            color: "#63B4FB"
-                            visible: index === tb.currentIndex
+                            anchors.top: lb_container_name.top
+                            anchors.bottom: lb_container_name.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
 
+                            color: "#63B4FB"
+                            visible: index === tb_c.currentIndex
                         }
                         Text {
-                            id: text_name
+                            id: lb_container_name
                             text: name_role
-                            font.pixelSize: 16
-                            anchors.fill: parent
+                            font.pixelSize: 17
+                            //font.bold: true
+                            color: "#100A44"
+                            topPadding: 5
+                            bottomPadding: 5
                             leftPadding: 10
                             verticalAlignment: Text.AlignVCenter
                             wrapMode: Text.WordWrap
                         }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            tb.currentIndex = index
-                            containerSelected(index)
-                            root.close()
+                        MouseArea {
+                            anchors.top: lb_container_name.top
+                            anchors.bottom: lb_container_name.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            propagateComposedEvents: true
+                            onClicked: {
+                                tb_c.currentIndex = index
+                                UiLogic.protocolsModel.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
+                                //container_selector.containerSelected(index)
+                                //root.close()
+                            }
+                        }
+
+                        ListView {
+                            id: tb_p
+                            currentIndex: -1
+                            visible: index === tb_c.currentIndex
+                            x: 10
+                            anchors.top: lb_container_name.bottom
+
+                            width: parent.width - 40
+                            height: visible ? tb_p.contentItem.height : 0
+
+                            spacing: 0
+                            clip: true
+                            interactive: false
+                            model: proxyProtocolsModel
+
+                            delegate: Item {
+                                id: dp_item
+
+                                implicitWidth: tb_p.width - 10
+                                implicitHeight: p_item.height
+                                Item {
+                                    id: p_item
+                                    width: parent.width
+                                    height: lb_protocol_name.height
+                                    anchors.left: parent.left
+                                    Rectangle {
+                                        anchors.top: parent.top
+                                        width: parent.width
+                                        height: 1
+                                        color: "lightgray"
+                                        visible: index !== tb_p.currentIndex
+                                    }
+//                                    Rectangle {
+//                                        anchors.top: lb_protocol_name.top
+//                                        anchors.bottom: lb_protocol_name.bottom
+//                                        width: parent.width
+
+//                                        color: "#63B4FB"
+//                                        visible: index === tb_p.currentIndex
+//                                    }
+
+//                                    Text {
+//                                        id: lb_protocol_name
+//                                        text: name_role
+//                                        font.pixelSize: 16
+//                                        topPadding: 5
+//                                        bottomPadding: 5
+//                                        leftPadding: 10
+//                                        verticalAlignment: Text.AlignVCenter
+//                                        wrapMode: Text.WordWrap
+//                                    }
+
+                                    SettingButtonType {
+                                        id: lb_protocol_name
+
+//                                        anchors.top: lb_protocol_name.top
+//                                        anchors.bottom: lb_protocol_name.bottom
+                                        topPadding: 10
+                                        bottomPadding: 10
+                                        leftPadding: 10
+
+                                        anchors.left: parent.left
+
+                                        width: parent.width
+                                        height: 30
+                                        text: qsTr(name_role + " settings")
+                                        textItem.font.pixelSize: 16
+                                        icon.source: "qrc:/images/settings.png"
+                                        onClicked: {
+                                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContSsConfigClicked()
+                                        }
+                                    }
+                                }
+
+//                                MouseArea {
+//                                    anchors.fill: parent
+//                                    onClicked: {
+//                                        tb_p.currentIndex = index
+//                                    }
+//                                }
+                            }
                         }
                     }
                 }

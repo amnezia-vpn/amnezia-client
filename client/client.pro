@@ -12,6 +12,7 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
+include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 
 HEADERS  += \
     ../ipc/ipc.h \
@@ -55,6 +56,7 @@ HEADERS  += \
     ui/pages_logic/WizardLogic.h \
    ui/pages_logic/protocols/CloakLogic.h \
    ui/pages_logic/protocols/OpenVpnLogic.h \
+   ui/pages_logic/protocols/PageProtocolLogicBase.h \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
@@ -105,6 +107,7 @@ SOURCES  += \
     ui/pages_logic/WizardLogic.cpp \
    ui/pages_logic/protocols/CloakLogic.cpp \
    ui/pages_logic/protocols/OpenVpnLogic.cpp \
+   ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
     ui/uilogic.cpp \

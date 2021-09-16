@@ -7,7 +7,7 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
+    PageProtocolLogicBase(logic, parent),
     m_lineEditProtoOpenVpnSubnetText{},
     m_radioButtonProtoOpenVpnUdpChecked{false},
     m_checkBoxProtoOpenVpnAutoEncryptionChecked{},
@@ -34,7 +34,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void OpenVpnLogic::updateOpenVpnPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
+void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {
     set_widgetProtoOpenVpnEnabled(haveAuthData);
     set_pushButtonOpenvpnSaveVisible(haveAuthData);
@@ -136,7 +136,7 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
     qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
 }
 
-QJsonObject OpenVpnLogic::getOpenVpnConfigFromPage(QJsonObject oldConfig)
+QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
     oldConfig.insert(config_key::subnet_address, lineEditProtoOpenVpnSubnetText());
     oldConfig.insert(config_key::transport_proto, radioButtonProtoOpenVpnUdpChecked() ? protocols::UDP : protocols::TCP);

@@ -1,11 +1,11 @@
 #ifndef SHADOWSOCKS_LOGIC_H
 #define SHADOWSOCKS_LOGIC_H
 
-#include "../PageLogicBase.h"
+#include "PageProtocolLogicBase.h"
 
 class UiLogic;
 
-class ShadowSocksLogic : public PageLogicBase
+class ShadowSocksLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
@@ -28,8 +28,8 @@ public:
     explicit ShadowSocksLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ShadowSocksLogic() = default;
 
-    void updateShadowSocksPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData);
-    QJsonObject getShadowSocksConfigFromPage(QJsonObject oldConfig);
+    void updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData) override;
+    QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:
     Settings m_settings;

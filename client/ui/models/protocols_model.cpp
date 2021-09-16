@@ -9,7 +9,7 @@ ProtocolsModel::ProtocolsModel(QObject *parent) :
 int ProtocolsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return amnezia::allContainers().size();
+    return amnezia::allProtocols().size();
 }
 
 QHash<int, QByteArray> ProtocolsModel::roleNames() const {
@@ -55,7 +55,7 @@ void ProtocolsModel::setSelectedServerIndex(int index)
     endResetModel();
 }
 
-void ProtocolsModel::setSelectedDockerContainer(DockerContainer c)
+void ProtocolsModel::setSelectedDockerContainer(amnezia::DockerContainer c)
 {
     beginResetModel();
     m_selectedDockerContainer = c;

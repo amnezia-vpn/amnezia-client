@@ -49,7 +49,6 @@ PageBase {
 
     SelectContainer {
         id: container_selector
-        //filter: function (){ return is_vpn_role }
     }
 
     Column {

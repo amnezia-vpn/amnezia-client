@@ -43,12 +43,14 @@ class ServerContainersLogic : public PageLogicBase
 public:
     Q_INVOKABLE void updateServerContainersPage();
 
-    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContSsConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContCloakConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoOpenVpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked();
-    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContSsConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContSsConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoCloakOpenVpnContCloakConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoOpenVpnContOpenvpnConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked();
+//    Q_INVOKABLE void onPushButtonProtoSsOpenVpnContSsConfigClicked();
+
+    Q_INVOKABLE void onPushButtonProtoSettingsClicked(amnezia::DockerContainer c, amnezia::Protocol p);
 
 public:
     explicit ServerContainersLogic(UiLogic *uiLogic, QObject *parent = nullptr);

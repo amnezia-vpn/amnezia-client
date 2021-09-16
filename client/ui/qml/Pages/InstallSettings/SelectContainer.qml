@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import SortFilterProxyModel 0.2
 import "./"
 import "../../Controls"
 import "../../Config"
@@ -8,7 +9,7 @@ Drawer {
     id: root
     signal containerSelected(int id)
     property alias selectedIndex: tb.currentIndex
-    property var filter: function (item){ return item.is_vpn_role }
+    property alias modelFilters: proxyModel.filters
 
     z: -3
 
@@ -20,6 +21,20 @@ Drawer {
 
     modal: true
     interactive: true
+
+    SortFilterProxyModel {
+        id: proxyModel
+        sourceModel: UiLogic.containersModel
+        filters: [
+            ValueFilter {
+                roleName: "is_installed_role"
+                value: false },
+            ValueFilter {
+                roleName: "is_vpn_role"
+                value: true }
+        ]
+
+    }
 
     Flickable {
         clip: true
@@ -48,21 +63,12 @@ Drawer {
                 width: parent.width - 40
                 height: contentItem.height
 
-                spacing: 1
+                spacing: 0
                 clip: true
                 interactive: false
-                model: UiLogic.containersModel
+                model: proxyModel
 
                 delegate: Item {
-                    required property int index
-
-                    required property string name_role
-                    required property string desc_role
-                    required property bool is_vpn_role
-                    required property bool is_other_role
-                    required property bool is_installed_role
-
-                    visible: filter(this)
                     implicitWidth: 170 * 2
                     implicitHeight: 30
                     Item {

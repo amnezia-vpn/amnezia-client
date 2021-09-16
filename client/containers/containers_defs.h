@@ -8,6 +8,7 @@
 using namespace amnezia;
 
 namespace amnezia {
+Q_NAMESPACE
 
 enum class DockerContainer {
     None,
@@ -16,6 +17,7 @@ enum class DockerContainer {
     OpenVpnOverCloak,
     WireGuard
 };
+Q_ENUM_NS(DockerContainer)
 
 DockerContainer containerFromString(const QString &container);
 QString containerToString(DockerContainer container);

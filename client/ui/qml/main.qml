@@ -13,6 +13,7 @@ import "Config"
 
 Window  {
     property var pages: ({})
+    property var protocolPages: ({})
 
     id: root
     visible: true

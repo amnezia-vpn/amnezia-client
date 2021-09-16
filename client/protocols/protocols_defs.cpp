@@ -29,6 +29,7 @@ QString amnezia::protoToString(amnezia::Protocol proto){
 QVector<amnezia::Protocol> amnezia::allProtocols()
 {
     return QVector<amnezia::Protocol> {
+        Protocol::Any,
         Protocol::OpenVpn,
         Protocol::ShadowSocks,
         Protocol::Cloak,

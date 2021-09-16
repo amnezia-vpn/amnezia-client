@@ -113,6 +113,7 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 } // namespace protocols
 
+Q_NAMESPACE
 enum class Protocol {
     Any,
     OpenVpn,
@@ -120,6 +121,8 @@ enum class Protocol {
     Cloak,
     WireGuard
 };
+Q_ENUM_NS(Protocol)
+
 QVector<Protocol> allProtocols();
 
 Protocol protoFromString(QString proto);
@@ -128,6 +131,16 @@ QString protoToString(Protocol proto);
 QMap<Protocol, QString> protocolHumanNames();
 QMap<Protocol, QString> protocolDescriptions();
 bool isProtocolVpnType(Protocol p);
+
+static void declareQmlProtocolEnum() {
+    qmlRegisterUncreatableMetaObject(
+                PageEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "ProtocolEnum",
+                "Error: only enums"
+                );
+}
 
 } // namespace amnezia
 

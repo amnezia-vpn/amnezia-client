@@ -75,6 +75,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_dialogConnectErrorText{}
 {
     m_containersModel = new ContainersModel(this);
+    m_protocolsModel = new ProtocolsModel(this);
     m_vpnConnection = new VpnConnection(this);
 
     m_appSettingsLogic = new AppSettingsLogic(this);
@@ -94,6 +95,11 @@ UiLogic::UiLogic(QObject *parent) :
     m_openVpnLogic = new OpenVpnLogic(this);
     m_shadowSocksLogic = new ShadowSocksLogic(this);
     m_cloakLogic = new CloakLogic(this);
+
+    m_protocolLogicMap->insert(Protocol::OpenVpn, new OpenVpnLogic(this));
+    m_protocolLogicMap->insert(Protocol::ShadowSocks, new ShadowSocksLogic(this));
+    m_protocolLogicMap->insert(Protocol::Cloak, new CloakLogic(this));
+    //m_protocolLogicMap->insert(Protocol::WireGuard, new WireguardLogic(this));
 }
 
 void UiLogic::initalizeUiLogic()

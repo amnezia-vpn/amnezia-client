@@ -7,7 +7,7 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
+    PageProtocolLogicBase(logic, parent),
     m_comboBoxProtoCloakCipherText{"chacha20-poly1305"},
     m_lineEditProtoCloakSiteText{"tile.openstreetmap.org"},
     m_lineEditProtoCloakPortText{},
@@ -24,7 +24,7 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void CloakLogic::updateCloakPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
+void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
 {
     set_widgetProtoCloakEnabled(haveAuthData);
     set_pushButtonCloakSaveVisible(haveAuthData);
@@ -42,7 +42,7 @@ void CloakLogic::updateCloakPage(const QJsonObject &ckConfig, DockerContainer co
     set_lineEditProtoCloakPortEnabled(container == DockerContainer::OpenVpnOverCloak);
 }
 
-QJsonObject CloakLogic::getCloakConfigFromPage(QJsonObject oldConfig)
+QJsonObject CloakLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
     oldConfig.insert(config_key::cipher, comboBoxProtoCloakCipherText());
     oldConfig.insert(config_key::site, lineEditProtoCloakSiteText());
@@ -54,7 +54,7 @@ QJsonObject CloakLogic::getCloakConfigFromPage(QJsonObject oldConfig)
 void CloakLogic::onPushButtonProtoCloakSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak);
-    protocolConfig = getCloakConfigFromPage(protocolConfig);
+    protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;

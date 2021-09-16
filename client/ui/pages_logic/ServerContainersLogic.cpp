@@ -1,4 +1,4 @@
-﻿#include "ServerContainersLogic.h"
+#include "ServerContainersLogic.h"
 #include "ShareConnectionLogic.h"
 #include "protocols/CloakLogic.h"
 #include "protocols/OpenVpnLogic.h"
@@ -50,8 +50,11 @@ void ServerContainersLogic::updateServerContainersPage()
 {
     set_progressBarProtocolsContainerReinstallVisible(false);
 
-    ContainersModel *model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
-    model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
+    ContainersModel *c_model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
+    c_model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
+
+    ProtocolsModel *p_model = qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel());
+    p_model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
 
     auto containers = m_settings.containers(uiLogic()->selectedServerIndex);
     DockerContainer defaultContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
@@ -116,6 +119,16 @@ void ServerContainersLogic::updateServerContainersPage()
         installButtonsEnabledFunc.at(i)(haveAuthData);
         framesVisibleFunc.at(i)(containers.contains(allContainers.at(i)));
     }
+}
+
+void ServerContainersLogic::onPushButtonProtoSettingsClicked(amnezia::DockerContainer c, amnezia::Protocol p)
+{
+    uiLogic()->selectedDockerContainer = c;
+    uiLogic()->protocolLogic(p)->updateProtocolPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p),
+                      uiLogic()->selectedDockerContainer,
+                      m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+
+    emit uiLogic()->goToPage(Page::OpenVpnSettings);
 }
 
 
@@ -245,50 +258,50 @@ void ServerContainersLogic::setupProtocolsPageConnections()
     }
 }
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
-                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::OpenVpnSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+//    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
+//                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::OpenVpnSettings);
+//}
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContSsConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
-                          uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::ShadowSocksSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContSsConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+//    uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
+//                          uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::ShadowSocksSettings);
+//}
 
-void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContCloakConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
-    uiLogic()->cloakLogic()->updateCloakPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak),
-                    uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::CloakSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoCloakOpenVpnContCloakConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverCloak;
+//    uiLogic()->cloakLogic()->updateCloakPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak),
+//                    uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::CloakSettings);
+//}
 
-void ServerContainersLogic::onPushButtonProtoOpenVpnContOpenvpnConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpn;
-    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
-                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::OpenVpnSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoOpenVpnContOpenvpnConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpn;
+//    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
+//                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::OpenVpnSettings);
+//}
 
-void ServerContainersLogic::onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
-                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::OpenVpnSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+//    uiLogic()->openVpnLogic()->updateOpenVpnPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn),
+//                      uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::OpenVpnSettings);
+//}
 
-void ServerContainersLogic::onPushButtonProtoSsOpenVpnContSsConfigClicked()
-{
-    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
-    uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
-                          uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    uiLogic()->goToPage(Page::ShadowSocksSettings);
-}
+//void ServerContainersLogic::onPushButtonProtoSsOpenVpnContSsConfigClicked()
+//{
+//    uiLogic()->selectedDockerContainer = DockerContainer::OpenVpnOverShadowSocks;
+//    uiLogic()->shadowSocksLogic()->updateShadowSocksPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks),
+//                          uiLogic()->selectedDockerContainer, m_settings.haveAuthData(uiLogic()->selectedServerIndex));
+//    uiLogic()->goToPage(Page::ShadowSocksSettings);
+//}

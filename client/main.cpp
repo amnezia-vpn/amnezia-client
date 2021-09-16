@@ -116,10 +116,16 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
+    qRegisterMetaType<amnezia::DockerContainer>("amnezia::DockerContainer");
+    qRegisterMetaType<amnezia::Protocol>("amnezia::Protocol");
+
     UiLogic *uiLogic = new UiLogic;
 
     QQmlApplicationEngine engine;
+
     PageEnumNS::declareQML();
+    declareQmlProtocolEnum();
+
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
