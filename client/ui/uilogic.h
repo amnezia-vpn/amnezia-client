@@ -41,6 +41,8 @@ class UiLogic : public QObject
 {
     Q_OBJECT
 
+    AUTO_PROPERTY(bool, pageEnabled)
+
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
@@ -104,6 +106,7 @@ signals:
 
 
     void goToPage(int page, bool reset = true, bool slide = true);
+    void goToProtocolPage(int protocol, bool reset = true, bool slide = true);
     void closePage();
     void setStartPage(int page, bool slide = true);
     void showPublicKeyWarning();
@@ -169,18 +172,14 @@ public:
     NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
     ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
-    ServerContainersLogic *serverVpnProtocolsLogic()      { return m_serverVpnProtocolsLogic; }
+    ServerContainersLogic *serverVpnProtocolsLogic()        { return m_serverVpnProtocolsLogic; }
     ShareConnectionLogic *shareConnectionLogic()            { return m_shareConnectionLogic; }
     SitesLogic *sitesLogic()                                { return m_sitesLogic; }
     StartPageLogic *startPageLogic()                        { return m_startPageLogic; }
     VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
     WizardLogic *wizardLogic()                              { return m_wizardLogic; }
 
-    OpenVpnLogic *openVpnLogic()                            { return m_openVpnLogic; }
-    ShadowSocksLogic *shadowSocksLogic()                    { return m_shadowSocksLogic; }
-    CloakLogic *cloakLogic()                                { return m_cloakLogic; }
-
-    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(amnezia::Protocol p) { return m_protocolLogicMap->value(p); }
+    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(amnezia::Protocol p) { return m_protocolLogicMap.value(p); }
 
 private:
     AppSettingsLogic *m_appSettingsLogic;
@@ -197,11 +196,7 @@ private:
     VpnLogic *m_vpnLogic;
     WizardLogic *m_wizardLogic;
 
-    OpenVpnLogic *m_openVpnLogic;
-    ShadowSocksLogic *m_shadowSocksLogic;
-    CloakLogic *m_cloakLogic;
-
-    QMap<Protocol, PageProtocolLogicBase *> *m_protocolLogicMap;
+    QMap<Protocol, PageProtocolLogicBase *> m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
     Settings m_settings;

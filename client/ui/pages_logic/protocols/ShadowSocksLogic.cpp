@@ -49,7 +49,7 @@ QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 void ShadowSocksLogic::onPushButtonProtoShadowSocksSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks);
-    protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
+    //protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;

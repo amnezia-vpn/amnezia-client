@@ -80,6 +80,17 @@ Window  {
         }
     }
 
+    function gotoProtocolPage(protocol, reset, slide) {
+        if (reset) {
+            protocolPages[protocol].logic.updatePage();
+        }
+        if (slide) {
+            pageLoader.push(protocolPages[protocol], {}, StackView.PushTransition)
+        } else {
+            pageLoader.push(protocolPages[protocol], {}, StackView.Immediate)
+        }
+    }
+
     function close_page() {
         if (pageLoader.depth <= 1) {
             return
@@ -169,7 +180,7 @@ Window  {
 
         onStatusChanged: if (status == FolderListModel.Ready) {
                              for (var i=0; i<folderModelPages.count; i++) {
-                                 createPagesObjects(folderModelPages.get(i, "filePath"));
+                                 createPagesObjects(folderModelPages.get(i, "filePath"), false);
                              }
                              UiLogic.initalizeUiLogic()
                          }
@@ -183,12 +194,18 @@ Window  {
 
         onStatusChanged: if (status == FolderListModel.Ready) {
                              for (var i=0; i<folderModelProtocols.count; i++) {
-                                 createPagesObjects(folderModelProtocols.get(i, "filePath"));
+                                 createPagesObjects(folderModelProtocols.get(i, "filePath"), true);
                              }
         }
     }
 
-    function createPagesObjects(file) {
+    Component {
+        PageProtoOpenVPN {
+
+        }
+    }
+
+    function createPagesObjects(file, isProtocol) {
         var c = Qt.createComponent("qrc" + file);
 
         var finishCreation = function (component){
@@ -199,7 +216,15 @@ Window  {
                 }
                 else {
                     obj.visible = false
-                    pages[obj.page] = obj
+                    if (isProtocol) {
+                        protocolPages[obj.protocol] = obj
+                        console.debug("QML add proto page " + obj.protocol)
+                    }
+                    else {
+                        pages[obj.page] = obj
+                    }
+
+
 
                 }
             } else if (component.status == Component.Error) {
@@ -207,15 +232,10 @@ Window  {
             }
         }
 
-        var lambdaFunc = function(){
-            finishCreation(c)
-        }
-
         if (c.status == Component.Ready)
             finishCreation(c);
         else {
             console.debug("Warning: Pages components are not ready");
-            c.statusChanged.connect(lambdaFunc);
         }
     }
 
@@ -223,6 +243,9 @@ Window  {
         target: UiLogic
         onGoToPage: {
             root.gotoPage(page, reset, slide)
+        }
+        onGoToProtocolPage: {
+            root.gotoProtocolPage(protocol, reset, slide)
         }
         onClosePage: {
             root.close_page()
@@ -243,6 +266,7 @@ Window  {
             root.hide()
         }
     }
+
     MessageDialog {
         id: closePrompt
 //        x: (root.width - width) / 2

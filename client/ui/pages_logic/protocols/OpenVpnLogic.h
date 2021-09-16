@@ -10,7 +10,12 @@ class OpenVpnLogic : public PageProtocolLogicBase
     Q_OBJECT
 
     AUTO_PROPERTY(QString, lineEditProtoOpenVpnSubnetText)
+
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpEnabled)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnUdpEnabled)
+    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpChecked)
     AUTO_PROPERTY(bool, radioButtonProtoOpenVpnUdpChecked)
+
     AUTO_PROPERTY(bool, checkBoxProtoOpenVpnAutoEncryptionChecked)
     AUTO_PROPERTY(QString, comboBoxProtoOpenVpnCipherText)
     AUTO_PROPERTY(QString, comboBoxProtoOpenVpnHashText)
@@ -21,14 +26,11 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(bool, widgetProtoOpenVpnEnabled)
     AUTO_PROPERTY(bool, pushButtonOpenvpnSaveVisible)
     AUTO_PROPERTY(bool, progressBarProtoOpenVpnResetVisible)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnUdpEnabled)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpEnabled)
-    AUTO_PROPERTY(bool, radioButtonProtoOpenVpnTcpChecked)
+
     AUTO_PROPERTY(bool, lineEditProtoOpenVpnPortEnabled)
 
     AUTO_PROPERTY(bool, comboBoxProtoOpenVpnCipherEnabled)
     AUTO_PROPERTY(bool, comboBoxProtoOpenVpnHashEnabled)
-    AUTO_PROPERTY(bool, pageProtoOpenVpnEnabled)
     AUTO_PROPERTY(bool, labelProtoOpenVpnInfoVisible)
     AUTO_PROPERTY(QString, labelProtoOpenVpnInfoText)
     AUTO_PROPERTY(int, progressBarProtoOpenVpnResetValue)

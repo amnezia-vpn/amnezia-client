@@ -2,14 +2,16 @@
 #define CONTAIERNS_DEFS_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 #include "../protocols/protocols_defs.h"
 
 using namespace amnezia;
 
 namespace amnezia {
-Q_NAMESPACE
 
+namespace ContainerEnumNS {
+Q_NAMESPACE
 enum class DockerContainer {
     None,
     OpenVpn,
@@ -18,6 +20,10 @@ enum class DockerContainer {
     WireGuard
 };
 Q_ENUM_NS(DockerContainer)
+} // namespace ContainerEnumNS
+
+using namespace ContainerEnumNS;
+using namespace ProtocolEnumNS;
 
 DockerContainer containerFromString(const QString &container);
 QString containerToString(DockerContainer container);
@@ -29,6 +35,16 @@ QMap<DockerContainer, QString> containerDescriptions();
 bool isContainerVpnType(DockerContainer c);
 
 QVector<Protocol> protocolsForContainer(DockerContainer container);
+
+static void declareQmlContainerEnum() {
+    qmlRegisterUncreatableMetaObject(
+                ContainerEnumNS::staticMetaObject,
+                "ContainerEnum",
+                1, 0,
+                "ContainerEnum",
+                "Error: only enums"
+                );
+}
 
 } // namespace amnezia
 

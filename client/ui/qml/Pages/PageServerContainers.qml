@@ -210,7 +210,10 @@ PageBase {
                                         textItem.font.pixelSize: 16
                                         icon.source: "qrc:/images/settings.png"
                                         onClicked: {
-                                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContSsConfigClicked()
+                                            tb_p.currentIndex = index
+                                            ServerContainersLogic.onPushButtonProtoSettingsClicked(
+                                                        proxyContainersModel.mapToSource(tb_c.currentIndex),
+                                                        proxyProtocolsModel.mapToSource(tb_p.currentIndex))
                                         }
                                     }
                                 }

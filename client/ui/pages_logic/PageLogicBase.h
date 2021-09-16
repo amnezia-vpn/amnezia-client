@@ -20,7 +20,6 @@ public:
     ~PageLogicBase() = default;
 
     Q_INVOKABLE virtual void updatePage() {}
-    Q_INVOKABLE Page pageForProto(amnezia::Protocol p);
 
 protected:
     UiLogic *uiLogic() const { return m_uiLogic; }

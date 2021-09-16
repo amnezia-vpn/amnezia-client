@@ -108,5 +108,6 @@
         <file>ui/qml/Controls/Caption.qml</file>
         <file>ui/qml/Controls/Logo.qml</file>
         <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
     </qresource>
 </RCC>

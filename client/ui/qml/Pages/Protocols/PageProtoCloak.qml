@@ -1,16 +1,16 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import PageEnum 1.0
+import ProtocolEnum 1.0
 import "../"
 import "../../Controls"
 import "../../Config"
 
-PageBase {
+PageProtocolBase {
     id: root
-    page: PageEnum.CloakSettings
-    logic: CloakLogic
+    protocol: ProtocolEnum.Cloak
+    logic: UiLogic.protocolLogic(protocol)
 
-    enabled: CloakLogic.pageProtoCloakEnabled
+    enabled: logic.pageProtoCloakEnabled
     BackButton {
         id: back
     }
@@ -19,7 +19,7 @@ PageBase {
         y: 40
         width: 380
         height: 600
-        enabled: CloakLogic.widgetProtoCloakEnabled
+        enabled: logic.widgetProtoCloakEnabled
         ComboBoxType {
             x: 190
             y: 60
@@ -33,14 +33,14 @@ PageBase {
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (CloakLogic.comboBoxProtoCloakCipherText === model[i]) {
+                    if (logic.comboBoxProtoCloakCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                CloakLogic.comboBoxProtoCloakCipherText = currentText
+                logic.comboBoxProtoCloakCipherText = currentText
             }
         }
         LabelType {
@@ -84,8 +84,8 @@ PageBase {
             y: 550
             width: 321
             height: 41
-            visible: CloakLogic.labelProtoCloakInfoVisible
-            text: CloakLogic.labelProtoCloakInfoText
+            visible: logic.labelProtoCloakInfoVisible
+            text: logic.labelProtoCloakInfoText
         }
         TextFieldType {
             id: lineEdit_proto_cloak_port
@@ -93,11 +93,11 @@ PageBase {
             y: 160
             width: 151
             height: 31
-            text: CloakLogic.lineEditProtoCloakPortText
+            text: logic.lineEditProtoCloakPortText
             onEditingFinished: {
-                CloakLogic.lineEditProtoCloakPortText = text
+                logic.lineEditProtoCloakPortText = text
             }
-            enabled: CloakLogic.lineEditProtoCloakPortEnabled
+            enabled: logic.lineEditProtoCloakPortEnabled
         }
         TextFieldType {
             id: lineEdit_proto_cloak_site
@@ -105,9 +105,9 @@ PageBase {
             y: 110
             width: 151
             height: 31
-            text: CloakLogic.lineEditProtoCloakSiteText
+            text: logic.lineEditProtoCloakSiteText
             onEditingFinished: {
-                CloakLogic.lineEditProtoCloakSiteText = text
+                logic.lineEditProtoCloakSiteText = text
             }
         }
         ProgressBar {
@@ -117,8 +117,8 @@ PageBase {
             width: 321
             height: 40
             from: 0
-            to: CloakLogic.progressBarProtoCloakResetMaximium
-            value: CloakLogic.progressBarProtoCloakResetValue
+            to: logic.progressBarProtoCloakResetMaximium
+            value: logic.progressBarProtoCloakResetValue
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -136,7 +136,7 @@ PageBase {
                     color: Qt.rgba(255, 255, 255, 0.15);
                 }
             }
-            visible: CloakLogic.progressBarProtoCloakResetVisible
+            visible: logic.progressBarProtoCloakResetVisible
         }
         BlueButtonType {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -144,9 +144,9 @@ PageBase {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: CloakLogic.pushButtonCloakSaveVisible
+            visible: logic.pushButtonCloakSaveVisible
             onClicked: {
-                CloakLogic.onPushButtonProtoCloakSaveClicked()
+                logic.onPushButtonProtoCloakSaveClicked()
             }
         }
     }

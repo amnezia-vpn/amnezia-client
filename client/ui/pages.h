@@ -11,10 +11,10 @@ enum Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
-           OpenVpnSettings, ShadowSocksSettings, CloakSettings};
+           ProtocolSettings};
 Q_ENUM_NS(Page)
 
-static void declareQML() {
+static void declareQmlPageEnum() {
     qmlRegisterUncreatableMetaObject(
                 PageEnumNS::staticMetaObject,
                 "PageEnum",

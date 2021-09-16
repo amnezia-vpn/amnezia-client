@@ -9,15 +9,3 @@ PageLogicBase::PageLogicBase(UiLogic *logic, QObject *parent):
 
 }
 
-Page PageLogicBase::pageForProto(Protocol p)
-{
-    switch (p) {
-    case Protocol::OpenVpn: return Page::OpenVpnSettings;
-    case Protocol::ShadowSocks: return Page::ShadowSocksSettings;
-    case Protocol::OpenVpn: return Page::OpenVpnSettings;
-    case Protocol::OpenVpn: return Page::OpenVpnSettings;
-
-    default:
-        break;
-    }
-}

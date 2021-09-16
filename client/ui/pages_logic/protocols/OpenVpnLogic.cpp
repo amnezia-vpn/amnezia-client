@@ -8,24 +8,26 @@ using namespace PageEnumNS;
 
 OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     PageProtocolLogicBase(logic, parent),
-    m_lineEditProtoOpenVpnSubnetText{},
+    m_lineEditProtoOpenVpnSubnetText{""},
+
+    m_radioButtonProtoOpenVpnTcpEnabled{true},
+    m_radioButtonProtoOpenVpnTcpChecked{false},
+    m_radioButtonProtoOpenVpnUdpEnabled{true},
     m_radioButtonProtoOpenVpnUdpChecked{false},
+
     m_checkBoxProtoOpenVpnAutoEncryptionChecked{},
     m_comboBoxProtoOpenVpnCipherText{"AES-256-GCM"},
     m_comboBoxProtoOpenVpnHashText{"SHA512"},
     m_checkBoxProtoOpenVpnBlockDnsChecked{false},
     m_lineEditProtoOpenVpnPortText{},
     m_checkBoxProtoOpenVpnTlsAuthChecked{false},
-    m_widgetProtoOpenVpnEnabled{false},
+    m_widgetProtoOpenVpnEnabled{true},
     m_pushButtonOpenvpnSaveVisible{false},
     m_progressBarProtoOpenVpnResetVisible{false},
-    m_radioButtonProtoOpenVpnUdpEnabled{false},
-    m_radioButtonProtoOpenVpnTcpEnabled{false},
-    m_radioButtonProtoOpenVpnTcpChecked{false},
+
     m_lineEditProtoOpenVpnPortEnabled{false},
     m_comboBoxProtoOpenVpnCipherEnabled{true},
     m_comboBoxProtoOpenVpnHashEnabled{true},
-    m_pageProtoOpenVpnEnabled{true},
     m_labelProtoOpenVpnInfoVisible{true},
     m_labelProtoOpenVpnInfoText{},
     m_progressBarProtoOpenVpnResetValue{0},
@@ -36,6 +38,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
 
 void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {
+    qDebug() << "OpenVpnLogic::updateProtocolPage";
     set_widgetProtoOpenVpnEnabled(haveAuthData);
     set_pushButtonOpenvpnSaveVisible(haveAuthData);
     set_progressBarProtoOpenVpnResetVisible(haveAuthData);
@@ -88,7 +91,7 @@ void OpenVpnLogic::onCheckBoxProtoOpenVpnAutoEncryptionClicked()
 void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn);
-    protocolConfig = getOpenVpnConfigFromPage(protocolConfig);
+    protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
@@ -96,7 +99,7 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 
     UiLogic::PageFunc page_proto_openvpn;
     page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {
-        set_pageProtoOpenVpnEnabled(enabled);
+        set_pageEnabled(enabled);
     };
     UiLogic::ButtonFunc pushButton_proto_openvpn_save;
     pushButton_proto_openvpn_save.setVisibleFunc = [this] (bool visible) ->void {

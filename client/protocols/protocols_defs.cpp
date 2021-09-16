@@ -1,9 +1,9 @@
 #include "protocols_defs.h"
 
-QDebug operator<<(QDebug debug, const amnezia::Protocol &p)
+QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Protocol &p)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << protoToString(p);
+    debug.nospace() << amnezia::protoToString(p);
 
     return debug;
 }
@@ -53,7 +53,7 @@ QMap<amnezia::Protocol, QString> amnezia::protocolDescriptions()
     return {};
 }
 
-bool amnezia::isProtocolVpnType(Protocol p)
+bool amnezia::isProtocolVpnType(ProtocolEnumNS::Protocol p)
 {
     switch (p) {
     case Protocol::Any :          return false;

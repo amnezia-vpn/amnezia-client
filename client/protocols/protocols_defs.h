@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QQmlEngine>
 
 namespace amnezia {
 namespace config_key {
@@ -113,6 +114,7 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 } // namespace protocols
 
+namespace ProtocolEnumNS {
 Q_NAMESPACE
 enum class Protocol {
     Any,
@@ -122,6 +124,9 @@ enum class Protocol {
     WireGuard
 };
 Q_ENUM_NS(Protocol)
+} // namespace ProtocolEnumNS
+
+using namespace ProtocolEnumNS;
 
 QVector<Protocol> allProtocols();
 
@@ -134,7 +139,7 @@ bool isProtocolVpnType(Protocol p);
 
 static void declareQmlProtocolEnum() {
     qmlRegisterUncreatableMetaObject(
-                PageEnumNS::staticMetaObject,
+                ProtocolEnumNS::staticMetaObject,
                 "ProtocolEnum",
                 1, 0,
                 "ProtocolEnum",

@@ -119,12 +119,15 @@ int main(int argc, char *argv[])
     qRegisterMetaType<amnezia::DockerContainer>("amnezia::DockerContainer");
     qRegisterMetaType<amnezia::Protocol>("amnezia::Protocol");
 
+    qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
+
     UiLogic *uiLogic = new UiLogic;
 
     QQmlApplicationEngine engine;
 
-    PageEnumNS::declareQML();
+    declareQmlPageEnum();
     declareQmlProtocolEnum();
+    declareQmlContainerEnum();
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -149,9 +152,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
     engine.rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
 
-    engine.rootContext()->setContextProperty("OpenVpnLogic", uiLogic->openVpnLogic());
-    engine.rootContext()->setContextProperty("ShadowSocksLogic", uiLogic->shadowSocksLogic());
-    engine.rootContext()->setContextProperty("CloakLogic", uiLogic->cloakLogic());
+//    engine.rootContext()->setContextProperty("OpenVpnLogic", uiLogic->openVpnLogic());
+//    engine.rootContext()->setContextProperty("ShadowSocksLogic", uiLogic->shadowSocksLogic());
+//    engine.rootContext()->setContextProperty("CloakLogic", uiLogic->cloakLogic());
 
     engine.load(url);
 

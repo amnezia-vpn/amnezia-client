@@ -92,13 +92,9 @@ UiLogic::UiLogic(QObject *parent) :
     m_vpnLogic = new VpnLogic(this);
     m_wizardLogic = new WizardLogic(this);
 
-    m_openVpnLogic = new OpenVpnLogic(this);
-    m_shadowSocksLogic = new ShadowSocksLogic(this);
-    m_cloakLogic = new CloakLogic(this);
-
-    m_protocolLogicMap->insert(Protocol::OpenVpn, new OpenVpnLogic(this));
-    m_protocolLogicMap->insert(Protocol::ShadowSocks, new ShadowSocksLogic(this));
-    m_protocolLogicMap->insert(Protocol::Cloak, new CloakLogic(this));
+    m_protocolLogicMap.insert(Protocol::OpenVpn, new OpenVpnLogic(this));
+    m_protocolLogicMap.insert(Protocol::ShadowSocks, new ShadowSocksLogic(this));
+    m_protocolLogicMap.insert(Protocol::Cloak, new CloakLogic(this));
     //m_protocolLogicMap->insert(Protocol::WireGuard, new WireguardLogic(this));
 }
 

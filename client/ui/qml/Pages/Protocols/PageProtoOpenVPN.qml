@@ -1,16 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import PageEnum 1.0
+import ProtocolEnum 1.0
 import "../"
 import "../../Controls"
 import "../../Config"
 
-PageBase {
+PageProtocolBase {
     id: root
-    page: PageEnum.OpenVpnSettings
-    logic: OpenVpnLogic
+    protocol: ProtocolEnum.OpenVpn
+    logic: UiLogic.protocolLogic(protocol)
 
-    enabled: OpenVpnLogic.pageProtoOpenVpnEnabled
     BackButton {
         id: back
     }
@@ -19,19 +18,19 @@ PageBase {
         y: 40
         width: 380
         height: 600
-        enabled: OpenVpnLogic.widgetProtoOpenVpnEnabled
+        enabled: logic.widgetProtoOpenVpnEnabled
         CheckBoxType {
             x: 30
             y: 280
             width: 321
             height: 21
             text: qsTr("Auto-negotiate encryption")
-            checked: OpenVpnLogic.checkBoxProtoOpenVpnAutoEncryptionChecked
+            checked: logic.checkBoxProtoOpenVpnAutoEncryptionChecked
             onCheckedChanged: {
-                OpenVpnLogic.checkBoxProtoOpenVpnAutoEncryptionChecked = checked
+                logic.checkBoxProtoOpenVpnAutoEncryptionChecked = checked
             }
             onClicked: {
-                OpenVpnLogic.checkBoxProtoOpenVpnAutoEncryptionClicked()
+                logic.checkBoxProtoOpenVpnAutoEncryptionClicked()
             }
         }
         CheckBoxType {
@@ -40,9 +39,9 @@ PageBase {
             width: 321
             height: 21
             text: qsTr("Block DNS requests outside of VPN")
-            checked: OpenVpnLogic.checkBoxProtoOpenVpnBlockDnsChecked
+            checked: logic.checkBoxProtoOpenVpnBlockDnsChecked
             onCheckedChanged: {
-                OpenVpnLogic.checkBoxProtoOpenVpnBlockDnsChecked = checked
+                logic.checkBoxProtoOpenVpnBlockDnsChecked = checked
             }
         }
         CheckBoxType {
@@ -51,9 +50,9 @@ PageBase {
             width: 321
             height: 21
             text: qsTr("Enable TLS auth")
-            checked: OpenVpnLogic.checkBoxProtoOpenVpnTlsAuthChecked
+            checked: logic.checkBoxProtoOpenVpnTlsAuthChecked
             onCheckedChanged: {
-                OpenVpnLogic.checkBoxProtoOpenVpnTlsAuthChecked = checked
+                logic.checkBoxProtoOpenVpnTlsAuthChecked = checked
             }
 
         }
@@ -76,16 +75,16 @@ PageBase {
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (OpenVpnLogic.comboBoxProtoOpenVpnCipherText === model[i]) {
+                    if (logic.comboBoxProtoOpenVpnCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                OpenVpnLogic.comboBoxProtoOpenVpnCipherText = currentText
+                logic.comboBoxProtoOpenVpnCipherText = currentText
             }
-            enabled: OpenVpnLogic.comboBoxProtoOpenVpnCipherEnabled
+            enabled: logic.comboBoxProtoOpenVpnCipherEnabled
         }
         ComboBoxType {
             x: 200
@@ -106,16 +105,16 @@ PageBase {
             ]
             currentIndex: {
                 for (let i = 0; i < model.length; ++i) {
-                    if (OpenVpnLogic.comboBoxProtoOpenVpnHashText === model[i]) {
+                    if (logic.comboBoxProtoOpenVpnHashText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
             onCurrentTextChanged: {
-                OpenVpnLogic.comboBoxProtoOpenVpnHashText = currentText
+                logic.comboBoxProtoOpenVpnHashText = currentText
             }
-            enabled: OpenVpnLogic.comboBoxProtoOpenVpnHashEnabled
+            enabled: logic.comboBoxProtoOpenVpnHashEnabled
         }
         Rectangle {
             x: 30
@@ -131,8 +130,8 @@ PageBase {
                 width: 171
                 height: 19
                 text: qsTr("TCP")
-                enabled: OpenVpnLogic.radioButtonProtoOpenVpnTcpEnabled
-                checked: OpenVpnLogic.radioButtonProtoOpenVpnTcpChecked
+                enabled: logic.radioButtonProtoOpenVpnTcpEnabled
+                checked: logic.radioButtonProtoOpenVpnTcpChecked
                 onCheckedChanged: {
                     UiLogic.radioButtonProtoOpenVpnTcpChecked = checked
                 }
@@ -143,11 +142,11 @@ PageBase {
                 width: 171
                 height: 19
                 text: qsTr("UDP")
-                checked: OpenVpnLogic.radioButtonProtoOpenVpnUdpChecked
+                checked: logic.radioButtonProtoOpenVpnUdpChecked
                 onCheckedChanged: {
-                    OpenVpnLogic.radioButtonProtoOpenVpnUdpChecked = checked
+                    logic.radioButtonProtoOpenVpnUdpChecked = checked
                 }
-                enabled: OpenVpnLogic.radioButtonProtoOpenVpnUdpEnabled
+                enabled: logic.radioButtonProtoOpenVpnUdpEnabled
             }
         }
         LabelType {
@@ -204,8 +203,8 @@ PageBase {
             y: 550
             width: 321
             height: 41
-            visible: OpenVpnLogic.labelProtoOpenVpnInfoVisible
-            text: OpenVpnLogic.labelProtoOpenVpnInfoText
+            visible: logic.labelProtoOpenVpnInfoVisible
+            text: logic.labelProtoOpenVpnInfoText
         }
         TextFieldType {
             id: lineEdit_proto_openvpn_port
@@ -213,11 +212,11 @@ PageBase {
             y: 230
             width: 151
             height: 31
-            text: OpenVpnLogic.lineEditProtoOpenVpnPortText
+            text: logic.lineEditProtoOpenVpnPortText
             onEditingFinished: {
-                OpenVpnLogic.lineEditProtoOpenVpnPortText = text
+                logic.lineEditProtoOpenVpnPortText = text
             }
-            enabled: OpenVpnLogic.lineEditProtoOpenVpnPortEnabled
+            enabled: logic.lineEditProtoOpenVpnPortEnabled
         }
         TextFieldType {
             id: lineEdit_proto_openvpn_subnet
@@ -225,9 +224,9 @@ PageBase {
             y: 65
             width: 321
             height: 31
-            text: OpenVpnLogic.lineEditProtoOpenVpnSubnetText
+            text: logic.lineEditProtoOpenVpnSubnetText
             onEditingFinished: {
-                OpenVpnLogic.lineEditProtoOpenVpnSubnetText = text
+                logic.lineEditProtoOpenVpnSubnetText = text
             }
         }
         ProgressBar {
@@ -237,9 +236,9 @@ PageBase {
             width: 321
             height: 40
             from: 0
-            to: OpenVpnLogic.progressBarProtoOpenVpnResetMaximium
-            value: OpenVpnLogic.progressBarProtoOpenVpnResetValue
-            visible: OpenVpnLogic.progressBarProtoOpenVpnResetVisible
+            to: logic.progressBarProtoOpenVpnResetMaximium
+            value: logic.progressBarProtoOpenVpnResetValue
+            visible: logic.progressBarProtoOpenVpnResetVisible
             background: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
@@ -264,9 +263,9 @@ PageBase {
             width: 321
             height: 40
             text: qsTr("Save and restart VPN")
-            visible: OpenVpnLogic.pushButtonOpenvpnSaveVisible
+            visible: logic.pushButtonOpenvpnSaveVisible
             onClicked: {
-                OpenVpnLogic.onPushButtonProtoOpenVpnSaveClicked()
+                logic.onPushButtonProtoOpenVpnSaveClicked()
             }
         }
     }
