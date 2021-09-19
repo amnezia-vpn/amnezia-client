@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <string>
+#include <cstring>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
