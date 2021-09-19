@@ -120,10 +120,14 @@ void UiLogic::initalizeUiLogic()
     //    }
 
     // Post initialization
-    goToPage(Page::Start, true, false);
+    //emit goToPage(Page::Start, true, false);
 
-    if (m_settings.defaultServerIndex() >= 0 && m_settings.serversCount() > 0) {
-        goToPage(Page::Vpn, true, false);
+    if (m_settings.serversCount() > 0) {
+        if (m_settings.defaultServerIndex() < 0) m_settings.setDefaultServer(0);
+        emit goToPage(Page::Vpn, true, false);
+    }
+    else {
+        emit goToPage(Page::Start, true, false);
     }
 
     selectedServerIndex = m_settings.defaultServerIndex();
@@ -131,7 +135,7 @@ void UiLogic::initalizeUiLogic()
     //goToPage(Page::NewServerProtocols, true, false);
 
 
-    //    //ui->pushButton_general_settings_exit->hide();
+    //ui->pushButton_general_settings_exit->hide();
 
 
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);

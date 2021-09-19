@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-    qRegisterMetaType<amnezia::DockerContainer>("amnezia::DockerContainer");
-    qRegisterMetaType<amnezia::Protocol>("amnezia::Protocol");
+    qRegisterMetaType<DockerContainer>("DockerContainer");
+    qRegisterMetaType<Protocol>("Protocol");
+    qRegisterMetaType<Page>("Page");
 
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
 

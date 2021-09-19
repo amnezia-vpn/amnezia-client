@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 BasicButtonType {
     id: root
     property alias iconMargin: img.anchors.margins
+    property alias img: img
     background: Item {}
     contentItem: Image {
         id: img

@@ -12,7 +12,6 @@ class CloakLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(QString, comboBoxProtoCloakCipherText)
     AUTO_PROPERTY(QString, lineEditProtoCloakSiteText)
     AUTO_PROPERTY(QString, lineEditProtoCloakPortText)
-    AUTO_PROPERTY(bool, widgetProtoCloakEnabled)
     AUTO_PROPERTY(bool, pushButtonCloakSaveVisible)
     AUTO_PROPERTY(bool, progressBarProtoCloakResetVisible)
     AUTO_PROPERTY(bool, lineEditProtoCloakPortEnabled)

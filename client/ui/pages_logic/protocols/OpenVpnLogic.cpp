@@ -21,7 +21,6 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     m_checkBoxProtoOpenVpnBlockDnsChecked{false},
     m_lineEditProtoOpenVpnPortText{},
     m_checkBoxProtoOpenVpnTlsAuthChecked{false},
-    m_widgetProtoOpenVpnEnabled{true},
     m_pushButtonOpenvpnSaveVisible{false},
     m_progressBarProtoOpenVpnResetVisible{false},
 
@@ -39,7 +38,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
 void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {
     qDebug() << "OpenVpnLogic::updateProtocolPage";
-    set_widgetProtoOpenVpnEnabled(haveAuthData);
+    set_pageEnabled(haveAuthData);
     set_pushButtonOpenvpnSaveVisible(haveAuthData);
     set_progressBarProtoOpenVpnResetVisible(haveAuthData);
 

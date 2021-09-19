@@ -13,10 +13,6 @@ ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_progressBarProtocolsContainerReinstallValue{0},
     m_progressBarProtocolsContainerReinstallMaximium{100},
-    m_pushButtonOpenVpnContInstallChecked{false},
-    m_pushButtonSsOpenVpnContInstallChecked{false},
-    m_pushButtonCloakOpenVpnContInstallChecked{false},
-    m_pushButtonWireguardContInstallChecked{false},
     m_pushButtonOpenVpnContInstallEnabled{false},
     m_pushButtonSsOpenVpnContInstallEnabled{false},
     m_pushButtonCloakOpenVpnContInstallEnabled{false},
@@ -71,12 +67,7 @@ void ServerContainersLogic::updateServerContainersPage()
     using SetVisibleFunc = std::function<void(bool)>;
     using SetCheckedFunc = std::function<void(bool)>;
     using SetEnabledFunc = std::function<void(bool)>;
-    QList<SetCheckedFunc> installButtonsCheckedFunc {
-        [this](bool checked) ->void {set_pushButtonOpenVpnContInstallChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonSsOpenVpnContInstallChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonCloakOpenVpnContInstallChecked(checked);},
-        [this](bool checked) ->void {set_pushButtonWireguardContInstallChecked(checked);},
-    };
+
     QList<SetEnabledFunc> installButtonsEnabledFunc {
         [this](bool enabled) ->void {set_pushButtonOpenVpnContInstallEnabled(enabled);},
         [this](bool enabled) ->void {set_pushButtonSsOpenVpnContInstallEnabled(enabled);},
@@ -115,22 +106,33 @@ void ServerContainersLogic::updateServerContainersPage()
         defaultButtonsCheckedFunc.at(i)(defaultContainer == allContainers.at(i));
         defaultButtonsVisibleFunc.at(i)(haveAuthData && containers.contains(allContainers.at(i)));
         shareButtonsVisibleFunc.at(i)(haveAuthData && containers.contains(allContainers.at(i)));
-        installButtonsCheckedFunc.at(i)(containers.contains(allContainers.at(i)));
         installButtonsEnabledFunc.at(i)(haveAuthData);
         framesVisibleFunc.at(i)(containers.contains(allContainers.at(i)));
     }
 }
 
-void ServerContainersLogic::onPushButtonProtoSettingsClicked(amnezia::DockerContainer c, amnezia::Protocol p)
+void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, Protocol p)
 {
+    qDebug()<< "ServerContainersLogic::onPushButtonProtoSettingsClicked" << c << p;
     uiLogic()->selectedDockerContainer = c;
     uiLogic()->protocolLogic(p)->updateProtocolPage(m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p),
                       uiLogic()->selectedDockerContainer,
                       m_settings.haveAuthData(uiLogic()->selectedServerIndex));
 
-    emit uiLogic()->goToProtocolPage(static_cast<int>(p));
+    emit uiLogic()->goToProtocolPage(p);
 }
 
+void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
+{
+    m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
+    updateServerContainersPage();
+}
+
+void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
+{
+    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), c);
+    emit uiLogic()->goToPage(Page::ShareConnection);
+}
 
 void ServerContainersLogic::setupProtocolsPageConnections()
 {
@@ -146,21 +148,6 @@ void ServerContainersLogic::setupProtocolsPageConnections()
     using ButtonClickedFunc = void (ServerContainersLogic::*)(bool);
     using ButtonSetEnabledFunc = std::function<void(bool)>;
 
-    // default buttons
-    QList<ButtonClickedFunc> defaultButtonClickedSig {
-        &ServerContainersLogic::pushButtonOpenVpnContDefaultClicked,
-                &ServerContainersLogic::pushButtonSsOpenVpnContDefaultClicked,
-                &ServerContainersLogic::pushButtonCloakOpenVpnContDefaultClicked,
-                &ServerContainersLogic::pushButtonWireguardContDefaultClicked
-    };
-
-    for (int i = 0; i < containers.size(); ++i) {
-        connect(this, defaultButtonClickedSig.at(i), [this, containers, i](bool){
-            qDebug() << "clmm" << i;
-            m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, containers.at(i));
-            updateServerContainersPage();
-        });
-    }
 
     // install buttons
     QList<ButtonClickedFunc> installButtonsClickedSig {
@@ -253,7 +240,7 @@ void ServerContainersLogic::setupProtocolsPageConnections()
 
         connect(this, buttonClickedFunc, [this, container](bool){
             uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), container);
-            uiLogic()->goToPage(Page::ShareConnection);
+            emit uiLogic()->goToPage(Page::ShareConnection);
         });
     }
 }

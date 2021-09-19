@@ -23,7 +23,6 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(QString, lineEditProtoOpenVpnPortText)
     AUTO_PROPERTY(bool, checkBoxProtoOpenVpnTlsAuthChecked)
 
-    AUTO_PROPERTY(bool, widgetProtoOpenVpnEnabled)
     AUTO_PROPERTY(bool, pushButtonOpenvpnSaveVisible)
     AUTO_PROPERTY(bool, progressBarProtoOpenVpnResetVisible)
 

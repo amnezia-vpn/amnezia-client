@@ -9,7 +9,6 @@ class ShadowSocksLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(bool, widgetProtoShadowSocksEnabled)
     AUTO_PROPERTY(QString, comboBoxProtoShadowSocksCipherText)
     AUTO_PROPERTY(QString, lineEditProtoShadowSocksPortText)
     AUTO_PROPERTY(bool, pushButtonShadowSocksSaveVisible)

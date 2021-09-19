@@ -16,6 +16,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name_role";
     roles[DescRole] = "desc_role";
+    roles[DefaultRole] = "default_role";
     roles[isVpnTypeRole] = "is_vpn_role";
     roles[isOtherTypeRole] = "is_other_role";
     roles[isInstalledRole] = "is_installed_role";
@@ -35,6 +36,9 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     }
     if (role == DescRole) {
         return containerDescriptions().value(c);
+    }
+    if (role == DefaultRole) {
+        return c == m_settings.defaultContainer(m_selectedServerIndex);
     }
     if (role == isVpnTypeRole) {
         return isContainerVpnType(c);

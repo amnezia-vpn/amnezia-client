@@ -55,7 +55,7 @@ void ProtocolsModel::setSelectedServerIndex(int index)
     endResetModel();
 }
 
-void ProtocolsModel::setSelectedDockerContainer(amnezia::DockerContainer c)
+void ProtocolsModel::setSelectedDockerContainer(DockerContainer c)
 {
     beginResetModel();
     m_selectedDockerContainer = c;

@@ -8,7 +8,6 @@ using namespace PageEnumNS;
 
 ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
     PageProtocolLogicBase(logic, parent),
-    m_widgetProtoShadowSocksEnabled{false},
     m_comboBoxProtoShadowSocksCipherText{"chacha20-poly1305"},
     m_lineEditProtoShadowSocksPortText{},
     m_pushButtonShadowSocksSaveVisible{false},
@@ -25,7 +24,7 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
 
 void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
 {
-    set_widgetProtoShadowSocksEnabled(haveAuthData);
+    set_pageEnabled(haveAuthData);
     set_pushButtonShadowSocksSaveVisible(haveAuthData);
     set_progressBarProtoShadowSocksResetVisible(haveAuthData);
 

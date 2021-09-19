@@ -8,6 +8,6 @@ import "../../Config"
 
 PageBase {
     id: root
-    property int protocol: ProtocolEnum.Any
+    property var protocol: ProtocolEnum.Any
     page: PageEnum.ProtocolSettings
 }

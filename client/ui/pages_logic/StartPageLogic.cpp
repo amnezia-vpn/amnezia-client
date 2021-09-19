@@ -156,7 +156,7 @@ void StartPageLogic::onPushButtonImport()
         m_settings.addServer(o);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
 
-        uiLogic()->setStartPage(Page::Vpn);
+        emit uiLogic()->setStartPage(Page::Vpn);
     }
     else {
         qDebug() << "Failed to import profile";

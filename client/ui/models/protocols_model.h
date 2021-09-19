@@ -27,7 +27,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Q_INVOKABLE void setSelectedServerIndex(int index);
-    Q_INVOKABLE void setSelectedDockerContainer(amnezia::DockerContainer c);
+    Q_INVOKABLE void setSelectedDockerContainer(DockerContainer c);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

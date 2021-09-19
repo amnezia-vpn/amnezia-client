@@ -19,28 +19,32 @@ PageProtocolBase {
         y: 40
         width: 380
         height: 600
-        enabled: logic.widgetProtoShadowSocksEnabled
+        enabled: logic.pageEnabled
         ComboBoxType {
             x: 190
             y: 60
             width: 151
             height: 31
-            model: [
-                qsTr("chacha20-poly1305"),
+            model: [               
+                qsTr("chacha20-ietf-poly1305"),
+                qsTr("xchacha20-ietf-poly1305"),
                 qsTr("aes-256-gcm"),
+                qsTr("aes-192-gcm"),
                 qsTr("aes-128-gcm")
             ]
             currentIndex: {
+                console.debug("logic.comboBoxProtoShadowSocksCipherText " + logic.comboBoxProtoShadowSocksCipherText)
                 for (let i = 0; i < model.length; ++i) {
+                    console.debug("check " +  model[i])
                     if (logic.comboBoxProtoShadowSocksCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
-            onCurrentTextChanged: {
-                logic.comboBoxProtoShadowSocksCipherText = currentText
-            }
+//            onCurrentTextChanged: {
+//                logic.comboBoxProtoShadowSocksCipherText = currentText
+//            }
         }
         LabelType {
             x: 30

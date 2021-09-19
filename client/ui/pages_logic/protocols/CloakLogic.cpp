@@ -11,7 +11,6 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
     m_comboBoxProtoCloakCipherText{"chacha20-poly1305"},
     m_lineEditProtoCloakSiteText{"tile.openstreetmap.org"},
     m_lineEditProtoCloakPortText{},
-    m_widgetProtoCloakEnabled{false},
     m_pushButtonCloakSaveVisible{false},
     m_progressBarProtoCloakResetVisible{false},
     m_lineEditProtoCloakPortEnabled{false},
@@ -26,7 +25,7 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
 
 void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
 {
-    set_widgetProtoCloakEnabled(haveAuthData);
+    set_pageEnabled(haveAuthData);
     set_pushButtonCloakSaveVisible(haveAuthData);
     set_progressBarProtoCloakResetVisible(haveAuthData);
 

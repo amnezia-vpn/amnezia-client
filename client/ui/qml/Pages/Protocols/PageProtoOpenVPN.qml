@@ -18,7 +18,7 @@ PageProtocolBase {
         y: 40
         width: 380
         height: 600
-        enabled: logic.widgetProtoOpenVpnEnabled
+        enabled: logic.pageEnabled
         CheckBoxType {
             x: 30
             y: 280

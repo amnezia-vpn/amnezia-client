@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.15
 import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import "./"
@@ -82,7 +83,7 @@ PageBase {
             ListView {
                 id: tb_c
                 x: 10
-                width: parent.width - 40
+                width: parent.width - 10
                 height: tb_c.contentItem.height
                 currentIndex: -1
                 spacing: 5
@@ -96,7 +97,7 @@ PageBase {
                     Item {
                         id: c_item
                         width: parent.width
-                        height: lb_container_name.height + tb_p.height
+                        height: row_container.height + tb_p.height
                         anchors.left: parent.left
                         Rectangle {
                             anchors.top: parent.top
@@ -106,47 +107,108 @@ PageBase {
                             visible: index !== tb_c.currentIndex
                         }
                         Rectangle {
-                            anchors.top: lb_container_name.top
-                            anchors.bottom: lb_container_name.bottom
+                            anchors.top: row_container.top
+                            anchors.bottom: row_container.bottom
                             anchors.left: parent.left
                             anchors.right: parent.right
 
                             color: "#63B4FB"
                             visible: index === tb_c.currentIndex
                         }
-                        Text {
-                            id: lb_container_name
-                            text: name_role
-                            font.pixelSize: 17
-                            //font.bold: true
-                            color: "#100A44"
-                            topPadding: 5
-                            bottomPadding: 5
-                            leftPadding: 10
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: Text.WordWrap
-                        }
 
-                        MouseArea {
-                            anchors.top: lb_container_name.top
-                            anchors.bottom: lb_container_name.bottom
+//                        ImageButtonType {
+//                            id: button_default1
+//                            z:10
+
+//                            Layout.alignment: Qt.AlignRight
+//                            checkable: true
+//                            img.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
+//                            width: 20
+//                            img.width: 20
+//                            height: 20
+
+//                            checked: default_role
+//                            onClicked: {
+//                                ServerContainersLogic.onPushButtonDefaultClicked(proxyContainersModel.mapToSource(index))
+//                            }
+//                        }
+
+                        RowLayout {
+                            id: row_container
+                            //width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            propagateComposedEvents: true
-                            onClicked: {
-                                tb_c.currentIndex = index
-                                UiLogic.protocolsModel.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
-                                //container_selector.containerSelected(index)
-                                //root.close()
+
+//                            anchors.top: lb_container_name.top
+//                            anchors.bottom: lb_container_name.bottom
+
+                            Text {
+                                id: lb_container_name
+                                text: name_role
+                                font.pixelSize: 17
+                                //font.bold: true
+                                color: "#100A44"
+                                topPadding: 5
+                                bottomPadding: 5
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+
+                                MouseArea {
+                                    anchors.top: lb_container_name.top
+                                    anchors.bottom: lb_container_name.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    propagateComposedEvents: true
+                                    onClicked: {
+                                        if (tb_c.currentIndex === index) tb_c.currentIndex = -1
+                                        else tb_c.currentIndex = index
+
+                                        UiLogic.protocolsModel.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
+                                        //ServerContainersLogic.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
+
+                                        //container_selector.containerSelected(index)
+                                        //root.close()
+                                    }
+                                }
                             }
+
+                            ImageButtonType {
+                                id: button_default
+
+                                Layout.alignment: Qt.AlignRight
+                                checkable: true
+                                img.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
+                                implicitWidth: 30
+                                implicitHeight: 30
+
+                                checked: default_role
+                                onClicked: {
+                                    ServerContainersLogic.onPushButtonDefaultClicked(proxyContainersModel.mapToSource(index))
+                                }
+                            }
+
+                            ImageButtonType {
+                                id: button_share
+                                Layout.alignment: Qt.AlignRight
+                                icon.source: "qrc:/images/share.png"
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                onClicked: {
+                                    ServerContainersLogic.onPushButtonShareClicked(proxyContainersModel.mapToSource(index))
+                                }
+                            }
+
                         }
+
 
                         ListView {
                             id: tb_p
                             currentIndex: -1
                             visible: index === tb_c.currentIndex
                             x: 10
-                            anchors.top: lb_container_name.bottom
+                            anchors.top: row_container.bottom
 
                             width: parent.width - 40
                             height: visible ? tb_p.contentItem.height : 0

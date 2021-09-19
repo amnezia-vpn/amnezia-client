@@ -73,6 +73,7 @@ Window  {
                 VpnLogic.updateVpnPage()
             }
         }
+
         if (slide) {
             pageLoader.push(pages[page], {}, StackView.PushTransition)
         } else {
@@ -84,6 +85,7 @@ Window  {
         if (reset) {
             protocolPages[protocol].logic.updatePage();
         }
+
         if (slide) {
             pageLoader.push(protocolPages[protocol], {}, StackView.PushTransition)
         } else {
@@ -199,13 +201,9 @@ Window  {
         }
     }
 
-    Component {
-        PageProtoOpenVPN {
-
-        }
-    }
-
     function createPagesObjects(file, isProtocol) {
+        if (file.indexOf("Base") !== -1) return; // skip Base Pages
+
         var c = Qt.createComponent("qrc" + file);
 
         var finishCreation = function (component){
@@ -218,10 +216,13 @@ Window  {
                     obj.visible = false
                     if (isProtocol) {
                         protocolPages[obj.protocol] = obj
-                        console.debug("QML add proto page " + obj.protocol)
+                        console.debug("PPP " + obj.protocol + " " + file)
+
                     }
                     else {
                         pages[obj.page] = obj
+                        console.debug("AAA " + obj.page + " " + file)
+
                     }
 
 
@@ -242,9 +243,11 @@ Window  {
     Connections {
         target: UiLogic
         onGoToPage: {
+            console.debug("Connections onGoToPage " + page);
             root.gotoPage(page, reset, slide)
         }
         onGoToProtocolPage: {
+            console.debug("Connections onGoToProtocolPage " + protocol);
             root.gotoProtocolPage(protocol, reset, slide)
         }
         onClosePage: {

@@ -19,7 +19,7 @@ PageProtocolBase {
         y: 40
         width: 380
         height: 600
-        enabled: logic.widgetProtoCloakEnabled
+        enabled: logic.pageEnabled
         ComboBoxType {
             x: 190
             y: 60

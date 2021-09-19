@@ -105,10 +105,10 @@ signals:
     void dialogConnectErrorTextChanged();
 
 
-    void goToPage(int page, bool reset = true, bool slide = true);
-    void goToProtocolPage(int protocol, bool reset = true, bool slide = true);
+    void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
+    void goToProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
     void closePage();
-    void setStartPage(int page, bool slide = true);
+    void setStartPage(PageEnumNS::Page page, bool slide = true);
     void showPublicKeyWarning();
     void showConnectErrorDialog();
     void show();
@@ -179,7 +179,7 @@ public:
     VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
     WizardLogic *wizardLogic()                              { return m_wizardLogic; }
 
-    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(amnezia::Protocol p) { return m_protocolLogicMap.value(p); }
+    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p) { return m_protocolLogicMap.value(p); }
 
 private:
     AppSettingsLogic *m_appSettingsLogic;
