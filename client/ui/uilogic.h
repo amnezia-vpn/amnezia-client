@@ -83,6 +83,8 @@ public:
     Q_INVOKABLE QString containerName(int container);
     Q_INVOKABLE QString containerDesc(int container);
 
+    Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
+    Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
 
 
     int getCurrentPageValue() const;

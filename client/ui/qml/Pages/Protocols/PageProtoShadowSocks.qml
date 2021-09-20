@@ -33,18 +33,13 @@ PageProtocolBase {
                 qsTr("aes-128-gcm")
             ]
             currentIndex: {
-                console.debug("logic.comboBoxProtoShadowSocksCipherText " + logic.comboBoxProtoShadowSocksCipherText)
                 for (let i = 0; i < model.length; ++i) {
-                    console.debug("check " +  model[i])
                     if (logic.comboBoxProtoShadowSocksCipherText === model[i]) {
                         return i
                     }
                 }
                 return -1
             }
-//            onCurrentTextChanged: {
-//                logic.comboBoxProtoShadowSocksCipherText = currentText
-//            }
         }
         LabelType {
             x: 30

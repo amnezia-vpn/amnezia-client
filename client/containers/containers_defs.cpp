@@ -60,7 +60,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
         {DockerContainer::WireGuard, "WireGuard"},
-        {DockerContainer::TorSite, QObject::tr("Web site under TOR")},
+        {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
     };
@@ -74,10 +74,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         {DockerContainer::Cloak, QObject::tr("Container with OpenVpn and ShadowSocks protocols "
                                                         "configured with traffic masking by Cloak plugin")},
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
-        {DockerContainer::TorSite, QObject::tr("Web site under TOR")},
+        {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
-
     };
 }
 
@@ -89,7 +88,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::Cloak :        return ServiceType::Vpn;
     case DockerContainer::ShadowSocks :  return ServiceType::Vpn;
     case DockerContainer::WireGuard :    return ServiceType::Vpn;
-    case DockerContainer::TorSite :      return ServiceType::Other;
+    case DockerContainer::TorWebSite :      return ServiceType::Other;
     case DockerContainer::Dns :          return ServiceType::Other;
     case DockerContainer::FileShare :    return ServiceType::Other;
     default:                             return ServiceType::Other;

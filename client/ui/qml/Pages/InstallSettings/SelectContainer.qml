@@ -10,7 +10,6 @@ Drawer {
     id: root
     signal containerSelected(int c_index)
     property int selectedIndex: -1
-    property alias modelFilters: proxyModel.filters
 
     z: -3
 

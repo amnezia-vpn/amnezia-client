@@ -68,7 +68,7 @@ QMap<amnezia::Protocol, QString> ProtocolProps::protocolHumanNames()
         {Protocol::ShadowSocks, "ShadowSocks"},
         {Protocol::Cloak, "Cloak"},
         {Protocol::WireGuard, "WireGuard"},
-        {Protocol::TorSite, "Web site under TOR"},
+        {Protocol::TorWebSite, "Web site in TOR network"},
         {Protocol::Dns, "DNS Service"},
         {Protocol::FileShare, "File Sharing Service"}
     };
@@ -87,7 +87,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Protocol p)
     case Protocol::Cloak :        return ServiceType::Vpn;
     case Protocol::ShadowSocks :  return ServiceType::Vpn;
     case Protocol::WireGuard :    return ServiceType::Vpn;
-    case Protocol::TorSite :      return ServiceType::Other;
+    case Protocol::TorWebSite :      return ServiceType::Other;
     case Protocol::Dns :          return ServiceType::Other;
     case Protocol::FileShare :    return ServiceType::Other;
     default:                      return ServiceType::Other;
@@ -102,7 +102,7 @@ int ProtocolProps::defaultPort(Protocol p)
     case Protocol::Cloak :        return 443;
     case Protocol::ShadowSocks :  return 6789;
     case Protocol::WireGuard :    return 51820;
-    case Protocol::TorSite :      return 443;
+    case Protocol::TorWebSite :      return 443;
     case Protocol::Dns :          return 53;
     case Protocol::FileShare :    return 139;
     default:                      return -1;
@@ -117,7 +117,7 @@ bool ProtocolProps::defaultPortChangeable(Protocol p)
     case Protocol::Cloak :        return true;
     case Protocol::ShadowSocks :  return true;
     case Protocol::WireGuard :    return true;
-    case Protocol::TorSite :      return true;
+    case Protocol::TorWebSite :      return true;
     case Protocol::Dns :          return false;
     case Protocol::FileShare :    return false;
     default:                      return -1;
@@ -132,7 +132,7 @@ TransportProto ProtocolProps::defaultTransportProto(Protocol p)
     case Protocol::Cloak :        return TransportProto::Tcp;
     case Protocol::ShadowSocks :  return TransportProto::Tcp;
     case Protocol::WireGuard :    return TransportProto::Udp;
-    case Protocol::TorSite :      return TransportProto::Tcp;
+    case Protocol::TorWebSite :      return TransportProto::Tcp;
     case Protocol::Dns :          return TransportProto::Udp;
     case Protocol::FileShare :    return TransportProto::Tcp;
     default:                      return TransportProto::Udp;
@@ -147,7 +147,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
     case Protocol::Cloak :        return false;
     case Protocol::ShadowSocks :  return false;
     case Protocol::WireGuard :    return false;
-    case Protocol::TorSite :      return false;
+    case Protocol::TorWebSite :      return false;
     case Protocol::Dns :          return false;
     case Protocol::FileShare :    return false;
     default:                      return -1;

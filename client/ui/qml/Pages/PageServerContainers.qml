@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.15
 import SortFilterProxyModel 0.2
+import ContainerProps 1.0
+import ProtocolProps 1.0
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -19,33 +21,149 @@ PageBase {
     }
     Caption {
         id: caption
-        text: qsTr("Protocols")
+        text: container_selector.selectedIndex > 0 ? qsTr("Install new service") : qsTr("Installed services")
     }
-    BlueButtonType {
-        id: pb_add_container
-        anchors.horizontalCenter: parent.horizontalCenter
+
+    SelectContainer {
+        id: container_selector
+
+        onContainerSelected: {
+            var containerProto =  ContainerProps.defaultProtocol(c_index)
+
+            tf_port_num.text = ProtocolProps.defaultPort(containerProto)
+            cb_port_proto.currentIndex = ProtocolProps.defaultTransportProto(containerProto)
+
+            tf_port_num.enabled = ProtocolProps.defaultPortChangeable(containerProto)
+            cb_port_proto.enabled = ProtocolProps.defaultTransportProtoChangeable(containerProto)
+        }
+    }
+
+    Column {
+        id: c1
+        visible: container_selector.selectedIndex > 0
+        width: parent.width
         anchors.top: caption.bottom
         anchors.topMargin: 10
 
+        Caption {
+            font.pixelSize: 22
+            text: UiLogic.containerName(container_selector.selectedIndex)
+        }
+
+        Text {
+            width: parent.width
+            anchors.topMargin: 10
+            padding: 10
+
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            color: "#181922"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+
+            text: UiLogic.containerDesc(container_selector.selectedIndex)
+        }
+    }
+
+    Rectangle {
+        id: frame_settings
+        visible: container_selector.selectedIndex > 0
+        width: parent.width
+        anchors.top: c1.bottom
+        anchors.topMargin: 10
+
+        border.width: 1
+        border.color: "lightgray"
+        anchors.bottomMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        radius: 2
+        Grid {
+            id: grid
+            visible: container_selector.selectedIndex > 0
+            anchors.fill: parent
+            columns: 2
+            horizontalItemAlignment: Grid.AlignHCenter
+            verticalItemAlignment: Grid.AlignVCenter
+            topPadding: 5
+            leftPadding: 10
+            spacing: 5
+
+
+            LabelType {
+                width: 130
+                text: qsTr("Port")
+            }
+            TextFieldType {
+                id: tf_port_num
+                width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
+            }
+            LabelType {
+                width: 130
+                text: qsTr("Network Protocol")
+            }
+            ComboBoxType {
+                id: cb_port_proto
+                width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
+                model: [
+                    qsTr("udp"),
+                    qsTr("tcp"),
+                ]
+            }
+        }
+    }
+
+    BlueButtonType {
+        id: pb_cancel_add
+        visible: container_selector.selectedIndex > 0
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: pb_continue_add.top
+        anchors.bottomMargin: 20
+
         width: parent.width - 40
         height: 40
-        text: qsTr("Add protocols container")
+        text: qsTr("Cancel")
         font.pixelSize: 16
-        onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
+        onClicked: container_selector.selectedIndex = -1
 
     }
-    SelectContainer {
-        id: container_selector
+
+    BlueButtonType {
+        id: pb_continue_add
+        visible: container_selector.selectedIndex > 0
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+
+        width: parent.width - 40
+        height: 40
+        text: qsTr("Continue")
+        font.pixelSize: 16
+        onClicked: {
+            let cont = container_selector.selectedIndex
+            let tp = ProtocolProps.transportProtoFromString(cb_port_proto.currentText)
+            let port = tf_port_num.text
+            ServerContainersLogic.onPushButtonContinueClicked(cont, port, tp)
+        }
     }
+
+
+
+
 
     Flickable {
+        visible: container_selector.selectedIndex <= 0
         clip: true
         width: parent.width
-        anchors.top: pb_add_container.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: caption.bottom
+        anchors.bottom: pb_add_container.top
         contentHeight: col.height
 
         Column {
+            visible: container_selector.selectedIndex <= 0
             id: col
             anchors {
                 left: parent.left;
@@ -116,23 +234,6 @@ PageBase {
                             visible: index === tb_c.currentIndex
                         }
 
-//                        ImageButtonType {
-//                            id: button_default1
-//                            z:10
-
-//                            Layout.alignment: Qt.AlignRight
-//                            checkable: true
-//                            img.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
-//                            width: 20
-//                            img.width: 20
-//                            height: 20
-
-//                            checked: default_role
-//                            onClicked: {
-//                                ServerContainersLogic.onPushButtonDefaultClicked(proxyContainersModel.mapToSource(index))
-//                            }
-//                        }
-
                         RowLayout {
                             id: row_container
                             //width: parent.width
@@ -156,6 +257,7 @@ PageBase {
                                 Layout.fillWidth: true
 
                                 MouseArea {
+                                    enabled: col.visible
                                     anchors.top: lb_container_name.top
                                     anchors.bottom: lb_container_name.bottom
                                     anchors.left: parent.left
@@ -191,6 +293,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_share
+                                visible: index === tb_c.currentIndex
                                 Layout.alignment: Qt.AlignRight
                                 icon.source: "qrc:/images/share.png"
                                 implicitWidth: 30
@@ -198,6 +301,25 @@ PageBase {
                                 onClicked: {
                                     ServerContainersLogic.onPushButtonShareClicked(proxyContainersModel.mapToSource(index))
                                 }
+
+                                VisibleBehavior on visible { }
+                            }
+
+                            ImageButtonType {
+                                id: button_remove
+                                visible: index === tb_c.currentIndex
+                                Layout.alignment: Qt.AlignRight
+                                checkable: true
+                                icon.source: "qrc:/images/delete.png"
+                                implicitWidth: 30
+                                implicitHeight: 30
+
+                                checked: default_role
+                                onClicked: {
+                                    ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
+                                }
+
+                                VisibleBehavior on visible { }
                             }
 
                         }
@@ -217,6 +339,9 @@ PageBase {
                             clip: true
                             interactive: false
                             model: proxyProtocolsModel
+
+                            VisibleBehavior on visible { }
+
 
                             delegate: Item {
                                 id: dp_item
@@ -279,471 +404,29 @@ PageBase {
                                         }
                                     }
                                 }
-
-//                                MouseArea {
-//                                    anchors.fill: parent
-//                                    onClicked: {
-//                                        tb_p.currentIndex = index
-//                                    }
-//                                }
                             }
                         }
                     }
                 }
             }
         }
-
-
     }
 
 
+    BlueButtonType {
+        id: pb_add_container
+        visible: container_selector.selectedIndex < 0
 
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 10
+        anchors.bottomMargin: 20
 
+        width: parent.width - 40
+        height: 40
+        text: qsTr("Install new protocols container")
+        font.pixelSize: 16
+        onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
 
-
-
-
-
-
-
-//    ProgressBar {
-//        id: progress_bar
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        y: 570
-//        width: 301
-//        height: 40
-//        from: 0
-//        to: ServerContainersLogic.progressBarProtocolsContainerReinstallMaximium
-//        value: ServerContainersLogic.progressBarProtocolsContainerReinstallValue
-//        visible: ServerContainersLogic.progressBarProtocolsContainerReinstallVisible
-//        background: Rectangle {
-//            implicitWidth: parent.width
-//            implicitHeight: parent.height
-//            color: "#100A44"
-//            radius: 4
-//        }
-
-//        contentItem: Item {
-//            implicitWidth: parent.width
-//            implicitHeight: parent.height
-//            Rectangle {
-//                width: progress_bar.visualPosition * parent.width
-//                height: parent.height
-//                radius: 4
-//                color: Qt.rgba(255, 255, 255, 0.15);
-//            }
-//        }
-
-//        LabelType {
-//            anchors.fill: parent
-//            text: qsTr("Configuring...")
-//            horizontalAlignment: Text.AlignHCenter
-//            font.family: "Lato"
-//            font.styleName: "normal"
-//            font.pixelSize: 16
-//            color: "#D4D4D4"
-//        }
-//    }
-//    ScrollView {
-//        x: 0
-//        y: 190
-//        width: 380
-//        height: 471
-//        clip: true
-//        Column {
-//            spacing: 5
-//            Rectangle {
-//                id: frame_openvpn_ss_cloak
-//                x: 9
-//                height: 135
-//                width: 363
-//                border.width: 1
-//                border.color: "lightgray"
-//                radius: 2
-//                visible: ServerContainersLogic.frameOpenvpnSsCloakSettingsVisible
-//                Item {
-//                    x: 5
-//                    y: 5
-//                    width: parent.width - 10
-//                    height: parent.height - 10
-//                    LabelType {
-//                        anchors.left: parent.left
-//                        width: 239
-//                        height: 24
-//                        text: qsTr("Cloak container")
-//                        leftPadding: 5
-//                    }
-//                    ImageButtonType {
-//                        anchors.right: sr1.left
-//                        anchors.rightMargin: 5
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
-//                        width: 24
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonCloakOpenVpnContDefaultChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonCloakOpenVpnContDefaultChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContDefaultClicked(checked)
-//                        }
-
-//                        visible: ServerContainersLogic.pushButtonCloakOpenVpnContDefaultVisible
-//                    }
-
-//                    ImageButtonType {
-//                        id: sr1
-//                        anchors.right: cn1.left
-//                        anchors.rightMargin: 5
-//                        icon.source: "qrc:/images/share.png"
-//                        width: 24
-//                        height: 24
-//                        visible: ServerContainersLogic.pushButtonCloakOpenVpnContShareVisible
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContShareClicked(false)
-//                        }
-//                    }
-//                    ImageButtonType {
-//                        id: cn1
-//                        anchors.right: parent.right
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/connect_button_connected.png"
-//                                             : "qrc:/images/connect_button_disconnected.png"
-//                        width: 36
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonCloakOpenVpnContInstallChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonCloakOpenVpnContInstallChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContInstallClicked(checked)
-//                        }
-//                        enabled: ServerContainersLogic.pushButtonCloakOpenVpnContInstallEnabled
-//                    }
-//                }
-//                Rectangle {
-//                    x: 10
-//                    y: 42
-//                    height: 83
-//                    width: 343
-//                    border.width: 1
-//                    border.color: "lightgray"
-//                    radius: 2
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 10
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("OpenVPN settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContOpenvpnConfigClicked()
-//                        }
-//                    }
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 33
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("ShadowSocks settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContSsConfigClicked()
-//                        }
-//                    }
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 56
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("Cloak settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoCloakOpenVpnContCloakConfigClicked()
-//                        }
-//                    }
-//                }
-//            }
-//            Rectangle {
-//                id: frame_openvpn_ss
-//                x: 9
-//                height: 105
-//                width: 363
-//                border.width: 1
-//                border.color: "lightgray"
-//                radius: 2
-//                visible: ServerContainersLogic.frameOpenvpnSsSettingsVisible
-//                Item {
-//                    x: 5
-//                    y: 5
-//                    width: parent.width - 10
-//                    height: parent.height - 10
-//                    LabelType {
-//                        anchors.left: parent.left
-//                        width: 239
-//                        height: 24
-//                        text: qsTr("ShadowSocks container")
-//                        leftPadding: 5
-//                    }
-//                    ImageButtonType {
-//                        anchors.right: sr2.left
-//                        anchors.rightMargin: 5
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
-//                        width: 24
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonSsOpenVpnContDefaultChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonSsOpenVpnContDefaultChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContDefaultClicked(checked)
-//                        }
-
-//                        visible: ServerContainersLogic.pushButtonSsOpenVpnContDefaultVisible
-//                    }
-
-//                    ImageButtonType {
-//                        id: sr2
-//                        anchors.right: cn2.left
-//                        anchors.rightMargin: 5
-//                        icon.source: "qrc:/images/share.png"
-//                        width: 24
-//                        height: 24
-//                        visible: ServerContainersLogic.pushButtonSsOpenVpnContShareVisible
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContShareClicked(false)
-//                        }
-//                    }
-//                    ImageButtonType {
-//                        id: cn2
-//                        anchors.right: parent.right
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/connect_button_connected.png"
-//                                             : "qrc:/images/connect_button_disconnected.png"
-//                        width: 36
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonSsOpenVpnContInstallChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonSsOpenVpnContInstallChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContInstallClicked(checked)
-//                        }
-//                        enabled: ServerContainersLogic.pushButtonSsOpenVpnContInstallEnabled
-//                    }
-//                }
-//                Rectangle {
-//                    x: 10
-//                    y: 42
-//                    height: 53
-//                    width: 343
-//                    border.width: 1
-//                    border.color: "lightgray"
-//                    radius: 2
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 5
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("OpenVPN settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContOpenvpnConfigClicked()
-//                        }
-//                    }
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 27
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("ShadowSocks settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoSsOpenVpnContSsConfigClicked()
-//                        }
-//                    }
-//                }
-//            }
-//            Rectangle {
-//                id: frame_openvpn
-//                x: 9
-//                height: 100
-//                width: 363
-//                border.width: 1
-//                border.color: "lightgray"
-//                radius: 2
-//                visible: ServerContainersLogic.frameOpenvpnSettingsVisible
-//                Item {
-//                    x: 5
-//                    y: 5
-//                    width: parent.width - 10
-//                    height: parent.height - 10
-//                    LabelType {
-//                        anchors.left: parent.left
-//                        width: 239
-//                        height: 24
-//                        text: qsTr("OpenVPN container")
-//                        leftPadding: 5
-//                    }
-//                    ImageButtonType {
-//                        anchors.right: sr3.left
-//                        anchors.rightMargin: 5
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
-//                        width: 24
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonOpenVpnContDefaultChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonOpenVpnContDefaultChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoOpenVpnContDefaultClicked(checked)
-//                        }
-
-//                        visible: ServerContainersLogic.pushButtonOpenVpnContDefaultVisible
-//                    }
-
-//                    ImageButtonType {
-//                        id: sr3
-//                        anchors.right: cn3.left
-//                        anchors.rightMargin: 5
-//                        icon.source: "qrc:/images/share.png"
-//                        width: 24
-//                        height: 24
-//                        visible: ServerContainersLogic.pushButtonOpenVpnContShareVisible
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoOpenVpnContShareClicked(false)
-//                        }
-//                    }
-//                    ImageButtonType {
-//                        id: cn3
-//                        anchors.right: parent.right
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/connect_button_connected.png"
-//                                             : "qrc:/images/connect_button_disconnected.png"
-//                        width: 36
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonOpenVpnContInstallChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonOpenVpnContInstallChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoOpenVpnContInstallClicked(checked)
-//                        }
-//                        enabled: ServerContainersLogic.pushButtonOpenVpnContInstallEnabled
-//                    }
-//                }
-//                Rectangle {
-//                    x: 10
-//                    y: 42
-//                    height: 44
-//                    width: 343
-//                    border.width: 1
-//                    border.color: "lightgray"
-//                    radius: 2
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 10
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("OpenVPN settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoOpenVpnContOpenvpnConfigClicked()
-//                        }
-//                    }
-//                }
-//            }
-//            Rectangle {
-//                id: frame_wireguard
-//                x: 9
-//                height: 100
-//                width: 363
-//                border.width: 1
-//                border.color: "lightgray"
-//                radius: 2
-//                visible: ServerContainersLogic.frameWireguardVisible
-//                Item {
-//                    x: 5
-//                    y: 5
-//                    width: parent.width - 10
-//                    height: parent.height - 10
-//                    LabelType {
-//                        anchors.left: parent.left
-//                        width: 239
-//                        height: 24
-//                        text: qsTr("WireGuard container")
-//                        leftPadding: 5
-//                    }
-//                    ImageButtonType {
-//                        anchors.right: sr4.left
-//                        anchors.rightMargin: 5
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
-//                        width: 24
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonWireguardContDefaultChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonWireguardContDefaultChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoWireguardContDefaultClicked(checked)
-//                        }
-
-//                        visible: ServerContainersLogic.pushButtonWireguardContDefaultVisible
-//                    }
-
-//                    ImageButtonType {
-//                        id: sr4
-//                        anchors.right: cn4.left
-//                        anchors.rightMargin: 5
-//                        icon.source: "qrc:/images/share.png"
-//                        width: 24
-//                        height: 24
-//                        visible: ServerContainersLogic.pushButtonWireguardContShareVisible
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoWireguardContShareClicked(false)
-//                        }
-//                    }
-//                    ImageButtonType {
-//                        id: cn4
-//                        anchors.right: parent.right
-//                        checkable: true
-//                        icon.source: checked ? "qrc:/images/connect_button_connected.png"
-//                                             : "qrc:/images/connect_button_disconnected.png"
-//                        width: 36
-//                        height: 24
-//                        checked: ServerContainersLogic.pushButtonWireguardContInstallChecked
-//                        onCheckedChanged: {
-//                            ServerContainersLogic.pushButtonWireguardContInstallChecked = checked
-//                        }
-//                        onClicked: {
-//                            ServerContainersLogic.onPushButtonProtoWireguardContInstallClicked(checked)
-//                        }
-//                        enabled: ServerContainersLogic.pushButtonWireguardContInstallEnabled
-//                    }
-//                }
-//                Rectangle {
-//                    id: frame_wireguard_settings
-//                    visible: ServerContainersLogic.frameWireguardSettingsVisible
-//                    x: 10
-//                    y: 42
-//                    height: 44
-//                    width: 343
-//                    border.width: 1
-//                    border.color: "lightgray"
-//                    radius: 2
-//                    SettingButtonType {
-//                        x: 10
-//                        y: 10
-//                        width: 323
-//                        height: 24
-//                        text: qsTr("WireGuard settings")
-//                        icon.source: "qrc:/images/settings.png"
-//                    }
-//                }
-//            }
-//        }
-//    }
+    }
 }

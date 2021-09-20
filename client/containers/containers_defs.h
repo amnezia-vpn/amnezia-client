@@ -20,7 +20,7 @@ enum DockerContainer {
     WireGuard,
 
     //non-vpn
-    TorSite,
+    TorWebSite,
     Dns,
     FileShare
 };

@@ -118,7 +118,7 @@ enum Protocol {
     ShadowSocks,
     Cloak,
     WireGuard,
-    TorSite,
+    TorWebSite,
     Dns,
     FileShare
 };

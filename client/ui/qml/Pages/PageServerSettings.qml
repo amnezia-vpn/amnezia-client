@@ -100,7 +100,7 @@ PageBase {
         y: 210
         width: 300
         height: 40
-        text: qsTr("VPN protocols")
+        text: qsTr("Protocols and services")
         onClicked: {
             UiLogic.goToPage(PageEnum.ServerContainers)
         }

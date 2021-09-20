@@ -1,6 +1,7 @@
 #ifndef SERVER_CONFIGURING_PROGRESS_LOGIC_H
 #define SERVER_CONFIGURING_PROGRESS_LOGIC_H
 
+#include <functional>
 #include "PageLogicBase.h"
 
 class UiLogic;
@@ -20,6 +21,28 @@ class ServerConfiguringProgressLogic : public PageLogicBase
 public:
     explicit ServerConfiguringProgressLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ServerConfiguringProgressLogic() = default;
+
+    ErrorCode doInstallAction(const std::function<ErrorCode()> &action);
+
+private:
+    struct ProgressFunc {
+        std::function<void(bool)> setVisibleFunc;
+        std::function<void(int)> setValueFunc;
+        std::function<int(void)> getValueFunc;
+        std::function<int(void)> getMaximiumFunc;
+        std::function<void(bool)> setTextVisibleFunc;
+        std::function<void(const QString&)> setTextFunc;
+    };
+    struct PageFunc {
+        std::function<void(bool)> setEnabledFunc;
+    };
+    struct ButtonFunc {
+        std::function<void(bool)> setVisibleFunc;
+    };
+    struct LabelFunc {
+        std::function<void(bool)> setVisibleFunc;
+        std::function<void(const QString&)> setTextFunc;
+    };
 
 };
 #endif // SERVER_CONFIGURING_PROGRESS_LOGIC_H
