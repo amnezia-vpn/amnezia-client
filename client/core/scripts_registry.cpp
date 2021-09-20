@@ -8,8 +8,8 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return QLatin1String("openvpn");
-    case DockerContainer::OpenVpnOverCloak: return QLatin1String("openvpn_cloak");
-    case DockerContainer::OpenVpnOverShadowSocks: return QLatin1String("openvpn_shadowsocks");
+    case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
+    case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
     default: return "";
     }

@@ -1,59 +1,115 @@
 #include "protocols_defs.h"
 
+using namespace amnezia;
+
 QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Protocol &p)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << amnezia::protoToString(p);
+    debug.nospace() << ProtocolProps::protoToString(p);
 
     return debug;
 }
 
-amnezia::Protocol amnezia::protoFromString(QString proto){
-    if (proto == config_key::openvpn) return Protocol::OpenVpn;
-    if (proto == config_key::cloak) return Protocol::Cloak;
-    if (proto == config_key::shadowsocks) return Protocol::ShadowSocks;
-    if (proto == config_key::wireguard) return Protocol::WireGuard;
+amnezia::Protocol ProtocolProps::protoFromString(QString proto){
+    QMetaEnum metaEnum = QMetaEnum::fromType<Protocol>();
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        Protocol p = static_cast<Protocol>(i);
+        if (proto == protoToString(p)) return p;
+    }
     return Protocol::Any;
 }
 
-QString amnezia::protoToString(amnezia::Protocol proto){
-    switch (proto) {
-    case(Protocol::OpenVpn): return config_key::openvpn;
-    case(Protocol::Cloak): return config_key::cloak;
-    case(Protocol::ShadowSocks): return config_key::shadowsocks;
-    case(Protocol::WireGuard): return config_key::wireguard;
-    default: return "";
+QString ProtocolProps::protoToString(amnezia::Protocol p){
+    if (p == Protocol::Any) return "";
+
+    QMetaEnum metaEnum = QMetaEnum::fromType<Protocol>();
+    QString protoKey = metaEnum.valueToKey(static_cast<int>(p));
+    return protoKey.toLower();
+}
+
+QList<amnezia::Protocol> ProtocolProps::allProtocols()
+{
+    QMetaEnum metaEnum = QMetaEnum::fromType<Protocol>();
+    QList<Protocol> all;
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        all.append(static_cast<Protocol>(i));
+    }
+
+    return all;
+}
+
+TransportProto ProtocolProps::transportProtoFromString(QString p)
+{
+    QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        TransportProto tp = static_cast<TransportProto>(i);
+        if (p.toLower() == transportProtoToString(tp)) return tp;
+    }
+    return TransportProto::Udp;
+}
+
+QString ProtocolProps::transportProtoToString(TransportProto proto, Protocol p)
+{
+    QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
+    QString protoKey = metaEnum.valueToKey(static_cast<int>(proto));
+    if (p == Protocol::OpenVpn){
+        return protoKey.toUpper();
+    }
+    else {
+        return protoKey.toLower();
     }
 }
 
-QVector<amnezia::Protocol> amnezia::allProtocols()
-{
-    return QVector<amnezia::Protocol> {
-        Protocol::Any,
-        Protocol::OpenVpn,
-        Protocol::ShadowSocks,
-        Protocol::Cloak,
-        Protocol::WireGuard
-    };
-}
 
-
-QMap<amnezia::Protocol, QString> amnezia::protocolHumanNames()
+QMap<amnezia::Protocol, QString> ProtocolProps::protocolHumanNames()
 {
     return {
         {Protocol::OpenVpn, "OpenVPN"},
         {Protocol::ShadowSocks, "ShadowSocks"},
         {Protocol::Cloak, "Cloak"},
-        {Protocol::WireGuard, "WireGuard"}
+        {Protocol::WireGuard, "WireGuard"},
+        {Protocol::TorSite, "Web site under TOR"},
+        {Protocol::Dns, "DNS Service"},
+        {Protocol::FileShare, "File Sharing Service"}
     };
 }
 
-QMap<amnezia::Protocol, QString> amnezia::protocolDescriptions()
+QMap<amnezia::Protocol, QString> ProtocolProps::protocolDescriptions()
 {
     return {};
 }
 
-bool amnezia::isProtocolVpnType(ProtocolEnumNS::Protocol p)
+amnezia::ServiceType ProtocolProps::protocolService(Protocol p)
+{
+    switch (p) {
+    case Protocol::Any :          return ServiceType::None;
+    case Protocol::OpenVpn :      return ServiceType::Vpn;
+    case Protocol::Cloak :        return ServiceType::Vpn;
+    case Protocol::ShadowSocks :  return ServiceType::Vpn;
+    case Protocol::WireGuard :    return ServiceType::Vpn;
+    case Protocol::TorSite :      return ServiceType::Other;
+    case Protocol::Dns :          return ServiceType::Other;
+    case Protocol::FileShare :    return ServiceType::Other;
+    default:                      return ServiceType::Other;
+    }
+}
+
+int ProtocolProps::defaultPort(Protocol p)
+{
+    switch (p) {
+    case Protocol::Any :          return -1;
+    case Protocol::OpenVpn :      return 1194;
+    case Protocol::Cloak :        return 443;
+    case Protocol::ShadowSocks :  return 6789;
+    case Protocol::WireGuard :    return 51820;
+    case Protocol::TorSite :      return 443;
+    case Protocol::Dns :          return 53;
+    case Protocol::FileShare :    return 139;
+    default:                      return -1;
+    }
+}
+
+bool ProtocolProps::defaultPortChangeable(Protocol p)
 {
     switch (p) {
     case Protocol::Any :          return false;
@@ -61,6 +117,39 @@ bool amnezia::isProtocolVpnType(ProtocolEnumNS::Protocol p)
     case Protocol::Cloak :        return true;
     case Protocol::ShadowSocks :  return true;
     case Protocol::WireGuard :    return true;
-    default:                      return false;
+    case Protocol::TorSite :      return true;
+    case Protocol::Dns :          return false;
+    case Protocol::FileShare :    return false;
+    default:                      return -1;
+    }
+}
+
+TransportProto ProtocolProps::defaultTransportProto(Protocol p)
+{
+    switch (p) {
+    case Protocol::Any :          return TransportProto::Udp;
+    case Protocol::OpenVpn :      return TransportProto::Udp;
+    case Protocol::Cloak :        return TransportProto::Tcp;
+    case Protocol::ShadowSocks :  return TransportProto::Tcp;
+    case Protocol::WireGuard :    return TransportProto::Udp;
+    case Protocol::TorSite :      return TransportProto::Tcp;
+    case Protocol::Dns :          return TransportProto::Udp;
+    case Protocol::FileShare :    return TransportProto::Tcp;
+    default:                      return TransportProto::Udp;
+    }
+}
+
+bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
+{
+    switch (p) {
+    case Protocol::Any :          return false;
+    case Protocol::OpenVpn :      return true;
+    case Protocol::Cloak :        return false;
+    case Protocol::ShadowSocks :  return false;
+    case Protocol::WireGuard :    return false;
+    case Protocol::TorSite :      return false;
+    case Protocol::Dns :          return false;
+    case Protocol::FileShare :    return false;
+    default:                      return -1;
     }
 }

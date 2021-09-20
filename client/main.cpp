@@ -16,7 +16,7 @@
 #include "ui/pages_logic/AppSettingsLogic.h"
 #include "ui/pages_logic/GeneralSettingsLogic.h"
 #include "ui/pages_logic/NetworkSettingsLogic.h"
-#include "ui/pages_logic/NewServerConfiguringLogic.h"
+#include "ui/pages_logic/ServerConfiguringProgressLogic.h"
 #include "ui/pages_logic/NewServerProtocolsLogic.h"
 #include "ui/pages_logic/ServerContainersLogic.h"
 #include "ui/pages_logic/ServerListLogic.h"
@@ -117,7 +117,9 @@ int main(int argc, char *argv[])
     app.setQuitOnLastWindowClosed(false);
 
     qRegisterMetaType<DockerContainer>("DockerContainer");
+    qRegisterMetaType<TransportProto>("TransportProto");
     qRegisterMetaType<Protocol>("Protocol");
+    qRegisterMetaType<ServiceType>("ServiceType");
     qRegisterMetaType<Page>("Page");
 
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
@@ -129,6 +131,12 @@ int main(int argc, char *argv[])
     declareQmlPageEnum();
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
+
+    QScopedPointer<ContainerProps> containerProps(new ContainerProps);
+    qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", containerProps.get());
+
+    QScopedPointer<ProtocolProps> protocolProps(new ProtocolProps);
+    qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", protocolProps.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -142,7 +150,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
     engine.rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
     engine.rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
-    engine.rootContext()->setContextProperty("NewServerConfiguringLogic", uiLogic->newServerConfiguringLogic());
+    engine.rootContext()->setContextProperty("ServerConfiguringProgressLogic", uiLogic->serverConfiguringProgressLogic());
     engine.rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
     engine.rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
     engine.rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
@@ -152,10 +160,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
     engine.rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
     engine.rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
-
-//    engine.rootContext()->setContextProperty("OpenVpnLogic", uiLogic->openVpnLogic());
-//    engine.rootContext()->setContextProperty("ShadowSocksLogic", uiLogic->shadowSocksLogic());
-//    engine.rootContext()->setContextProperty("CloakLogic", uiLogic->cloakLogic());
 
     engine.load(url);
 

@@ -34,7 +34,7 @@ void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerCon
     set_lineEditProtoShadowSocksPortText(ssConfig.value(config_key::port).
                                         toString(protocols::shadowsocks::defaultPort));
 
-    set_lineEditProtoShadowSocksPortEnabled(container == DockerContainer::OpenVpnOverShadowSocks);
+    set_lineEditProtoShadowSocksPortEnabled(container == DockerContainer::ShadowSocks);
 }
 
 QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
@@ -52,7 +52,7 @@ void ShadowSocksLogic::onPushButtonProtoShadowSocksSaveClicked()
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::shadowsocks, protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Protocol::ShadowSocks), protocolConfig);
     UiLogic::PageFunc page_proto_shadowsocks;
     page_proto_shadowsocks.setEnabledFunc = [this] (bool enabled) -> void {
         set_pageProtoShadowSocksEnabled(enabled);

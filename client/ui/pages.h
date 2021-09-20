@@ -8,7 +8,7 @@ namespace PageEnumNS
 {
 Q_NAMESPACE
 enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
-           Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguring,
+           Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
            ProtocolSettings};

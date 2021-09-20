@@ -19,15 +19,14 @@ public:
         NameRole = Qt::UserRole + 1,
         DescRole,
         DefaultRole,
-        isVpnTypeRole,
-        isOtherTypeRole,
-        isInstalledRole
+        ServiceTypeRole,
+        IsInstalledRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    void setSelectedServerIndex(int index);
+    Q_INVOKABLE void setSelectedServerIndex(int index);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

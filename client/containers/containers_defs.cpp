@@ -3,39 +3,38 @@
 QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << containerToString(c);
+    debug.nospace() << ContainerProps::containerToString(c);
 
     return debug;
 }
 
-amnezia::DockerContainer amnezia::containerFromString(const QString &container){
-    if (container == config_key::amnezia_openvpn) return DockerContainer::OpenVpn;
-    if (container == config_key::amnezia_openvpn_cloak) return DockerContainer::OpenVpnOverCloak;
-    if (container == config_key::amnezia_shadowsocks) return DockerContainer::OpenVpnOverShadowSocks;
-    if (container == config_key::amnezia_wireguard) return DockerContainer::WireGuard;
+amnezia::DockerContainer ContainerProps::containerFromString(const QString &container){
+    QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        DockerContainer c = static_cast<DockerContainer>(i);
+        if (container == containerToString(c)) return c;
+    }
     return DockerContainer::None;
 }
 
-QString amnezia::containerToString(amnezia::DockerContainer container){
-    switch (container) {
-    case(DockerContainer::OpenVpn): return config_key::amnezia_openvpn;
-    case(DockerContainer::OpenVpnOverCloak): return config_key::amnezia_openvpn_cloak;
-    case(DockerContainer::OpenVpnOverShadowSocks): return config_key::amnezia_shadowsocks;
-    case(DockerContainer::WireGuard): return config_key::amnezia_wireguard;
-    default: return "none";
-    }
+QString ContainerProps::containerToString(amnezia::DockerContainer c){
+    if (c == DockerContainer::None) return "none";
+
+    QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
+    QString containerKey = metaEnum.valueToKey(static_cast<int>(c));
+    return "amnezia-" + containerKey.toLower();
 }
 
-QVector<amnezia::Protocol> amnezia::protocolsForContainer(amnezia::DockerContainer container)
+QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn:
         return { Protocol::OpenVpn };
 
-    case DockerContainer::OpenVpnOverShadowSocks:
+    case DockerContainer::ShadowSocks:
         return { Protocol::OpenVpn, Protocol::ShadowSocks };
 
-    case DockerContainer::OpenVpnOverCloak:
+    case DockerContainer::Cloak:
         return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
 
     default:
@@ -43,46 +42,62 @@ QVector<amnezia::Protocol> amnezia::protocolsForContainer(amnezia::DockerContain
     }
 }
 
-QVector<amnezia::DockerContainer> amnezia::allContainers()
+QList<DockerContainer> ContainerProps::allContainers()
 {
-    return QVector<amnezia::DockerContainer> {
-        DockerContainer::None,
-        DockerContainer::OpenVpn,
-        DockerContainer::OpenVpnOverShadowSocks,
-        DockerContainer::OpenVpnOverCloak,
-        DockerContainer::WireGuard
-    };
+    QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
+    QList<DockerContainer> all;
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        all.append(static_cast<DockerContainer>(i));
+    }
+
+    return all;
 }
 
-QMap<DockerContainer, QString> amnezia::containerHumanNames()
+QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return {
         {DockerContainer::OpenVpn, "OpenVPN"},
-        {DockerContainer::OpenVpnOverShadowSocks, "OpenVpn over ShadowSocks"},
-        {DockerContainer::OpenVpnOverCloak, "OpenVpn over Cloak"},
-        {DockerContainer::WireGuard, "WireGuard"}
+        {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
+        {DockerContainer::Cloak, "OpenVpn over Cloak"},
+        {DockerContainer::WireGuard, "WireGuard"},
+        {DockerContainer::TorSite, QObject::tr("Web site under TOR")},
+        {DockerContainer::Dns, QObject::tr("DNS Service")},
+        {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
     };
 }
 
-QMap<DockerContainer, QString> amnezia::containerDescriptions()
+QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
 {
     return {
         {DockerContainer::OpenVpn, QObject::tr("OpenVPN container")},
-        {DockerContainer::OpenVpnOverShadowSocks, QObject::tr("Container with OpenVpn and ShadowSocks")},
-        {DockerContainer::OpenVpnOverCloak, QObject::tr("Container with OpenVpn and ShadowSocks protocols "
+        {DockerContainer::ShadowSocks, QObject::tr("Container with OpenVpn and ShadowSocks")},
+        {DockerContainer::Cloak, QObject::tr("Container with OpenVpn and ShadowSocks protocols "
                                                         "configured with traffic masking by Cloak plugin")},
-        {DockerContainer::WireGuard, QObject::tr("WireGuard container")}
+        {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
+        {DockerContainer::TorSite, QObject::tr("Web site under TOR")},
+        {DockerContainer::Dns, QObject::tr("DNS Service")},
+        {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
+
     };
 }
 
-bool amnezia::isContainerVpnType(DockerContainer c)
+amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
 {
     switch (c) {
-    case DockerContainer::None :                    return false;
-    case DockerContainer::OpenVpn :                 return true;
-    case DockerContainer::OpenVpnOverCloak :        return true;
-    case DockerContainer::OpenVpnOverShadowSocks :  return true;
-    case DockerContainer::WireGuard :               return true;
-    default: return false;
+    case DockerContainer::None :         return ServiceType::None;
+    case DockerContainer::OpenVpn :      return ServiceType::Vpn;
+    case DockerContainer::Cloak :        return ServiceType::Vpn;
+    case DockerContainer::ShadowSocks :  return ServiceType::Vpn;
+    case DockerContainer::WireGuard :    return ServiceType::Vpn;
+    case DockerContainer::TorSite :      return ServiceType::Other;
+    case DockerContainer::Dns :          return ServiceType::Other;
+    case DockerContainer::FileShare :    return ServiceType::Other;
+    default:                             return ServiceType::Other;
     }
 }
+
+Protocol ContainerProps::defaultProtocol(DockerContainer c)
+{
+    return static_cast<Protocol>(c);
+}
+

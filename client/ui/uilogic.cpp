@@ -47,7 +47,7 @@
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
-#include "pages_logic/NewServerConfiguringLogic.h"
+#include "pages_logic/ServerConfiguringProgressLogic.h"
 #include "pages_logic/NewServerProtocolsLogic.h"
 #include "pages_logic/ServerListLogic.h"
 #include "pages_logic/ServerSettingsLogic.h"
@@ -81,7 +81,7 @@ UiLogic::UiLogic(QObject *parent) :
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
     m_networkSettingsLogic = new NetworkSettingsLogic(this);
-    m_newServerConfiguringLogic = new NewServerConfiguringLogic(this);
+    m_serverConfiguringProgressLogic = new ServerConfiguringProgressLogic(this);
     m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);
@@ -132,7 +132,7 @@ void UiLogic::initalizeUiLogic()
 
     selectedServerIndex = m_settings.defaultServerIndex();
     goToPage(Page::ServerContainers, true, false);
-    //goToPage(Page::NewServerProtocols, true, false);
+    goToPage(Page::NewServerProtocols, true, false);
 
 
     //ui->pushButton_general_settings_exit->hide();
@@ -355,12 +355,12 @@ void UiLogic::onCloseWindow()
 
 QString UiLogic::containerName(int container)
 {
-    return amnezia::containerHumanNames().value(static_cast<DockerContainer>(container));
+    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(container));
 }
 
 QString UiLogic::containerDesc(int container)
 {
-    return amnezia::containerDescriptions().value(static_cast<DockerContainer>(container));
+    return ContainerProps::containerDescriptions().value(static_cast<DockerContainer>(container));
 
 }
 
@@ -396,7 +396,7 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
 {
     if (containers.isEmpty()) return;
 
-    goToPage(Page::ServerConfiguring);
+    emit goToPage(Page::ServerConfiguringProgress);
     QEventLoop loop;
     QTimer::singleShot(500, &loop, SLOT(quit()));
     loop.exec();
@@ -404,34 +404,34 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
 
     PageFunc page_new_server_configuring;
     page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
-        newServerConfiguringLogic()->set_pageEnabled(enabled);
+        serverConfiguringProgressLogic()->set_pageEnabled(enabled);
     };
     ButtonFunc no_button;
     LabelFunc label_new_server_configuring_wait_info;
     label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
-        newServerConfiguringLogic()->set_labelWaitInfoText(text);
+        serverConfiguringProgressLogic()->set_labelWaitInfoText(text);
     };
     label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->set_labelWaitInfoVisible(visible);
+        serverConfiguringProgressLogic()->set_labelWaitInfoVisible(visible);
     };
     ProgressFunc progressBar_new_server_configuring;
     progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->set_progressBarVisible(visible);
+        serverConfiguringProgressLogic()->set_progressBarVisible(visible);
     };
     progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
-        newServerConfiguringLogic()->set_progressBarValue(value);
+        serverConfiguringProgressLogic()->set_progressBarValue(value);
     };
     progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
-        return newServerConfiguringLogic()->progressBarValue();
+        return serverConfiguringProgressLogic()->progressBarValue();
     };
     progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
-        return newServerConfiguringLogic()->progressBarMaximium();
+        return serverConfiguringProgressLogic()->progressBarMaximium();
     };
     progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
-        newServerConfiguringLogic()->set_progressBarTextVisible(visible);
+        serverConfiguringProgressLogic()->set_progressBarTextVisible(visible);
     };
     progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
-        newServerConfiguringLogic()->set_progressBarText(text);
+        serverConfiguringProgressLogic()->set_progressBarText(text);
     };
     bool ok = installContainers(installCredentials, containers,
                                 page_new_server_configuring,
@@ -452,16 +452,16 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
             containerConfigs.append(cfg);
         }
         server.insert(config_key::containers, containerConfigs);
-        server.insert(config_key::defaultContainer, containerToString(containers.firstKey()));
+        server.insert(config_key::defaultContainer, ContainerProps::containerToString(containers.firstKey()));
 
         m_settings.addServer(server);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
 
-        setStartPage(Page::Vpn);
+        emit setStartPage(Page::Vpn);
         qApp->processEvents();
     }
     else {
-        closePage();
+        emit closePage();
     }
 }
 

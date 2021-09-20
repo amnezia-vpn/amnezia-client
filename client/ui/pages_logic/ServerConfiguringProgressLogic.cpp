@@ -1,6 +1,6 @@
-#include "NewServerConfiguringLogic.h"
+#include "ServerConfiguringProgressLogic.h"
 
-NewServerConfiguringLogic::NewServerConfiguringLogic(UiLogic *logic, QObject *parent):
+ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_progressBarValue{0},
     m_labelWaitInfoVisible{true},

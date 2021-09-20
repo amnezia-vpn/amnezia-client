@@ -18,9 +18,8 @@ public:
     enum SiteRoles {
         NameRole = Qt::UserRole + 1,
         DescRole,
-        isVpnTypeRole,
-        isOtherTypeRole,
-        isInstalledRole
+        ServiceTypeRole,
+        IsInstalledRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

@@ -41,17 +41,6 @@ constexpr char subnet_cidr[] = "subnet_cidr";
 
 // proto config keys
 constexpr char last_config[] = "last_config";
-
-constexpr char openvpn[] = "openvpn";
-constexpr char shadowsocks[] = "shadowsocks";
-constexpr char cloak[] = "cloak";
-constexpr char wireguard[] = "wireguard";
-
-// containers config keys
-constexpr char amnezia_openvpn[] = "amnezia-openvpn";
-constexpr char amnezia_shadowsocks[] = "amnezia-shadowsocks";
-constexpr char amnezia_openvpn_cloak[] = "amnezia-openvpn-cloak";
-constexpr char amnezia_wireguard[] = "amnezia-wireguard";
 }
 
 namespace protocols {
@@ -116,26 +105,61 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 namespace ProtocolEnumNS {
 Q_NAMESPACE
-enum class Protocol {
-    Any,
+
+enum TransportProto {
+    Udp,
+    Tcp
+};
+Q_ENUM_NS(TransportProto)
+
+enum Protocol {
+    Any = 0,
     OpenVpn,
     ShadowSocks,
     Cloak,
-    WireGuard
+    WireGuard,
+    TorSite,
+    Dns,
+    FileShare
 };
 Q_ENUM_NS(Protocol)
+
+enum ServiceType {
+    None = 0,
+    Vpn,
+    Other
+};
+Q_ENUM_NS(ServiceType)
 } // namespace ProtocolEnumNS
 
 using namespace ProtocolEnumNS;
 
-QVector<Protocol> allProtocols();
+class ProtocolProps : public QObject
+{
+    Q_OBJECT
 
-Protocol protoFromString(QString proto);
-QString protoToString(Protocol proto);
+public:
+    Q_INVOKABLE static QList<Protocol> allProtocols();
 
-QMap<Protocol, QString> protocolHumanNames();
-QMap<Protocol, QString> protocolDescriptions();
-bool isProtocolVpnType(Protocol p);
+    // spelling may differ for various protocols - TCP for OpenVPN, tcp for others
+    Q_INVOKABLE static TransportProto transportProtoFromString(QString p);
+    Q_INVOKABLE static QString transportProtoToString(TransportProto proto, Protocol p = Protocol::Any);
+
+    Q_INVOKABLE static Protocol protoFromString(QString p);
+    Q_INVOKABLE static QString protoToString(Protocol p);
+
+    Q_INVOKABLE static QMap<Protocol, QString> protocolHumanNames();
+    Q_INVOKABLE static QMap<Protocol, QString> protocolDescriptions();
+
+    Q_INVOKABLE static ServiceType protocolService(Protocol p);
+
+    Q_INVOKABLE static int defaultPort(Protocol p);
+    Q_INVOKABLE static bool defaultPortChangeable(Protocol p);
+
+    Q_INVOKABLE static TransportProto defaultTransportProto(Protocol p);
+    Q_INVOKABLE static bool defaultTransportProtoChangeable(Protocol p);
+
+};
 
 static void declareQmlProtocolEnum() {
     qmlRegisterUncreatableMetaObject(
@@ -143,6 +167,14 @@ static void declareQmlProtocolEnum() {
                 "ProtocolEnum",
                 1, 0,
                 "ProtocolEnum",
+                "Error: only enums"
+                );
+
+    qmlRegisterUncreatableMetaObject(
+                ProtocolEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "TransportProto",
                 "Error: only enums"
                 );
 }

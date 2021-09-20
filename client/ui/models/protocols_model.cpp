@@ -9,41 +9,37 @@ ProtocolsModel::ProtocolsModel(QObject *parent) :
 int ProtocolsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return amnezia::allProtocols().size();
+    return ProtocolProps::allProtocols().size();
 }
 
 QHash<int, QByteArray> ProtocolsModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name_role";
     roles[DescRole] = "desc_role";
-    roles[isVpnTypeRole] = "is_vpn_role";
-    roles[isOtherTypeRole] = "is_other_role";
-    roles[isInstalledRole] = "is_installed_role";
+    roles[ServiceTypeRole] = "service_type_role";
+    roles[IsInstalledRole] = "is_installed_role";
     return roles;
 }
 
 QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0
-            || index.row() >= amnezia::allContainers().size()) {
+            || index.row() >= ContainerProps::allContainers().size()) {
         return QVariant();
     }
 
-    Protocol p = amnezia::allProtocols().at(index.row());
+    Protocol p = ProtocolProps::allProtocols().at(index.row());
     if (role == NameRole) {
-        return protocolHumanNames().value(p);
+        return ProtocolProps::protocolHumanNames().value(p);
     }
     if (role == DescRole) {
-        return protocolDescriptions().value(p);
+        return ProtocolProps::protocolDescriptions().value(p);
     }
-    if (role == isVpnTypeRole) {
-        return isProtocolVpnType(p);
+    if (role == ServiceTypeRole) {
+        return ProtocolProps::protocolService(p);
     }
-//    if (role == isOtherTypeRole) {
-//        return isContainerVpnType(c)
-//    }
-    if (role == isInstalledRole) {
-        return protocolsForContainer(m_selectedDockerContainer).contains(p);
+    if (role == IsInstalledRole) {
+        return ContainerProps::protocolsForContainer(m_selectedDockerContainer).contains(p);
     }
     return QVariant();
 }

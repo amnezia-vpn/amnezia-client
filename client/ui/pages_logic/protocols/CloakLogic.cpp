@@ -38,7 +38,7 @@ void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer
     set_lineEditProtoCloakPortText(ckConfig.value(config_key::port).
                                   toString(protocols::cloak::defaultPort));
 
-    set_lineEditProtoCloakPortEnabled(container == DockerContainer::OpenVpnOverCloak);
+    set_lineEditProtoCloakPortEnabled(container == DockerContainer::Cloak);
 }
 
 QJsonObject CloakLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
@@ -57,7 +57,7 @@ void CloakLogic::onPushButtonProtoCloakSaveClicked()
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::cloak, protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Protocol::Cloak), protocolConfig);
 
     UiLogic::PageFunc page_proto_cloak;
     page_proto_cloak.setEnabledFunc = [this] (bool enabled) -> void {

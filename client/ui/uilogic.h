@@ -19,7 +19,7 @@ class AppSettingsLogic;
 class GeneralSettingsLogic;
 class NetworkSettingsLogic;
 class NewServerProtocolsLogic;
-class NewServerConfiguringLogic;
+class ServerConfiguringProgressLogic;
 class ServerListLogic;
 class ServerSettingsLogic;
 class ServerContainersLogic;
@@ -61,7 +61,7 @@ public:
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
     friend class NetworkSettingsLogic;
-    friend class NewServerConfiguringLogic;
+    friend class ServerConfiguringProgressLogic;
     friend class NewServerProtocolsLogic;
     friend class ServerListLogic;
     friend class ServerSettingsLogic;
@@ -168,7 +168,7 @@ public:
     AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
     GeneralSettingsLogic *generalSettingsLogic()            { return m_generalSettingsLogic; }
     NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
-    NewServerConfiguringLogic *newServerConfiguringLogic()  { return m_newServerConfiguringLogic; }
+    ServerConfiguringProgressLogic *serverConfiguringProgressLogic()  { return m_serverConfiguringProgressLogic; }
     NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
     ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
@@ -185,7 +185,7 @@ private:
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;
-    NewServerConfiguringLogic *m_newServerConfiguringLogic;
+    ServerConfiguringProgressLogic *m_serverConfiguringProgressLogic;
     NewServerProtocolsLogic *m_newServerProtocolsLogic;
     ServerListLogic *m_serverListLogic;
     ServerSettingsLogic *m_serverSettingsLogic;

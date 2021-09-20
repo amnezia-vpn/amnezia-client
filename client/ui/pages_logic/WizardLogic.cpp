@@ -20,26 +20,26 @@ void WizardLogic::updatePage()
 QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const
 {
     QJsonObject cloakConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverCloak) },
-        { config_key::cloak, QJsonObject {
+        { config_key::container, ContainerProps::containerToString(DockerContainer::Cloak) },
+        { ProtocolProps::protoToString(Protocol::Cloak), QJsonObject {
                 { config_key::site, lineEditHighWebsiteMaskingText() }}
         }
     };
     QJsonObject ssConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpnOverShadowSocks) }
+        { config_key::container, ContainerProps::containerToString(DockerContainer::ShadowSocks) }
     };
     QJsonObject openVpnConfig {
-        { config_key::container, amnezia::containerToString(DockerContainer::OpenVpn) }
+        { config_key::container, ContainerProps::containerToString(DockerContainer::OpenVpn) }
     };
 
     QMap<DockerContainer, QJsonObject> containers;
 
     if (radioButtonHighChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverCloak, cloakConfig);
+        containers.insert(DockerContainer::Cloak, cloakConfig);
     }
 
     if (radioButtonMediumChecked()) {
-        containers.insert(DockerContainer::OpenVpnOverShadowSocks, ssConfig);
+        containers.insert(DockerContainer::ShadowSocks, ssConfig);
     }
 
     if (radioButtonLowChecked()) {

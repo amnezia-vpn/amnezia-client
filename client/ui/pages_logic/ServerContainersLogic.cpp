@@ -59,8 +59,8 @@ void ServerContainersLogic::updateServerContainersPage()
     // all containers
     QList<DockerContainer> allContainers {
         DockerContainer::OpenVpn,
-                DockerContainer::OpenVpnOverShadowSocks,
-                DockerContainer::OpenVpnOverCloak,
+                DockerContainer::ShadowSocks,
+                DockerContainer::Cloak,
                 DockerContainer::WireGuard
     };
 
@@ -141,8 +141,8 @@ void ServerContainersLogic::setupProtocolsPageConnections()
     // all containers
     QList<DockerContainer> containers {
         DockerContainer::OpenVpn,
-                DockerContainer::OpenVpnOverShadowSocks,
-                DockerContainer::OpenVpnOverCloak,
+                DockerContainer::ShadowSocks,
+                DockerContainer::Cloak,
                 DockerContainer::WireGuard
     };
     using ButtonClickedFunc = void (ServerContainersLogic::*)(bool);

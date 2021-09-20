@@ -41,8 +41,8 @@ Window  {
             if (page === PageEnum.WizardHigh) {
                 WizardLogic.updatePage();
             }
-            if (page === PageEnum.ServerConfiguring) {
-                ServerConfiguringLogic.progressBarValue = 0;
+            if (page === PageEnum.ServerConfiguringProgress) {
+                ServerConfiguringProgressLogic.progressBarValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
                 GeneralSettingsLogic.updatePage();
@@ -79,6 +79,8 @@ Window  {
         } else {
             pageLoader.push(pages[page], {}, StackView.Immediate)
         }
+
+        pages[page].activated(reset)
     }
 
     function gotoProtocolPage(protocol, reset, slide) {
@@ -91,6 +93,8 @@ Window  {
         } else {
             pageLoader.push(protocolPages[protocol], {}, StackView.Immediate)
         }
+
+        protocolPages[protocol].activated(reset)
     }
 
     function close_page() {

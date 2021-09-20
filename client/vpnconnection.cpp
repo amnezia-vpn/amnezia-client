@@ -133,7 +133,7 @@ QMap<Protocol, QString> VpnConnection::getLastVpnConfig(const QJsonObject &conta
          Protocol::Cloak,
          Protocol::WireGuard}) {
 
-        QString cfg = containerConfig.value(protoToString(proto)).toObject().value(config_key::last_config).toString();
+        QString cfg = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
         if (!cfg.isEmpty()) configs.insert(proto, cfg);
     }
@@ -153,10 +153,10 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
         if (proto == Protocol::OpenVpn) {
             configData = OpenVpnConfigurator::processConfigWithLocalSettings(configData);
         }
-        qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << protoToString(proto);
+        qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
     else {
-        qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << protoToString(proto);
+        qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << ProtocolProps::protoToString(proto);
         if (proto == Protocol::OpenVpn) {
             configData = OpenVpnConfigurator::genOpenVpnConfig(credentials,
                 container, containerConfig, &e);
@@ -199,8 +199,8 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
     ErrorCode errorCode = ErrorCode::NoError;
 
     if (container == DockerContainer::OpenVpn ||
-            container == DockerContainer::OpenVpnOverShadowSocks ||
-            container == DockerContainer::OpenVpnOverCloak) {
+            container == DockerContainer::ShadowSocks ||
+            container == DockerContainer::Cloak) {
 
         QString openVpnConfigData =
             createVpnConfigurationForProto(
@@ -223,7 +223,7 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
         }
     }
 
-    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+    if (container == DockerContainer::ShadowSocks) {
         QJsonObject ssConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
                 serverIndex, credentials, container, containerConfig, Protocol::ShadowSocks, &errorCode).toUtf8()).
@@ -232,7 +232,7 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
         m_vpnConfiguration.insert(config::key_shadowsocks_config_data, ssConfigData);
     }
 
-    if (container == DockerContainer::OpenVpnOverCloak) {
+    if (container == DockerContainer::Cloak) {
         QJsonObject cloakConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
                 serverIndex, credentials, container, containerConfig, Protocol::Cloak, &errorCode).toUtf8()).
@@ -256,7 +256,7 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
-                .arg(serverIndex).arg(containerToString(container)) << m_settings.routeMode();
+                .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings.routeMode();
     m_remoteAddress = credentials.hostName;
 
     emit connectionStateChanged(VpnProtocol::Connecting);
@@ -281,8 +281,8 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
             return e;
         }
     }
-    else if (container == DockerContainer::OpenVpnOverShadowSocks) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpnOverShadowSocks, containerConfig);
+    else if (container == DockerContainer::ShadowSocks) {
+        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::ShadowSocks, containerConfig);
         if (e) {
             emit connectionStateChanged(VpnProtocol::Error);
             return e;
@@ -295,8 +295,8 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
             return e;
         }
     }
-    else if (container == DockerContainer::OpenVpnOverCloak) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpnOverCloak, containerConfig);
+    else if (container == DockerContainer::Cloak) {
+        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::Cloak, containerConfig);
         if (e) {
             emit connectionStateChanged(VpnProtocol::Error);
             return e;

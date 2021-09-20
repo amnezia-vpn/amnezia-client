@@ -69,7 +69,7 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
     set_checkBoxProtoOpenVpnTlsAuthChecked(isTlsAuth);
 
-    if (container == DockerContainer::OpenVpnOverShadowSocks) {
+    if (container == DockerContainer::ShadowSocks) {
         set_radioButtonProtoOpenVpnUdpEnabled(false);
         set_radioButtonProtoOpenVpnTcpEnabled(false);
         set_radioButtonProtoOpenVpnTcpChecked(true);
@@ -94,7 +94,7 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(config_key::openvpn, protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Protocol::OpenVpn), protocolConfig);
 
     UiLogic::PageFunc page_proto_openvpn;
     page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {

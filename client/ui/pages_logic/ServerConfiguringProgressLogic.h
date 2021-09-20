@@ -1,11 +1,11 @@
-#ifndef NEW_SERVER_CONFIGURING_LOGIC_H
-#define NEW_SERVER_CONFIGURING_LOGIC_H
+#ifndef SERVER_CONFIGURING_PROGRESS_LOGIC_H
+#define SERVER_CONFIGURING_PROGRESS_LOGIC_H
 
 #include "PageLogicBase.h"
 
 class UiLogic;
 
-class NewServerConfiguringLogic : public PageLogicBase
+class ServerConfiguringProgressLogic : public PageLogicBase
 {
     Q_OBJECT
 
@@ -18,8 +18,8 @@ class NewServerConfiguringLogic : public PageLogicBase
     AUTO_PROPERTY(QString, progressBarText)
 
 public:
-    explicit NewServerConfiguringLogic(UiLogic *uiLogic, QObject *parent = nullptr);
-    ~NewServerConfiguringLogic() = default;
+    explicit ServerConfiguringProgressLogic(UiLogic *uiLogic, QObject *parent = nullptr);
+    ~ServerConfiguringProgressLogic() = default;
 
 };
-#endif // NEW_SERVER_CONFIGURING_LOGIC_H
+#endif // SERVER_CONFIGURING_PROGRESS_LOGIC_H

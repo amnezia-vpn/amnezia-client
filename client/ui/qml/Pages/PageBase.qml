@@ -10,6 +10,8 @@ Item {
     property var page: PageEnum.Start
     property var logic: UiLogic
 
+    signal activated(bool reset)
+
 //    width: GC.screenWidth
 //    height: GC.screenHeight
 

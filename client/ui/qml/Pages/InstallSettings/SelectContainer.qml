@@ -1,14 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import SortFilterProxyModel 0.2
+import ProtocolEnum 1.0
 import "./"
 import "../../Controls"
 import "../../Config"
 
 Drawer {
     id: root
-    signal containerSelected(int id)
-    property alias selectedIndex: tb.currentIndex
+    signal containerSelected(int c_index)
+    property int selectedIndex: -1
     property alias modelFilters: proxyModel.filters
 
     z: -3
@@ -30,8 +31,22 @@ Drawer {
                 roleName: "is_installed_role"
                 value: false },
             ValueFilter {
-                roleName: "is_vpn_role"
-                value: true }
+                roleName: "service_type_role"
+                value: ProtocolEnum.Vpn }
+        ]
+
+    }
+
+    SortFilterProxyModel {
+        id: proxyModel_other
+        sourceModel: UiLogic.containersModel
+        filters: [
+            ValueFilter {
+                roleName: "is_installed_role"
+                value: false },
+            ValueFilter {
+                roleName: "service_type_role"
+                value: ProtocolEnum.Other }
         ]
 
     }
@@ -60,7 +75,8 @@ Drawer {
             ListView {
                 id: tb
                 x: 10
-                width: parent.width - 40
+                currentIndex: -1
+                width: parent.width - 20
                 height: contentItem.height
 
                 spacing: 0
@@ -104,7 +120,9 @@ Drawer {
                         anchors.fill: parent
                         onClicked: {
                             tb.currentIndex = index
-                            containerSelected(index)
+                            tb_other.currentIndex = -1
+                            containerSelected(proxyModel.mapToSource(index))
+                            selectedIndex = proxyModel.mapToSource(index)
                             root.close()
                         }
                     }
@@ -112,64 +130,68 @@ Drawer {
             }
 
 
-//            Caption {
-//                id: cap2
-//                text: qsTr("Other containers")
-//            }
+            Caption {
+                id: cap2
+                font.pixelSize: 20
+                text: qsTr("Other containers")
+            }
 
-//            ListView {
-//                id: tb_other
-//                x: 10
-//                //y: 20
-//                width: parent.width - 40
-//                height: contentItem.height
+            ListView {
+                id: tb_other
+                x: 10
+                currentIndex: -1
+                width: parent.width - 20
+                height: contentItem.height
 
-//                spacing: 1
-//                clip: true
-//                interactive: false
-//                property int currentRow: -1
-//                model: UiLogic.containersModel
+                spacing: 0
+                clip: true
+                interactive: false
+                model: proxyModel_other
 
-//                delegate: Item {
-//                    implicitWidth: 170 * 2
-//                    implicitHeight: 30
-//                    Item {
-//                        width: parent.width
-//                        height: 30
-//                        anchors.left: parent.left
-//                        id: c1_other
-//                        Rectangle {
-//                            anchors.top: parent.top
-//                            width: parent.width
-//                            height: 1
-//                            color: "lightgray"
-//                            visible: index !== tb_other.currentRow
-//                        }
-//                        Rectangle {
-//                            anchors.fill: parent
-//                            color: "#63B4FB"
-//                            visible: index === tb_other.currentRow
+                delegate: Item {
+                    implicitWidth: 170 * 2
+                    implicitHeight: 30
+                    Item {
+                        width: parent.width
+                        height: 30
+                        anchors.left: parent.left
+                        id: c1_other
+                        Rectangle {
+                            anchors.top: parent.top
+                            width: parent.width
+                            height: 1
+                            color: "lightgray"
+                            visible: index !== tb_other.currentIndex
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#63B4FB"
+                            visible: index === tb_other.currentIndex
 
-//                        }
-//                        Text {
-//                            id: text_name_other
-//                            text: name
-//                            font.pixelSize: 16
-//                            anchors.fill: parent
-//                            leftPadding: 10
-//                            verticalAlignment: Text.AlignVCenter
-//                            wrapMode: Text.WordWrap
-//                        }
-//                    }
+                        }
+                        Text {
+                            id: text_name_other
+                            text: name_role
+                            font.pixelSize: 16
+                            anchors.fill: parent
+                            leftPadding: 10
+                            verticalAlignment: Text.AlignVCenter
+                            wrapMode: Text.WordWrap
+                        }
+                    }
 
-//                    MouseArea {
-//                        anchors.fill: parent
-//                        onClicked: {
-//                            tb_other.currentRow = index
-//                        }
-//                    }
-//                }
-//            }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            tb_other.currentIndex = index
+                            tb.currentIndex = -1
+                            containerSelected(proxyModel_other.mapToSource(index))
+                            selectedIndex = proxyModel_other.mapToSource(index)
+                            root.close()
+                        }
+                    }
+                }
+            }
 
 
         }

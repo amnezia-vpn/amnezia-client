@@ -79,20 +79,20 @@ bool Settings::editServer(int index, const QJsonObject &server)
 void Settings::setDefaultContainer(int serverIndex, DockerContainer container)
 {
     QJsonObject s = server(serverIndex);
-    s.insert(config_key::defaultContainer, containerToString(container));
+    s.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     editServer(serverIndex, s);
 }
 
 DockerContainer Settings::defaultContainer(int serverIndex) const
 {
-    return containerFromString(defaultContainerName(serverIndex));
+    return ContainerProps::containerFromString(defaultContainerName(serverIndex));
 }
 
 QString Settings::defaultContainerName(int serverIndex) const
 {
     QString name = server(serverIndex).value(config_key::defaultContainer).toString();
     if (name.isEmpty()) {
-        return containerToString(DockerContainer::None);
+        return ContainerProps::containerToString(DockerContainer::None);
     }
     else return name;
 }
@@ -103,7 +103,7 @@ QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const
 
     QMap<DockerContainer, QJsonObject> containersMap;
     for (const QJsonValue &val : containers) {
-        containersMap.insert(containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
+        containersMap.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
     }
 
     return containersMap;
@@ -135,7 +135,7 @@ void Settings::setContainerConfig(int serverIndex, DockerContainer container, co
     }
     auto c = containers(serverIndex);
     c[container] = config;
-    c[container][config_key::container] = containerToString(container);
+    c[container][config_key::container] = ContainerProps::containerToString(container);
     setContainers(serverIndex, c);
 }
 
@@ -154,13 +154,13 @@ void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
 QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Protocol proto)
 {
     const QJsonObject &c = containerConfig(serverIndex, container);
-    return c.value(protoToString(proto)).toObject();
+    return c.value(ProtocolProps::protoToString(proto)).toObject();
 }
 
 void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Protocol proto, const QJsonObject &config)
 {
     QJsonObject c = containerConfig(serverIndex, container);
-    c.insert(protoToString(proto), config);
+    c.insert(ProtocolProps::protoToString(proto), config);
 
     setContainerConfig(serverIndex, container, c);
 }

@@ -296,13 +296,13 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                              "easyrsa import-req %2/%3.req %3\"")
-            .arg(amnezia::containerToString(container))
+            .arg(ContainerProps::containerToString(container))
             .arg(amnezia::protocols::openvpn::clientsDirPath)
             .arg(clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
                                     "easyrsa sign-req client %2\"")
-            .arg(amnezia::containerToString(container))
+            .arg(ContainerProps::containerToString(container))
             .arg(clientId);
 
     QStringList scriptList {script_import, script_sign};

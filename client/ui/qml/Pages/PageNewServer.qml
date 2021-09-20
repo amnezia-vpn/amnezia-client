@@ -57,5 +57,6 @@ PageBase {
     }
 
     Logo {
+        anchors.bottom: parent.bottom
     }
 }

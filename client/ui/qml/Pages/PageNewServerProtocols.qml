@@ -1,6 +1,8 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
+import ContainerProps 1.0
+import ProtocolProps 1.0
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -11,6 +13,11 @@ PageBase {
     id: root
     page: PageEnum.NewServerProtocols
     logic: NewServerProtocolsLogic
+
+    onActivated: {
+        container_selector.selectedIndex = -1
+        UiLogic.containersModel.setSelectedServerIndex(-1)
+    }
 
     BackButton {
         id: back
@@ -29,7 +36,10 @@ PageBase {
         height: 40
         text: qsTr("Setup server")
         onClicked: {
-            NewServerProtocolsLogic.pushButtonConfigureClicked()
+            let cont = container_selector.selectedIndex
+            let tp = ProtocolProps.transportProtoFromString(cb_port_proto.currentText)
+            let port = tf_port_num.text
+            NewServerProtocolsLogic.onPushButtonConfigureClicked(cont, port, tp)
         }
     }
 
@@ -49,6 +59,15 @@ PageBase {
 
     SelectContainer {
         id: container_selector
+        onContainerSelected: {
+            var containerProto =  ContainerProps.defaultProtocol(c_index)
+
+            tf_port_num.text = ProtocolProps.defaultPort(containerProto)
+            cb_port_proto.currentIndex = ProtocolProps.defaultTransportProto(containerProto)
+
+            tf_port_num.enabled = ProtocolProps.defaultPortChangeable(containerProto)
+            cb_port_proto.enabled = ProtocolProps.defaultTransportProtoChangeable(containerProto)
+        }
     }
 
     Column {
@@ -108,36 +127,23 @@ PageBase {
 
             LabelType {
                 width: 130
-                text: qsTr("Port (TCP/UDP)")
+                text: qsTr("Port")
             }
             TextFieldType {
+                id: tf_port_num
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                text: NewServerProtocolsLogic.lineEditOpenvpnPortText
-                onEditingFinished: {
-                    NewServerProtocolsLogic.lineEditOpenvpnPortText = text
-                }
             }
             LabelType {
                 width: 130
-                text: qsTr("Protocol")
+                text: qsTr("Network Protocol")
             }
             ComboBoxType {
+                id: cb_port_proto
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
                 model: [
                     qsTr("udp"),
                     qsTr("tcp"),
                 ]
-                currentIndex: {
-                    for (let i = 0; i < model.length; ++i) {
-                        if (NewServerProtocolsLogic.comboBoxOpenvpnProtoText === model[i]) {
-                            return i
-                        }
-                    }
-                    return -1
-                }
-                onCurrentTextChanged: {
-                    NewServerProtocolsLogic.comboBoxOpenvpnProtoText = currentText
-                }
             }
         }
     }

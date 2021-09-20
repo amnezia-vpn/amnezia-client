@@ -142,10 +142,10 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 
     ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
-    containerConfig.insert(config_key::container, containerToString(uiLogic()->selectedDockerContainer));
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
 
     ErrorCode e = ErrorCode::NoError;
-    for (Protocol p: amnezia::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
+    for (Protocol p: ContainerProps::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
         QJsonObject protoConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p);
 
         QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, p, &e);
@@ -155,7 +155,7 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         }
         protoConfig.insert(config_key::last_config, cfg);
 
-        containerConfig.insert(protoToString(p), protoConfig);
+        containerConfig.insert(ProtocolProps::protoToString(p), protoConfig);
     }
 
     QByteArray ba;
@@ -165,7 +165,7 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         serverConfig.remove(config_key::password);
         serverConfig.remove(config_key::port);
         serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
-        serverConfig.insert(config_key::defaultContainer, containerToString(uiLogic()->selectedDockerContainer));
+        serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
 
 
         ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
@@ -248,8 +248,8 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
         set_toolBoxShareConnectionCurrentIndex(share_openvpn);
     }
 
-    if (container == DockerContainer::OpenVpnOverShadowSocks ||
-            container == DockerContainer::OpenVpnOverCloak) {
+    if (container == DockerContainer::ShadowSocks ||
+            container == DockerContainer::Cloak) {
         set_pageShareAmneziaVisible(true);
         set_pageShareShadowSocksVisible(true);
 
@@ -287,7 +287,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
         set_toolBoxShareConnectionCurrentIndex(share_shadowshock);
     }
 
-    if (container == DockerContainer::OpenVpnOverCloak) {
+    if (container == DockerContainer::Cloak) {
         //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
         set_pageShareCloakVisible(true);
         set_plainTextEditShareCloakText(QString(""));
@@ -328,9 +328,9 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     // Amnezia sharing
     //    QJsonObject exportContainer;
     //    for (Protocol p: protocolsForContainer(container)) {
-    //        QJsonObject protocolConfig = containerConfig.value(protoToString(p)).toObject();
+    //        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(p)).toObject();
     //        protocolConfig.remove(config_key::last_config);
-    //        exportContainer.insert(protoToString(p), protocolConfig);
+    //        exportContainer.insert(ProtocolProps::protoToString(p), protocolConfig);
     //    }
     //    exportContainer.insert(config_key::container, containerToString(container));
 

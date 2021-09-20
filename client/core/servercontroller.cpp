@@ -177,7 +177,7 @@ QString ServerController::getTextFileFromContainer(DockerContainer container,
     if (errorCode) *errorCode = ErrorCode::NoError;
 
     QString script = QString("sudo docker exec -i %1 sh -c \"cat \'%2\'\"").
-            arg(amnezia::containerToString(container)).arg(path);
+            arg(ContainerProps::containerToString(container)).arg(path);
 
     qDebug().noquote() << "Copy file from container\n" << script;
 
@@ -363,7 +363,7 @@ ErrorCode ServerController::removeContainer(const ServerCredentials &credentials
 
 ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    qDebug().noquote() << "ServerController::setupContainer" << containerToString(container);
+    qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
 
@@ -415,10 +415,10 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
 
 bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
-    if (container == DockerContainer::OpenVpn) {
-        const QJsonObject &oldProtoConfig = oldConfig[config_key::openvpn].toObject();
-        const QJsonObject &newProtoConfig = newConfig[config_key::openvpn].toObject();
+    const QJsonObject &oldProtoConfig = oldConfig[ContainerProps::containerToString(container)].toObject();
+    const QJsonObject &newProtoConfig = newConfig[ContainerProps::containerToString(container)].toObject();
 
+    if (container == DockerContainer::OpenVpn) {
         if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) !=
             newProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto))
                 return true;
@@ -428,20 +428,14 @@ bool ServerController::isReinstallContainerRequred(DockerContainer container, co
                 return true;
     }
 
-    if (container == DockerContainer::OpenVpnOverCloak) {
-        const QJsonObject &oldProtoConfig = oldConfig[config_key::cloak].toObject();
-        const QJsonObject &newProtoConfig = newConfig[config_key::cloak].toObject();
-
+    if (container == DockerContainer::Cloak) {
         if (oldProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort) !=
             newProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort))
                 return true;
     }
 
-    if (container == DockerContainer::OpenVpnOverShadowSocks) {
-        const QJsonObject &oldProtoConfig = oldConfig[config_key::shadowsocks].toObject();
-        const QJsonObject &newProtoConfig = newConfig[config_key::shadowsocks].toObject();
-
-        if (oldProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) !=
+    if (container == DockerContainer::ShadowSocks) {
+         if (oldProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) !=
             newProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort))
                 return true;
     }
@@ -544,10 +538,10 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
 
 ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    const QJsonObject &openvpnConfig = config.value(config_key::openvpn).toObject();
-    const QJsonObject &cloakConfig = config.value(config_key::cloak).toObject();
-    const QJsonObject &ssConfig = config.value(config_key::shadowsocks).toObject();
-    const QJsonObject &wireguarConfig = config.value(config_key::wireguard).toObject();
+    const QJsonObject &openvpnConfig = config.value(ProtocolProps::protoToString(Protocol::OpenVpn)).toObject();
+    const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Protocol::Cloak)).toObject();
+    const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Protocol::ShadowSocks)).toObject();
+    const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Protocol::WireGuard)).toObject();
     //
 
     Vars vars;
@@ -580,8 +574,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$SHADOWSOCKS_LOCAL_PORT", ssConfig.value(config_key::local_port).toString(protocols::shadowsocks::defaultLocalProxyPort) }});
     vars.append({{"$SHADOWSOCKS_CIPHER", ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) }});
 
-    vars.append({{"$CONTAINER_NAME", amnezia::containerToString(container)}});
-    vars.append({{"$DOCKERFILE_FOLDER", "/opt/amnezia/" + amnezia::containerToString(container)}});
+    vars.append({{"$CONTAINER_NAME", ContainerProps::containerToString(container)}});
+    vars.append({{"$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container)}});
 
     // Cloak vars
     vars.append({{"$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) }});

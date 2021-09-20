@@ -12,12 +12,17 @@ namespace amnezia {
 
 namespace ContainerEnumNS {
 Q_NAMESPACE
-enum class DockerContainer {
-    None,
+enum DockerContainer {
+    None = 0,
     OpenVpn,
-    OpenVpnOverShadowSocks,
-    OpenVpnOverCloak,
-    WireGuard
+    ShadowSocks,
+    Cloak,
+    WireGuard,
+
+    //non-vpn
+    TorSite,
+    Dns,
+    FileShare
 };
 Q_ENUM_NS(DockerContainer)
 } // namespace ContainerEnumNS
@@ -25,18 +30,31 @@ Q_ENUM_NS(DockerContainer)
 using namespace ContainerEnumNS;
 using namespace ProtocolEnumNS;
 
-DockerContainer containerFromString(const QString &container);
-QString containerToString(DockerContainer container);
+class ContainerProps : public QObject
+{
+    Q_OBJECT
 
-QVector<DockerContainer> allContainers();
+public:
+    Q_INVOKABLE static DockerContainer containerFromString(const QString &container);
+    Q_INVOKABLE static QString containerToString(DockerContainer container);
 
-QMap<DockerContainer, QString> containerHumanNames();
-QMap<DockerContainer, QString> containerDescriptions();
-bool isContainerVpnType(DockerContainer c);
+    Q_INVOKABLE static QList<DockerContainer> allContainers();
 
-QVector<Protocol> protocolsForContainer(DockerContainer container);
+    Q_INVOKABLE static QMap<DockerContainer, QString> containerHumanNames();
+    Q_INVOKABLE static QMap<DockerContainer, QString> containerDescriptions();
 
-static void declareQmlContainerEnum() {
+    Q_INVOKABLE static QVector<Protocol> protocolsForContainer(DockerContainer container);
+
+    Q_INVOKABLE static ServiceType containerService(DockerContainer c);
+
+    // binding between Docker container and main protocol of given container
+    // it may be changed fot future containers :)
+    Q_INVOKABLE static Protocol defaultProtocol(DockerContainer c);
+};
+
+
+
+static void declareQmlContainerEnum() {   
     qmlRegisterUncreatableMetaObject(
                 ContainerEnumNS::staticMetaObject,
                 "ContainerEnum",
