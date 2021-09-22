@@ -16,7 +16,7 @@ class WizardLogic : public PageLogicBase
     AUTO_PROPERTY(QString, lineEditHighWebsiteMaskingText)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
     Q_INVOKABLE void onPushButtonVpnModeFinishClicked();
     Q_INVOKABLE void onPushButtonLowFinishClicked();
 

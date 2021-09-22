@@ -31,7 +31,7 @@ Window  {
     function gotoPage(page, reset, slide) {
         if (reset) {
             if (page === PageEnum.ServerSettings) {
-                ServerSettingsLogic.updatePage();
+                ServerSettingsLogic.onUpdatePage();
             }
             if (page === PageEnum.ShareConnection) {
             }
@@ -39,32 +39,32 @@ Window  {
                 WizardLogic.radioButtonMediumChecked = true
             }
             if (page === PageEnum.WizardHigh) {
-                WizardLogic.updatePage();
+                WizardLogic.onUpdatePage();
             }
             if (page === PageEnum.ServerConfiguringProgress) {
                 ServerConfiguringProgressLogic.progressBarValue = 0;
             }
             if (page === PageEnum.GeneralSettings) {
-                GeneralSettingsLogic.updatePage();
+                GeneralSettingsLogic.onUpdatePage();
             }
             if (page === PageEnum.ServersList) {
-                ServerListLogic.updatePage();
+                ServerListLogic.onUpdatePage();
             }
             if (page === PageEnum.Start) {
                 StartPageLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-                StartPageLogic.updatePage();
+                StartPageLogic.onUpdatePage();
             }
             if (page === PageEnum.NewServerProtocols) {
-                NewServerProtocolsLogic.updatePage()
+                NewServerProtocolsLogic.onUpdatePage()
             }
             if (page === PageEnum.ServerContainers) {
-                ServerContainersLogic.updateServerContainersPage()
+                ServerContainersLogic.onUpdatePage()
             }
             if (page === PageEnum.AppSettings) {
-                AppSettingsLogic.updatePage()
+                AppSettingsLogic.onUpdatePage()
             }
             if (page === PageEnum.NetworkSettings) {
-                NetworkSettingsLogic.updatePage()
+                NetworkSettingsLogic.onUpdatePage()
             }
             if (page === PageEnum.Sites) {
                 SitesLogic.updateSitesPage()
@@ -84,8 +84,8 @@ Window  {
     }
 
     function gotoProtocolPage(protocol, reset, slide) {
-        if (reset) {
-            protocolPages[protocol].logic.updatePage();
+        if (reset && protocolPages[protocol] !== "undefined") {
+            protocolPages[protocol].logic.onUpdatePage();
         }
 
         if (slide) {
@@ -113,7 +113,7 @@ Window  {
         }
         if (page === PageEnum.Start) {
             UiLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-            UiLogic.updatePage();
+            UiLogic.onUpdatePage();
         }
     }
 
@@ -154,26 +154,31 @@ Window  {
 
 //        initialItem: page_servers
         onCurrentItemChanged: {
+            console.debug("QML onCurrentItemChanged " + pageLoader.currentItem)
             UiLogic.currentPageValue = currentItem.page
         }
 
-        Keys.onReleased: {
-            if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
-                console.debug("Back button captured")
-                if (UiLogic.currentPageValue !== PageEnum.VPN &&
-                        UiLogic.currentPageValue !== PageEnum.ServerConfiguring &&
-                        !(UiLogic.currentPageValue === PageEnum.Start && pageLoader.depth < 2)) {
-                    close_page();
-                }
+//        Keys.onReleased: {
+//            if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+//                console.debug("Back button captured")
+//                if (UiLogic.currentPageValue !== PageEnum.VPN &&
+//                        UiLogic.currentPageValue !== PageEnum.ServerConfiguring &&
+//                        !(UiLogic.currentPageValue === PageEnum.Start && pageLoader.depth < 2)) {
+//                    close_page();
+//                }
 
 
-                // TODO: fix
-                //if (ui->stackedWidget_main->currentWidget()->isEnabled()) {
-                //    closePage();
-                //}
+//                // TODO: fix
+//                //if (ui->stackedWidget_main->currentWidget()->isEnabled()) {
+//                //    closePage();
+//                //}
 
-                event.accepted = true
-            }
+//                event.accepted = true
+//            }
+//        }
+
+        Keys.onPressed: {
+            UiLogic.keyPressEvent(event.key)
         }
 
     }
@@ -220,13 +225,9 @@ Window  {
                     obj.visible = false
                     if (isProtocol) {
                         protocolPages[obj.protocol] = obj
-                        console.debug("PPP " + obj.protocol + " " + file)
-
                     }
                     else {
                         pages[obj.page] = obj
-                        console.debug("AAA " + obj.page + " " + file)
-
                     }
 
 
@@ -246,30 +247,30 @@ Window  {
 
     Connections {
         target: UiLogic
-        onGoToPage: {
+        function onGoToPage(page, reset, slide) {
             console.debug("Connections onGoToPage " + page);
             root.gotoPage(page, reset, slide)
         }
-        onGoToProtocolPage: {
+        function onGoToProtocolPage(protocol, reset, slide) {
             console.debug("Connections onGoToProtocolPage " + protocol);
             root.gotoProtocolPage(protocol, reset, slide)
         }
-        onClosePage: {
+        function onClosePage() {
             root.close_page()
         }
-        onSetStartPage: {
+        function onSetStartPage(page, slide) {
             root.set_start_page(page, slide)
         }
-        onShowPublicKeyWarning: {
+        function onShowPublicKeyWarning() {
             publicKeyWarning.visible = true
         }
-        onShowConnectErrorDialog: {
+        function onShowConnectErrorDialog() {
             connectErrorDialog.visible = true
         }
-        onShow: {
+        function onShow() {
             root.show()
         }
-        onHide: {
+        function onHide() {
             root.hide()
         }
     }

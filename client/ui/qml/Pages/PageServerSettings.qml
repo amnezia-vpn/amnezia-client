@@ -100,7 +100,7 @@ PageBase {
         y: 210
         width: 300
         height: 40
-        text: qsTr("Protocols and services")
+        text: qsTr("Protocols and Services")
         onClicked: {
             UiLogic.goToPage(PageEnum.ServerContainers)
         }

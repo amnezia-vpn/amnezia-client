@@ -21,7 +21,7 @@ class ServerSettingsLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelCurrentVpnProtocolText)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onPushButtonClearServer();
     Q_INVOKABLE void onPushButtonForgetServer();

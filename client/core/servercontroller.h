@@ -32,6 +32,9 @@ public:
     static ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &oldConfig, const QJsonObject &newConfig = QJsonObject());
 
+    // create initial config - generate passwords, etc
+    static QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
+
     static bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
     static ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);

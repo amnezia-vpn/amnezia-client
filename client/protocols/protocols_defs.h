@@ -100,6 +100,10 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 }
 
+namespace sftp {
+constexpr char defaultUserName[] = "sftp_user";
+
+} // namespace sftp
 
 } // namespace protocols
 
@@ -118,9 +122,12 @@ enum Protocol {
     ShadowSocks,
     Cloak,
     WireGuard,
+
+    // non-vpn
     TorWebSite,
     Dns,
-    FileShare
+    FileShare,
+    Sftp
 };
 Q_ENUM_NS(Protocol)
 
@@ -175,6 +182,14 @@ static void declareQmlProtocolEnum() {
                 "ProtocolEnum",
                 1, 0,
                 "TransportProto",
+                "Error: only enums"
+                );
+
+    qmlRegisterUncreatableMetaObject(
+                ProtocolEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "ServiceType",
                 "Error: only enums"
                 );
 }

@@ -16,7 +16,7 @@ AppSettingsLogic::AppSettingsLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void AppSettingsLogic::updatePage()
+void AppSettingsLogic::onUpdatePage()
 {
     set_checkBoxAutostartChecked(Autostart::isAutostart());
     set_checkBoxAutoConnectChecked(m_settings.isAutoConnect());

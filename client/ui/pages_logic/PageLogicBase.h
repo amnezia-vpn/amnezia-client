@@ -19,7 +19,7 @@ public:
     explicit PageLogicBase(UiLogic *uiLogic, QObject *parent = nullptr);
     ~PageLogicBase() = default;
 
-    Q_INVOKABLE virtual void updatePage() {}
+    Q_INVOKABLE virtual void onUpdatePage() {}
 
 protected:
     UiLogic *uiLogic() const { return m_uiLogic; }
@@ -27,5 +27,7 @@ protected:
     Settings m_settings;
     UiLogic *m_uiLogic;
 
+signals:
+    void updatePage();
 };
 #endif // PAGE_LOGIC_BASE_H

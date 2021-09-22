@@ -13,7 +13,7 @@ class NewServerProtocolsLogic : public PageLogicBase
     AUTO_PROPERTY(double, progressBarConnectionMaximum)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
     Q_INVOKABLE void onPushButtonConfigureClicked(DockerContainer c, int port, TransportProto tp);
 
 public:

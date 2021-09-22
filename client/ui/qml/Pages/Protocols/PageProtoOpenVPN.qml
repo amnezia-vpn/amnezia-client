@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.15
 import ProtocolEnum 1.0
 import "../"
 import "../../Controls"
@@ -13,113 +14,52 @@ PageProtocolBase {
     BackButton {
         id: back
     }
-    Item {
-        x: 0
-        y: 40
-        width: 380
-        height: 600
-        enabled: logic.pageEnabled
-        CheckBoxType {
-            x: 30
-            y: 280
-            width: 321
-            height: 21
-            text: qsTr("Auto-negotiate encryption")
-            checked: logic.checkBoxProtoOpenVpnAutoEncryptionChecked
-            onCheckedChanged: {
-                logic.checkBoxProtoOpenVpnAutoEncryptionChecked = checked
-            }
-            onClicked: {
-                logic.checkBoxProtoOpenVpnAutoEncryptionClicked()
-            }
-        }
-        CheckBoxType {
-            x: 30
-            y: 430
-            width: 321
-            height: 21
-            text: qsTr("Block DNS requests outside of VPN")
-            checked: logic.checkBoxProtoOpenVpnBlockDnsChecked
-            onCheckedChanged: {
-                logic.checkBoxProtoOpenVpnBlockDnsChecked = checked
-            }
-        }
-        CheckBoxType {
-            x: 30
-            y: 390
-            width: 321
-            height: 21
-            text: qsTr("Enable TLS auth")
-            checked: logic.checkBoxProtoOpenVpnTlsAuthChecked
-            onCheckedChanged: {
-                logic.checkBoxProtoOpenVpnTlsAuthChecked = checked
-            }
+    Caption {
+        id: caption
+        text: qsTr("OpenVPN Settings")
+    }
 
-        }
-        ComboBoxType {
+    Item {
+        enabled: logic.pageEnabled
+        anchors.top: caption.bottom
+        anchors.bottom: parent.bottom
+        width: parent.width
+
+        LabelType {
+            id: lb_subnet
             x: 30
-            y: 340
-            width: 151
-            height: 31
-            model: [
-                qsTr("AES-256-GCM"),
-                qsTr("AES-192-GCM"),
-                qsTr("AES-128-GCM"),
-                qsTr("AES-256-CBC"),
-                qsTr("AES-192-CBC"),
-                qsTr("AES-128-CBC"),
-                qsTr("ChaCha20-Poly1305"),
-                qsTr("ARIA-256-CBC"),
-                qsTr("CAMELLIA-256-CBC"),
-                qsTr("none")
-            ]
-            currentIndex: {
-                for (let i = 0; i < model.length; ++i) {
-                    if (logic.comboBoxProtoOpenVpnCipherText === model[i]) {
-                        return i
-                    }
-                }
-                return -1
-            }
-            onCurrentTextChanged: {
-                logic.comboBoxProtoOpenVpnCipherText = currentText
-            }
-            enabled: logic.comboBoxProtoOpenVpnCipherEnabled
+            anchors.top: parent.top
+            width: parent.width
+            height: 21
+            text: qsTr("VPN Addresses Subnet")
         }
-        ComboBoxType {
-            x: 200
-            y: 340
-            width: 151
+        TextFieldType {
+            id: tf_subnet
+            x: 30
+            anchors.top: lb_subnet.bottom
+
+            width: parent.width - 60
             height: 31
-            model: [
-                qsTr("SHA512"),
-                qsTr("SHA384"),
-                qsTr("SHA256"),
-                qsTr("SHA3-512"),
-                qsTr("SHA3-384"),
-                qsTr("SHA3-256"),
-                qsTr("whirlpool"),
-                qsTr("BLAKE2b512"),
-                qsTr("BLAKE2s256"),
-                qsTr("SHA1")
-            ]
-            currentIndex: {
-                for (let i = 0; i < model.length; ++i) {
-                    if (logic.comboBoxProtoOpenVpnHashText === model[i]) {
-                        return i
-                    }
-                }
-                return -1
+            text: logic.lineEditProtoOpenVpnSubnetText
+            onEditingFinished: {
+                logic.lineEditProtoOpenVpnSubnetText = text
             }
-            onCurrentTextChanged: {
-                logic.comboBoxProtoOpenVpnHashText = currentText
-            }
-            enabled: logic.comboBoxProtoOpenVpnHashEnabled
+        }
+
+        //
+        LabelType {
+            id: lb_proto
+            x: 30
+            anchors.top: tf_subnet.bottom
+            width: parent.width
+            height: 21
+            text: qsTr("Network protocol")
         }
         Rectangle {
+            id: rect_proto
             x: 30
-            y: 140
-            width: 321
+            anchors.top: lb_proto.bottom
+            width: parent.width  - 60
             height: 71
             border.width: 1
             border.color: "lightgray"
@@ -149,68 +89,27 @@ PageProtocolBase {
                 enabled: logic.radioButtonProtoOpenVpnUdpEnabled
             }
         }
+
+        //
         LabelType {
+            id: lb_port
+            anchors.top: rect_proto.bottom
+            anchors.topMargin: 20
+
             x: 30
-            y: 110
-            width: 151
-            height: 21
-            text: qsTr("Network protocol")
-        }
-        LabelType {
-            x: 30
-            y: 230
-            width: 151
+            width: root.width / 2 - 10
             height: 31
             text: qsTr("Port")
         }
-        Text {
-            font.family: "Lato"
-            font.styleName: "normal"
-            font.pixelSize: 24
-            color: "#100A44"
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: qsTr("OpenVPN Settings")
-            x: 10
-            y: 0
-            width: 340
-            height: 30
-        }
-        LabelType {
-            x: 200
-            y: 310
-            width: 151
-            height: 21
-            text: qsTr("Hash")
-        }
-        LabelType {
-            x: 30
-            y: 40
-            width: 291
-            height: 21
-            text: qsTr("VPN Addresses Subnet")
-        }
-        LabelType {
-            x: 30
-            y: 310
-            width: 151
-            height: 21
-            text: qsTr("Cipher")
-        }
-        LabelType {
-            id: label_proto_openvpn_info
-            x: 30
-            y: 550
-            width: 321
-            height: 41
-            visible: logic.labelProtoOpenVpnInfoVisible
-            text: logic.labelProtoOpenVpnInfoText
-        }
         TextFieldType {
-            id: lineEdit_proto_openvpn_port
-            x: 200
-            y: 230
-            width: 151
+            id: tf_port
+            anchors.top: rect_proto.bottom
+            anchors.topMargin: 20
+
+            anchors.left: parent.horizontalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 30
+
             height: 31
             text: logic.lineEditProtoOpenVpnPortText
             onEditingFinished: {
@@ -218,19 +117,157 @@ PageProtocolBase {
             }
             enabled: logic.lineEditProtoOpenVpnPortEnabled
         }
-        TextFieldType {
-            id: lineEdit_proto_openvpn_subnet
+
+        //
+        CheckBoxType {
+            id: check_auto_enc
+            anchors.top: lb_port.bottom
+            anchors.topMargin: 20
             x: 30
-            y: 65
-            width: 321
-            height: 31
-            text: logic.lineEditProtoOpenVpnSubnetText
-            onEditingFinished: {
-                logic.lineEditProtoOpenVpnSubnetText = text
+            width: parent.width
+            height: 21
+            text: qsTr("Auto-negotiate encryption")
+            checked: logic.checkBoxProtoOpenVpnAutoEncryptionChecked
+            onCheckedChanged: {
+                logic.checkBoxProtoOpenVpnAutoEncryptionChecked = checked
+            }
+            onClicked: {
+                logic.checkBoxProtoOpenVpnAutoEncryptionClicked()
             }
         }
+
+
+        //
+        LabelType {
+            id: lb_cipher
+            x: 30
+            anchors.top: check_auto_enc.bottom
+            anchors.topMargin: 20
+            width: parent.width
+            height: 21
+            text: qsTr("Cipher")
+        }
+
+        ComboBoxType {
+            id: cb_cipher
+            x: 30
+            anchors.top: lb_cipher.bottom
+            width: parent.width - 60
+
+            height: 31
+            model: [
+                qsTr("AES-256-GCM"),
+                qsTr("AES-192-GCM"),
+                qsTr("AES-128-GCM"),
+                qsTr("AES-256-CBC"),
+                qsTr("AES-192-CBC"),
+                qsTr("AES-128-CBC"),
+                qsTr("ChaCha20-Poly1305"),
+                qsTr("ARIA-256-CBC"),
+                qsTr("CAMELLIA-256-CBC"),
+                qsTr("none")
+            ]
+            currentIndex: {
+                for (let i = 0; i < model.length; ++i) {
+                    if (logic.comboBoxProtoOpenVpnCipherText === model[i]) {
+                        return i
+                    }
+                }
+                return -1
+            }
+            onCurrentTextChanged: {
+                logic.comboBoxProtoOpenVpnCipherText = currentText
+            }
+            enabled: logic.comboBoxProtoOpenVpnCipherEnabled
+        }
+
+        //
+        LabelType {
+            id: lb_hash
+            anchors.top: cb_cipher.bottom
+            anchors.topMargin: 20
+            width: parent.width
+
+            height: 21
+            text: qsTr("Hash")
+        }
+        ComboBoxType {
+            id: cb_hash
+            x: 30
+            height: 31
+            anchors.top: lb_hash.bottom
+            width: parent.width - 60
+            model: [
+                qsTr("SHA512"),
+                qsTr("SHA384"),
+                qsTr("SHA256"),
+                qsTr("SHA3-512"),
+                qsTr("SHA3-384"),
+                qsTr("SHA3-256"),
+                qsTr("whirlpool"),
+                qsTr("BLAKE2b512"),
+                qsTr("BLAKE2s256"),
+                qsTr("SHA1")
+            ]
+            currentIndex: {
+                for (let i = 0; i < model.length; ++i) {
+                    if (logic.comboBoxProtoOpenVpnHashText === model[i]) {
+                        return i
+                    }
+                }
+                return -1
+            }
+            onCurrentTextChanged: {
+                logic.comboBoxProtoOpenVpnHashText = currentText
+            }
+            enabled: logic.comboBoxProtoOpenVpnHashEnabled
+        }
+
+        CheckBoxType {
+            id: check_tls
+            x: 30
+            anchors.top: cb_hash.bottom
+            anchors.topMargin: 20
+            width: parent.width
+            height: 21
+            text: qsTr("Enable TLS auth")
+            checked: logic.checkBoxProtoOpenVpnTlsAuthChecked
+            onCheckedChanged: {
+                logic.checkBoxProtoOpenVpnTlsAuthChecked = checked
+            }
+
+        }
+
+        CheckBoxType {
+            id: check_block_dns
+            x: 30
+            anchors.top: check_tls.bottom
+            anchors.topMargin: 20
+            width: parent.width
+            height: 21
+            text: qsTr("Block DNS requests outside of VPN")
+            checked: logic.checkBoxProtoOpenVpnBlockDnsChecked
+            onCheckedChanged: {
+                logic.checkBoxProtoOpenVpnBlockDnsChecked = checked
+            }
+        }
+
+
+
+
+//        LabelType {
+//            id: label_proto_openvpn_info
+//            x: 30
+//            y: 550
+//            width: 321
+//            height: 41
+//            visible: logic.labelProtoOpenVpnInfoVisible
+//            text: logic.labelProtoOpenVpnInfoText
+//        }
+
+
         ProgressBar {
-            id: progressBar_proto_openvpn_reset
+            id: progress_save
             anchors.horizontalCenter: parent.horizontalCenter
             y: 500
             width: 321
@@ -250,7 +287,7 @@ PageProtocolBase {
                 implicitWidth: parent.width
                 implicitHeight: parent.height
                 Rectangle {
-                    width: progressBar_proto_openvpn_reset.visualPosition * parent.width
+                    width: progress_save.visualPosition * parent.width
                     height: parent.height
                     radius: 4
                     color: Qt.rgba(255, 255, 255, 0.15);
@@ -258,9 +295,12 @@ PageProtocolBase {
             }
         }
         BlueButtonType {
+            id: pb_save
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 500
-            width: 321
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
+            x: 30
+            width: parent.width - 60
             height: 40
             text: qsTr("Save and restart VPN")
             visible: logic.pushButtonOpenvpnSaveVisible

@@ -9,7 +9,7 @@ GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void GeneralSettingsLogic::updatePage()
+void GeneralSettingsLogic::onUpdatePage()
 {
     set_pushButtonGeneralSettingsShareConnectionEnable(m_settings.haveAuthData(m_settings.defaultServerIndex()));
 }

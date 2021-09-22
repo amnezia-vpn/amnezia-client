@@ -22,7 +22,8 @@ enum DockerContainer {
     //non-vpn
     TorWebSite,
     Dns,
-    FileShare
+    FileShare,
+    Sftp
 };
 Q_ENUM_NS(DockerContainer)
 } // namespace ContainerEnumNS
@@ -43,6 +44,7 @@ public:
     Q_INVOKABLE static QMap<DockerContainer, QString> containerHumanNames();
     Q_INVOKABLE static QMap<DockerContainer, QString> containerDescriptions();
 
+    // these protocols will be displayed in container settings
     Q_INVOKABLE static QVector<Protocol> protocolsForContainer(DockerContainer container);
 
     Q_INVOKABLE static ServiceType containerService(DockerContainer c);

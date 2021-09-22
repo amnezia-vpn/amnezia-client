@@ -14,7 +14,7 @@ class NetworkSettingsLogic : public PageLogicBase
     READONLY_PROPERTY(QString, ipAddressValidatorRegex)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onLineEditDns1EditFinished(const QString& text);
     Q_INVOKABLE void onLineEditDns2EditFinished(const QString& text);

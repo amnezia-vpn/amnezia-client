@@ -12,7 +12,7 @@ WizardLogic::WizardLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void WizardLogic::updatePage()
+void WizardLogic::onUpdatePage()
 {
     set_lineEditHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
 }

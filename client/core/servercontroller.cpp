@@ -413,6 +413,29 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
     }
 }
 
+QJsonObject ServerController::createContainerInitialConfig(DockerContainer container, int port, TransportProto tp)
+{
+    Protocol mainProto = ContainerProps::defaultProtocol(container);
+
+    QJsonObject config {
+        { config_key::container, ContainerProps::containerToString(container) }
+    };
+
+    QJsonObject protoConfig;
+    protoConfig.insert(config_key::port, QString::number(port));
+    protoConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(tp, mainProto));
+
+
+    if (container == DockerContainer::Sftp) {
+        protoConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
+        protoConfig.insert(config_key::password, Utils::getRandomString(10));
+    }
+
+    config.insert(ProtocolProps::protoToString(mainProto), protoConfig);
+
+    return config;
+}
+
 bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
     const QJsonObject &oldProtoConfig = oldConfig[ContainerProps::containerToString(container)].toObject();
@@ -512,6 +535,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
 
     if (stdOut.contains("address already in use")) return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("is already in use by container")) return ErrorCode::ServerPortAlreadyAllocatedError;
+    if (stdOut.contains("invalid publish")) return ErrorCode::ServerDockerFailedError;
 
     return e;
 }
@@ -525,10 +549,15 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
 
 ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
+    QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
+
+    if (script.isEmpty()) {
+        return ErrorCode::NoError;
+    }
+
     ErrorCode e = uploadTextFileToContainer(container, credentials,
-        replaceVars(amnezia::scriptData(ProtocolScriptType::container_startup, container),
-             genVarsForScript(credentials, container, config)),
-        "/opt/amnezia/start.sh");
+        replaceVars(script, genVarsForScript(credentials, container, config)),
+            "/opt/amnezia/start.sh");
     if (e) return e;
 
     return runScript(sshParams(credentials),
@@ -542,6 +571,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Protocol::Cloak)).toObject();
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Protocol::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Protocol::WireGuard)).toObject();
+    const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Protocol::Sftp)).toObject();
     //
 
     Vars vars;
@@ -587,6 +617,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$WIREGUARD_SUBNET_MASK", openvpnConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) }});
 
     vars.append({{"$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) }});
+
+    // Sftp vars
+    vars.append({{"$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Protocol::Sftp))) }});
 
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);

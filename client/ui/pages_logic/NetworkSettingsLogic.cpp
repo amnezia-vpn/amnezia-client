@@ -10,7 +10,7 @@ NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void NetworkSettingsLogic::updatePage()
+void NetworkSettingsLogic::onUpdatePage()
 {
     set_lineEditDns1Text(m_settings.primaryDns());
     set_lineEditDns2Text(m_settings.secondaryDns());
@@ -35,13 +35,13 @@ void NetworkSettingsLogic::onLineEditDns2EditFinished(const QString &text)
 void NetworkSettingsLogic::onPushButtonResetDns1Clicked()
 {
     m_settings.setPrimaryDns(m_settings.cloudFlareNs1);
-    updatePage();
+    onUpdatePage();
 }
 
 void NetworkSettingsLogic::onPushButtonResetDns2Clicked()
 {
     m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
-    updatePage();
+    onUpdatePage();
 }
 
 QString NetworkSettingsLogic::getIpAddressValidatorRegex() const

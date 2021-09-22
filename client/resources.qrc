@@ -114,5 +114,12 @@
         <file>images/delete.png</file>
         <file>ui/qml/Controls/FadeBehavior.qml</file>
         <file>ui/qml/Controls/VisibleBehavior.qml</file>
+        <file>server_scripts/dns/configure_container.sh</file>
+        <file>server_scripts/dns/Dockerfile</file>
+        <file>server_scripts/dns/run_container.sh</file>
+        <file>server_scripts/sftp/configure_container.sh</file>
+        <file>server_scripts/sftp/Dockerfile</file>
+        <file>server_scripts/sftp/run_container.sh</file>
+        <file>ui/qml/Pages/Protocols/PageProtoSftp.qml</file>
     </qresource>
 </RCC>

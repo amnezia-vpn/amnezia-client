@@ -21,7 +21,7 @@ ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void ServerSettingsLogic::updatePage()
+void ServerSettingsLogic::onUpdatePage()
 {
     set_labelWaitInfoVisible(false);
     set_labelWaitInfoText("");
@@ -91,7 +91,7 @@ void ServerSettingsLogic::onPushButtonForgetServer()
 
     uiLogic()->selectedServerIndex = -1;
 
-    uiLogic()->serverListLogic()->updatePage();
+    uiLogic()->serverListLogic()->onUpdatePage();
 
     if (m_settings.serversCount() == 0) {
         uiLogic()->setStartPage(Page::Start);
@@ -121,7 +121,7 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
     QJsonObject server = m_settings.server(uiLogic()->selectedServerIndex);
     server.insert(config_key::description, newText);
     m_settings.editServer(uiLogic()->selectedServerIndex, server);
-    uiLogic()->serverListLogic()->updatePage();
+    uiLogic()->serverListLogic()->onUpdatePage();
 }
 
 void ServerSettingsLogic::onPushButtonShareFullClicked()

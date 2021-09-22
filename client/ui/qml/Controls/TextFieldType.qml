@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import Qt.labs.platform 1.0
 
 TextField {
     id: root
@@ -8,6 +9,7 @@ TextField {
     width: parent.width - 80
     height: 40
     anchors.topMargin: 5
+    selectByMouse: true
 
     selectionColor: "darkgray"
     font.pixelSize: 16
@@ -33,6 +35,38 @@ TextField {
                 return "#A7A7A7"
             }
             return "#A7A7A7"
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: contextMenu.open()
+    }
+
+    Menu {
+        id: contextMenu
+
+        onAboutToShow: console.log("aboutToShow")
+        onAboutToHide: console.log("aboutToHide")
+
+        MenuItem {
+            text: qsTr("C&ut")
+            shortcut: StandardKey.Cut
+            enabled: root.selectedText
+            onTriggered: root.cut()
+        }
+        MenuItem {
+            text: qsTr("&Copy")
+            shortcut: StandardKey.Copy
+            enabled: root.selectedText
+            onTriggered: root.copy()
+        }
+        MenuItem {
+            text: qsTr("&Paste")
+            shortcut: StandardKey.Paste
+            enabled: root.canPaste
+            onTriggered: root.paste()
         }
     }
 }

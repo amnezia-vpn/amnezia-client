@@ -21,7 +21,7 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void StartPageLogic::updatePage()
+void StartPageLogic::onUpdatePage()
 {
     set_lineEditStartExistingCodeText("");
     set_textEditSshKeyText("");

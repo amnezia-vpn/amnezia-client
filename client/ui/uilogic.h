@@ -4,6 +4,7 @@
 #include <QRegExpValidator>
 #include <QQmlEngine>
 #include <functional>
+#include <QKeyEvent>
 
 #include "property_helper.h"
 #include "pages.h"
@@ -85,6 +86,8 @@ public:
 
     Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
     Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
+
+    Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
 
     int getCurrentPageValue() const;
@@ -181,7 +184,7 @@ public:
     VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
     WizardLogic *wizardLogic()                              { return m_wizardLogic; }
 
-    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p) { return m_protocolLogicMap.value(p); }
+    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p);
 
 private:
     AppSettingsLogic *m_appSettingsLogic;
@@ -212,7 +215,6 @@ private:
     //    QPoint offset;
     //    bool needToHideCustomTitlebar = false;
 
-    //    void keyPressEvent(QKeyEvent* event) override;
     //    void showEvent(QShowEvent *event) override;
     //    void hideEvent(QHideEvent *event) override;
 

@@ -5,6 +5,7 @@ import SortFilterProxyModel 0.2
 import ContainerProps 1.0
 import ProtocolProps 1.0
 import PageEnum 1.0
+import ProtocolEnum 1.0
 import "./"
 import "../Controls"
 import "../Config"
@@ -16,6 +17,18 @@ PageBase {
     logic: ServerContainersLogic
 
     enabled: ServerContainersLogic.pageEnabled
+
+    function resetPage() {
+        container_selector.selectedIndex = -1
+    }
+
+    Connections {
+        target: logic
+        function onUpdatePage() {
+            root.resetPage()
+        }
+    }
+
     BackButton {
         id: back
     }
@@ -174,7 +187,7 @@ PageBase {
 
             Caption {
                 id: cap1
-                text: qsTr("Installed VPN containers")
+                text: qsTr("Installed Protocols and Services")
                 font.pixelSize: 20
 
             }
@@ -268,16 +281,13 @@ PageBase {
                                         else tb_c.currentIndex = index
 
                                         UiLogic.protocolsModel.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
-                                        //ServerContainersLogic.setSelectedDockerContainer(proxyContainersModel.mapToSource(index))
-
-                                        //container_selector.containerSelected(index)
-                                        //root.close()
                                     }
                                 }
                             }
 
                             ImageButtonType {
                                 id: button_default
+                                visible: service_type_role == ProtocolEnum.Vpn
 
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true

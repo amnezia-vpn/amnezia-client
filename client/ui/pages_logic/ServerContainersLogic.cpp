@@ -18,13 +18,15 @@ ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
 {
 }
 
-void ServerContainersLogic::updateServerContainersPage()
+void ServerContainersLogic::onUpdatePage()
 {
     ContainersModel *c_model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
     c_model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
 
     ProtocolsModel *p_model = qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel());
     p_model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
+
+    emit updatePage();
 }
 
 void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, Protocol p)
@@ -41,7 +43,7 @@ void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, 
 void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
 {
     m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
-    updateServerContainersPage();
+    onUpdatePage();
 }
 
 void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
@@ -62,23 +64,12 @@ void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
         if (c.isEmpty()) m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, DockerContainer::None);
         else m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c.keys().first());
     }
-    updateServerContainersPage();
+    onUpdatePage();
 }
 
 void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp)
 {
-    QMap<DockerContainer, QJsonObject> containers;
-    Protocol mainProto = ContainerProps::defaultProtocol(c);
-
-    QJsonObject config {
-        { config_key::container, ContainerProps::containerToString(c) },
-        { ProtocolProps::protoToString(mainProto), QJsonObject {
-                { config_key::port, QString::number(port) },
-                { config_key::transport_proto, ProtocolProps::transportProtoToString(tp, mainProto) }}
-        }
-    };
-
-    containers.insert(c, config);
+    QJsonObject config = ServerController::createContainerInitialConfig(c, port, tp);
 
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
@@ -88,10 +79,12 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     });
 
     if (!e) {
-        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, c, QJsonObject());
-        m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
+        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, c, config);
+        if (ContainerProps::containerService(c) == ServiceType::Vpn) {
+            m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
+        }
     }
 
-    updateServerContainersPage();
+    onUpdatePage();
     emit uiLogic()->closePage();
 }

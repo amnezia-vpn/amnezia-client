@@ -38,7 +38,7 @@ QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::Docker
         return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
 
     default:
-        return {};
+        return { defaultProtocol(container) };
     }
 }
 
@@ -62,7 +62,8 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::WireGuard, "WireGuard"},
         {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
-        {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
+        {DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
+        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")}
     };
 }
 
@@ -76,7 +77,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
         {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
-        {DockerContainer::FileShare, QObject::tr("File Sharing Service")}
+        {DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
+        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")}
     };
 }
 
@@ -88,7 +90,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::Cloak :        return ServiceType::Vpn;
     case DockerContainer::ShadowSocks :  return ServiceType::Vpn;
     case DockerContainer::WireGuard :    return ServiceType::Vpn;
-    case DockerContainer::TorWebSite :      return ServiceType::Other;
+    case DockerContainer::TorWebSite :   return ServiceType::Other;
     case DockerContainer::Dns :          return ServiceType::Other;
     case DockerContainer::FileShare :    return ServiceType::Other;
     default:                             return ServiceType::Other;

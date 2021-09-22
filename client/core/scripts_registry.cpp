@@ -12,6 +12,9 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
+    case DockerContainer::Dns: return QLatin1String("dns");
+    case DockerContainer::FileShare: return QLatin1String("file_share");
+    case DockerContainer::Sftp: return QLatin1String("sftp");
     default: return "";
     }
 }
@@ -46,12 +49,12 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
     QString fileName = QString(":/server_scripts/%1").arg(amnezia::scriptName(type));
     QFile file(fileName);
     if (! file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Error opening script" << fileName;
+        qDebug() << "Warning: script missing" << fileName;
         return "";
     }
     QByteArray ba = file.readAll();
     if (ba.isEmpty()) {
-        qDebug() << "Error, script is empty" << fileName;
+        qDebug() << "Warning: script is empty" << fileName;
     }
     return ba;
 }
@@ -61,7 +64,7 @@ QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer co
     QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
     QFile file(fileName);
     if (! file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Error opening script" << fileName;
+        qDebug() << "Warning: script missing" << fileName;
         return "";
     }
     QByteArray data = file.readAll();

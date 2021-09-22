@@ -61,6 +61,7 @@
 #include "pages_logic/protocols/CloakLogic.h"
 #include "pages_logic/protocols/OpenVpnLogic.h"
 #include "pages_logic/protocols/ShadowSocksLogic.h"
+#include "pages_logic/protocols/OtherProtocolsLogic.h"
 
 
 using namespace amnezia;
@@ -96,6 +97,10 @@ UiLogic::UiLogic(QObject *parent) :
     m_protocolLogicMap.insert(Protocol::ShadowSocks, new ShadowSocksLogic(this));
     m_protocolLogicMap.insert(Protocol::Cloak, new CloakLogic(this));
     //m_protocolLogicMap->insert(Protocol::WireGuard, new WireguardLogic(this));
+
+    m_protocolLogicMap.insert(Protocol::Dns, new OtherProtocolsLogic(this));
+    m_protocolLogicMap.insert(Protocol::Sftp, new OtherProtocolsLogic(this));
+
 }
 
 void UiLogic::initalizeUiLogic()
@@ -131,8 +136,9 @@ void UiLogic::initalizeUiLogic()
     }
 
     selectedServerIndex = m_settings.defaultServerIndex();
-    goToPage(Page::ServerContainers, true, false);
-    goToPage(Page::NewServerProtocols, true, false);
+    //goToPage(Page::ServerContainers, true, false);
+    //goToPage(Page::NewServerProtocols, true, false);
+    onGotoProtocolPage(Protocol::OpenVpn);
 
 
     //ui->pushButton_general_settings_exit->hide();
@@ -284,52 +290,53 @@ void UiLogic::showOnStartup()
 }
 
 
-//void UiLogic::keyPressEvent(QKeyEvent *event)
-//{
-//    switch (event->key()) {
-//    case Qt::Key_L:
-//        if (!Debug::openLogsFolder()) {
-//            QMessageBox::warning(this, APPLICATION_NAME, tr("Cannot open logs folder!"));
-//        }
-//        break;
-//#ifdef QT_DEBUG
-//    case Qt::Key_Q:
-//        qApp->quit();
-//        break;
-//        //    case Qt::Key_0:
-//        //        *((char*)-1) = 'x';
-//        //        break;
-//    case Qt::Key_H:
-//        selectedServerIndex = m_settings.defaultServerIndex();
-//        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+void UiLogic::keyPressEvent(Qt::Key key)
+{
+    switch (key) {
+    case Qt::Key_L:
+        if (!Debug::openLogsFolder()) {
+            //QMessageBox::warning(this, APPLICATION_NAME, tr("Cannot open logs folder!"));
+        }
+        break;
+#ifdef QT_DEBUG
+    case Qt::Key_Q:
+        qApp->quit();
+        break;
+        //    case Qt::Key_0:
+        //        *((char*)-1) = 'x';
+        //        break;
+    case Qt::Key_H:
+        selectedServerIndex = m_settings.defaultServerIndex();
+        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
 
-//        updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer);
-//        goToPage(Page::ShareConnection);
-//        break;
-//#endif
-//    case Qt::Key_C:
-//        qDebug().noquote() << "Def server" << m_settings.defaultServerIndex() << m_settings.defaultContainerName(m_settings.defaultServerIndex());
-//        //qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
-//        qDebug().noquote() << QJsonDocument(m_settings.defaultServer()).toJson();
-//        break;
-//    case Qt::Key_A:
-//        goToPage(Page::Start);
-//        break;
-//    case Qt::Key_S:
-//        selectedServerIndex = m_settings.defaultServerIndex();
-//        goToPage(Page::ServerSettings);
-//        break;
-//    case Qt::Key_P:
-//        selectedServerIndex = m_settings.defaultServerIndex();
-//        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
-//        goToPage(Page::ServerContainers);
-//        break;
-//    case Qt::Key_T:
-//        SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
-//        break;
-//    case Qt::Key_Escape:
-//        if (currentPage() == Page::Vpn) break;
-//        if (currentPage() == Page::ServerConfiguring) break;
+        //updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer);
+        emit goToPage(Page::ShareConnection);
+        break;
+#endif
+    case Qt::Key_C:
+        qDebug().noquote() << "Def server" << m_settings.defaultServerIndex() << m_settings.defaultContainerName(m_settings.defaultServerIndex());
+        //qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
+        qDebug().noquote() << QJsonDocument(m_settings.defaultServer()).toJson();
+        break;
+    case Qt::Key_A:
+        emit goToPage(Page::Start);
+        break;
+    case Qt::Key_S:
+        selectedServerIndex = m_settings.defaultServerIndex();
+        emit goToPage(Page::ServerSettings);
+        break;
+    case Qt::Key_P:
+        selectedServerIndex = m_settings.defaultServerIndex();
+        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+        emit goToPage(Page::ServerContainers);
+        break;
+    case Qt::Key_T:
+        SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
+        break;
+    case Qt::Key_Escape:
+    case Qt::Key_Back:
+        if (currentPage() == Page::Vpn) break;
+        if (currentPage() == Page::ServerConfiguringProgress) break;
 //        if (currentPage() == Page::Start && pagesStack.size() < 2) break;
 //        if (currentPage() == Page::Sites &&
 //                ui->tableView_sites->selectionModel()->selection().indexes().size() > 0) {
@@ -337,13 +344,13 @@ void UiLogic::showOnStartup()
 //            break;
 //        }
 
-//        if (! ui->stackedWidget_main->isAnimationRunning() && ui->stackedWidget_main->currentWidget()->isEnabled()) {
-//            closePage();
-//        }
-//    default:
-//        ;
-//    }
-//}
+        //if (! ui->stackedWidget_main->isAnimationRunning() && ui->stackedWidget_main->currentWidget()->isEnabled()) {
+            emit closePage();
+        //}
+    default:
+        ;
+    }
+}
 
 void UiLogic::onCloseWindow()
 {
@@ -649,6 +656,15 @@ void UiLogic::setupTray()
 void UiLogic::setTrayIcon(const QString &iconPath)
 {
     setTrayIconUrl(iconPath);
+}
+
+PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
+    PageProtocolLogicBase *logic = m_protocolLogicMap.value(p);
+    if (logic) return logic;
+    else {
+        qDebug() << "UiLogic::protocolLogic Warning: logic missing for" << p;
+        return new PageProtocolLogicBase(this);
+    }
 }
 
 PageEnumNS::Page UiLogic::currentPage()

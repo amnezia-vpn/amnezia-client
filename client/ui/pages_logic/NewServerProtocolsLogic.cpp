@@ -9,7 +9,7 @@ NewServerProtocolsLogic::NewServerProtocolsLogic(UiLogic *logic, QObject *parent
 }
 
 
-void NewServerProtocolsLogic::updatePage()
+void NewServerProtocolsLogic::onUpdatePage()
 {
     set_progressBarConnectionMinimum(0);
     set_progressBarConnectionMaximum(300);

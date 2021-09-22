@@ -14,7 +14,7 @@ class AppSettingsLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelVersionText)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onCheckBoxAutostartToggled(bool checked);
     Q_INVOKABLE void onCheckBoxAutoconnectToggled(bool checked);

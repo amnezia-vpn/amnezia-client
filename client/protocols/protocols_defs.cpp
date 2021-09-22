@@ -70,7 +70,8 @@ QMap<amnezia::Protocol, QString> ProtocolProps::protocolHumanNames()
         {Protocol::WireGuard, "WireGuard"},
         {Protocol::TorWebSite, "Web site in TOR network"},
         {Protocol::Dns, "DNS Service"},
-        {Protocol::FileShare, "File Sharing Service"}
+        {Protocol::FileShare, "File Sharing Service"},
+        {Protocol::Sftp, QObject::tr("Sftp service")}
     };
 }
 
@@ -105,6 +106,7 @@ int ProtocolProps::defaultPort(Protocol p)
     case Protocol::TorWebSite :      return 443;
     case Protocol::Dns :          return 53;
     case Protocol::FileShare :    return 139;
+    case Protocol::Sftp :         return 222;
     default:                      return -1;
     }
 }
@@ -132,9 +134,11 @@ TransportProto ProtocolProps::defaultTransportProto(Protocol p)
     case Protocol::Cloak :        return TransportProto::Tcp;
     case Protocol::ShadowSocks :  return TransportProto::Tcp;
     case Protocol::WireGuard :    return TransportProto::Udp;
-    case Protocol::TorWebSite :      return TransportProto::Tcp;
+    // non-vpn
+    case Protocol::TorWebSite :   return TransportProto::Tcp;
     case Protocol::Dns :          return TransportProto::Udp;
-    case Protocol::FileShare :    return TransportProto::Tcp;
+    case Protocol::FileShare :    return TransportProto::Udp;
+    case Protocol::Sftp :         return TransportProto::Tcp;
     default:                      return TransportProto::Udp;
     }
 }
@@ -147,9 +151,11 @@ bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
     case Protocol::Cloak :        return false;
     case Protocol::ShadowSocks :  return false;
     case Protocol::WireGuard :    return false;
-    case Protocol::TorWebSite :      return false;
+    // non-vpn
+    case Protocol::TorWebSite :   return false;
     case Protocol::Dns :          return false;
     case Protocol::FileShare :    return false;
-    default:                      return -1;
+    case Protocol::Sftp :         return false;
+    default:                      return false;
     }
 }

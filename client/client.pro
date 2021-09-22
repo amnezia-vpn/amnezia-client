@@ -56,6 +56,7 @@ HEADERS  += \
     ui/pages_logic/WizardLogic.h \
    ui/pages_logic/protocols/CloakLogic.h \
    ui/pages_logic/protocols/OpenVpnLogic.h \
+   ui/pages_logic/protocols/OtherProtocolsLogic.h \
    ui/pages_logic/protocols/PageProtocolLogicBase.h \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
@@ -107,6 +108,7 @@ SOURCES  += \
     ui/pages_logic/WizardLogic.cpp \
    ui/pages_logic/protocols/CloakLogic.cpp \
    ui/pages_logic/protocols/OpenVpnLogic.cpp \
+   ui/pages_logic/protocols/OtherProtocolsLogic.cpp \
    ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \

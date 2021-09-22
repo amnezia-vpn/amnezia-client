@@ -23,7 +23,7 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(bool, pushButtonConnectVisible)
 
 public:
-    Q_INVOKABLE void updatePage() override;
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onPushButtonConnect();
     Q_INVOKABLE void onPushButtonImport();
