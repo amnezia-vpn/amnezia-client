@@ -82,7 +82,6 @@ jobs:
         file:
         - "AmneziaVPN_x64.exe"
         on:
-          tags: true
           branch: master
 
     - name: Windows_x32
