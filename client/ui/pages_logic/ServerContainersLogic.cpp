@@ -74,8 +74,8 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
-    ErrorCode e = uiLogic()->serverConfiguringProgressLogic()->doInstallAction([this, c](){
-        return ServerController::setupContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), c);
+    ErrorCode e = uiLogic()->serverConfiguringProgressLogic()->doInstallAction([this, c, &config](){
+        return ServerController::setupContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), c, config);
     });
 
     if (!e) {

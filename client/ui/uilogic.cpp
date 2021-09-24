@@ -100,6 +100,7 @@ UiLogic::UiLogic(QObject *parent) :
 
     m_protocolLogicMap.insert(Protocol::Dns, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Protocol::Sftp, new OtherProtocolsLogic(this));
+    m_protocolLogicMap.insert(Protocol::TorWebSite, new OtherProtocolsLogic(this));
 
 }
 
@@ -138,7 +139,7 @@ void UiLogic::initalizeUiLogic()
     selectedServerIndex = m_settings.defaultServerIndex();
     //goToPage(Page::ServerContainers, true, false);
     //goToPage(Page::NewServerProtocols, true, false);
-    onGotoProtocolPage(Protocol::OpenVpn);
+    //onGotoProtocolPage(Protocol::OpenVpn);
 
 
     //ui->pushButton_general_settings_exit->hide();
@@ -399,7 +400,7 @@ QString UiLogic::containerDesc(int container)
 
 
 
-void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers)
+void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 {
     if (containers.isEmpty()) return;
 
@@ -473,7 +474,7 @@ void UiLogic::installServer(const QMap<DockerContainer, QJsonObject> &containers
 }
 
 bool UiLogic::installContainers(ServerCredentials credentials,
-                                const QMap<DockerContainer, QJsonObject> &containers,
+                                QMap<DockerContainer, QJsonObject> &containers,
                                 const PageFunc &page,
                                 const ProgressFunc &progress,
                                 const ButtonFunc &button,
@@ -496,7 +497,7 @@ bool UiLogic::installContainers(ServerCredentials credentials,
     }
 
     int cnt = 0;
-    for (QMap<DockerContainer, QJsonObject>::const_iterator i = containers.constBegin(); i != containers.constEnd(); i++, cnt++) {
+    for (QMap<DockerContainer, QJsonObject>::iterator i = containers.begin(); i != containers.end(); i++, cnt++) {
         QTimer timer;
         connect(&timer, &QTimer::timeout, [progress](){
             progress.setValueFunc(progress.getValueFunc() + 1);

@@ -13,6 +13,10 @@ public:
 
     static QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, Protocol proto, ErrorCode *errorCode = nullptr);
+
+    static void updateContainerConfigAfterInstallation(DockerContainer container,
+        QJsonObject &containerConfig, const QString &stdOut);
+
 };
 
 #endif // VPN_CONFIGURATOR_H

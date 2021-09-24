@@ -51,7 +51,8 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 
 void WizardLogic::onPushButtonVpnModeFinishClicked()
 {
-    uiLogic()->installServer(getInstallConfigsFromWizardPage());
+    auto containers = getInstallConfigsFromWizardPage();
+    uiLogic()->installServer(containers);
     if (checkBoxVpnModeChecked()) {
         m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
@@ -61,5 +62,6 @@ void WizardLogic::onPushButtonVpnModeFinishClicked()
 
 void WizardLogic::onPushButtonLowFinishClicked()
 {
-    uiLogic()->installServer(getInstallConfigsFromWizardPage());
+    auto containers = getInstallConfigsFromWizardPage();
+    uiLogic()->installServer(containers);
 }

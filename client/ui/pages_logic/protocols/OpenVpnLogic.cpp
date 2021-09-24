@@ -125,7 +125,7 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
         return progressBarProtoOpenVpnResetMaximium();
     };
 
-    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
         return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_openvpn, progressBar_proto_openvpn_reset,

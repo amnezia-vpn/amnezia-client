@@ -37,7 +37,8 @@ PageProtocolBase {
             horizontalItemAlignment: Grid.AlignHCenter
             verticalItemAlignment: Grid.AlignVCenter
             topPadding: 5
-            leftPadding: 10
+            leftPadding: 30
+            rightPadding: 30
             spacing: 5
 
 
@@ -76,4 +77,61 @@ PageProtocolBase {
         }
     }
 
+    LabelType {
+        anchors.bottom: check_persist.top
+        anchors.bottomMargin: 10
+        width: parent.width - 60
+        x: 30
+        font.pixelSize: 14
+        textFormat: Text.RichText
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+            acceptedButtons: Qt.NoButton
+        }
+
+//        text: "In order to mount remote SFTP folder as local drive, perform following steps:
+//- Install the latest version of WinFsp [https://github.com/billziss-gh/winfsp/releases/latest].
+//- Install the latest version of SSHFS-Win. Choose the x64 or x86 installer according to your computer's architecture [https://github.com/billziss-gh/sshfs-win/releases]"
+        onLinkActivated: Qt.openUrlExternally(link)
+
+        text:"In order to mount remote SFTP folder as local drive, perform following steps:
+<ul>
+<li>Install the latest version of <a href=\"https://github.com/billziss-gh/winfsp/releases/latest\">WinFsp</a>.</li>
+<li>Install the latest version of <a href=\"https://github.com/billziss-gh/sshfs-win/releases\">SSHFS-Win</a>. Choose the x64 or x86 installer according to your computer's architecture.</li>
+</ul>"
+    }
+
+    CheckBoxType {
+        id: check_persist
+        anchors.bottom: pb_mount.top
+        anchors.bottomMargin: 10
+        x: 30
+        width: parent.width
+        height: 21
+        text: qsTr("Restore drive after restart")
+        checked: logic.checkBoxSftpRestoreChecked
+        onCheckedChanged: {
+            logic.checkBoxSftpRestoreChecked = checked
+        }
+        onClicked: {
+            logic.checkBoxSftpRestoreClicked()
+        }
+    }
+
+    BlueButtonType {
+        id: pb_mount
+        enabled: logic.pushButtonSftpMountEnabled
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        x: 30
+        width: parent.width - 60
+        height: 40
+        text: qsTr("Mount drive")
+        onClicked: {
+            logic.onPushButtonSftpMountDriveClicked()
+        }
+    }
 }

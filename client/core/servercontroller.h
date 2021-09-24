@@ -28,9 +28,9 @@ public:
 
     static ErrorCode removeAllContainers(const ServerCredentials &credentials);
     static ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
-    static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     static ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &oldConfig, const QJsonObject &newConfig = QJsonObject());
+        const QJsonObject &oldConfig, QJsonObject &newConfig);
 
     // create initial config - generate passwords, etc
     static QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
@@ -67,8 +67,8 @@ private:
     static ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     static ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     static ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
-    static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
-    static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
+    static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     static ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
 };

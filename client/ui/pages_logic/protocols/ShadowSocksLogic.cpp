@@ -82,7 +82,7 @@ void ShadowSocksLogic::onPushButtonProtoShadowSocksSaveClicked()
         return progressBarProtoShadowSocksResetMaximium();
     };
 
-    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
         return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_shadowsocks, progressBar_proto_shadowsocks_reset,

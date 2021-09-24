@@ -88,7 +88,7 @@ void CloakLogic::onPushButtonProtoCloakSaveClicked()
         return progressBarProtoCloakResetMaximium();
     };
 
-    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, newContainerConfig](){
+    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
         return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_cloak, progressBar_proto_cloak_reset,

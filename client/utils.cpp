@@ -248,4 +248,5 @@ bool Utils::signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent)
     }
     return success;
 }
+
 #endif

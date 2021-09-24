@@ -103,7 +103,7 @@ int ProtocolProps::defaultPort(Protocol p)
     case Protocol::Cloak :        return 443;
     case Protocol::ShadowSocks :  return 6789;
     case Protocol::WireGuard :    return 51820;
-    case Protocol::TorWebSite :      return 443;
+    case Protocol::TorWebSite :   return -1;
     case Protocol::Dns :          return 53;
     case Protocol::FileShare :    return 139;
     case Protocol::Sftp :         return 222;

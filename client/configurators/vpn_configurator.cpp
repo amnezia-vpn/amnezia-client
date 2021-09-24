@@ -31,3 +31,24 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
         return "";
     }
 }
+
+void VpnConfigurator::updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig,
+    const QString &stdOut)
+{
+    Protocol mainProto = ContainerProps::defaultProtocol(container);
+
+    if (container == DockerContainer::TorWebSite) {
+        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+
+        qDebug() << "amnezia-tor onions" << stdOut;
+
+        QStringList l = stdOut.split(",");
+        for (QString s : l) {
+            if (s.contains(":80")) {
+                protocol.insert(config_key::site, s);
+            }
+        }
+
+        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+    }
+}

@@ -35,6 +35,8 @@ class OpenVpnLogic;
 class ShadowSocksLogic;
 class CloakLogic;
 
+class OtherProtocolsLogic;
+
 class VpnConnection;
 
 
@@ -77,6 +79,8 @@ public:
     friend class OpenVpnLogic;
     friend class ShadowSocksLogic;
     friend class CloakLogic;
+
+    friend class OtherProtocolsLogic;
 
     Q_INVOKABLE void initalizeUiLogic();
     Q_INVOKABLE void onCloseWindow();
@@ -128,7 +132,9 @@ private:
     QString m_dialogConnectErrorText;
 
 private slots:
-    void installServer(const QMap<DockerContainer, QJsonObject> &containers);
+    // containers - INOUT arg
+    void installServer(QMap<DockerContainer, QJsonObject> &containers);
+
     void setTrayState(VpnProtocol::ConnectionState state);
 
 private:
@@ -153,7 +159,7 @@ private:
     };
 
     bool installContainers(ServerCredentials credentials,
-                           const QMap<DockerContainer, QJsonObject> &containers,
+                           QMap<DockerContainer, QJsonObject> &containers,
                            const PageFunc& page,
                            const ProgressFunc& progress,
                            const ButtonFunc& button,

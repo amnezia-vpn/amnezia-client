@@ -37,6 +37,9 @@ QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::Docker
     case DockerContainer::Cloak:
         return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
 
+    case DockerContainer::Dns:
+        return { };
+
     default:
         return { defaultProtocol(container) };
     }

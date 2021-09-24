@@ -4,6 +4,8 @@ TARGET = AmneziaVPN
 TEMPLATE = app
 #CONFIG += console
 
+CONFIG += qtquickcompiler
+
 ios:CONFIG += static
 
 DEFINES += QT_DEPRECATED_WARNINGS

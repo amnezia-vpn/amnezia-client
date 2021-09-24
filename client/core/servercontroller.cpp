@@ -19,6 +19,8 @@
 #include "scripts_registry.h"
 #include "utils.h"
 
+#include <configurators/vpn_configurator.h>
+
 
 using namespace QSsh;
 
@@ -361,7 +363,7 @@ ErrorCode ServerController::removeContainer(const ServerCredentials &credentials
             genVarsForScript(credentials, container)));
 }
 
-ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     //qDebug().noquote() << QJsonDocument(config).toJson();
@@ -397,7 +399,7 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 }
 
 ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
-    const QJsonObject &oldConfig, const QJsonObject &newConfig)
+    const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
     bool reinstallRequred = isReinstallContainerRequred(container, oldConfig, newConfig);
     qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
@@ -518,7 +520,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
                     genVarsForScript(credentials, container, config)));
 }
 
-ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
@@ -540,11 +542,25 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     return e;
 }
 
-ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
-    return runScript(sshParams(credentials),
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+
+
+    ErrorCode e = runScript(sshParams(credentials),
         replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container),
-            genVarsForScript(credentials, container, config)));
+            genVarsForScript(credentials, container, config)),
+                cbReadStdOut, cbReadStdErr);
+
+    VpnConfigurator::updateContainerConfigAfterInstallation(container, config, stdOut);
+
+    return e;
 }
 
 ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
@@ -620,6 +636,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Sftp vars
     vars.append({{"$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Protocol::Sftp))) }});
+    vars.append({{"$SFTP_USER", sftpConfig.value(config_key::userName).toString() }});
+    vars.append({{"$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() }});
 
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
