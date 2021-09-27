@@ -52,9 +52,9 @@ PageProtocolBase {
 
                 implicitWidth: parent.width
                 height: 31
-                text: logic.lineEditProtoOpenVpnSubnetText
+                text: logic.lineEditSubnetText
                 onEditingFinished: {
-                    logic.lineEditProtoOpenVpnSubnetText = text
+                    logic.lineEditSubnetText = text
                 }
             }
 
@@ -78,10 +78,10 @@ PageProtocolBase {
                     width: 171
                     height: 19
                     text: qsTr("TCP")
-                    enabled: logic.radioButtonProtoOpenVpnTcpEnabled
-                    checked: logic.radioButtonProtoOpenVpnTcpChecked
+                    enabled: logic.radioButtonTcpEnabled
+                    checked: logic.radioButtonTcpChecked
                     onCheckedChanged: {
-                        UiLogic.radioButtonProtoOpenVpnTcpChecked = checked
+                        UiLogic.radioButtonTcpChecked = checked
                     }
                 }
                 RadioButtonType {
@@ -90,11 +90,11 @@ PageProtocolBase {
                     width: 171
                     height: 19
                     text: qsTr("UDP")
-                    checked: logic.radioButtonProtoOpenVpnUdpChecked
+                    checked: logic.radioButtonUdpChecked
                     onCheckedChanged: {
-                        logic.radioButtonProtoOpenVpnUdpChecked = checked
+                        logic.radioButtonUdpChecked = checked
                     }
-                    enabled: logic.radioButtonProtoOpenVpnUdpEnabled
+                    enabled: logic.radioButtonUdpEnabled
                 }
             }
 
@@ -113,11 +113,11 @@ PageProtocolBase {
                     Layout.fillWidth: true
 
                     height: 31
-                    text: logic.lineEditProtoOpenVpnPortText
+                    text: logic.lineEditPortText
                     onEditingFinished: {
-                        logic.lineEditProtoOpenVpnPortText = text
+                        logic.lineEditPortText = text
                     }
-                    enabled: logic.lineEditProtoOpenVpnPortEnabled
+                    enabled: logic.lineEditPortEnabled
                 }
             }
 
@@ -130,12 +130,12 @@ PageProtocolBase {
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Auto-negotiate encryption")
-                checked: logic.checkBoxProtoOpenVpnAutoEncryptionChecked
+                checked: logic.checkBoxAutoEncryptionChecked
                 onCheckedChanged: {
-                    logic.checkBoxProtoOpenVpnAutoEncryptionChecked = checked
+                    logic.checkBoxAutoEncryptionChecked = checked
                 }
                 onClicked: {
-                    logic.checkBoxProtoOpenVpnAutoEncryptionClicked()
+                    logic.checkBoxAutoEncryptionClicked()
                 }
             }
 
@@ -165,16 +165,16 @@ PageProtocolBase {
                 ]
                 currentIndex: {
                     for (let i = 0; i < model.length; ++i) {
-                        if (logic.comboBoxProtoOpenVpnCipherText === model[i]) {
+                        if (logic.comboBoxVpnCipherText === model[i]) {
                             return i
                         }
                     }
                     return -1
                 }
                 onCurrentTextChanged: {
-                    logic.comboBoxProtoOpenVpnCipherText = currentText
+                    logic.comboBoxVpnCipherText = currentText
                 }
-                enabled: logic.comboBoxProtoOpenVpnCipherEnabled
+                enabled: !check_auto_enc.checked
             }
 
             //
@@ -202,16 +202,16 @@ PageProtocolBase {
                 ]
                 currentIndex: {
                     for (let i = 0; i < model.length; ++i) {
-                        if (logic.comboBoxProtoOpenVpnHashText === model[i]) {
+                        if (logic.comboBoxVpnHashText === model[i]) {
                             return i
                         }
                     }
                     return -1
                 }
                 onCurrentTextChanged: {
-                    logic.comboBoxProtoOpenVpnHashText = currentText
+                    logic.comboBoxVpnHashText = currentText
                 }
-                enabled: logic.comboBoxProtoOpenVpnHashEnabled
+                enabled: !check_auto_enc.checked
             }
 
             CheckBoxType {
@@ -220,9 +220,9 @@ PageProtocolBase {
                 Layout.topMargin: 20
                 height: 21
                 text: qsTr("Enable TLS auth")
-                checked: logic.checkBoxProtoOpenVpnTlsAuthChecked
+                checked: logic.checkBoxTlsAuthChecked
                 onCheckedChanged: {
-                    logic.checkBoxProtoOpenVpnTlsAuthChecked = checked
+                    logic.checkBoxTlsAuthChecked = checked
                 }
 
             }
@@ -232,9 +232,9 @@ PageProtocolBase {
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Block DNS requests outside of VPN")
-                checked: logic.checkBoxProtoOpenVpnBlockDnsChecked
+                checked: logic.checkBoxBlockDnsChecked
                 onCheckedChanged: {
-                    logic.checkBoxProtoOpenVpnBlockDnsChecked = checked
+                    logic.checkBoxBlockDnsChecked = checked
                 }
             }
 
@@ -363,7 +363,7 @@ PageProtocolBase {
                     height: 40
                     text: qsTr("Save and restart VPN")
                     width: parent.width
-                    visible: logic.pushButtonOpenvpnSaveVisible
+                    visible: logic.pushButtonSaveVisible
                     onClicked: {
                         logic.onPushButtonProtoOpenVpnSaveClicked()
                     }
@@ -373,9 +373,9 @@ PageProtocolBase {
                     id: progress_save
                     anchors.fill: pb_save
                     from: 0
-                    to: logic.progressBarProtoOpenVpnResetMaximium
-                    value: logic.progressBarProtoOpenVpnResetValue
-                    visible: logic.progressBarProtoOpenVpnResetVisible
+                    to: logic.progressBarResetMaximium
+                    value: logic.progressBarResetValue
+                    visible: logic.progressBarResetVisible
                     background: Rectangle {
                         implicitWidth: parent.width
                         implicitHeight: parent.height
