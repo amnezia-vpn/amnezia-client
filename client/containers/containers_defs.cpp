@@ -19,15 +19,20 @@ amnezia::DockerContainer ContainerProps::containerFromString(const QString &cont
 
 QString ContainerProps::containerToString(amnezia::DockerContainer c){
     if (c == DockerContainer::None) return "none";
+    if (c == DockerContainer::Cloak) return "amnezia-openvpn-cloak";
 
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
     QString containerKey = metaEnum.valueToKey(static_cast<int>(c));
+
     return "amnezia-" + containerKey.toLower();
 }
 
 QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
 {
     switch (container) {
+    case DockerContainer::None:
+        return { };
+
     case DockerContainer::OpenVpn:
         return { Protocol::OpenVpn };
 
@@ -59,6 +64,7 @@ QList<DockerContainer> ContainerProps::allContainers()
 QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return {
+        {DockerContainer::None, "Unknown (Old version)"},
         {DockerContainer::OpenVpn, "OpenVPN"},
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
