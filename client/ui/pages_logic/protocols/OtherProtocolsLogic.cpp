@@ -9,7 +9,9 @@
 #include "../../uilogic.h"
 #include "utils.h"
 
+#ifdef Q_OS_WINDOWS
 #include <Windows.h>
+#endif
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -22,12 +24,14 @@ OtherProtocolsLogic::OtherProtocolsLogic(UiLogic *logic, QObject *parent):
 
 OtherProtocolsLogic::~OtherProtocolsLogic()
 {
-    for (QProcess *p: m_sftpMpuntProcesses) {
+#ifdef Q_OS_WINDOWS
+    for (QProcess *p: m_sftpMountProcesses) {
         if (p) Utils::signalCtrl(p->processId(), CTRL_C_EVENT);
         if (p) p->kill();
         if (p) p->waitForFinished();
         if (p) delete p;
     }
+#endif
 }
 
 void OtherProtocolsLogic::updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData)

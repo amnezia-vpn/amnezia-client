@@ -34,7 +34,9 @@ private:
     Settings m_settings;
     UiLogic *m_uiLogic;
 
-    QList <QProcess *> m_sftpMpuntProcesses;
+#ifdef Q_OS_WINDOWS
+    QList <QProcess *> m_sftpMountProcesses;
+#endif
 
 };
 #endif // OTHER_PROTOCOLS_LOGIC_H

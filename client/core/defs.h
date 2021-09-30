@@ -66,6 +66,7 @@ enum ErrorCode
     CloakExecutableCrashed
 };
 
+
 namespace config {
 // config keys
 const char key_openvpn_config_data[] = "openvpn_config_data";
@@ -77,5 +78,7 @@ const char key_wireguard_config_data[] = "wireguard_config_data";
 }
 
 } // namespace amnezia
+
+Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // DEFS_H

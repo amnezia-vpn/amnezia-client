@@ -43,6 +43,13 @@ signals:
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
+    // This signal is emitted when the controller is initialized. Note that the
+    // VPN tunnel can be already active. In this case, "connected" should be set
+    // to true and the "connectionDate" should be set to the activation date if
+    // known.
+    // If "status" is set to false, the backend service is considered unavailable.
+    void initialized(bool status, bool connected,
+                     const QDateTime& connectionDate);
 protected slots:
     virtual void onTimeout();
 

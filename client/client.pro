@@ -34,6 +34,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+   protocols/android_vpnprotocol.h \
    protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
     protocols/shadowsocksvpnprotocol.h \
@@ -87,6 +88,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+   protocols/android_vpnprotocol.cpp \
    protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
@@ -174,10 +176,24 @@ macx {
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
 }
 
+android {
+   QT += androidextras
+
+   INCLUDEPATH += platforms/android
+
+   DISTFILES += \
+       android/AndroidManifest.xml \
+       android/build.gradle \
+       android/gradle/wrapper/gradle-wrapper.jar \
+       android/gradle/wrapper/gradle-wrapper.properties \
+       android/gradlew \
+       android/gradlew.bat \
+       android/res/values/libs.xml
+
+   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+}
+
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
 
-DISTFILES += \
-   android/AndroidManifest.xml
 
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

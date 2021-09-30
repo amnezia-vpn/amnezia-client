@@ -1,23 +1,52 @@
 buildscript {
+   ext{
+       kotlin_version = "1.4.30-M1"
+       //  for libwg
+       appcompatVersion = '1.1.0'
+       annotationsVersion = '1.0.1'
+       databindingVersion = '3.3.1'
+       jsr305Version = '3.0.2'
+       streamsupportVersion = '1.7.0'
+       threetenabpVersion = '1.1.1'
+       groupName = 'org.amnezia.vpn'
+   }
+
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
 repositories {
     google()
     jcenter()
+    mavenCentral()
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+    implementation 'com.android.billingclient:billing-ktx:4.0.0'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
+    implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
+    implementation 'com.adjust.sdk:adjust-android:4.28.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:17.0.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
 }
 
 android {
@@ -71,7 +100,13 @@ android {
 
     defaultConfig {
         resConfig "en"
-        minSdkVersion = qtMinSdkVersion
+        minSdkVersion = 24
         targetSdkVersion = qtTargetSdkVersion
     }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'tunnel/CMakeLists.txt'
+//       }
+//   }
 }
