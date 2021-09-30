@@ -104,9 +104,9 @@ android {
         targetSdkVersion = qtTargetSdkVersion
     }
 
-//   externalNativeBuild {
-//       cmake {
-//           path 'tunnel/CMakeLists.txt'
-//       }
-//   }
+   externalNativeBuild {
+       cmake {
+           path 'wireguard/CMakeLists.txt'
+       }
+   }
 }

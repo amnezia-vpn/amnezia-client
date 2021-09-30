@@ -10,6 +10,10 @@
 #include <core/servercontroller.h>
 #include <protocols/wireguardprotocol.h>
 
+#ifdef Q_OS_ANDROID
+#include <protocols/android_vpnprotocol.h>
+#endif
+
 #include "ipc.h"
 #include "core/ipcclient.h"
 #include "protocols/openvpnprotocol.h"
@@ -316,7 +320,11 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
             return e;
         }
 
+#ifdef Q_OS_ANDROID
+        m_vpnProtocol.reset(new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration));
+#else
         m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
+#endif
     }
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);

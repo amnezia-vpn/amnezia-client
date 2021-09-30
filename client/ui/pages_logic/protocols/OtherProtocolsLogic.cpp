@@ -74,7 +74,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
 
     set_pushButtonSftpMountEnabled(false);
     QProcess *p = new QProcess;
-    m_sftpMpuntProcesses.append(p);
+    m_sftpMountProcesses.append(p);
     p->setProcessChannelMode(QProcess::MergedChannels);
 
     connect(p, &QProcess::readyRead, this, [this, p, letter](){

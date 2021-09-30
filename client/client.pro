@@ -34,7 +34,6 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
-   protocols/android_vpnprotocol.h \
    protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
     protocols/shadowsocksvpnprotocol.h \
@@ -88,7 +87,6 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
-   protocols/android_vpnprotocol.cpp \
    protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
@@ -180,6 +178,12 @@ android {
    QT += androidextras
 
    INCLUDEPATH += platforms/android
+
+   HEADERS +=    protocols/android_vpnprotocol.h \
+
+
+   SOURCES +=    protocols/android_vpnprotocol.cpp \
+
 
    DISTFILES += \
        android/AndroidManifest.xml \
