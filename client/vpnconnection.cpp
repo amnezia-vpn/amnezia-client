@@ -321,7 +321,9 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
         }
 
 #ifdef Q_OS_ANDROID
-        m_vpnProtocol.reset(new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration));
+        AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration);
+        androidVpnProtocol->initialize();
+        m_vpnProtocol.reset(androidVpnProtocol);
 #else
         m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
 #endif
