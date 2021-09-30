@@ -42,7 +42,7 @@ namespace {
 AndroidVpnProtocol* s_instance = nullptr;
 
 constexpr auto PERMISSIONHELPER_CLASS =
-    "org/amnezia/vpn/VPNPermissionHelper";
+    "org/amnezia/vpn/qt/VPNPermissionHelper";
 
 }  // namespace
 
