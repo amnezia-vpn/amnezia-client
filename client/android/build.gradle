@@ -119,11 +119,11 @@ android {
            }
        }
        debug {
-           applicationIdSuffix ".debug"
-           versionNameSuffix "-debug"
+           //applicationIdSuffix ".debug"
+           //versionNameSuffix "-debug"
            externalNativeBuild {
                cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}.debug", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
                }
            }
        }

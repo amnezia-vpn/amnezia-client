@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.4.1)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 message("PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
-set( CMAKE_WG_TOOLS_DIR ../../../desktop-client/client/3rd/wireguard-tools )
+set( CMAKE_WG_TOOLS_DIR ../../../../desktop-client/client/3rd/wireguard-tools )
 
 
 find_program(CCACHE_FOUND ccache)
@@ -27,7 +27,7 @@ add_executable(libwg.so ${WG_SOURCES})
 target_include_directories(libwg.so PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_WG_TOOLS_DIR}/src/uapi/linux/" "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_WG_TOOLS_DIR}/src/")
 target_compile_options(libwg.so PUBLIC -O3 -std=gnu11 -D_GNU_SOURCE -include ${CMAKE_CURRENT_SOURCE_DIR}/ndk-compat/compat.h -DHAVE_VISIBILITY_HIDDEN -DRUNSTATEDIR=\"/data/data/${ANDROID_PACKAGE_NAME}/cache\")
 
-add_custom_target(libwg-go.so WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/libwg-go" COMMENT "Building wireguard-go"
+add_custom_target(libwg-go.so WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/libwg-go" COMMENT "Building wireguard-go" VERBATIM COMMAND make
     ANDROID_ARCH_NAME=${ANDROID_ARCH_NAME}
     ANDROID_C_COMPILER=${ANDROID_C_COMPILER}
     ANDROID_TOOLCHAIN_ROOT=${ANDROID_TOOLCHAIN_ROOT}

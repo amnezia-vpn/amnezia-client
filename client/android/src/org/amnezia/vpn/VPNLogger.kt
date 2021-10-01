@@ -66,7 +66,7 @@ class Log {
         }
     }
     private fun write(message: String) {
-        LocalDateTime.now()
-        file.appendText("[${LocalDateTime.now()}] $message  \n")
+        //LocalDateTime.now()
+        //file.appendText("[${LocalDateTime.now()}] $message  \n")
     }
 }
