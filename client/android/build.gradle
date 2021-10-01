@@ -67,6 +67,10 @@ android {
 
     buildToolsVersion '28.0.3'
 
+    dexOptions {
+       javaMaxHeapSize "3g"
+    }
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -103,6 +107,27 @@ android {
         minSdkVersion = 24
         targetSdkVersion = qtTargetSdkVersion
     }
+
+   buildTypes {
+       release {
+           // That would enable treeshaking and remove java code that is just called from qt
+           minifyEnabled false
+           externalNativeBuild {
+               cmake {
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+               }
+           }
+       }
+       debug {
+           applicationIdSuffix ".debug"
+           versionNameSuffix "-debug"
+           externalNativeBuild {
+               cmake {
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}.debug", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+               }
+           }
+       }
+   }
 
    externalNativeBuild {
        cmake {
