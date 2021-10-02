@@ -195,6 +195,13 @@ android {
        android/res/values/libs.xml
 
    ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+   for (abi, ANDROID_ABIS): {
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
+   }
+
 }
 
 REPC_REPLICA += ../ipc/ipc_interface.rep

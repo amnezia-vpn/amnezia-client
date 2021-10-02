@@ -129,9 +129,9 @@ android {
        }
    }
 
-   externalNativeBuild {
-       cmake {
-           path 'wireguard/CMakeLists.txt'
-       }
-   }
+//   externalNativeBuild {
+//       cmake {
+//           path 'wireguard/CMakeLists.txt'
+//       }
+//   }
 }
