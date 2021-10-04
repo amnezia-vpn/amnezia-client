@@ -57,7 +57,7 @@ void OpenVpnProtocol::stop()
     }
 }
 
-ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
+ErrorCode OpenVpnProtocol::prepare()
 {
     if (!IpcClient::Interface()) {
         return ErrorCode::AmneziaServiceConnectionFailed;

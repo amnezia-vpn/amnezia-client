@@ -6,6 +6,8 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
+#include "containers/containers_defs.h"
+
 using namespace amnezia;
 
 class QTimer;
@@ -23,6 +25,7 @@ public:
 
     static QString textConnectionState(ConnectionState connectionState);
 
+    virtual ErrorCode prepare() { return ErrorCode::NoError; }
 
     virtual bool isConnected() const;
     virtual bool isDisconnected() const;
@@ -36,6 +39,8 @@ public:
 
     QString routeGateway() const;
     QString vpnGateway() const;
+
+    static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

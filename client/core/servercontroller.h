@@ -46,14 +46,18 @@ public:
         const ServerCredentials &credentials, const QString &file, const QString &path,
         QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
 
-    static QString getTextFileFromContainer(DockerContainer container,
+    static QByteArray getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
 
     static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 
     static QString replaceVars(const QString &script, const Vars &vars);
 
-    static ErrorCode runScript(const QSsh::SshConnectionParameters &sshParams, QString script,
+    static ErrorCode runScript(const ServerCredentials &credentials, QString script,
+        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
+        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+
+    static ErrorCode runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
 

@@ -130,7 +130,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    e = ServerController::runScript(ServerController::sshParams(credentials),
+    e = ServerController::runScript(credentials,
         ServerController::replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
             ServerController::genVarsForScript(credentials, container)));
 

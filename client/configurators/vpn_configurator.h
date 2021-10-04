@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "core/servercontroller.h"
 
+// Retrieve connection settings from server
 class VpnConfigurator
 {
 public:
@@ -21,6 +22,7 @@ public:
     static void updateContainerConfigAfterInstallation(DockerContainer container,
         QJsonObject &containerConfig, const QString &stdOut);
 
+    static Settings &m_settings();
 };
 
 #endif // VPN_CONFIGURATOR_H

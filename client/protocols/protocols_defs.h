@@ -16,6 +16,7 @@ constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
 constexpr char description[] = "description";
+constexpr char cert[] = "cert";
 
 
 constexpr char containers[] = "containers";
@@ -23,7 +24,6 @@ constexpr char container[] = "container";
 constexpr char defaultContainer[] = "defaultContainer";
 
 constexpr char protocols[] = "protocols";
-//constexpr char protocol[] = "protocol";
 
 constexpr char remote[] = "remote";
 constexpr char transport_proto[] = "transport_proto";

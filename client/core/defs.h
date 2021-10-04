@@ -74,6 +74,7 @@ const char key_openvpn_config_path[] = "openvpn_config_path";
 const char key_shadowsocks_config_data[] = "shadowsocks_config_data";
 const char key_cloak_config_data[] = "cloak_config_data";
 const char key_wireguard_config_data[] = "wireguard_config_data";
+const char key_ikev2_config_data[] = "ikev2_config_data";
 
 }
 

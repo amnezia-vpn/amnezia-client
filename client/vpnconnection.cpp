@@ -133,10 +133,7 @@ ErrorCode VpnConnection::lastError() const
 QMap<Protocol, QString> VpnConnection::getLastVpnConfig(const QJsonObject &containerConfig)
 {
     QMap<Protocol, QString> configs;
-    for (Protocol proto: { Protocol::OpenVpn,
-         Protocol::ShadowSocks,
-         Protocol::Cloak,
-         Protocol::WireGuard}) {
+    for (Protocol proto: ProtocolProps::allProtocols()) {
 
         QString cfg = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
@@ -242,6 +239,13 @@ ErrorCode VpnConnection::createVpnConfiguration(int serverIndex,
         m_vpnConfiguration.insert(config::key_wireguard_config_data, wgConfigData);
     }
 
+    if (container == DockerContainer::Ipsec) {
+        QString ikev2ConfigData = createVpnConfigurationForProto(
+                    serverIndex, credentials, container, containerConfig, Protocol::Ikev2, &errorCode);
+
+        m_vpnConfiguration.insert(config::key_ikev2_config_data, ikev2ConfigData);
+    }
+
     //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
     return ErrorCode::NoError;
 }
@@ -261,63 +265,29 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
         m_vpnProtocol.reset();
     }
 
-    if (container == DockerContainer::None || container == DockerContainer::OpenVpn) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpn, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
-
-        m_vpnProtocol.reset(new OpenVpnProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+    ErrorCode e = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
+    if (e) {
+        emit connectionStateChanged(VpnProtocol::Error);
+        return e;
     }
-    else if (container == DockerContainer::ShadowSocks) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::ShadowSocks, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
 
-        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+
+#ifndef Q_OS_ANDROID
+
+    m_vpnProtocol.reset(VpnProtocol::factory(container, containerConfig));
+    if (!m_vpnProtocol) {
+        return ErrorCode::InternalError;
     }
-    else if (container == DockerContainer::Cloak) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::Cloak, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
 
-        m_vpnProtocol.reset(new OpenVpnOverCloakProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
-    }
-    else if (container == DockerContainer::WireGuard) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::WireGuard, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+    m_vpnProtocol->prepare();
 
-#ifdef Q_OS_ANDROID
+
+#else
         AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration);
         androidVpnProtocol->initialize();
         m_vpnProtocol.reset(androidVpnProtocol);
-#else
-        m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
 #endif
-    }
+
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));

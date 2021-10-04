@@ -11,6 +11,8 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
     case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
+    case DockerContainer::Ipsec: return QLatin1String("ipsec");
+
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
     case DockerContainer::Dns: return QLatin1String("dns");
     case DockerContainer::FileShare: return QLatin1String("file_share");
