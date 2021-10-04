@@ -31,6 +31,9 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
 
 bool Debug::init()
 {
+    qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
+
+#ifndef QT_DEBUG
     QString path = userLogsDir();
     QDir appDir(path);
     if (!appDir.mkpath(path)) {
@@ -39,7 +42,6 @@ bool Debug::init()
 
     m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 
-    qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
 
     m_file.setFileName(appDir.filePath(m_logFileName));
     if (!m_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -49,6 +51,7 @@ bool Debug::init()
     m_file.setTextModeEnabled(true);
     m_textStream.setDevice(&m_file);
     qInstallMessageHandler(debugMessageHandler);
+#endif
 
     return true;
 }

@@ -164,6 +164,10 @@ public:
     Q_INVOKABLE static TransportProto defaultTransportProto(Protocol p);
     Q_INVOKABLE static bool defaultTransportProtoChangeable(Protocol p);
 
+
+    Q_INVOKABLE static QString key_proto_config_data(Protocol p);
+    Q_INVOKABLE static QString key_proto_config_path(Protocol p);
+
 };
 
 static void declareQmlProtocolEnum() {

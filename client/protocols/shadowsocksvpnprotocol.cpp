@@ -112,5 +112,5 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 
 void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &configuration)
 {
-    m_shadowSocksConfig = configuration.value(config::key_shadowsocks_config_data).toObject();
+    m_shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::ShadowSocks)).toObject();
 }

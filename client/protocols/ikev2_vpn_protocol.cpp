@@ -32,7 +32,8 @@ void Ikev2Protocol::stop()
 
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
-    m_config = configuration.value(config::key_ikev2_config_data).toObject();
+    QString cfgData = configuration.value(ProtocolProps::key_proto_config_data(Protocol::Ikev2)).toString();
+    m_config = QJsonDocument::fromJson(cfgData.toUtf8()).object();
 }
 
 

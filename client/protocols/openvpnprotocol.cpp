@@ -86,16 +86,16 @@ void OpenVpnProtocol::killOpenVpnProcess()
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(config::key_openvpn_config_data)) {
+    if (configuration.contains(ProtocolProps::key_proto_config_data(Protocol::OpenVpn))) {
         m_configFile.open();
-        m_configFile.write(configuration.value(config::key_openvpn_config_data).toString().toUtf8());
+        m_configFile.write(configuration.value(ProtocolProps::key_proto_config_data(Protocol::OpenVpn)).toString().toUtf8());
         m_configFile.close();
         m_configFileName = m_configFile.fileName();
 
         qDebug().noquote() << QString("Set config data") << m_configFileName;
     }
-    else if (configuration.contains(config::key_openvpn_config_path)) {
-        m_configFileName = configuration.value(config::key_openvpn_config_path).toString();
+    else if (configuration.contains(ProtocolProps::key_proto_config_path(Protocol::OpenVpn))) {
+        m_configFileName = configuration.value(ProtocolProps::key_proto_config_path(Protocol::OpenVpn)).toString();
         QFileInfo file(m_configFileName);
 
         if (file.fileName().isEmpty()) {

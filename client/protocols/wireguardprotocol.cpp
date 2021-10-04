@@ -73,7 +73,7 @@ void WireguardProtocol::stop()
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(config::key_wireguard_config_data)) {
+    if (configuration.contains(ProtocolProps::key_proto_config_data(Protocol::WireGuard))) {
         if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
             qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
             return;
@@ -81,12 +81,12 @@ void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configurat
 
         m_isConfigLoaded = true;
 
-        m_configFile.write(configuration.value(config::key_wireguard_config_data).toString().toUtf8());
+        m_configFile.write(configuration.value(ProtocolProps::key_proto_config_data(Protocol::Ikev2)).toString().toUtf8());
         m_configFile.close();
         m_configFileName = m_configFile.fileName();
 
         qDebug().noquote() << QString("Set config data") << m_configFileName;
-        qDebug().noquote() << QString("Set config data") << configuration.value(config::key_wireguard_config_data).toString().toUtf8();
+        qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toString().toUtf8();
     }
 //    else if (configuration.contains(config::key_wireguard_config_path)) {
 //        m_configFileName = configuration.value(config::key_wireguard_config_path).toString();
