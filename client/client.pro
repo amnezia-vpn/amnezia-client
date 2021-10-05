@@ -126,9 +126,6 @@ SOURCES  += \
     protocols/vpnprotocol.cpp \
     protocols/openvpnprotocol.cpp \
 
-FORMS    += \
-   ui/server_widget.ui
-
 RESOURCES += \
     resources.qrc
 
