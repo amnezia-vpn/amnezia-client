@@ -73,31 +73,22 @@ void WireguardProtocol::stop()
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(ProtocolProps::key_proto_config_data(Protocol::WireGuard))) {
-        if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
-            return;
-        }
+    QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toObject();
 
-        m_isConfigLoaded = true;
-
-        m_configFile.write(configuration.value(ProtocolProps::key_proto_config_data(Protocol::Ikev2)).toString().toUtf8());
-        m_configFile.close();
-        m_configFileName = m_configFile.fileName();
-
-        qDebug().noquote() << QString("Set config data") << m_configFileName;
-        qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toString().toUtf8();
+    if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
+        return;
     }
-//    else if (configuration.contains(config::key_wireguard_config_path)) {
-//        m_configFileName = configuration.value(config::key_wireguard_config_path).toString();
-//        QFileInfo file(m_configFileName);
 
-//        if (file.fileName().isEmpty()) {
-//            m_configFileName = defaultConfigFileName();
-//        }
+    m_isConfigLoaded = true;
 
-//        qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
-//    }
+    m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
+    m_configFile.close();
+    m_configFileName = m_configFile.fileName();
+
+    qDebug().noquote() << QString("Set config data") << m_configFileName;
+    qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toString().toUtf8();
+
 }
 
 //bool WireguardProtocol::openVpnProcessIsRunning() const

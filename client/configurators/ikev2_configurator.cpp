@@ -55,7 +55,6 @@ QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials,
         return "";
     }
 
-
     QJsonObject config;
     config[config_key::hostName] = connData.host;
     config[config_key::userName] = connData.clientId;

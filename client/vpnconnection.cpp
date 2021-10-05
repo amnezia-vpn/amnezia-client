@@ -159,7 +159,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     else {
         qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << ProtocolProps::protoToString(proto);
         configData = VpnConfigurator::genVpnProtocolConfig(credentials,
-                                          container, containerConfig, proto, &e);
+            container, containerConfig, proto, &e);
 
         QString configDataBeforeLocalProcessing = configData;
 
@@ -191,66 +191,26 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     ErrorCode e = ErrorCode::NoError;
     QJsonObject vpnConfiguration;
 
-    if (container == DockerContainer::OpenVpn ||
-            container == DockerContainer::ShadowSocks ||
-            container == DockerContainer::Cloak) {
 
-        QString openVpnConfigData =
+    for (ProtocolEnumNS::Protocol proto : ContainerProps::protocolsForContainer(container)) {
+//        QString vpnConfigData =
+//            createVpnConfigurationForProto(
+//                serverIndex, credentials, container, containerConfig, proto, &e);
+
+        QJsonObject vpnConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
-                serverIndex, credentials, container, containerConfig, Protocol::OpenVpn, &e);
+                serverIndex, credentials, container, containerConfig, proto, &e).toUtf8()).
+                    object();
 
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(Protocol::OpenVpn), openVpnConfigData);
         if (e) {
             if (errorCode) *errorCode = e;
             return {};
         }
 
-        QFile file(OpenVpnProtocol::defaultConfigFileName());
-        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
-            QTextStream stream(&file);
-            stream << openVpnConfigData << endl;
-            file.close();
-        }
-        else {
-            if (errorCode) *errorCode = ErrorCode::FailedToSaveConfigData;
-            return {};
-        }
+        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
+
     }
 
-    if (container == DockerContainer::ShadowSocks) {
-        QJsonObject ssConfigData = QJsonDocument::fromJson(
-            createVpnConfigurationForProto(
-                serverIndex, credentials, container, containerConfig, Protocol::ShadowSocks, &e).toUtf8()).
-            object();
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(Protocol::ShadowSocks), ssConfigData);
-    }
-
-    if (container == DockerContainer::Cloak) {
-        QJsonObject cloakConfigData = QJsonDocument::fromJson(
-            createVpnConfigurationForProto(
-                serverIndex, credentials, container, containerConfig, Protocol::Cloak, &e).toUtf8()).
-            object();
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(Protocol::Cloak), cloakConfigData);
-    }
-
-    if (container == DockerContainer::WireGuard) {
-        QString wgConfigData = createVpnConfigurationForProto(
-                    serverIndex, credentials, container, containerConfig, Protocol::WireGuard, &e);
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(Protocol::WireGuard), wgConfigData);
-    }
-
-    if (container == DockerContainer::Ipsec) {
-        QString ikev2ConfigData = createVpnConfigurationForProto(
-                    serverIndex, credentials, container, containerConfig, Protocol::Ikev2, &e);
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(Protocol::Ikev2), ikev2ConfigData);
-    }
-
-    //qDebug().noquote() << "VPN config" << QJsonDocument(m_vpnConfiguration).toJson();
     return vpnConfiguration;
 }
 

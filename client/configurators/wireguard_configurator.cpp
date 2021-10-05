@@ -158,8 +158,10 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
     config.replace("$WIREGUARD_PSK", connData.pskKey);
 
-    qDebug().noquote() << config;
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
@@ -168,7 +170,10 @@ QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString WireguardConfigurator::processConfigWithExportSettings(QString config)

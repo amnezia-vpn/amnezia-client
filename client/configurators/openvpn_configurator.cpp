@@ -5,6 +5,7 @@
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <QJsonObject>
 
 #include "core/server_defs.h"
 #include "containers/containers_defs.h"
@@ -242,8 +243,10 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     config.replace("block-outside-dns", "");
 #endif
 
-    //qDebug().noquote() << config;
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
