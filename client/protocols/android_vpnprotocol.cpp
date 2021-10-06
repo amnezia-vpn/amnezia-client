@@ -88,6 +88,7 @@ void AndroidVpnProtocol::initialize()
 
 ErrorCode AndroidVpnProtocol::start()
 {
+
     qDebug() << "Prompting for VPN permission";
     auto appContext = QtAndroid::androidActivity().callObjectMethod(
         "getApplicationContext", "()Landroid/content/Context;");
@@ -128,6 +129,7 @@ ErrorCode AndroidVpnProtocol::start()
     QAndroidParcel sendData;
     sendData.writeData(QJsonDocument(m_rawConfig).toJson());
     m_serviceBinder.transact(ACTION_ACTIVATE, sendData, nullptr);
+    return NoError;
 }
 
 // Activates the tunnel that is currently set
