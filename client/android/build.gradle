@@ -134,4 +134,13 @@ android {
 //           path 'wireguard/CMakeLists.txt'
 //       }
 //   }
+
+   externalNativeBuild {
+       cmake {
+           path 'openvpn/src/main/cpp/CMakeLists.txt'
+       }
+   }
 }
+
+
+

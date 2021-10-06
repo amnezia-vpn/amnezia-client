@@ -192,19 +192,28 @@ android {
        android/gradle/wrapper/gradle-wrapper.properties \
        android/gradlew \
        android/gradlew.bat \
-       android/res/values/libs.xml
+       android/res/values/libs.xml \
+       android/src/org/amnezia/vpn/VpnService.kt \
+       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt \
+       android/src/org/amnezia/vpn/VPNCli.kt
 
-   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
-   for (abi, ANDROID_ABIS): {
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
-   }
+        for (abi, ANDROID_ABIS): {
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libjbcrypto.so
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopenvpn.so
+           ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopvpnutil.so
+        }
 
 }
 
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
+
+ANDROID_EXTRA_LIBS = C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/wireguard/x86_64/libwg.so C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/wireguard/x86_64/libwg-go.so C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/wireguard/x86_64/libwg-quick.so C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/openvpn/x86_64/libjbcrypto.so C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/openvpn/x86_64/libopenvpn.so C:/Users/nikita.rozov/Documents/desktop-client/client/android/lib/openvpn/x86_64/libopvpnutil.so $$PWD/../../../../../Android/Sdk/android_openssl/Qt-5.12.4_5.13.0/x86_64/libcrypto.so $$PWD/../../../../../Android/Sdk/android_openssl/Qt-5.12.4_5.13.0/x86_64/libssl.so
 
 
