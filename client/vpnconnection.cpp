@@ -248,9 +248,10 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
 
 #else
-        AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration);
-        androidVpnProtocol->initialize();
-        m_vpnProtocol.reset(androidVpnProtocol);
+    Protocol proto = ContainerProps::defaultProtocol(container);
+    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
+    androidVpnProtocol->initialize();
+    m_vpnProtocol.reset(androidVpnProtocol);
 #endif
 
 
