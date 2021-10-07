@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QUrl>
+#include <Utils.h>
 
 #include <iostream>
 
@@ -71,6 +72,14 @@ bool Debug::openLogsFolder()
         qWarning() << "Can't open url:" << path;
         return false;
     }
+    return true;
+}
+
+bool Debug::openServiceLogsFolder()
+{
+    QString path = Utils::systemLogPath();
+    path = "file:///" + path;
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     return true;
 }
 
