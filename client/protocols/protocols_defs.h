@@ -24,6 +24,7 @@ constexpr char containers[] = "containers";
 constexpr char container[] = "container";
 constexpr char defaultContainer[] = "defaultContainer";
 
+constexpr char protocol[] = "protocol";
 constexpr char protocols[] = "protocols";
 
 constexpr char remote[] = "remote";

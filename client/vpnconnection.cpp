@@ -211,6 +211,9 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
 
     }
 
+    Protocol proto = ContainerProps::defaultProtocol(container);
+    vpnConfiguration[config_key::protocol] = ProtocolProps::protoToString(proto);
+
     return vpnConfiguration;
 }
 
@@ -248,7 +251,6 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
 
 #else
-    Protocol proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
     androidVpnProtocol->initialize();
     m_vpnProtocol.reset(androidVpnProtocol);
