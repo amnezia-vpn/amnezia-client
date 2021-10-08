@@ -51,7 +51,7 @@ void WireguardProtocol::stop()
     m_wireguardStopProcess->setProgram(wireguardExecPath());
 
 
-    QStringList arguments({"/uninstalltunnelservice", serviceName(), });
+    QStringList arguments({"--remove", configPath()});
     m_wireguardStopProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
@@ -123,7 +123,7 @@ void WireguardProtocol::updateRouteGateway(QString line)
 QString WireguardProtocol::wireguardExecPath() const
 {
 #ifdef Q_OS_WIN
-    return Utils::executable("wireguard/wireguard", true);
+    return Utils::executable("wireguard/wireguard-service", true);
 #elif defined Q_OS_LINUX
     return Utils::usrExecutable("wg");
 #else
@@ -172,7 +172,7 @@ ErrorCode WireguardProtocol::start()
     m_wireguardStartProcess->setProgram(wireguardExecPath());
 
 
-    QStringList arguments({"/installtunnelservice", configPath(), });
+    QStringList arguments({"--add", configPath()});
     m_wireguardStartProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
