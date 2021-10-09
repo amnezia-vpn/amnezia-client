@@ -271,63 +271,69 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
         m_vpnProtocol.reset();
     }
 
-    if (container == DockerContainer::None || container == DockerContainer::OpenVpn) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpn, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+//    if (container == DockerContainer::None || container == DockerContainer::OpenVpn) {
+//        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::OpenVpn, containerConfig);
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
 
-        m_vpnProtocol.reset(new OpenVpnProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
-    }
-    else if (container == DockerContainer::ShadowSocks) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::ShadowSocks, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+//        m_vpnProtocol.reset(new OpenVpnProtocol(m_vpnConfiguration));
+//        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
+//    }
+//    else if (container == DockerContainer::ShadowSocks) {
+//        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::ShadowSocks, containerConfig);
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
 
-        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
-    }
-    else if (container == DockerContainer::Cloak) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::Cloak, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+//        m_vpnProtocol.reset(new ShadowSocksVpnProtocol(m_vpnConfiguration));
+//        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
+//    }
+//    else if (container == DockerContainer::Cloak) {
+//        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::Cloak, containerConfig);
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
 
-        m_vpnProtocol.reset(new OpenVpnOverCloakProtocol(m_vpnConfiguration));
-        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
-    }
-    else if (container == DockerContainer::WireGuard) {
-        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::WireGuard, containerConfig);
-        if (e) {
-            emit connectionStateChanged(VpnProtocol::Error);
-            return e;
-        }
+//        m_vpnProtocol.reset(new OpenVpnOverCloakProtocol(m_vpnConfiguration));
+//        e = static_cast<OpenVpnProtocol *>(m_vpnProtocol.data())->checkAndSetupTapDriver();
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
+//    }
+//    else if (container == DockerContainer::WireGuard) {
+//        ErrorCode e = createVpnConfiguration(serverIndex, credentials, DockerContainer::WireGuard, containerConfig);
+//        if (e) {
+//            emit connectionStateChanged(VpnProtocol::Error);
+//            return e;
+//        }
 
-#ifdef Q_OS_ANDROID
-        AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration);
-        androidVpnProtocol->initialize();
-        m_vpnProtocol.reset(androidVpnProtocol);
-#else
-        m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
-#endif
-    }
+//#ifdef Q_OS_ANDROID
+//        AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::WireGuard, m_vpnConfiguration);
+//        androidVpnProtocol->initialize();
+//        m_vpnProtocol.reset(androidVpnProtocol);
+//#else
+//        m_vpnProtocol.reset(new WireguardProtocol(m_vpnConfiguration));
+//#endif
+//    }
+
+
+
+            AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::OpenVpn, m_vpnConfiguration);
+            androidVpnProtocol->initialize();
+            m_vpnProtocol.reset(androidVpnProtocol);
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));

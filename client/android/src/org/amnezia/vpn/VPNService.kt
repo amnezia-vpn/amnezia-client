@@ -1,6 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package org.amnezia.vpn
 
@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import android.system.OsConstants
 import com.wireguard.android.util.SharedLibraryLoader
 import com.wireguard.config.*
@@ -20,7 +21,10 @@ class VPNService : android.net.VpnService() {
     private var mConfig: JSONObject? = null
     private var mConnectionTime: Long = 0
     private var mAlreadyInitialised = false
+    private var mbuilder: Builder = Builder()
 
+
+    private var mOpenVPNThreadv3: OpenVPNThreadv3? = null
     private var currentTunnelHandle = -1
 
     fun init() {
@@ -29,9 +33,12 @@ class VPNService : android.net.VpnService() {
         }
         Log.init(this)
         SharedLibraryLoader.loadSharedLibrary(this, "wg-go")
-        Log.i(tag, "loaded lib")
+        SharedLibraryLoader.loadSharedLibrary(this, "ovpn3")
+        Log.i(tag, "Loaded libs")
         Log.e(tag, "Wireguard Version ${wgVersion()}")
+        mOpenVPNThreadv3 = OpenVPNThreadv3 (this)
         mAlreadyInitialised = true
+
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -44,9 +51,9 @@ class VPNService : android.net.VpnService() {
     }
 
     /**
-     * EntryPoint for the Service, gets Called when AndroidController.cpp
-     * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
-     */
+    * EntryPoint for the Service, gets Called when AndroidController.cpp
+    * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
+    */
     override fun onBind(intent: Intent?): IBinder? {
         Log.v(tag, "Got Bind request")
         init()
@@ -54,34 +61,38 @@ class VPNService : android.net.VpnService() {
     }
 
     /**
-     * Might be the entryPoint if the Service gets Started via an
-     * Service Intent: Might be from Always-On-Vpn from Settings
-     * or from Booting the device and having "connect on boot" enabled.
-     */
+    * Might be the entryPoint if the Service gets Started via an
+    * Service Intent: Might be from Always-On-Vpn from Settings
+    * or from Booting the device and having "connect on boot" enabled.
+    */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         init()
-        intent?.let {
-            if (intent.getBooleanExtra("startOnly", false)) {
-                Log.i(tag, "Start only!")
-                return super.onStartCommand(intent, flags, startId)
-            }
-        }
-        // This start is from always-on
-        if (this.mConfig == null) {
-            // We don't have tunnel to turn on - Try to create one with last config the service got
-            val prefs = Prefs.get(this)
-            val lastConfString = prefs.getString("lastConf", "")
-            if (lastConfString.isNullOrEmpty()) {
-                // We have nothing to connect to -> Exit
-                Log.e(
-                    tag,
-                    "VPN service was triggered without defining a Server or having a tunnel"
-                )
-                return super.onStartCommand(intent, flags, startId)
-            }
-            this.mConfig = JSONObject(lastConfString)
-        }
-        turnOn(this.mConfig!!)
+        //        intent?.let {
+        //            if (intent.getBooleanExtra("startOnly", false)) {
+        //                Log.i(tag, "Start only!")
+        //                return super.onStartCommand(intent, flags, startId)
+        //            }
+        //        }
+        //        // This start is from always-on
+        //        if (this.mConfig == null) {
+        //            // We don't have tunnel to turn on - Try to create one with last config the service got
+        //            val prefs = Prefs.get(this)
+        //            val lastConfString = prefs.getString("lastConf", "")
+        //            if (lastConfString.isNullOrEmpty()) {
+        //                // We have nothing to connect to -> Exit
+        //                Log.e(
+        //                    tag,
+        //                    "VPN service was triggered without defining a Server or having a tunnel"
+        //                )
+        //                return super.onStartCommand(intent, flags, startId)
+        //            }
+        //            this.mConfig = JSONObject(lastConfString)
+        //        }
+
+
+        // Log.v(tag, "onStartCommand:" + this.mConfig)
+        // turnOn(this.mConfig)
+
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -93,38 +104,38 @@ class VPNService : android.net.VpnService() {
     }
 
     var connectionTime: Long = 0
-        get() {
-            return mConnectionTime
-        }
+    get() {
+        return mConnectionTime
+    }
 
     var isUp: Boolean
-        get() {
-            return currentTunnelHandle >= 0
+    get() {
+        return currentTunnelHandle >= 0
+    }
+    private set(value) {
+        if (value) {
+            mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
+            mConnectionTime = System.currentTimeMillis()
+            return
         }
-        private set(value) {
-            if (value) {
-                mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
-                mConnectionTime = System.currentTimeMillis()
-                return
-            }
-            mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
-            mConnectionTime = 0
-        }
+        mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
+        mConnectionTime = 0
+    }
     val status: JSONObject
-        get() {
-            val deviceIpv4: String = ""
-            return JSONObject().apply {
-                putOpt("rx_bytes", getConfigValue("rx_bytes"))
-                putOpt("tx_bytes", getConfigValue("tx_bytes"))
-                putOpt("endpoint", mConfig?.getJSONObject("server")?.getString("ipv4Gateway"))
-                putOpt("deviceIpv4", mConfig?.getJSONObject("device")?.getString("ipv4Address"))
-            }
+    get() {
+        val deviceIpv4: String = ""
+        return JSONObject().apply {
+            putOpt("rx_bytes", getConfigValue("rx_bytes"))
+            putOpt("tx_bytes", getConfigValue("tx_bytes"))
+            putOpt("endpoint", mConfig?.getJSONObject("server")?.getString("ipv4Gateway"))
+            putOpt("deviceIpv4", mConfig?.getJSONObject("device")?.getString("ipv4Address"))
         }
-      /*
-      * Checks if the VPN Permission is given. 
-      * If the permission is given, returns true
-      * Requests permission and returns false if not.
-      */
+    }
+    /*
+    * Checks if the VPN Permission is given.
+    * If the permission is given, returns true
+    * Requests permission and returns false if not.
+    */
     fun checkPermissions(): Boolean {
         // See https://developer.android.com/guide/topics/connectivity/vpn#connect_a_service
         // Call Prepare, if we get an Intent back, we dont have the VPN Permission
@@ -138,66 +149,116 @@ class VPNService : android.net.VpnService() {
         return false
     }
 
-    fun turnOn(json: JSONObject) {
-        Log.sensitive(tag, json.toString())
-        val wireguard_conf = buildWireugardConfig(json)
+    fun turnOn(json: JSONObject?): ParcelFileDescriptor? {
+        Log.sensitive(tag, "" + json.toString())
+        //        val wireguard_conf = buildWireugardConfig(json)
 
         if (!checkPermissions()) {
             Log.e(tag, "turn on was called without no permissions present!")
             isUp = false
-            return
+            return null
         }
-        Log.i(tag, "Permission okay")
-        if (currentTunnelHandle != -1) {
-            Log.e(tag, "Tunnel already up")
-            // Turn the tunnel down because this might be a switch
-            wgTurnOff(currentTunnelHandle)
-        }
-        val wgConfig: String = wireguard_conf!!.toWgUserspaceString()
-        val builder = Builder()
-        setupBuilder(wireguard_conf, builder)
-        builder.setSession("mvpn0")
-        builder.establish().use { tun ->
-            if (tun == null)return
-            Log.i(tag, "Go backend " + wgVersion())
-            currentTunnelHandle = wgTurnOn("mvpn0", tun.detachFd(), wgConfig)
-        }
-        if (currentTunnelHandle < 0) {
-            Log.e(tag, "Activation Error Code -> $currentTunnelHandle")
-            isUp = false
-            return
-        }
-        protect(wgGetSocketV4(currentTunnelHandle))
-        protect(wgGetSocketV6(currentTunnelHandle))
-        mConfig = json
-        isUp = true
+        //        Log.i(tag, "Permission okay")
+        //        if (currentTunnelHandle != -1) {
+        //            Log.e(tag, "Tunnel already up")
+        //            // Turn the tunnel down because this might be a switch
+        //            wgTurnOff(currentTunnelHandle)
+        //        }
+        //        val wgConfig: String = wireguard_conf!!.toWgUserspaceString()
+        //        val builder = Builder()
+        //        setupBuilder(wireguard_conf, builder)
+        //        builder.setSession("mvpn0")
+        //        builder.establish().use { tun ->
+        //            if (tun == null)return
+        //            Log.i(tag, "Go backend " + wgVersion())
+        //            currentTunnelHandle = wgTurnOn("mvpn0", tun.detachFd(), wgConfig)
+        //        }
+        //        if (currentTunnelHandle < 0) {
+        //            Log.e(tag, "Activation Error Code -> $currentTunnelHandle")
+        //            isUp = false
+        //            return
+        //        }
+        //        protect(wgGetSocketV4(currentTunnelHandle))
+        //        protect(wgGetSocketV6(currentTunnelHandle))
+        //        mConfig = json
+        //        isUp = true
 
-        // Store the config in case the service gets
-        // asked boot vpn from the OS
-        val prefs = Prefs.get(this)
-        prefs.edit()
-            .putString("lastConf", json.toString())
-            .apply()
+        //        // Store the config in case the service gets
+        //        // asked boot vpn from the OS
+        //        val prefs = Prefs.get(this)
+        //        prefs.edit()
+        //            .putString("lastConf", json.toString())
+        //            .apply()
 
-        NotificationUtil.show(this) // Go foreground
+        //        NotificationUtil.show(this) // Go foreground
+
+        //        val builder = Builder()
+        //        //        setupBuilder(wireguard_conf, builder)
+        //        builder.addAddress("192.168.194.1", 24)
+        //        builder.addDnsServer("8.8.8.8")
+        //        builder.addRoute("0.0.0.0", 0)
+        //        builder.setSession("mvpn0")
+        //        builder.establish()
+
+
+        // Configure a new interface from our VpnService instance. This must be done
+        //         from inside a VpnService.
+
+//       val builder = Builder()
+        //         Create a local TUN interface using predetermined addresses. In your app,
+        //         you typically use values returned from the VPN gateway during handshaking.
+//        val localTunnel = builder
+//        .addAddress("10.0.20.1", 0)
+//        .addRoute("192.168.111.0", 24)
+//        .addDnsServer("192.168.111.1")
+//        .establish()
+                val localTunnel = mbuilder.establish()
+
+        Log.v(tag, "builder.establish()")
+
+        startOpenVpn()
+
+        return localTunnel
+
     }
+
+
+    fun setMtu(mtu: Int) {
+        Log.v(tag, "setMtu()" + mtu)
+        mbuilder.setMtu(mtu)
+    }
+
+    fun addAddress(ip: String, len: Int){
+        Log.v(tag, "addAddress()" + ip + " " + len)
+        mbuilder.addAddress(ip, len)
+    }
+
+    fun addRoute(ip: String, len: Int){
+        Log.v(tag, "addRoute()" + ip + " " + len)
+        mbuilder.addRoute(ip, len)
+    }
+
+    fun addDNS(ip: String){
+        mbuilder.addDnsServer(ip)
+    }
+
 
     fun turnOff() {
         Log.v(tag, "Try to disable tunnel")
-        wgTurnOff(currentTunnelHandle)
-        currentTunnelHandle = -1
-        stopForeground(false)
+        //        wgTurnOff(currentTunnelHandle)
+        //        currentTunnelHandle = -1
+        //        stopForeground(false)
         isUp = false
     }
 
     /**
-     * Configures an Android VPN Service Tunnel
-     * with a given Wireguard Config
-     */
+    * Configures an Android VPN Service Tunnel
+    * with a given Wireguard Config
+    */
     private fun setupBuilder(config: Config, builder: Builder) {
         // Setup Split tunnel
         for (excludedApplication in config.`interface`.excludedApplications)
-            builder.addDisallowedApplication(excludedApplication)
+        builder.addDisallowedApplication(excludedApplication)
 
         // Device IP
         for (addr in config.`interface`.addresses) builder.addAddress(addr.address, addr.mask)
@@ -220,9 +281,9 @@ class VPNService : android.net.VpnService() {
     }
 
     /**
-     * Gets config value for {key} from the Current
-     * running Wireguard tunnel
-     */
+    * Gets config value for {key} from the Current
+    * running Wireguard tunnel
+    */
     private fun getConfigValue(key: String): String? {
         if (!isUp) {
             return null
@@ -241,15 +302,15 @@ class VPNService : android.net.VpnService() {
     }
 
     /**
-     * Create a Wireguard [Config]  from a [json] string -
-     * The [json] will be created in AndroidController.cpp
-     */
+    * Create a Wireguard [Config]  from a [json] string -
+    * The [json] will be created in AndroidVpnProtocol.cpp
+    */
     private fun buildWireugardConfig(obj: JSONObject): Config {
         val confBuilder = Config.Builder()
         val jServer = obj.getJSONObject("server")
         val peerBuilder = Peer.Builder()
         val ep =
-            InetEndpoint.parse(jServer.getString("ipv4AddrIn") + ":" + jServer.getString("port"))
+        InetEndpoint.parse(jServer.getString("ipv4AddrIn") + ":" + jServer.getString("port"))
         peerBuilder.setEndpoint(ep)
         peerBuilder.setPublicKey(Key.fromBase64(jServer.getString("publicKey")))
 
@@ -257,53 +318,61 @@ class VPNService : android.net.VpnService() {
         if (jAllowedIPList.length() == 0) {
             val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
             peerBuilder.addAllowedIp(internet)
-        } else {
-            (0 until jAllowedIPList.length()).toList().forEach {
-                val network = InetNetwork.parse(jAllowedIPList.getString(it))
-                peerBuilder.addAllowedIp(network)
-            }
-        }
-
-        confBuilder.addPeer(peerBuilder.build())
-
-        val privateKey = obj.getJSONObject("keys").getString("privateKey")
-        val jDevice = obj.getJSONObject("device")
-
-        val ifaceBuilder = Interface.Builder()
-        ifaceBuilder.parsePrivateKey(privateKey)
-        ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv4Address")))
-        ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv6Address")))
-        ifaceBuilder.addDnsServer(InetNetwork.parse(obj.getString("dns")).address)
-        val jExcludedApplication = obj.getJSONArray("excludedApps")
-        (0 until jExcludedApplication.length()).toList().forEach {
-            val appName = jExcludedApplication.get(it).toString()
-            ifaceBuilder.excludeApplication(appName)
-        }
-        confBuilder.setInterface(ifaceBuilder.build())
-        return confBuilder.build()
-    }
-
-    companion object {
-        @JvmStatic
-        fun startService(c: Context) {
-            c.applicationContext.startService(
-                Intent(c.applicationContext, VPNService::class.java).apply {
-                    putExtra("startOnly", true)
+            } else {
+                (0 until jAllowedIPList.length()).toList().forEach {
+                    val network = InetNetwork.parse(jAllowedIPList.getString(it))
+                    peerBuilder.addAllowedIp(network)
                 }
-            )
+            }
+
+            confBuilder.addPeer(peerBuilder.build())
+
+            val privateKey = obj.getJSONObject("keys").getString("privateKey")
+            val jDevice = obj.getJSONObject("device")
+
+            val ifaceBuilder = Interface.Builder()
+            ifaceBuilder.parsePrivateKey(privateKey)
+            ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv4Address")))
+            ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv6Address")))
+            ifaceBuilder.addDnsServer(InetNetwork.parse(obj.getString("dns")).address)
+            val jExcludedApplication = obj.getJSONArray("excludedApps")
+            (0 until jExcludedApplication.length()).toList().forEach {
+                val appName = jExcludedApplication.get(it).toString()
+                ifaceBuilder.excludeApplication(appName)
+            }
+            confBuilder.setInterface(ifaceBuilder.build())
+            return confBuilder.build()
         }
 
-        @JvmStatic
-        private external fun wgGetConfig(handle: Int): String?
-        @JvmStatic
-        private external fun wgGetSocketV4(handle: Int): Int
-        @JvmStatic
-        private external fun wgGetSocketV6(handle: Int): Int
-        @JvmStatic
-        private external fun wgTurnOff(handle: Int)
-        @JvmStatic
-        private external fun wgTurnOn(ifName: String, tunFd: Int, settings: String): Int
-        @JvmStatic
-        private external fun wgVersion(): String?
-    }
-}
+
+        private fun startOpenVpn() {
+            Thread ({
+                mOpenVPNThreadv3?.run()
+                }).start()
+                Log.i(tag, "OpenVPNThreadv3 start")
+            }
+
+            companion object {
+                @JvmStatic
+                fun startService(c: Context) {
+                    c.applicationContext.startService(
+                        Intent(c.applicationContext, VPNService::class.java).apply {
+                            putExtra("startOnly", true)
+                        }
+                        )
+                    }
+
+                    @JvmStatic
+                    private external fun wgGetConfig(handle: Int): String?
+                    @JvmStatic
+                    private external fun wgGetSocketV4(handle: Int): Int
+                    @JvmStatic
+                    private external fun wgGetSocketV6(handle: Int): Int
+                    @JvmStatic
+                    private external fun wgTurnOff(handle: Int)
+                    @JvmStatic
+                    private external fun wgTurnOn(ifName: String, tunFd: Int, settings: String): Int
+                    @JvmStatic
+                    private external fun wgVersion(): String?
+                }
+            }
