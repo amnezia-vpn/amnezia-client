@@ -18,6 +18,7 @@ enum DockerContainer {
     ShadowSocks,
     Cloak,
     WireGuard,
+    Ipsec,
 
     //non-vpn
     TorWebSite,

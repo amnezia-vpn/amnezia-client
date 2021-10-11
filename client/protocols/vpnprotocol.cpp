@@ -4,6 +4,13 @@
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
 
+#include "openvpnprotocol.h"
+#include "shadowsocksvpnprotocol.h"
+#include "openvpnovercloakprotocol.h"
+#include "wireguardprotocol.h"
+#include "ikev2_vpn_protocol.h"
+
+
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
     : QObject(parent),
       m_connectionState(ConnectionState::Unknown),
@@ -86,6 +93,19 @@ void VpnProtocol::setConnectionState(VpnProtocol::ConnectionState state)
 QString VpnProtocol::vpnGateway() const
 {
     return m_vpnGateway;
+}
+
+VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject& configuration)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn: return new OpenVpnProtocol(configuration);
+    case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
+    case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);
+    case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
+    case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
+
+    default: return nullptr;
+    }
 }
 
 QString VpnProtocol::routeGateway() const

@@ -12,6 +12,7 @@ class Debug
 public:
     static bool init();
     static bool openLogsFolder();
+    static bool openServiceLogsFolder();
     static QString appLogFileNamePath();
 
 private:

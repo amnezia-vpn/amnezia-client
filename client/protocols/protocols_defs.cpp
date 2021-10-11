@@ -174,3 +174,13 @@ bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
     default:                      return false;
     }
 }
+
+QString ProtocolProps::key_proto_config_data(Protocol p)
+{
+    return protoToString(p) + "_config_data";
+}
+
+QString ProtocolProps::key_proto_config_path(Protocol p)
+{
+    return protoToString(p) + "_config_path";
+}

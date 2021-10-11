@@ -122,5 +122,9 @@
         <file>server_scripts/sftp/run_container.sh</file>
         <file>ui/qml/Pages/Protocols/PageProtoSftp.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
+        <file>server_scripts/ipsec/configure_container.sh</file>
+        <file>server_scripts/ipsec/Dockerfile</file>
+        <file>server_scripts/ipsec/run_container.sh</file>
+        <file>server_scripts/ipsec/start.sh</file>
     </qresource>
 </RCC>
