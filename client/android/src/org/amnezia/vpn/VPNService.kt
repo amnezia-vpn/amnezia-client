@@ -192,36 +192,16 @@ class VPNService : android.net.VpnService() {
 
         //        NotificationUtil.show(this) // Go foreground
 
-        //        val builder = Builder()
-        //        //        setupBuilder(wireguard_conf, builder)
-        //        builder.addAddress("192.168.194.1", 24)
-        //        builder.addDnsServer("8.8.8.8")
-        //        builder.addRoute("0.0.0.0", 0)
-        //        builder.setSession("mvpn0")
-        //        builder.establish()
-
-
-        // Configure a new interface from our VpnService instance. This must be done
-        //         from inside a VpnService.
-
-//       val builder = Builder()
-        //         Create a local TUN interface using predetermined addresses. In your app,
-        //         you typically use values returned from the VPN gateway during handshaking.
-//        val localTunnel = builder
-//        .addAddress("10.0.20.1", 0)
-//        .addRoute("192.168.111.0", 24)
-//        .addDnsServer("192.168.111.1")
-//        .establish()
-                val localTunnel = mbuilder.establish()
-
-        Log.v(tag, "builder.establish()")
 
         startOpenVpn()
 
-        return localTunnel
+        return 1//localTunnel
 
     }
 
+    fun establish(): ParcelFileDescriptor? {
+        return mbuilder.establish()
+    }
 
     fun setMtu(mtu: Int) {
         Log.v(tag, "setMtu()" + mtu)
@@ -245,9 +225,9 @@ class VPNService : android.net.VpnService() {
 
     fun turnOff() {
         Log.v(tag, "Try to disable tunnel")
-        //        wgTurnOff(currentTunnelHandle)
-        //        currentTunnelHandle = -1
-        //        stopForeground(false)
+        wgTurnOff(currentTunnelHandle)
+        currentTunnelHandle = -1
+        stopForeground(false)
         isUp = false
     }
 
@@ -350,6 +330,7 @@ class VPNService : android.net.VpnService() {
                 mOpenVPNThreadv3?.run()
                 }).start()
                 Log.i(tag, "OpenVPNThreadv3 start")
+                isUp = true
             }
 
             companion object {

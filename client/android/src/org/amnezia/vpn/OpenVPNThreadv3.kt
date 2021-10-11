@@ -37,23 +37,22 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun run() {
         //TEMP
-        Log.i(tag, "run()")
-        val lConfigData: String = readFileDirectlyAsText("/data/local/tmp/osinit.ovpn")
+
+        val lConfigData: String = readFileDirectlyAsText("/data/local/tmp/android_conf.ovpn")
         val config: ClientAPI_Config = ClientAPI_Config()
         config.content = lConfigData
 
-       val lCreds: ClientAPI_ProvideCreds = ClientAPI_ProvideCreds()
+        val lCreds: ClientAPI_ProvideCreds = ClientAPI_ProvideCreds()
         //username from config or GUI
-        lCreds.username = "username"
+        lCreds.username = ""
         //password from config or GUI
-        lCreds.password = "password"
+        lCreds.password = ""
 
         provide_creds(lCreds)
 
-
         eval_config(config)
         connect()
-        Log.i(tag, "connect()")
+        Log.i(tag, "Connect succesfully")
     }
 
     fun readFileDirectlyAsText(fileName: String): String = File(fileName).readText(Charsets.UTF_8)
@@ -67,17 +66,13 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     }
 
 
-
-//      override fun reconnect() {
-//          reconnect(1);
-//      }
     override fun  tun_builder_new(): Boolean {
         return true
     }
 
     override fun tun_builder_establish(): Int {
         Log.v(tag, "tun_builder_establish")
-        return mService.turnOn(null)!!.detachFd()
+        return mService.establish()!!.detachFd()
     }
 
     override fun  tun_builder_add_address(address: String , prefix_length: Int , gateway: String , ipv6:Boolean , net30: Boolean ): Boolean {
@@ -87,6 +82,15 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     }
 
     override fun tun_builder_add_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
+        Log.v(tag, "tun_builder_add_route")
+        if (address.equals("remote_host"))
+        return false
+
+        mService.addRoute(address, prefix_length);
+        return true
+    }
+
+    override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
         if (address.equals("remote_host"))
         return false
 
@@ -100,6 +104,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     }
 
     override fun tun_builder_set_mtu(mtu: Int): Boolean {
+        Log.v(tag, "tun_builder_set_mtu")
         mService.setMtu(mtu)
         return true
     }
@@ -109,5 +114,9 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         return true
     }
 
+    override fun tun_builder_set_session_name(name: String ): Boolean {
+        Log.v(tag, "We should call this session: " + name)
+        return true
+    }
 
 }

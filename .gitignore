@@ -8,6 +8,8 @@ deploy/build/*
 deploy/build_32/*
 deploy/build_64/*
 winbuild*.bat
+client/android/src/net/
+
 
 # Qt-es
 /.qmake.cache

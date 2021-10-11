@@ -193,10 +193,10 @@ android {
        android/gradlew \
        android/gradlew.bat \
        android/res/values/libs.xml \
+    android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
        android/src/org/amnezia/vpn/VpnService.kt \
        android/src/org/amnezia/vpn/VpnServiceBinder.kt \
-       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt \
-       android/src/org/amnezia/vpn/VPNCli.kt
+       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
        ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
