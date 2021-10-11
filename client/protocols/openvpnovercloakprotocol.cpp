@@ -44,7 +44,8 @@ ErrorCode OpenVpnOverCloakProtocol::start()
                                      << "-p" << m_cloakConfig.value(config_key::port).toString(amnezia::protocols::cloak::defaultPort)
                                      << "-l" << amnezia::protocols::openvpn::defaultPort;
 
-    if (m_cloakConfig.value(config_key::transport_proto).toString() == protocols::UDP) {
+    ProtocolEnumNS::TransportProto tp = ProtocolProps::transportProtoFromString(m_cloakConfig.value(config_key::transport_proto).toString());
+    if (tp == ProtocolEnumNS::TransportProto::Udp) {
         args << "-u";
     }
 

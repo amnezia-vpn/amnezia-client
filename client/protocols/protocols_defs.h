@@ -46,10 +46,6 @@ constexpr char last_config[] = "last_config";
 namespace protocols {
 
 
-
-constexpr char UDP[] = "udp"; // case sens
-constexpr char TCP[] = "tcp";
-
 namespace openvpn {
 constexpr char defaultSubnetAddress[] = "10.8.0.0";
 constexpr char defaultSubnetMask[] = "255.255.255.0";
@@ -122,6 +118,8 @@ enum Protocol {
     ShadowSocks,
     Cloak,
     WireGuard,
+    Ikev2,
+    L2tp,
 
     // non-vpn
     TorWebSite,

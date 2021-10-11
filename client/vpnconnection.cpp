@@ -7,6 +7,7 @@
 #include <configurators/cloak_configurator.h>
 #include <configurators/shadowsocks_configurator.h>
 #include <configurators/wireguard_configurator.h>
+#include <configurators/vpn_configurator.h>
 #include <core/servercontroller.h>
 #include <protocols/wireguardprotocol.h>
 
@@ -154,30 +155,19 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     QString configData;
     if (lastVpnConfig.contains(proto)) {
         configData = lastVpnConfig.value(proto);
-        if (proto == Protocol::OpenVpn) {
-            configData = OpenVpnConfigurator::processConfigWithLocalSettings(configData);
-        }
+        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+
         qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
     else {
         qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << ProtocolProps::protoToString(proto);
-        if (proto == Protocol::OpenVpn) {
-            configData = OpenVpnConfigurator::genOpenVpnConfig(credentials,
-                container, containerConfig, &e);
-            configData = OpenVpnConfigurator::processConfigWithLocalSettings(configData);
-        }
-        else if (proto == Protocol::Cloak) {
-            configData = CloakConfigurator::genCloakConfig(credentials,
-                container, containerConfig, &e);
-        }
-        else if (proto == Protocol::ShadowSocks) {
-            configData = ShadowSocksConfigurator::genShadowSocksConfig(credentials,
-                container, containerConfig, &e);
-        }
-        else if (proto == Protocol::WireGuard) {
-            configData = WireguardConfigurator::genWireguardConfig(credentials,
-                container, containerConfig, &e);
-        }
+        configData = VpnConfigurator::genVpnProtocolConfig(credentials,
+                                          container, containerConfig, proto, &e);
+
+        QString configDataBeforeLocalProcessing = configData;
+
+        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+
 
         if (errorCode && e) {
             *errorCode = e;
@@ -188,7 +178,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
         if (serverIndex >= 0) {
             qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container << proto;
             QJsonObject protoObject = m_settings.protocolConfig(serverIndex, container, proto);
-            protoObject.insert(config_key::last_config, configData);
+            protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings.setProtocolConfig(serverIndex, container, proto, protoObject);
         }
     }

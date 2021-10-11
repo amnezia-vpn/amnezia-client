@@ -133,7 +133,9 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
     oldConfig.insert(config_key::subnet_address, lineEditSubnetText());
-    oldConfig.insert(config_key::transport_proto, radioButtonUdpChecked() ? protocols::UDP : protocols::TCP);
+    oldConfig.insert(config_key::transport_proto,
+        ProtocolProps::transportProtoToString(radioButtonUdpChecked() ? ProtocolEnumNS::Udp : ProtocolEnumNS::Tcp));
+
     oldConfig.insert(config_key::ncp_disable, ! checkBoxAutoEncryptionChecked());
     oldConfig.insert(config_key::cipher, comboBoxVpnCipherText());
     oldConfig.insert(config_key::hash, comboBoxVpnHashText());
