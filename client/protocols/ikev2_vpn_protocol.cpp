@@ -145,8 +145,6 @@ ErrorCode Ikev2Protocol::start()
                 qDebug() <<"Can't create the VPN connect";
             }
         }
-
-    }
 //        auto adapterInstallProcess = new QProcess;
 
 //        adapterInstallProcess->setProgram("powershell");
@@ -162,7 +160,7 @@ ErrorCode Ikev2Protocol::start()
 //        adapterInstallProcess->setNativeArguments(arguments);
 //        adapterInstallProcess->start();
 //        adapterInstallProcess->waitForFinished(5000);
-//    }
+    }
 
     {
         auto adapterConfigProcess = new QProcess;
@@ -205,7 +203,6 @@ ErrorCode Ikev2Protocol::start()
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void Ikev2Protocol::conn_state(){
 
-    //while ( _stoped != true){
     if (hRasConn != nullptr){
         RASCONNSTATUS cs;
         cs.dwSize = sizeof(RASCONNSTATUS);
@@ -218,12 +215,12 @@ void Ikev2Protocol::conn_state(){
         if (cs.rasconnstate == 0)//disconnected
         {
             setConnectionState(Disconnected);
+            _conn_state->stop();
         }
     }else{
         setConnectionState(Disconnected);
+        _conn_state->stop();
     }
-    //  std::this_thread::sleep_for(std::chrono::seconds(5));
-    //}
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #ifdef Q_OS_WINDOWS
