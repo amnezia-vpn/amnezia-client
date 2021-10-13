@@ -232,7 +232,6 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
         m_vpnProtocol.reset();
     }
 
-
     ErrorCode e = ErrorCode::NoError;
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
     if (e) {
@@ -252,8 +251,12 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
 
 #else
-    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(Protocol::OpenVpn, m_vpnConfiguration);
-    androidVpnProtocol->initialize();
+    Protocol proto = ContainerProps::defaultProtocol(container);
+    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
+    if (!androidVpnProtocol->initialize()) {
+         qDebug() << QString("Init failed") ;
+         return UnknownError;
+    }
     m_vpnProtocol.reset(androidVpnProtocol);
 #endif
 

@@ -58,7 +58,7 @@ AndroidVpnProtocol* AndroidVpnProtocol::instance() {
     return s_instance;
 }
 
-void AndroidVpnProtocol::initialize()
+bool AndroidVpnProtocol::initialize()
 {
     qDebug() << "Initializing";
 
@@ -81,9 +81,12 @@ void AndroidVpnProtocol::initialize()
         "(Landroid/content/Context;)V", appContext.object());
 
     // Start the VPN Service (if not yet) and Bind to it
-    QtAndroid::bindService(
+    const bool bindResult = QtAndroid::bindService(
         QAndroidIntent(appContext.object(), "org.amnezia.vpn.VPNService"),
         *this, QtAndroid::BindFlag::AutoCreate);
+    qDebug() << "Binding to the service..." << bindResult;
+
+    return bindResult;
 }
 
 ErrorCode AndroidVpnProtocol::start()
@@ -91,45 +94,49 @@ ErrorCode AndroidVpnProtocol::start()
 
     qDebug() << "Prompting for VPN permission";
     auto appContext = QtAndroid::androidActivity().callObjectMethod(
-        "getApplicationContext", "()Landroid/content/Context;");
+                "getApplicationContext", "()Landroid/content/Context;");
     QAndroidJniObject::callStaticMethod<void>(
-        PERMISSIONHELPER_CLASS, "startService", "(Landroid/content/Context;)V",
-        appContext.object());
+                PERMISSIONHELPER_CLASS, "startService", "(Landroid/content/Context;)V",
+                appContext.object());
 
 
-//    QJsonObject jServer;
-//    jServer["ipv4AddrIn"] = server.ipv4AddrIn();
-//    jServer["ipv4Gateway"] = server.ipv4Gateway();
-//    jServer["ipv6AddrIn"] = server.ipv6AddrIn();
-//    jServer["ipv6Gateway"] = server.ipv6Gateway();
-//    jServer["publicKey"] = server.publicKey();
-//    jServer["port"] = (int)server.choosePort();
+    //    QJsonObject jServer;
+    //    jServer["ipv4AddrIn"] = server.ipv4AddrIn();
+    //    jServer["ipv4Gateway"] = server.ipv4Gateway();
+    //    jServer["ipv6AddrIn"] = server.ipv6AddrIn();
+    //    jServer["ipv6Gateway"] = server.ipv6Gateway();
+    //    jServer["publicKey"] = server.publicKey();
+    //    jServer["port"] = (int)server.choosePort();
 
-//    QJsonArray allowedIPs;
-//    foreach (auto item, allowedIPAddressRanges) {
-//      QJsonValue val;
-//      val = item.toString();
-//      allowedIPs.append(val);
-//    }
+    //    QJsonArray allowedIPs;
+    //    foreach (auto item, allowedIPAddressRanges) {
+    //      QJsonValue val;
+    //      val = item.toString();
+    //      allowedIPs.append(val);
+    //    }
 
-//    QJsonArray excludedApps;
-//    foreach (auto appID, vpnDisabledApps) {
-//      excludedApps.append(QJsonValue(appID));
-//    }
+    //    QJsonArray excludedApps;
+    //    foreach (auto appID, vpnDisabledApps) {
+    //      excludedApps.append(QJsonValue(appID));
+    //    }
 
-//    QJsonObject args;
-//    args["device"] = jDevice;
-//    args["keys"] = jKeys;
-//    args["server"] = jServer;
-//    args["reason"] = (int)reason;
-//    args["allowedIPs"] = allowedIPs;
-//    args["excludedApps"] = excludedApps;
-//    args["dns"] = dns.toString();
+    //    QJsonObject args;
+    //    args["device"] = jDevice;
+    //    args["keys"] = jKeys;
+    //    args["server"] = jServer;
+    //    args["reason"] = (int)reason;
+    //    args["allowedIPs"] = allowedIPs;
+    //    args["excludedApps"] = excludedApps;
+    //    args["dns"] = dns.toString();
 
     QAndroidParcel sendData;
     sendData.writeData(QJsonDocument(m_rawConfig).toJson());
-    m_serviceBinder.transact(ACTION_ACTIVATE, sendData, nullptr);
-    return NoError;
+    bool activateResult = false;
+    while (!activateResult){
+        activateResult = m_serviceBinder.transact(ACTION_ACTIVATE, sendData, nullptr);
+    }
+
+    return activateResult ? NoError : UnknownError;
 }
 
 // Activates the tunnel that is currently set
@@ -212,7 +219,7 @@ void AndroidVpnProtocol::cleanupBackendLogs() {
 
 void AndroidVpnProtocol::onServiceConnected(
     const QString& name, const QAndroidBinder& serviceBinder) {
-  qDebug() << "Server connected";
+  qDebug() << "Server " + name + " connected";
 
   Q_UNUSED(name);
 

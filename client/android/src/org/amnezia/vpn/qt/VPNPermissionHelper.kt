@@ -16,8 +16,8 @@ class VPNPermissionHelper : android.net.VpnService() {
      * is present and prompting if not.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(tag, "onStartCommand")
         val intent = prepare(this.applicationContext)
-         Log.i(tag, "VPNPermissionHelper onStartCommand")
         if (intent != null) {
             startActivityForResult(intent)
         }

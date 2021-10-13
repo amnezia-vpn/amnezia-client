@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<Protocol>("Protocol");
     qRegisterMetaType<ServiceType>("ServiceType");
     qRegisterMetaType<Page>("Page");
+    qRegisterMetaType<VpnProtocol::ConnectionState>("ConnectionState");
 
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
 
