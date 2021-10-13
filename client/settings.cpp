@@ -167,8 +167,9 @@ void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Pro
 
 void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto)
 {
+    // recursively remove
     if (proto == Protocol::Any) {
-        for (Protocol p: { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak, Protocol::WireGuard}) {
+        for (Protocol p: ContainerProps::protocolsForContainer(container)) {
             clearLastConnectionConfig(serverIndex, container, p);
         }
         return;

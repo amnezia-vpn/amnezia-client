@@ -130,7 +130,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    e = ServerController::runScript(ServerController::sshParams(credentials),
+    e = ServerController::runScript(credentials,
         ServerController::replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
             ServerController::genVarsForScript(credentials, container)));
 
@@ -158,8 +158,10 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
     config.replace("$WIREGUARD_PSK", connData.pskKey);
 
-    qDebug().noquote() << config;
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
@@ -168,7 +170,10 @@ QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString WireguardConfigurator::processConfigWithExportSettings(QString config)

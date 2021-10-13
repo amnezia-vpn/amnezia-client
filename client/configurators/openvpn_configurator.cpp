@@ -5,6 +5,7 @@
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <QJsonObject>
 
 #include "core/server_defs.h"
 #include "containers/containers_defs.h"
@@ -242,16 +243,14 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     config.replace("block-outside-dns", "");
 #endif
 
-    //qDebug().noquote() << config;
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
 QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
 {
-    // TODO replace DNS if it already set
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
-
     if (m_settings().routeMode() != Settings::VpnAllSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
@@ -277,9 +276,6 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
 
 QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
 {
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
-
     if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
         config.append("redirect-gateway def1 bypass-dhcp\n");
     }
@@ -308,5 +304,5 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
     QStringList scriptList {script_import, script_sign};
     QString script = ServerController::replaceVars(scriptList.join("\n"), ServerController::genVarsForScript(credentials, container));
 
-    return ServerController::runScript(ServerController::sshParams(credentials), script);
+    return ServerController::runScript(credentials, script);
 }

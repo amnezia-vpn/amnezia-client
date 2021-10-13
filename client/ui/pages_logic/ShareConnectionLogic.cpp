@@ -194,7 +194,7 @@ void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
     QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
     cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
 
-    set_textEditShareOpenVpnCodeText(cfg);
+    set_textEditShareOpenVpnCodeText(QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString());
 
     set_pushButtonShareOpenVpnGenerateEnabled(true);
     set_pushButtonShareOpenVpnCopyEnabled(true);

@@ -43,7 +43,7 @@ TransportProto ProtocolProps::transportProtoFromString(QString p)
     QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
     for (int i = 0; i < metaEnum.keyCount(); ++i) {
         TransportProto tp = static_cast<TransportProto>(i);
-        if (p.toLower() == transportProtoToString(tp)) return tp;
+        if (p.toLower() == transportProtoToString(tp).toLower()) return tp;
     }
     return TransportProto::Udp;
 }
@@ -52,12 +52,17 @@ QString ProtocolProps::transportProtoToString(TransportProto proto, Protocol p)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
     QString protoKey = metaEnum.valueToKey(static_cast<int>(proto));
-    if (p == Protocol::OpenVpn){
-        return protoKey.toUpper();
-    }
-    else {
-        return protoKey.toLower();
-    }
+    return protoKey.toLower();
+
+//    if (p == Protocol::OpenVpn){
+//        return protoKey.toLower();
+//    }
+//    else if (p == Protocol::ShadowSocks) {
+//        return protoKey.toUpper();
+//    }
+//    else {
+//        return protoKey.toLower();
+//    }
 }
 
 
@@ -103,6 +108,9 @@ int ProtocolProps::defaultPort(Protocol p)
     case Protocol::Cloak :        return 443;
     case Protocol::ShadowSocks :  return 6789;
     case Protocol::WireGuard :    return 51820;
+    case Protocol::Ikev2 :        return -1;
+    case Protocol::L2tp :         return -1;
+
     case Protocol::TorWebSite :   return -1;
     case Protocol::Dns :          return 53;
     case Protocol::FileShare :    return 139;
@@ -119,7 +127,11 @@ bool ProtocolProps::defaultPortChangeable(Protocol p)
     case Protocol::Cloak :        return true;
     case Protocol::ShadowSocks :  return true;
     case Protocol::WireGuard :    return true;
-    case Protocol::TorWebSite :      return true;
+    case Protocol::Ikev2 :        return false;
+    case Protocol::L2tp :         return false;
+
+
+    case Protocol::TorWebSite :   return true;
     case Protocol::Dns :          return false;
     case Protocol::FileShare :    return false;
     default:                      return -1;
@@ -134,12 +146,13 @@ TransportProto ProtocolProps::defaultTransportProto(Protocol p)
     case Protocol::Cloak :        return TransportProto::Tcp;
     case Protocol::ShadowSocks :  return TransportProto::Tcp;
     case Protocol::WireGuard :    return TransportProto::Udp;
+    case Protocol::Ikev2 :        return TransportProto::Udp;
+    case Protocol::L2tp :         return TransportProto::Udp;
     // non-vpn
     case Protocol::TorWebSite :   return TransportProto::Tcp;
     case Protocol::Dns :          return TransportProto::Udp;
     case Protocol::FileShare :    return TransportProto::Udp;
     case Protocol::Sftp :         return TransportProto::Tcp;
-    default:                      return TransportProto::Udp;
     }
 }
 
@@ -151,6 +164,8 @@ bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
     case Protocol::Cloak :        return false;
     case Protocol::ShadowSocks :  return false;
     case Protocol::WireGuard :    return false;
+    case Protocol::Ikev2 :        return false;
+    case Protocol::L2tp :         return false;
     // non-vpn
     case Protocol::TorWebSite :   return false;
     case Protocol::Dns :          return false;
@@ -158,4 +173,14 @@ bool ProtocolProps::defaultTransportProtoChangeable(Protocol p)
     case Protocol::Sftp :         return false;
     default:                      return false;
     }
+}
+
+QString ProtocolProps::key_proto_config_data(Protocol p)
+{
+    return protoToString(p) + "_config_data";
+}
+
+QString ProtocolProps::key_proto_config_path(Protocol p)
+{
+    return protoToString(p) + "_config_path";
 }

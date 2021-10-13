@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "core/servercontroller.h"
 
+// Retrieve connection settings from server
 class VpnConfigurator
 {
 public:
@@ -14,9 +15,14 @@ public:
     static QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, Protocol proto, ErrorCode *errorCode = nullptr);
 
+    static QString processConfigWithLocalSettings(DockerContainer container, Protocol proto, QString config);
+    static QString processConfigWithExportSettings(DockerContainer container, Protocol proto, QString config);
+
+    // workaround for containers which is not support normal configaration
     static void updateContainerConfigAfterInstallation(DockerContainer container,
         QJsonObject &containerConfig, const QString &stdOut);
 
+    static Settings &m_settings();
 };
 
 #endif // VPN_CONFIGURATOR_H

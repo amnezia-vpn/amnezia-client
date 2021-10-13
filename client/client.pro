@@ -19,6 +19,7 @@ include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 HEADERS  += \
     ../ipc/ipc.h \
    configurators/cloak_configurator.h \
+   configurators/ikev2_configurator.h \
    configurators/shadowsocks_configurator.h \
    configurators/ssh_configurator.h \
    configurators/vpn_configurator.h \
@@ -34,6 +35,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+   protocols/ikev2_vpn_protocol.h \
    protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
     protocols/shadowsocksvpnprotocol.h \
@@ -73,6 +75,7 @@ HEADERS  += \
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
+   configurators/ikev2_configurator.cpp \
    configurators/shadowsocks_configurator.cpp \
    configurators/ssh_configurator.cpp \
    configurators/vpn_configurator.cpp \
@@ -87,6 +90,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+   protocols/ikev2_vpn_protocol.cpp \
    protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
     protocols/shadowsocksvpnprotocol.cpp \
@@ -121,9 +125,6 @@ SOURCES  += \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     protocols/openvpnprotocol.cpp \
-
-FORMS    += \
-   ui/server_widget.ui
 
 RESOURCES += \
     resources.qrc
@@ -174,10 +175,37 @@ macx {
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
 }
 
+android {
+   QT += androidextras
+
+   INCLUDEPATH += platforms/android
+
+   HEADERS +=    protocols/android_vpnprotocol.h \
+
+
+   SOURCES +=    protocols/android_vpnprotocol.cpp \
+
+
+   DISTFILES += \
+       android/AndroidManifest.xml \
+       android/build.gradle \
+       android/gradle/wrapper/gradle-wrapper.jar \
+       android/gradle/wrapper/gradle-wrapper.properties \
+       android/gradlew \
+       android/gradlew.bat \
+       android/res/values/libs.xml
+
+   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+   for (abi, ANDROID_ABIS): {
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
+   }
+
+}
+
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
 
-DISTFILES += \
-   android/AndroidManifest.xml
 
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

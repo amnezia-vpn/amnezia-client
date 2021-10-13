@@ -1,37 +1,3 @@
-﻿//#include <QApplication>
-//#include <QClipboard>
-//#include <QDebug>
-//#include <QDesktopServices>
-//#include <QFileDialog>
-//#include <QHBoxLayout>
-//#include <QHostInfo>
-//#include <QItemSelectionModel>
-//#include <QJsonDocument>
-//#include <QJsonObject>
-//#include <QKeyEvent>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMetaEnum>
-//#include <QSysInfo>
-//#include <QThread>
-//#include <QTimer>
-//#include <QRegularExpression>
-//#include <QSaveFile>
-
-//#include "configurators/cloak_configurator.h"
-//#include "configurators/vpn_configurator.h"
-//#include "configurators/openvpn_configurator.h"
-//#include "configurators/shadowsocks_configurator.h"
-//#include "configurators/ssh_configurator.h"
-
-//#include "core/servercontroller.h"
-//#include "core/server_defs.h"
-//#include "core/errorstrings.h"
-
-//#include "containers/containers_defs.h"
-//#include "protocols/shadowsocksvpnprotocol.h"
-
-
 #include "VpnLogic.h"
 
 #include "core/errorstrings.h"
@@ -52,7 +18,6 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     m_labelSpeedReceivedText{tr("0 Mbps")},
     m_labelSpeedSentText{tr("0 Mbps")},
     m_labelStateText{},
-    m_pushButtonConnectEnabled{false},
     m_widgetVpnModeEnabled{false}
 {
     connect(uiLogic()->m_vpnConnection, &VpnConnection::bytesChanged, this, &VpnLogic::onBytesChanged);
@@ -107,10 +72,10 @@ void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
 
 void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 {
-    qDebug() << "UiLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
+    qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
 
-    bool pushButtonConnectEnabled = false;
-    bool radioButtonsModeEnabled = false;
+    bool pbConnectEnabled = false;
+    bool rbModeEnabled = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
 
     uiLogic()->setTrayState(state);
@@ -119,41 +84,41 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     case VpnProtocol::Disconnected:
         onBytesChanged(0,0);
         set_pushButtonConnectChecked(false);
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
+        pbConnectEnabled = true;
+        rbModeEnabled = true;
         break;
     case VpnProtocol::Preparing:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
+        pbConnectEnabled = false;
+        rbModeEnabled = false;
         break;
     case VpnProtocol::Connecting:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
+        pbConnectEnabled = false;
+        rbModeEnabled = false;
         break;
     case VpnProtocol::Connected:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = false;
+        pbConnectEnabled = true;
+        rbModeEnabled = false;
         break;
     case VpnProtocol::Disconnecting:
-        pushButtonConnectEnabled = false;
-        radioButtonsModeEnabled = false;
+        pbConnectEnabled = false;
+        rbModeEnabled = false;
         break;
     case VpnProtocol::Reconnecting:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = false;
+        pbConnectEnabled = true;
+        rbModeEnabled = false;
         break;
     case VpnProtocol::Error:
         set_pushButtonConnectEnabled(false);
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
+        pbConnectEnabled = true;
+        rbModeEnabled = true;
         break;
     case VpnProtocol::Unknown:
-        pushButtonConnectEnabled = true;
-        radioButtonsModeEnabled = true;
+        pbConnectEnabled = true;
+        rbModeEnabled = true;
     }
 
-    set_pushButtonConnectEnabled(pushButtonConnectEnabled);
-    set_widgetVpnModeEnabled(radioButtonsModeEnabled);
+    set_pushButtonConnectEnabled(pbConnectEnabled);
+    set_widgetVpnModeEnabled(rbModeEnabled);
 }
 
 void VpnLogic::onVpnProtocolError(ErrorCode errorCode)
@@ -197,11 +162,12 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 {
     set_labelErrorText("");
     set_pushButtonConnectChecked(true);
+    set_pushButtonConnectEnabled(false);
+
     qApp->processEvents();
 
     ErrorCode errorCode = uiLogic()->m_vpnConnection->connectToVpn(
-                serverIndex, credentials, container, containerConfig
-                );
+                serverIndex, credentials, container, containerConfig);
 
     if (errorCode) {
         //ui->pushButton_connect->setChecked(false);
@@ -210,7 +176,6 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
         return;
     }
 
-    set_pushButtonConnectEnabled(false);
 }
 
 void VpnLogic::onDisconnect()

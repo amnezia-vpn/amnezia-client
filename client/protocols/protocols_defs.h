@@ -16,14 +16,16 @@ constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
 constexpr char description[] = "description";
+constexpr char cert[] = "cert";
+constexpr char config[] = "config";
 
 
 constexpr char containers[] = "containers";
 constexpr char container[] = "container";
 constexpr char defaultContainer[] = "defaultContainer";
 
+constexpr char protocol[] = "protocol";
 constexpr char protocols[] = "protocols";
-//constexpr char protocol[] = "protocol";
 
 constexpr char remote[] = "remote";
 constexpr char transport_proto[] = "transport_proto";
@@ -45,10 +47,6 @@ constexpr char last_config[] = "last_config";
 
 namespace protocols {
 
-
-
-constexpr char UDP[] = "udp"; // case sens
-constexpr char TCP[] = "tcp";
 
 namespace openvpn {
 constexpr char defaultSubnetAddress[] = "10.8.0.0";
@@ -122,6 +120,8 @@ enum Protocol {
     ShadowSocks,
     Cloak,
     WireGuard,
+    Ikev2,
+    L2tp,
 
     // non-vpn
     TorWebSite,
@@ -165,6 +165,10 @@ public:
 
     Q_INVOKABLE static TransportProto defaultTransportProto(Protocol p);
     Q_INVOKABLE static bool defaultTransportProtoChangeable(Protocol p);
+
+
+    Q_INVOKABLE static QString key_proto_config_data(Protocol p);
+    Q_INVOKABLE static QString key_proto_config_path(Protocol p);
 
 };
 

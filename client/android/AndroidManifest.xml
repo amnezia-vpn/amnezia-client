@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
-<manifest package="org.qtproject.example" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
-    <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
-         Remove the comment if you do not require these default permissions. -->
-    <!-- %%INSERT_PERMISSIONS -->
+<manifest package="org.amnezia.vpn" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
+
+   <uses-permission android:name="android.permission.INTERNET" />
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+
 
     <!-- The following comment will be replaced upon deployment with default features based on the dependencies of the application.
          Remove the comment if you do not require these default features. -->
@@ -76,6 +81,19 @@
             <meta-data android:name="android.app.extract_android_style" android:value="default"/>
             <!-- extract android style -->
     </activity>
+
+    <service android:name=".VPNService"
+        android:permission="android.permission.BIND_VPN_SERVICE">
+        <intent-filter>
+            <action android:name="android.net.VpnService"/>
+        </intent-filter>
+    </service>
+    <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper"
+        android:process=":QtOnlyProcess"
+        android:permission="android.permission.BIND_VPN_SERVICE">
+    </service>
+
+
 
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 

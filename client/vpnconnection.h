@@ -30,8 +30,9 @@ public:
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Protocol proto,
         ErrorCode *errorCode = nullptr);
 
-    ErrorCode createVpnConfiguration(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+    QJsonObject createVpnConfiguration(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container,
+        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     ErrorCode connectToVpn(int serverIndex,
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);

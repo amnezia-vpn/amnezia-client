@@ -6,6 +6,8 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
+#include "containers/containers_defs.h"
+
 using namespace amnezia;
 
 class QTimer;
@@ -23,6 +25,7 @@ public:
 
     static QString textConnectionState(ConnectionState connectionState);
 
+    virtual ErrorCode prepare() { return ErrorCode::NoError; }
 
     virtual bool isConnected() const;
     virtual bool isDisconnected() const;
@@ -37,12 +40,21 @@ public:
     QString routeGateway() const;
     QString vpnGateway() const;
 
+    static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(VpnProtocol::ConnectionState state);
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
+    // This signal is emitted when the controller is initialized. Note that the
+    // VPN tunnel can be already active. In this case, "connected" should be set
+    // to true and the "connectionDate" should be set to the activation date if
+    // known.
+    // If "status" is set to false, the backend service is considered unavailable.
+    void initialized(bool status, bool connected,
+                     const QDateTime& connectionDate);
 protected slots:
     virtual void onTimeout();
 

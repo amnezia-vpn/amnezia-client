@@ -332,6 +332,7 @@ PageBase {
 
                                 checked: default_role
                                 onClicked: {
+                                    tb_c.currentIndex = -1
                                     ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
                                 }
 

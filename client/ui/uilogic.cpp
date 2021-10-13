@@ -294,10 +294,9 @@ void UiLogic::showOnStartup()
 void UiLogic::keyPressEvent(Qt::Key key)
 {
     switch (key) {
-    case Qt::Key_L:
-        if (!Debug::openLogsFolder()) {
-            //QMessageBox::warning(this, APPLICATION_NAME, tr("Cannot open logs folder!"));
-        }
+    case Qt::Key_L: Debug::openLogsFolder();
+        break;
+    case Qt::Key_K: Debug::openServiceLogsFolder();
         break;
 #ifdef QT_DEBUG
     case Qt::Key_Q:
