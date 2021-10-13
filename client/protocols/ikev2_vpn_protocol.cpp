@@ -21,6 +21,8 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
 {
     //m_configFile.setFileTemplate(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     readIkev2Configuration(configuration);
+
+    connect(_conn_state, &QTimer::timeout, this, &Ikev2Protocol::conn_state);
 }
 
 Ikev2Protocol::~Ikev2Protocol()
@@ -32,7 +34,6 @@ Ikev2Protocol::~Ikev2Protocol()
 #endif
     Ikev2Protocol::stop();
     QThread::msleep(200);
-    _th_conn_state->join();
     _thr->join();
 }
 
@@ -120,16 +121,16 @@ ErrorCode Ikev2Protocol::start()
 
         certInstallProcess->start();
     }
-   // /*
+    // /*
     {
-//        auto adapterRemoveProcess = new QProcess;
+        //        auto adapterRemoveProcess = new QProcess;
 
-//        adapterRemoveProcess->setProgram("powershell");
-//        QString arguments = QString("-command \"Remove-VpnConnection -Name '%1' -Force\"").arg(tunnelName());
-//        adapterRemoveProcess->setNativeArguments(arguments);
+        //        adapterRemoveProcess->setProgram("powershell");
+        //        QString arguments = QString("-command \"Remove-VpnConnection -Name '%1' -Force\"").arg(tunnelName());
+        //        adapterRemoveProcess->setNativeArguments(arguments);
 
-//        adapterRemoveProcess->start();
-//        adapterRemoveProcess->waitForFinished(5000);
+        //        adapterRemoveProcess->start();
+        //        adapterRemoveProcess->waitForFinished(5000);
         if ( disconnect_vpn()){
             qDebug()<<"VPN was disconnected";
         }
@@ -139,27 +140,29 @@ ErrorCode Ikev2Protocol::start()
     }
 
     {
-//        {
-//            if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
-//                qDebug() <<"Can't create the VPN connect";
-//            }
-//        }
-        auto adapterInstallProcess = new QProcess;
+        {
+            if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
+                qDebug() <<"Can't create the VPN connect";
+            }
+        }
 
-        adapterInstallProcess->setProgram("powershell");
-        QString arguments = QString("-command \"Add-VpnConnection "
-                                    "-ServerAddress '%1' "
-                                    "-Name '%2' "
-                                    "-TunnelType IKEv2 "
-                                    "-AuthenticationMethod MachineCertificate "
-                                    "-EncryptionLevel Required "
-                                    "-PassThru\"")
-                .arg(m_config[config_key::hostName].toString())
-                .arg(tunnelName());
-        adapterInstallProcess->setNativeArguments(arguments);
-        adapterInstallProcess->start();
-        adapterInstallProcess->waitForFinished(5000);
     }
+//        auto adapterInstallProcess = new QProcess;
+
+//        adapterInstallProcess->setProgram("powershell");
+//        QString arguments = QString("-command \"Add-VpnConnection "
+//                                    "-ServerAddress '%1' "
+//                                    "-Name '%2' "
+//                                    "-TunnelType IKEv2 "
+//                                    "-AuthenticationMethod MachineCertificate "
+//                                    "-EncryptionLevel Required "
+//                                    "-PassThru\"")
+//                .arg(m_config[config_key::hostName].toString())
+//                .arg(tunnelName());
+//        adapterInstallProcess->setNativeArguments(arguments);
+//        adapterInstallProcess->start();
+//        adapterInstallProcess->waitForFinished(5000);
+//    }
 
     {
         auto adapterConfigProcess = new QProcess;
@@ -186,7 +189,7 @@ ErrorCode Ikev2Protocol::start()
     }
     //*/
     {
-       if (connect_to_vpn(tunnelName())){
+        if (connect_to_vpn(tunnelName())){
             _thr = std::make_unique<std::thread>(&Ikev2Protocol::_ikev2_states, this);
         }else{
             qDebug()<<"We can't connect to VPN";
@@ -202,53 +205,55 @@ ErrorCode Ikev2Protocol::start()
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void Ikev2Protocol::conn_state(){
 
-    while ( _stoped != true){
-        if (hRasConn != nullptr){
-            RASCONNSTATUS cs;
-            cs.dwSize = sizeof(RASCONNSTATUS);
-            RasGetConnectStatus(hRasConn, &cs);
-            qDebug()<<"Current state RAS= "<< cs.rasconnstate;
-            if (cs.rasconnstate == RASCS_DONE)//connected
-            {
-                 setConnectionState(Connected);
-            }
-            if (cs.rasconnstate == 0)//disconnected
-            {
-                 setConnectionState(Disconnected);
-            }
+    //while ( _stoped != true){
+    if (hRasConn != nullptr){
+        RASCONNSTATUS cs;
+        cs.dwSize = sizeof(RASCONNSTATUS);
+        RasGetConnectStatus(hRasConn, &cs);
+        qDebug()<<"Current state RAS= "<< cs.rasconnstate;
+        if (cs.rasconnstate == RASCS_DONE)//connected
+        {
+            setConnectionState(Connected);
         }
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        if (cs.rasconnstate == 0)//disconnected
+        {
+            setConnectionState(Disconnected);
+        }
+    }else{
+        setConnectionState(Disconnected);
     }
+    //  std::this_thread::sleep_for(std::chrono::seconds(5));
+    //}
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #ifdef Q_OS_WINDOWS
-//bool Ikev2Protocol::create_new_vpn(const QString & vpn_name,
-//                                   const QString & serv_addr){
+bool Ikev2Protocol::create_new_vpn(const QString & vpn_name,
+                                   const QString & serv_addr){
 
-//    if ( RasValidateEntryName(nullptr, vpn_name.toStdWString().c_str()) != ERROR_SUCCESS)
-//        return false;
-//    DWORD size = 0;
-//    ::RasGetEntryProperties(nullptr, L"", nullptr, &size, nullptr, nullptr);
-//    LPRASENTRY pras = static_cast<LPRASENTRY>(malloc(size));
-//    memset(pras, 0, size);
-//    pras->dwSize = size;
-//    pras->dwType = RASET_Vpn;
-//    pras->dwRedialCount = 1;
-//    pras->dwRedialPause = 60;
-//    pras->dwfNetProtocols =  RASNP_Ip|RASNP_Ipv6;
-//    pras->dwEncryptionType = ET_RequireMax;
-//    wcscpy_s(pras->szLocalPhoneNumber, serv_addr.toStdWString().c_str());
-//    wcscpy_s(pras->szDeviceType, RASDT_Vpn);
-//    pras->dwfOptions = RASEO_RemoteDefaultGateway;
-//    pras->dwfOptions |= RASEO_RequireDataEncryption;
-//    pras->dwfOptions2 |= RASEO2_RequireMachineCertificates;
-//    pras->dwVpnStrategy = VS_Ikev2Only;
-//    const auto nRet = ::RasSetEntryProperties(nullptr, vpn_name.toStdWString().c_str(), pras, pras->dwSize, NULL, 0);
-//    free(pras);
-//    if (nRet == ERROR_SUCCESS)
-//        return true;
-//    return false;
-//}
+    if ( RasValidateEntryName(nullptr, vpn_name.toStdWString().c_str()) != ERROR_SUCCESS)
+        return false;
+    DWORD size = 0;
+    ::RasGetEntryProperties(nullptr, L"", nullptr, &size, nullptr, nullptr);
+    LPRASENTRY pras = static_cast<LPRASENTRY>(malloc(size));
+    memset(pras, 0, size);
+    pras->dwSize = size;
+    pras->dwType = RASET_Vpn;
+    pras->dwRedialCount = 1;
+    pras->dwRedialPause = 60;
+    pras->dwfNetProtocols =  RASNP_Ip|RASNP_Ipv6;
+    pras->dwEncryptionType = ET_RequireMax;
+    wcscpy_s(pras->szLocalPhoneNumber, serv_addr.toStdWString().c_str());
+    wcscpy_s(pras->szDeviceType, RASDT_Vpn);
+    pras->dwfOptions = RASEO_RemoteDefaultGateway;
+    pras->dwfOptions |= RASEO_RequireDataEncryption;
+    pras->dwfOptions2 |= RASEO2_RequireMachineCertificates;
+    pras->dwVpnStrategy = VS_Ikev2Only;
+    const auto nRet = ::RasSetEntryProperties(nullptr, vpn_name.toStdWString().c_str(), pras, pras->dwSize, NULL, 0);
+    free(pras);
+    if (nRet == ERROR_SUCCESS)
+        return true;
+    return false;
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name){
 
@@ -267,7 +272,8 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
                        &Ikev2Protocol::RasDialFuncCallback,
                        &hRasConn);
     if (ret == ERROR_SUCCESS){
-        _th_conn_state = std::make_unique<std::thread>(&Ikev2Protocol::conn_state, this);
+        //_th_conn_state = std::make_unique<std::thread>(&Ikev2Protocol::conn_state, this);
+        _conn_state->start(5000);
         return true;
     }
     return false;
@@ -278,6 +284,7 @@ bool Ikev2Protocol::disconnect_vpn(){
         if ( RasHangUp(hRasConn) != ERROR_SUCCESS)
             return false;
     }
+    std::this_thread::sleep_for(std::chrono::seconds(3));
     return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -293,49 +300,49 @@ void Ikev2Protocol::_ikev2_states(){
         switch (_connection_state)
         {
         case RASCS_OpenPort:
-            setConnectionState(Preparing);
+            //setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_OpenPort = %d\n", _connection_state);
             //printf ("Opening port...\n");
             break;
         case RASCS_PortOpened:
-            setConnectionState(Preparing);
+            //setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_PortOpened = %d\n", _connection_state);
             //printf ("Port opened.\n");
             break;
         case RASCS_ConnectDevice:
-            setConnectionState(Preparing);
+            //setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_ConnectDevice = %d\n", _connection_state);
             //printf ("Connecting device...\n");
             break;
         case RASCS_DeviceConnected:
-            setConnectionState(Preparing);
+            //setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_DeviceConnected = %d\n", _connection_state);
             //printf ("Device connected.\n");
             break;
         case RASCS_AllDevicesConnected:
-            setConnectionState(Preparing);
+            //setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_AllDevicesConnected = %d\n", _connection_state);
             //printf ("All devices connected.\n");
             break;
         case RASCS_Authenticate:
-            setConnectionState(Preparing);
+            // setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_Authenticate = %d\n", _connection_state);
             // printf ("Authenticating...\n");
             break;
         case RASCS_AuthNotify:
-            setConnectionState(Disconnected);
+            //setConnectionState(Disconnected);
             qDebug()<<__LINE__;
             //printf ("RASCS_AuthNotify = %d\n", _connection_state);
             // printf ("Authentication notify.\n");
             break;
         case RASCS_AuthRetry:
-            setConnectionState(Preparing);
+            // setConnectionState(Preparing);
             qDebug()<<__LINE__;
             //printf ("RASCS_AuthRetry = %d\n", _connection_state);
             //printf ("Retrying authentication...\n");
@@ -447,14 +454,16 @@ void Ikev2Protocol::_ikev2_states(){
             break;
 
         case RASCS_Connected: // = RASCS_DONE:
-            setConnectionState(Connected);
+            //setConnectionState(Connected);
             qDebug()<<__LINE__;
             //printf ("RASCS_Connected = %d\n", _connection_state);
             //printf ("Connection completed.\n");
             //SetEvent(gEvent_handle);
+            newEvent = false;
+            return;
             break;
         case RASCS_Disconnected:
-            setConnectionState(Disconnected);
+            //setConnectionState(Disconnected);
             qDebug()<<__LINE__;
             //printf ("RASCS_Disconnected = %d\n", _connection_state);
             //printf ("Disconnecting...\n");
@@ -475,9 +484,8 @@ void Ikev2Protocol::_ikev2_states(){
 #ifdef Q_OS_WINDOWS
 void WINAPI Ikev2Protocol::RasDialFuncCallback(UINT /*unMsg*/,
                                                RASCONNSTATE rasconnstate,
-                                               DWORD dwError ){
+                                               DWORD /*dwError*/ ){
 
-    qDebug() << "Ikev2Protocol::RasDialFuncCallback" << rasconnstate << dwError;
     _connection_state = rasconnstate;
     newEvent = true;
     cv.notify_all();

@@ -59,8 +59,8 @@ private:
 #ifdef Q_OS_WIN
     //RAS functions and parametrs
     HRASCONN        hRasConn{nullptr};
-//    bool create_new_vpn(const QString & vpn_name,
-//                        const QString & serv_addr);
+    bool create_new_vpn(const QString & vpn_name,
+                        const QString & serv_addr);
     bool delete_vpn_connection(const QString &vpn_name);
 
     bool connect_to_vpn(const QString & vpn_name);
@@ -73,8 +73,10 @@ private:
     std::unique_ptr<std::thread> _thr{nullptr};
     void _ikev2_states();
     std::atomic_bool _stoped{false};
+    QTimer *_conn_state{new QTimer(this)};
 
-    std::unique_ptr<std::thread>_th_conn_state{nullptr};
+    //std::unique_ptr<std::thread>_th_conn_state{nullptr};
+private slots:
     void conn_state();
 signals:
     //void Ikev2_connected();
