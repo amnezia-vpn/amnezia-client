@@ -249,8 +249,11 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     return QJsonDocument(jConfig).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
+QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
 {
+    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    QString config = json[config_key::config].toString();
+
     if (m_settings().routeMode() != Settings::VpnAllSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
     }
@@ -260,7 +263,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
         }
     }
 
-#if defined Q_OS_MAC || defined(Q_OS_LINUX)
+#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     config.replace("block-outside-dns", "");
     QString dnsConf = QString(
                 "\nscript-security 2\n"
@@ -271,20 +274,25 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
     config.append(dnsConf);
 #endif
 
-    return config;
+    json[config_key::config] = config;
+    return QJsonDocument(json).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
+QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
 {
+    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    QString config = json[config_key::config].toString();
+
     if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
         config.append("redirect-gateway def1 bypass-dhcp\n");
     }
 
-#if defined Q_OS_MAC || defined(Q_OS_LINUX)
+#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     config.replace("block-outside-dns", "");
 #endif
 
-    return config;
+    json[config_key::config] = config;
+    return QJsonDocument(json).toJson();
 }
 
 ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
