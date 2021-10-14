@@ -108,7 +108,7 @@ class VPNService : android.net.VpnService() {
         get() {
             return currentTunnelHandle >= 0
         }
-        private set(value) {
+        set(value) {
             if (value) {
                 mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
                 mConnectionTime = System.currentTimeMillis()
@@ -189,7 +189,7 @@ class VPNService : android.net.VpnService() {
             Log.v(tag, "Try to disable tunnel")
             when(mProtocol){
                 "wireguard" ->  wgTurnOff(currentTunnelHandle)
-                "openvpn" ->  mOpenVPNThreadv3?.stopVPN()
+                "openvpn" ->  ovpnTurnOff()
                 else -> {
                     Log.e(tag, "No protocol")
                 }
@@ -201,6 +201,12 @@ class VPNService : android.net.VpnService() {
             stopSelf();
         }
 
+
+        private fun ovpnTurnOff() {
+            mOpenVPNThreadv3?.stop()
+            mOpenVPNThreadv3 = null
+            Log.e(tag, "mOpenVPNThreadv3?.stop()")
+        }
         /**
         * Configures an Android VPN Service Tunnel
         * with a given Wireguard Config
@@ -299,15 +305,11 @@ class VPNService : android.net.VpnService() {
             }
 
             private fun startOpenVpn() {
+                mOpenVPNThreadv3 = OpenVPNThreadv3 (this)
                 Thread ({
                     mOpenVPNThreadv3?.run()
                     }).start()
                 }
-
-                fun openvpnConnected(){
-                    isUp = true;
-                }
-
 
                 private fun startWireGuard(){
                     val wireguard_conf = buildWireugardConfig(mConfig!!)
