@@ -28,96 +28,94 @@ import net.openvpn.ovpn3.ClientAPI_TransportStats
 
 class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runnable {
     private val tag = "OpenVPNThreadv3"
-    private var mConfig: JSONObject? = null
     private var mAlreadyInitialised = false
     private var mService: VPNService = service
 
     override fun run() {
-        //TEMP
 
         val config: ClientAPI_Config = ClientAPI_Config()
         config.content = mService.getVpnConfig().getString("openvpn_config_data")
 
         eval_config(config)
         val status = connect()
-        Log.i(tag, "ERROR " + status)
-        if (status.getError() != false) {
+        if (status.getError()) {
             Log.i(tag, "connect() error: " + status.getError() + ": " + status.getMessage())
-            mService.openvpnConnected()
-            } else {
-                Log.i(tag, "Connect succesfully, OpenVPN3 thread finished")
-                mService.openvpnConnected()
-            }
-        }
-
-        override fun log(arg0: ClientAPI_LogInfo){
-            Log.i(tag, arg0.getText())
-        }
-
-        override fun event(event: ClientAPI_Event ){
-            Log.i(tag, event.getName())
-        }
-
-        override fun  tun_builder_new(): Boolean {
-            return true
-        }
-
-        override fun tun_builder_establish(): Int {
-            Log.v(tag, "tun_builder_establish")
-            return mService.establish()!!.detachFd()
-        }
-
-        override fun  tun_builder_add_address(address: String , prefix_length: Int , gateway: String , ipv6:Boolean , net30: Boolean ): Boolean {
-            Log.v(tag, "tun_builder_add_address")
-            mService.addAddress(address, prefix_length)
-            return true
-        }
-
-        override fun tun_builder_add_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
-            Log.v(tag, "tun_builder_add_route")
-            if (address.equals("remote_host"))
-            return false
-
-            mService.addRoute(address, prefix_length);
-            return true
-        }
-
-        override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
-            if (address.equals("remote_host"))
-            return false
-
-            mService.addRoute(address, prefix_length);
-            return true
-        }
-
-        override fun tun_builder_set_remote_address(address: String , ipv6: Boolean): Boolean {
-            mService.setMtu(1500)
-            return true
-        }
-
-        override fun tun_builder_set_mtu(mtu: Int): Boolean {
-            Log.v(tag, "tun_builder_set_mtu")
-            mService.setMtu(mtu)
-            return true
-        }
-
-        override fun tun_builder_add_dns_server(address: String , ipv6: Boolean): Boolean  {
-            mService.addDNS(address)
-            return true
-        }
-
-        override fun tun_builder_set_session_name(name: String ): Boolean {
-            Log.v(tag, "We should call this session: " + name)
-            return true
-        }
-
-
-        fun stopVPN(): Boolean {
-            stop()
-            return false
-        }
-
-        override fun stop() {
-            super.stop()
         }
     }
+
+    override fun log(arg0: ClientAPI_LogInfo){
+        Log.i(tag, arg0.getText())
+    }
+
+    override fun event(event: ClientAPI_Event ) {
+        val eventName = event.getName()
+        when (eventName) {
+            "CONNECTED" -> mService.isUp = true
+            "DISCONNECTED" -> mService.isUp = false
+        }
+        Log.i(tag, eventName)
+    }
+
+    override fun  tun_builder_new(): Boolean {
+        return true
+    }
+
+    override fun tun_builder_establish(): Int {
+        Log.v(tag, "tun_builder_establish")
+        return mService.establish()!!.detachFd()
+    }
+
+    override fun  tun_builder_add_address(address: String , prefix_length: Int , gateway: String , ipv6:Boolean , net30: Boolean ): Boolean {
+        Log.v(tag, "tun_builder_add_address")
+        mService.addAddress(address, prefix_length)
+        return true
+    }
+
+    override fun tun_builder_add_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
+        Log.v(tag, "tun_builder_add_route")
+        if (address.equals("remote_host"))
+        return false
+
+        mService.addRoute(address, prefix_length);
+        return true
+    }
+
+    override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
+        if (address.equals("remote_host"))
+        return false
+
+        mService.addRoute(address, prefix_length);
+        return true
+    }
+
+    override fun tun_builder_set_remote_address(address: String , ipv6: Boolean): Boolean {
+        mService.setMtu(1500)
+        return true
+    }
+
+    override fun tun_builder_set_mtu(mtu: Int): Boolean {
+        Log.v(tag, "tun_builder_set_mtu")
+        mService.setMtu(mtu)
+        return true
+    }
+
+    override fun tun_builder_add_dns_server(address: String , ipv6: Boolean): Boolean  {
+        mService.addDNS(address)
+        return true
+    }
+
+    override fun tun_builder_set_session_name(name: String ): Boolean {
+        Log.v(tag, "We should call this session: " + name)
+        return true
+    }
+
+
+    fun stopVPN(): Boolean {
+        stop()
+        return false
+    }
+
+    override fun stop() {
+        super.stop()
+    }
+}
