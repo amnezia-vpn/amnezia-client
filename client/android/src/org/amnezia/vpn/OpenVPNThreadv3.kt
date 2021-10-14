@@ -32,15 +32,17 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     private var mService: VPNService = service
 
     override fun run() {
+
         val config: ClientAPI_Config = ClientAPI_Config()
-        config.content = mService.getVpnConfig().getString("openvpn_config_data")
+        config.content = mService.getVpnConfig().getJSONObject("openvpn_config_data").getString("config")
+
         eval_config(config)
 
         val status = connect()
-
         if (status.getError()) {
             Log.i(tag, "connect() error: " + status.getError() + ": " + status.getMessage())
         }
+
     }
 
     override fun log(arg0: ClientAPI_LogInfo){
@@ -56,7 +58,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         Log.i(tag, eventName)
     }
 
-    override fun  tun_builder_new(): Boolean {
+    override fun tun_builder_new(): Boolean {
         return true
     }
 
