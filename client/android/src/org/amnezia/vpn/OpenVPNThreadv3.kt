@@ -82,6 +82,11 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         return true
     }
 
+    override fun tun_builder_reroute_gw(ipv4: Boolean , ipv6: Boolean ,  flags: Long): Boolean {
+           mService.addRoute("0.0.0.0", 0)
+           return true
+    }
+
     override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
         if (address.equals("remote_host"))
         return false
