@@ -184,6 +184,9 @@ macx {
     SOURCES  += ui/macos_util.mm
 
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
 }
 
 linux:!android {
