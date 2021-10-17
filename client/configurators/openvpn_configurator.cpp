@@ -23,7 +23,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        if (errorCode) *errorCode = ErrorCode::OpenSslFailed;
         return connData;
     }
 
@@ -188,7 +188,9 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     ret = X509_REQ_set_version(x509_req, nVersion);
     if (ret != 1) {
         qWarning() << "Could not get X509!";
-        goto free_all;
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
     }
 
     // 3. set subject of x509 req
@@ -205,14 +207,18 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     ret = X509_REQ_set_pubkey(x509_req, pKey);
     if (ret != 1){
         qWarning() << "Could not set pubkey!";
-        goto free_all;
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
     }
 
     // 5. set sign key of x509 req
     ret = X509_REQ_sign(x509_req, pKey, EVP_sha256());    // return x509_req->signature->length
     if (ret <= 0){
         qWarning() << "Could not sign request!";
-        goto free_all;
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
     }
 
     // save private key
@@ -220,9 +226,11 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     q_check_ptr(bp_private);
     if (PEM_write_bio_PrivateKey(bp_private, pKey, nullptr, nullptr, 0, nullptr, nullptr) != 1)
     {
+        qFatal("PEM_write_bio_PrivateKey");
         EVP_PKEY_free(pKey);
         BIO_free_all(bp_private);
-        qFatal("PEM_write_bio_PrivateKey");
+        X509_REQ_free(x509_req);
+        return connData;
     }
 
     const char * buffer = nullptr;
@@ -231,6 +239,10 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     connData.privKey = QByteArray(buffer, size);
     if (connData.privKey.isEmpty()) {
         qFatal("Failed to generate a random private key");
+        EVP_PKEY_free(pKey);
+        BIO_free_all(bp_private);
+        X509_REQ_free(x509_req);
+        return connData;
     }
     BIO_free_all(bp_private);
 
@@ -245,12 +257,6 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 
 
     EVP_PKEY_free(pKey); // this will also free the rsa key
-
-    return connData;
-
-free_all:
-    X509_REQ_free(x509_req);
-    EVP_PKEY_free(pKey);
 
     return connData;
 }

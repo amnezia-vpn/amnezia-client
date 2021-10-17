@@ -186,6 +186,11 @@ macx {
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
 }
 
+linux:!android {
+    LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
+    LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+}
+
 android {
    QT += androidextras
 

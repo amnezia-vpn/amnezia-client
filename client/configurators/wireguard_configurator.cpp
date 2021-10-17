@@ -89,7 +89,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     connData.host = credentials.hostName;
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        if (errorCode) *errorCode = ErrorCode::InternalError;
         return connData;
     }
 
