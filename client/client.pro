@@ -16,6 +16,9 @@ include("3rd/QtSsh/src/botan/botan.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 
+INCLUDEPATH += $$PWD/3rd/OpenSSL/include
+DEPENDPATH += $$PWD/3rd/OpenSSL/include
+
 HEADERS  += \
     ../ipc/ipc.h \
    configurators/cloak_configurator.h \
@@ -154,7 +157,6 @@ win32 {
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 
 
-
     LIBS += \
         -luser32 \
         -lrasapi32 \
@@ -164,6 +166,15 @@ win32 {
         -liphlpapi \
         -lgdi32
 
+
+   !contains(QMAKE_TARGET.arch, x86_64) {
+      # Windows x86
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86/ -llibssl -llibcrypto -lopenssl
+   }
+   else {
+      # Windows x86_64
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86_64/ -llibssl -llibcrypto -lopenssl
+   }
 }
 
 macx {

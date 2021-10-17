@@ -12,158 +12,9 @@
 #include "core/scripts_registry.h"
 #include "utils.h"
 
-QString OpenVpnConfigurator::getEasyRsaShPath()
-{
-#ifdef Q_OS_WIN
-    // easyrsa sh path should looks like
-    QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-    qDebug().noquote() << "EasyRsa sh path" << easyRsaShPath;
-
-    return easyRsaShPath;
-
-#else
-    return QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/easyrsa";
-#endif
-}
-
-QProcessEnvironment OpenVpnConfigurator::prepareEnv()
-{
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString pathEnvVar = env.value("PATH");
-
-#if defined Q_OS_WIN
-    pathEnvVar.clear();
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
-#elif defined Q_OS_MAC
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
-#elif defined Q_OS_LINUX
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/openvpn");
-#endif
-
-    env.insert("PATH", pathEnvVar);
-    //qDebug().noquote() << "ENV PATH" << pathEnvVar;
-    return env;
-}
-
-ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
-{
-#ifndef Q_OS_IOS
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
-#ifdef Q_OS_WIN
-    p.setProcessEnvironment(prepareEnv());
-    p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2\"").arg(getEasyRsaShPath()).arg("init-pki"));
-    qDebug().noquote() << "EasyRsa tmp path" << path;
-    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
-#else
-    p.setProgram(getEasyRsaShPath());
-    p.setArguments(QStringList() << "init-pki");
-#endif
-
-    p.setWorkingDirectory(path);
-
-    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-        qDebug().noquote() <<  "Init PKI" << p.readAll();
-    });
-
-    p.start();
-    p.waitForFinished();
-
-    if (p.exitCode() == 0) return ErrorCode::NoError;
-    else return ErrorCode::EasyRsaError;
-#else
-    return ErrorCode::NotImplementedError;
-#endif
-}
-
-ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &clientId)
-{
-#ifndef Q_OS_IOS
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
-#ifdef Q_OS_WIN
-    p.setProcessEnvironment(prepareEnv());
-    p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2 %3 %4\"")
-                         .arg(getEasyRsaShPath())
-                         .arg("gen-req").arg(clientId).arg("nopass"));
-
-    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
-#else
-    p.setArguments(QStringList() << "gen-req" << clientId << "nopass");
-    p.setProgram(getEasyRsaShPath());
-#endif
-
-    p.setWorkingDirectory(path);
-
-    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-        QString data = p.readAll();
-        qDebug().noquote() << data;
-
-        if (data.contains("Common Name (eg: your user, host, or server name)")) {
-            p.write("\n");
-        }
-    });
-
-    p.start();
-    p.waitForFinished();
-
-    if (p.exitCode() == 0) return ErrorCode::NoError;
-    else return ErrorCode::EasyRsaError;
-#else
-    return ErrorCode::NotImplementedError;
-#endif
-}
-
-
-OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
-{
-    OpenVpnConfigurator::ConnectionData connData;
-    connData.clientId = Utils::getRandomString(32);
-
-    QTemporaryDir dir;
-    //    if (dir.isValid()) {
-    //            // dir.path() returns the unique directory path
-    //    }
-
-    QString path = dir.path();
-
-    initPKI(path);
-    ErrorCode errorCode = genReq(path, connData.clientId);
-
-    Q_UNUSED(errorCode)
-
-#if defined Q_OS_LINUX
-    if (!QDir(path).exists())
-    {
-        QDir().mkdir(path);
-    }
-
-    if (!QDir(path + "/pki/").exists())
-    {
-        QDir().mkdir(path + "/pki/");
-        QDir().mkdir(path + "/pki/reqs/");
-        QDir().mkdir(path + "/pki/private/");
-    }
-#endif
-
-    QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
-    req.open(QIODevice::ReadWrite);
-    connData.request = req.readAll();
-
-    QFile key(path + "/pki/private/" + connData.clientId + ".key");
-    key.open(QIODevice::ReadWrite);
-    connData.privKey = key.readAll();
-
-    //    qDebug().noquote() << connData.request;
-    //    qDebug().noquote() << connData.privKey;
-
-    return connData;
-}
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
     DockerContainer container, ErrorCode *errorCode)
@@ -305,4 +156,93 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
     QString script = ServerController::replaceVars(scriptList.join("\n"), ServerController::genVarsForScript(credentials, container));
 
     return ServerController::runScript(credentials, script);
+}
+
+OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
+{
+    ConnectionData connData;
+    connData.clientId = Utils::getRandomString(32);
+
+    int             ret = 0;
+    int             nVersion = 1;
+
+    QByteArray clientIdUtf8 = connData.clientId.toUtf8();
+
+    EVP_PKEY * pKey = EVP_PKEY_new();
+    q_check_ptr(pKey);
+    RSA * rsa = RSA_generate_key(2048, RSA_F4, nullptr, nullptr);
+    q_check_ptr(rsa);
+    EVP_PKEY_assign_RSA(pKey, rsa);
+
+
+    // 2. set version of x509 req
+    X509_REQ *x509_req = X509_REQ_new();
+    ret = X509_REQ_set_version(x509_req, nVersion);
+    if (ret != 1) {
+        qWarning() << "Could not get X509!";
+        goto free_all;
+    }
+
+    // 3. set subject of x509 req
+    X509_NAME *x509_name = X509_REQ_get_subject_name(x509_req);
+
+    X509_NAME_add_entry_by_txt(x509_name, "C",  MBSTRING_ASC,
+                               (unsigned char *)"ORG", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(x509_name, "O",  MBSTRING_ASC,
+                               (unsigned char *)"", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(x509_name, "CN", MBSTRING_ASC,
+                               reinterpret_cast<unsigned char const *>(clientIdUtf8.data()), clientIdUtf8.size(), -1, 0);
+
+    // 4. set public key of x509 req
+    ret = X509_REQ_set_pubkey(x509_req, pKey);
+    if (ret != 1){
+        qWarning() << "Could not set pubkey!";
+        goto free_all;
+    }
+
+    // 5. set sign key of x509 req
+    ret = X509_REQ_sign(x509_req, pKey, EVP_sha256());    // return x509_req->signature->length
+    if (ret <= 0){
+        qWarning() << "Could not sign request!";
+        goto free_all;
+    }
+
+    // save private key
+    BIO * bp_private = BIO_new(BIO_s_mem());
+    q_check_ptr(bp_private);
+    if (PEM_write_bio_PrivateKey(bp_private, pKey, nullptr, nullptr, 0, nullptr, nullptr) != 1)
+    {
+        EVP_PKEY_free(pKey);
+        BIO_free_all(bp_private);
+        qFatal("PEM_write_bio_PrivateKey");
+    }
+
+    const char * buffer = nullptr;
+    size_t size = BIO_get_mem_data(bp_private, &buffer);
+    q_check_ptr(buffer);
+    connData.privKey = QByteArray(buffer, size);
+    if (connData.privKey.isEmpty()) {
+        qFatal("Failed to generate a random private key");
+    }
+    BIO_free_all(bp_private);
+
+    // save req
+    BIO * bio_req = BIO_new(BIO_s_mem());
+    PEM_write_bio_X509_REQ(bio_req, x509_req);
+
+    BUF_MEM *bio_buf;
+    BIO_get_mem_ptr(bio_req, &bio_buf);
+    connData.request = QByteArray(bio_buf->data, bio_buf->length);
+    BIO_free(bio_req);
+
+
+    EVP_PKEY_free(pKey); // this will also free the rsa key
+
+    return connData;
+
+free_all:
+    X509_REQ_free(x509_req);
+    EVP_PKEY_free(pKey);
+
+    return connData;
 }
