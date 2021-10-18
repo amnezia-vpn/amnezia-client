@@ -32,12 +32,6 @@ public:
         const ServerCredentials &credentials, QString clientId);
 
 private:
-    static QString getEasyRsaShPath();
-
-    static QProcessEnvironment prepareEnv();
-    static ErrorCode initPKI(const QString &path);
-    static ErrorCode genReq(const QString &path, const QString &clientId);
-
     static ConnectionData createCertRequest();
 
     static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,

@@ -49,7 +49,6 @@ enum ErrorCode
 
     // Distro errors
     OpenVpnExecutableMissing,
-    EasyRsaExecutableMissing,
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
@@ -61,6 +60,7 @@ enum ErrorCode
     OpenVpnTapAdapterError,
 
     // 3rd party utils errors
+    OpenSslFailed,
     OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
     CloakExecutableCrashed

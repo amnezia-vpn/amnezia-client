@@ -6,8 +6,6 @@ TEMPLATE = app
 
 CONFIG += qtquickcompiler
 
-ios:CONFIG += static
-
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
@@ -15,6 +13,9 @@ include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+
+INCLUDEPATH += $$PWD/3rd/OpenSSL/include
+DEPENDPATH += $$PWD/3rd/OpenSSL/include
 
 HEADERS  += \
     ../ipc/ipc.h \
@@ -154,7 +155,6 @@ win32 {
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 
 
-
     LIBS += \
         -luser32 \
         -lrasapi32 \
@@ -164,6 +164,15 @@ win32 {
         -liphlpapi \
         -lgdi32
 
+
+   !contains(QMAKE_TARGET.arch, x86_64) {
+      message("Windows x86 build")
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86/ -llibssl -llibcrypto -lopenssl
+   }
+   else {
+      message("Windows x86_64 build")
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86_64/ -llibssl -llibcrypto -lopenssl
+   }
 }
 
 macx {
@@ -173,6 +182,14 @@ macx {
     SOURCES  += ui/macos_util.mm
 
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
+}
+
+linux:!android {
+    LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
+    LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
 }
 
 android {
@@ -198,12 +215,59 @@ android {
    ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
+      #message("Android build for ANDROID_TARGET_ARCH" $$abi)
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
    }
 
 }
+
+ios {
+    message("Client ios build")
+    CONFIG += static
+
+    Q_ENABLE_BITCODE.value = NO
+    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+
+    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+        message("Building for iPhone OS")
+        QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
+        QMAKE_BUNDLE = AmneziaVPN
+        QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+        QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
+        QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
+        QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+        QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
+
+        XCODEBUILD_FLAGS += -allowProvisioningUpdates
+
+        DEFINES += iphoneos
+
+        contains(QT_ARCH, arm64) {
+            message("Building for iOS/ARM v8 64-bit architecture")
+            ARCH_TAG = "ios_armv8_64"
+
+            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
+            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+        } else {
+            message("Building for iOS/ARM v7 (32-bit) architecture")
+            ARCH_TAG = "ios_armv7"
+        }
+    }
+
+    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+        message("Building for iPhone Simulator")
+        ARCH_TAG = "ios_x86_64"
+
+        DEFINES += iphonesimulator
+
+        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
+        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+    }
+}
+
 
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
