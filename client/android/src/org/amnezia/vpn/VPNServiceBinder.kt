@@ -43,7 +43,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     * returns true if the [code] was accepted
     */
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
-        Log.i(tag, "GOT TRANSACTION $code")
+        Log.i(tag, "GOT TRANSACTION " + code)
 
         when (code) {
             ACTIONS.activate -> {

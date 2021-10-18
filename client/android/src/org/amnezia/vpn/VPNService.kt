@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.net.ProxyInfo
 import android.os.ParcelFileDescriptor
 import android.system.OsConstants
 import com.wireguard.android.util.SharedLibraryLoader
@@ -152,7 +153,7 @@ class VPNService : android.net.VpnService() {
                 return 0
             }
             Log.i(tag, "Permission okay")
-            mConfig = json
+            mConfig = json!!
             mProtocol = mConfig!!.getString("protocol")
             when (mProtocol) {
                 "openvpn" -> startOpenVpn()
@@ -166,6 +167,12 @@ class VPNService : android.net.VpnService() {
         }
 
         fun establish(): ParcelFileDescriptor? {
+            mbuilder.allowFamily(OsConstants.AF_INET)
+            mbuilder.allowFamily(OsConstants.AF_INET6)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mbuilder.setMetered(false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
+
             return mbuilder.establish()
         }
 
@@ -174,15 +181,35 @@ class VPNService : android.net.VpnService() {
         }
 
         fun addAddress(ip: String, len: Int){
+            Log.v(tag, "mbuilder.addAddress($ip, $len)")
             mbuilder.addAddress(ip, len)
         }
 
         fun addRoute(ip: String, len: Int){
+            Log.v(tag, "mbuilder.addRoute($ip, $len)")
             mbuilder.addRoute(ip, len)
         }
 
         fun addDNS(ip: String){
+            Log.v(tag, "mbuilder.addDnsServer($ip)")
             mbuilder.addDnsServer(ip)
+        }
+
+        fun setSessionName(name: String){
+            Log.v(tag, "mbuilder.setSession($name)")
+            mbuilder.setSession(name)
+        }
+
+        fun addHttpProxy(host: String, port: Int): Boolean{
+            val proxyInfo = ProxyInfo.buildDirectProxy(host, port)
+            Log.v(tag, "mbuilder.addHttpProxy($host, $port)")
+            mbuilder.setHttpProxy(proxyInfo)
+            return true
+        }
+
+        fun setDomain(domain: String) {
+            Log.v(tag, "mbuilder.setDomain($domain)")
+            mbuilder.addSearchDomain(domain)
         }
 
         fun turnOff() {
@@ -205,7 +232,7 @@ class VPNService : android.net.VpnService() {
         private fun ovpnTurnOff() {
             mOpenVPNThreadv3?.stop()
             mOpenVPNThreadv3 = null
-            Log.e(tag, "mOpenVPNThreadv3?.stop()")
+            Log.e(tag, "mOpenVPNThreadv3 stop!")
         }
         /**
         * Configures an Android VPN Service Tunnel

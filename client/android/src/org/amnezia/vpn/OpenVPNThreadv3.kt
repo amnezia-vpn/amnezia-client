@@ -82,15 +82,14 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         return true
     }
 
-    override fun tun_builder_reroute_gw(ipv4: Boolean , ipv6: Boolean ,  flags: Long): Boolean {
-           mService.addRoute("0.0.0.0", 0)
-           return true
+    override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean , flags: Long): Boolean {
+          Log.v(tag, "tun_builder_reroute_gw")
+          mService.addRoute("0.0.0.0", 0)
+          return true
     }
 
     override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
-        if (address.equals("remote_host"))
-        return false
-
+        Log.v(tag, "tun_builder_exclude_route")
         mService.addRoute(address, prefix_length);
         return true
     }
@@ -108,12 +107,43 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_add_dns_server(address: String , ipv6: Boolean): Boolean  {
         mService.addDNS(address)
+        mService.addRoute(address, 32)
         return true
     }
 
     override fun tun_builder_set_session_name(name: String ): Boolean {
         Log.v(tag, "We should call this session: " + name)
+        mService.setSessionName(name)
         return true
+    }
+
+    override fun tun_builder_set_proxy_http(host: String, port: Int): Boolean {
+          return mService.addHttpProxy(host, port);
+    }
+
+    override fun tun_builder_set_proxy_https(host: String , port: Int): Boolean {
+       Log.v(tag, "tun_builder_set_proxy_https")
+       return false
+    }
+
+    override fun pause_on_connection_timeout(): Boolean {
+       Log.v(tag, "pause_on_connection_timeout")
+       return true
+    }
+
+    override fun tun_builder_add_search_domain(domain: String ): Boolean {
+           mService.setDomain(domain);
+           return true
+    }
+
+    override fun tun_builder_set_layer(layer: Int): Boolean {
+        return layer == 3
+    }
+
+    override fun  socket_protect(socket: Int, remote: String, ipv6: Boolean): Boolean {
+        Log.v(tag, "socket_protect")
+        return mService.protect(socket);
+
     }
 
     override fun stop() {
