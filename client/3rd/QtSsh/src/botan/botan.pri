@@ -11,13 +11,11 @@ win32 {
        -lcrypt32 \
 
    !contains(QMAKE_TARGET.arch, x86_64) {
-      message("Windows x86 build")
       INCLUDEPATH += $$PWD/windows/x86_64
       HEADERS += $$PWD/windows/x86/botan_all.h
       SOURCES += $$PWD/windows/x86/botan_all.cpp
    }
    else {
-      message("Windows x86_64 build")
       INCLUDEPATH += $$PWD/windows/x86_64
       HEADERS += $$PWD/windows/x86_64/botan_all.h
       SOURCES += $$PWD/windows/x86_64/botan_all.cpp
@@ -25,14 +23,12 @@ win32 {
 }
 
 macx:!ios {
-    message("macOS build")
     INCLUDEPATH += $$PWD/macos
     HEADERS += $$PWD/macos/botan_all.h
     SOURCES += $$PWD/macos/botan_all.cpp
 }
 
 linux-g++ {
-    message("Linux build")
     INCLUDEPATH += $$PWD/linux
     HEADERS += $$PWD/linux/botan_all.h
     SOURCES += $$PWD/linux/botan_all.cpp
@@ -43,7 +39,6 @@ linux-g++ {
 android {
    for (abi, ANDROID_ABIS): {
       equals(ANDROID_TARGET_ARCH,$$abi) {
-         message("Android build for ANDROID_TARGET_ARCH" $$abi)
          INCLUDEPATH += $$PWD/android/$${abi}
          HEADERS += $$PWD/android/$${abi}/botan_all.h
          SOURCES += $$PWD/android/$${abi}/botan_all.cpp
@@ -52,8 +47,20 @@ android {
 }
 
 ios: {
-    message("ios build")
-    INCLUDEPATH += $$PWD/ios
-    HEADERS += $$PWD/ios/botan_all.h
-    SOURCES += $$PWD/ios/botan_all.cpp
+    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+        contains(QT_ARCH, arm64) {
+            INCLUDEPATH += $$PWD/ios/iphone
+            HEADERS += $$PWD/ios/iphone/botan_all.h
+            SOURCES += $$PWD/ios/iphone/botan_all.cpp
+        } else {
+            message("Building for iOS/ARM v7 (32-bit) architecture")
+            ARCH_TAG = "ios_armv7"
+        }
+    }
+
+    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+        INCLUDEPATH += $$PWD/ios/simulator
+        HEADERS += $$PWD/ios/simulator/botan_all.h
+        SOURCES += $$PWD/ios/simulator/botan_all.cpp
+    }
 }

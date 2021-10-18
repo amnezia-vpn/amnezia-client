@@ -1,8 +1,0 @@
-# X509 extensions for a client
-
-basicConstraints = CA:FALSE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer:always
-extendedKeyUsage = codeSigning
-keyUsage = digitalSignature
-
