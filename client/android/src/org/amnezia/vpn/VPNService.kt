@@ -193,6 +193,9 @@ class VPNService : android.net.VpnService() {
         fun addDNS(ip: String){
             Log.v(tag, "mbuilder.addDnsServer($ip)")
             mbuilder.addDnsServer(ip)
+            if ("samsung".equals(Build.BRAND) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                mbuilder.addRoute(ip, 32)
+            }
         }
 
         fun setSessionName(name: String){

@@ -107,7 +107,6 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_add_dns_server(address: String , ipv6: Boolean): Boolean  {
         mService.addDNS(address)
-        mService.addRoute(address, 32)
         return true
     }
 
