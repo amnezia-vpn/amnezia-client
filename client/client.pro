@@ -133,13 +133,6 @@ RESOURCES += \
 TRANSLATIONS = \
     translations/amneziavpn_ru.ts
 
-#CONFIG(release, debug|release) {
-#    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
-#    MOC_DIR = $$DESTDIR
-#    OBJECTS_DIR = $$DESTDIR
-#    RCC_DIR = $$DESTDIR
-#}
-
 win32 {
     OTHER_FILES += platform_win/vpnclient.rc
     RC_FILE = platform_win/vpnclient.rc
@@ -167,11 +160,11 @@ win32 {
 
    !contains(QMAKE_TARGET.arch, x86_64) {
       message("Windows x86 build")
-      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86/ -llibssl -llibcrypto -lopenssl
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86/ -llibssl -llibcrypto
    }
    else {
       message("Windows x86_64 build")
-      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86_64/ -llibssl -llibcrypto -lopenssl
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86_64/ -llibssl -llibcrypto
    }
 }
 
@@ -199,9 +192,7 @@ android {
 
    HEADERS +=    protocols/android_vpnprotocol.h \
 
-
    SOURCES +=    protocols/android_vpnprotocol.cpp \
-
 
    DISTFILES += \
        android/AndroidManifest.xml \
@@ -210,17 +201,30 @@ android {
        android/gradle/wrapper/gradle-wrapper.properties \
        android/gradlew \
        android/gradlew.bat \
-       android/res/values/libs.xml
+       android/res/values/libs.xml \
+       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
+       android/src/org/amnezia/vpn/VpnService.kt \
+       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
-   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
-      #message("Android build for ANDROID_TARGET_ARCH" $$abi)
+      equals(ANDROID_TARGET_ARCH,$$abi) {
+         LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libcrypto.a
+         LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libssl.a
+      }
+
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
-   }
 
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libjbcrypto.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopenvpn.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopvpnutil.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpn3.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnexec.so
+   }
 }
 
 ios {
@@ -271,5 +275,3 @@ ios {
 
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
-
-

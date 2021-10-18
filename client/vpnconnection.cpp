@@ -251,11 +251,14 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
 
 #else
+    Protocol proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    androidVpnProtocol->initialize();
+    if (!androidVpnProtocol->initialize()) {
+         qDebug() << QString("Init failed") ;
+         return UnknownError;
+    }
     m_vpnProtocol.reset(androidVpnProtocol);
 #endif
-
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
