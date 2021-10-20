@@ -34,6 +34,13 @@ constexpr char hash[] = "hash";
 constexpr char ncp_disable[] = "ncp_disable";
 constexpr char tls_auth[] = "tls_auth";
 
+constexpr char client_priv_key[] = "client_priv_key";
+constexpr char client_pub_key[] = "client_pub_key";
+constexpr char server_priv_key[] = "server_priv_key";
+constexpr char server_pub_key[] = "server_pub_key";
+constexpr char psk_key[] = "psk_key";
+
+
 constexpr char site[] = "site";
 constexpr char block_outside_dns[] = "block_outside_dns";
 

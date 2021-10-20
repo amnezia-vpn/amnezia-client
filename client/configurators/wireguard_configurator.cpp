@@ -161,6 +161,12 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
+    jConfig[config_key::hostName] = connData.host;
+    jConfig[config_key::client_priv_key] = connData.clientPrivKey;
+    jConfig[config_key::client_pub_key] = connData.clientPubKey;
+    jConfig[config_key::psk_key] = connData.pskKey;
+    jConfig[config_key::server_pub_key] = connData.serverPubKey;
+
     return QJsonDocument(jConfig).toJson();
 }
 
