@@ -105,7 +105,7 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = 24
-        targetSdkVersion = qtTargetSdkVersion
+        targetSdkVersion = 30
     }
 
    buildTypes {
