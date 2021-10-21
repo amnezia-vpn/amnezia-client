@@ -92,6 +92,7 @@ bool AndroidVpnProtocol::initialize()
 ErrorCode AndroidVpnProtocol::start()
 {
 
+    //qDebug().noquote() << "AndroidVpnProtocol::start" << QJsonDocument(m_rawConfig).toJson();
     qDebug() << "Prompting for VPN permission";
     auto appContext = QtAndroid::androidActivity().callObjectMethod(
                 "getApplicationContext", "()Landroid/content/Context;");

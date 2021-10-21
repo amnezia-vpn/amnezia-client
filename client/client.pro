@@ -36,11 +36,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
-   protocols/ikev2_vpn_protocol.h \
-   protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
-    protocols/shadowsocksvpnprotocol.h \
-   protocols/wireguardprotocol.h \
     settings.h \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
@@ -72,7 +68,6 @@ HEADERS  += \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
-    protocols/openvpnprotocol.h \
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -91,11 +86,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
-   protocols/ikev2_vpn_protocol.cpp \
-   protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
-    protocols/shadowsocksvpnprotocol.cpp \
-   protocols/wireguardprotocol.cpp \
     settings.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
@@ -125,7 +116,6 @@ SOURCES  += \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
-    protocols/openvpnprotocol.cpp \
 
 RESOURCES += \
     resources.qrc
@@ -183,6 +173,23 @@ macx {
 linux:!android {
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+}
+
+win32|macx|linux:!android {
+
+   HEADERS  += \
+      protocols/openvpnprotocol.h \
+      protocols/ikev2_vpn_protocol.h \
+      protocols/openvpnovercloakprotocol.h \
+      protocols/shadowsocksvpnprotocol.h \
+      protocols/wireguardprotocol.h \
+
+   SOURCES  += \
+      protocols/openvpnprotocol.cpp \
+      protocols/ikev2_vpn_protocol.cpp \
+      protocols/openvpnovercloakprotocol.cpp \
+      protocols/shadowsocksvpnprotocol.cpp \
+      protocols/wireguardprotocol.cpp \
 }
 
 android {

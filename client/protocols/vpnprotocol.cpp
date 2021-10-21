@@ -4,11 +4,13 @@
 #include "vpnprotocol.h"
 #include "core/errorstrings.h"
 
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
 #include "openvpnprotocol.h"
 #include "shadowsocksvpnprotocol.h"
 #include "openvpnovercloakprotocol.h"
 #include "wireguardprotocol.h"
 #include "ikev2_vpn_protocol.h"
+#endif
 
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
@@ -98,12 +100,13 @@ QString VpnProtocol::vpnGateway() const
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject& configuration)
 {
     switch (container) {
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     case DockerContainer::OpenVpn: return new OpenVpnProtocol(configuration);
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
     case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);
     case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
-
+#endif
     default: return nullptr;
     }
 }

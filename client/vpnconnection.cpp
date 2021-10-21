@@ -17,9 +17,6 @@
 
 #include "ipc.h"
 #include "core/ipcclient.h"
-#include "protocols/openvpnprotocol.h"
-#include "protocols/openvpnovercloakprotocol.h"
-#include "protocols/shadowsocksvpnprotocol.h"
 
 #include "utils.h"
 #include "vpnconnection.h"
