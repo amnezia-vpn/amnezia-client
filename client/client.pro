@@ -68,6 +68,10 @@ HEADERS  += \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
+    logger.h \
+    loghandler.h \
+    loglevel.h \
+    constants.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -116,6 +120,9 @@ SOURCES  += \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
+    logger.cpp \
+    loghandler.cpp
+
 
 RESOURCES += \
     resources.qrc
@@ -238,6 +245,42 @@ android {
 ios {
     message("Client ios build")
     CONFIG += static
+    CONFIG += file_copies
+
+    # For the authentication
+    LIBS += -framework AuthenticationServices
+
+    # For notifications
+    LIBS += -framework UIKit
+    LIBS += -framework Foundation
+    LIBS += -framework StoreKit
+    LIBS += -framework UserNotifications
+
+    DEFINES += MVPN_IOS
+
+    SOURCES += \
+#            platforms/macos/macospingsender.cpp
+
+    OBJECTIVE_SOURCES += \
+#            platforms/ios/iosiaphandler.mm \
+#            platforms/ios/iosauthenticationlistener.mm \
+#            platforms/ios/ioscontroller.mm \
+#            platforms/ios/iosdatamigration.mm \
+            platforms/ios/iosglue.mm \
+#            platforms/ios/iosnotificationhandler.mm \
+#            platforms/ios/iosutils.mm \
+#            platforms/macos/macoscryptosettings.mm
+
+    HEADERS += \
+#            platforms/macos/macospingsender.h
+
+    OBJECTIVE_HEADERS += \
+#            platforms/ios/iosiaphandler.h \
+#            platforms/ios/iosauthenticationlistener.h \
+#            platforms/ios/ioscontroller.h \
+#            platforms/ios/iosdatamigration.h \
+#            platforms/ios/iosnotificationhandler.h \
+#            platforms/ios/iosutils.h
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
@@ -278,6 +321,15 @@ ios {
         LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
         LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
     }
+
+    NETWORKEXTENSION=1
+    ! build_pass: system(ruby $$PWD/ios/xcode_patcher.rb "$$PWD" "$$OUT_PWD/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "$$NETWORKEXTENSION"|| echo "Failed to merge xcode with wireguard")
+
+
+
+#ruby %{sourceDir}/client/ios/xcode_patcher.rb "%{buildDir}/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "1"
+    #cd client/ && /Users/md/Qt/5.15.2/ios/bin/qmake -o Makefile /Users/md/amnezia/desktop-client/client/client.pro -spec macx-ios-clang CONFIG+=iphonesimulator CONFIG+=simulator CONFIG+=qml_debug -after
+# %{sourceDir}/client/ios/xcode_patcher.rb %{buildDir}/client/AmneziaVPN.xcodeproj 2.0 2.0.0 ios 1
 }
 
 
