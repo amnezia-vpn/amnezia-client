@@ -46,6 +46,11 @@ public:
 
     static QString tunnelName() { return "AmneziaVPN IKEv2"; }
 
+public:
+    void newConnectionStateEventReceived(UINT unMsg,
+                                         RASCONNSTATE rasconnstate,
+                                         DWORD dwError);
+
 private:
     void readIkev2Configuration(const QJsonObject &configuration);
 
@@ -65,23 +70,6 @@ private:
 
     bool connect_to_vpn(const QString & vpn_name);
     bool disconnect_vpn();
-    static void WINAPI RasDialFuncCallback(UINT unMsg,
-                                   RASCONNSTATE rasconnstate,
-                                   DWORD dwError );
-
-
-    std::unique_ptr<std::thread> _thr{nullptr};
-    void _ikev2_states();
-    std::atomic_bool _stoped{false};
-    QTimer *_conn_state{new QTimer(this)};
-
-    //std::unique_ptr<std::thread>_th_conn_state{nullptr};
-private slots:
-    void conn_state();
-signals:
-    //void Ikev2_connected();
-    //void Ikev2_disconnected();
-    //void Ikev2_state(int);
 #endif
 
 };
