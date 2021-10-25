@@ -39,8 +39,8 @@ QString errorString(ErrorCode code){
 
     // Distro errors
     case (OpenVpnExecutableMissing): return QObject::tr("OpenVPN executable missing");
-    case (EasyRsaExecutableMissing): return QObject::tr("EasyRsa executable missing");
     case (AmneziaServiceConnectionFailed): return QObject::tr("Amnezia helper service error");
+    case (OpenSslFailed): return QObject::tr("OpenSSL failed");
 
     // VPN errors
     case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");

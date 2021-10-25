@@ -52,13 +52,6 @@ PageBase {
             AppSettingsLogic.onCheckBoxStartMinimizedToggled(checked)
         }
     }
-    Image {
-        anchors.horizontalCenter: root.horizontalCenter
-        width: GC.trW(150)
-        height: GC.trH(22)
-        y: GC.trY(590)
-        source: "qrc:/images/AmneziaVPN.png"
-    }
     LabelType {
         x: 30
         y: 240
@@ -69,7 +62,8 @@ PageBase {
     BlueButtonType {
         x: 30
         y: 280
-        width: 321
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - 40
         height: 41
         text: qsTr("Check for updates")
         onClicked: {
@@ -79,11 +73,16 @@ PageBase {
     BlueButtonType {
         x: 30
         y: 340
-        width: 321
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - 40
         height: 41
         text: qsTr("Open logs folder")
         onClicked: {
             AppSettingsLogic.onPushButtonOpenLogsClicked()
         }
+    }
+
+    Logo {
+        anchors.bottom: parent.bottom
     }
 }

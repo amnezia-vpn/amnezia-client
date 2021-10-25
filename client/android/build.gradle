@@ -65,7 +65,7 @@ android {
 
     compileSdkVersion androidCompileSdkVersion.toInteger()
 
-    buildToolsVersion '28.0.3'
+    //buildToolsVersion '28.0.3'
 
     dexOptions {
        javaMaxHeapSize "3g"
@@ -105,7 +105,7 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = 24
-        targetSdkVersion = qtTargetSdkVersion
+        targetSdkVersion = 30
     }
 
    buildTypes {
@@ -134,4 +134,13 @@ android {
 //           path 'wireguard/CMakeLists.txt'
 //       }
 //   }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'openvpn/src/main/cpp/CMakeLists.txt'
+//       }
+//   }
 }
+
+
+

@@ -9,6 +9,7 @@ deploy/build_32/*
 deploy/build_64/*
 winbuild*.bat
 
+
 # Qt-es
 /.qmake.cache
 /.qmake.stash

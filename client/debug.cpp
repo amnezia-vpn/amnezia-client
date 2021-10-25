@@ -3,12 +3,12 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QUrl>
-#include <Utils.h>
 
 #include <iostream>
 
 #include "debug.h"
 #include "defines.h"
+#include "utils.h"
 
 QFile Debug::m_file;
 QTextStream Debug::m_textStream;
@@ -34,7 +34,6 @@ bool Debug::init()
 {
     qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
 
-#ifndef QT_DEBUG
     QString path = userLogsDir();
     QDir appDir(path);
     if (!appDir.mkpath(path)) {
@@ -51,6 +50,8 @@ bool Debug::init()
     }
     m_file.setTextModeEnabled(true);
     m_textStream.setDevice(&m_file);
+
+#ifndef QT_DEBUG
     qInstallMessageHandler(debugMessageHandler);
 #endif
 

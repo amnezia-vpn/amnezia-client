@@ -14,34 +14,22 @@ PageBase {
         id: back
     }
     Caption {
+        id: caption
         text: qsTr("DNS Servers")
     }
-    Image {
-        anchors.horizontalCenter: root.horizontalCenter
-        width: GC.trW(150)
-        height: GC.trH(22)
-        y: GC.trY(590)
-        source: "qrc:/images/AmneziaVPN.png"
-    }
     LabelType {
+        id: l1
         x: 40
-        y: 95
-        width: 291
+        anchors.top: caption.bottom
+        width: parent.width - 40
         height: 21
         text: qsTr("Primary DNS server")
-    }
-    LabelType {
-        x: 40
-        y: 175
-        width: 291
-        height: 21
-        text: qsTr("Secondray DNS server")
     }
     TextFieldType {
         id: dns1
         x: 40
-        y: 120
-        width: 271
+        anchors.top: l1.bottom
+        width: parent.width - 90
         height: 40
         text: NetworkSettingsLogic.lineEditDns1Text
         onEditingFinished: {
@@ -52,11 +40,33 @@ PageBase {
             regExp: NetworkSettingsLogic.ipAddressValidatorRegex
         }
     }
+    ImageButtonType {
+        id: resetDNS1
+        anchors. left: dns1.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: dns1.verticalCenter
+        width: 24
+        height: 24
+        icon.source: "qrc:/images/reload.png"
+        onClicked: {
+            NetworkSettingsLogic.onPushButtonResetDns1Clicked()
+        }
+    }
+
+    LabelType {
+        id: l2
+        x: 40
+        anchors.top: dns1.bottom
+        anchors.topMargin: 20
+        width: parent.width - 40
+        height: 21
+        text: qsTr("Secondray DNS server")
+    }
     TextFieldType {
         id: dns2
         x: 40
-        y: 200
-        width: 271
+        anchors.top: l2.bottom
+        width: parent.width - 90
         height: 40
         text: NetworkSettingsLogic.lineEditDns2Text
         onEditingFinished: {
@@ -68,25 +78,19 @@ PageBase {
         }
     }
     ImageButtonType {
-        id: resetDNS1
-        x: 320
-        y: 127
-        width: 24
-        height: 24
-        icon.source: "qrc:/images/reload.png"
-        onClicked: {
-            NetworkSettingsLogic.onPushButtonResetDns1Clicked()
-        }
-    }
-    ImageButtonType {
         id: resetDNS2
-        x: 320
-        y: 207
+        anchors. left: dns2.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: dns2.verticalCenter
         width: 24
         height: 24
         icon.source: "qrc:/images/reload.png"
         onClicked: {
             NetworkSettingsLogic.onPushButtonResetDns2Clicked()
         }
+    }
+
+    Logo {
+        anchors.bottom: parent.bottom
     }
 }
