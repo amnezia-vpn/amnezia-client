@@ -6,13 +6,17 @@ package org.amnezia.vpn.qt
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 
 class VPNPermissionHelper : android.net.VpnService() {
+
+        private val tag = "VPNPermissionHelper"
     /**
      * This small service does nothing else then checking if the vpn permission
      * is present and prompting if not.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(tag, "onStartCommand")
         val intent = prepare(this.applicationContext)
         if (intent != null) {
             startActivityForResult(intent)

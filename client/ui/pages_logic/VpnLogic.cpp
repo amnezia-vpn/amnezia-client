@@ -24,6 +24,9 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     connect(uiLogic()->m_vpnConnection, &VpnConnection::connectionStateChanged, this, &VpnLogic::onConnectionStateChanged);
     connect(uiLogic()->m_vpnConnection, &VpnConnection::vpnProtocolError, this, &VpnLogic::onVpnProtocolError);
 
+    connect(this, &VpnLogic::connectToVpn, uiLogic()->m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(this, &VpnLogic::disconnectFromVpn, uiLogic()->m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+
     if (m_settings.isAutoConnect() && m_settings.defaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this](){
             set_pushButtonConnectEnabled(false);
@@ -166,20 +169,19 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 
     qApp->processEvents();
 
-    ErrorCode errorCode = uiLogic()->m_vpnConnection->connectToVpn(
-                serverIndex, credentials, container, containerConfig);
+    emit connectToVpn(serverIndex, credentials, container, containerConfig);
 
-    if (errorCode) {
-        //ui->pushButton_connect->setChecked(false);
-        uiLogic()->setDialogConnectErrorText(errorString(errorCode));
-        emit uiLogic()->showConnectErrorDialog();
-        return;
-    }
+//    if (errorCode) {
+//        //ui->pushButton_connect->setChecked(false);
+//        uiLogic()->setDialogConnectErrorText(errorString(errorCode));
+//        emit uiLogic()->showConnectErrorDialog();
+//        return;
+//    }
 
 }
 
 void VpnLogic::onDisconnect()
 {
     set_pushButtonConnectChecked(false);
-    uiLogic()->m_vpnConnection->disconnectFromVpn();
+    emit disconnectFromVpn();
 }

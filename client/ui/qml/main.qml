@@ -152,35 +152,15 @@ Window  {
         anchors.fill: parent
         focus: true
 
-//        initialItem: page_servers
         onCurrentItemChanged: {
             console.debug("QML onCurrentItemChanged " + pageLoader.currentItem)
             UiLogic.currentPageValue = currentItem.page
         }
 
-//        Keys.onReleased: {
-//            if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
-//                console.debug("Back button captured")
-//                if (UiLogic.currentPageValue !== PageEnum.VPN &&
-//                        UiLogic.currentPageValue !== PageEnum.ServerConfiguring &&
-//                        !(UiLogic.currentPageValue === PageEnum.Start && pageLoader.depth < 2)) {
-//                    close_page();
-//                }
-
-
-//                // TODO: fix
-//                //if (ui->stackedWidget_main->currentWidget()->isEnabled()) {
-//                //    closePage();
-//                //}
-
-//                event.accepted = true
-//            }
-//        }
-
         Keys.onPressed: {
             UiLogic.keyPressEvent(event.key)
+            event.accepted = true
         }
-
     }
 
     FolderListModel {

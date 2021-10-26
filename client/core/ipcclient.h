@@ -19,19 +19,23 @@ class IpcClient : public QObject
 {
     Q_OBJECT
 public:
-   static IpcClient &Instance();
-   static bool init();
-   static QSharedPointer<IpcInterfaceReplica> Interface() { return Instance().m_ipcClient; }
+   explicit IpcClient(QObject *parent = nullptr);
+
+   static IpcClient *Instance();
+   static bool init(IpcClient *instance);
+   static QSharedPointer<IpcInterfaceReplica> Interface();
    static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
+
+   bool isSocketConnected() const;
 
 signals:
 
 private:
-    explicit IpcClient(QObject *parent = nullptr);
+    ~IpcClient() override;
 
     QRemoteObjectNode m_ClientNode;
     QSharedPointer<IpcInterfaceReplica> m_ipcClient;
-    QSharedPointer<QLocalSocket> m_localSocket;
+    QPointer<QLocalSocket> m_localSocket;
 
     struct ProcessDescriptor {
         ProcessDescriptor () {
@@ -45,6 +49,9 @@ private:
     };
 
     QMap<int, QSharedPointer<ProcessDescriptor>> m_processNodes;
+    bool m_isSocketConnected {false};
+
+    static IpcClient *m_instance;
 };
 
 #endif // IPCCLIENT_H

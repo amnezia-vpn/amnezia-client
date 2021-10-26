@@ -22,7 +22,7 @@ public:
 
     virtual ~AndroidVpnProtocol() override = default;
 
-    void initialize();
+    bool initialize();
 
     virtual ErrorCode start() override;
     virtual void stop() override;

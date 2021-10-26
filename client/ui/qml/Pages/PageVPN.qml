@@ -143,11 +143,12 @@ PageBase {
 
     Text {
         id: conn_type_label
+        visible: !GC.isMobile()
         x: 20
         anchors.bottom: conn_type_group.top
         anchors.bottomMargin: 10
         width: 281
-        height: 21
+        height: GC.isMobile() ? 0: 21
         font.family: "Lato"
         font.styleName: "normal"
         font.pixelSize: 15
@@ -161,9 +162,10 @@ PageBase {
     Item {
         id: conn_type_group
         x: 20
+        visible: !GC.isMobile()
         anchors.bottom: button_add_site.top
         width: 351
-        height: 91
+        height: GC.isMobile() ? 0: 91
         enabled: VpnLogic.widgetVpnModeEnabled
         RadioButtonType {
             x: 0

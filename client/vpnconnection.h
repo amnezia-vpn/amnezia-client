@@ -34,10 +34,7 @@ public:
         const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
-    ErrorCode connectToVpn(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
 
-    void disconnectFromVpn();
 
     bool isConnected() const;
     bool isDisconnected() const;
@@ -50,6 +47,12 @@ public:
     void flushDns();
 
     const QString &remoteAddress() const;
+
+public slots:
+    void connectToVpn(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+
+    void disconnectFromVpn();
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -70,6 +73,7 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
+    IpcClient *m_IpcClient {nullptr};
 
 };
 

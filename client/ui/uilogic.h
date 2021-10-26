@@ -5,6 +5,7 @@
 #include <QQmlEngine>
 #include <functional>
 #include <QKeyEvent>
+#include <QThread>
 
 #include "property_helper.h"
 #include "pages.h"
@@ -210,6 +211,7 @@ private:
     QMap<Protocol, PageProtocolLogicBase *> m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
+    QThread m_vpnConnectionThread;
     Settings m_settings;
 
 

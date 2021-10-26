@@ -6,8 +6,6 @@ TEMPLATE = app
 
 CONFIG += qtquickcompiler
 
-ios:CONFIG += static
-
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
@@ -15,6 +13,9 @@ include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+
+INCLUDEPATH += $$PWD/3rd/OpenSSL/include
+DEPENDPATH += $$PWD/3rd/OpenSSL/include
 
 HEADERS  += \
     ../ipc/ipc.h \
@@ -35,11 +36,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
-   protocols/ikev2_vpn_protocol.h \
-   protocols/openvpnovercloakprotocol.h \
    protocols/protocols_defs.h \
-    protocols/shadowsocksvpnprotocol.h \
-   protocols/wireguardprotocol.h \
     settings.h \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
@@ -71,7 +68,6 @@ HEADERS  += \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
-    protocols/openvpnprotocol.h \
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -90,11 +86,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
-   protocols/ikev2_vpn_protocol.cpp \
-   protocols/openvpnovercloakprotocol.cpp \
    protocols/protocols_defs.cpp \
-    protocols/shadowsocksvpnprotocol.cpp \
-   protocols/wireguardprotocol.cpp \
     settings.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
@@ -124,20 +116,12 @@ SOURCES  += \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
-    protocols/openvpnprotocol.cpp \
 
 RESOURCES += \
     resources.qrc
 
 TRANSLATIONS = \
     translations/amneziavpn_ru.ts
-
-#CONFIG(release, debug|release) {
-#    DESTDIR = $$PWD/../../AmneziaVPN-build/client/release
-#    MOC_DIR = $$DESTDIR
-#    OBJECTS_DIR = $$DESTDIR
-#    RCC_DIR = $$DESTDIR
-#}
 
 win32 {
     OTHER_FILES += platform_win/vpnclient.rc
@@ -154,7 +138,6 @@ win32 {
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 
 
-
     LIBS += \
         -luser32 \
         -lrasapi32 \
@@ -164,6 +147,15 @@ win32 {
         -liphlpapi \
         -lgdi32
 
+
+   !contains(QMAKE_TARGET.arch, x86_64) {
+      message("Windows x86 build")
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86/ -llibssl -llibcrypto
+   }
+   else {
+      message("Windows x86_64 build")
+      LIBS += -L$$PWD/3rd/OpenSSL/lib/windows/x86_64/ -llibssl -llibcrypto
+   }
 }
 
 macx {
@@ -173,6 +165,31 @@ macx {
     SOURCES  += ui/macos_util.mm
 
     LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
+    LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
+}
+
+linux:!android {
+    LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
+    LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+}
+
+win32|macx|linux:!android {
+
+   HEADERS  += \
+      protocols/openvpnprotocol.h \
+      protocols/ikev2_vpn_protocol.h \
+      protocols/openvpnovercloakprotocol.h \
+      protocols/shadowsocksvpnprotocol.h \
+      protocols/wireguardprotocol.h \
+
+   SOURCES  += \
+      protocols/openvpnprotocol.cpp \
+      protocols/ikev2_vpn_protocol.cpp \
+      protocols/openvpnovercloakprotocol.cpp \
+      protocols/shadowsocksvpnprotocol.cpp \
+      protocols/wireguardprotocol.cpp \
 }
 
 android {
@@ -182,9 +199,7 @@ android {
 
    HEADERS +=    protocols/android_vpnprotocol.h \
 
-
    SOURCES +=    protocols/android_vpnprotocol.cpp \
-
 
    DISTFILES += \
        android/AndroidManifest.xml \
@@ -193,19 +208,79 @@ android {
        android/gradle/wrapper/gradle-wrapper.properties \
        android/gradlew \
        android/gradlew.bat \
-       android/res/values/libs.xml
+       android/gradle.properties \
+       android/res/values/libs.xml \
+       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
+       android/src/org/amnezia/vpn/VpnService.kt \
+       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
-   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
+      equals(ANDROID_TARGET_ARCH,$$abi) {
+         LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libcrypto.a
+         LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libssl.a
+      }
+
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-go.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/wireguard/$${abi}/libwg-quick.so
-   }
 
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libjbcrypto.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopenvpn.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopvpnutil.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpn3.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnexec.so
+   }
 }
+
+ios {
+    message("Client ios build")
+    CONFIG += static
+
+    Q_ENABLE_BITCODE.value = NO
+    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+
+    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+        message("Building for iPhone OS")
+        QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
+        QMAKE_BUNDLE = AmneziaVPN
+        QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+        QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
+        QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
+        QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+        QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
+
+        XCODEBUILD_FLAGS += -allowProvisioningUpdates
+
+        DEFINES += iphoneos
+
+        contains(QT_ARCH, arm64) {
+            message("Building for iOS/ARM v8 64-bit architecture")
+            ARCH_TAG = "ios_armv8_64"
+
+            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
+            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+        } else {
+            message("Building for iOS/ARM v7 (32-bit) architecture")
+            ARCH_TAG = "ios_armv7"
+        }
+    }
+
+    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+        message("Building for iPhone Simulator")
+        ARCH_TAG = "ios_x86_64"
+
+        DEFINES += iphonesimulator
+
+        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
+        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+    }
+}
+
 
 REPC_REPLICA += ../ipc/ipc_interface.rep
 !ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
-
 

@@ -19,15 +19,8 @@ PageBase {
         text: qsTr("Server settings")
         anchors.horizontalCenter: parent.horizontalCenter
     }
-    Image {
-        anchors.horizontalCenter: root.horizontalCenter
-        width: GC.trW(150)
-        height: GC.trH(22)
-        y: GC.trY(590)
-        source: "qrc:/images/AmneziaVPN.png"
-    }
     LabelType {
-        x: 20
+        anchors.horizontalCenter: parent.horizontalCenter
         y: 150
         width: 341
         height: 31
@@ -66,7 +59,7 @@ PageBase {
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 410
-        width: 300
+        width: parent.width - 40
         height: 40
         text: ServerSettingsLogic.pushButtonClearText
         visible: ServerSettingsLogic.pushButtonClearVisible
@@ -77,7 +70,7 @@ PageBase {
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 350
-        width: 300
+        width: parent.width - 40
         height: 40
         text: ServerSettingsLogic.pushButtonClearClientCacheText
         visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
@@ -88,7 +81,7 @@ PageBase {
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 470
-        width: 300
+        width: parent.width - 40
         height: 40
         text: qsTr("Forget this server")
         onClicked: {
@@ -98,7 +91,7 @@ PageBase {
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 210
-        width: 300
+        width: parent.width - 40
         height: 40
         text: qsTr("Protocols and Services")
         onClicked: {
@@ -108,12 +101,16 @@ PageBase {
     BlueButtonType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 260
-        width: 300
+        width: parent.width - 40
         height: 40
         text: qsTr("Share Server (FULL ACCESS)")
         visible: ServerSettingsLogic.pushButtonShareFullVisible
         onClicked: {
             ServerSettingsLogic.onPushButtonShareFullClicked()
         }
+    }
+
+    Logo {
+        anchors.bottom: parent.bottom
     }
 }

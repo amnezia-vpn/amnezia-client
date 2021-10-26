@@ -17,12 +17,12 @@ PageBase {
     Caption {
         id: caption
         text: qsTr("Servers list")
+        width: undefined
     }
     ImageButtonType {
-        x: 240
-        y: 39
-        anchors.left: caption.right
+        anchors.bottom: caption.bottom
         anchors.leftMargin: 10
+        anchors.left: caption.right
         width: 24
         height: 24
         icon.source: "qrc:/images/plus.png"
@@ -33,14 +33,17 @@ PageBase {
     ListView {
         id: listWidget_servers
         x: 20
-        y: 90
-        width: 340
-        height: 501
+        anchors.top: caption.bottom
+        anchors.topMargin: 15
+        width: parent.width
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
         model: ServerListLogic.serverListModel
         spacing: 5
+        clip: true
         delegate: Item {
             height: 60
-            width: 341
+            width: root.width - 40
             MouseArea {
                 id: ms
                 anchors.fill: parent
@@ -113,7 +116,7 @@ PageBase {
                 visible: false
             }
             ImageButtonType {
-                x: 300
+                x: parent.width - 30
                 y: 25
                 width: 24
                 height: 24
@@ -128,14 +131,13 @@ PageBase {
             }
             ImageButtonType {
                 id: pushButtonSetting
-                x: 260
+                x: parent.width - 60
                 y: 25
                 width: 24
                 height: 24
                 icon.source: "qrc:/images/settings.png"
-                onClicked: {
-                    ServerListLogic.onServerListPushbuttonSettingsClicked(index)
-                }
+                opacity: 0
+
                 OpacityAnimator {
                     id: mouseEnterAni
                     target: pushButtonSetting;
@@ -153,6 +155,25 @@ PageBase {
                     duration: 150
                     running: false
                     easing.type: Easing.InOutQuad
+                }
+                MouseArea {
+                    cursorShape: Qt.PointingHandCursor
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    propagateComposedEvents: true
+
+                    onEntered: {
+                        mouseExitAni.stop()
+                        mouseEnterAni.start()
+                    }
+                    onExited: {
+                        mouseEnterAni.stop()
+                        mouseExitAni.start()
+                    }
+
+                    onClicked: {
+                        ServerListLogic.onServerListPushbuttonSettingsClicked(index)
+                    }
                 }
             }
         }

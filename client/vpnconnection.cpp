@@ -17,21 +17,13 @@
 
 #include "ipc.h"
 #include "core/ipcclient.h"
-#include "protocols/openvpnprotocol.h"
-#include "protocols/openvpnovercloakprotocol.h"
-#include "protocols/shadowsocksvpnprotocol.h"
 
 #include "utils.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 {
-    QTimer::singleShot(0, this, [this](){
-        if (!IpcClient::init()) {
-            qWarning() << "Error occured when init IPC client";
-            emit serviceIsNotReady();
-        }
-    });
+
 }
 
 VpnConnection::~VpnConnection()
@@ -193,10 +185,6 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
 
 
     for (ProtocolEnumNS::Protocol proto : ContainerProps::protocolsForContainer(container)) {
-//        QString vpnConfigData =
-//            createVpnConfigurationForProto(
-//                serverIndex, credentials, container, containerConfig, proto, &e);
-
         QJsonObject vpnConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
                 serverIndex, credentials, container, containerConfig, proto, &e).toUtf8()).
@@ -208,7 +196,6 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
         }
 
         vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
-
     }
 
     Protocol proto = ContainerProps::defaultProtocol(container);
@@ -217,11 +204,27 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     return vpnConfiguration;
 }
 
-ErrorCode VpnConnection::connectToVpn(int serverIndex,
+void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
                 .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings.routeMode();
+
+    #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
+    if (!m_IpcClient) {
+        m_IpcClient = new IpcClient;
+    }
+
+    if (!m_IpcClient->isSocketConnected()) {
+        if (!IpcClient::init(m_IpcClient)) {
+            qWarning() << "Error occured when init IPC client";
+            emit serviceIsNotReady();
+            emit connectionStateChanged(VpnProtocol::Error);
+            return;
+        }
+    }
+#endif
+
     m_remoteAddress = credentials.hostName;
 
     emit connectionStateChanged(VpnProtocol::Connecting);
@@ -236,26 +239,29 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
     if (e) {
         emit connectionStateChanged(VpnProtocol::Error);
-        return e;
+        return;
     }
 
 
 #ifndef Q_OS_ANDROID
-
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
-        return ErrorCode::InternalError;
+        emit VpnProtocol::Error;
+        return;
     }
 
     m_vpnProtocol->prepare();
 
-
 #else
+    Protocol proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    androidVpnProtocol->initialize();
+    if (!androidVpnProtocol->initialize()) {
+         qDebug() << QString("Init failed") ;
+         emit VpnProtocol::Error;
+         return;
+    }
     m_vpnProtocol.reset(androidVpnProtocol);
 #endif
-
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
@@ -263,7 +269,8 @@ ErrorCode VpnConnection::connectToVpn(int serverIndex,
 
     ServerController::disconnectFromHost(credentials);
 
-    return m_vpnProtocol.data()->start();
+    e = m_vpnProtocol.data()->start();
+    if (e) emit VpnProtocol::Error;
 }
 
 QString VpnConnection::bytesPerSecToText(quint64 bytes)

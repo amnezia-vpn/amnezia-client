@@ -48,5 +48,10 @@ public slots:
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
     void onVpnProtocolError(amnezia::ErrorCode errorCode);
 
+signals:
+    void connectToVpn(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+
+    void disconnectFromVpn();
 };
 #endif // VPN_LOGIC_H
