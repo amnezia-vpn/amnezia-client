@@ -39,26 +39,15 @@ Ikev2Protocol::~Ikev2Protocol()
 
 void Ikev2Protocol::stop()
 {
+    setConnectionState(VpnProtocol::Disconnecting);
 #ifdef Q_OS_WINDOWS
     {
-        //setConnectionState(Disconnecting);
-
-        //auto disconnectProcess = new QProcess;
-
-        //        disconnectProcess->setProgram("rasdial");
-        //        QString arguments = QString("\"%1\" /disconnect")
-        //                .arg(tunnelName());
-        //        disconnectProcess->setNativeArguments(arguments);
-
-        //        //        connect(connectProcess, &QProcess::readyRead, [connectProcess]() {
-        //        //            qDebug().noquote() << "connectProcess readyRead" << connectProcess->readAll();
-        //        //        });
-
-        //        disconnectProcess->start();
-        //        disconnectProcess->waitForFinished(5000);
-        //        setConnectionState(Disconnected);
         if (! disconnect_vpn() ){
             qDebug()<<"We don't disconnect";
+            setConnectionState(VpnProtocol::Error);
+        }
+        else {
+            setConnectionState(VpnProtocol::Disconnected);
         }
     }
 #endif
@@ -440,12 +429,11 @@ bool Ikev2Protocol::disconnect_vpn(){
         if ( RasHangUp(hRasConn) != ERROR_SUCCESS)
             return false;
     }
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    QThread::msleep(3000);
+
     return true;
 }
-#endif
 
-#ifdef Q_OS_WINDOWS
 void WINAPI RasDialFuncCallback(UINT unMsg,
                                 RASCONNSTATE rasconnstate,
                                 DWORD dwError ){

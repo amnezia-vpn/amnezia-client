@@ -77,7 +77,9 @@ UiLogic::UiLogic(QObject *parent) :
 {
     m_containersModel = new ContainersModel(this);
     m_protocolsModel = new ProtocolsModel(this);
-    m_vpnConnection = new VpnConnection(this);
+    m_vpnConnection = new VpnConnection();
+    m_vpnConnection->moveToThread(&m_vpnConnectionThread);
+    m_vpnConnectionThread.start();
 
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
@@ -264,16 +266,21 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
 
 UiLogic::~UiLogic()
 {
-    hide();
-    m_vpnConnection->disconnectFromVpn();
-    for (int i = 0; i < 50; i++) {
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(100);
-        if (m_vpnConnection->isDisconnected()) {
-            break;
+    emit hide();
+
+    if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
+        m_vpnConnection->disconnectFromVpn();
+        for (int i = 0; i < 50; i++) {
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(100);
+            if (m_vpnConnection->isDisconnected()) {
+                break;
+            }
         }
     }
 
+    m_vpnConnectionThread.quit();
+    m_vpnConnectionThread.wait(3000);
     delete m_vpnConnection;
 
     qDebug() << "Application closed";
