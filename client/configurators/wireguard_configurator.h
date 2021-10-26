@@ -28,8 +28,6 @@ public:
 
 
 private:
-    static QProcessEnvironment prepareEnv();
-
     static ConnectionData prepareWireguardConfig(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode *errorCode = nullptr);
 
