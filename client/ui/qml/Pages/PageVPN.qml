@@ -82,7 +82,7 @@ PageBase {
     Item {
         x: 0
         anchors.bottom: line.top
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: GC.isMobile() ? 0 :10
         width: parent.width
         height: 51
         Image {
@@ -136,8 +136,8 @@ PageBase {
         x: 20
         width: parent.width - 40
         height: 1
-        anchors.bottom: conn_type_label.top
-        anchors.bottomMargin: 10
+        anchors.bottom: GC.isMobile() ? root.bottom : conn_type_label.top
+        anchors.bottomMargin: s10
         color: "#DDDDDD"
     }
 
@@ -146,7 +146,7 @@ PageBase {
         visible: !GC.isMobile()
         x: 20
         anchors.bottom: conn_type_group.top
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: GC.isMobile() ? 0 :10
         width: 281
         height: GC.isMobile() ? 0: 21
         font.family: "Lato"
@@ -208,11 +208,11 @@ PageBase {
 
     BasicButtonType {
         id: button_add_site
+        visible: !GC.isMobile()
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height - 60
-        //anchors.bottom: parent.bottom
         width: parent.width - 40
-        height: 40
+        height: GC.isMobile() ? 0: 40
         text: qsTr("+ Add site")
         enabled: VpnLogic.pushButtonVpnAddSiteEnabled
         background: Rectangle {

@@ -49,7 +49,13 @@ PageBase {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    listWidget_servers.currentIndex = index
+                    if (GC.isMobile()) {
+                        ServerListLogic.onServerListPushbuttonSettingsClicked(index)
+                    }
+                    else {
+                        listWidget_servers.currentIndex = index
+                    }
+
                     mouse.accepted = false
                 }
                 onEntered: {
