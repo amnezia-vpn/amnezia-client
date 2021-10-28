@@ -8,16 +8,15 @@ using namespace PageEnumNS;
 
 ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
     PageProtocolLogicBase(logic, parent),
-    m_comboBoxProtoShadowSocksCipherText{"chacha20-poly1305"},
-    m_lineEditProtoShadowSocksPortText{},
-    m_pushButtonShadowSocksSaveVisible{false},
-    m_progressBarProtoShadowSocksResetVisible{false},
-    m_lineEditProtoShadowSocksPortEnabled{false},
-    m_pageProtoShadowSocksEnabled{true},
-    m_labelProtoShadowSocksInfoVisible{true},
-    m_labelProtoShadowSocksInfoText{},
-    m_progressBarProtoShadowSocksResetValue{0},
-    m_progressBarProtoShadowSocksResetMaximium{100}
+    m_comboBoxCipherText{"chacha20-poly1305"},
+    m_lineEditPortText{},
+    m_pushButtonSaveVisible{false},
+    m_progressBaResetVisible{false},
+    m_lineEditPortEnabled{false},
+    m_labelInfoVisible{true},
+    m_labelInfoText{},
+    m_progressBaResetValue{0},
+    m_progressBaResetMaximium{100}
 {
 
 }
@@ -25,27 +24,27 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
 void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
 {
     set_pageEnabled(haveAuthData);
-    set_pushButtonShadowSocksSaveVisible(haveAuthData);
-    set_progressBarProtoShadowSocksResetVisible(haveAuthData);
+    set_pushButtonSaveVisible(haveAuthData);
+    set_progressBaResetVisible(haveAuthData);
 
-    set_comboBoxProtoShadowSocksCipherText(ssConfig.value(config_key::cipher).
+    set_comboBoxCipherText(ssConfig.value(config_key::cipher).
                                           toString(protocols::shadowsocks::defaultCipher));
 
-    set_lineEditProtoShadowSocksPortText(ssConfig.value(config_key::port).
+    set_lineEditPortText(ssConfig.value(config_key::port).
                                         toString(protocols::shadowsocks::defaultPort));
 
-    set_lineEditProtoShadowSocksPortEnabled(container == DockerContainer::ShadowSocks);
+    set_lineEditPortEnabled(container == DockerContainer::ShadowSocks);
 }
 
 QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::cipher, comboBoxProtoShadowSocksCipherText());
-    oldConfig.insert(config_key::port, lineEditProtoShadowSocksPortText());
+    oldConfig.insert(config_key::cipher, comboBoxCipherText());
+    oldConfig.insert(config_key::port, lineEditPortText());
 
     return oldConfig;
 }
 
-void ShadowSocksLogic::onPushButtonProtoShadowSocksSaveClicked()
+void ShadowSocksLogic::onPushButtonSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::ShadowSocks);
     //protocolConfig = getShadowSocksConfigFromPage(protocolConfig);
@@ -55,37 +54,37 @@ void ShadowSocksLogic::onPushButtonProtoShadowSocksSaveClicked()
     newContainerConfig.insert(ProtocolProps::protoToString(Protocol::ShadowSocks), protocolConfig);
     UiLogic::PageFunc page_proto_shadowsocks;
     page_proto_shadowsocks.setEnabledFunc = [this] (bool enabled) -> void {
-        set_pageProtoShadowSocksEnabled(enabled);
+        set_pageEnabled(enabled);
     };
     UiLogic::ButtonFunc pushButton_proto_shadowsocks_save;
     pushButton_proto_shadowsocks_save.setVisibleFunc = [this] (bool visible) ->void {
-        set_pushButtonShadowSocksSaveVisible(visible);
+        set_pushButtonSaveVisible(visible);
     };
     UiLogic::LabelFunc label_proto_shadowsocks_info;
     label_proto_shadowsocks_info.setVisibleFunc = [this] (bool visible) ->void {
-        set_labelProtoShadowSocksInfoVisible(visible);
+        set_labelInfoVisible(visible);
     };
     label_proto_shadowsocks_info.setTextFunc = [this] (const QString& text) ->void {
-        set_labelProtoShadowSocksInfoText(text);
+        set_labelInfoText(text);
     };
-    UiLogic::ProgressFunc progressBar_proto_shadowsocks_reset;
-    progressBar_proto_shadowsocks_reset.setVisibleFunc = [this] (bool visible) ->void {
-        set_progressBarProtoShadowSocksResetVisible(visible);
+    UiLogic::ProgressFunc progressBar_reset;
+    progressBar_reset.setVisibleFunc = [this] (bool visible) ->void {
+        set_progressBaResetVisible(visible);
     };
-    progressBar_proto_shadowsocks_reset.setValueFunc = [this] (int value) ->void {
-        set_progressBarProtoShadowSocksResetValue(value);
+    progressBar_reset.setValueFunc = [this] (int value) ->void {
+        set_progressBaResetValue(value);
     };
-    progressBar_proto_shadowsocks_reset.getValueFunc = [this] (void) -> int {
-        return progressBarProtoShadowSocksResetValue();
+    progressBar_reset.getValueFunc = [this] (void) -> int {
+        return progressBaResetValue();
     };
-    progressBar_proto_shadowsocks_reset.getMaximiumFunc = [this] (void) -> int {
-        return progressBarProtoShadowSocksResetMaximium();
+    progressBar_reset.getMaximiumFunc = [this] (void) -> int {
+        return progressBaResetMaximium();
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
         return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
-    page_proto_shadowsocks, progressBar_proto_shadowsocks_reset,
+    page_proto_shadowsocks, progressBar_reset,
     pushButton_proto_shadowsocks_save, label_proto_shadowsocks_info);
 
     if (!e) {

@@ -9,20 +9,20 @@ class CloakLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(QString, comboBoxProtoCloakCipherText)
-    AUTO_PROPERTY(QString, lineEditProtoCloakSiteText)
-    AUTO_PROPERTY(QString, lineEditProtoCloakPortText)
-    AUTO_PROPERTY(bool, pushButtonCloakSaveVisible)
-    AUTO_PROPERTY(bool, progressBarProtoCloakResetVisible)
-    AUTO_PROPERTY(bool, lineEditProtoCloakPortEnabled)
-    AUTO_PROPERTY(bool, pageProtoCloakEnabled)
-    AUTO_PROPERTY(bool, labelProtoCloakInfoVisible)
-    AUTO_PROPERTY(QString, labelProtoCloakInfoText)
-    AUTO_PROPERTY(int, progressBarProtoCloakResetValue)
-    AUTO_PROPERTY(int, progressBarProtoCloakResetMaximium)
+    AUTO_PROPERTY(QString, comboBoxCipherText)
+    AUTO_PROPERTY(QString, lineEditSiteText)
+    AUTO_PROPERTY(QString, lineEditPortText)
+    AUTO_PROPERTY(bool, pushButtonSaveVisible)
+    AUTO_PROPERTY(bool, progressBarResetVisible)
+    AUTO_PROPERTY(bool, lineEditPortEnabled)
+    AUTO_PROPERTY(bool, pageEnabled)
+    AUTO_PROPERTY(bool, labelInfoVisible)
+    AUTO_PROPERTY(QString, labelInfoText)
+    AUTO_PROPERTY(int, progressBarResetValue)
+    AUTO_PROPERTY(int, progressBarResetMaximium)
 
 public:
-    Q_INVOKABLE void onPushButtonProtoCloakSaveClicked();
+    Q_INVOKABLE void onPushButtonSaveClicked();
 
 public:
     explicit CloakLogic(UiLogic *uiLogic, QObject *parent = nullptr);

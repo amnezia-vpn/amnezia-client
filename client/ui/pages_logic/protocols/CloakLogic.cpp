@@ -8,17 +8,17 @@ using namespace PageEnumNS;
 
 CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
     PageProtocolLogicBase(logic, parent),
-    m_comboBoxProtoCloakCipherText{"chacha20-poly1305"},
-    m_lineEditProtoCloakSiteText{"tile.openstreetmap.org"},
-    m_lineEditProtoCloakPortText{},
-    m_pushButtonCloakSaveVisible{false},
-    m_progressBarProtoCloakResetVisible{false},
-    m_lineEditProtoCloakPortEnabled{false},
-    m_pageProtoCloakEnabled{true},
-    m_labelProtoCloakInfoVisible{true},
-    m_labelProtoCloakInfoText{},
-    m_progressBarProtoCloakResetValue{0},
-    m_progressBarProtoCloakResetMaximium{100}
+    m_comboBoxCipherText{"chacha20-poly1305"},
+    m_lineEditSiteText{"tile.openstreetmap.org"},
+    m_lineEditPortText{},
+    m_pushButtonSaveVisible{false},
+    m_progressBarResetVisible{false},
+    m_lineEditPortEnabled{false},
+    m_pageEnabled{true},
+    m_labelInfoVisible{true},
+    m_labelInfoText{},
+    m_progressBarResetValue{0},
+    m_progressBarResetMaximium{100}
 {
 
 }
@@ -26,31 +26,31 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
 void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
 {
     set_pageEnabled(haveAuthData);
-    set_pushButtonCloakSaveVisible(haveAuthData);
-    set_progressBarProtoCloakResetVisible(haveAuthData);
+    set_pushButtonSaveVisible(haveAuthData);
+    set_progressBarResetVisible(haveAuthData);
 
-    set_comboBoxProtoCloakCipherText(ckConfig.value(config_key::cipher).
+    set_comboBoxCipherText(ckConfig.value(config_key::cipher).
                                     toString(protocols::cloak::defaultCipher));
 
-    set_lineEditProtoCloakSiteText(ckConfig.value(config_key::site).
+    set_lineEditSiteText(ckConfig.value(config_key::site).
                                   toString(protocols::cloak::defaultRedirSite));
 
-    set_lineEditProtoCloakPortText(ckConfig.value(config_key::port).
+    set_lineEditPortText(ckConfig.value(config_key::port).
                                   toString(protocols::cloak::defaultPort));
 
-    set_lineEditProtoCloakPortEnabled(container == DockerContainer::Cloak);
+    set_lineEditPortEnabled(container == DockerContainer::Cloak);
 }
 
 QJsonObject CloakLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::cipher, comboBoxProtoCloakCipherText());
-    oldConfig.insert(config_key::site, lineEditProtoCloakSiteText());
-    oldConfig.insert(config_key::port, lineEditProtoCloakPortText());
+    oldConfig.insert(config_key::cipher, comboBoxCipherText());
+    oldConfig.insert(config_key::site, lineEditSiteText());
+    oldConfig.insert(config_key::port, lineEditPortText());
 
     return oldConfig;
 }
 
-void CloakLogic::onPushButtonProtoCloakSaveClicked()
+void CloakLogic::onPushButtonSaveClicked()
 {
     QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
@@ -59,40 +59,40 @@ void CloakLogic::onPushButtonProtoCloakSaveClicked()
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Protocol::Cloak), protocolConfig);
 
-    UiLogic::PageFunc page_proto_cloak;
-    page_proto_cloak.setEnabledFunc = [this] (bool enabled) -> void {
-        set_pageProtoCloakEnabled(enabled);
+    UiLogic::PageFunc page_func;
+    page_func.setEnabledFunc = [this] (bool enabled) -> void {
+        set_pageEnabled(enabled);
     };
-    UiLogic::ButtonFunc pushButton_proto_cloak_save;
-    pushButton_proto_cloak_save.setVisibleFunc = [this] (bool visible) ->void {
-        set_pushButtonCloakSaveVisible(visible);
+    UiLogic::ButtonFunc pushButton_save_func;
+    pushButton_save_func.setVisibleFunc = [this] (bool visible) ->void {
+        set_pushButtonSaveVisible(visible);
     };
-    UiLogic::LabelFunc label_proto_cloak_info;
-    label_proto_cloak_info.setVisibleFunc = [this] (bool visible) ->void {
-        set_labelProtoCloakInfoVisible(visible);
+    UiLogic::LabelFunc label_info_func;
+    label_info_func.setVisibleFunc = [this] (bool visible) ->void {
+        set_labelInfoVisible(visible);
     };
-    label_proto_cloak_info.setTextFunc = [this] (const QString& text) ->void {
-        set_labelProtoCloakInfoText(text);
+    label_info_func.setTextFunc = [this] (const QString& text) ->void {
+        set_labelInfoText(text);
     };
-    UiLogic::ProgressFunc progressBar_proto_cloak_reset;
-    progressBar_proto_cloak_reset.setVisibleFunc = [this] (bool visible) ->void {
-        set_progressBarProtoCloakResetVisible(visible);
+    UiLogic::ProgressFunc progressBar_reset;
+    progressBar_reset.setVisibleFunc = [this] (bool visible) ->void {
+        set_progressBarResetVisible(visible);
     };
-    progressBar_proto_cloak_reset.setValueFunc = [this] (int value) ->void {
-        set_progressBarProtoCloakResetValue(value);
+    progressBar_reset.setValueFunc = [this] (int value) ->void {
+        set_progressBarResetValue(value);
     };
-    progressBar_proto_cloak_reset.getValueFunc = [this] (void) -> int {
-        return progressBarProtoCloakResetValue();
+    progressBar_reset.getValueFunc = [this] (void) -> int {
+        return progressBarResetValue();
     };
-    progressBar_proto_cloak_reset.getMaximiumFunc = [this] (void) -> int {
-        return progressBarProtoCloakResetMaximium();
+    progressBar_reset.getMaximiumFunc = [this] (void) -> int {
+        return progressBarResetMaximium();
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
         return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
-    page_proto_cloak, progressBar_proto_cloak_reset,
-    pushButton_proto_cloak_save, label_proto_cloak_info);
+    page_func, progressBar_reset,
+    pushButton_save_func, label_info_func);
 
     if (!e) {
         m_settings.setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);

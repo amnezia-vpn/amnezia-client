@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.15
 import SortFilterProxyModel 0.2
 import ContainerProps 1.0
@@ -292,19 +293,30 @@ PageBase {
                             }
 
                             ImageButtonType {
-                                id: button_default
-                                visible: service_type_role == ProtocolEnum.Vpn
-
+                                id: button_remove
+                                visible: index === tb_c.currentIndex
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true
-                                img.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
+                                icon.source: "qrc:/images/delete.png"
                                 implicitWidth: 30
                                 implicitHeight: 30
 
                                 checked: default_role
-                                onClicked: {
-                                    ServerContainersLogic.onPushButtonDefaultClicked(proxyContainersModel.mapToSource(index))
+
+                                MessageDialog {
+                                    id: dialogRemove
+                                    standardButtons: StandardButton.Yes | StandardButton.Cancel
+                                    title: "AmneziaVPN"
+                                    text: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
+                                    onAccepted: {
+                                        tb_c.currentIndex = -1
+                                        ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
+                                    }
                                 }
+
+                                onClicked: dialogRemove.open()
+
+                                VisibleBehavior on visible { }
                             }
 
                             ImageButtonType {
@@ -322,23 +334,20 @@ PageBase {
                             }
 
                             ImageButtonType {
-                                id: button_remove
-                                visible: index === tb_c.currentIndex
+                                id: button_default
+                                visible: service_type_role == ProtocolEnum.Vpn
+
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true
-                                icon.source: "qrc:/images/delete.png"
+                                img.source: checked ? "qrc:/images/check.png" : "qrc:/images/uncheck.png"
                                 implicitWidth: 30
                                 implicitHeight: 30
 
                                 checked: default_role
                                 onClicked: {
-                                    tb_c.currentIndex = -1
-                                    ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
+                                    ServerContainersLogic.onPushButtonDefaultClicked(proxyContainersModel.mapToSource(index))
                                 }
-
-                                VisibleBehavior on visible { }
                             }
-
                         }
 
 

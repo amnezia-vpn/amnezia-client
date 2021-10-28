@@ -137,7 +137,7 @@ PageBase {
         width: parent.width - 40
         height: 1
         anchors.bottom: GC.isMobile() ? root.bottom : conn_type_label.top
-        anchors.bottomMargin: s10
+        anchors.bottomMargin: 10
         color: "#DDDDDD"
     }
 
