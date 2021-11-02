@@ -31,7 +31,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 
     EVP_PKEY * pKey = EVP_PKEY_new();
     q_check_ptr(pKey);
-    pKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &buff[0], EDDSA_KEY_LENGTH);
+    pKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL, &buff[0], EDDSA_KEY_LENGTH);
 
 
     size_t keySize = EDDSA_KEY_LENGTH;
