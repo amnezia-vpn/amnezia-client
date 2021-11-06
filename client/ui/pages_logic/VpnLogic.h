@@ -24,7 +24,7 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(bool, radioButtonVpnModeExceptSitesChecked)
 
 public:
-    Q_INVOKABLE void updateVpnPage();
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);

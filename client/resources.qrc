@@ -126,5 +126,13 @@
         <file>server_scripts/ipsec/Dockerfile</file>
         <file>server_scripts/ipsec/run_container.sh</file>
         <file>server_scripts/ipsec/start.sh</file>
+        <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtocolBase.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoOpenVPN.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoSftp.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoShadowSocks.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoTorWebSite.qml</file>
+        <file>ui/qml/Controls/TextAreaType.qml</file>
+        <file>ui/qml/Controls/ContextMenu.qml</file>
     </qresource>
 </RCC>

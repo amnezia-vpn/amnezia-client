@@ -43,7 +43,7 @@ QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::Docker
         return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
 
     case DockerContainer::Ipsec:
-        return { Protocol::Ikev2, Protocol::L2tp };
+        return { Protocol::Ikev2 /*, Protocol::L2tp */};
 
     case DockerContainer::Dns:
         return { };
@@ -129,6 +129,7 @@ Protocol ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns :          return Protocol::Dns;
     case DockerContainer::FileShare :    return Protocol::FileShare;
     case DockerContainer::Sftp :         return Protocol::Sftp;
+    default:                             return Protocol::Any;
     }
 }
 

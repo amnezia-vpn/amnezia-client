@@ -46,15 +46,16 @@ class UiLogic : public QObject
     Q_OBJECT
 
     AUTO_PROPERTY(bool, pageEnabled)
+    AUTO_PROPERTY(int, pagesStackDepth)
+    AUTO_PROPERTY(int, currentPageValue)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
-    Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
+    // TODO: review
     Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
     Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
     Q_PROPERTY(bool trayActionConnectEnabled READ getTrayActionConnectEnabled WRITE setTrayActionConnectEnabled NOTIFY trayActionConnectEnabledChanged)
-
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
 
 public:
@@ -83,6 +84,8 @@ public:
 
     friend class OtherProtocolsLogic;
 
+    Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
+
     Q_INVOKABLE void initalizeUiLogic();
     Q_INVOKABLE void onCloseWindow();
 
@@ -91,12 +94,11 @@ public:
 
     Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
     Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
+    Q_INVOKABLE void onGotoShareProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
 
-    int getCurrentPageValue() const;
-    void setCurrentPageValue(int currentPageValue);
     QString getTrayIconUrl() const;
     void setTrayIconUrl(const QString &trayIconUrl);
     bool getTrayActionDisconnectEnabled() const;
@@ -108,7 +110,6 @@ public:
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
 signals:
-    void currentPageValueChanged();
     void trayIconUrlChanged();
     void trayActionDisconnectEnabledChanged();
     void trayActionConnectEnabledChanged();
@@ -117,6 +118,8 @@ signals:
 
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
+    void goToShareProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
+
     void closePage();
     void setStartPage(PageEnumNS::Page page, bool slide = true);
     void showPublicKeyWarning();
@@ -125,7 +128,6 @@ signals:
     void hide();
 
 private:
-    int m_currentPageValue;
     QString m_trayIconUrl;
     bool m_trayActionDisconnectEnabled;
     bool m_trayActionConnectEnabled;

@@ -35,6 +35,8 @@ void StartPageLogic::onUpdatePage()
     set_pushButtonConnectVisible(true);
 
     set_pushButtonConnectKeyChecked(false);
+
+    set_pushButtonBackFromStartVisible(uiLogic()->pagesStackDepth() > 0);
 }
 
 void StartPageLogic::onPushButtonConnect()

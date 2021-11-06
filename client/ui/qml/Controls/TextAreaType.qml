@@ -2,14 +2,23 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import Qt.labs.platform 1.0
 
-TextField {
+Flickable
+{
+    property alias textArea: root
+    id: flickable
+    flickableDirection: Flickable.VerticalFlick
+    clip: true
+    TextArea.flickable:
+
+TextArea {
     id: root
     property bool error: false
 
     width: parent.width - 80
     height: 40
     anchors.topMargin: 5
-    selectByMouse: true
+    selectByMouse: false
+
 
     selectionColor: "darkgray"
     font.pixelSize: 16
@@ -37,15 +46,6 @@ TextField {
             return "#A7A7A7"
         }
     }
+}
 
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        onClicked: contextMenu.open()
-    }
-
-    ContextMenu {
-        id: contextMenu
-        textObj: root
-    }
 }

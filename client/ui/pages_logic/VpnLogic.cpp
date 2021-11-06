@@ -36,7 +36,7 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
 }
 
 
-void VpnLogic::updateVpnPage()
+void VpnLogic::onUpdatePage()
 {
     Settings::RouteMode mode = m_settings.routeMode();
     set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);

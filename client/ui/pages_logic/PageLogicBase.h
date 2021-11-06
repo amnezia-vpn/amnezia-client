@@ -14,6 +14,8 @@ class PageLogicBase : public QObject
 {
     Q_OBJECT
     AUTO_PROPERTY(bool, pageEnabled)
+//    AUTO_PROPERTY(int, serverIndex)
+//    AUTO_PROPERTY(DockerContainer, dockerContainer)
 
 public:
     explicit PageLogicBase(UiLogic *uiLogic, QObject *parent = nullptr);

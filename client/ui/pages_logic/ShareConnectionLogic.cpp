@@ -21,11 +21,6 @@
 
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_pageShareAmneziaVisible{true},
-    m_pageShareOpenVpnVisible{true},
-    m_pageShareShadowSocksVisible{true},
-    m_pageShareCloakVisible{true},
-    m_pageShareFullAccessVisible{true},
     m_textEditShareOpenVpnCodeText{},
     m_pushButtonShareOpenVpnCopyEnabled{false},
     m_pushButtonShareOpenVpnSaveEnabled{false},
@@ -222,12 +217,6 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
 
     //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
-    set_pageShareAmneziaVisible(false);
-    set_pageShareOpenVpnVisible(false);
-    set_pageShareShadowSocksVisible(false);
-    set_pageShareCloakVisible(false);
-    set_pageShareFullAccessVisible(false);
-
     enum currentWidget {
         full_access = 0,
         share_amezia,
@@ -237,8 +226,6 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     };
 
     if (container == DockerContainer::OpenVpn) {
-        set_pageShareAmneziaVisible(true);
-        set_pageShareOpenVpnVisible(true);
 
         QString cfg = tr("Press Generate config");
         set_textEditShareOpenVpnCodeText(cfg);
@@ -250,8 +237,6 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
 
     if (container == DockerContainer::ShadowSocks ||
             container == DockerContainer::Cloak) {
-        set_pageShareAmneziaVisible(true);
-        set_pageShareShadowSocksVisible(true);
 
         QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
         QString cfg = protoConfig.value(config_key::last_config).toString();
@@ -289,7 +274,6 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
 
     if (container == DockerContainer::Cloak) {
         //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
-        set_pageShareCloakVisible(true);
         set_plainTextEditShareCloakText(QString(""));
 
         QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
@@ -313,7 +297,6 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
 
     // Full access
     if (container == DockerContainer::None) {
-        set_pageShareFullAccessVisible(true);
 
         const QJsonObject &server = m_settings.server(uiLogic()->selectedServerIndex);
 

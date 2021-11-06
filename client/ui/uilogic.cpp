@@ -69,7 +69,6 @@ using namespace PageEnumNS;
 
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
-    m_currentPageValue{0},
     m_trayIconUrl{},
     m_trayActionDisconnectEnabled{true},
     m_trayActionConnectEnabled{true},
@@ -170,32 +169,6 @@ void UiLogic::initalizeUiLogic()
     //    ui->lineEdit_proto_shadowsocks_port->setValidator(&m_ipPortValidator);
     //    ui->lineEdit_proto_cloak_port->setValidator(&m_ipPortValidator);
 
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-int UiLogic::getCurrentPageValue() const
-{
-    return m_currentPageValue;
-}
-
-void UiLogic::setCurrentPageValue(int currentPageValue)
-{
-    if (m_currentPageValue != currentPageValue) {
-        m_currentPageValue = currentPageValue;
-        emit currentPageValueChanged();
-    }
 }
 
 QString UiLogic::getTrayIconUrl() const
@@ -676,7 +649,7 @@ PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
 
 PageEnumNS::Page UiLogic::currentPage()
 {
-    return static_cast<PageEnumNS::Page>(getCurrentPageValue());
+    return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
 void UiLogic::setTrayState(VpnProtocol::ConnectionState state)

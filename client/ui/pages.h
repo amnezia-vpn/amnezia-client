@@ -4,6 +4,19 @@
 #include <QObject>
 #include <QQmlEngine>
 
+class PageType : public QObject
+{
+    Q_GADGET
+
+public:
+    enum Type {
+        Basic,
+        Proto,
+        ShareProto
+    };
+    Q_ENUM(Type)
+};
+
 namespace PageEnumNS
 {
 Q_NAMESPACE

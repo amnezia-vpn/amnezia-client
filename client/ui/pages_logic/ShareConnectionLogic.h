@@ -11,11 +11,6 @@ class ShareConnectionLogic: public PageLogicBase
     Q_OBJECT
 
 public:
-    AUTO_PROPERTY(bool, pageShareAmneziaVisible)
-    AUTO_PROPERTY(bool, pageShareOpenVpnVisible)
-    AUTO_PROPERTY(bool, pageShareShadowSocksVisible)
-    AUTO_PROPERTY(bool, pageShareCloakVisible)
-    AUTO_PROPERTY(bool, pageShareFullAccessVisible)
     AUTO_PROPERTY(QString, textEditShareOpenVpnCodeText)
     AUTO_PROPERTY(bool, pushButtonShareOpenVpnCopyEnabled)
     AUTO_PROPERTY(bool, pushButtonShareOpenVpnSaveEnabled)

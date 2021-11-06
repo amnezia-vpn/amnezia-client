@@ -136,6 +136,8 @@ int main(int argc, char *argv[])
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
 
+    qmlRegisterType<PageType>("PageType", 1, 0, "PageType");
+
     QScopedPointer<ContainerProps> containerProps(new ContainerProps);
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", containerProps.get());
 

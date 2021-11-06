@@ -15,6 +15,7 @@ WizardLogic::WizardLogic(UiLogic *logic, QObject *parent):
 void WizardLogic::onUpdatePage()
 {
     set_lineEditHighWebsiteMaskingText(protocols::cloak::defaultRedirSite);
+    set_radioButtonMediumChecked(true);
 }
 
 QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const

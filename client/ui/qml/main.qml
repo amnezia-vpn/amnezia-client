@@ -3,17 +3,20 @@ import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 import PageEnum 1.0
+import PageType 1.0
 import Qt.labs.platform 1.1
 import Qt.labs.folderlistmodel 2.12
 import QtQuick.Dialogs 1.1
 import "./"
 import "Pages"
 import "Pages/Protocols"
+import "Pages/Share"
 import "Config"
 
 Window  {
     property var pages: ({})
     property var protocolPages: ({})
+    property var sharePages: ({})
 
     id: root
     visible: true
@@ -28,73 +31,28 @@ Window  {
     //flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
 
-    function gotoPage(page, reset, slide) {
+    function gotoPage(type, page, reset, slide) {
+
+        let p_obj;
+        if (type === PageType.Basic) p_obj = pages[page]
+        else if (type === PageType.Proto) p_obj = protocolPages[page]
+        else if (type === PageType.ShareProto) p_obj = sharePages[page]
+        else return
+
+        console.debug("QML gotoPage " + type + " " + page + " " + p_obj)
+
+
+        if (slide) {
+            pageLoader.push(p_obj, {}, StackView.PushTransition)
+        } else {
+            pageLoader.push(p_obj, {}, StackView.Immediate)
+        }
+
         if (reset) {
-            if (page === PageEnum.ServerSettings) {
-                ServerSettingsLogic.onUpdatePage();
-            }
-            if (page === PageEnum.ShareConnection) {
-            }
-            if (page === PageEnum.Wizard) {
-                WizardLogic.radioButtonMediumChecked = true
-            }
-            if (page === PageEnum.WizardHigh) {
-                WizardLogic.onUpdatePage();
-            }
-            if (page === PageEnum.ServerConfiguringProgress) {
-                ServerConfiguringProgressLogic.progressBarValue = 0;
-            }
-            if (page === PageEnum.GeneralSettings) {
-                GeneralSettingsLogic.onUpdatePage();
-            }
-            if (page === PageEnum.ServersList) {
-                ServerListLogic.onUpdatePage();
-            }
-            if (page === PageEnum.Start) {
-                StartPageLogic.pushButtonBackFromStartVisible = !pageLoader.empty
-                StartPageLogic.onUpdatePage();
-            }
-            if (page === PageEnum.NewServerProtocols) {
-                NewServerProtocolsLogic.onUpdatePage()
-            }
-            if (page === PageEnum.ServerContainers) {
-                ServerContainersLogic.onUpdatePage()
-            }
-            if (page === PageEnum.AppSettings) {
-                AppSettingsLogic.onUpdatePage()
-            }
-            if (page === PageEnum.NetworkSettings) {
-                NetworkSettingsLogic.onUpdatePage()
-            }
-            if (page === PageEnum.Sites) {
-                SitesLogic.updateSitesPage()
-            }
-            if (page === PageEnum.Vpn) {
-                VpnLogic.updateVpnPage()
-            }
+            p_obj.logic.onUpdatePage();
         }
 
-        if (slide) {
-            pageLoader.push(pages[page], {}, StackView.PushTransition)
-        } else {
-            pageLoader.push(pages[page], {}, StackView.Immediate)
-        }
-
-        pages[page].activated(reset)
-    }
-
-    function gotoProtocolPage(protocol, reset, slide) {
-        if (reset && protocolPages[protocol] !== "undefined") {
-            protocolPages[protocol].logic.onUpdatePage();
-        }
-
-        if (slide) {
-            pageLoader.push(protocolPages[protocol], {}, StackView.PushTransition)
-        } else {
-            pageLoader.push(protocolPages[protocol], {}, StackView.Immediate)
-        }
-
-        protocolPages[protocol].activated(reset)
+        p_obj.activated(reset)
     }
 
     function close_page() {
@@ -146,6 +104,8 @@ Window  {
         color: "white"
     }
 
+    //PageShareProtoCloak {}
+
     StackView {
         id: pageLoader
         y: GC.isDesktop() ? titleBar.height : 0
@@ -155,6 +115,10 @@ Window  {
         onCurrentItemChanged: {
             console.debug("QML onCurrentItemChanged " + pageLoader.currentItem)
             UiLogic.currentPageValue = currentItem.page
+        }
+
+        onDepthChanged: {
+            UiLogic.pagesStackDepth = depth
         }
 
         Keys.onPressed: {
@@ -171,7 +135,7 @@ Window  {
 
         onStatusChanged: if (status == FolderListModel.Ready) {
                              for (var i=0; i<folderModelPages.count; i++) {
-                                 createPagesObjects(folderModelPages.get(i, "filePath"), false);
+                                 createPagesObjects(folderModelPages.get(i, "filePath"), PageType.Basic);
                              }
                              UiLogic.initalizeUiLogic()
                          }
@@ -185,40 +149,56 @@ Window  {
 
         onStatusChanged: if (status == FolderListModel.Ready) {
                              for (var i=0; i<folderModelProtocols.count; i++) {
-                                 createPagesObjects(folderModelProtocols.get(i, "filePath"), true);
+                                 createPagesObjects(folderModelProtocols.get(i, "filePath"), PageType.Proto);
                              }
         }
     }
 
-    function createPagesObjects(file, isProtocol) {
+    FolderListModel {
+        id: folderModelShareProtocols
+        folder: "qrc:/ui/qml/Pages/Share/"
+        nameFilters: ["*.qml"]
+        showDirs: false
+
+        onStatusChanged: if (status == FolderListModel.Ready) {
+                             for (var i=0; i<folderModelShareProtocols.count; i++) {
+                                 createPagesObjects(folderModelShareProtocols.get(i, "filePath"), PageType.ShareProto);
+                             }
+        }
+    }
+
+    function createPagesObjects(file, type) {
         if (file.indexOf("Base") !== -1) return; // skip Base Pages
+        //console.debug("Creating compenent " + file + " for " + type);
 
         var c = Qt.createComponent("qrc" + file);
 
         var finishCreation = function (component){
-            if (component.status == Component.Ready) {
+            if (component.status === Component.Ready) {
                 var obj = component.createObject(root);
-                if (obj == null) {
+                if (obj === null) {
                     console.debug("Error creating object " + component.url);
                 }
                 else {
                     obj.visible = false
-                    if (isProtocol) {
-                        protocolPages[obj.protocol] = obj
-                    }
-                    else {
+                    if (type === PageType.Basic) {
                         pages[obj.page] = obj
                     }
+                    else if (type === PageType.Proto) {
+                        protocolPages[obj.protocol] = obj
+                    }
+                    else if (type === PageType.ShareProto) {
+                        sharePages[obj.protocol] = obj
+                    }
 
-
-
+                    //console.debug("Created compenent " + component.url + " for " + type);
                 }
-            } else if (component.status == Component.Error) {
+            } else if (component.status === Component.Error) {
                 console.debug("Error loading component:", component.errorString());
             }
         }
 
-        if (c.status == Component.Ready)
+        if (c.status === Component.Ready)
             finishCreation(c);
         else {
             console.debug("Warning: Pages components are not ready");
@@ -228,13 +208,19 @@ Window  {
     Connections {
         target: UiLogic
         function onGoToPage(page, reset, slide) {
-            console.debug("Connections onGoToPage " + page);
-            root.gotoPage(page, reset, slide)
+            console.debug("Qml Connections onGoToPage " + page);
+            root.gotoPage(PageType.Basic, page, reset, slide)
         }
         function onGoToProtocolPage(protocol, reset, slide) {
-            console.debug("Connections onGoToProtocolPage " + protocol);
-            root.gotoProtocolPage(protocol, reset, slide)
+            console.debug("Qml Connections onGoToProtocolPage " + protocol);
+            root.gotoPage(PageType.Proto, protocol, reset, slide)
         }
+        function onGoToShareProtocolPage(protocol, reset, slide) {
+            console.debug("Qml Connections onGoToShareProtocolPage " + protocol);
+            root.gotoPage(PageType.ShareProto, protocol, reset, slide)
+        }
+
+
         function onClosePage() {
             root.close_page()
         }
