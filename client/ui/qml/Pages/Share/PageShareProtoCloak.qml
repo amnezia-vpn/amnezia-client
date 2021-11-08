@@ -40,7 +40,7 @@ PageShareProtocolBase {
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
         text: ShareConnectionLogic.pushButtonShareCloakCopyText
-        enabled: ShareConnectionLogic.pushButtonShareCloakCopyEnabled
+        //enabled: ShareConnectionLogic.pushButtonShareCloakCopyEnabled
         onClicked: {
             ShareConnectionLogic.onPushButtonShareCloakCopyClicked()
         }

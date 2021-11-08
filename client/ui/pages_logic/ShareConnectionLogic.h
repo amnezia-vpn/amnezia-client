@@ -14,8 +14,6 @@ public:
     AUTO_PROPERTY(QString, textEditShareOpenVpnCodeText)
     AUTO_PROPERTY(bool, pushButtonShareOpenVpnCopyEnabled)
     AUTO_PROPERTY(bool, pushButtonShareOpenVpnSaveEnabled)
-    AUTO_PROPERTY(int, toolBoxShareConnectionCurrentIndex)
-    AUTO_PROPERTY(bool, pushButtonShareShadowSocksCopyEnabled)
     AUTO_PROPERTY(QString, lineEditShareShadowSocksStringText)
     AUTO_PROPERTY(QString, labelShareShadowSocksQrCodeText)
     AUTO_PROPERTY(QString, labelShareShadowSocksServerText)
@@ -23,7 +21,6 @@ public:
     AUTO_PROPERTY(QString, labelShareShadowSocksMethodText)
     AUTO_PROPERTY(QString, labelShareShadowSocksPasswordText)
     AUTO_PROPERTY(QString, plainTextEditShareCloakText)
-    AUTO_PROPERTY(bool, pushButtonShareCloakCopyEnabled)
     AUTO_PROPERTY(QString, textEditShareFullCodeText)
     AUTO_PROPERTY(QString, textEditShareAmneziaCodeText)
     AUTO_PROPERTY(QString, pushButtonShareFullCopyText)
@@ -55,7 +52,8 @@ public:
 
     void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
                            DockerContainer container);
-    void updateQRCodeImage(const QString &text, const std::function<void(const QString&)>& setLabelFunc);
+    QImage updateQRCodeImage(const QString &text);
+    QString imageToBase64(const QImage &image);
 
 private:
     CQR_Encode m_qrEncode;

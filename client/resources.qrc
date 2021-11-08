@@ -134,5 +134,6 @@
         <file>ui/qml/Pages/Share/PageShareProtoTorWebSite.qml</file>
         <file>ui/qml/Controls/TextAreaType.qml</file>
         <file>ui/qml/Controls/ContextMenu.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoAmnezia.qml</file>
     </qresource>
 </RCC>

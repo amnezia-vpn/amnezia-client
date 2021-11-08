@@ -104,7 +104,7 @@ Window  {
         color: "white"
     }
 
-    //PageShareProtoCloak {}
+    //PageShareProtoAmnezia {}
 
     StackView {
         id: pageLoader

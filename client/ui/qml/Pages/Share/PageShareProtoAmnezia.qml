@@ -8,7 +8,7 @@ import "../../Config"
 
 PageShareProtocolBase {
     id: root
-    protocol: ProtocolEnum.OpenVpn
+    protocol: ProtocolEnum.Any
     logic: ShareConnectionLogic
 
     BackButton {
@@ -16,11 +16,28 @@ PageShareProtocolBase {
     }
     Caption {
         id: caption
-        text: qsTr("Share OpenVPN Settings")
+        text: qsTr("Share for Amnezia")
+    }
+
+    Text {
+        id: lb_desc
+        anchors.top: caption.bottom
+        anchors.topMargin: 20
+        width: parent.width - 60
+        anchors.horizontalCenter: root.horizontalCenter
+
+        font.family: "Lato"
+        font.styleName: "normal"
+        font.pixelSize: 16
+        color: "#181922"
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        wrapMode: Text.Wrap
+        text: qsTr("Anyone who logs in with this code will be able to connect to this VPN server. \nThis code does not include server credentials.")
     }
 
     TextAreaType {
-        anchors.top: caption.bottom
+        anchors.top: lb_desc.bottom
         anchors.topMargin: 20
         anchors.bottom: pb_gen.top
         anchors.bottomMargin: 20
@@ -29,9 +46,9 @@ PageShareProtocolBase {
         width: parent.width - 60
 
         textArea.readOnly: true
-
+        textArea.wrapMode: TextEdit.WrapAnywhere
         textArea.verticalAlignment: Text.AlignTop
-        textArea.text: ShareConnectionLogic.textEditShareOpenVpnCodeText
+        textArea.text: ShareConnectionLogic.textEditShareAmneziaCodeText
     }
 
 
@@ -41,12 +58,11 @@ PageShareProtocolBase {
         anchors.bottomMargin: 10
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
-
-        text: ShareConnectionLogic.pushButtonShareOpenVpnGenerateText
+        text: ShareConnectionLogic.pushButtonShareAmneziaGenerateText
+        enabled: ShareConnectionLogic.pushButtonShareAmneziaGenerateEnabled
         onClicked: {
-            ShareConnectionLogic.onPushButtonShareOpenVpnGenerateClicked()
+            ShareConnectionLogic.onPushButtonShareAmneziaGenerateClicked()
         }
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnGenerateEnabled
     }
     ShareConnectionButtonType {
         id: pb_copy
@@ -54,12 +70,11 @@ PageShareProtocolBase {
         anchors.bottomMargin: 10
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
-
-        text: ShareConnectionLogic.pushButtonShareOpenVpnCopyText
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnCopyEnabled
+        text: ShareConnectionLogic.pushButtonShareAmneziaCopyText
         onClicked: {
-            ShareConnectionLogic.onPushButtonShareOpenVpnCopyClicked()
+            ShareConnectionLogic.onPushButtonShareAmneziaCopyClicked()
         }
+        enabled: ShareConnectionLogic.pushButtonShareAmneziaCopyEnabled
     }
     ShareConnectionButtonType {
         id: pb_save
@@ -67,11 +82,9 @@ PageShareProtocolBase {
         anchors.bottomMargin: 10
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
-
         text: qsTr("Save file")
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnSaveEnabled
         onClicked: {
-            ShareConnectionLogic.onPushButtonShareOpenVpnSaveClicked()
+            ShareConnectionLogic.onPushButtonShareAmneziaSaveClicked()
         }
     }
 }

@@ -66,6 +66,7 @@ PageBase {
                 text: qsTr("Share for Amnezia")
                 height: 40
                 width: tb_c.width - 10
+                onClicked: UiLogic.onGotoShareProtocolPage(ProtocolEnum.Any)
             }
 
             ListView {
@@ -350,63 +351,6 @@ PageBase {
 //                        Item {
 //                            width: 360
 //                            height: 380
-//                            Text {
-//                                x: 10
-//                                y: 280
-//                                width: 341
-//                                height: 111
-//                                font.family: "Lato"
-//                                font.styleName: "normal"
-//                                font.pixelSize: 16
-//                                color: "#181922"
-//                                horizontalAlignment: Text.AlignLeft
-//                                verticalAlignment: Text.AlignVCenter
-//                                wrapMode: Text.Wrap
-//                                text: qsTr("Anyone who logs in with this code will be able to connect to this VPN server. \nThis code does not include server credentials.")
-//                            }
-//                            ShareConnectionButtonType {
-//                                x: 10
-//                                y: 180
-//                                width: 341
-//                                height: 40
-//                                text: ShareConnectionLogic.pushButtonShareAmneziaCopyText
-//                                onClicked: {
-//                                    ShareConnectionLogic.onPushButtonShareAmneziaCopyClicked()
-//                                }
-//                                enabled: ShareConnectionLogic.pushButtonShareAmneziaCopyEnabled
-//                            }
-//                            ShareConnectionButtonType {
-//                                x: 10
-//                                y: 130
-//                                width: 341
-//                                height: 40
-//                                text: ShareConnectionLogic.pushButtonShareAmneziaGenerateText
-//                                enabled: ShareConnectionLogic.pushButtonShareAmneziaGenerateEnabled
-//                                onClicked: {
-//                                    ShareConnectionLogic.onPushButtonShareAmneziaGenerateClicked()
-//                                }
-//                            }
-//                            ShareConnectionButtonType {
-//                                x: 10
-//                                y: 230
-//                                width: 341
-//                                height: 40
-//                                text: qsTr("Save file")
-//                                onClicked: {
-//                                    ShareConnectionLogic.onPushButtonShareAmneziaSaveClicked()
-//                                }
-//                            }
-//                            TextFieldType {
-//                                x: 10
-//                                y: 10
-//                                width: 341
-//                                height: 100
-//                                verticalAlignment: Text.AlignTop
-//                                text: ShareConnectionLogic.textEditShareAmneziaCodeText
-//                                onEditingFinished: {
-//                                    ShareConnectionLogic.textEditShareAmneziaCodeText = text
-//                                }
-//                            }
 //                        }
 //                    }
 //                    onClicked: {
@@ -428,99 +372,7 @@ PageBase {
 //                        Item {
 //                            width: 360
 //                            height: 380
-//                            LabelType {
-//                                x: 10
-//                                y: 70
-//                                width: 100
-//                                height: 20
-//                                text: qsTr("Password")
-//                            }
-//                            LabelType {
-//                                x: 10
-//                                y: 10
-//                                width: 100
-//                                height: 20
-//                                text: qsTr("Server:")
-//                            }
-//                            LabelType {
-//                                x: 10
-//                                y: 50
-//                                width: 100
-//                                height: 20
-//                                text: qsTr("Encryption:")
-//                            }
-//                            LabelType {
-//                                x: 10
-//                                y: 30
-//                                width: 100
-//                                height: 20
-//                                text: qsTr("Port:")
-//                            }
-//                            LabelType {
-//                                x: 10
-//                                y: 100
-//                                width: 191
-//                                height: 20
-//                                text: qsTr("Connection string")
-//                            }
-//                            LabelType {
-//                                x: 130
-//                                y: 70
-//                                width: 100
-//                                height: 20
-//                                text: ShareConnectionLogic.labelShareShadowSocksPasswordText
-//                            }
-//                            LabelType {
-//                                x: 130
-//                                y: 10
-//                                width: 100
-//                                height: 20
-//                                text: ShareConnectionLogic.labelShareShadowSocksServerText
-//                            }
-//                            LabelType {
-//                                x: 130
-//                                y: 50
-//                                width: 100
-//                                height: 20
-//                                text: ShareConnectionLogic.labelShareShadowSocksMethodText
-//                            }
-//                            LabelType {
-//                                x: 130
-//                                y: 30
-//                                width: 100
-//                                height: 20
-//                                text: ShareConnectionLogic.labelShareShadowSocksPortText
-//                            }
-//                            Image {
-//                                id: label_share_ss_qr_code
-//                                x: 85
-//                                y: 235
-//                                width: 200
-//                                height: 200
-//                                source: ShareConnectionLogic.labelShareShadowSocksQrCodeText === "" ? "" : "data:image/png;base64," + UiLogic.labelShareShadowSocksQrCodeText
-//                            }
-//                            ShareConnectionButtonType {
-//                                x: 10
-//                                y: 180
-//                                width: 331
-//                                height: 40
-//                                text: ShareConnectionLogic.pushButtonShareShadowSocksCopyText
-//                                enabled: ShareConnectionLogic.pushButtonShareShadowSocksCopyEnabled
-//                                onClicked: {
-//                                    ShareConnectionLogic.onPushButtonShareShadowSocksCopyClicked()
-//                                }
-//                            }
-//                            TextFieldType {
-//                                x: 10
-//                                y: 130
-//                                width: 331
-//                                height: 100
-//                                horizontalAlignment: Text.AlignHCenter
-//                                text: ShareConnectionLogic.lineEditShareShadowSocksStringText
-//                                onEditingFinished: {
-//                                    ShareConnectionLogic.lineEditShareShadowSocksStringText = text
-//                                }
-//                            }
+
 //                        }
 //                    }
 //                    onClicked: {
