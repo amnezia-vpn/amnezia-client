@@ -61,8 +61,8 @@ PageShareProtocolBase {
 This code includes your server credentials!\n
 Provide this code only to TRUSTED users.")
                       : qsTr("Anyone who logs in with this code will be able to connect to this VPN server. \n
-This code does not include server credentials.")
-
+This code does not include server credentials.\n
+New encryption keys pair will be generated.")
             }
 
             ShareConnectionButtonType {
@@ -130,6 +130,13 @@ This code does not include server credentials.")
                 Layout.preferredHeight: width
                 smooth: false
                 source: ShareConnectionLogic.shareAmneziaQrCodeText
+                visible: ShareConnectionLogic.shareAmneziaQrCodeText.length > 0
+            }
+
+            LabelType {
+                height: 20
+                text: qsTr("Config to long to be displayed as QR code")
+                visible: ShareConnectionLogic.shareAmneziaQrCodeText.length == 0 && tfShareCode.textArea.length > 0
             }
         }
     }

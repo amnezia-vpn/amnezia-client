@@ -40,7 +40,7 @@ public:
 
     void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
                            DockerContainer container);
-    QImage updateQRCodeImage(const QString &text);
+    QImage updateQRCodeImage(const QByteArray &data);
     QString imageToBase64(const QImage &image);
 
 private:

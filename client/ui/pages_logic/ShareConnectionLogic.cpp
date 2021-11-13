@@ -44,6 +44,8 @@ void ShareConnectionLogic::onUpdatePage()
 void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 {
     set_textEditShareAmneziaCodeText("");
+    set_shareAmneziaQrCodeText("");
+
     QJsonObject serverConfig;
     // Full access
     if (shareFullAccess()) {
@@ -83,12 +85,15 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         }
     }
 
-    QByteArray ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QString code = QString("vpn://%1").arg(QString(ba));
+    QByteArray ba = QJsonDocument(serverConfig).toBinaryData();
+    ba = qCompress(ba, 8);
+    QString code = QString("vpn://%1").arg(QString(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
     set_textEditShareAmneziaCodeText(code);
 
-    QImage qr = updateQRCodeImage(code);
-    set_shareAmneziaQrCodeText(imageToBase64(qr));
+    if (ba.size() < 1024) {
+        QImage qr = updateQRCodeImage(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
+        set_shareAmneziaQrCodeText(imageToBase64(qr));
+    }
 }
 
 void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
@@ -138,7 +143,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
                 ssString = "ss://" + ssString.toUtf8().toBase64();
                 set_lineEditShareShadowSocksStringText(ssString);
 
-                QImage qr = updateQRCodeImage(ssString);
+                QImage qr = updateQRCodeImage(ssString.toUtf8());
                 set_shareShadowSocksQrCodeText(imageToBase64(qr));
 
                 set_labelShareShadowSocksServerText(ssConfig.value("server").toString());
@@ -175,14 +180,14 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCreden
     set_textEditShareAmneziaCodeText(tr(""));
 }
 
-QImage ShareConnectionLogic::updateQRCodeImage(const QString &text)
+QImage ShareConnectionLogic::updateQRCodeImage(const QByteArray &data)
 {
     int levelIndex = 1;
     int versionIndex = 0;
     bool bExtent = true;
     int maskIndex = -1;
 
-    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, text.toUtf8().data() );
+    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, data.data() );
 
     int qrImageSize = m_qrEncode.m_nSymbleSize;
 
