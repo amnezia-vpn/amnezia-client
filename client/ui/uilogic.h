@@ -98,6 +98,7 @@ public:
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
+    Q_INVOKABLE bool saveTextFile(const QString& desc, const QString& ext, const QString& data);
 
     QString getTrayIconUrl() const;
     void setTrayIconUrl(const QString &trayIconUrl);

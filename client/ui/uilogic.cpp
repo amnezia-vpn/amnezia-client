@@ -697,4 +697,13 @@ void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
 }
 
 
+bool UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
+{
+    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
+    QSaveFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(data.toUtf8());
+    return save.commit();
+}

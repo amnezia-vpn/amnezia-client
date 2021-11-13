@@ -29,22 +29,15 @@ PageShareProtocolBase {
         width: parent.width - 60
 
         textArea.readOnly: true
-
-        textArea.text: ShareConnectionLogic.plainTextEditShareCloakText
+        textArea.text: ShareConnectionLogic.textEditShareCloakText
     }
 
-    ShareConnectionButtonType {
+    ShareConnectionButtonCopyType {
         id: pb_save
         anchors.bottom: root.bottom
         anchors.bottomMargin: 10
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
-        text: ShareConnectionLogic.pushButtonShareCloakCopyText
         //enabled: ShareConnectionLogic.pushButtonShareCloakCopyEnabled
-        onClicked: {
-            ShareConnectionLogic.onPushButtonShareCloakCopyClicked()
-        }
     }
-
-
 }

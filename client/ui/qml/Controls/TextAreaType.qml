@@ -14,11 +14,9 @@ Flickable
         id: root
         property bool error: false
 
-        width: parent.width - 80
         height: 40
         anchors.topMargin: 5
         selectByMouse: false
-
 
         selectionColor: "darkgray"
         font.pixelSize: 16

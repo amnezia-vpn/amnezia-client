@@ -20,6 +20,7 @@ PageShareProtocolBase {
     }
 
     TextAreaType {
+        id: tfShareCode
         anchors.top: caption.bottom
         anchors.topMargin: 20
         anchors.bottom: pb_gen.top
@@ -44,22 +45,19 @@ PageShareProtocolBase {
 
         text: ShareConnectionLogic.pushButtonShareOpenVpnGenerateText
         onClicked: {
+            enabled = false
             ShareConnectionLogic.onPushButtonShareOpenVpnGenerateClicked()
+            enabled = true
         }
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnGenerateEnabled
     }
-    ShareConnectionButtonType {
+    ShareConnectionButtonCopyType {
         id: pb_copy
         anchors.bottom: pb_save.top
         anchors.bottomMargin: 10
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
 
-        text: ShareConnectionLogic.pushButtonShareOpenVpnCopyText
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnCopyEnabled
-        onClicked: {
-            ShareConnectionLogic.onPushButtonShareOpenVpnCopyClicked()
-        }
+        enabled: tfShareCode.textArea.length > 0
     }
     ShareConnectionButtonType {
         id: pb_save
@@ -68,10 +66,11 @@ PageShareProtocolBase {
         anchors.horizontalCenter: root.horizontalCenter
         width: parent.width - 60
 
-        text: qsTr("Save file")
-        enabled: ShareConnectionLogic.pushButtonShareOpenVpnSaveEnabled
+        text: qsTr("Save to file")
+        enabled: tfShareCode.textArea.length > 0
+
         onClicked: {
-            ShareConnectionLogic.onPushButtonShareOpenVpnSaveClicked()
+            UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "*.ovpn", tfShareCode.textArea.text)
         }
     }
 }

@@ -24,7 +24,7 @@ PageShareProtocolBase {
         width: root.width
         anchors.top: caption.bottom
         anchors.topMargin: 20
-        anchors.bottom: parent.bottom
+        anchors.bottom: root.bottom
         anchors.bottomMargin: 20
         anchors.left: root.left
         anchors.leftMargin: 30
@@ -108,14 +108,10 @@ PageShareProtocolBase {
                 text: ShareConnectionLogic.lineEditShareShadowSocksStringText
                 readOnly: true
             }
-            ShareConnectionButtonType {
-                height: 40
+            ShareConnectionButtonCopyType {
+                Layout.preferredHeight: 40
                 Layout.fillWidth: true
-                text: ShareConnectionLogic.pushButtonShareShadowSocksCopyText
                 enabled: tfConnString.length > 0
-                onClicked: {
-                    ShareConnectionLogic.onPushButtonShareShadowSocksCopyClicked()
-                }
             }
 
             Image {
@@ -124,7 +120,7 @@ PageShareProtocolBase {
                 Layout.fillWidth: true
                 Layout.preferredHeight: width
                 smooth: false
-                source: ShareConnectionLogic.labelShareShadowSocksQrCodeText
+                source: ShareConnectionLogic.shareShadowSocksQrCodeText
             }
         }
     }
