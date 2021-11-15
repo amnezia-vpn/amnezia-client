@@ -8,7 +8,6 @@ import "../../Config"
 PageShareProtocolBase {
     id: root
     protocol: ProtocolEnum.TorWebSite
-    logic: UiLogic.protocolLogic(protocol)
 
     BackButton {
         id: back

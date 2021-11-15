@@ -9,7 +9,6 @@ import "../../Config"
 PageShareProtocolBase {
     id: root
     protocol: ProtocolEnum.ShadowSocks
-    logic: UiLogic.protocolLogic(protocol)
 
     BackButton {
         id: back
@@ -31,65 +30,11 @@ PageShareProtocolBase {
         anchors.right: root.right
         anchors.rightMargin: 30
 
-        contentHeight: content.height + content2.height + 40
+        contentHeight: content.height
         clip: true
 
-        GridLayout {
-            id: content
-            enabled: logic.pageEnabled
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            columns: 2
-
-            //
-            LabelType {
-                height: 20
-                text: qsTr("Server:")
-            }
-            TextFieldType {
-                height: 20
-                text: ShareConnectionLogic.labelShareShadowSocksServerText
-                readOnly: true
-            }
-
-            //
-            LabelType {
-                height: 20
-                text: qsTr("Port:")
-            }
-            TextFieldType {
-                height: 20
-                text: ShareConnectionLogic.labelShareShadowSocksPortText
-                readOnly: true
-            }
-
-            //
-            LabelType {
-                height: 20
-                text: qsTr("Password")
-            }
-            TextFieldType {
-                height: 20
-                text: ShareConnectionLogic.labelShareShadowSocksPasswordText
-                readOnly: true
-            }
-
-            //
-            LabelType {
-                height: 20
-                text: qsTr("Encryption:")
-            }
-            TextFieldType {
-                height: 20
-                text: ShareConnectionLogic.labelShareShadowSocksMethodText
-                readOnly: true
-            }
-        }
-
         ColumnLayout {
-            id: content2
+            id: content
             enabled: logic.pageEnabled
             anchors.top: content.bottom
             anchors.topMargin: 20
@@ -97,7 +42,57 @@ PageShareProtocolBase {
             anchors.right: parent.right
 
             LabelType {
+                id: lb_desc
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+
+                horizontalAlignment: Text.AlignHCenter
+
+                wrapMode: Text.Wrap
+                text: qsTr("Note: ShadowSocks protocol using same password for all connections")
+            }
+
+            ShareConnectionButtonType {
+                Layout.topMargin: 10
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+
+                text: genConfigProcess ? generatingConfigText : generateConfigText
+                onClicked: {
+                    enabled = false
+                    genConfigProcess = true
+                    ShareConnectionLogic.onPushButtonShareShadowSocksGenerateClicked()
+                    enabled = true
+                    genConfigProcess = false
+                }
+            }
+
+            TextAreaType {
+                id: tfShareCode
+
+                Layout.topMargin: 20
+                Layout.preferredHeight: 200
+                Layout.fillWidth: true
+
+                textArea.readOnly: true
+                textArea.wrapMode: TextEdit.WrapAnywhere
+                textArea.verticalAlignment: Text.AlignTop
+                textArea.text: ShareConnectionLogic.textEditShareShadowSocksText
+
+                visible: tfShareCode.textArea.length > 0
+            }
+            ShareConnectionButtonCopyType {
+                Layout.preferredHeight: 40
+                Layout.fillWidth: true
+                Layout.bottomMargin: 20
+
+                start_text: qsTr("Copy config")
+                copyText: tfShareCode.textArea.text
+            }
+
+            LabelType {
                 height: 20
+                visible: tfConnString.length > 0
                 text: qsTr("Connection string")
             }
             TextFieldType {
@@ -106,12 +101,15 @@ PageShareProtocolBase {
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
                 text: ShareConnectionLogic.lineEditShareShadowSocksStringText
+                visible: tfConnString.length > 0
+
                 readOnly: true
             }
             ShareConnectionButtonCopyType {
                 Layout.preferredHeight: 40
                 Layout.fillWidth: true
-                enabled: tfConnString.length > 0
+                start_text: qsTr("Copy string")
+                copyText: tfConnString.text
             }
 
             Image {

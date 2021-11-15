@@ -72,7 +72,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
         {DockerContainer::WireGuard, "WireGuard"},
-        {DockerContainer::Ipsec, QObject::tr("IPsec container")},
+        {DockerContainer::Ipsec, QObject::tr("IPsec")},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},

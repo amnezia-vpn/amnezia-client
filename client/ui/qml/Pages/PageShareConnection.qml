@@ -83,7 +83,6 @@ PageBase {
                         height: 40
                         width: tb_c.width - 10
                         onClicked: UiLogic.onGotoShareProtocolPage(proxyProtocolsModel.mapToSource(index))
-
                     }
                 }
             }

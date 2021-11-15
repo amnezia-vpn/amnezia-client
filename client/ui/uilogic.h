@@ -99,6 +99,8 @@ public:
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
     Q_INVOKABLE bool saveTextFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE bool saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE void copyToClipboard(const QString& text);
 
     QString getTrayIconUrl() const;
     void setTrayIconUrl(const QString &trayIconUrl);

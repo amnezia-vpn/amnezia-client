@@ -17,20 +17,27 @@ public:
     AUTO_PROPERTY(QString, shareAmneziaQrCodeText)
 
     AUTO_PROPERTY(QString, textEditShareOpenVpnCodeText)
-    AUTO_PROPERTY(QString, pushButtonShareOpenVpnGenerateText)
 
+    AUTO_PROPERTY(QString, textEditShareShadowSocksText)
     AUTO_PROPERTY(QString, lineEditShareShadowSocksStringText)
     AUTO_PROPERTY(QString, shareShadowSocksQrCodeText)
-    AUTO_PROPERTY(QString, labelShareShadowSocksServerText)
-    AUTO_PROPERTY(QString, labelShareShadowSocksPortText)
-    AUTO_PROPERTY(QString, labelShareShadowSocksMethodText)
-    AUTO_PROPERTY(QString, labelShareShadowSocksPasswordText)
 
     AUTO_PROPERTY(QString, textEditShareCloakText)
+
+    AUTO_PROPERTY(QString, textEditShareWireGuardCodeText)
+    AUTO_PROPERTY(QString, shareWireGuardQrCodeText)
+
+    AUTO_PROPERTY(QString, textEditShareIkev2CertText)
+    AUTO_PROPERTY(QString, textEditShareIkev2MobileConfigText)
+    AUTO_PROPERTY(QString, textEditShareIkev2StrongSwanConfigText)
 
 public:
     Q_INVOKABLE void onPushButtonShareAmneziaGenerateClicked();
     Q_INVOKABLE void onPushButtonShareOpenVpnGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareShadowSocksGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareCloakGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareWireGuardGenerateClicked();
+    Q_INVOKABLE void onPushButtonShareIkev2GenerateClicked();
 
     Q_INVOKABLE virtual void onUpdatePage() override;
 
@@ -38,8 +45,7 @@ public:
     explicit ShareConnectionLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ShareConnectionLogic() = default;
 
-    void updateSharingPage(int serverIndex, const ServerCredentials &credentials,
-                           DockerContainer container);
+    void updateSharingPage(int serverIndex, DockerContainer container);
     QImage updateQRCodeImage(const QByteArray &data);
     QString imageToBase64(const QImage &image);
 

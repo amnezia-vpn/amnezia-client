@@ -136,5 +136,9 @@
         <file>ui/qml/Controls/ContextMenu.qml</file>
         <file>ui/qml/Pages/Share/PageShareProtoAmnezia.qml</file>
         <file>ui/qml/Controls/ShareConnectionButtonCopyType.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoWireGuard.qml</file>
+        <file>server_scripts/ipsec/mobileconfig.plist</file>
+        <file>ui/qml/Pages/Share/PageShareProtoIkev2.qml</file>
+        <file>server_scripts/ipsec/strongswan.profile</file>
     </qresource>
 </RCC>

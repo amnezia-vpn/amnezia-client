@@ -48,7 +48,7 @@ void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
 
 void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
 {
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), c);
+    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, c);
     emit uiLogic()->goToPage(Page::ShareConnection);
 }
 

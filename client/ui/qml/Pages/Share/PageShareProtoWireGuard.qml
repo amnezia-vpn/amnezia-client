@@ -8,14 +8,14 @@ import "../../Config"
 
 PageShareProtocolBase {
     id: root
-    protocol: ProtocolEnum.Cloak
+    protocol: ProtocolEnum.WireGuard
 
     BackButton {
         id: back
     }
     Caption {
         id: caption
-        text: qsTr("Share Cloak Settings")
+        text: qsTr("Share WireGuard Settings")
     }
 
     Flickable {
@@ -41,7 +41,6 @@ PageShareProtocolBase {
             anchors.left: parent.left
             anchors.right: parent.right
 
-
             LabelType {
                 id: lb_desc
                 Layout.fillWidth: true
@@ -50,7 +49,7 @@ PageShareProtocolBase {
                 horizontalAlignment: Text.AlignHCenter
 
                 wrapMode: Text.Wrap
-                text: qsTr("Note: Cloak protocol using same password for all connections")
+                text: qsTr("New encryption keys pair will be generated.")
             }
 
             ShareConnectionButtonType {
@@ -62,7 +61,7 @@ PageShareProtocolBase {
                 onClicked: {
                     enabled = false
                     genConfigProcess = true
-                    ShareConnectionLogic.onPushButtonShareCloakGenerateClicked()
+                    ShareConnectionLogic.onPushButtonShareWireGuardGenerateClicked()
                     enabled = true
                     genConfigProcess = false
                 }
@@ -72,39 +71,43 @@ PageShareProtocolBase {
                 id: tfShareCode
 
                 Layout.topMargin: 20
-                Layout.bottomMargin: 20
-                Layout.fillWidth: true
                 Layout.preferredHeight: 200
+                Layout.fillWidth: true
 
                 textArea.readOnly: true
-                textArea.text: ShareConnectionLogic.textEditShareCloakText
+                textArea.wrapMode: TextEdit.WrapAnywhere
+                textArea.verticalAlignment: Text.AlignTop
+                textArea.text: ShareConnectionLogic.textEditShareWireGuardCodeText
 
                 visible: tfShareCode.textArea.length > 0
             }
-
             ShareConnectionButtonCopyType {
-                Layout.bottomMargin: 10
-                Layout.fillWidth: true
                 Layout.preferredHeight: 40
+                Layout.fillWidth: true
 
                 copyText: tfShareCode.textArea.text
             }
 
             ShareConnectionButtonType {
-                Layout.bottomMargin: 10
-                Layout.fillWidth: true
                 Layout.preferredHeight: 40
+                Layout.fillWidth: true
 
                 text: qsTr("Save to file")
                 enabled: tfShareCode.textArea.length > 0
                 visible: tfShareCode.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Save AmneziaVPN config"), "*.json", tfShareCode.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "*.conf", tfShareCode.textArea.text)
                 }
             }
 
+            Image {
+                Layout.topMargin: 20
+                Layout.fillWidth: true
+                Layout.preferredHeight: width
+                smooth: false
+                source: ShareConnectionLogic.shareWireGuardQrCodeText
+            }
         }
     }
-
 }

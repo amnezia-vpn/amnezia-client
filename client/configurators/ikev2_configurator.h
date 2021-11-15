@@ -12,7 +12,8 @@ class Ikev2Configurator
 public:
 
     struct ConnectionData {
-        QByteArray cert; // p12 client cert
+        QByteArray clientCert; // p12 client cert
+        QByteArray caCert; // p12 server cert
         QString clientId;
         QString password; // certificate password
         QString host; // host ip
@@ -21,8 +22,10 @@ public:
     static QString genIkev2Config(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
+    static QString genIkev2Config(const ConnectionData &connData);
+    static QString genMobileConfig(const ConnectionData &connData);
+    static QString genStrongSwanConfig(const ConnectionData &connData);
 
-private:
     static ConnectionData prepareIkev2Config(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode *errorCode = nullptr);
 };

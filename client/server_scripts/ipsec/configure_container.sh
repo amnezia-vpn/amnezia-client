@@ -222,6 +222,8 @@ certutil -z <(head -c 1024 /dev/urandom) \
    --extKeyUsage serverAuth \
    --extSAN "ip:$SERVER_IP_ADDRESS,dns:$SERVER_IP_ADDRESS"
 
+certutil -L -d sql:/etc/ipsec.d -n "IKEv2 VPN CA" -a | grep -v CERTIFICATE > /etc/ipsec.d/ca_cert_base64.p12
+
 cat > /etc/ipsec.d/ikev2.conf <<EOF
 conn ikev2-cp
   left=%defaultroute

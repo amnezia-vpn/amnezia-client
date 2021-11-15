@@ -2,8 +2,13 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 ShareConnectionButtonType {
-    readonly property string start_text: qsTr("Copy")
-    readonly property string end_text: qsTr("Copied")
+    property string start_text: qsTr("Copy")
+    property string end_text: qsTr("Copied")
+
+    property string copyText
+
+    enabled: copyText.length > 0
+    visible: copyText.length > 0
 
     Timer {
         id: timer
@@ -16,5 +21,6 @@ ShareConnectionButtonType {
     onClicked: {
         text = end_text
         timer.running = true
+        UiLogic.copyToClipboard(copyText)
     }
 }

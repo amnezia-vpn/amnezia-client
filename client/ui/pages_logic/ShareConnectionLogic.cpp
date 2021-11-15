@@ -13,6 +13,8 @@
 #include "configurators/vpn_configurator.h"
 #include "configurators/openvpn_configurator.h"
 #include "configurators/shadowsocks_configurator.h"
+#include "configurators/wireguard_configurator.h"
+#include "configurators/ikev2_configurator.h"
 #include "configurators/ssh_configurator.h"
 
 #include "defines.h"
@@ -25,20 +27,30 @@ ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     m_textEditShareOpenVpnCodeText{},
     m_lineEditShareShadowSocksStringText{},
     m_shareShadowSocksQrCodeText{},
-    m_labelShareShadowSocksServerText{},
-    m_labelShareShadowSocksPortText{},
-    m_labelShareShadowSocksMethodText{},
-    m_labelShareShadowSocksPasswordText{},
     m_textEditShareCloakText{},
-    m_textEditShareAmneziaCodeText{},
-    m_pushButtonShareOpenVpnGenerateText{tr("Generate config")}
+    m_textEditShareAmneziaCodeText{}
 {
-    // TODO consider move to Component.onCompleted
-    //updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer);
 }
 
 void ShareConnectionLogic::onUpdatePage()
 {
+    set_textEditShareAmneziaCodeText(tr(""));
+    set_shareAmneziaQrCodeText("");
+
+    set_textEditShareOpenVpnCodeText("");
+
+    set_shareShadowSocksQrCodeText("");
+    set_textEditShareShadowSocksText("");
+    set_lineEditShareShadowSocksStringText("");
+
+    set_textEditShareCloakText("");
+
+    set_textEditShareWireGuardCodeText("");
+    set_shareWireGuardQrCodeText("");
+
+    set_textEditShareIkev2CertText("");
+    set_textEditShareIkev2MobileConfigText("");
+    set_textEditShareIkev2StrongSwanConfigText("");
 }
 
 void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
@@ -90,7 +102,7 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
     QString code = QString("vpn://%1").arg(QString(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
     set_textEditShareAmneziaCodeText(code);
 
-    if (ba.size() < 1024) {
+    if (ba.size() < 2900) {
         QImage qr = updateQRCodeImage(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
         set_shareAmneziaQrCodeText(imageToBase64(qr));
     }
@@ -98,86 +110,130 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 {
-    set_pushButtonShareOpenVpnGenerateText(tr("Generating..."));
-
     ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
     const QJsonObject &containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
 
     ErrorCode e = ErrorCode::NoError;
     QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
-    cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
+    cfg = VpnConfigurator::processConfigWithExportSettings(uiLogic()->selectedDockerContainer, Protocol::OpenVpn, cfg);
 
     set_textEditShareOpenVpnCodeText(QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString());
-
-    set_pushButtonShareOpenVpnGenerateText(tr("Generate config"));
 }
 
-void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCredentials &credentials,
-                                DockerContainer container)
+void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
+    QString cfg = protoConfig.value(config_key::last_config).toString();
+
+    if (cfg.isEmpty()) {
+        const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+        ErrorCode e = ErrorCode::NoError;
+        cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
+    }
+
+    QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+
+    QString ssString = QString("%1:%2@%3:%4")
+            .arg(ssConfig.value("method").toString())
+            .arg(ssConfig.value("password").toString())
+            .arg(ssConfig.value("server").toString())
+            .arg(ssConfig.value("server_port").toString());
+
+    ssString = "ss://" + ssString.toUtf8().toBase64();
+    set_lineEditShareShadowSocksStringText(ssString);
+
+    QImage qr = updateQRCodeImage(ssString.toUtf8());
+    set_shareShadowSocksQrCodeText(imageToBase64(qr));
+
+    QString humanString = QString("Server: %3\n"
+                                  "Port: %4\n"
+                                  "Encryption: %1\n"
+                                  "Password: %2")
+            .arg(ssConfig.value("method").toString())
+            .arg(ssConfig.value("password").toString())
+            .arg(ssConfig.value("server").toString())
+            .arg(ssConfig.value("server_port").toString());
+
+    set_textEditShareShadowSocksText(humanString);
+}
+
+void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
+    QString cfg = protoConfig.value(config_key::last_config).toString();
+
+    if (cfg.isEmpty()) {
+        const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+        ErrorCode e = ErrorCode::NoError;
+        cfg = CloakConfigurator::genCloakConfig(credentials, container, containerConfig, &e);
+    }
+
+    QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+    cloakConfig.remove(config_key::transport_proto);
+    cloakConfig.insert("ProxyMethod", "shadowsocks");
+
+    set_textEditShareCloakText(QJsonDocument(cloakConfig).toJson());
+}
+
+void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+    ErrorCode e = ErrorCode::NoError;
+    QString cfg = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, &e);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::WireGuard, cfg);
+    cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString();
+
+    set_textEditShareWireGuardCodeText(cfg);
+
+    QImage qr = updateQRCodeImage(cfg.toUtf8());
+    set_shareWireGuardQrCodeText(imageToBase64(qr));
+}
+
+void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+    Ikev2Configurator::ConnectionData connData = Ikev2Configurator::prepareIkev2Config(credentials, container);
+
+    QString cfg = Ikev2Configurator::genIkev2Config(connData);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::Ikev2, cfg);
+    cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::cert].toString();
+
+    set_textEditShareIkev2CertText(cfg);
+
+    QString mobileCfg = Ikev2Configurator::genMobileConfig(connData);
+    set_textEditShareIkev2MobileConfigText(mobileCfg);
+
+    QString strongSwanCfg = Ikev2Configurator::genStrongSwanConfig(connData);
+    set_textEditShareIkev2StrongSwanConfigText(strongSwanCfg);
+
+}
+
+
+void ShareConnectionLogic::updateSharingPage(int serverIndex, DockerContainer container)
 {
     uiLogic()->selectedDockerContainer = container;
     uiLogic()->selectedServerIndex = serverIndex;
     set_shareFullAccess(container == DockerContainer::None);
-
-    if (! shareFullAccess()) {
-        for (Protocol p : ContainerProps::protocolsForContainer(container)) {
-            if (p == Protocol::ShadowSocks) {
-                QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
-                QString cfg = protoConfig.value(config_key::last_config).toString();
-
-                if (cfg.isEmpty()) {
-                    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-
-                    ErrorCode e = ErrorCode::NoError;
-                    cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
-                }
-
-                QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
-
-                QString ssString = QString("%1:%2@%3:%4")
-                        .arg(ssConfig.value("method").toString())
-                        .arg(ssConfig.value("password").toString())
-                        .arg(ssConfig.value("server").toString())
-                        .arg(ssConfig.value("server_port").toString());
-
-                ssString = "ss://" + ssString.toUtf8().toBase64();
-                set_lineEditShareShadowSocksStringText(ssString);
-
-                QImage qr = updateQRCodeImage(ssString.toUtf8());
-                set_shareShadowSocksQrCodeText(imageToBase64(qr));
-
-                set_labelShareShadowSocksServerText(ssConfig.value("server").toString());
-                set_labelShareShadowSocksPortText(ssConfig.value("server_port").toString());
-                set_labelShareShadowSocksMethodText(ssConfig.value("method").toString());
-                set_labelShareShadowSocksPasswordText(ssConfig.value("password").toString());
-
-            }
-            else if (p == Protocol::Cloak) {
-                set_textEditShareCloakText(QString(""));
-
-                QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
-                QString cfg = protoConfig.value(config_key::last_config).toString();
-
-                if (cfg.isEmpty()) {
-                    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-
-                    ErrorCode e = ErrorCode::NoError;
-                    cfg = CloakConfigurator::genCloakConfig(credentials, container, containerConfig, &e);
-
-                    //set_pushButtonShareCloakCopyEnabled(true);
-                }
-
-                QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
-                cloakConfig.remove(config_key::transport_proto);
-                cloakConfig.insert("ProxyMethod", "shadowsocks");
-
-                set_textEditShareCloakText(QJsonDocument(cloakConfig).toJson());
-            }
-        }
-
-    }
-
-    set_textEditShareAmneziaCodeText(tr(""));
 }
 
 QImage ShareConnectionLogic::updateQRCodeImage(const QByteArray &data)

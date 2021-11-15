@@ -9,7 +9,6 @@ import "../../Config"
 PageShareProtocolBase {
     id: root
     protocol: ProtocolEnum.OpenVpn
-    logic: ShareConnectionLogic
 
     BackButton {
         id: back
@@ -19,58 +18,90 @@ PageShareProtocolBase {
         text: qsTr("Share OpenVPN Settings")
     }
 
-    TextAreaType {
-        id: tfShareCode
+    Flickable {
+        id: fl
+        width: root.width
         anchors.top: caption.bottom
         anchors.topMargin: 20
-        anchors.bottom: pb_gen.top
-        anchors.bottomMargin: 20
-
-        anchors.horizontalCenter: root.horizontalCenter
-        width: parent.width - 60
-
-        textArea.readOnly: true
-
-        textArea.verticalAlignment: Text.AlignTop
-        textArea.text: ShareConnectionLogic.textEditShareOpenVpnCodeText
-    }
-
-
-    ShareConnectionButtonType {
-        id: pb_gen
-        anchors.bottom: pb_copy.top
-        anchors.bottomMargin: 10
-        anchors.horizontalCenter: root.horizontalCenter
-        width: parent.width - 60
-
-        text: ShareConnectionLogic.pushButtonShareOpenVpnGenerateText
-        onClicked: {
-            enabled = false
-            ShareConnectionLogic.onPushButtonShareOpenVpnGenerateClicked()
-            enabled = true
-        }
-    }
-    ShareConnectionButtonCopyType {
-        id: pb_copy
-        anchors.bottom: pb_save.top
-        anchors.bottomMargin: 10
-        anchors.horizontalCenter: root.horizontalCenter
-        width: parent.width - 60
-
-        enabled: tfShareCode.textArea.length > 0
-    }
-    ShareConnectionButtonType {
-        id: pb_save
         anchors.bottom: root.bottom
-        anchors.bottomMargin: 10
-        anchors.horizontalCenter: root.horizontalCenter
-        width: parent.width - 60
+        anchors.bottomMargin: 20
+        anchors.left: root.left
+        anchors.leftMargin: 30
+        anchors.right: root.right
+        anchors.rightMargin: 30
 
-        text: qsTr("Save to file")
-        enabled: tfShareCode.textArea.length > 0
+        contentHeight: content.height
+        clip: true
 
-        onClicked: {
-            UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "*.ovpn", tfShareCode.textArea.text)
+        ColumnLayout {
+            id: content
+            enabled: logic.pageEnabled
+            anchors.top: content.bottom
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+
+            LabelType {
+                id: lb_desc
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+
+                horizontalAlignment: Text.AlignHCenter
+
+                wrapMode: Text.Wrap
+                text: qsTr("New encryption keys pair will be generated.")
+            }
+
+            ShareConnectionButtonType {
+                Layout.topMargin: 20
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+
+                text: genConfigProcess ? generatingConfigText : generateConfigText
+                onClicked: {
+                    enabled = false
+                    genConfigProcess = true
+                    ShareConnectionLogic.onPushButtonShareOpenVpnGenerateClicked()
+                    genConfigProcess = false
+                    enabled = true
+                }
+            }
+
+            TextAreaType {
+                id: tfShareCode
+                Layout.topMargin: 20
+                Layout.preferredHeight: 200
+                Layout.fillWidth: true
+
+                textArea.readOnly: true
+
+                textArea.verticalAlignment: Text.AlignTop
+                textArea.text: ShareConnectionLogic.textEditShareOpenVpnCodeText
+
+                visible: tfShareCode.textArea.length > 0
+            }
+
+            ShareConnectionButtonCopyType {
+                Layout.preferredHeight: 40
+                Layout.fillWidth: true
+
+                copyText: tfShareCode.textArea.text
+            }
+            ShareConnectionButtonType {
+                Layout.bottomMargin: 10
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+                width: parent.width - 60
+
+                text: qsTr("Save to file")
+                enabled: tfShareCode.textArea.length > 0
+                visible: tfShareCode.textArea.length > 0
+
+                onClicked: {
+                    UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "*.ovpn", tfShareCode.textArea.text)
+                }
+            }
         }
     }
 }

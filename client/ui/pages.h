@@ -24,7 +24,7 @@ enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
-           ProtocolSettings};
+           ProtocolSettings, ProtocolShare};
 Q_ENUM_NS(Page)
 
 static void declareQmlPageEnum() {

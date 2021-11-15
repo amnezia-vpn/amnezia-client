@@ -705,5 +705,29 @@ bool UiLogic::saveTextFile(const QString& desc, const QString& ext, const QStrin
     QSaveFile save(fileName);
     save.open(QIODevice::WriteOnly);
     save.write(data.toUtf8());
+
+    QFileInfo fi(fileName);
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
     return save.commit();
+}
+
+bool UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
+{
+    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+
+    QSaveFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(QByteArray::fromBase64(data.toUtf8()));
+
+    QFileInfo fi(fileName);
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+    return save.commit();
+}
+
+void UiLogic::copyToClipboard(const QString &text)
+{
+    qApp->clipboard()->setText(text);
 }

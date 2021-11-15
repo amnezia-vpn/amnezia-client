@@ -126,6 +126,6 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
 
 void ServerSettingsLogic::onPushButtonShareFullClicked()
 {
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), DockerContainer::None);
+    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
     emit uiLogic()->goToShareProtocolPage(Protocol::Any);
 }

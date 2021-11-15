@@ -9,12 +9,6 @@ import "../../Config"
 PageShareProtocolBase {
     id: root
     protocol: ProtocolEnum.Any
-    logic: ShareConnectionLogic
-
-    readonly property string generateConfigText: qsTr("Generate config")
-    readonly property string generatingConfigText: qsTr("Generating config...")
-    readonly property string showConfigText: qsTr("Show config")
-    property bool genConfigProcess: false
 
     BackButton {
         id: back
@@ -66,7 +60,6 @@ New encryption keys pair will be generated.")
             }
 
             ShareConnectionButtonType {
-                id: pb_gen
                 Layout.topMargin: 20
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
@@ -102,15 +95,12 @@ New encryption keys pair will be generated.")
 
 
             ShareConnectionButtonCopyType {
-                id: pb_copy
                 Layout.bottomMargin: 10
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
-                enabled: tfShareCode.textArea.length > 0
-                visible: tfShareCode.textArea.length > 0
+                copyText: tfShareCode.textArea.text
             }
             ShareConnectionButtonType {
-                id: pb_save
                 Layout.bottomMargin: 10
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
@@ -135,7 +125,7 @@ New encryption keys pair will be generated.")
 
             LabelType {
                 height: 20
-                text: qsTr("Config to long to be displayed as QR code")
+                text: qsTr("Config too long to be displayed as QR code")
                 visible: ShareConnectionLogic.shareAmneziaQrCodeText.length == 0 && tfShareCode.textArea.length > 0
             }
         }

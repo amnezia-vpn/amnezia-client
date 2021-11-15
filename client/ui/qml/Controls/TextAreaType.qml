@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import Qt.labs.platform 1.0
 
+import "../Config"
+
 Flickable
 {
     property alias textArea: root
@@ -44,6 +46,18 @@ Flickable
                 return "#A7A7A7"
             }
         }
+
+//        MouseArea {
+//            anchors.fill: root
+//            enabled: GC.isDesktop()
+//            acceptedButtons: Qt.RightButton
+//            onClicked: contextMenu.open()
+//        }
+
+//        ContextMenu {
+//            id: contextMenu
+//            textObj: root
+//        }
     }
 
 }

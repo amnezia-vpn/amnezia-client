@@ -134,9 +134,9 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     e = runScript(credentials,
         replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
-//    QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
-//    runScript(credentials,
-//            replaceVars(remover, genVarsForScript(credentials, container)));
+    QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
+    runScript(credentials,
+        replaceVars(remover, genVarsForScript(credentials, container)));
 
     return e;
 }
