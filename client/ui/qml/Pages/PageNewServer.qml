@@ -30,6 +30,7 @@ PageBase {
         id: pushButtonWizard
         text: qsTr("Run Setup Wizard")
         anchors.top: labelWizard.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 10
         onClicked: {
             UiLogic.goToPage(PageEnum.Wizard);

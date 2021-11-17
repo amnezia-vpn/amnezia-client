@@ -37,7 +37,7 @@ void ServerSettingsLogic::onUpdatePage()
                                      .arg(port));
     set_lineEditDescriptionText(server.value(config_key::description).toString());
     QString selectedContainerName = m_settings.defaultContainerName(uiLogic()->selectedServerIndex);
-    set_labelCurrentVpnProtocolText(tr("Protocol: ") + selectedContainerName);
+    set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 }
 
 void ServerSettingsLogic::onPushButtonClearServer()
@@ -90,8 +90,7 @@ void ServerSettingsLogic::onPushButtonForgetServer()
 
 
     uiLogic()->selectedServerIndex = -1;
-
-    uiLogic()->serverListLogic()->onUpdatePage();
+    uiLogic()->onUpdateAllPages();
 
     if (m_settings.serversCount() == 0) {
         uiLogic()->setStartPage(Page::Start);
@@ -121,7 +120,7 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
     QJsonObject server = m_settings.server(uiLogic()->selectedServerIndex);
     server.insert(config_key::description, newText);
     m_settings.editServer(uiLogic()->selectedServerIndex, server);
-    uiLogic()->serverListLogic()->onUpdatePage();
+    uiLogic()->onUpdateAllPages();
 }
 
 void ServerSettingsLogic::onPushButtonShareFullClicked()

@@ -16,8 +16,6 @@
         <file>images/tray/default.png</file>
         <file>images/tray/error.png</file>
         <file>images/arrow_left.png</file>
-        <file>images/connect_button_connected.png</file>
-        <file>images/connect_button_disconnected.png</file>
         <file>fonts/Lato-Black.ttf</file>
         <file>fonts/Lato-BlackItalic.ttf</file>
         <file>fonts/Lato-Bold.ttf</file>
@@ -140,5 +138,8 @@
         <file>server_scripts/ipsec/mobileconfig.plist</file>
         <file>ui/qml/Pages/Share/PageShareProtoIkev2.qml</file>
         <file>server_scripts/ipsec/strongswan.profile</file>
+        <file>images/animation.gif</file>
+        <file>images/connected.png</file>
+        <file>images/disconnected.png</file>
     </qresource>
 </RCC>

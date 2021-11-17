@@ -85,6 +85,7 @@ public:
     friend class OtherProtocolsLogic;
 
     Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
+    Q_INVOKABLE void onUpdateAllPages();
 
     Q_INVOKABLE void initalizeUiLogic();
     Q_INVOKABLE void onCloseWindow();
@@ -95,6 +96,8 @@ public:
     Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
     Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
     Q_INVOKABLE void onGotoShareProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
+
+    Q_INVOKABLE void onGotoCurrentProtocolsPage();
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 

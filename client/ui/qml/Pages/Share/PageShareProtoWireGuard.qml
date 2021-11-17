@@ -36,8 +36,7 @@ PageShareProtocolBase {
         ColumnLayout {
             id: content
             enabled: logic.pageEnabled
-            anchors.top: content.bottom
-            anchors.topMargin: 20
+            anchors.top: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
 

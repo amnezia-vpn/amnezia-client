@@ -15,36 +15,30 @@ PageBase {
     BackButton {
         id: back
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 16
+
+    Caption {
+        id: caption
+        text: SitesLogic.labelSitesAddCustomText
+    }
+
+    LabelType {
+        id: lb_addr
         color: "#333333"
-        horizontalAlignment: Text.AlignLeft
-        verticalAlignment: Text.AlignVCenter
         text: qsTr("Web site/Hostname/IP address/Subnet")
         x: 20
-        y: 110
-        width: 311
+        anchors.top: caption.bottom
+        anchors.topMargin: 10
+        width: parent.width
         height: 21
     }
-    Text {
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 20
-        color: "#100A44"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignTop
-        text: SitesLogic.labelSitesAddCustomText
-        x: 20
-        y: 40
-        width: 340
-        height: 60
-    }
+
     TextFieldType {
-        x: 20
-        y: 140
-        width: 231
+        anchors.top: lb_addr.bottom
+        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.right: sites_add.left
+        anchors.rightMargin: 10
         height: 31
         placeholderText: qsTr("yousite.com or IP address")
         text: SitesLogic.lineEditSitesAddCustomText
@@ -55,10 +49,13 @@ PageBase {
             SitesLogic.onPushButtonAddCustomSitesClicked()
         }
     }
+
     BlueButtonType {
         id: sites_add
-        x: 260
-        y: 140
+        anchors.right: sites_import.left
+        anchors.rightMargin: 10
+        anchors.top: lb_addr.bottom
+        anchors.topMargin: 10
         width: 51
         height: 31
         font.pixelSize: 24
@@ -67,23 +64,13 @@ PageBase {
             SitesLogic.onPushButtonAddCustomSitesClicked()
         }
     }
-    BlueButtonType {
-        id: sites_delete
-        x: 80
-        y: 589
-        width: 231
-        height: 31
-        font.pixelSize: 16
-        text: qsTr("Delete selected")
-        onClicked: {
-            SitesLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
-        }
-    }
 
     BasicButtonType {
         id: sites_import
-        x: 320
-        y: 140
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.top: lb_addr.bottom
+        anchors.topMargin: 10
         width: 51
         height: 31
         background: Rectangle {
@@ -116,12 +103,15 @@ PageBase {
             SitesLogic.onPushButtonSitesImportClicked(fileUrl)
         }
     }
+
     ListView {
         id: tb
         x: 20
-        y: 200
-        width: 341
-        height: 371
+        anchors.top: sites_add.bottom
+        anchors.topMargin: 10
+        width: parent.width - 40
+        anchors.bottom: sites_delete.top
+        anchors.bottomMargin: 10
         spacing: 1
         clip: true
         property int currentRow: -1
@@ -185,6 +175,19 @@ PageBase {
                     tb.currentRow = index
                 }
             }
+        }
+    }
+
+    BlueButtonType {
+        id: sites_delete
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 31
+        font.pixelSize: 16
+        text: qsTr("Delete selected")
+        onClicked: {
+            SitesLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
         }
     }
 }

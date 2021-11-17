@@ -111,21 +111,10 @@ PageBase {
                 text: desc
             }
             ImageButtonType {
-                x: 212
-                y: 25
-                width: 32
-                height: 24
-                checkable: true
-                iconMargin: 0
-                icon.source: checked ? "qrc:/images/connect_button_connected.png"
-                                     : "qrc:/images/connect_button_disconnected.png"
-                visible: false
-            }
-            ImageButtonType {
                 x: parent.width - 30
-                y: 25
-                width: 24
-                height: 24
+                y: 15
+                width: 30
+                height: 30
                 checkable: true
                 icon.source: checked ? "qrc:/images/check.png"
                                      : "qrc:/images/uncheck.png"
@@ -138,9 +127,9 @@ PageBase {
             ImageButtonType {
                 id: pushButtonSetting
                 x: parent.width - 60
-                y: 25
-                width: 24
-                height: 24
+                y: 15
+                width: 30
+                height: 30
                 icon.source: "qrc:/images/settings.png"
                 opacity: 0
 

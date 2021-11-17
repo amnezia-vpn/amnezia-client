@@ -105,6 +105,28 @@ UiLogic::UiLogic(QObject *parent) :
 
 }
 
+UiLogic::~UiLogic()
+{
+    emit hide();
+
+    if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
+        m_vpnConnection->disconnectFromVpn();
+        for (int i = 0; i < 50; i++) {
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(100);
+            if (m_vpnConnection->isDisconnected()) {
+                break;
+            }
+        }
+    }
+
+    m_vpnConnectionThread.quit();
+    m_vpnConnectionThread.wait(3000);
+    delete m_vpnConnection;
+
+    qDebug() << "Application closed";
+}
+
 void UiLogic::initalizeUiLogic()
 {
     qDebug() << "UiLogic::initalizeUiLogic()";
@@ -210,19 +232,6 @@ void UiLogic::setTrayActionConnectEnabled(bool trayActionConnectEnabled)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 QString UiLogic::getDialogConnectErrorText() const
 {
     return m_dialogConnectErrorText;
@@ -236,29 +245,6 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
     }
 }
 
-
-UiLogic::~UiLogic()
-{
-    emit hide();
-
-    if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
-        m_vpnConnection->disconnectFromVpn();
-        for (int i = 0; i < 50; i++) {
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(100);
-            if (m_vpnConnection->isDisconnected()) {
-                break;
-            }
-        }
-    }
-
-    m_vpnConnectionThread.quit();
-    m_vpnConnectionThread.wait(3000);
-    delete m_vpnConnection;
-
-    qDebug() << "Application closed";
-}
-
 void UiLogic::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) {
@@ -270,6 +256,26 @@ void UiLogic::showOnStartup()
     }
 }
 
+void UiLogic::onUpdateAllPages()
+{
+    for (PageLogicBase *logic : {
+         (PageLogicBase *) m_appSettingsLogic,
+         (PageLogicBase *) m_generalSettingsLogic,
+         (PageLogicBase *) m_networkSettingsLogic,
+         (PageLogicBase *) m_serverConfiguringProgressLogic,
+         (PageLogicBase *) m_newServerProtocolsLogic,
+         (PageLogicBase *) m_serverListLogic,
+         (PageLogicBase *) m_serverSettingsLogic,
+         (PageLogicBase *) m_serverVpnProtocolsLogic,
+         (PageLogicBase *) m_shareConnectionLogic,
+         (PageLogicBase *) m_sitesLogic,
+         (PageLogicBase *) m_startPageLogic,
+         (PageLogicBase *) m_vpnLogic,
+         (PageLogicBase *) m_wizardLogic
+    }) {
+        logic->onUpdatePage();
+    }
+}
 
 void UiLogic::keyPressEvent(Qt::Key key)
 {
@@ -306,9 +312,7 @@ void UiLogic::keyPressEvent(Qt::Key key)
         emit goToPage(Page::ServerSettings);
         break;
     case Qt::Key_P:
-        selectedServerIndex = m_settings.defaultServerIndex();
-        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
-        emit goToPage(Page::ServerContainers);
+        onGotoCurrentProtocolsPage();
         break;
     case Qt::Key_T:
         SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
@@ -349,6 +353,13 @@ QString UiLogic::containerDesc(int container)
 {
     return ContainerProps::containerDescriptions().value(static_cast<DockerContainer>(container));
 
+}
+
+void UiLogic::onGotoCurrentProtocolsPage()
+{
+    selectedServerIndex = m_settings.defaultServerIndex();
+    selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+    emit goToPage(Page::ServerContainers);
 }
 
 

@@ -43,6 +43,15 @@ void VpnLogic::onUpdatePage()
     set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
     set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
     set_pushButtonVpnAddSiteEnabled(mode != Settings::VpnAllSites);
+
+    const QJsonObject &server = uiLogic()->m_settings.defaultServer();
+    QString serverString = QString("%2 (%3)")
+            .arg(server.value(config_key::description).toString())
+            .arg(server.value(config_key::hostName).toString());
+    set_labelCurrentServer(serverString);
+
+    QString selectedContainerName = m_settings.defaultContainerName(m_settings.defaultServerIndex());
+    set_labelCurrentService(selectedContainerName);
 }
 
 
@@ -79,6 +88,7 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 
     bool pbConnectEnabled = false;
     bool rbModeEnabled = false;
+    bool pbConnectVisible = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
 
     uiLogic()->setTrayState(state);
@@ -88,39 +98,48 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
         onBytesChanged(0,0);
         set_pushButtonConnectChecked(false);
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Preparing:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connecting:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connected:
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Disconnecting:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Reconnecting:
         pbConnectEnabled = true;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Error:
         set_pushButtonConnectEnabled(false);
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Unknown:
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
     }
 
     set_pushButtonConnectEnabled(pbConnectEnabled);
+    set_pushButtonConnectVisible(pbConnectVisible);
     set_widgetVpnModeEnabled(rbModeEnabled);
 }
 
