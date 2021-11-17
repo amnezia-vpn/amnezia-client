@@ -23,7 +23,7 @@ enum DockerContainer {
     //non-vpn
     TorWebSite,
     Dns,
-    FileShare,
+    //FileShare,
     Sftp
 };
 Q_ENUM_NS(DockerContainer)

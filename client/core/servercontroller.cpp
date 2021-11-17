@@ -127,7 +127,13 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<void (const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
+
+    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  /opt/amnezia/";
+    ErrorCode e = runScript(credentials,
+        replaceVars(mkdir, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    if (e) return e;
+
+    e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
 
     QString runner = QString("sudo docker exec -i $CONTAINER_NAME bash %1 ").arg(fileName);
