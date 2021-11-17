@@ -126,7 +126,7 @@ PageBase {
             }
             ImageButtonType {
                 id: pushButtonSetting
-                x: parent.width - 60
+                x: parent.width - 70
                 y: 15
                 width: 30
                 height: 30

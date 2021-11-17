@@ -69,9 +69,6 @@ using namespace PageEnumNS;
 
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
-    m_trayIconUrl{},
-    m_trayActionDisconnectEnabled{true},
-    m_trayActionConnectEnabled{true},
     m_dialogConnectErrorText{}
 {
     m_containersModel = new ContainersModel(this);
@@ -191,45 +188,6 @@ void UiLogic::initalizeUiLogic()
     //    ui->lineEdit_proto_shadowsocks_port->setValidator(&m_ipPortValidator);
     //    ui->lineEdit_proto_cloak_port->setValidator(&m_ipPortValidator);
 
-}
-
-QString UiLogic::getTrayIconUrl() const
-{
-    return m_trayIconUrl;
-}
-
-void UiLogic::setTrayIconUrl(const QString &trayIconUrl)
-{
-    if (m_trayIconUrl != trayIconUrl) {
-        m_trayIconUrl = trayIconUrl;
-        emit trayIconUrlChanged();
-    }
-}
-
-bool UiLogic::getTrayActionDisconnectEnabled() const
-{
-    return m_trayActionDisconnectEnabled;
-}
-
-void UiLogic::setTrayActionDisconnectEnabled(bool trayActionDisconnectEnabled)
-{
-    if (m_trayActionDisconnectEnabled != trayActionDisconnectEnabled) {
-        m_trayActionDisconnectEnabled = trayActionDisconnectEnabled;
-        emit trayActionDisconnectEnabledChanged();
-    }
-}
-
-bool UiLogic::getTrayActionConnectEnabled() const
-{
-    return m_trayActionConnectEnabled;
-}
-
-void UiLogic::setTrayActionConnectEnabled(bool trayActionConnectEnabled)
-{
-    if (m_trayActionConnectEnabled != trayActionConnectEnabled) {
-        m_trayActionConnectEnabled = trayActionConnectEnabled;
-        emit trayActionConnectEnabledChanged();
-    }
 }
 
 QString UiLogic::getDialogConnectErrorText() const
@@ -641,12 +599,22 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
 
 void UiLogic::setupTray()
 {
-    setTrayState(VpnProtocol::Disconnected);
+     m_tray = new QSystemTrayIcon(qmlRoot());
+     setTrayState(VpnProtocol::Disconnected);
+
+     m_tray->show();
+
+     connect(m_tray, &QSystemTrayIcon::activated, this, &UiLogic::onTrayActivated);
 }
 
 void UiLogic::setTrayIcon(const QString &iconPath)
 {
-    setTrayIconUrl(iconPath);
+    m_tray->setIcon(QIcon(QPixmap(iconPath).scaled(128,128)));
+}
+
+void UiLogic::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    emit raise();
 }
 
 PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
@@ -658,6 +626,16 @@ PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
     }
 }
 
+QObject *UiLogic::qmlRoot() const
+{
+    return m_qmlRoot;
+}
+
+void UiLogic::setQmlRoot(QObject *newQmlRoot)
+{
+    m_qmlRoot = newQmlRoot;
+}
+
 PageEnumNS::Page UiLogic::currentPage()
 {
     return static_cast<PageEnumNS::Page>(currentPageValue());
@@ -665,10 +643,7 @@ PageEnumNS::Page UiLogic::currentPage()
 
 void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
 {
-    QString resourcesPath = "qrc:/images/tray/%1";
-
-    setTrayActionDisconnectEnabled(state == VpnProtocol::Connected);
-    setTrayActionConnectEnabled(state == VpnProtocol::Disconnected);
+    QString resourcesPath = ":/images/tray/%1";
 
     switch (state) {
     case VpnProtocol::Disconnected:
@@ -704,7 +679,6 @@ void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
     //    resourcesPath = ":/images_mac/tray_icon/%1";
     //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
     //#endif
-
 }
 
 

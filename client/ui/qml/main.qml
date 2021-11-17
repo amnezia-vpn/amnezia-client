@@ -239,6 +239,11 @@ Window  {
         function onHide() {
             root.hide()
         }
+        function onRaise() {
+            root.show()
+            root.raise()
+            root.requestActivate()
+        }
     }
 
     MessageDialog {
@@ -252,62 +257,6 @@ Window  {
             Qt.quit()
         }
         visible: false
-    }
-    SystemTrayIcon {
-        visible: true
-        icon.source: UiLogic.trayIconUrl
-        onActivated: {
-            if (Qt.platform.os == "osx" ||
-                    Qt.platform.os == "linux") {
-                if (reason === SystemTrayIcon.DoubleClick ||
-                        reason === SystemTrayIcon.Trigger) {
-                    root.show()
-                    root.raise()
-                    root.requestActivate()
-                }
-            }
-        }
-
-        menu: Menu {
-            MenuItem {
-                iconSource: "qrc:/images/tray/application.png"
-                text: qsTr("Show") + " " + "AmneziaVPN"
-                onTriggered: {
-                    root.show()
-                    root.raise()
-                }
-            }
-            MenuSeparator { }
-            MenuItem {
-                text: qsTr("Connect")
-                enabled: UiLogic.trayActionConnectEnabled
-                onTriggered: {
-                    UiLogic.onConnect()
-                }
-            }
-            MenuItem {
-                text: qsTr("Disconnect")
-                enabled: UiLogic.trayActionDisconnectEnabled
-                onTriggered: {
-                    UiLogic.onDisconnect()
-                }
-            }
-            MenuSeparator { }
-            MenuItem {
-                iconSource: "qrc:/images/tray/link.png"
-                text: qsTr("Visit Website")
-                onTriggered: {
-                    Qt.openUrlExternally("https://amnezia.org")
-                }
-            }
-            MenuItem {
-                iconSource: "qrc:/images/tray/cancel.png"
-                text: qsTr("Quit") + " " + "AmneziaVPN"
-                onTriggered: {
-                    closePrompt.open()
-                }
-            }
-        }
     }
     MessageDialog {
         id: publicKeyWarning

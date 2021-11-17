@@ -6,6 +6,7 @@
 #include <functional>
 #include <QKeyEvent>
 #include <QThread>
+#include <QSystemTrayIcon>
 
 #include "property_helper.h"
 #include "pages.h"
@@ -53,9 +54,6 @@ class UiLogic : public QObject
     READONLY_PROPERTY(QObject *, protocolsModel)
 
     // TODO: review
-    Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
-    Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
-    Q_PROPERTY(bool trayActionConnectEnabled READ getTrayActionConnectEnabled WRITE setTrayActionConnectEnabled NOTIFY trayActionConnectEnabledChanged)
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
 
 public:
@@ -105,13 +103,6 @@ public:
     Q_INVOKABLE bool saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
-    QString getTrayIconUrl() const;
-    void setTrayIconUrl(const QString &trayIconUrl);
-    bool getTrayActionDisconnectEnabled() const;
-    void setTrayActionDisconnectEnabled(bool trayActionDisconnectEnabled);
-    bool getTrayActionConnectEnabled() const;
-    void setTrayActionConnectEnabled(bool trayActionConnectEnabled);
-
     QString getDialogConnectErrorText() const;
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
@@ -132,11 +123,10 @@ signals:
     void showConnectErrorDialog();
     void show();
     void hide();
+    void raise();
 
 private:
-    QString m_trayIconUrl;
-    bool m_trayActionDisconnectEnabled;
-    bool m_trayActionConnectEnabled;
+    QSystemTrayIcon *m_tray;
 
     QString m_dialogConnectErrorText;
 
@@ -145,6 +135,7 @@ private slots:
     void installServer(QMap<DockerContainer, QJsonObject> &containers);
 
     void setTrayState(VpnProtocol::ConnectionState state);
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     PageEnumNS::Page currentPage();
@@ -201,7 +192,12 @@ public:
 
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p);
 
+    QObject *qmlRoot() const;
+    void setQmlRoot(QObject *newQmlRoot);
+
 private:
+    QObject *m_qmlRoot{nullptr};
+
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;

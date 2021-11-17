@@ -177,6 +177,10 @@ int main(int argc, char *argv[])
         delete uiLogic;
     });
 
+    if (engine->rootObjects().size() > 0) {
+        uiLogic->setQmlRoot(engine->rootObjects().at(0));
+    }
+
     // TODO - fix
 //#ifdef Q_OS_WIN
 //    if (parser.isSet("a")) mainWindow.showOnStartup();
