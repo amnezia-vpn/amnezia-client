@@ -104,6 +104,8 @@ UiLogic::UiLogic(QObject *parent) :
 
 UiLogic::~UiLogic()
 {
+    m_tray = nullptr;
+
     emit hide();
 
     if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
@@ -609,7 +611,7 @@ void UiLogic::setupTray()
 
 void UiLogic::setTrayIcon(const QString &iconPath)
 {
-    m_tray->setIcon(QIcon(QPixmap(iconPath).scaled(128,128)));
+    if (m_tray) m_tray->setIcon(QIcon(QPixmap(iconPath).scaled(128,128)));
 }
 
 void UiLogic::onTrayActivated(QSystemTrayIcon::ActivationReason reason)

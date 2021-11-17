@@ -24,6 +24,12 @@
 
 using namespace QSsh;
 
+Settings &ServerController::m_settings()
+{
+    static Settings s;
+    return s;
+}
+
 ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
@@ -678,6 +684,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     vars.append({{"$IPSEC_VPN_C2C_TRAFFIC", "no"}});
 
+    vars.append({{"$PRIMARY_SERVER_DNS", m_settings().primaryDns()}});
+    vars.append({{"$SECONDARY_SERVER_DNS", m_settings().secondaryDns()}});
 
 
     // Sftp vars
