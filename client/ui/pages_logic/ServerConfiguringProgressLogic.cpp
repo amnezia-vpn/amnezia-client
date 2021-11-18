@@ -18,6 +18,11 @@ ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, Q
 
 }
 
+void ServerConfiguringProgressLogic::onUpdatePage()
+{
+    set_progressBarValue(0);
+}
+
 
 ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<ErrorCode()> &action)
 {

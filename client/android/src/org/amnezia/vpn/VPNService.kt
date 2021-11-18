@@ -287,48 +287,74 @@ class VPNService : android.net.VpnService() {
             return null
         }
 
-        /**
-        * Create a Wireguard [Config]  from a [json] string -
-        * The [json] will be created in AndroidVpnProtocol.cpp
-        */
-        private fun buildWireugardConfig(obj: JSONObject): Config {
-            val confBuilder = Config.Builder()
-            val jServer = obj.getJSONObject("server")
-            val peerBuilder = Peer.Builder()
-            val ep =
-            InetEndpoint.parse(jServer.getString("ipv4AddrIn") + ":" + jServer.getString("port"))
-            peerBuilder.setEndpoint(ep)
-            peerBuilder.setPublicKey(Key.fromBase64(jServer.getString("publicKey")))
-
-            val jAllowedIPList = obj.getJSONArray("allowedIPs")
-            if (jAllowedIPList.length() == 0) {
-                val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
-                peerBuilder.addAllowedIp(internet)
-                } else {
-                    (0 until jAllowedIPList.length()).toList().forEach {
-                        val network = InetNetwork.parse(jAllowedIPList.getString(it))
-                        peerBuilder.addAllowedIp(network)
+        private fun parseConfigData(data: String): Map<String, Map<String, String>> {
+            val parseData = mutableMapOf<String, Map<String, String>>()
+            var currentSection: Pair<String, MutableMap<String, String>>? = null
+            data.lines().forEach { line ->
+                if (line.isNotEmpty()) {
+                    if (line.startsWith('[')) {
+                        currentSection?.let {
+                            parseData.put(it.first, it.second)
+                        }
+                        currentSection = line.substring(1, line.indexOfLast { it == ']' }) to mutableMapOf()
+                    } else {
+                        val parameter = line.split("=", limit = 2)
+                        currentSection!!.second.put(parameter.first().trim(), parameter.last().trim())
                     }
                 }
-
-                confBuilder.addPeer(peerBuilder.build())
-
-                val privateKey = obj.getJSONObject("keys").getString("privateKey")
-                val jDevice = obj.getJSONObject("device")
-
-                val ifaceBuilder = Interface.Builder()
-                ifaceBuilder.parsePrivateKey(privateKey)
-                ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv4Address")))
-                ifaceBuilder.addAddress(InetNetwork.parse(jDevice.getString("ipv6Address")))
-                ifaceBuilder.addDnsServer(InetNetwork.parse(obj.getString("dns")).address)
-                val jExcludedApplication = obj.getJSONArray("excludedApps")
-                (0 until jExcludedApplication.length()).toList().forEach {
-                    val appName = jExcludedApplication.get(it).toString()
-                    ifaceBuilder.excludeApplication(appName)
-                }
-                confBuilder.setInterface(ifaceBuilder.build())
-                return confBuilder.build()
             }
+            currentSection?.let {
+                parseData.put(it.first, it.second)
+            }
+            return parseData
+        }
+
+        /**
+         * Create a Wireguard [Config]  from a [json] string -
+         * The [json] will be created in AndroidVpnProtocol.cpp
+         */
+        private fun buildWireugardConfig(obj: JSONObject): Config {
+            val confBuilder = Config.Builder()
+            val wireguardConfigData = obj.getJSONObject("wireguard_config_data")
+            val config = parseConfigData(wireguardConfigData.getString("config"))
+            val peerBuilder = Peer.Builder()
+            val peerConfig = config["Peer"]!!
+            peerBuilder.setPublicKey(Key.fromBase64(peerConfig["PublicKey"]))
+            peerConfig["PresharedKey"]?.let {
+                peerBuilder.setPreSharedKey(Key.fromBase64(it))
+            }
+            val allowedIPList = peerConfig["AllowedIPs"]?.split(",") ?: emptyList()
+            if (allowedIPList.isEmpty()) {
+                val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
+                peerBuilder.addAllowedIp(internet)
+            } else {
+                allowedIPList.forEach {
+                    val network = InetNetwork.parse(it.trim())
+                    peerBuilder.addAllowedIp(network)
+                }
+            }
+            peerBuilder.setEndpoint(InetEndpoint.parse(peerConfig["Endpoint"]))
+            peerConfig["PersistentKeepalive"]?.let {
+                peerBuilder.setPersistentKeepalive(it.toInt())
+            }
+            confBuilder.addPeer(peerBuilder.build())
+
+            val ifaceBuilder = Interface.Builder()
+            val ifaceConfig = config["Interface"]!!
+            ifaceBuilder.parsePrivateKey(ifaceConfig["PrivateKey"])
+            ifaceBuilder.addAddress(InetNetwork.parse(ifaceConfig["Address"]))
+            ifaceConfig["DNS"]!!.split(",").forEach {
+                ifaceBuilder.addDnsServer(InetNetwork.parse(it.trim()).address)
+            }
+                /*val jExcludedApplication = obj.getJSONArray("excludedApps")
+            (0 until jExcludedApplication.length()).toList().forEach {
+                val appName = jExcludedApplication.get(it).toString()
+                ifaceBuilder.excludeApplication(appName)
+            }*/
+            confBuilder.setInterface(ifaceBuilder.build())
+
+            return confBuilder.build()
+        }
 
             fun getVpnConfig(): JSONObject {
                 return mConfig!!

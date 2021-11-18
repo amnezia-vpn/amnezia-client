@@ -92,11 +92,11 @@ private:
 	unsigned char m_byRSWork[MAX_CODEBLOCK]; 
 
 public:
-	bool EncodeData(int nLevel, int nVersion, bool bAutoExtent, int nMaskingNo, char* lpsSource, int ncSource = 0);
+    bool EncodeData(int nLevel, int nVersion, bool bAutoExtent, int nMaskingNo, const char* lpsSource, int ncSource = 0);
 
 private:
-	int GetEncodeVersion(int nVersion, char* lpsSource, int ncLength);
-	bool EncodeSourceData(char* lpsSource, int ncLength, int nVerGroup);
+    int GetEncodeVersion(int nVersion, const char* lpsSource, int ncLength);
+    bool EncodeSourceData(const char* lpsSource, int ncLength, int nVerGroup);
 
 	int GetBitLength(unsigned char nMode, int ncData, int nVerGroup);
 

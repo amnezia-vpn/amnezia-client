@@ -6,6 +6,11 @@
 #include <QDebug>
 #include <QTemporaryFile>
 
+#include <openssl/rand.h>
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+
 #include "sftpdefs.h"
 
 #include "core/server_defs.h"
@@ -13,72 +18,34 @@
 #include "core/scripts_registry.h"
 #include "utils.h"
 
-QProcessEnvironment WireguardConfigurator::prepareEnv()
-{
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString pathEnvVar = env.value("PATH");
-
-#ifdef Q_OS_WIN
-    pathEnvVar.clear();
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\wireguard;");
-#else
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
-#endif
-
-    env.insert("PATH", pathEnvVar);
-    qDebug().noquote() << "ENV PATH" << pathEnvVar;
-    return env;
-}
-
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 {
+    // TODO review
+    constexpr size_t EDDSA_KEY_LENGTH = 32;
+
     ConnectionData connData;
 
-    QString program;
-#ifdef Q_OS_WIN
-    program = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\wireguard\\wg.exe";
-#else
-    program = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS/wg";
-#endif
+    unsigned char buff[EDDSA_KEY_LENGTH];
+    int ret = RAND_priv_bytes(buff, EDDSA_KEY_LENGTH);
+    if (ret <=0) return connData;
 
-#ifndef Q_OS_IOS
+    EVP_PKEY * pKey = EVP_PKEY_new();
+    q_check_ptr(pKey);
+    pKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL, &buff[0], EDDSA_KEY_LENGTH);
 
-    // Priv
-    {
-        QProcess p;
-        p.setProcessEnvironment(prepareEnv());
-        p.setProcessChannelMode(QProcess::MergedChannels);
-        p.setProgram(program);
 
-        p.setArguments(QStringList() << "genkey");
+    size_t keySize = EDDSA_KEY_LENGTH;
 
-        p.start();
-        p.waitForFinished();
+    // save private key
+    unsigned char priv[EDDSA_KEY_LENGTH];
+    EVP_PKEY_get_raw_private_key(pKey, priv, &keySize);
+    connData.clientPrivKey = QByteArray::fromRawData((char*)priv, keySize).toBase64();
 
-        connData.clientPrivKey = QString(p.readAll());
-        connData.clientPrivKey.replace("\r", "");
-        connData.clientPrivKey.replace("\n", "");
-    }
+    // save public key
+    unsigned char pub[EDDSA_KEY_LENGTH];
+    EVP_PKEY_get_raw_public_key(pKey, pub, &keySize);
+    connData.clientPubKey = QByteArray::fromRawData((char*)pub, keySize).toBase64();
 
-    // Pub
-    {
-        QProcess p;
-        p.setProcessEnvironment(prepareEnv());
-        p.setProcessChannelMode(QProcess::MergedChannels);
-        p.setProgram(program);
-
-        p.setArguments(QStringList() << "pubkey");
-
-        p.start();
-        p.write(connData.clientPrivKey.toUtf8());
-        p.closeWriteChannel();
-        p.waitForFinished();
-
-        connData.clientPubKey = QString(p.readAll());
-        connData.clientPubKey.replace("\r", "");
-        connData.clientPubKey.replace("\n", "");
-    }
-#endif
     return connData;
 }
 

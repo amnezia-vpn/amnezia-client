@@ -22,6 +22,7 @@ public:
     explicit ServerConfiguringProgressLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ServerConfiguringProgressLogic() = default;
 
+    void onUpdatePage() override;
     ErrorCode doInstallAction(const std::function<ErrorCode()> &action);
 
 private:

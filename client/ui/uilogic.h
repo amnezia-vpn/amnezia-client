@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 #include <functional>
 #include <QKeyEvent>
+#include <QThread>
+#include <QSystemTrayIcon>
 
 #include "property_helper.h"
 #include "pages.h"
@@ -45,15 +47,13 @@ class UiLogic : public QObject
     Q_OBJECT
 
     AUTO_PROPERTY(bool, pageEnabled)
+    AUTO_PROPERTY(int, pagesStackDepth)
+    AUTO_PROPERTY(int, currentPageValue)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
-    Q_PROPERTY(int currentPageValue READ getCurrentPageValue WRITE setCurrentPageValue NOTIFY currentPageValueChanged)
-    Q_PROPERTY(QString trayIconUrl READ getTrayIconUrl WRITE setTrayIconUrl NOTIFY trayIconUrlChanged)
-    Q_PROPERTY(bool trayActionDisconnectEnabled READ getTrayActionDisconnectEnabled WRITE setTrayActionDisconnectEnabled NOTIFY trayActionDisconnectEnabledChanged)
-    Q_PROPERTY(bool trayActionConnectEnabled READ getTrayActionConnectEnabled WRITE setTrayActionConnectEnabled NOTIFY trayActionConnectEnabledChanged)
-
+    // TODO: review
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
 
 public:
@@ -82,6 +82,9 @@ public:
 
     friend class OtherProtocolsLogic;
 
+    Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
+    Q_INVOKABLE void onUpdateAllPages();
+
     Q_INVOKABLE void initalizeUiLogic();
     Q_INVOKABLE void onCloseWindow();
 
@@ -90,24 +93,20 @@ public:
 
     Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
     Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
+    Q_INVOKABLE void onGotoShareProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
+
+    Q_INVOKABLE void onGotoCurrentProtocolsPage();
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
-
-    int getCurrentPageValue() const;
-    void setCurrentPageValue(int currentPageValue);
-    QString getTrayIconUrl() const;
-    void setTrayIconUrl(const QString &trayIconUrl);
-    bool getTrayActionDisconnectEnabled() const;
-    void setTrayActionDisconnectEnabled(bool trayActionDisconnectEnabled);
-    bool getTrayActionConnectEnabled() const;
-    void setTrayActionConnectEnabled(bool trayActionConnectEnabled);
+    Q_INVOKABLE bool saveTextFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE bool saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE void copyToClipboard(const QString& text);
 
     QString getDialogConnectErrorText() const;
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
 signals:
-    void currentPageValueChanged();
     void trayIconUrlChanged();
     void trayActionDisconnectEnabledChanged();
     void trayActionConnectEnabledChanged();
@@ -116,18 +115,18 @@ signals:
 
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
+    void goToShareProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
+
     void closePage();
     void setStartPage(PageEnumNS::Page page, bool slide = true);
     void showPublicKeyWarning();
     void showConnectErrorDialog();
     void show();
     void hide();
+    void raise();
 
 private:
-    int m_currentPageValue;
-    QString m_trayIconUrl;
-    bool m_trayActionDisconnectEnabled;
-    bool m_trayActionConnectEnabled;
+    QSystemTrayIcon *m_tray;
 
     QString m_dialogConnectErrorText;
 
@@ -136,6 +135,7 @@ private slots:
     void installServer(QMap<DockerContainer, QJsonObject> &containers);
 
     void setTrayState(VpnProtocol::ConnectionState state);
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     PageEnumNS::Page currentPage();
@@ -192,7 +192,12 @@ public:
 
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p);
 
+    QObject *qmlRoot() const;
+    void setQmlRoot(QObject *newQmlRoot);
+
 private:
+    QObject *m_qmlRoot{nullptr};
+
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;
@@ -210,6 +215,7 @@ private:
     QMap<Protocol, PageProtocolLogicBase *> m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
+    QThread m_vpnConnectionThread;
     Settings m_settings;
 
 

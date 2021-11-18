@@ -5,9 +5,7 @@ import QtGraphicalEffects 1.12
 Item {
     id: root
     property bool active: false
-    property Component content: undefined
     property string text: ""
-    width: 360
     height: active ? contentLoader.item.height + 40 + 5 * 2 : 40
     signal clicked()
 
@@ -63,13 +61,6 @@ Item {
             hoverEnabled: true
             onClicked: root.clicked()
         }
-    }
-    Loader {
-        x: 0
-        y: 40 + 5
-        id: contentLoader
-        sourceComponent: root.content
-        visible: root.active
     }
 }
 

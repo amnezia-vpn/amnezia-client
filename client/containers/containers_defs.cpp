@@ -43,10 +43,13 @@ QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::Docker
         return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
 
     case DockerContainer::Ipsec:
-        return { Protocol::Ikev2, Protocol::L2tp };
+        return { Protocol::Ikev2 /*, Protocol::L2tp */};
 
     case DockerContainer::Dns:
         return { };
+
+    case DockerContainer::Sftp:
+        return { Protocol::Sftp};
 
     default:
         return { defaultProtocol(container) };
@@ -72,11 +75,11 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
         {DockerContainer::WireGuard, "WireGuard"},
-        {DockerContainer::Ipsec, QObject::tr("IPsec container")},
+        {DockerContainer::Ipsec, QObject::tr("IPsec")},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
-        {DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
+        //{DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")}
     };
 }
@@ -93,7 +96,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
-        {DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
+        //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")}
     };
 }
@@ -109,7 +112,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::Ipsec :        return ServiceType::Vpn;
     case DockerContainer::TorWebSite :   return ServiceType::Other;
     case DockerContainer::Dns :          return ServiceType::Other;
-    case DockerContainer::FileShare :    return ServiceType::Other;
+    //case DockerContainer::FileShare :    return ServiceType::Other;
     case DockerContainer::Sftp :         return ServiceType::Other;
     default:                             return ServiceType::Other;
     }
@@ -127,8 +130,9 @@ Protocol ContainerProps::defaultProtocol(DockerContainer c)
 
     case DockerContainer::TorWebSite :   return Protocol::TorWebSite;
     case DockerContainer::Dns :          return Protocol::Dns;
-    case DockerContainer::FileShare :    return Protocol::FileShare;
+    //case DockerContainer::FileShare :    return Protocol::FileShare;
     case DockerContainer::Sftp :         return Protocol::Sftp;
+    default:                             return Protocol::Any;
     }
 }
 

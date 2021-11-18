@@ -24,6 +24,12 @@
 
 using namespace QSsh;
 
+Settings &ServerController::m_settings()
+{
+    static Settings s;
+    return s;
+}
+
 ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
@@ -127,16 +133,22 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<void (const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
+
+    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  /opt/amnezia/";
+    ErrorCode e = runScript(credentials,
+        replaceVars(mkdir, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    if (e) return e;
+
+    e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
 
     QString runner = QString("sudo docker exec -i $CONTAINER_NAME bash %1 ").arg(fileName);
     e = runScript(credentials,
         replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
-//    QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
-//    runScript(credentials,
-//            replaceVars(remover, genVarsForScript(credentials, container)));
+    QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
+    runScript(credentials,
+        replaceVars(remover, genVarsForScript(credentials, container)));
 
     return e;
 }
@@ -672,6 +684,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     vars.append({{"$IPSEC_VPN_C2C_TRAFFIC", "no"}});
 
+    vars.append({{"$PRIMARY_SERVER_DNS", m_settings().primaryDns()}});
+    vars.append({{"$SECONDARY_SERVER_DNS", m_settings().secondaryDns()}});
 
 
     // Sftp vars

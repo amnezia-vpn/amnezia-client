@@ -20,7 +20,7 @@ Drawer {
     height: parent.height
 
     modal: true
-    interactive: true
+    interactive: activeFocus
 
     SortFilterProxyModel {
         id: proxyModel

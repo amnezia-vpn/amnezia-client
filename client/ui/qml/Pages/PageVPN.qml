@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.15
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -11,12 +12,11 @@ PageBase {
     logic: VpnLogic
 
     Image {
+        id: bg_top
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         width: parent.width
-
-//        width: 380
-//        height: 325
+        height: parent.height * 0.28
         source: "qrc:/images/background_connected.png"
     }
 
@@ -31,38 +31,26 @@ PageBase {
         }
     }
 
-    LabelType {
-        id: error_text
-        x: 0
-        y: 280
-        width: 381
-        height: 61
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        text: VpnLogic.labelErrorText
-    }
-    Text {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 250
-        width: 380
-        height: 31
-        font.family: "Lato"
-        font.styleName: "normal"
-        font.pixelSize: 15
-        color: "#181922"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        text: VpnLogic.labelStateText
+    AnimatedImage {
+        id: connect_anim
+        source: "qrc:/images/animation.gif"
+        anchors.top: bg_top.bottom
+        anchors.topMargin: 10
+        anchors.horizontalCenter: root.horizontalCenter
+        width: Math.min(parent.width, parent.height) / 4
+        height: width
+
+        visible: !VpnLogic.pushButtonConnectVisible
+        paused: VpnLogic.pushButtonConnectVisible
+        //VisibleBehavior on visible { }
     }
 
     BasicButtonType {
         id: button_connect
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 200
-        width: 80
-        height: 40
+        anchors.horizontalCenter: connect_anim.horizontalCenter
+        anchors.verticalCenter: connect_anim.verticalCenter
+        width: connect_anim.width
+        height: width
         checkable: true
         checked: VpnLogic.pushButtonConnectChecked
         onCheckedChanged: {
@@ -71,18 +59,102 @@ PageBase {
         }
         background: Image {
             anchors.fill: parent
-            source: button_connect.checked ? "qrc:/images/connect_button_connected.png"
-                                           : "qrc:/images/connect_button_disconnected.png"
+            source: button_connect.checked ? "qrc:/images/connected.png"
+                                           : "qrc:/images/disconnected.png"
         }
         contentItem: Item {}
         antialiasing: true
         enabled: VpnLogic.pushButtonConnectEnabled
+        opacity: VpnLogic.pushButtonConnectVisible ? 1 : 0
+
+//        transitions: Transition {
+//            NumberAnimation { properties: "opacity"; easing.type: Easing.InOutQuad; duration: 500 }
+//        }
+    }
+
+
+    LabelType {
+        id: lb_state
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: button_connect.bottom
+        width: parent.width
+        height: 21
+        horizontalAlignment: Text.AlignHCenter
+        text: VpnLogic.labelStateText
+    }
+
+    RowLayout {
+        id: layout1
+        anchors.top: lb_state.bottom
+        //anchors.topMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+
+
+        LabelType {
+            Layout.alignment: Qt.AlignRight
+            height: 21
+            text: qsTr("Server") + ": "
+        }
+
+        BasicButtonType {
+            Layout.alignment: Qt.AlignLeft
+            height: 21
+            background: Item {}
+            text: VpnLogic.labelCurrentServer
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            onClicked: {
+                UiLogic.goToPage(PageEnum.ServersList)
+            }
+        }
+    }
+
+    RowLayout {
+        id: layout2
+        anchors.top: layout1.bottom
+        anchors.topMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+
+
+        LabelType {
+            Layout.alignment: Qt.AlignRight
+            height: 21
+            text: qsTr("Service") + ": "
+        }
+
+        BasicButtonType {
+            Layout.alignment: Qt.AlignLeft
+            height: 21
+            background: Item {}
+            text: VpnLogic.labelCurrentService
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            onClicked: {
+                UiLogic.onGotoCurrentProtocolsPage()
+            }
+        }
+    }
+
+
+    LabelType {
+        id: error_text
+        anchors.top: layout2.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width
+        height: 21
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+        text: VpnLogic.labelErrorText
     }
 
     Item {
         x: 0
         anchors.bottom: line.top
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: GC.isMobile() ? 0 :10
         width: parent.width
         height: 51
         Image {
@@ -136,7 +208,7 @@ PageBase {
         x: 20
         width: parent.width - 40
         height: 1
-        anchors.bottom: conn_type_label.top
+        anchors.bottom: GC.isMobile() ? root.bottom : conn_type_label.top
         anchors.bottomMargin: 10
         color: "#DDDDDD"
     }
@@ -146,7 +218,7 @@ PageBase {
         visible: !GC.isMobile()
         x: 20
         anchors.bottom: conn_type_group.top
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: GC.isMobile() ? 0 :10
         width: 281
         height: GC.isMobile() ? 0: 21
         font.family: "Lato"
@@ -208,11 +280,11 @@ PageBase {
 
     BasicButtonType {
         id: button_add_site
+        visible: !GC.isMobile()
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height - 60
-        //anchors.bottom: parent.bottom
         width: parent.width - 40
-        height: 40
+        height: GC.isMobile() ? 0: 40
         text: qsTr("+ Add site")
         enabled: VpnLogic.pushButtonVpnAddSiteEnabled
         background: Rectangle {

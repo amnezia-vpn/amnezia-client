@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
+    qRegisterMetaType<VpnProtocol::ConnectionState>("VpnProtocol::ConnectionState");
+    qRegisterMetaType<ServerCredentials>("ServerCredentials");
+
     qRegisterMetaType<DockerContainer>("DockerContainer");
     qRegisterMetaType<TransportProto>("TransportProto");
     qRegisterMetaType<Protocol>("Protocol");
@@ -127,11 +130,13 @@ int main(int argc, char *argv[])
 
     UiLogic *uiLogic = new UiLogic;
 
-    QQmlApplicationEngine engine;
+    QQmlApplicationEngine *engine = new QQmlApplicationEngine;
 
     declareQmlPageEnum();
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
+
+    qmlRegisterType<PageType>("PageType", 1, 0, "PageType");
 
     QScopedPointer<ContainerProps> containerProps(new ContainerProps);
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", containerProps.get());
@@ -140,29 +145,41 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", protocolProps.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+    QObject::connect(engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    engine.rootContext()->setContextProperty("UiLogic", uiLogic);
+    engine->rootContext()->setContextProperty("UiLogic", uiLogic);
 
-    engine.rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
-    engine.rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
-    engine.rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
-    engine.rootContext()->setContextProperty("ServerConfiguringProgressLogic", uiLogic->serverConfiguringProgressLogic());
-    engine.rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
-    engine.rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
-    engine.rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
-    engine.rootContext()->setContextProperty("ServerContainersLogic", uiLogic->serverVpnProtocolsLogic());
-    engine.rootContext()->setContextProperty("ShareConnectionLogic", uiLogic->shareConnectionLogic());
-    engine.rootContext()->setContextProperty("SitesLogic", uiLogic->sitesLogic());
-    engine.rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
-    engine.rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
-    engine.rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
+    engine->rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
+    engine->rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
+    engine->rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
+    engine->rootContext()->setContextProperty("ServerConfiguringProgressLogic", uiLogic->serverConfiguringProgressLogic());
+    engine->rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
+    engine->rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
+    engine->rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
+    engine->rootContext()->setContextProperty("ServerContainersLogic", uiLogic->serverVpnProtocolsLogic());
+    engine->rootContext()->setContextProperty("ShareConnectionLogic", uiLogic->shareConnectionLogic());
+    engine->rootContext()->setContextProperty("SitesLogic", uiLogic->sitesLogic());
+    engine->rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
+    engine->rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
+    engine->rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
 
-    engine.load(url);
+    engine->load(url);
+
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, uiLogic, [&engine, uiLogic](){
+        QObject::disconnect(engine, 0,0,0);
+        delete engine;
+
+        QObject::disconnect(uiLogic, 0,0,0);
+        delete uiLogic;
+    });
+
+    if (engine->rootObjects().size() > 0) {
+        uiLogic->setQmlRoot(engine->rootObjects().at(0));
+    }
 
     // TODO - fix
 //#ifdef Q_OS_WIN

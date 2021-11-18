@@ -4,10 +4,13 @@ import QtQuick.Controls 2.12
 
 BasicButtonType {
     id: root
+    height: 40
     background: Rectangle {
         anchors.fill: parent
         radius: 4
-        color: root.containsMouse ? "#282932" : "#181922"
+        color: root.enabled
+               ? (root.containsMouse ? "#282932" : "#181922")
+               : "#484952"
     }
     font.pixelSize: 16
     contentItem: Text {

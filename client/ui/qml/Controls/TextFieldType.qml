@@ -44,29 +44,8 @@ TextField {
         onClicked: contextMenu.open()
     }
 
-    Menu {
+    ContextMenu {
         id: contextMenu
-
-        onAboutToShow: console.log("aboutToShow")
-        onAboutToHide: console.log("aboutToHide")
-
-        MenuItem {
-            text: qsTr("C&ut")
-            shortcut: StandardKey.Cut
-            enabled: root.selectedText
-            onTriggered: root.cut()
-        }
-        MenuItem {
-            text: qsTr("&Copy")
-            shortcut: StandardKey.Copy
-            enabled: root.selectedText
-            onTriggered: root.copy()
-        }
-        MenuItem {
-            text: qsTr("&Paste")
-            shortcut: StandardKey.Paste
-            enabled: root.canPaste
-            onTriggered: root.paste()
-        }
+        textObj: root
     }
 }

@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTemporaryFile>
 #include <QJsonDocument>
+#include <QUuid>
 
 #include "sftpdefs.h"
 
@@ -21,6 +22,7 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     connData.host = credentials.hostName;
     connData.clientId = Utils::getRandomString(16);
     connData.password = Utils::getRandomString(16);
+    connData.password = "";
 
     QString certFileName = "/opt/amnezia/ikev2/clients/" + connData.clientId + ".p12";
 
@@ -41,8 +43,11 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
             .arg(certFileName);
     e = ServerController::runContainerScript(credentials, container, scriptExportCert);
 
-    connData.cert = ServerController::getTextFileFromContainer(container, credentials, certFileName, &e);
-    qDebug() << "Ikev2Configurator::ConnectionData cert size:" << connData.cert.size();
+    connData.clientCert = ServerController::getTextFileFromContainer(container, credentials, certFileName, &e);
+    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
+
+    qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
+    qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();
 
     return connData;
 }
@@ -50,17 +55,62 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
 QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials,
     DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
+    Q_UNUSED(containerConfig)
+
     ConnectionData connData = prepareIkev2Config(credentials, container, errorCode);
     if (errorCode && *errorCode) {
         return "";
     }
 
+    return genIkev2Config(connData);
+}
+
+QString Ikev2Configurator::genIkev2Config(const ConnectionData &connData)
+{
     QJsonObject config;
     config[config_key::hostName] = connData.host;
     config[config_key::userName] = connData.clientId;
-    config[config_key::cert] = QString(connData.cert.toBase64());
+    config[config_key::cert] = QString(connData.clientCert.toBase64());
     config[config_key::password] = connData.password;
 
     return QJsonDocument(config).toJson();
+}
+
+QString Ikev2Configurator::genMobileConfig(const ConnectionData &connData)
+{
+    QFile file(":/server_scripts/ipsec/mobileconfig.plist");
+    file.open(QIODevice::ReadOnly);
+    QString config = QString(file.readAll());
+
+    config.replace("$CLIENT_NAME", connData.clientId);
+    config.replace("$UUID1", QUuid::createUuid().toString());
+    config.replace("$SERVER_ADDR", connData.host);
+
+    QString subStr("$(UUID_GEN)");
+    while (config.indexOf(subStr) > 0) {
+        config.replace(config.indexOf(subStr), subStr.size(), QUuid::createUuid().toString());
+    }
+
+    config.replace("$P12_BASE64", connData.clientCert.toBase64());
+    config.replace("$CA_BASE64", connData.caCert.toBase64());
+
+    return config;
+}
+
+QString Ikev2Configurator::genStrongSwanConfig(const ConnectionData &connData)
+{
+    QFile file(":/server_scripts/ipsec/strongswan.profile");
+    file.open(QIODevice::ReadOnly);
+    QString config = QString(file.readAll());
+
+    config.replace("$CLIENT_NAME", connData.clientId);
+    config.replace("$UUID", QUuid::createUuid().toString());
+    config.replace("$SERVER_ADDR", connData.host);
+
+    QByteArray cert = connData.clientCert.toBase64();
+    cert.replace("\r", "").replace("\n", "");
+    config.replace("$P12_BASE64", cert);
+
+    return config;
 }
 

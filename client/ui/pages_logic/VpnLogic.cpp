@@ -24,6 +24,9 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     connect(uiLogic()->m_vpnConnection, &VpnConnection::connectionStateChanged, this, &VpnLogic::onConnectionStateChanged);
     connect(uiLogic()->m_vpnConnection, &VpnConnection::vpnProtocolError, this, &VpnLogic::onVpnProtocolError);
 
+    connect(this, &VpnLogic::connectToVpn, uiLogic()->m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(this, &VpnLogic::disconnectFromVpn, uiLogic()->m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+
     if (m_settings.isAutoConnect() && m_settings.defaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this](){
             set_pushButtonConnectEnabled(false);
@@ -33,13 +36,22 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
 }
 
 
-void VpnLogic::updateVpnPage()
+void VpnLogic::onUpdatePage()
 {
     Settings::RouteMode mode = m_settings.routeMode();
     set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);
     set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
     set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
     set_pushButtonVpnAddSiteEnabled(mode != Settings::VpnAllSites);
+
+    const QJsonObject &server = uiLogic()->m_settings.defaultServer();
+    QString serverString = QString("%2 (%3)")
+            .arg(server.value(config_key::description).toString())
+            .arg(server.value(config_key::hostName).toString());
+    set_labelCurrentServer(serverString);
+
+    QString selectedContainerName = m_settings.defaultContainerName(m_settings.defaultServerIndex());
+    set_labelCurrentService(selectedContainerName);
 }
 
 
@@ -76,6 +88,7 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
 
     bool pbConnectEnabled = false;
     bool rbModeEnabled = false;
+    bool pbConnectVisible = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
 
     uiLogic()->setTrayState(state);
@@ -85,39 +98,48 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
         onBytesChanged(0,0);
         set_pushButtonConnectChecked(false);
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Preparing:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connecting:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connected:
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Disconnecting:
         pbConnectEnabled = false;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Reconnecting:
         pbConnectEnabled = true;
+        pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Error:
         set_pushButtonConnectEnabled(false);
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Unknown:
         pbConnectEnabled = true;
+        pbConnectVisible = true;
         rbModeEnabled = true;
     }
 
     set_pushButtonConnectEnabled(pbConnectEnabled);
+    set_pushButtonConnectVisible(pbConnectVisible);
     set_widgetVpnModeEnabled(rbModeEnabled);
 }
 
@@ -166,20 +188,19 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 
     qApp->processEvents();
 
-    ErrorCode errorCode = uiLogic()->m_vpnConnection->connectToVpn(
-                serverIndex, credentials, container, containerConfig);
+    emit connectToVpn(serverIndex, credentials, container, containerConfig);
 
-    if (errorCode) {
-        //ui->pushButton_connect->setChecked(false);
-        uiLogic()->setDialogConnectErrorText(errorString(errorCode));
-        emit uiLogic()->showConnectErrorDialog();
-        return;
-    }
+//    if (errorCode) {
+//        //ui->pushButton_connect->setChecked(false);
+//        uiLogic()->setDialogConnectErrorText(errorString(errorCode));
+//        emit uiLogic()->showConnectErrorDialog();
+//        return;
+//    }
 
 }
 
 void VpnLogic::onDisconnect()
 {
     set_pushButtonConnectChecked(false);
-    uiLogic()->m_vpnConnection->disconnectFromVpn();
+    emit disconnectFromVpn();
 }

@@ -128,7 +128,7 @@ PageBase {
             anchors.top: parent.top
             anchors.topMargin: 5
 
-            text: qsTr("Where to get connection data →")
+            text: qsTr("How to get own server? →")
             background: Item {
                 anchors.fill: parent
             }
@@ -147,7 +147,7 @@ PageBase {
             checkable: true
             checked: true
             onClicked: {
-                Qt.openUrlExternally("https://amnezia.org")
+                Qt.openUrlExternally("https://amnezia.org/instruction.html")
             }
         }
         LabelType {

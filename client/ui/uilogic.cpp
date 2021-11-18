@@ -69,15 +69,13 @@ using namespace PageEnumNS;
 
 UiLogic::UiLogic(QObject *parent) :
     QObject(parent),
-    m_currentPageValue{0},
-    m_trayIconUrl{},
-    m_trayActionDisconnectEnabled{true},
-    m_trayActionConnectEnabled{true},
     m_dialogConnectErrorText{}
 {
     m_containersModel = new ContainersModel(this);
     m_protocolsModel = new ProtocolsModel(this);
-    m_vpnConnection = new VpnConnection(this);
+    m_vpnConnection = new VpnConnection();
+    m_vpnConnection->moveToThread(&m_vpnConnectionThread);
+    m_vpnConnectionThread.start();
 
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
@@ -102,6 +100,30 @@ UiLogic::UiLogic(QObject *parent) :
     m_protocolLogicMap.insert(Protocol::Sftp, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Protocol::TorWebSite, new OtherProtocolsLogic(this));
 
+}
+
+UiLogic::~UiLogic()
+{
+    m_tray = nullptr;
+
+    emit hide();
+
+    if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
+        m_vpnConnection->disconnectFromVpn();
+        for (int i = 0; i < 50; i++) {
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(100);
+            if (m_vpnConnection->isDisconnected()) {
+                break;
+            }
+        }
+    }
+
+    m_vpnConnectionThread.quit();
+    m_vpnConnectionThread.wait(3000);
+    delete m_vpnConnection;
+
+    qDebug() << "Application closed";
 }
 
 void UiLogic::initalizeUiLogic()
@@ -168,85 +190,7 @@ void UiLogic::initalizeUiLogic()
     //    ui->lineEdit_proto_shadowsocks_port->setValidator(&m_ipPortValidator);
     //    ui->lineEdit_proto_cloak_port->setValidator(&m_ipPortValidator);
 
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-int UiLogic::getCurrentPageValue() const
-{
-    return m_currentPageValue;
-}
-
-void UiLogic::setCurrentPageValue(int currentPageValue)
-{
-    if (m_currentPageValue != currentPageValue) {
-        m_currentPageValue = currentPageValue;
-        emit currentPageValueChanged();
-    }
-}
-
-QString UiLogic::getTrayIconUrl() const
-{
-    return m_trayIconUrl;
-}
-
-void UiLogic::setTrayIconUrl(const QString &trayIconUrl)
-{
-    if (m_trayIconUrl != trayIconUrl) {
-        m_trayIconUrl = trayIconUrl;
-        emit trayIconUrlChanged();
-    }
-}
-
-bool UiLogic::getTrayActionDisconnectEnabled() const
-{
-    return m_trayActionDisconnectEnabled;
-}
-
-void UiLogic::setTrayActionDisconnectEnabled(bool trayActionDisconnectEnabled)
-{
-    if (m_trayActionDisconnectEnabled != trayActionDisconnectEnabled) {
-        m_trayActionDisconnectEnabled = trayActionDisconnectEnabled;
-        emit trayActionDisconnectEnabledChanged();
-    }
-}
-
-bool UiLogic::getTrayActionConnectEnabled() const
-{
-    return m_trayActionConnectEnabled;
-}
-
-void UiLogic::setTrayActionConnectEnabled(bool trayActionConnectEnabled)
-{
-    if (m_trayActionConnectEnabled != trayActionConnectEnabled) {
-        m_trayActionConnectEnabled = trayActionConnectEnabled;
-        emit trayActionConnectEnabledChanged();
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 QString UiLogic::getDialogConnectErrorText() const
 {
@@ -261,24 +205,6 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
     }
 }
 
-
-UiLogic::~UiLogic()
-{
-    hide();
-    m_vpnConnection->disconnectFromVpn();
-    for (int i = 0; i < 50; i++) {
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(100);
-        if (m_vpnConnection->isDisconnected()) {
-            break;
-        }
-    }
-
-    delete m_vpnConnection;
-
-    qDebug() << "Application closed";
-}
-
 void UiLogic::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) {
@@ -290,6 +216,26 @@ void UiLogic::showOnStartup()
     }
 }
 
+void UiLogic::onUpdateAllPages()
+{
+    for (PageLogicBase *logic : {
+         (PageLogicBase *) m_appSettingsLogic,
+         (PageLogicBase *) m_generalSettingsLogic,
+         (PageLogicBase *) m_networkSettingsLogic,
+         (PageLogicBase *) m_serverConfiguringProgressLogic,
+         (PageLogicBase *) m_newServerProtocolsLogic,
+         (PageLogicBase *) m_serverListLogic,
+         (PageLogicBase *) m_serverSettingsLogic,
+         (PageLogicBase *) m_serverVpnProtocolsLogic,
+         (PageLogicBase *) m_shareConnectionLogic,
+         (PageLogicBase *) m_sitesLogic,
+         (PageLogicBase *) m_startPageLogic,
+         (PageLogicBase *) m_vpnLogic,
+         (PageLogicBase *) m_wizardLogic
+    }) {
+        logic->onUpdatePage();
+    }
+}
 
 void UiLogic::keyPressEvent(Qt::Key key)
 {
@@ -326,9 +272,7 @@ void UiLogic::keyPressEvent(Qt::Key key)
         emit goToPage(Page::ServerSettings);
         break;
     case Qt::Key_P:
-        selectedServerIndex = m_settings.defaultServerIndex();
-        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
-        emit goToPage(Page::ServerContainers);
+        onGotoCurrentProtocolsPage();
         break;
     case Qt::Key_T:
         SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
@@ -369,6 +313,13 @@ QString UiLogic::containerDesc(int container)
 {
     return ContainerProps::containerDescriptions().value(static_cast<DockerContainer>(container));
 
+}
+
+void UiLogic::onGotoCurrentProtocolsPage()
+{
+    selectedServerIndex = m_settings.defaultServerIndex();
+    selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+    emit goToPage(Page::ServerContainers);
 }
 
 
@@ -650,12 +601,22 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
 
 void UiLogic::setupTray()
 {
-    setTrayState(VpnProtocol::Disconnected);
+     m_tray = new QSystemTrayIcon(qmlRoot());
+     setTrayState(VpnProtocol::Disconnected);
+
+     m_tray->show();
+
+     connect(m_tray, &QSystemTrayIcon::activated, this, &UiLogic::onTrayActivated);
 }
 
 void UiLogic::setTrayIcon(const QString &iconPath)
 {
-    setTrayIconUrl(iconPath);
+    if (m_tray) m_tray->setIcon(QIcon(QPixmap(iconPath).scaled(128,128)));
+}
+
+void UiLogic::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    emit raise();
 }
 
 PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
@@ -667,17 +628,24 @@ PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
     }
 }
 
+QObject *UiLogic::qmlRoot() const
+{
+    return m_qmlRoot;
+}
+
+void UiLogic::setQmlRoot(QObject *newQmlRoot)
+{
+    m_qmlRoot = newQmlRoot;
+}
+
 PageEnumNS::Page UiLogic::currentPage()
 {
-    return static_cast<PageEnumNS::Page>(getCurrentPageValue());
+    return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
 void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
 {
-    QString resourcesPath = "qrc:/images/tray/%1";
-
-    setTrayActionDisconnectEnabled(state == VpnProtocol::Connected);
-    setTrayActionConnectEnabled(state == VpnProtocol::Disconnected);
+    QString resourcesPath = ":/images/tray/%1";
 
     switch (state) {
     case VpnProtocol::Disconnected:
@@ -713,8 +681,40 @@ void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
     //    resourcesPath = ":/images_mac/tray_icon/%1";
     //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
     //#endif
-
 }
 
 
+bool UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
+{
+    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
+    QSaveFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(data.toUtf8());
+
+    QFileInfo fi(fileName);
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+    return save.commit();
+}
+
+bool UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
+{
+    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+
+    QSaveFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(QByteArray::fromBase64(data.toUtf8()));
+
+    QFileInfo fi(fileName);
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+    return save.commit();
+}
+
+void UiLogic::copyToClipboard(const QString &text)
+{
+    qApp->clipboard()->setText(text);
+}

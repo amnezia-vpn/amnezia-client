@@ -120,8 +120,8 @@ proxyarp
 lcp-echo-failure 4
 lcp-echo-interval 30
 connect-delay 5000
-ms-dns $PRIMARY_DNS
-ms-dns $SECONDARY_DNS
+ms-dns $PRIMARY_SERVER_DNS
+ms-dns $SECONDARY_SERVER_DNS
 EOF
 
 
@@ -222,6 +222,8 @@ certutil -z <(head -c 1024 /dev/urandom) \
    --extKeyUsage serverAuth \
    --extSAN "ip:$SERVER_IP_ADDRESS,dns:$SERVER_IP_ADDRESS"
 
+certutil -L -d sql:/etc/ipsec.d -n "IKEv2 VPN CA" -a | grep -v CERTIFICATE > /etc/ipsec.d/ca_cert_base64.p12
+
 cat > /etc/ipsec.d/ikev2.conf <<EOF
 conn ikev2-cp
   left=%defaultroute
@@ -248,7 +250,7 @@ conn ikev2-cp
   ikelifetime=24h
   salifetime=24h
   encapsulation=yes
-  modecfgdns=$PRIMARY_DNS,$SECONDARY_DNS
+  modecfgdns=$PRIMARY_SERVER_DNS,$SECONDARY_SERVER_DNS
 EOF
 
  ipsec auto --add ikev2-cp

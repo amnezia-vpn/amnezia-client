@@ -15,7 +15,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
 
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
     case DockerContainer::Dns: return QLatin1String("dns");
-    case DockerContainer::FileShare: return QLatin1String("file_share");
+    //case DockerContainer::FileShare: return QLatin1String("file_share");
     case DockerContainer::Sftp: return QLatin1String("sftp");
     default: return "";
     }

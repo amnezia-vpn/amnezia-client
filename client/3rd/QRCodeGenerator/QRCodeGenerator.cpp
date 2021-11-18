@@ -597,7 +597,7 @@ CQR_Encode::~CQR_Encode()
 /////////////////////////////////////////////////////////////////////////////
 // CQR_Encode::EncodeData
 
-bool CQR_Encode::EncodeData(int nLevel, int nVersion, bool bAutoExtent, int nMaskingNo, char* lpsSource, int ncSource)
+bool CQR_Encode::EncodeData(int nLevel, int nVersion, bool bAutoExtent, int nMaskingNo, const char* lpsSource, int ncSource)
 {
 	int i, j;
 
@@ -746,7 +746,7 @@ bool CQR_Encode::EncodeData(int nLevel, int nVersion, bool bAutoExtent, int nMas
 /////////////////////////////////////////////////////////////////////////////
 // CQR_Encode::GetEncodeVersion
 
-int CQR_Encode::GetEncodeVersion(int nVersion, char* lpsSource, int ncLength)
+int CQR_Encode::GetEncodeVersion(int nVersion, const char* lpsSource, int ncLength)
 {
 	int nVerGroup = nVersion >= 27 ? QR_VRESION_L : (nVersion >= 10 ? QR_VRESION_M : QR_VRESION_S);
 	int i, j;
@@ -788,7 +788,7 @@ int CQR_Encode::GetEncodeVersion(int nVersion, char* lpsSource, int ncLength)
 
 /////////////////////////////////////////////////////////////////////////////
 // CQR_Encode::EncodeSourceData
-bool CQR_Encode::EncodeSourceData(char* lpsSource, int ncLength, int nVerGroup)
+bool CQR_Encode::EncodeSourceData(const char* lpsSource, int ncLength, int nVerGroup)
 {
 	memset(m_nBlockLength, 0, sizeof(m_nBlockLength));
 

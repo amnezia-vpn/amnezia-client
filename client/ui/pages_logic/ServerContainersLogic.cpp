@@ -43,12 +43,12 @@ void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, 
 void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
 {
     m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
-    onUpdatePage();
+    uiLogic()->onUpdateAllPages();
 }
 
 void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
 {
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), c);
+    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, c);
     emit uiLogic()->goToPage(Page::ShareConnection);
 }
 
@@ -64,7 +64,7 @@ void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
         if (c.isEmpty()) m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, DockerContainer::None);
         else m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c.keys().first());
     }
-    onUpdatePage();
+    uiLogic()->onUpdateAllPages();
 }
 
 void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp)
@@ -85,6 +85,6 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
         }
     }
 
-    onUpdatePage();
+    uiLogic()->onUpdateAllPages();
     emit uiLogic()->closePage();
 }

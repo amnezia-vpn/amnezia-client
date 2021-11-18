@@ -14,7 +14,7 @@ ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
 void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 {
     m_settings.setDefaultServer(index);
-    onUpdatePage();
+    uiLogic()->onUpdateAllPages();
 }
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)

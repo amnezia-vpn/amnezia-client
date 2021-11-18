@@ -73,6 +73,9 @@ QMap<amnezia::Protocol, QString> ProtocolProps::protocolHumanNames()
         {Protocol::ShadowSocks, "ShadowSocks"},
         {Protocol::Cloak, "Cloak"},
         {Protocol::WireGuard, "WireGuard"},
+        {Protocol::Ikev2, "IKEv2"},
+        {Protocol::L2tp, "L2TP"},
+
         {Protocol::TorWebSite, "Web site in TOR network"},
         {Protocol::Dns, "DNS Service"},
         {Protocol::FileShare, "File Sharing Service"},

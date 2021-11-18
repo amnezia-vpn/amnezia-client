@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QSaveFile>
 #include <QStandardPaths>
+#include <QImage>
 
 #include "ShareConnectionLogic.h"
 
@@ -12,6 +13,8 @@
 #include "configurators/vpn_configurator.h"
 #include "configurators/openvpn_configurator.h"
 #include "configurators/shadowsocks_configurator.h"
+#include "configurators/wireguard_configurator.h"
+#include "configurators/ikev2_configurator.h"
 #include "configurators/ssh_configurator.h"
 
 #include "defines.h"
@@ -21,333 +24,226 @@
 
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_pageShareAmneziaVisible{true},
-    m_pageShareOpenVpnVisible{true},
-    m_pageShareShadowSocksVisible{true},
-    m_pageShareCloakVisible{true},
-    m_pageShareFullAccessVisible{true},
     m_textEditShareOpenVpnCodeText{},
-    m_pushButtonShareOpenVpnCopyEnabled{false},
-    m_pushButtonShareOpenVpnSaveEnabled{false},
-    m_toolBoxShareConnectionCurrentIndex{-1},
-    m_pushButtonShareShadowSocksCopyEnabled{false},
     m_lineEditShareShadowSocksStringText{},
-    m_labelShareShadowSocksQrCodeText{},
-    m_labelShareShadowSocksServerText{},
-    m_labelShareShadowSocksPortText{},
-    m_labelShareShadowSocksMethodText{},
-    m_labelShareShadowSocksPasswordText{},
-    m_plainTextEditShareCloakText{},
-    m_pushButtonShareCloakCopyEnabled{false},
-    m_textEditShareFullCodeText{},
-    m_textEditShareAmneziaCodeText{},
-    m_pushButtonShareFullCopyText{tr("Copy")},
-    m_pushButtonShareAmneziaCopyText{tr("Copy")},
-    m_pushButtonShareOpenVpnCopyText{tr("Copy")},
-    m_pushButtonShareShadowSocksCopyText{tr("Copy")},
-    m_pushButtonShareCloakCopyText{tr("Copy")},
-    m_pushButtonShareAmneziaGenerateEnabled{true},
-    m_pushButtonShareAmneziaCopyEnabled{true},
-    m_pushButtonShareAmneziaGenerateText{tr("Generate config")},
-    m_pushButtonShareOpenVpnGenerateEnabled{true},
-    m_pushButtonShareOpenVpnGenerateText{tr("Generate config")}
+    m_shareShadowSocksQrCodeText{},
+    m_textEditShareCloakText{},
+    m_textEditShareAmneziaCodeText{}
 {
-    // TODO consider move to Component.onCompleted
-    updateSharingPage(uiLogic()->selectedServerIndex, m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer);
 }
 
-
-void ShareConnectionLogic::onPushButtonShareFullCopyClicked()
+void ShareConnectionLogic::onUpdatePage()
 {
-    QGuiApplication::clipboard()->setText(textEditShareFullCodeText());
-    set_pushButtonShareFullCopyText(tr("Copied"));
+    set_textEditShareAmneziaCodeText(tr(""));
+    set_shareAmneziaQrCodeText("");
 
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareFullCopyText(tr("Copy"));
-    });
-}
+    set_textEditShareOpenVpnCodeText("");
 
-void ShareConnectionLogic::onPushButtonShareFullSaveClicked()
-{
-    if (textEditShareFullCodeText().isEmpty()) return;
+    set_shareShadowSocksQrCodeText("");
+    set_textEditShareShadowSocksText("");
+    set_lineEditShareShadowSocksStringText("");
 
-    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save AmneziaVPN config"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.amnezia");
-    QSaveFile save(fileName);
-    save.open(QIODevice::WriteOnly);
-    save.write(textEditShareFullCodeText().toUtf8());
-    save.commit();
-}
+    set_textEditShareCloakText("");
 
-void ShareConnectionLogic::onPushButtonShareAmneziaCopyClicked()
-{
-    if (textEditShareAmneziaCodeText().isEmpty()) return;
+    set_textEditShareWireGuardCodeText("");
+    set_shareWireGuardQrCodeText("");
 
-    QGuiApplication::clipboard()->setText(textEditShareAmneziaCodeText());
-    set_pushButtonShareAmneziaCopyText(tr("Copied"));
-
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareAmneziaCopyText(tr("Copy"));
-    });
-}
-
-void ShareConnectionLogic::onPushButtonShareAmneziaSaveClicked()
-{
-    if (textEditShareAmneziaCodeText().isEmpty()) return;
-
-    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save AmneziaVPN config"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.amnezia");
-    QSaveFile save(fileName);
-    save.open(QIODevice::WriteOnly);
-    save.write(textEditShareAmneziaCodeText().toUtf8());
-    save.commit();
-}
-
-void ShareConnectionLogic::onPushButtonShareOpenVpnCopyClicked()
-{
-    QGuiApplication::clipboard()->setText(textEditShareOpenVpnCodeText());
-    set_pushButtonShareOpenVpnCopyText(tr("Copied"));
-
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareOpenVpnCopyText(tr("Copy"));
-    });
-}
-
-void ShareConnectionLogic::onPushButtonShareShadowSocksCopyClicked()
-{
-    QGuiApplication::clipboard()->setText(lineEditShareShadowSocksStringText());
-    set_pushButtonShareShadowSocksCopyText(tr("Copied"));
-
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareShadowSocksCopyText(tr("Copy"));
-    });
-}
-
-void ShareConnectionLogic::onPushButtonShareCloakCopyClicked()
-{
-    QGuiApplication::clipboard()->setText(plainTextEditShareCloakText());
-    set_pushButtonShareCloakCopyText(tr("Copied"));
-
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonShareCloakCopyText(tr("Copy"));
-    });
+    set_textEditShareIkev2CertText("");
+    set_textEditShareIkev2MobileConfigText("");
+    set_textEditShareIkev2StrongSwanConfigText("");
 }
 
 void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 {
-    set_pushButtonShareAmneziaGenerateEnabled(false);
-    set_pushButtonShareAmneziaCopyEnabled(false);
-    set_pushButtonShareAmneziaGenerateText(tr("Generating..."));
-    qApp->processEvents();
+    set_textEditShareAmneziaCodeText("");
+    set_shareAmneziaQrCodeText("");
 
-    ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
-    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
-    containerConfig.insert(config_key::container, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
-
-    ErrorCode e = ErrorCode::NoError;
-    for (Protocol p: ContainerProps::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
-        QJsonObject protoConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p);
-
-        QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, p, &e);
-        if (e) {
-            cfg = "Error generating config";
-            break;
-        }
-        protoConfig.insert(config_key::last_config, cfg);
-
-        containerConfig.insert(ProtocolProps::protoToString(p), protoConfig);
+    QJsonObject serverConfig;
+    // Full access
+    if (shareFullAccess()) {
+        serverConfig = m_settings.server(uiLogic()->selectedServerIndex);
     }
-
-    QByteArray ba;
-    if (!e) {
-        QJsonObject serverConfig = m_settings.server(uiLogic()->selectedServerIndex);
-        serverConfig.remove(config_key::userName);
-        serverConfig.remove(config_key::password);
-        serverConfig.remove(config_key::port);
-        serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
-        serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
-
-
-        ba = QJsonDocument(serverConfig).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-        set_textEditShareAmneziaCodeText(QString("vpn://%1").arg(QString(ba)));
-    }
+    // Container share
     else {
-        set_textEditShareAmneziaCodeText(tr("Error while generating connection profile"));
+        ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
+        QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+        containerConfig.insert(config_key::container, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
+
+        ErrorCode e = ErrorCode::NoError;
+        for (Protocol p: ContainerProps::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
+            QJsonObject protoConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p);
+
+            QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, p, &e);
+            if (e) {
+                cfg = "Error generating config";
+                break;
+            }
+            protoConfig.insert(config_key::last_config, cfg);
+            containerConfig.insert(ProtocolProps::protoToString(p), protoConfig);
+        }
+
+        QByteArray ba;
+        if (!e) {
+            serverConfig = m_settings.server(uiLogic()->selectedServerIndex);
+            serverConfig.remove(config_key::userName);
+            serverConfig.remove(config_key::password);
+            serverConfig.remove(config_key::port);
+            serverConfig.insert(config_key::containers, QJsonArray {containerConfig});
+            serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
+        }
+        else {
+            set_textEditShareAmneziaCodeText(tr("Error while generating connection profile"));
+            return;
+        }
     }
 
-    set_pushButtonShareAmneziaGenerateEnabled(true);
-    set_pushButtonShareAmneziaCopyEnabled(true);
-    set_pushButtonShareAmneziaGenerateText(tr("Generate config"));
+    QByteArray ba = QJsonDocument(serverConfig).toBinaryData();
+    ba = qCompress(ba, 8);
+    QString code = QString("vpn://%1").arg(QString(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
+    set_textEditShareAmneziaCodeText(code);
+
+    if (ba.size() < 2900) {
+        QImage qr = updateQRCodeImage(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
+        set_shareAmneziaQrCodeText(imageToBase64(qr));
+    }
 }
 
 void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 {
-    set_pushButtonShareOpenVpnGenerateEnabled(false);
-    set_pushButtonShareOpenVpnCopyEnabled(false);
-    set_pushButtonShareOpenVpnSaveEnabled(false);
-    set_pushButtonShareOpenVpnGenerateText(tr("Generating..."));
-
     ServerCredentials credentials = m_settings.serverCredentials(uiLogic()->selectedServerIndex);
     const QJsonObject &containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
 
     ErrorCode e = ErrorCode::NoError;
     QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
-    cfg = OpenVpnConfigurator::processConfigWithExportSettings(cfg);
+    cfg = VpnConfigurator::processConfigWithExportSettings(uiLogic()->selectedDockerContainer, Protocol::OpenVpn, cfg);
 
     set_textEditShareOpenVpnCodeText(QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString());
-
-    set_pushButtonShareOpenVpnGenerateEnabled(true);
-    set_pushButtonShareOpenVpnCopyEnabled(true);
-    set_pushButtonShareOpenVpnSaveEnabled(true);
-    set_pushButtonShareOpenVpnGenerateText(tr("Generate config"));
 }
 
-void ShareConnectionLogic::onPushButtonShareOpenVpnSaveClicked()
+void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save OpenVPN config"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.ovpn");
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
 
-    QSaveFile save(fileName);
-    save.open(QIODevice::WriteOnly);
-    save.write(textEditShareOpenVpnCodeText().toUtf8());
-    save.commit();
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
+    QString cfg = protoConfig.value(config_key::last_config).toString();
+
+    if (cfg.isEmpty()) {
+        const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+        ErrorCode e = ErrorCode::NoError;
+        cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
+    }
+
+    QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+
+    QString ssString = QString("%1:%2@%3:%4")
+            .arg(ssConfig.value("method").toString())
+            .arg(ssConfig.value("password").toString())
+            .arg(ssConfig.value("server").toString())
+            .arg(ssConfig.value("server_port").toString());
+
+    ssString = "ss://" + ssString.toUtf8().toBase64();
+    set_lineEditShareShadowSocksStringText(ssString);
+
+    QImage qr = updateQRCodeImage(ssString.toUtf8());
+    set_shareShadowSocksQrCodeText(imageToBase64(qr));
+
+    QString humanString = QString("Server: %3\n"
+                                  "Port: %4\n"
+                                  "Encryption: %1\n"
+                                  "Password: %2")
+            .arg(ssConfig.value("method").toString())
+            .arg(ssConfig.value("password").toString())
+            .arg(ssConfig.value("server").toString())
+            .arg(ssConfig.value("server_port").toString());
+
+    set_textEditShareShadowSocksText(humanString);
 }
 
-
-void ShareConnectionLogic::updateSharingPage(int serverIndex, const ServerCredentials &credentials,
-                                DockerContainer container)
+void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
 {
-    uiLogic()->selectedDockerContainer = container;
-    uiLogic()->selectedServerIndex = serverIndex;
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
+    QString cfg = protoConfig.value(config_key::last_config).toString();
+
+    if (cfg.isEmpty()) {
+        const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+        ErrorCode e = ErrorCode::NoError;
+        cfg = CloakConfigurator::genCloakConfig(credentials, container, containerConfig, &e);
+    }
+
+    QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
+    cloakConfig.remove(config_key::transport_proto);
+    cloakConfig.insert("ProxyMethod", "shadowsocks");
+
+    set_textEditShareCloakText(QJsonDocument(cloakConfig).toJson());
+}
+
+void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
+
+    const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
+
+    ErrorCode e = ErrorCode::NoError;
+    QString cfg = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, &e);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::WireGuard, cfg);
+    cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString();
+
+    set_textEditShareWireGuardCodeText(cfg);
+
+    QImage qr = updateQRCodeImage(cfg.toUtf8());
+    set_shareWireGuardQrCodeText(imageToBase64(qr));
+}
+
+void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
+{
+    int serverIndex = uiLogic()->selectedServerIndex;
+    DockerContainer container = uiLogic()->selectedDockerContainer;
+    ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
 
     //const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
 
-    set_pageShareAmneziaVisible(false);
-    set_pageShareOpenVpnVisible(false);
-    set_pageShareShadowSocksVisible(false);
-    set_pageShareCloakVisible(false);
-    set_pageShareFullAccessVisible(false);
+    Ikev2Configurator::ConnectionData connData = Ikev2Configurator::prepareIkev2Config(credentials, container);
 
-    enum currentWidget {
-        full_access = 0,
-        share_amezia,
-        share_openvpn,
-        share_shadowshock,
-        share_cloak
-    };
+    QString cfg = Ikev2Configurator::genIkev2Config(connData);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::Ikev2, cfg);
+    cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::cert].toString();
 
-    if (container == DockerContainer::OpenVpn) {
-        set_pageShareAmneziaVisible(true);
-        set_pageShareOpenVpnVisible(true);
+    set_textEditShareIkev2CertText(cfg);
 
-        QString cfg = tr("Press Generate config");
-        set_textEditShareOpenVpnCodeText(cfg);
-        set_pushButtonShareOpenVpnCopyEnabled(false);
-        set_pushButtonShareOpenVpnSaveEnabled(false);
+    QString mobileCfg = Ikev2Configurator::genMobileConfig(connData);
+    set_textEditShareIkev2MobileConfigText(mobileCfg);
 
-        set_toolBoxShareConnectionCurrentIndex(share_openvpn);
-    }
+    QString strongSwanCfg = Ikev2Configurator::genStrongSwanConfig(connData);
+    set_textEditShareIkev2StrongSwanConfigText(strongSwanCfg);
 
-    if (container == DockerContainer::ShadowSocks ||
-            container == DockerContainer::Cloak) {
-        set_pageShareAmneziaVisible(true);
-        set_pageShareShadowSocksVisible(true);
-
-        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
-        QString cfg = protoConfig.value(config_key::last_config).toString();
-
-        if (cfg.isEmpty()) {
-            const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-
-            ErrorCode e = ErrorCode::NoError;
-            cfg = ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, &e);
-
-            set_pushButtonShareShadowSocksCopyEnabled(true);
-        }
-
-        QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
-
-        QString ssString = QString("%1:%2@%3:%4")
-                .arg(ssConfig.value("method").toString())
-                .arg(ssConfig.value("password").toString())
-                .arg(ssConfig.value("server").toString())
-                .arg(ssConfig.value("server_port").toString());
-
-        ssString = "ss://" + ssString.toUtf8().toBase64();
-        set_lineEditShareShadowSocksStringText(ssString);
-        updateQRCodeImage(ssString, [this](const QString& labelText) ->void {
-            set_labelShareShadowSocksQrCodeText(labelText);
-        });
-
-        set_labelShareShadowSocksServerText(ssConfig.value("server").toString());
-        set_labelShareShadowSocksPortText(ssConfig.value("server_port").toString());
-        set_labelShareShadowSocksMethodText(ssConfig.value("method").toString());
-        set_labelShareShadowSocksPasswordText(ssConfig.value("password").toString());
-
-        set_toolBoxShareConnectionCurrentIndex(share_shadowshock);
-    }
-
-    if (container == DockerContainer::Cloak) {
-        //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
-        set_pageShareCloakVisible(true);
-        set_plainTextEditShareCloakText(QString(""));
-
-        QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
-        QString cfg = protoConfig.value(config_key::last_config).toString();
-
-        if (cfg.isEmpty()) {
-            const QJsonObject &containerConfig = m_settings.containerConfig(serverIndex, container);
-
-            ErrorCode e = ErrorCode::NoError;
-            cfg = CloakConfigurator::genCloakConfig(credentials, container, containerConfig, &e);
-
-            set_pushButtonShareCloakCopyEnabled(true);
-        }
-
-        QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
-        cloakConfig.remove(config_key::transport_proto);
-        cloakConfig.insert("ProxyMethod", "shadowsocks");
-
-        set_plainTextEditShareCloakText(QJsonDocument(cloakConfig).toJson());
-    }
-
-    // Full access
-    if (container == DockerContainer::None) {
-        set_pageShareFullAccessVisible(true);
-
-        const QJsonObject &server = m_settings.server(uiLogic()->selectedServerIndex);
-
-        QByteArray ba = QJsonDocument(server).toJson().toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-
-        set_textEditShareFullCodeText(QString("vpn://%1").arg(QString(ba)));
-        set_toolBoxShareConnectionCurrentIndex(full_access);
-    }
-
-    //ui->toolBox_share_connection->addItem(ui->page_share_amnezia, tr("  Share for Amnezia client"));
-
-    // Amnezia sharing
-    //    QJsonObject exportContainer;
-    //    for (Protocol p: protocolsForContainer(container)) {
-    //        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(p)).toObject();
-    //        protocolConfig.remove(config_key::last_config);
-    //        exportContainer.insert(ProtocolProps::protoToString(p), protocolConfig);
-    //    }
-    //    exportContainer.insert(config_key::container, containerToString(container));
-
-    //    ui->textEdit_share_amnezia_code->setPlainText(QJsonDocument(exportContainer).toJson());
-
-    set_textEditShareAmneziaCodeText(tr(""));
 }
 
 
-void ShareConnectionLogic::updateQRCodeImage(const QString &text, const std::function<void(const QString&)>& set_labelFunc)
+void ShareConnectionLogic::updateSharingPage(int serverIndex, DockerContainer container)
+{
+    uiLogic()->selectedDockerContainer = container;
+    uiLogic()->selectedServerIndex = serverIndex;
+    set_shareFullAccess(container == DockerContainer::None);
+}
+
+QImage ShareConnectionLogic::updateQRCodeImage(const QByteArray &data)
 {
     int levelIndex = 1;
     int versionIndex = 0;
     bool bExtent = true;
     int maskIndex = -1;
 
-    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, text.toUtf8().data() );
+    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, data.data() );
 
     int qrImageSize = m_qrEncode.m_nSymbleSize;
 
@@ -361,10 +257,14 @@ void ShareConnectionLogic::updateQRCodeImage(const QString &text, const std::fun
             if ( m_qrEncode.m_byModuleData[i][j] )
                 encodeImage.setPixel( i + QR_MARGIN, j + QR_MARGIN, 0 );
 
-    QByteArray byteArray;
-    QBuffer buffer(&byteArray);
-    encodeImage.save(&buffer, "PNG"); // writes the image in PNG format inside the buffer
-    QString iconBase64 = QString::fromLatin1(byteArray.toBase64().data());
+    return encodeImage;
+}
 
-    set_labelFunc(iconBase64);
+QString ShareConnectionLogic::imageToBase64(const QImage &image)
+{
+    QByteArray ba;
+    QBuffer bu(&ba);
+    bu.open(QIODevice::WriteOnly);
+    image.save(&bu, "PNG");
+    return "data:image/png;base64," + QString::fromLatin1(ba.toBase64().data());
 }

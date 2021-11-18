@@ -4,6 +4,19 @@
 #include <QObject>
 #include <QQmlEngine>
 
+class PageType : public QObject
+{
+    Q_GADGET
+
+public:
+    enum Type {
+        Basic,
+        Proto,
+        ShareProto
+    };
+    Q_ENUM(Type)
+};
+
 namespace PageEnumNS
 {
 Q_NAMESPACE
@@ -11,7 +24,7 @@ enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
-           ProtocolSettings};
+           ProtocolSettings, ProtocolShare};
 Q_ENUM_NS(Page)
 
 static void declareQmlPageEnum() {

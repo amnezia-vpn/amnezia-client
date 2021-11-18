@@ -22,7 +22,7 @@ SitesLogic::SitesLogic(UiLogic *logic, QObject *parent):
     sitesModels.insert(Settings::VpnAllExceptSites, new SitesModel(Settings::VpnAllExceptSites));
 }
 
-void SitesLogic::updateSitesPage()
+void SitesLogic::onUpdatePage()
 {
     Settings::RouteMode m = m_settings.routeMode();
     if (m == Settings::VpnAllSites) return;
@@ -71,7 +71,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
             uiLogic()->m_vpnConnection->flushDns();
         }
 
-        updateSitesPage();
+        onUpdatePage();
     };
 
     const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo){
@@ -93,7 +93,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
     }
     else {
         cbProcess(newSite, "");
-        updateSitesPage();
+        onUpdatePage();
         QHostInfo::lookupHost(newSite, this, cbResolv);
     }
 }
@@ -123,7 +123,7 @@ void SitesLogic::onPushButtonSitesDeleteClicked(int row)
         uiLogic()->m_vpnConnection->flushDns();
     }
 
-    updateSitesPage();
+    onUpdatePage();
 }
 
 void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
@@ -153,6 +153,6 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
     uiLogic()->m_vpnConnection->addRoutes(QStringList() << ips);
     uiLogic()->m_vpnConnection->flushDns();
 
-    updateSitesPage();
+    onUpdatePage();
 }
 

@@ -24,7 +24,7 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const {
 QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0
-            || index.row() >= ContainerProps::allContainers().size()) {
+            || index.row() >= ProtocolProps::allProtocols().size()) {
         return QVariant();
     }
 

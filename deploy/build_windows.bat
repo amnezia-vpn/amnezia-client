@@ -82,6 +82,7 @@ signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://ti
 
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
+copy "%WORK_DIR:"=%\service\wireguard-service\release\wireguard-service.exe"	%OUT_APP_DIR%\wireguard\
 
 del %OUT_APP_DIR%\botand.dll
 

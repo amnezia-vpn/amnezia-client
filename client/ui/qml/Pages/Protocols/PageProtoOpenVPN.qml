@@ -338,9 +338,6 @@ PageProtocolBase {
 
             }
 
-
-
-
             LabelType {
                 id: label_proto_openvpn_info
 
@@ -348,8 +345,6 @@ PageProtocolBase {
                 visible: logic.labelProtoOpenVpnInfoVisible
                 text: logic.labelProtoOpenVpnInfoText
             }
-
-
 
             Rectangle {
                 id: it_save

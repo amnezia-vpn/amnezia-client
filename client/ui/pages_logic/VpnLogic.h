@@ -14,7 +14,10 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelSpeedReceivedText)
     AUTO_PROPERTY(QString, labelSpeedSentText)
     AUTO_PROPERTY(QString, labelStateText)
+    AUTO_PROPERTY(QString, labelCurrentServer)
+    AUTO_PROPERTY(QString, labelCurrentService)
     AUTO_PROPERTY(bool, pushButtonConnectEnabled)
+    AUTO_PROPERTY(bool, pushButtonConnectVisible)
     AUTO_PROPERTY(bool, widgetVpnModeEnabled)
     AUTO_PROPERTY(QString, labelErrorText)
     AUTO_PROPERTY(bool, pushButtonVpnAddSiteEnabled)
@@ -24,7 +27,7 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(bool, radioButtonVpnModeExceptSitesChecked)
 
 public:
-    Q_INVOKABLE void updateVpnPage();
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
@@ -48,5 +51,10 @@ public slots:
     void onConnectionStateChanged(VpnProtocol::ConnectionState state);
     void onVpnProtocolError(amnezia::ErrorCode errorCode);
 
+signals:
+    void connectToVpn(int serverIndex,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+
+    void disconnectFromVpn();
 };
 #endif // VPN_LOGIC_H

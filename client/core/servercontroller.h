@@ -6,6 +6,8 @@
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
 #include "defs.h"
+#include "settings.h"
+
 #include "containers/containers_defs.h"
 
 #include "sftpdefs.h"
@@ -75,6 +77,7 @@ private:
     static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     static ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
+    static Settings &m_settings();
 };
 
 #endif // SERVERCONTROLLER_H

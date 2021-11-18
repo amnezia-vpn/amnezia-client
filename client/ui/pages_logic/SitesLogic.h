@@ -15,7 +15,7 @@ class SitesLogic : public PageLogicBase
     AUTO_PROPERTY(QString, lineEditSitesAddCustomText)
 
 public:
-    Q_INVOKABLE void updateSitesPage();
+    Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onPushButtonAddCustomSitesClicked();
     Q_INVOKABLE void onPushButtonSitesDeleteClicked(int row);
