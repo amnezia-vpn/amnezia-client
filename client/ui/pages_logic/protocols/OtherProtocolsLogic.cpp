@@ -90,7 +90,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
 //            .arg(labelTftpPortText())
 //            .arg(labelTftpPasswordText());
 
-    p->setProgram("C:\\Program Files1\\SSHFS-Win\\bin\\sshfs.exe");
+    p->setProgram("C:\\Program Files\\SSHFS-Win\\bin\\sshfs.exe");
 
     QString host = m_settings.serverCredentials(uiLogic()->selectedServerIndex).hostName;
     QString args = QString(
@@ -121,6 +121,8 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
     }
 
     //qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
+
+    set_pushButtonSftpMountEnabled(true);
 
 #endif
 }

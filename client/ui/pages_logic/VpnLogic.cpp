@@ -55,25 +55,19 @@ void VpnLogic::onUpdatePage()
 }
 
 
-void VpnLogic::onRadioButtonVpnModeAllSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeAllSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllSites);
-    }
+    m_settings.setRouteMode(Settings::VpnAllSites);
 }
 
-void VpnLogic::onRadioButtonVpnModeForwardSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeForwardSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
-    }
+    m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
 }
 
-void VpnLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeExceptSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllExceptSites);
-    }
+    m_settings.setRouteMode(Settings::VpnAllExceptSites);
 }
 
 void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)

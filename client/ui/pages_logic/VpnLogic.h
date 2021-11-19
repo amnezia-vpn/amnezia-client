@@ -29,9 +29,9 @@ class VpnLogic : public PageLogicBase
 public:
     Q_INVOKABLE void onUpdatePage() override;
 
-    Q_INVOKABLE void onRadioButtonVpnModeAllSitesToggled(bool checked);
-    Q_INVOKABLE void onRadioButtonVpnModeForwardSitesToggled(bool checked);
-    Q_INVOKABLE void onRadioButtonVpnModeExceptSitesToggled(bool checked);
+    Q_INVOKABLE void onRadioButtonVpnModeAllSitesClicked();
+    Q_INVOKABLE void onRadioButtonVpnModeForwardSitesClicked();
+    Q_INVOKABLE void onRadioButtonVpnModeExceptSitesClicked();
 
     Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
 
