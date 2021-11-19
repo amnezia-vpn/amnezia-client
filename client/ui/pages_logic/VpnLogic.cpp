@@ -50,7 +50,8 @@ void VpnLogic::onUpdatePage()
             .arg(server.value(config_key::hostName).toString());
     set_labelCurrentServer(serverString);
 
-    QString selectedContainerName = m_settings.defaultContainerName(m_settings.defaultServerIndex());
+    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
+    QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
 }
 

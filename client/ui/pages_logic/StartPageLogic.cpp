@@ -114,14 +114,23 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectText(tr("Connect"));
 
     uiLogic()->installCredentials = serverCredentials;
-    if (ok) uiLogic()->goToPage(Page::NewServer);
+    if (ok) emit uiLogic()->goToPage(Page::NewServer);
 }
 
 void StartPageLogic::onPushButtonImport()
 {
     QString s = lineEditStartExistingCodeText();
     s.replace("vpn://", "");
-    QJsonObject o = QJsonDocument::fromJson(QByteArray::fromBase64(s.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)).object();
+    QByteArray ba = QByteArray::fromBase64(s.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray ba_uncompressed = qUncompress(ba);
+
+    QJsonObject o;
+    if (!ba_uncompressed.isEmpty()) {
+        o = QJsonDocument::fromBinaryData(ba_uncompressed).object();
+    }
+    else {
+        o = QJsonDocument::fromJson(ba).object();
+    }
 
     ServerCredentials credentials;
     credentials.hostName = o.value("h").toString();
@@ -169,6 +178,8 @@ void StartPageLogic::onPushButtonImport()
     if (!o.contains(config_key::containers)) {
         uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
         uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
-        uiLogic()->goToPage(Page::ServerContainers);
+        uiLogic()->onUpdateAllPages();
+
+        emit uiLogic()->goToPage(Page::ServerContainers);
     }
 }

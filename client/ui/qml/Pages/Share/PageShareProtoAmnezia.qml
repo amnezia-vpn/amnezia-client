@@ -124,7 +124,7 @@ New encryption keys pair will be generated.")
             }
 
             LabelType {
-                height: 20
+                Layout.fillWidth: true
                 text: qsTr("Config too long to be displayed as QR code")
                 visible: ShareConnectionLogic.shareAmneziaQrCodeText.length == 0 && tfShareCode.textArea.length > 0
             }

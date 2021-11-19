@@ -36,7 +36,9 @@ void ServerSettingsLogic::onUpdatePage()
                                      .arg(port.isEmpty() ? "" : ":")
                                      .arg(port));
     set_lineEditDescriptionText(server.value(config_key::description).toString());
-    QString selectedContainerName = m_settings.defaultContainerName(uiLogic()->selectedServerIndex);
+
+    DockerContainer selectedContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
+    QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 }
 
