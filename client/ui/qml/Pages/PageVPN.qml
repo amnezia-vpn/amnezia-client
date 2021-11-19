@@ -53,10 +53,7 @@ PageBase {
         height: width
         checkable: true
         checked: VpnLogic.pushButtonConnectChecked
-        onCheckedChanged: {
-            VpnLogic.pushButtonConnectChecked = checked
-            VpnLogic.onPushButtonConnectClicked(checked)
-        }
+        onClicked: VpnLogic.onPushButtonConnectClicked()
         background: Image {
             anchors.fill: parent
             source: button_connect.checked ? "qrc:/images/connected.png"

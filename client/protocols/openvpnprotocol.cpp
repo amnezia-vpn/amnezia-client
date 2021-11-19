@@ -192,15 +192,15 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, [&](QProcess::ProcessError error) {
-        qDebug() << "IpcProcessInterfaceReplica errorOccurred" << error;
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::errorOccurred, [&](QProcess::ProcessError error) {
+        qDebug() << "PrivilegedProcess errorOccurred" << error;
     });
 
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::stateChanged, [&](QProcess::ProcessState newState) {
-        qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::stateChanged, [&](QProcess::ProcessState newState) {
+        qDebug() << "PrivilegedProcess stateChanged" << newState;
     });
 
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::finished, this, [&]() {
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::finished, this, [&]() {
         setConnectionState(ConnectionState::Disconnected);
     });
 

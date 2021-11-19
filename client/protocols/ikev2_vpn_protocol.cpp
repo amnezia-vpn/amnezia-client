@@ -278,18 +278,18 @@ ErrorCode Ikev2Protocol::start()
         certInstallProcess->setArguments(arguments);
 
         //        qDebug() << arguments.join(" ");
-        //        connect(certInstallProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
-        //            qDebug() << "IpcProcessInterfaceReplica errorOccurred" << error;
+        //        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
+        //            qDebug() << "PrivilegedProcess errorOccurred" << error;
         //        });
 
-        //        connect(certInstallProcess.data(), &IpcProcessInterfaceReplica::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
-        //            qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
+        //        connect(certInstallProcess.data(), &PrivilegedProcess::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
+        //            qDebug() << "PrivilegedProcess stateChanged" << newState;
         //        });
 
-        //        connect(certInstallProcess.data(), &IpcProcessInterfaceReplica::readyRead, [certInstallProcess]() {
+        //        connect(certInstallProcess.data(), &PrivilegedProcess::readyRead, [certInstallProcess]() {
         //            auto req = certInstallProcess->readAll();
         //            req.waitForFinished();
-        //            qDebug() << "IpcProcessInterfaceReplica readyRead" << req.returnValue();
+        //            qDebug() << "PrivilegedProcess readyRead" << req.returnValue();
         //        });
 
 

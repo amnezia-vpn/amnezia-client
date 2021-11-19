@@ -51,7 +51,7 @@ private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
 
-    QSharedPointer<IpcProcessInterfaceReplica> m_openVpnProcess;
+    QSharedPointer<PrivilegedProcess> m_openVpnProcess;
 };
 
 #endif // OPENVPNPROTOCOL_H

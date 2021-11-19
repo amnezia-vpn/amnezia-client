@@ -81,6 +81,8 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
 
     bool pbConnectEnabled = false;
+    bool pbConnectChecked = false;
+
     bool rbModeEnabled = false;
     bool pbConnectVisible = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
@@ -90,49 +92,57 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     switch (state) {
     case VpnProtocol::Disconnected:
         onBytesChanged(0,0);
-        set_pushButtonConnectChecked(false);
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Preparing:
+        pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connecting:
+        pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connected:
+        pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Disconnecting:
+        pbConnectChecked = false;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Reconnecting:
+        pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Error:
-        set_pushButtonConnectEnabled(false);
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Unknown:
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
     }
 
     set_pushButtonConnectEnabled(pbConnectEnabled);
+    set_pushButtonConnectChecked(pbConnectChecked);
+
     set_pushButtonConnectVisible(pbConnectVisible);
     set_widgetVpnModeEnabled(rbModeEnabled);
 }
@@ -142,9 +152,9 @@ void VpnLogic::onVpnProtocolError(ErrorCode errorCode)
     set_labelErrorText(errorString(errorCode));
 }
 
-void VpnLogic::onPushButtonConnectClicked(bool checked)
+void VpnLogic::onPushButtonConnectClicked()
 {
-    if (checked) {
+    if (! pushButtonConnectChecked()) {
         onConnect();
     } else {
         onDisconnect();

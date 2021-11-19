@@ -28,7 +28,9 @@ VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
 
 VpnConnection::~VpnConnection()
 {
+    //qDebug() << "VpnConnection::~VpnConnection() 1";
     m_vpnProtocol.clear();
+    //qDebug() << "VpnConnection::~VpnConnection() 2";
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -231,8 +233,11 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        //qDebug() << "VpnConnection::connectToVpn 1";
         m_vpnProtocol->stop();
+        //qDebug() << "VpnConnection::connectToVpn 2";
         m_vpnProtocol.reset();
+        //qDebug() << "VpnConnection::connectToVpn 3";
     }
 
     ErrorCode e = ErrorCode::NoError;
@@ -281,7 +286,7 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 
 void VpnConnection::disconnectFromVpn()
 {
-    qDebug() << "Disconnect from VPN";
+    // qDebug() << "Disconnect from VPN 1";
 
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
@@ -295,6 +300,7 @@ void VpnConnection::disconnectFromVpn()
         return;
     }
     m_vpnProtocol.data()->stop();
+    // qDebug() << "Disconnect from VPN 2";
 }
 
 VpnProtocol::ConnectionState VpnConnection::connectionState()

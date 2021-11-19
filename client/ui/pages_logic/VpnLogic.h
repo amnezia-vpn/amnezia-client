@@ -33,7 +33,7 @@ public:
     Q_INVOKABLE void onRadioButtonVpnModeForwardSitesClicked();
     Q_INVOKABLE void onRadioButtonVpnModeExceptSitesClicked();
 
-    Q_INVOKABLE void onPushButtonConnectClicked(bool checked);
+    Q_INVOKABLE void onPushButtonConnectClicked();
 
 public:
     explicit VpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);
