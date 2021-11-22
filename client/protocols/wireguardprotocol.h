@@ -36,8 +36,8 @@ private:
     QString m_configFileName;
     QFile m_configFile;
 
-    QSharedPointer<IpcProcessInterfaceReplica> m_wireguardStartProcess;
-    QSharedPointer<IpcProcessInterfaceReplica> m_wireguardStopProcess;
+    QSharedPointer<PrivilegedProcess> m_wireguardStartProcess;
+    QSharedPointer<PrivilegedProcess> m_wireguardStopProcess;
 
     bool m_isConfigLoaded = false;
 

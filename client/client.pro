@@ -30,6 +30,7 @@ HEADERS  += \
     core/errorstrings.h \
     core/ipcclient.h \
     configurators/openvpn_configurator.h \
+   core/privileged_process.h \
    core/scripts_registry.h \
    core/server_defs.h \
     core/servercontroller.h \
@@ -84,6 +85,7 @@ SOURCES  += \
    core/errorstrings.cpp \
     core/ipcclient.cpp \
     configurators/openvpn_configurator.cpp \
+   core/privileged_process.cpp \
    core/scripts_registry.cpp \
    core/server_defs.cpp \
     core/servercontroller.cpp \

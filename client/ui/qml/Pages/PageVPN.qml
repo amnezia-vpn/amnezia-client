@@ -53,10 +53,7 @@ PageBase {
         height: width
         checkable: true
         checked: VpnLogic.pushButtonConnectChecked
-        onCheckedChanged: {
-            VpnLogic.pushButtonConnectChecked = checked
-            VpnLogic.onPushButtonConnectClicked(checked)
-        }
+        onClicked: VpnLogic.onPushButtonConnectClicked()
         background: Image {
             anchors.fill: parent
             source: button_connect.checked ? "qrc:/images/connected.png"
@@ -246,11 +243,7 @@ PageBase {
             height: 19
             checked: VpnLogic.radioButtonVpnModeAllSitesChecked
             text: qsTr("For all connections")
-            onCheckedChanged: {
-                VpnLogic.radioButtonVpnModeAllSitesChecked = checked
-                button_add_site.enabled = !checked
-                VpnLogic.onRadioButtonVpnModeAllSitesToggled(checked)
-            }
+            onClicked: VpnLogic.onRadioButtonVpnModeAllSitesClicked(true)
         }
         RadioButtonType {
             x: 0
@@ -259,10 +252,7 @@ PageBase {
             height: 19
             text: qsTr("Except selected sites")
             checked: VpnLogic.radioButtonVpnModeExceptSitesChecked
-            onCheckedChanged: {
-                VpnLogic.radioButtonVpnModeExceptSitesChecked = checked
-                VpnLogic.onRadioButtonVpnModeExceptSitesToggled(checked)
-            }
+            onClicked: VpnLogic.onRadioButtonVpnModeExceptSitesClicked(true)
         }
         RadioButtonType {
             x: 0
@@ -271,10 +261,7 @@ PageBase {
             height: 19
             text: qsTr("For selected sites")
             checked: VpnLogic.radioButtonVpnModeForwardSitesChecked
-            onCheckedChanged: {
-                VpnLogic.radioButtonVpnModeForwardSitesChecked = checked
-                VpnLogic.onRadioButtonVpnModeForwardSitesToggled(checked)
-            }
+            onClicked: VpnLogic.onRadioButtonVpnModeForwardSitesClicked(true)
         }
     }
 

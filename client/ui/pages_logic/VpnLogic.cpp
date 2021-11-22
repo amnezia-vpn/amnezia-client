@@ -50,30 +50,25 @@ void VpnLogic::onUpdatePage()
             .arg(server.value(config_key::hostName).toString());
     set_labelCurrentServer(serverString);
 
-    QString selectedContainerName = m_settings.defaultContainerName(m_settings.defaultServerIndex());
+    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
+    QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
 }
 
 
-void VpnLogic::onRadioButtonVpnModeAllSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeAllSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllSites);
-    }
+    m_settings.setRouteMode(Settings::VpnAllSites);
 }
 
-void VpnLogic::onRadioButtonVpnModeForwardSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeForwardSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
-    }
+    m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
 }
 
-void VpnLogic::onRadioButtonVpnModeExceptSitesToggled(bool checked)
+void VpnLogic::onRadioButtonVpnModeExceptSitesClicked()
 {
-    if (checked) {
-        m_settings.setRouteMode(Settings::VpnAllExceptSites);
-    }
+    m_settings.setRouteMode(Settings::VpnAllExceptSites);
 }
 
 void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
@@ -87,6 +82,8 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
 
     bool pbConnectEnabled = false;
+    bool pbConnectChecked = false;
+
     bool rbModeEnabled = false;
     bool pbConnectVisible = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
@@ -96,49 +93,57 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     switch (state) {
     case VpnProtocol::Disconnected:
         onBytesChanged(0,0);
-        set_pushButtonConnectChecked(false);
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Preparing:
+        pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connecting:
+        pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Connected:
+        pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Disconnecting:
+        pbConnectChecked = false;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Reconnecting:
+        pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
     case VpnProtocol::Error:
-        set_pushButtonConnectEnabled(false);
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
     case VpnProtocol::Unknown:
+        pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
     }
 
     set_pushButtonConnectEnabled(pbConnectEnabled);
+    set_pushButtonConnectChecked(pbConnectChecked);
+
     set_pushButtonConnectVisible(pbConnectVisible);
     set_widgetVpnModeEnabled(rbModeEnabled);
 }
@@ -148,9 +153,9 @@ void VpnLogic::onVpnProtocolError(ErrorCode errorCode)
     set_labelErrorText(errorString(errorCode));
 }
 
-void VpnLogic::onPushButtonConnectClicked(bool checked)
+void VpnLogic::onPushButtonConnectClicked()
 {
-    if (checked) {
+    if (! pushButtonConnectChecked()) {
         onConnect();
     } else {
         onDisconnect();

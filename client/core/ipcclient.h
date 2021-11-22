@@ -7,13 +7,7 @@
 #include "ipc.h"
 #include "rep_ipc_interface_replica.h"
 
-#ifndef Q_OS_IOS
-#include "rep_ipc_process_interface_replica.h"
-#else
-class IpcProcessInterfaceReplica {
-
-};
-#endif
+#include "privileged_process.h"
 
 class IpcClient : public QObject
 {
@@ -24,7 +18,7 @@ public:
    static IpcClient *Instance();
    static bool init(IpcClient *instance);
    static QSharedPointer<IpcInterfaceReplica> Interface();
-   static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
+   static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
 
    bool isSocketConnected() const;
 
@@ -40,10 +34,10 @@ private:
     struct ProcessDescriptor {
         ProcessDescriptor () {
             replicaNode = QSharedPointer<QRemoteObjectNode>(new QRemoteObjectNode());
-            ipcProcess = QSharedPointer<IpcProcessInterfaceReplica>();
+            ipcProcess = QSharedPointer<PrivilegedProcess>();
             localSocket = QSharedPointer<QLocalSocket>();
         }
-        QSharedPointer<IpcProcessInterfaceReplica> ipcProcess;
+        QSharedPointer<PrivilegedProcess> ipcProcess;
         QSharedPointer<QRemoteObjectNode> replicaNode;
         QSharedPointer<QLocalSocket> localSocket;
     };
