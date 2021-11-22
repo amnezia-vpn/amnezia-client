@@ -1,5 +1,6 @@
 #include "privileged_process.h"
 
+#ifndef Q_OS_IOS
 PrivilegedProcess::PrivilegedProcess() :
     IpcProcessInterfaceReplica()
 {
@@ -25,3 +26,4 @@ void PrivilegedProcess::waitForFinished(int msecs)
 
     loop->exec();
 }
+#endif // Q_OS_IOS
