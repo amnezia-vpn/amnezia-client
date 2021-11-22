@@ -414,6 +414,7 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 
         m_settings.addServer(server);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
+        onUpdateAllPages();
 
         emit setStartPage(Page::Vpn);
         qApp->processEvents();
