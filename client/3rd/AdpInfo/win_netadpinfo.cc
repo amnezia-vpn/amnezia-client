@@ -122,7 +122,7 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
     std::vector<BYTE> buffer{};
     IP_ADAPTER_INFO *adapter_info{nullptr};
     DWORD result{ERROR_BUFFER_OVERFLOW};
-    ULONG buffer_len = sizeof(IP_ADAPTER_INFO) * 3;
+    ULONG buffer_len = sizeof(IP_ADAPTER_INFO) * 10;
     while (result == ERROR_BUFFER_OVERFLOW){
         buffer.resize(buffer_len);
         adapter_info = reinterpret_cast<IP_ADAPTER_INFO*>(&buffer[0]);
@@ -141,7 +141,16 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
         _tmp->set_name(adapter_iterator->AdapterName);
         _tmp->set_description(adapter_iterator->Description);
         _tmp->set_local_address(adapter_iterator->IpAddressList.IpAddress.String);
-        _tmp->set_local_gateway(adapter_iterator->GatewayList.IpAddress.String);
+        std::string lgw = adapter_iterator->GatewayList.IpAddress.String;
+        if (lgw.length() == 0 || lgw.find("0.0.0.0") != std::string::npos)
+        {
+            if (adapter_iterator->DhcpEnabled == 1)
+            {
+                lgw = adapter_iterator->DhcpServer.IpAddress.String;
+            }
+        }
+        _tmp->set_local_gateway(lgw);
+        //_tmp->set_local_gateway(adapter_iterator->GatewayList.IpAddress.String);
         _tmp->set_route_gateway(get_route_gateway());
         _adapters.emplace_back(_tmp);
         adapter_iterator = adapter_iterator->Next;
@@ -149,7 +158,7 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
     return {false, ""};
 }
 
-RET_TYPE NetAdpInfo::get_adapter_infor(std::string_view _adapter_name){
+RET_TYPE NetAdpInfo::get_adapter_info(std::string_view _adapter_name){
 
     _index_of_adapter = -1;
     const auto result{collect_adapters_data()};
@@ -161,6 +170,9 @@ RET_TYPE NetAdpInfo::get_adapter_infor(std::string_view _adapter_name){
     for (auto i = 0; i< len; ++i){
         auto adap_name = _adapters[i]->get_name();
         auto adap_desc = _adapters[i]->get_description();
+        qDebug()<<"adap name : "<<QString::fromStdString(adap_name.data());
+        qDebug()<<"adap description : "<<QString::fromStdString(adap_desc.data());
+        qDebug()<<"find_string: "<<QString::fromStdString(_adapter_name.data());
         if (adap_name.find(_adapter_name) != std::string::npos || adap_desc.find(_adapter_name) != std::string::npos){
             _index_of_adapter = i;
             return {false, ""};

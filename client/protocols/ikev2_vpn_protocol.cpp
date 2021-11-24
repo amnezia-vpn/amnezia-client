@@ -11,10 +11,6 @@
 #include "ikev2_vpn_protocol.h"
 #include "utils.h"
 
-#ifdef Q_OS_WIN
-#include <iphlpapi.h>
-#endif
-
 static Ikev2Protocol* self = nullptr;
 static std::mutex rasDialFuncMutex;
 
@@ -24,14 +20,6 @@ static void WINAPI RasDialFuncCallback(UINT unMsg,
                                        RASCONNSTATE rasconnstate,
                                        DWORD dwError );
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//QString m_routeGateway;
-//QString m_vpnLocalAddress;
-//QString m_vpnGateway;
-//static void get_connecting_status(std::string_view _vpn_name,
-//                                  std::string &_m_route_gateway,
-//                                  std::string & _m_vpn_local_address,
-//                                  std::string &_m_vpn_gateway);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) :
@@ -184,15 +172,11 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
     {
         //get the network settings of adapters
         std::string p1,p2,p3;
-        const auto ret = adpInfo.get_adapter_infor(tunnelName().toStdString());
+        const auto ret = adpInfo.get_adapter_info(tunnelName().toStdString());
         if (std::get<0>(ret) == false){
             p1 = adpInfo.get_adapter_route_gateway();
             p2 = adpInfo.get_adapter_local_address();
             p3 = adpInfo.get_adapter_local_gateway();
-            //       get_connecting_status(tunnelName().toStdString().c_str(),
-            //                             p1,
-            //                             p2,
-            //                             p3);
             m_routeGateway = QString::fromStdString(p1);
             m_vpnLocalAddress = QString::fromStdString(p2);
             m_vpnGateway = QString::fromStdString(p3);
@@ -248,21 +232,21 @@ ErrorCode Ikev2Protocol::start()
                                "-importpfx", certFile.fileName(), "NoExport"
                               });
         certInstallProcess->setArguments(arguments);
-        qDebug()<<m_config;
-        qDebug() << arguments.join(" ");
-        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
-            qDebug() << "PrivilegedProcess errorOccurred" << error;
-        });
 
-        connect(certInstallProcess.data(), &PrivilegedProcess::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
-            qDebug() << "PrivilegedProcess stateChanged" << newState;
-        });
+//        qDebug() << arguments.join(" ");
+//        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
+//            qDebug() << "PrivilegedProcess errorOccurred" << error;
+//        });
 
-        connect(certInstallProcess.data(), &PrivilegedProcess::readyRead, [certInstallProcess]() {
-            auto req = certInstallProcess->readAll();
-            req.waitForFinished();
-            qDebug() << "PrivilegedProcess readyRead" << req.returnValue();
-        });
+//        connect(certInstallProcess.data(), &PrivilegedProcess::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
+//            qDebug() << "PrivilegedProcess stateChanged" << newState;
+//        });
+
+//        connect(certInstallProcess.data(), &PrivilegedProcess::readyRead, [certInstallProcess]() {
+//            auto req = certInstallProcess->readAll();
+//            req.waitForFinished();
+//            qDebug() << "PrivilegedProcess readyRead" << req.returnValue();
+//        });
 
 
         certInstallProcess->start();

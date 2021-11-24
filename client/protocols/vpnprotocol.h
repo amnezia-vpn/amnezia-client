@@ -8,6 +8,8 @@
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 
+#include "3rd/AdpInfo/netadpinfo.h"
+
 using namespace amnezia;
 
 class QTimer;
@@ -69,6 +71,7 @@ protected:
     QString m_routeGateway;
     QString m_vpnLocalAddress;
     QString m_vpnGateway;
+    adpinfo::NetAdpInfo adpInfo;
 
     QJsonObject m_rawConfig;
 

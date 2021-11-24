@@ -185,8 +185,28 @@ ErrorCode WireguardProtocol::start()
         qDebug() << "WireguardProtocol::WireguardProtocol stateChanged" << newState;
     });
 
-    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [this]() {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [&]() {
         setConnectionState(ConnectionState::Connected);
+        {
+            //TODO:FIXME: without some ugly sleep we have't get a adapter parametrs
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::string p1,p2,p3;
+            const auto &ret = adpInfo.get_adapter_info("WireGuard Tunnel");//serviceName().toStdString());//("AmneziaVPN IKEv2");
+            if (std::get<0>(ret) == false){
+                p1 = adpInfo.get_adapter_route_gateway();
+                p2 = adpInfo.get_adapter_local_address();
+                p3 = adpInfo.get_adapter_local_gateway();
+                m_routeGateway = QString::fromStdString(p1);
+                m_vpnLocalAddress = QString::fromStdString(p2);
+                m_vpnGateway = QString::fromStdString(p3);
+                qDebug()<<"My wireguard m_routeGateway "<<m_routeGateway;
+                qDebug()<<"My wireguard m_vpnLocalAddress "<<m_vpnLocalAddress;
+                qDebug()<<"My wireguard m_vpnGateway "<< m_vpnGateway;
+            }
+            else{
+                qDebug()<<"We can't get information about active adapter:"<<QString::fromStdString(std::get<1>(ret));
+            }
+        }
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyRead, this, [this]() {
@@ -220,19 +240,19 @@ ErrorCode WireguardProtocol::start()
 
 void WireguardProtocol::updateVpnGateway(const QString &line)
 {
-//    // line looks like
-//    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
+    //    // line looks like
+    //    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
 
-//    QStringList params = line.split(",");
-//    for (const QString &l : params) {
-//        if (l.contains("ifconfig")) {
-//            if (l.split(" ").size() == 3) {
-//                m_vpnLocalAddress = l.split(" ").at(1);
-//                m_vpnGateway = l.split(" ").at(2);
+    //    QStringList params = line.split(",");
+    //    for (const QString &l : params) {
+    //        if (l.contains("ifconfig")) {
+    //            if (l.split(" ").size() == 3) {
+    //                m_vpnLocalAddress = l.split(" ").at(1);
+    //                m_vpnGateway = l.split(" ").at(2);
 
-//                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
-//            }
-//        }
+    //                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
+    //            }
+    //        }
     //    }
 }
 

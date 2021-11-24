@@ -185,10 +185,10 @@ ErrorCode OpenVpnProtocol::start()
     }
     m_openVpnProcess->setProgram(openVpnExecPath());
     QStringList arguments({"--config" , configPath(),
-                      "--management", m_managementHost, QString::number(m_managementPort),
-                      "--management-client",
-                      "--log", vpnLogFileNamePath
-                     });
+                           "--management", m_managementHost, QString::number(m_managementPort),
+                           "--management-client",
+                           "--log", vpnLogFileNamePath
+                          });
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
@@ -234,7 +234,6 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
 {
     for (;;)  {
         QString line = m_managementServer.readLine().simplified();
-
         if (line.isEmpty()) {
             return;
         }
@@ -247,6 +246,24 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             sendInitialData();
         }  else if (line.startsWith(">STATE")) {
             if (line.contains("CONNECTED,SUCCESS")) {
+                {
+                    std::string p1,p2,p3;
+                    const auto &ret = adpInfo.get_adapter_info("TAP-Windows Adapter V9");
+                    if (std::get<0>(ret) == false){
+                        p1 = adpInfo.get_adapter_route_gateway();
+                        p2 = adpInfo.get_adapter_local_address();
+                        p3 = adpInfo.get_adapter_local_gateway();
+                        m_routeGateway = QString::fromStdString(p1);
+                        m_vpnLocalAddress = QString::fromStdString(p2);
+                        m_vpnGateway = QString::fromStdString(p3);
+                        qDebug()<<"My openvpn m_routeGateway "<<m_routeGateway;
+                        qDebug()<<"My openvpn m_vpnLocalAddress "<<m_vpnLocalAddress;
+                        qDebug()<<"My openvpn m_vpnGateway "<< m_vpnGateway;
+                    }
+                    else{
+                        qDebug()<<"We can't get information about active adapter:"<<QString::fromStdString(std::get<1>(ret));
+                    }
+                }
                 sendByteCount();
                 stopTimeoutTimer();
                 setConnectionState(VpnProtocol::Connected);
