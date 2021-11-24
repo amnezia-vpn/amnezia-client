@@ -13,6 +13,7 @@ include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+include("3rd/AdpInfo/adpinfo.pri")
 
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
