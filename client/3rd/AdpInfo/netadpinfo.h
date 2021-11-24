@@ -1,84 +1,102 @@
 #pragma once 
 
-#include <list>
 #include <vector>
 #include <string>
 #include <tuple>
-//#include <thread>
+#include <memory>
+
 
 namespace  adpinfo{
-
-static bool is_string_equal(const std::string &lhs, const std::string &rhs){
-    if (lhs.find(rhs) != std::string::npos)
-        return true;
-    return false;
-}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//static bool is_string_equal(const std::string &lhs, const std::string &rhs){
+//    if (lhs.find(rhs) != std::string::npos)
+//        return true;
+//    return false;
+//}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// {false,""} - no error
+// {true,"descr"} - error with description
 using RET_TYPE = std::tuple<bool, std::string>;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-typedef struct adapter{
-    std::string name{};
-    std::string mac{};
-    std::list<std::string> dns_address{};
-    std::list<std::tuple<std::string,std::string>> ip_mask_V4{};
-    std::list<std::string> gateWay{};
-    std::string dhcp_server_adress{};
+//class Adapter{
+//private:
+//    std::string name{};
+//    std::string descr{};
+//    std::string current_ip_address_v4{};
+//    std::string maskv4{};
+//    std::vector<std::string> dns_address{};
 
-    std::string system_gateway{}; // default system gatewasy for ip 0.0.0.0
+//public:
+//    explicit Adapter() = default;
+//    ~Adapter() = default;
 
-    bool operator==(const adapter& rhs) {
-        if (!is_string_equal(name, rhs.name))
-            return false;
-        if (!is_string_equal(mac, rhs.mac))
-            return false;
-        if (dns_address != rhs.dns_address)
-            return false;
-        if (ip_mask_V4 != rhs.ip_mask_V4)
-            return false;
-        if (gateWay != rhs.gateWay)
-            return false;
-        if (!is_string_equal(dhcp_server_adress, rhs.dhcp_server_adress))
-            return false;
-        if (!is_string_equal(system_gateway, rhs.system_gateway))
-            return false;
+//    void set_name(std::string_view);
+//    std::string_view get_name()const;
 
-        return true;
-    }
-}adapter;
+//    void set_description(std::string_view);
+//    std::string_view get_description()const;
+
+//    void set_mac(std::string_view);
+//    std::string_view get_mac()const;
+
+////    bool operator==(const adapter& rhs) {
+////        if (!is_string_equal(name, rhs.name))
+////            return false;
+////        if (!is_string_equal(mac, rhs.mac))
+////            return false;
+////        if (dns_address != rhs.dns_address)
+////            return false;
+////        return true;
+////    }
+//}adapter;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /*
  * The object uses for collect the information about active network adapters/interfaces
- * NetAdpInfo adi;
- * //Each call to the collect function fills
- * //the _adapters array with information about active network connections (network address, gateways, ip addresses, etc.).
- * adi.collect();
- *
- * //We get the adapter that appeared after the penultimate call to the collect function
- * adi.get_differents()
- *
- * //We get the adapter that appeared after the penultimate call to the collect function and
- * //have a concrete system name
- *get_adapter_info_by_name
+ *  QString m_routeGateway;
+    QString m_vpnLocalAddress;
+    QString m_vpnGateway;
 */
 class NetAdpInfo final{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    class Adapter{
+        std::string name{};
+        std::string descr{};
+        std::string route{};
+        std::string address{};
+        std::string gateway{};
+    public:
+        explicit Adapter() = default;
+        ~Adapter() = default;
 
-    bool init_error{false};
-    std::vector<adapter>_adapters{};
-    adapter _adapter_in_use{};
+        void set_name(std::string_view);
+        std::string_view get_name()const;
+        void set_description(std::string_view);
+        std::string_view get_description()const;
+        void set_route_gateway(std::string_view);
+        std::string_view get_route_gateway()const;
+        void set_local_address(std::string_view);
+        std::string_view get_local_address()const;
+        void set_local_gateway(std::string_view);
+        std::string_view get_local_gateway()const;
+    };
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    int16_t _index_of_adapter{};
+    std::vector<std::shared_ptr<Adapter>>_adapters{};
+
+    RET_TYPE collect_adapters_data();
 
 public:
-    explicit NetAdpInfo();
-    ~NetAdpInfo();
+    explicit NetAdpInfo() = default;
+    ~NetAdpInfo()  = default;
+
+    RET_TYPE get_adapter_infor(std::string_view );
+    std::string_view get_adapter_route_gateway()const;
+    std::string_view get_adapter_local_address()const;
+    std::string_view get_adapter_local_gateway()const;
     
-    //collect all adapter data
-    RET_TYPE collect();
-    //return all adapter data
-    std::list<adapter> get_adapters()const;
-    //get the diferent between the first call collect and the next call collect
-    adapter get_differents()const;
-    //get the adapter by name
-    adapter get_adapter_info_by_name(const std::string &)const;
+    //static std::string get_system_route();
 };
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-}
+} //end namespace
