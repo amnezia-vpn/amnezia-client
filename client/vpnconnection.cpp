@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonObject>
+#include <android_controller.h>
 
 #include <configurators/openvpn_configurator.h>
 #include <configurators/cloak_configurator.h>
@@ -260,11 +261,8 @@ void VpnConnection::connectToVpn(int serverIndex,
 #else
     Protocol proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    if (!androidVpnProtocol->initialize()) {
-         qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         return;
-    }
+    connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+
     m_vpnProtocol.reset(androidVpnProtocol);
 #endif
 

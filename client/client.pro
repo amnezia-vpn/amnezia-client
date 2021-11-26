@@ -39,6 +39,7 @@ HEADERS  += \
     managementserver.h \
    protocols/protocols_defs.h \
     settings.h \
+    ui/notificationhandler.h \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
     ui/pages.h \
@@ -63,6 +64,7 @@ HEADERS  += \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
+   ui/systemtray_notificationhandler.h \
     ui/uilogic.h \
    ui/qautostart.h \
    ui/models/sites_model.h \
@@ -90,6 +92,7 @@ SOURCES  += \
     managementserver.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
+    ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
@@ -112,6 +115,7 @@ SOURCES  += \
    ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
+   ui/systemtray_notificationhandler.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \
    ui/models/sites_model.cpp \
@@ -199,9 +203,16 @@ android {
 
    INCLUDEPATH += platforms/android
 
-   HEADERS +=    protocols/android_vpnprotocol.h \
+   HEADERS += \
+      platforms/android/android_controller.h \
+      platforms/android/android_notificationhandler.h \
+      protocols/android_vpnprotocol.h
 
-   SOURCES +=    protocols/android_vpnprotocol.cpp \
+   SOURCES += \
+      platforms/android/android_controller.cpp \
+      platforms/android/android_notificationhandler.cpp \
+      protocols/android_vpnprotocol.cpp
+
 
    DISTFILES += \
        android/AndroidManifest.xml \

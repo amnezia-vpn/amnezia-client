@@ -16,6 +16,7 @@
 #include "models/containers_model.h"
 #include "models/protocols_model.h"
 
+#include "notificationhandler.h"
 #include "settings.h"
 
 class AppSettingsLogic;
@@ -217,6 +218,8 @@ private:
     VpnConnection* m_vpnConnection;
     QThread m_vpnConnectionThread;
     Settings m_settings;
+
+    NotificationHandler* notificationHandler;
 
 
     //    QRegExpValidator m_ipAddressValidator;

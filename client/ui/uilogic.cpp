@@ -44,6 +44,10 @@
 #include "ui/macos_util.h"
 #endif
 
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
+#endif
+
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
@@ -128,9 +132,18 @@ UiLogic::~UiLogic()
 
 void UiLogic::initalizeUiLogic()
 {
+    if (!AndroidController::instance()->initialize()) {
+         qDebug() << QString("Init failed") ;
+         emit VpnProtocol::Error;
+         return;
+    }
+
     qDebug() << "UiLogic::initalizeUiLogic()";
     setupTray();
 
+    notificationHandler = NotificationHandler::create(this);
+
+    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, notificationHandler, &NotificationHandler::showVpnStateNotification);
 
     //    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
     //        needToHideCustomTitlebar = true;
