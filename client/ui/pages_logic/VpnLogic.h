@@ -20,7 +20,6 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(bool, pushButtonConnectVisible)
     AUTO_PROPERTY(bool, widgetVpnModeEnabled)
     AUTO_PROPERTY(QString, labelErrorText)
-    AUTO_PROPERTY(bool, pushButtonVpnAddSiteEnabled)
 
     AUTO_PROPERTY(bool, radioButtonVpnModeAllSitesChecked)
     AUTO_PROPERTY(bool, radioButtonVpnModeForwardSitesChecked)

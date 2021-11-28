@@ -273,7 +273,7 @@ PageBase {
         width: parent.width - 40
         height: GC.isMobile() ? 0: 40
         text: qsTr("+ Add site")
-        enabled: VpnLogic.pushButtonVpnAddSiteEnabled
+        enabled: ! VpnLogic.radioButtonVpnModeAllSitesChecked
         background: Rectangle {
             anchors.fill: parent
             radius: 4
