@@ -233,34 +233,14 @@ ErrorCode Ikev2Protocol::start()
                               });
         certInstallProcess->setArguments(arguments);
 
-//        qDebug() << arguments.join(" ");
-//        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
-//            qDebug() << "PrivilegedProcess errorOccurred" << error;
-//        });
-
-//        connect(certInstallProcess.data(), &PrivilegedProcess::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
-//            qDebug() << "PrivilegedProcess stateChanged" << newState;
-//        });
-
-//        connect(certInstallProcess.data(), &PrivilegedProcess::readyRead, [certInstallProcess]() {
-//            auto req = certInstallProcess->readAll();
-//            req.waitForFinished();
-//            qDebug() << "PrivilegedProcess readyRead" << req.returnValue();
-//        });
-
+        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
+            qDebug() << "PrivilegedProcess errorOccurred" << error;
+        });
 
         certInstallProcess->start();
     }
     ///*
     {
-        //        auto adapterRemoveProcess = new QProcess;
-
-        //        adapterRemoveProcess->setProgram("powershell");
-        //        QString arguments = QString("-command \"Remove-VpnConnection -Name '%1' -Force\"").arg(tunnelName());
-        //        adapterRemoveProcess->setNativeArguments(arguments);
-
-        //        adapterRemoveProcess->start();
-        //        adapterRemoveProcess->waitForFinished(5000);
         if ( disconnect_vpn()){
             qDebug()<<"VPN was disconnected";
         }
@@ -270,26 +250,9 @@ ErrorCode Ikev2Protocol::start()
     }
 
     {
-        {
-            if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
-                qDebug() <<"Can't create the VPN connect";
-            }
+        if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
+            qDebug() <<"Can't create the VPN connect";
         }
-        //        auto adapterInstallProcess = new QProcess;
-
-        //        adapterInstallProcess->setProgram("powershell");
-        //        QString arguments = QString("-command \"Add-VpnConnection "
-        //                                    "-ServerAddress '%1' "
-        //                                    "-Name '%2' "
-        //                                    "-TunnelType IKEv2 "
-        //                                    "-AuthenticationMethod MachineCertificate "
-        //                                    "-EncryptionLevel Required "
-        //                                    "-PassThru\"")
-        //                .arg(m_config[config_key::hostName].toString())
-        //                .arg(tunnelName());
-        //        adapterInstallProcess->setNativeArguments(arguments);
-        //        adapterInstallProcess->start();
-        //        adapterInstallProcess->waitForFinished(5000);
     }
 
     {
@@ -308,10 +271,6 @@ ErrorCode Ikev2Protocol::start()
                 .arg(tunnelName());
         adapterConfigProcess->setNativeArguments(arguments);
 
-        //        connect(adapterConfigProcess, &QProcess::readyRead, [adapterConfigProcess]() {
-        //            qDebug().noquote() << "adapterConfigProcess readyRead" << adapterConfigProcess->readAll();
-        //        });
-
         adapterConfigProcess->start();
         adapterConfigProcess->waitForFinished(5000);
     }
@@ -321,7 +280,6 @@ ErrorCode Ikev2Protocol::start()
             qDebug()<<"We can't connect to VPN";
         }
     }
-    //setConnectionState(Connecting);
     return ErrorCode::NoError;
 #else
     return ErrorCode::NoError;
@@ -399,42 +357,5 @@ void WINAPI RasDialFuncCallback(UINT unMsg,
     }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void get_connecting_status(std::string_view _vpn_name,
-//                           std::string &_m_route_gateway,
-//                           std::string & _m_vpn_local_address,
-//                           std::string &_m_vpn_gateway){
-//    if (_vpn_name.length() == 0)
-//        return;
-//    IP_ADAPTER_INFO *adapterInfo{nullptr};
-//    DWORD adapLen = sizeof(IP_ADAPTER_INFO);
-//    adapterInfo = (IP_ADAPTER_INFO*)malloc(adapLen);
-//    if (adapterInfo == nullptr)
-//        return;
-//    auto status{::GetAdaptersInfo(adapterInfo, &adapLen)};
-//    if (status == ERROR_BUFFER_OVERFLOW){
-//        free (adapterInfo);
-//        adapterInfo = (IP_ADAPTER_INFO*)malloc(adapLen);
-//        status = ::GetAdaptersInfo(adapterInfo, &adapLen);
-//        if (adapterInfo == nullptr)
-//            return ;
-//    }
-//    auto it = adapterInfo;
-//    while (it){
-//        if (strcmp(_vpn_name.data(), it->Description) == 0){
-//            //
-//            adpinfo::NetAdpInfo ni;
-//            auto tmp_str  = ni.get_system_route();
-//            _m_route_gateway = tmp_str;
-//            //memcpy(_m_route_gateway.data(), rsg.c_str(), rsg.length());
-//            _m_vpn_local_address = it->IpAddressList.IpAddress.String;
-//            //memcpy(_m_vpn_local_address.data(), it->IpAddressList.IpAddress.String, 16);
-//            _m_vpn_gateway =  it->GatewayList.IpAddress.String;
-//            //memcpy(_m_vpn_gateway.data(), it->GatewayList.IpAddress.String,16);
-//            qDebug()<<"FINDED";
-//            break;
-//        }
-//        it = it->Next;
-//    }
-//    free(adapterInfo);
-//}
+
 #endif
