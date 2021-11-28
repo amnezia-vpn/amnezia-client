@@ -15,24 +15,24 @@
 #    include "platforms/linux/linuxsystemtraynotificationhandler.h"
 #  endif
 
-#  include "systemtraynotificationhandler.h"
+#  include "systemtray_notificationhandler.h"
 #endif
 
 // static
 NotificationHandler* NotificationHandler::create(QObject* parent) {
 #if defined(Q_OS_IOS)
-  return new IOSNotificationHandler(parent);
+    return new IOSNotificationHandler(parent);
 #elif defined(Q_OS_ANDROID)
-  return new AndroidNotificationHandler(parent);
+    return new AndroidNotificationHandler(parent);
 #else
 
 #  if defined(Q_OS_LINUX)
-  if (LinuxSystemTrayNotificationHandler::requiredCustomImpl()) {
-    return new LinuxSystemTrayNotificationHandler(parent);
-  }
+    if (LinuxSystemTrayNotificationHandler::requiredCustomImpl()) {
+        return new LinuxSystemTrayNotificationHandler(parent);
+    }
 #  endif
 
-  return new SystemTrayNotificationHandler(parent);
+    return new SystemTrayNotificationHandler(parent);
 #endif
 }
 
@@ -42,83 +42,83 @@ NotificationHandler* s_instance = nullptr;
 
 // static
 NotificationHandler* NotificationHandler::instance() {
-  Q_ASSERT(s_instance);
-  return s_instance;
+    Q_ASSERT(s_instance);
+    return s_instance;
 }
 
 NotificationHandler::NotificationHandler(QObject* parent) : QObject(parent) {
-  Q_ASSERT(!s_instance);
-  s_instance = this;
+    Q_ASSERT(!s_instance);
+    s_instance = this;
 }
 
 NotificationHandler::~NotificationHandler() {
-  Q_ASSERT(s_instance == this);
-  s_instance = nullptr;
+    Q_ASSERT(s_instance == this);
+    s_instance = nullptr;
 }
 
-void NotificationHandler::showVpnStateNotification(VpnProtocol::ConnectionState state)
+void NotificationHandler::setConnectionState(VpnProtocol::ConnectionState state)
 {
-  if (state != VpnProtocol::Connected && state != VpnProtocol::Disconnected) {
-    return;
-  }
+    if (state != VpnProtocol::Connected && state != VpnProtocol::Disconnected) {
+        return;
+    }
 
-  QString title;
-  QString message;
+    QString title;
+    QString message;
 
-  switch (state) {
+    switch (state) {
     case VpnProtocol::ConnectionState::Connected:
-      m_connected = true;
+        m_connected = true;
 
-      title = tr("AmneziaVPN");
-      message = tr("VPN Connected");
-      break;
+        title = tr("AmneziaVPN");
+        message = tr("VPN Connected");
+        break;
 
     case VpnProtocol::ConnectionState::Disconnected:
-      if (m_connected) {
-        m_connected = false;
-        title = tr("AmneziaVPN");
-        message = tr("VPN Disconnected");
-      }
-      break;
+        if (m_connected) {
+            m_connected = false;
+            title = tr("AmneziaVPN");
+            message = tr("VPN Disconnected");
+        }
+        break;
 
     default:
-      break;
-  }
+        break;
+    }
 
-  Q_ASSERT(title.isEmpty() == message.isEmpty());
+    Q_ASSERT(title.isEmpty() == message.isEmpty());
 
-  if (!title.isEmpty()) {
-    notifyInternal(VpnState, title, message, 2000);
-  }
+    if (!title.isEmpty()) {
+        notifyInternal(VpnState, title, message, 2000);
+    }
 }
 
 void NotificationHandler::unsecuredNetworkNotification(const QString& networkName) {
-  qDebug() << "Unsecured network notification shown";
+    qDebug() << "Unsecured network notification shown";
 
 
-  QString title = tr("AmneziaVPN notification");
-  QString message = tr("Unsucured network detected: ") + networkName;
+    QString title = tr("AmneziaVPN notification");
+    QString message = tr("Unsucured network detected: ") + networkName;
 
-  notifyInternal(UnsecuredNetwork, title, message, 2000);
+    notifyInternal(UnsecuredNetwork, title, message, 2000);
 }
 
 void NotificationHandler::notifyInternal(Message type, const QString& title,
                                          const QString& message,
                                          int timerMsec) {
-  m_lastMessage = type;
+    m_lastMessage = type;
 
-  emit notificationShown(title, message);
-  notify(type, title, message, timerMsec);
+    emit notificationShown(title, message);
+    notify(type, title, message, timerMsec);
 }
 
 void NotificationHandler::messageClickHandle() {
-  qDebug() << "Message clicked";
+    qDebug() << "Message clicked";
 
-  if (m_lastMessage == VpnState) {
-    qCritical() << "Random message clicked received";
-    return;
-  }
+    if (m_lastMessage == VpnState) {
+        qCritical() << "Random message clicked received";
+        return;
+    }
 
-  emit notificationClicked(m_lastMessage);
-  m_lastMessage = VpnState;
+    emit notificationClicked(m_lastMessage);
+    m_lastMessage = VpnState;
 }

@@ -108,8 +108,6 @@ UiLogic::UiLogic(QObject *parent) :
 
 UiLogic::~UiLogic()
 {
-    m_tray = nullptr;
-
     emit hide();
 
     if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
@@ -132,18 +130,22 @@ UiLogic::~UiLogic()
 
 void UiLogic::initalizeUiLogic()
 {
+#ifdef Q_OS_ANDROID
     if (!AndroidController::instance()->initialize()) {
          qDebug() << QString("Init failed") ;
          emit VpnProtocol::Error;
          return;
     }
+#endif
 
     qDebug() << "UiLogic::initalizeUiLogic()";
-    setupTray();
 
-    notificationHandler = NotificationHandler::create(this);
+    m_notificationHandler = NotificationHandler::create(qmlRoot());
 
-    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, notificationHandler, &NotificationHandler::showVpnStateNotification);
+    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, m_notificationHandler, &NotificationHandler::setConnectionState);
+    connect(m_notificationHandler, &NotificationHandler::raiseRequested, this, &UiLogic::raise);
+    connect(m_notificationHandler, &NotificationHandler::connectRequested, vpnLogic(), &VpnLogic::onConnect);
+    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, vpnLogic(), &VpnLogic::onDisconnect);
 
     //    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
     //        needToHideCustomTitlebar = true;
@@ -613,26 +615,6 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
     return ErrorCode::NoError;
 }
 
-void UiLogic::setupTray()
-{
-     m_tray = new QSystemTrayIcon(qmlRoot());
-     setTrayState(VpnProtocol::Disconnected);
-
-     m_tray->show();
-
-     connect(m_tray, &QSystemTrayIcon::activated, this, &UiLogic::onTrayActivated);
-}
-
-void UiLogic::setTrayIcon(const QString &iconPath)
-{
-    if (m_tray) m_tray->setIcon(QIcon(QPixmap(iconPath).scaled(128,128)));
-}
-
-void UiLogic::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
-{
-    emit raise();
-}
-
 PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
     PageProtocolLogicBase *logic = m_protocolLogicMap.value(p);
     if (logic) return logic;
@@ -652,56 +634,22 @@ void UiLogic::setQmlRoot(QObject *newQmlRoot)
     m_qmlRoot = newQmlRoot;
 }
 
+NotificationHandler *UiLogic::notificationHandler() const
+{
+    return m_notificationHandler;
+}
+
 PageEnumNS::Page UiLogic::currentPage()
 {
     return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
-void UiLogic::setTrayState(VpnProtocol::ConnectionState state)
-{
-    QString resourcesPath = ":/images/tray/%1";
-
-    switch (state) {
-    case VpnProtocol::Disconnected:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-        break;
-    case VpnProtocol::Preparing:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-        break;
-    case VpnProtocol::Connecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-        break;
-    case VpnProtocol::Connected:
-        setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
-        break;
-    case VpnProtocol::Disconnecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-        break;
-    case VpnProtocol::Reconnecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-        break;
-    case VpnProtocol::Error:
-        setTrayIcon(QString(resourcesPath).arg(ErrorTrayIconName));
-        break;
-    case VpnProtocol::Unknown:
-    default:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
-    }
-
-    //#ifdef Q_OS_MAC
-    //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
-    //    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
-    //    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
-    //    resourcesPath = ":/images_mac/tray_icon/%1";
-    //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
-    //#endif
-}
-
-
 bool UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+
+    if (fileName.isEmpty()) return false;
 
     QSaveFile save(fileName);
     save.open(QIODevice::WriteOnly);
@@ -717,6 +665,8 @@ bool UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QStr
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+
+    if (fileName.isEmpty()) return false;
 
     QSaveFile save(fileName);
     save.open(QIODevice::WriteOnly);

@@ -11,35 +11,39 @@
 #include <QSystemTrayIcon>
 
 class SystemTrayNotificationHandler : public NotificationHandler {
- public:
-  explicit SystemTrayNotificationHandler(QObject* parent);
-  ~SystemTrayNotificationHandler();
+    Q_OBJECT
 
- protected:
-  virtual void notify(Message type, const QString& title,
-                      const QString& message, int timerMsec) override;
+public:
+    explicit SystemTrayNotificationHandler(QObject* parent);
+    ~SystemTrayNotificationHandler();
 
- private:
-  void updateIcon(const QString& icon);
+    void setConnectionState(VpnProtocol::ConnectionState state) override;
 
-  void updateContextMenu();
+protected:
+    virtual void notify(Message type, const QString& title,
+                        const QString& message, int timerMsec) override;
 
-  void showHideWindow();
+private:
+    void showHideWindow();
 
-  void maybeActivated(QSystemTrayIcon::ActivationReason reason);
+    void setTrayState(VpnProtocol::ConnectionState state);
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
- private:
-  QMenu m_menu;
-  QSystemTrayIcon m_systemTrayIcon;
+    void setTrayIcon(const QString &iconPath);
 
-  QAction* m_statusLabel = nullptr;
-  QAction* m_lastLocationLabel = nullptr;
-  QAction* m_disconnectAction = nullptr;
-  QAction* m_separator = nullptr;
-  QAction* m_preferencesAction = nullptr;
-  QAction* m_showHideLabel = nullptr;
-  QAction* m_quitAction = nullptr;
-  QMenu* m_helpMenu = nullptr;
+private:
+    QMenu m_menu;
+    QSystemTrayIcon m_systemTrayIcon;
+
+    QAction* m_trayActionConnect = nullptr;
+    QAction* m_trayActionDisconnect = nullptr;
+    QAction* m_preferencesAction = nullptr;
+    QAction* m_statusLabel = nullptr;    
+    QAction* m_separator = nullptr;
+
+    const QString ConnectedTrayIconName = "active.png";
+    const QString DisconnectedTrayIconName = "default.png";
+    const QString ErrorTrayIconName = "error.png";
 };
 
 #endif  // SYSTEMTRAY_NOTIFICATIONHANDLER_H

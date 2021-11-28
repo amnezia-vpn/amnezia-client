@@ -6,7 +6,6 @@
 #include <functional>
 #include <QKeyEvent>
 #include <QThread>
-#include <QSystemTrayIcon>
 
 #include "property_helper.h"
 #include "pages.h"
@@ -108,11 +107,7 @@ public:
     void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
 signals:
-    void trayIconUrlChanged();
-    void trayActionDisconnectEnabledChanged();
-    void trayActionConnectEnabledChanged();
     void dialogConnectErrorTextChanged();
-
 
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
@@ -127,16 +122,12 @@ signals:
     void raise();
 
 private:
-    QSystemTrayIcon *m_tray;
-
     QString m_dialogConnectErrorText;
 
 private slots:
     // containers - INOUT arg
     void installServer(QMap<DockerContainer, QJsonObject> &containers);
 
-    void setTrayState(VpnProtocol::ConnectionState state);
-    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     PageEnumNS::Page currentPage();
@@ -172,9 +163,6 @@ private:
                               const ButtonFunc& button,
                               const LabelFunc& info);
 
-    void setupTray();
-    void setTrayIcon(const QString &iconPath);
-
 
 public:
     AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
@@ -195,6 +183,8 @@ public:
 
     QObject *qmlRoot() const;
     void setQmlRoot(QObject *newQmlRoot);
+
+    NotificationHandler *notificationHandler() const;
 
 private:
     QObject *m_qmlRoot{nullptr};
@@ -219,7 +209,7 @@ private:
     QThread m_vpnConnectionThread;
     Settings m_settings;
 
-    NotificationHandler* notificationHandler;
+    NotificationHandler* m_notificationHandler;
 
 
     //    QRegExpValidator m_ipAddressValidator;
@@ -232,10 +222,6 @@ private:
 
     //    void showEvent(QShowEvent *event) override;
     //    void hideEvent(QHideEvent *event) override;
-
-    const QString ConnectedTrayIconName = "active.png";
-    const QString DisconnectedTrayIconName = "default.png";
-    const QString ErrorTrayIconName = "error.png";
 
 
     //    QStack<Page> pagesStack;

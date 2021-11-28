@@ -88,8 +88,6 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
     bool pbConnectVisible = false;
     set_labelStateText(VpnProtocol::textConnectionState(state));
 
-    uiLogic()->setTrayState(state);
-
     switch (state) {
     case VpnProtocol::Disconnected:
         onBytesChanged(0,0);

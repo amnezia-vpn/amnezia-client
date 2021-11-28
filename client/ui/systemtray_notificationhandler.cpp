@@ -6,53 +6,47 @@
 #include "systemtray_notificationhandler.h"
 
 
-#ifdef MVPN_MACOS
+#ifdef Q_OS_MACOS
 #  include "platforms/macos/macosutils.h"
 #endif
 
+#include <QApplication>
+#include <QDesktopServices>
 #include <QIcon>
 #include <QWindow>
 
+#include "defines.h"
 
-SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent)
-    : NotificationHandler(parent) {
 
-//  MozillaVPN* vpn = MozillaVPN::instance();
-//  Q_ASSERT(vpn);
+SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
+    NotificationHandler(parent),
+    m_systemTrayIcon(parent)
 
-//  connect(vpn, &MozillaVPN::stateChanged, this,
-//          &SystemTrayNotificationHandler::updateContextMenu);
+{
+    m_systemTrayIcon.show();
+    connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
 
-//  connect(vpn->currentServer(), &ServerData::changed, this,
-//          &SystemTrayNotificationHandler::updateContextMenu);
 
-//  connect(vpn->controller(), &Controller::stateChanged, this,
-//          &SystemTrayNotificationHandler::updateContextMenu);
+    m_menu.addAction(QIcon(":/images/tray/application.png"), tr("Show") + " " + APPLICATION_NAME, this, [this](){
+        emit raiseRequested();
+    });
+    m_menu.addSeparator();
+    m_trayActionConnect = m_menu.addAction(tr("Connect"), this, [this](){ emit connectRequested(); });
+    m_trayActionDisconnect = m_menu.addAction(tr("Disconnect"), this, [this](){ emit disconnectRequested(); });
 
-//  connect(vpn->statusIcon(), &StatusIcon::iconChanged, this,
-//          &SystemTrayNotificationHandler::updateIcon);
+    m_menu.addSeparator();
 
-//  m_systemTrayIcon.setToolTip(qtTrId("vpn.main.productName"));
+    m_menu.addAction(QIcon(":/images/tray/link.png"), tr("Visit Website"), [&](){
+        QDesktopServices::openUrl(QUrl("https://amnezia.org"));
+    });
 
-//  // Status label
-//  m_statusLabel = m_menu.addAction("");
-//  m_statusLabel->setEnabled(false);
+    m_menu.addAction(QIcon(":/images/tray/cancel.png"), tr("Quit") + " " + APPLICATION_NAME, this, [&](){
+        qApp->quit();
+    });
 
-//  m_lastLocationLabel =
-//      m_menu.addAction("", vpn->controller(), &Controller::activate);
-//  m_lastLocationLabel->setEnabled(false);
+    m_systemTrayIcon.setContextMenu(&m_menu);
+    setTrayState(VpnProtocol::Disconnected);
 
-//  m_disconnectAction =
-//      m_menu.addAction("", vpn->controller(), &Controller::deactivate);
-
-//  m_separator = m_menu.addSeparator();
-
-//  m_showHideLabel = m_menu.addAction(
-//      "", this, &SystemTrayNotificationHandler::showHideWindow);
-
-//  m_menu.addSeparator();
-
-//  m_helpMenu = m_menu.addMenu("");
 
 //  m_preferencesAction = m_menu.addAction("", vpn, &MozillaVPN::requestSettings);
 
@@ -80,20 +74,94 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent)
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
 }
 
+void SystemTrayNotificationHandler::setConnectionState(VpnProtocol::ConnectionState state)
+{
+    setTrayState(state);
+    NotificationHandler::setConnectionState(state);
+}
+
+void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
+{
+    QIcon trayIconMask(QPixmap(iconPath).scaled(128,128));
+    trayIconMask.setIsMask(true);
+    m_systemTrayIcon.setIcon(trayIconMask);
+}
+
+void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+#ifndef Q_OS_MAC
+    if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
+        emit raiseRequested();
+    }
+#endif
+}
+
+void SystemTrayNotificationHandler::setTrayState(VpnProtocol::ConnectionState state)
+{
+    qDebug() << "SystemTrayNotificationHandler::setTrayState" << state;
+    QString resourcesPath = ":/images/tray/%1";
+
+    switch (state) {
+    case VpnProtocol::Disconnected:
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        m_trayActionConnect->setEnabled(true);
+        m_trayActionDisconnect->setEnabled(false);
+        break;
+    case VpnProtocol::Preparing:
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        break;
+    case VpnProtocol::Connecting:
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        break;
+    case VpnProtocol::Connected:
+        setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        break;
+    case VpnProtocol::Disconnecting:
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        break;
+    case VpnProtocol::Reconnecting:
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        break;
+    case VpnProtocol::Error:
+        setTrayIcon(QString(resourcesPath).arg(ErrorTrayIconName));
+        m_trayActionConnect->setEnabled(true);
+        m_trayActionDisconnect->setEnabled(false);
+        break;
+    case VpnProtocol::Unknown:
+    default:
+        m_trayActionConnect->setEnabled(false);
+        m_trayActionDisconnect->setEnabled(true);
+        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+    }
+
+    //#ifdef Q_OS_MAC
+    //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
+    //    bool darkTaskBar = MacOSFunctions::instance().isMenuBarUseDarkTheme();
+    //    darkTaskBar = forceUseBrightIcons ? true : darkTaskBar;
+    //    resourcesPath = ":/images_mac/tray_icon/%1";
+    //    useIconName = useIconName.replace(".png", darkTaskBar ? "@2x.png" : " dark@2x.png");
+    //#endif
+}
+
+
 void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            const QString& title,
                                            const QString& message,
                                            int timerMsec) {
   Q_UNUSED(type);
 
-//  QIcon icon(Constants::LOGO_URL);
-//  m_systemTrayIcon.showMessage(title, message, icon, timerMsec);
-}
-
-void SystemTrayNotificationHandler::updateIcon(const QString& icon) {
-  QIcon trayIconMask(icon);
-  trayIconMask.setIsMask(true);
-  m_systemTrayIcon.setIcon(trayIconMask);
+  QIcon icon(ConnectedTrayIconName);
+  m_systemTrayIcon.showMessage(title, message, icon, timerMsec);
 }
 
 void SystemTrayNotificationHandler::showHideWindow() {
@@ -111,17 +179,3 @@ void SystemTrayNotificationHandler::showHideWindow() {
 //  }
 }
 
-void SystemTrayNotificationHandler::maybeActivated(
-    QSystemTrayIcon::ActivationReason reason) {
-  qDebug() << "Activated";
-
-#if defined(MVPN_WINDOWS) || defined(MVPN_LINUX)
-  if (reason == QSystemTrayIcon::DoubleClick ||
-      reason == QSystemTrayIcon::Trigger) {
-    QmlEngineHolder* engine = QmlEngineHolder::instance();
-    engine->showWindow();
-  }
-#else
-  Q_UNUSED(reason);
-#endif
-}

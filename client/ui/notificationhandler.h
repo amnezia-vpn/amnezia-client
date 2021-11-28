@@ -31,12 +31,15 @@ public:
     void messageClickHandle();
 
 public slots:
-    void showVpnStateNotification(VpnProtocol::ConnectionState state);
+    virtual void setConnectionState(VpnProtocol::ConnectionState state);
 
 signals:
     void notificationShown(const QString& title, const QString& message);
-
     void notificationClicked(Message message);
+
+    void raiseRequested();
+    void connectRequested();
+    void disconnectRequested();
 
 protected:
     explicit NotificationHandler(QObject* parent);

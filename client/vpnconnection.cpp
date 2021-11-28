@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonObject>
-#include <android_controller.h>
 
 #include <configurators/openvpn_configurator.h>
 #include <configurators/cloak_configurator.h>
@@ -13,7 +12,8 @@
 #include <protocols/wireguardprotocol.h>
 
 #ifdef Q_OS_ANDROID
-#include <protocols/android_vpnprotocol.h>
+#include "android_controller.h"
+#include "protocols/android_vpnprotocol.h"
 #endif
 
 #include "ipc.h"

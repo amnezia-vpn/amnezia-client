@@ -64,7 +64,6 @@ HEADERS  += \
    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
-   ui/systemtray_notificationhandler.h \
     ui/uilogic.h \
    ui/qautostart.h \
    ui/models/sites_model.h \
@@ -115,7 +114,6 @@ SOURCES  += \
    ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
-   ui/systemtray_notificationhandler.cpp \
     ui/uilogic.cpp \
    ui/qautostart.cpp \
    ui/models/sites_model.cpp \
@@ -184,6 +182,7 @@ linux:!android {
 win32|macx|linux:!android {
 
    HEADERS  += \
+      ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
       protocols/ikev2_vpn_protocol.h \
       protocols/openvpnovercloakprotocol.h \
@@ -191,6 +190,7 @@ win32|macx|linux:!android {
       protocols/wireguardprotocol.h \
 
    SOURCES  += \
+      ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
       protocols/ikev2_vpn_protocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
