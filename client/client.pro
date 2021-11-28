@@ -40,6 +40,7 @@ HEADERS  += \
     managementserver.h \
    protocols/protocols_defs.h \
     settings.h \
+    ui/notificationhandler.h \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
     ui/pages.h \
@@ -91,6 +92,7 @@ SOURCES  += \
     managementserver.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
+    ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
@@ -181,6 +183,7 @@ linux:!android {
 win32|macx|linux:!android {
 
    HEADERS  += \
+      ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
       protocols/ikev2_vpn_protocol.h \
       protocols/openvpnovercloakprotocol.h \
@@ -188,6 +191,7 @@ win32|macx|linux:!android {
       protocols/wireguardprotocol.h \
 
    SOURCES  += \
+      ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
       protocols/ikev2_vpn_protocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
@@ -200,9 +204,16 @@ android {
 
    INCLUDEPATH += platforms/android
 
-   HEADERS +=    protocols/android_vpnprotocol.h \
+   HEADERS += \
+      platforms/android/android_controller.h \
+      platforms/android/android_notificationhandler.h \
+      protocols/android_vpnprotocol.h
 
-   SOURCES +=    protocols/android_vpnprotocol.cpp \
+   SOURCES += \
+      platforms/android/android_controller.cpp \
+      platforms/android/android_notificationhandler.cpp \
+      protocols/android_vpnprotocol.cpp
+
 
    DISTFILES += \
        android/AndroidManifest.xml \

@@ -377,11 +377,11 @@ class VPNService : android.net.VpnService() {
                     val wgConfig: String = wireguard_conf!!.toWgUserspaceString()
                     val builder = Builder()
                     setupBuilder(wireguard_conf, builder)
-                    builder.setSession("mvpn0")
+                    builder.setSession("avpn0")
                     builder.establish().use { tun ->
                         if (tun == null)return
                         Log.i(tag, "Go backend " + wgVersion())
-                        currentTunnelHandle = wgTurnOn("mvpn0", tun.detachFd(), wgConfig)
+                        currentTunnelHandle = wgTurnOn("avpn0", tun.detachFd(), wgConfig)
                     }
                     if (currentTunnelHandle < 0) {
                         Log.e(tag, "Activation Error Code -> $currentTunnelHandle")

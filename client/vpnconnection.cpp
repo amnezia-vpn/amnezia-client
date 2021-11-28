@@ -12,7 +12,8 @@
 #include <protocols/wireguardprotocol.h>
 
 #ifdef Q_OS_ANDROID
-#include <protocols/android_vpnprotocol.h>
+#include "android_controller.h"
+#include "protocols/android_vpnprotocol.h"
 #endif
 
 #include "ipc.h"
@@ -260,11 +261,8 @@ void VpnConnection::connectToVpn(int serverIndex,
 #else
     Protocol proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    if (!androidVpnProtocol->initialize()) {
-         qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         return;
-    }
+    connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+
     m_vpnProtocol.reset(androidVpnProtocol);
 #endif
 
