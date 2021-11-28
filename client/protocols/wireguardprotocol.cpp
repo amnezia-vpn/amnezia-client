@@ -97,24 +97,9 @@ void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configurat
 
 }
 
-//bool WireguardProtocol::openVpnProcessIsRunning() const
-//{
-//    return Utils::processIsRunning("openvpn");
-//}
-
 QString WireguardProtocol::configPath() const
 {
     return m_configFileName;
-}
-
-void WireguardProtocol::updateRouteGateway(QString line)
-{
-    // TODO: fix for macos
-    line = line.split("ROUTE_GATEWAY", QString::SkipEmptyParts).at(1);
-    if (!line.contains("/")) return;
-    m_routeGateway = line.split("/", QString::SkipEmptyParts).first();
-    m_routeGateway.replace(" ", "");
-    qDebug() << "Set VPN route gateway" << m_routeGateway;
 }
 
 QString WireguardProtocol::wireguardExecPath() const
@@ -236,24 +221,6 @@ ErrorCode WireguardProtocol::start()
 #else
     return ErrorCode::NotImplementedError;
 #endif
-}
-
-void WireguardProtocol::updateVpnGateway(const QString &line)
-{
-    //    // line looks like
-    //    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
-
-    //    QStringList params = line.split(",");
-    //    for (const QString &l : params) {
-    //        if (l.contains("ifconfig")) {
-    //            if (l.split(" ").size() == 3) {
-    //                m_vpnLocalAddress = l.split(" ").at(1);
-    //                m_vpnGateway = l.split(" ").at(2);
-
-    //                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
-    //            }
-    //        }
-    //    }
 }
 
 QString WireguardProtocol::serviceName() const

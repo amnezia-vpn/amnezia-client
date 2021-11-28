@@ -24,11 +24,8 @@ public:
 private:
     QString configPath() const;
     QString wireguardExecPath() const;
-    //bool openVpnProcessIsRunning() const;
     void readWireguardConfiguration(const QJsonObject &configuration);
 
-    void updateRouteGateway(QString line);
-    void updateVpnGateway(const QString &line);
     QString serviceName() const;
 
 
