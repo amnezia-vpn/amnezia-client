@@ -7,7 +7,7 @@ import os
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
-    private lazy var adapter: WireGuardAdapter = {
+    private lazy var wgAdapter: WireGuardAdapter = {
         return WireGuardAdapter(with: self) { logLevel, message in
             wg_log(logLevel.osLogLevel, message: message)
         }
@@ -29,9 +29,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
 
         // Start the tunnel
-        adapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
+        wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
             guard let adapterError = adapterError else {
-                let interfaceName = self.adapter.interfaceName ?? "unknown"
+                let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
 
                 wg_log(.info, message: "Tunnel interface is \(interfaceName)")
 
@@ -72,7 +72,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         wg_log(.info, staticMessage: "Stopping tunnel")
 
-        adapter.stop { error in
+        wgAdapter.stop { error in
             ErrorNotifier.removeLastErrorFile()
 
             if let error = error {
@@ -93,7 +93,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         guard let completionHandler = completionHandler else { return }
 
         if messageData.count == 1 && messageData[0] == 0 {
-            adapter.getRuntimeConfiguration { settings in
+            wgAdapter.getRuntimeConfiguration { settings in
                 var data: Data?
                 if let settings = settings {
                     data = settings.data(using: .utf8)!
@@ -111,14 +111,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
             do {
               let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
-              adapter.update(tunnelConfiguration: tunnelConfiguration) { error in
+              wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
                 if let error = error {
                   wg_log(.error, message: "Failed to switch tunnel configuration: \(error.localizedDescription)")
                   completionHandler(nil)
                   return
                 }
 
-                self.adapter.getRuntimeConfiguration { settings in
+                self.wgAdapter.getRuntimeConfiguration { settings in
                   var data: Data?
                   if let settings = settings {
                       data = settings.data(using: .utf8)!

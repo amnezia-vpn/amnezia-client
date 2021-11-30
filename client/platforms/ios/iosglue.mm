@@ -8,7 +8,7 @@
 #include <string.h>
 
 #ifndef NETWORK_EXTENSION
-#  include "logger.h"
+//#  include "logger.h"
 #else
 #  import <Foundation/Foundation.h>
 #  import <os/log.h>
@@ -183,13 +183,13 @@ EXPORT bool key_eq(const uint8_t key1[WG_KEY_LEN], const uint8_t key2[WG_KEY_LEN
 
 #ifndef NETWORK_EXTENSION
 namespace {
-Logger logger(LOG_IOS, "IOSSGlue");
+//Logger logger(LOG_IOS, "IOSSGlue");
 }
 #endif
 
 EXPORT void write_msg_to_log(const char* tag, const char* msg) {
 #ifndef NETWORK_EXTENSION
-  logger.debug() << "Swift log - tag:" << tag << "msg: " << msg;
+//  logger.debug() << "Swift log - tag:" << tag << "msg: " << msg;
 #else
   os_log_with_type(OS_LOG_DEFAULT, OS_LOG_TYPE_DEBUG, "tag: %s - msg: %s", tag, msg);
 

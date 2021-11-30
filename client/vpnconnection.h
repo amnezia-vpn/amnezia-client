@@ -25,9 +25,9 @@ public:
 
     ErrorCode lastError() const;
 
-    static QMap<Protocol, QString> getLastVpnConfig(const QJsonObject &containerConfig);
+    static QMap<Proto, QString> getLastVpnConfig(const QJsonObject &containerConfig);
     QString createVpnConfigurationForProto(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Protocol proto,
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
         ErrorCode *errorCode = nullptr);
 
     QJsonObject createVpnConfiguration(int serverIndex,
@@ -39,7 +39,7 @@ public:
     bool isConnected() const;
     bool isDisconnected() const;
 
-    VpnProtocol::ConnectionState connectionState();
+    VpnProtocol::VpnConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     void addRoutes(const QStringList &ips);
@@ -56,14 +56,14 @@ public slots:
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void connectionStateChanged(VpnProtocol::ConnectionState state);
+    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
 
     void serviceIsNotReady();
 
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(VpnProtocol::ConnectionState state);
+    void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;

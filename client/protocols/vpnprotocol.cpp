@@ -15,7 +15,7 @@
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
     : QObject(parent),
-      m_connectionState(ConnectionState::Unknown),
+      m_connectionState(VpnConnectionState::Unknown),
       m_rawConfig(configuration),
       m_timeoutTimer(new QTimer(this)),
       m_receivedBytes(0),
@@ -29,7 +29,7 @@ void VpnProtocol::setLastError(ErrorCode lastError)
 {
     m_lastError = lastError;
     if (lastError){
-        setConnectionState(ConnectionState::Error);
+        setConnectionState(VpnConnectionState::Error);
     }
     qCritical().noquote() << "VpnProtocol error, code" << m_lastError << errorString(m_lastError);
 }
@@ -57,7 +57,7 @@ void VpnProtocol::stopTimeoutTimer()
     m_timeoutTimer->stop();
 }
 
-VpnProtocol::ConnectionState VpnProtocol::connectionState() const
+VpnProtocol::VpnConnectionState VpnProtocol::connectionState() const
 {
     return m_connectionState;
 }
@@ -70,19 +70,19 @@ void VpnProtocol::setBytesChanged(quint64 receivedBytes, quint64 sentBytes)
     m_sentBytes = sentBytes;
 }
 
-void VpnProtocol::setConnectionState(VpnProtocol::ConnectionState state)
+void VpnProtocol::setConnectionState(VpnProtocol::VpnConnectionState state)
 {
     qDebug() << "VpnProtocol::setConnectionState" << textConnectionState(state);
 
     if (m_connectionState == state) {
         return;
     }
-    if (m_connectionState == ConnectionState::Disconnected && state == ConnectionState::Disconnecting) {
+    if (m_connectionState == VpnConnectionState::Disconnected && state == VpnConnectionState::Disconnecting) {
         return;
     }
 
     m_connectionState = state;
-    if (m_connectionState == ConnectionState::Disconnected) {
+    if (m_connectionState == VpnConnectionState::Disconnected) {
         m_receivedBytes = 0;
         m_sentBytes = 0;
     }
@@ -116,17 +116,17 @@ QString VpnProtocol::routeGateway() const
     return m_routeGateway;
 }
 
-QString VpnProtocol::textConnectionState(ConnectionState connectionState)
+QString VpnProtocol::textConnectionState(VpnConnectionState connectionState)
 {
     switch (connectionState) {
-    case ConnectionState::Unknown: return tr("Unknown");
-    case ConnectionState::Disconnected: return tr("Disconnected");
-    case ConnectionState::Preparing: return tr("Preparing");
-    case ConnectionState::Connecting: return tr("Connecting...");
-    case ConnectionState::Connected: return tr("Connected");
-    case ConnectionState::Disconnecting: return tr("Disconnecting...");
-    case ConnectionState::Reconnecting: return tr("Reconnecting...");
-    case ConnectionState::Error: return tr("Error");
+    case VpnConnectionState::Unknown: return tr("Unknown");
+    case VpnConnectionState::Disconnected: return tr("Disconnected");
+    case VpnConnectionState::Preparing: return tr("Preparing");
+    case VpnConnectionState::Connecting: return tr("Connecting...");
+    case VpnConnectionState::Connected: return tr("Connected");
+    case VpnConnectionState::Disconnecting: return tr("Disconnecting...");
+    case VpnConnectionState::Reconnecting: return tr("Reconnecting...");
+    case VpnConnectionState::Error: return tr("Error");
     default:
         ;
     }
@@ -141,10 +141,10 @@ QString VpnProtocol::textConnectionState() const
 
 bool VpnProtocol::isConnected() const
 {
-    return m_connectionState == ConnectionState::Connected;
+    return m_connectionState == VpnConnectionState::Connected;
 }
 
 bool VpnProtocol::isDisconnected() const
 {
-    return m_connectionState == ConnectionState::Disconnected;
+    return m_connectionState == VpnConnectionState::Disconnected;
 }

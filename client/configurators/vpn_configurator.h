@@ -13,10 +13,10 @@ class VpnConfigurator
 public:
 
     static QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, Protocol proto, ErrorCode *errorCode = nullptr);
+        const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
 
-    static QString processConfigWithLocalSettings(DockerContainer container, Protocol proto, QString config);
-    static QString processConfigWithExportSettings(DockerContainer container, Protocol proto, QString config);
+    static QString processConfigWithLocalSettings(DockerContainer container, Proto proto, QString config);
+    static QString processConfigWithExportSettings(DockerContainer container, Proto proto, QString config);
 
     // workaround for containers which is not support normal configaration
     static void updateContainerConfigAfterInstallation(DockerContainer container,

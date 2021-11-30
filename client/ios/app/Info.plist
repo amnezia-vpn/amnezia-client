@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>ADJUST_SDK_TOKEN</key>
+	<string>$(ADJUST_SDK_TOKEN)</string>
 	<key>CFBundleAllowMixedLocalizations</key>
 	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Mozilla VPN</string>
+	<string>AmneziaVPN</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIcons</key>
@@ -49,7 +51,5 @@
 	<string>Light</string>
 	<key>com.wireguard.ios.app_group_id</key>
 	<string>group.org.mozilla.ios.Guardian</string>
-	<key>ADJUST_SDK_TOKEN</key>
-	<string>$(ADJUST_SDK_TOKEN)</string>
 </dict>
 </plist>

@@ -449,7 +449,7 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
 
 QJsonObject ServerController::createContainerInitialConfig(DockerContainer container, int port, TransportProto tp)
 {
-    Protocol mainProto = ContainerProps::defaultProtocol(container);
+    Proto mainProto = ContainerProps::defaultProtocol(container);
 
     QJsonObject config {
         { config_key::container, ContainerProps::containerToString(container) }
@@ -616,11 +616,11 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
 
 ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    const QJsonObject &openvpnConfig = config.value(ProtocolProps::protoToString(Protocol::OpenVpn)).toObject();
-    const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Protocol::Cloak)).toObject();
-    const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Protocol::ShadowSocks)).toObject();
-    const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Protocol::WireGuard)).toObject();
-    const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Protocol::Sftp)).toObject();
+    const QJsonObject &openvpnConfig = config.value(ProtocolProps::protoToString(Proto::OpenVpn)).toObject();
+    const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
+    const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
+    const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
+    const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     //
 
     Vars vars;
@@ -689,7 +689,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
 
     // Sftp vars
-    vars.append({{"$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Protocol::Sftp))) }});
+    vars.append({{"$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) }});
     vars.append({{"$SFTP_USER", sftpConfig.value(config_key::userName).toString() }});
     vars.append({{"$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() }});
 

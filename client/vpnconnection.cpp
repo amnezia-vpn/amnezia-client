@@ -15,6 +15,10 @@
 #include <protocols/android_vpnprotocol.h>
 #endif
 
+#ifdef Q_OS_IOS
+#include <protocols/ios_vpnprotocol.h>
+#endif
+
 #include "ipc.h"
 #include "core/ipcclient.h"
 
@@ -38,7 +42,7 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
     emit bytesChanged(receivedBytes, sentBytes);
 }
 
-void VpnConnection::onConnectionStateChanged(VpnProtocol::ConnectionState state)
+void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
 {
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
@@ -124,10 +128,10 @@ ErrorCode VpnConnection::lastError() const
     return m_vpnProtocol.data()->lastError();
 }
 
-QMap<Protocol, QString> VpnConnection::getLastVpnConfig(const QJsonObject &containerConfig)
+QMap<Proto, QString> VpnConnection::getLastVpnConfig(const QJsonObject &containerConfig)
 {
-    QMap<Protocol, QString> configs;
-    for (Protocol proto: ProtocolProps::allProtocols()) {
+    QMap<Proto, QString> configs;
+    for (Proto proto: ProtocolProps::allProtocols()) {
 
         QString cfg = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
@@ -137,7 +141,7 @@ QMap<Protocol, QString> VpnConnection::getLastVpnConfig(const QJsonObject &conta
 }
 
 QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
-    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Protocol proto,
+    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
     ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
@@ -186,7 +190,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     QJsonObject vpnConfiguration;
 
 
-    for (ProtocolEnumNS::Protocol proto : ContainerProps::protocolsForContainer(container)) {
+    for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         QJsonObject vpnConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
                 serverIndex, credentials, container, containerConfig, proto, &e).toUtf8()).
@@ -200,8 +204,8 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
         vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     }
 
-    Protocol proto = ContainerProps::defaultProtocol(container);
-    vpnConfiguration[config_key::protocol] = ProtocolProps::protoToString(proto);
+    Proto proto = ContainerProps::defaultProtocol(container);
+    vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
     return vpnConfiguration;
 }
@@ -212,7 +216,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
                 .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings.routeMode();
 
-    #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
+#if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     if (!m_IpcClient) {
         m_IpcClient = new IpcClient;
     }
@@ -228,7 +232,6 @@ void VpnConnection::connectToVpn(int serverIndex,
 #endif
 
     m_remoteAddress = credentials.hostName;
-
     emit connectionStateChanged(VpnProtocol::Connecting);
 
     if (m_vpnProtocol) {
@@ -241,24 +244,22 @@ void VpnConnection::connectToVpn(int serverIndex,
     }
 
     ErrorCode e = ErrorCode::NoError;
+
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
     if (e) {
         emit connectionStateChanged(VpnProtocol::Error);
         return;
     }
-
-
-#ifndef Q_OS_ANDROID
+    
+#if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
         emit VpnProtocol::Error;
         return;
     }
-
     m_vpnProtocol->prepare();
-
-#else
-    Protocol proto = ContainerProps::defaultProtocol(container);
+#elif defined Q_OS_ANDROID
+    Proto proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
     if (!androidVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
@@ -266,6 +267,15 @@ void VpnConnection::connectToVpn(int serverIndex,
          return;
     }
     m_vpnProtocol.reset(androidVpnProtocol);
+#elif defined Q_OS_IOS
+    Proto proto = ContainerProps::defaultProtocol(container);
+    IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+    if (!iosVpnProtocol->initialize()) {
+         qDebug() << QString("Init failed") ;
+         emit VpnProtocol::Error;
+         return;
+    }
+    m_vpnProtocol.reset(iosVpnProtocol);
 #endif
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
@@ -303,7 +313,7 @@ void VpnConnection::disconnectFromVpn()
     // qDebug() << "Disconnect from VPN 2";
 }
 
-VpnProtocol::ConnectionState VpnConnection::connectionState()
+VpnProtocol::VpnConnectionState VpnConnection::connectionState()
 {
     if (!m_vpnProtocol) return VpnProtocol::Disconnected;
     return m_vpnProtocol->connectionState();

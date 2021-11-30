@@ -52,12 +52,12 @@ QJsonObject CloakLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 
 void CloakLogic::onPushButtonSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::Cloak);
+    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::Cloak);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(ProtocolProps::protoToString(Protocol::Cloak), protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Proto::Cloak), protocolConfig);
 
     UiLogic::PageFunc page_func;
     page_func.setEnabledFunc = [this] (bool enabled) -> void {

@@ -24,6 +24,29 @@ ui_*.h
 Makefile*
 *build-*
 
+# Qt-es
+client/.xcode/
+client/.qmake.cache
+client/.qmake.stash
+client/*.pro.user
+client/*.pro.user.*
+client/*.qbs.user
+client/*.qbs.user.*
+client/*.moc
+client/moc_*.cpp
+client/qrc_*.cpp
+client/ui_*.h
+client/ui_*.cpp
+client/Makefile*
+client/*build-*
+client/AmneziaVPN.xcodeproj
+client/Debug-iphonesimulator
+client/amneziavpn_plugin_import.cpp
+client/amneziavpn_qml_plugin_import.cpp
+client/qmlcache_loader.cpp
+client/rep_ipc_interface_replica.h
+client/resources_qmlcache.qrc
+
 # QtCreator
 
 *.autosave
@@ -37,6 +60,7 @@ CMakeLists.txt.user*
 
 # MACOS files
 .DS_Store
+client/.DS_Store
 ._.DS_Store
 ._*
 *.dmg

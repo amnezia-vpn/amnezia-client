@@ -46,7 +46,7 @@ constexpr auto PERMISSIONHELPER_CLASS =
 
 }  // namespace
 
-AndroidVpnProtocol::AndroidVpnProtocol(Protocol protocol, const QJsonObject &configuration, QObject* parent)
+AndroidVpnProtocol::AndroidVpnProtocol(Proto protocol, const QJsonObject &configuration, QObject* parent)
     : VpnProtocol(configuration, parent),
       m_protocol(protocol),
       m_binder(this)

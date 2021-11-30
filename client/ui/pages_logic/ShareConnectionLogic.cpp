@@ -70,7 +70,7 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         containerConfig.insert(config_key::container, ContainerProps::containerToString(uiLogic()->selectedDockerContainer));
 
         ErrorCode e = ErrorCode::NoError;
-        for (Protocol p: ContainerProps::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
+        for (Proto p: ContainerProps::protocolsForContainer(uiLogic()->selectedDockerContainer)) {
             QJsonObject protoConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p);
 
             QString cfg = VpnConfigurator::genVpnProtocolConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, p, &e);
@@ -115,7 +115,7 @@ void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 
     ErrorCode e = ErrorCode::NoError;
     QString cfg = OpenVpnConfigurator::genOpenVpnConfig(credentials, uiLogic()->selectedDockerContainer, containerConfig, &e);
-    cfg = VpnConfigurator::processConfigWithExportSettings(uiLogic()->selectedDockerContainer, Protocol::OpenVpn, cfg);
+    cfg = VpnConfigurator::processConfigWithExportSettings(uiLogic()->selectedDockerContainer, Proto::OpenVpn, cfg);
 
     set_textEditShareOpenVpnCodeText(QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString());
 }
@@ -126,7 +126,7 @@ void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
     DockerContainer container = uiLogic()->selectedDockerContainer;
     ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
 
-    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::ShadowSocks);
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Proto::ShadowSocks);
     QString cfg = protoConfig.value(config_key::last_config).toString();
 
     if (cfg.isEmpty()) {
@@ -168,7 +168,7 @@ void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
     DockerContainer container = uiLogic()->selectedDockerContainer;
     ServerCredentials credentials = m_settings.serverCredentials(serverIndex);
 
-    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Protocol::Cloak);
+    QJsonObject protoConfig = m_settings.protocolConfig(serverIndex, container, Proto::Cloak);
     QString cfg = protoConfig.value(config_key::last_config).toString();
 
     if (cfg.isEmpty()) {
@@ -195,7 +195,7 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
     ErrorCode e = ErrorCode::NoError;
     QString cfg = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, &e);
-    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::WireGuard, cfg);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Proto::WireGuard, cfg);
     cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString();
 
     set_textEditShareWireGuardCodeText(cfg);
@@ -215,7 +215,7 @@ void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
     Ikev2Configurator::ConnectionData connData = Ikev2Configurator::prepareIkev2Config(credentials, container);
 
     QString cfg = Ikev2Configurator::genIkev2Config(connData);
-    cfg = VpnConfigurator::processConfigWithExportSettings(container, Protocol::Ikev2, cfg);
+    cfg = VpnConfigurator::processConfigWithExportSettings(container, Proto::Ikev2, cfg);
     cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::cert].toString();
 
     set_textEditShareIkev2CertText(cfg);

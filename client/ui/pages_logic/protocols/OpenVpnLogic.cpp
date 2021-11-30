@@ -81,12 +81,12 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
 
 void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Protocol::OpenVpn);
+    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::OpenVpn);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(ProtocolProps::protoToString(Protocol::OpenVpn), protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Proto::OpenVpn), protocolConfig);
 
     UiLogic::PageFunc page_proto_openvpn;
     page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {

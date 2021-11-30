@@ -260,29 +260,20 @@ ios {
 
     DEFINES += MVPN_IOS
 
-    SOURCES += \
-#            platforms/macos/macospingsender.cpp
-
-    OBJECTIVE_SOURCES += \
-#            platforms/ios/iosiaphandler.mm \
-#            platforms/ios/iosauthenticationlistener.mm \
-#            platforms/ios/ioscontroller.mm \
-#            platforms/ios/iosdatamigration.mm \
-            platforms/ios/iosglue.mm \
-#            platforms/ios/iosnotificationhandler.mm \
-#            platforms/ios/iosutils.mm \
-#            platforms/macos/macoscryptosettings.mm
-
     HEADERS += \
-#            platforms/macos/macospingsender.h
-
-    OBJECTIVE_HEADERS += \
-#            platforms/ios/iosiaphandler.h \
-#            platforms/ios/iosauthenticationlistener.h \
-#            platforms/ios/ioscontroller.h \
-#            platforms/ios/iosdatamigration.h \
-#            platforms/ios/iosnotificationhandler.h \
-#            platforms/ios/iosutils.h
+      protocols/ios_vpnprotocol.h \
+      platforms/ios/json.h \
+      platforms/ios/bigint.h \
+      platforms/ios/bigintipv6addr.h \
+      platforms/ios/ipaddress.h \
+      platforms/ios/ipaddressrange.h
+  
+    SOURCES  += \
+      protocols/ios_vpnprotocol.mm \
+      platforms/ios/json.cpp \
+      platforms/ios/iosglue.mm \
+      platforms/ios/ipaddress.cpp \
+      platforms/ios/ipaddressrange.cpp
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
@@ -313,19 +304,29 @@ ios {
             ARCH_TAG = "ios_armv7"
         }
     }
+  
+  CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+      message("Building for iPhone Simulator")
+      ARCH_TAG = "ios_x86_64"
+    
+      DEFINES += iphoneos
+    
+      LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
+      LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+  }
 
-    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
-        message("Building for iPhone Simulator")
-        ARCH_TAG = "ios_x86_64"
-
-        DEFINES += iphonesimulator
-
-        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
-        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
-    }
+#    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+#        message("Building for iPhone Simulator")
+#        ARCH_TAG = "ios_x86_64"
+#
+#        DEFINES += iphonesimulator
+#
+#        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
+#        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+#    }
 
     NETWORKEXTENSION=1
-    ! build_pass: system(ruby $$PWD/ios/xcode_patcher.rb "$$PWD" "$$OUT_PWD/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "$$NETWORKEXTENSION"|| echo "Failed to merge xcode with wireguard")
+#    ! build_pass: system(ruby $$PWD/scripts/xcode_patcher.rb "$$PWD" "$$OUT_PWD/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "$$NETWORKEXTENSION"|| echo "Failed to merge xcode with wireguard")
 
 
 

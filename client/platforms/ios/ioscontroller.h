@@ -5,12 +5,12 @@
 #ifndef IOSCONTROLLER_H
 #define IOSCONTROLLER_H
 
-#include "controllerimpl.h"
+#include "vpnprotocol.h"
 
 #include <QObject>
 
-class IOSController final : public ControllerImpl {
-  Q_DISABLE_COPY_MOVE(IOSController)
+class IOSVPNProtocol final : public VpnProtocol {
+  Q_DISABLE_COPY_MOVE(IOSVPNProtocol)
 
  public:
   IOSController();

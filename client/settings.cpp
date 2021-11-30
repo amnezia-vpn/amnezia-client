@@ -151,13 +151,13 @@ void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
     setContainers(serverIndex, c);
 }
 
-QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Protocol proto)
+QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Proto proto)
 {
     const QJsonObject &c = containerConfig(serverIndex, container);
     return c.value(ProtocolProps::protoToString(proto)).toObject();
 }
 
-void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Protocol proto, const QJsonObject &config)
+void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Proto proto, const QJsonObject &config)
 {
     QJsonObject c = containerConfig(serverIndex, container);
     c.insert(ProtocolProps::protoToString(proto), config);
@@ -165,11 +165,11 @@ void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Pro
     setContainerConfig(serverIndex, container, c);
 }
 
-void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto)
+void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto)
 {
     // recursively remove
-    if (proto == Protocol::Any) {
-        for (Protocol p: ContainerProps::protocolsForContainer(container)) {
+    if (proto == Proto::Any) {
+        for (Proto p: ContainerProps::protocolsForContainer(container)) {
             clearLastConnectionConfig(serverIndex, container, p);
         }
         return;
