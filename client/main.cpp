@@ -116,12 +116,12 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-    qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::ConnectionState");
+    qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
     qRegisterMetaType<DockerContainer>("DockerContainer");
     qRegisterMetaType<TransportProto>("TransportProto");
-    qRegisterMetaType<Proto>("Protocol");
+    qRegisterMetaType<Proto>("Proto");
     qRegisterMetaType<ServiceType>("ServiceType");
     qRegisterMetaType<Page>("Page");
     qRegisterMetaType<VpnProtocol::VpnConnectionState>("ConnectionState");

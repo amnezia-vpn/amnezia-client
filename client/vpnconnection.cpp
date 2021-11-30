@@ -12,7 +12,8 @@
 #include <protocols/wireguardprotocol.h>
 
 #ifdef Q_OS_ANDROID
-#include <protocols/android_vpnprotocol.h>
+#include "android_controller.h"
+#include "protocols/android_vpnprotocol.h"
 #endif
 
 #ifdef Q_OS_IOS
@@ -261,11 +262,8 @@ void VpnConnection::connectToVpn(int serverIndex,
 #elif defined Q_OS_ANDROID
     Proto proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    if (!androidVpnProtocol->initialize()) {
-         qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         return;
-    }
+    connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
@@ -279,7 +277,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 #endif
 
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::ConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::ConnectionState)));
+    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
     ServerController::disconnectFromHost(credentials);

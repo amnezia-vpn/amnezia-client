@@ -61,7 +61,7 @@ void WireguardProtocol::stop()
 
     connect(m_wireguardStopProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol Stop errorOccurred" << error;
-        setConnectionState(ConnectionState::Disconnected);
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
     connect(m_wireguardStopProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
@@ -79,7 +79,7 @@ void WireguardProtocol::stop()
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
 {
-    QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toObject();
+    QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toObject();
 
     if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
@@ -93,7 +93,7 @@ void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configurat
     m_configFileName = m_configFile.fileName();
 
     qDebug().noquote() << QString("Set config data") << m_configFileName;
-    qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Protocol::WireGuard)).toString().toUtf8();
+    qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toString().toUtf8();
 
 }
 
@@ -151,7 +151,7 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-    setConnectionState(ConnectionState::Connecting);
+    setConnectionState(VpnConnectionState::Connecting);
 
     m_wireguardStartProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -178,7 +178,7 @@ ErrorCode WireguardProtocol::start()
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol errorOccurred" << error;
-        setConnectionState(ConnectionState::Disconnected);
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
@@ -186,7 +186,7 @@ ErrorCode WireguardProtocol::start()
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [this]() {
-        setConnectionState(ConnectionState::Connected);
+        setConnectionState(VpnConnectionState::Connected);
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyRead, this, [this]() {

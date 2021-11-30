@@ -78,7 +78,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_ckProcess.waitForStarted();
 
     if (m_ckProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(ConnectionState::Connecting);
+        setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }
@@ -113,5 +113,5 @@ QString OpenVpnOverCloakProtocol::cloakExecPath()
 
 void OpenVpnOverCloakProtocol::readCloakConfiguration(const QJsonObject &configuration)
 {
-    m_cloakConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::Cloak)).toObject();
+    m_cloakConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::Cloak)).toObject();
 }

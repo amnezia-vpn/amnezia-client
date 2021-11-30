@@ -11,38 +11,16 @@ using namespace amnezia;
 
 
 
-class AndroidVpnProtocol : public VpnProtocol,
-                           public QAndroidServiceConnection
+class AndroidVpnProtocol : public VpnProtocol
 {
     Q_OBJECT
 
 public:
     explicit AndroidVpnProtocol(Proto protocol, const QJsonObject& configuration, QObject* parent = nullptr);
-    static AndroidVpnProtocol* instance();
-
     virtual ~AndroidVpnProtocol() override = default;
 
-    bool initialize();
-
-    virtual ErrorCode start() override;
-    virtual void stop() override;
-
-    void resume_start();
-
-    void checkStatus();
-
-    void setNotificationText(const QString& title, const QString& message,
-                             int timerSec);
-    void setFallbackConnectedNotification();
-
-    void getBackendLogs(std::function<void(const QString&)>&& callback);
-
-    void cleanupBackendLogs();
-
-    // from QAndroidServiceConnection
-    void onServiceConnected(const QString& name,
-                            const QAndroidBinder& serviceBinder) override;
-    void onServiceDisconnected(const QString& name) override;
+    ErrorCode start() override;
+    void stop() override;
 
 signals:
 
@@ -55,28 +33,6 @@ protected:
 private:
     Proto m_protocol;
 
-    bool m_serviceConnected = false;
-    std::function<void(const QString&)> m_logCallback;
-
-    QAndroidBinder m_serviceBinder;
-    class VPNBinder : public QAndroidBinder {
-     public:
-      VPNBinder(AndroidVpnProtocol* controller) : m_controller(controller) {}
-
-      bool onTransact(int code, const QAndroidParcel& data,
-                      const QAndroidParcel& reply,
-                      QAndroidBinder::CallType flags) override;
-
-      QString readUTF8Parcel(QAndroidParcel data);
-
-     private:
-      AndroidVpnProtocol* m_controller = nullptr;
-    };
-
-    VPNBinder m_binder;
-
-    static void startActivityForResult(JNIEnv* env, jobject /*thiz*/,
-                                       jobject intent);
 };
 
 #endif // ANDROID_VPNPROTOCOL_H

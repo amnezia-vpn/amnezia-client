@@ -39,6 +39,7 @@ HEADERS  += \
     managementserver.h \
    protocols/protocols_defs.h \
     settings.h \
+    ui/notificationhandler.h \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
     ui/pages.h \
@@ -94,6 +95,7 @@ SOURCES  += \
     managementserver.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
+    ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
@@ -133,6 +135,8 @@ TRANSLATIONS = \
     translations/amneziavpn_ru.ts
 
 win32 {
+    DEFINES += MVPN_WINDOWS
+
     OTHER_FILES += platform_win/vpnclient.rc
     RC_FILE = platform_win/vpnclient.rc
 
@@ -168,6 +172,8 @@ win32 {
 }
 
 macx {
+    DEFINES += MVPN_MACOS
+
     ICON   = $$PWD/images/app.icns
 
     HEADERS  += ui/macos_util.h
@@ -180,6 +186,8 @@ macx {
 }
 
 linux:!android {
+    DEFINES += MVPN_LINUX
+
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
 }
@@ -187,6 +195,7 @@ linux:!android {
 win32|macx|linux:!android {
 
    HEADERS  += \
+      ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
       protocols/ikev2_vpn_protocol.h \
       protocols/openvpnovercloakprotocol.h \
@@ -194,6 +203,7 @@ win32|macx|linux:!android {
       protocols/wireguardprotocol.h \
 
    SOURCES  += \
+      ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
       protocols/ikev2_vpn_protocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
@@ -203,12 +213,20 @@ win32|macx|linux:!android {
 
 android {
    QT += androidextras
+   DEFINES += MVPN_ANDROID
 
    INCLUDEPATH += platforms/android
 
-   HEADERS +=    protocols/android_vpnprotocol.h \
+   HEADERS += \
+      platforms/android/android_controller.h \
+      platforms/android/android_notificationhandler.h \
+      protocols/android_vpnprotocol.h
 
-   SOURCES +=    protocols/android_vpnprotocol.cpp \
+   SOURCES += \
+      platforms/android/android_controller.cpp \
+      platforms/android/android_notificationhandler.cpp \
+      protocols/android_vpnprotocol.cpp
+
 
    DISTFILES += \
        android/AndroidManifest.xml \

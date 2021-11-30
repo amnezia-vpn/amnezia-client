@@ -1,6 +1,7 @@
 #include "servercontroller.h"
 
 #include <QCryptographicHash>
+#include <QDir>
 #include <QFile>
 #include <QEventLoop>
 #include <QLoggingCategory>
@@ -10,6 +11,7 @@
 #include <QJsonDocument>
 #include <QApplication>
 #include <QTemporaryFile>
+#include <QFileInfo>
 
 #include "sftpchannel.h"
 #include "sshconnectionmanager.h"
@@ -134,12 +136,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
 
-    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  /opt/amnezia/";
-    ErrorCode e = runScript(credentials,
-        replaceVars(mkdir, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
-    if (e) return e;
-
-    e = uploadTextFileToContainer(container, credentials, script, fileName);
+    ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
 
     QString runner = QString("sudo docker exec -i $CONTAINER_NAME bash %1 ").arg(fileName);
@@ -166,6 +163,14 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     auto cbReadStd = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
         stdOut += data + "\n";
     };
+
+    // mkdir
+    QFileInfo fi(path);
+    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  " + fi.absoluteDir().absolutePath();
+    e = runScript(credentials,
+        replaceVars(mkdir, genVarsForScript(credentials, container)));
+    if (e) return e;
+
 
     if (overwriteMode == QSsh::SftpOverwriteMode::SftpOverwriteExisting) {
         e = runScript(credentials,

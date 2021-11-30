@@ -86,8 +86,8 @@ void OpenVpnProtocol::killOpenVpnProcess()
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(ProtocolProps::key_proto_config_data(Protocol::OpenVpn))) {
-        QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::OpenVpn)).toObject();
+    if (configuration.contains(ProtocolProps::key_proto_config_data(Proto::OpenVpn))) {
+        QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::OpenVpn)).toObject();
 
         m_configFile.open();
         m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
@@ -167,7 +167,7 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-    setConnectionState(ConnectionState::Connecting);
+    setConnectionState(VpnConnectionState::Connecting);
 
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -201,7 +201,7 @@ ErrorCode OpenVpnProtocol::start()
     });
 
     connect(m_openVpnProcess.data(), &PrivilegedProcess::finished, this, [&]() {
-        setConnectionState(ConnectionState::Disconnected);
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
     m_openVpnProcess->start();
