@@ -280,6 +280,7 @@ ios {
 
     HEADERS += \
       protocols/ios_vpnprotocol.h \
+      platforms/ios/iosnotificationhandler.h \
       platforms/ios/json.h \
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
@@ -288,6 +289,7 @@ ios {
   
     SOURCES  += \
       protocols/ios_vpnprotocol.mm \
+      platforms/ios/iosnotificationhandler.mm \
       platforms/ios/json.cpp \
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
