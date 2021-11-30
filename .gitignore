@@ -25,6 +25,7 @@ Makefile*
 *build-*
 
 # Qt-es
+client/Debug-iphoneos/
 client/.xcode/
 client/.qmake.cache
 client/.qmake.stash
@@ -40,7 +41,7 @@ client/ui_*.cpp
 client/Makefile*
 client/*build-*
 client/AmneziaVPN.xcodeproj
-client/Debug-iphonesimulator
+client/Debug-iphonesimulator/
 client/amneziavpn_plugin_import.cpp
 client/amneziavpn_qml_plugin_import.cpp
 client/qmlcache_loader.cpp
