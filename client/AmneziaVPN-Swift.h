@@ -217,7 +217,7 @@ enum ConnectionState : NSInteger;
 SWIFT_CLASS("_TtC10AmneziaVPN18IOSVpnProtocolImpl")
 @interface IOSVpnProtocolImpl : NSObject
 - (nonnull instancetype)initWithBundleID:(NSString * _Nonnull)bundleID privateKey:(NSData * _Nonnull)privateKey deviceIpv4Address:(NSString * _Nonnull)deviceIpv4Address deviceIpv6Address:(NSString * _Nonnull)deviceIpv6Address closure:(void (^ _Nonnull)(enum ConnectionState, NSDate * _Nullable))closure callback:(void (^ _Nonnull)(BOOL))callback OBJC_DESIGNATED_INITIALIZER;
-- (void)connectWithDnsServer:(NSString * _Nonnull)dnsServer serverIpv6Gateway:(NSString * _Nonnull)serverIpv6Gateway serverPublicKey:(NSString * _Nonnull)serverPublicKey serverIpv4AddrIn:(NSString * _Nonnull)serverIpv4AddrIn serverPort:(NSInteger)serverPort allowedIPAddressRanges:(NSArray<VPNIPAddressRange *> * _Nonnull)allowedIPAddressRanges ipv6Enabled:(Boolean)enabled reason:(NSInteger)reason failureCallback:(void (^ _Nonnull)(void))failureCallback;
+- (void)connectWithDnsServer:(NSString * _Nonnull)dnsServer serverIpv6Gateway:(NSString * _Nonnull)serverIpv6Gateway serverPublicKey:(NSString * _Nonnull)serverPublicKey presharedKey:(NSString * _Nonnull)presharedKey serverIpv4AddrIn:(NSString * _Nonnull)serverIpv4AddrIn serverPort:(NSInteger)serverPort allowedIPAddressRanges:(NSArray<VPNIPAddressRange *> * _Nonnull)allowedIPAddressRanges ipv6Enabled:(Boolean)enabled reason:(NSInteger)reason failureCallback:(void (^ _Nonnull)(void))failureCallback;
 - (void)disconnect;
 - (void)checkStatusWithCallback:(void (^ _Nonnull)(NSString * _Nonnull, NSString * _Nonnull, NSString * _Nonnull))callback;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;

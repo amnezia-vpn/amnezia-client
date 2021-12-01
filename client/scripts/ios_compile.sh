@@ -159,15 +159,14 @@ IOS_FLAGS="
   Q_OS_IOS=1
 "
 
-#printn Y "Mode: "
-#if [[ "$RELEASE" ]]; then
-#  print G "release"
-#  MODE="CONFIG-=debug CONFIG+=release CONFIG-=debug_and_release"
-#else
-#  print G "debug"
-#  MODE="CONFIG+=debug CONFIG-=release CONFIG-=debug_and_release"
-#fi
-MODE="CONFIG-=debug CONFIG+=release CONFIG-=debug_and_release"
+printn Y "Mode: "
+if [[ "$RELEASE" ]]; then
+  print G "release"
+  MODE="CONFIG-=debug CONFIG+=release CONFIG-=debug_and_release"
+else
+  print G "debug"
+  MODE="CONFIG+=debug CONFIG-=release CONFIG-=debug_and_release"
+fi
 
 OSRUBY=$OS
 printn Y "OS: "

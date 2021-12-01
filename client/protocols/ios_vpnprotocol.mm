@@ -96,30 +96,29 @@ bool IOSVpnProtocol::initialize()
                 case ConnectionStateError: {
                     [m_controller dealloc];
                     m_controller = nullptr;
-                    emit initialized(false, false, QDateTime());
+                    emit connectionStateChanged(VpnConnectionState::Error);
                     return;
                 }
                 case ConnectionStateConnected: {
                     Q_ASSERT(date);
                     QDateTime qtDate(QDateTime::fromNSDate(date));
-                    emit initialized(true, true, qtDate);
+                    emit connectionStateChanged(VpnConnectionState::Connected);
                     return;
                 }
                 case ConnectionStateDisconnected:
                     // Just in case we are connecting, let's call disconnect.
                     [m_controller disconnect];
-                    emit initialized(true, false, QDateTime());
+                    emit connectionStateChanged(VpnConnectionState::Disconnected);
                     return;
             }
         }
         callback:^(BOOL a_connected) {
             qDebug() << "State changed: " << a_connected;
             if (a_connected) {
-                emit isConnected();
+                emit connectionStateChanged(Connected);
                 return;
             }
-
-            emit isDisconnected();
+//            emit connectionStateChanged(Disconnected);
         }];
     }
     return true;
@@ -176,6 +175,7 @@ ErrorCode IOSVpnProtocol::start()
     [m_controller connectWithDnsServer:dnsServersList.takeFirst().toNSString()
                      serverIpv6Gateway:@"FE80::1"
                        serverPublicKey:serverPubKey.toNSString()
+                          presharedKey:pskKey.toNSString()
                       serverIpv4AddrIn:serverAddr.toNSString()
                             serverPort:port.toInt()
                 allowedIPAddressRanges:allowedIPAddressRangesNS
@@ -183,7 +183,7 @@ ErrorCode IOSVpnProtocol::start()
                                 reason:0
                        failureCallback:^() {
         qDebug() << "IOSVPNProtocol - connection failed";
-        emit isDisconnected();
+        emit connectionStateChanged(Disconnected);
     }];
     return NoError;
 }
@@ -192,7 +192,7 @@ void IOSVpnProtocol::stop()
 {
     if (!m_controller) {
         qDebug() << "Not correctly initialized";
-        emit isDisconnected();
+        emit connectionStateChanged(Disconnected);
         return;
     }
     

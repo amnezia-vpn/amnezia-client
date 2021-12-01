@@ -61,16 +61,19 @@ public class IOSVpnProtocolImpl : NSObject {
 
             let nsManagers = managers ?? []
             Logger.global?.log(message: "We have received \(nsManagers.count) managers.")
+            print("We have received \(nsManagers.count) managers.")
 
             let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
             if tunnel == nil {
                 Logger.global?.log(message: "Creating the tunnel")
+                print("Creating the tunnel")
                 self!.tunnel = NETunnelProviderManager()
                 closure(IOSConnectionState.Disconnected, nil)
                 return
             }
 
             Logger.global?.log(message: "Tunnel already exists")
+            print("Tunnel already exists")
 
             self!.tunnel = tunnel
             if tunnel?.connection.status == .connected {
@@ -87,18 +90,25 @@ public class IOSVpnProtocolImpl : NSObject {
         switch session.status {
         case .connected:
             Logger.global?.log(message: "STATE CHANGED: connected")
+            print("STATE CHANGED: connected")
         case .connecting:
             Logger.global?.log(message: "STATE CHANGED: connecting")
+            print("STATE CHANGED: connecting")
         case .disconnected:
             Logger.global?.log(message: "STATE CHANGED: disconnected")
+            print("STATE CHANGED: disconnected")
         case .disconnecting:
             Logger.global?.log(message: "STATE CHANGED: disconnecting")
+            print("STATE CHANGED: disconnecting")
         case .invalid:
             Logger.global?.log(message: "STATE CHANGED: invalid")
+            print("STATE CHANGED: invalid")
         case .reasserting:
             Logger.global?.log(message: "STATE CHANGED: reasserting")
+            print("STATE CHANGED: reasserting")
         default:
             Logger.global?.log(message: "STATE CHANGED: unknown status")
+            print("STATE CHANGED: unknown status")
         }
 
         // We care about "unknown" state changes.
@@ -129,10 +139,11 @@ public class IOSVpnProtocolImpl : NSObject {
         }
 
         Logger.global?.log(message: "Found the manager with the correct bundle identifier: \(tunnelProto.providerBundleIdentifier!)")
+        print("Found the manager with the correct bundle identifier: \(tunnelProto.providerBundleIdentifier!)")
         return true
     }
 
-    @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
+    @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
         assert(tunnel != nil)
 
@@ -144,6 +155,7 @@ public class IOSVpnProtocolImpl : NSObject {
         let ipv6GatewayIP = IPv6Address(serverIpv6Gateway)
 
         var peerConfiguration = PeerConfiguration(publicKey: keyData)
+        peerConfiguration.preSharedKey = PreSharedKey(base64Key: presharedKey)
         peerConfiguration.endpoint = Endpoint(from: serverIpv4AddrIn + ":\(serverPort )")
         peerConfiguration.allowedIPs = []
 
@@ -168,6 +180,7 @@ public class IOSVpnProtocolImpl : NSObject {
             }
         }
         interface.dns = [ DNSServer(address: dnsServerIP!)]
+        interface.mtu = 1412 // 1280
 
         if (ipv6Enabled) {
             interface.dns.append(DNSServer(address: ipv6GatewayIP!))
@@ -206,6 +219,7 @@ public class IOSVpnProtocolImpl : NSObject {
                 }
 
                 Logger.global?.log(message: "Loading the tunnel succeeded")
+                print("Loading the tunnel succeeded")
 
                 do {
                     if (reason == 1 /* ReasonSwitching */) {
@@ -219,8 +233,10 @@ public class IOSVpnProtocolImpl : NSObject {
                                 Logger.global?.log(message: "Failed to convert response to string")
                                 return
                             }
+                            print("Config sent to NE: \(configString)")
                         }
                     } else {
+                        print("starting tunnel")
                         try (self.tunnel!.connection as? NETunnelProviderSession)?.startTunnel()
                     }
                 } catch let error {

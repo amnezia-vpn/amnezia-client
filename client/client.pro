@@ -299,50 +299,46 @@ ios {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 
-    CONFIG(iphoneos, iphoneos|iphonesimulator) {
-        message("Building for iPhone OS")
-        QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
-        QMAKE_BUNDLE = AmneziaVPN
-        QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
-        QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
-        QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-        QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
-        QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
-
-        XCODEBUILD_FLAGS += -allowProvisioningUpdates
-
-        DEFINES += iphoneos
-
-        contains(QT_ARCH, arm64) {
-            message("Building for iOS/ARM v8 64-bit architecture")
-            ARCH_TAG = "ios_armv8_64"
-
-            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
-        } else {
-            message("Building for iOS/ARM v7 (32-bit) architecture")
-            ARCH_TAG = "ios_armv7"
-        }
-    }
-  
-  CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
-      message("Building for iPhone Simulator")
-      ARCH_TAG = "ios_x86_64"
+#    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+  iphoneos {
+    message("Building for iPhone OS")
+    QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
+    QMAKE_BUNDLE = AmneziaVPN
+    QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+    QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
+    QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
+    QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+    QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
+    QMAKE_INFO_PLIST= $$PWD/ios/app/Info.plist
     
-      DEFINES += iphoneos
+    XCODEBUILD_FLAGS += -allowProvisioningUpdates
     
+    DEFINES += iphoneos
+    
+    contains(QT_ARCH, arm64) {
+      message("Building for iOS/ARM v8 64-bit architecture")
+      ARCH_TAG = "ios_armv8_64"
+      
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+    } else {
+      message("Building for iOS/ARM v7 (32-bit) architecture")
+      ARCH_TAG = "ios_armv7"
+    }
   }
+#    }
+  
 
 #    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
-#        message("Building for iPhone Simulator")
-#        ARCH_TAG = "ios_x86_64"
-#
-#        DEFINES += iphonesimulator
-#
-#        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
-#        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+#  iphonesimulator {
+#    message("Building for iPhone Simulator")
+#    ARCH_TAG = "ios_x86_64"
+#    
+#    DEFINES += iphonesimulator
+#    
+#    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
+#    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+#  }
 #    }
 
     NETWORKEXTENSION=1
