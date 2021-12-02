@@ -36,20 +36,20 @@
 //    return converted_string;
 //}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-static std::string get_founded_route(std::string_view ip_address){
+//static std::string get_founded_route(std::string_view ip_address){
 
-    MIB_IPFORWARDROW br{0};
-    ZeroMemory(&br, sizeof(MIB_IPFORWARDROW));
-    struct in_addr ia;
-    std::string sTmp{};
-    DWORD dwRes = GetBestRoute(inet_addr(ip_address.data()), 0, &br);
-    if( dwRes == NO_ERROR ){
-        ia.S_un.S_addr = (u_long) br.dwForwardDest;
-        sTmp = inet_ntoa(ia);
-        qDebug()<<"Best Route:"<< sTmp.data();
-    }
-    return sTmp;
-}
+//    MIB_IPFORWARDROW br{0};
+//    ZeroMemory(&br, sizeof(MIB_IPFORWARDROW));
+//    struct in_addr ia;
+//    std::string sTmp{};
+//    DWORD dwRes = GetBestRoute(inet_addr(ip_address.data()), 0, &br);
+//    if( dwRes == NO_ERROR ){
+//        ia.S_un.S_addr = (u_long) br.dwForwardDest;
+//        sTmp = inet_ntoa(ia);
+//        qDebug()<<"Best Route:"<< sTmp.data();
+//    }
+//    return sTmp;
+//}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 static std::string get_route_gateway()
 {
@@ -225,7 +225,7 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
         std::string lgw = adapter_iterator->GatewayList.IpAddress.String;
         if (lgw.length() == 0 || lgw.find("0.0.0.0") != std::string::npos)
         {
-            lgw = get_founded_route("8.8.8.8");
+            //lgw = get_founded_route("8.8.8.8");
             if (adapter_iterator->DhcpEnabled == 1)
             {
                 lgw = adapter_iterator->DhcpServer.IpAddress.String;
