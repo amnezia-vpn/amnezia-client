@@ -174,7 +174,7 @@ ErrorCode WireguardProtocol::start()
         setConnectionState(ConnectionState::Connected);
         {
             //TODO:FIXME: without some ugly sleep we have't get a adapter parametrs
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            std::this_thread::sleep_for(std::chrono::seconds(4));
             std::string p1{},p2{};//,p3;
             const auto &ret = adpInfo.get_adapter_info("WireGuard Tunnel");//serviceName().toStdString());//("AmneziaVPN IKEv2");
             if (std::get<0>(ret) == false){

@@ -250,7 +250,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                 stopTimeoutTimer();
                 setConnectionState(VpnProtocol::Connected);
                 {
-                     std::this_thread::sleep_for(std::chrono::seconds(3));
+                    std::this_thread::sleep_for(std::chrono::seconds(4));
                     std::string p1,p2,p3;
                     const auto &ret = adpInfo.get_adapter_info("TAP-Windows Adapter V9");
                     if (std::get<0>(ret) == false){

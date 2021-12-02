@@ -170,7 +170,7 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
         //SetEvent(gEvent_handle);
     {
         //get the network settings of adapters
-         std::this_thread::sleep_for(std::chrono::seconds(3));
+         std::this_thread::sleep_for(std::chrono::seconds(4));
         std::string p1,p2,p3;
         const auto ret = adpInfo.get_adapter_info(tunnelName().toStdString());
         if (std::get<0>(ret) == false){
