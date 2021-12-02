@@ -11,6 +11,20 @@ namespace  adpinfo{
 // {false,""} - no error
 // {true,"descr"} - error with description
 using RET_TYPE = std::tuple<bool, std::string>;
+
+//using ROUTE_TABLE = std::tuple<std::string, std::string, std::string>;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+ * Getting the route table
+*/
+typedef struct route_table{
+    std::string szDestIp;
+    std::string szMaskIp;
+    std::string szGatewayIp;
+    std::string szInterfaceIp;
+}route_table;
+std::vector<std::tuple<std::string,std::string,std::string,std::string>>get_route_table();
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /*
  * The object uses for collect the information about active network adapters/interfaces
@@ -52,6 +66,7 @@ public:
     std::string_view get_adapter_route_gateway()const;
     std::string_view get_adapter_local_address()const;
     std::string_view get_adapter_local_gateway()const;
+
 };
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

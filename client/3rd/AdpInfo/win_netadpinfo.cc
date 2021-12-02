@@ -7,37 +7,48 @@
 #include <cassert>
 
 #include <windows.h>
-//#include <atlbase.h>
-//#include <wbemcli.h>
-//#include <comutil.h>
 #include <iphlpapi.h>
 
 #pragma comment(lib, "iphlpapi.lib")
-//#pragma comment(lib, "wbemuuid.lib")
-//#pragma comment(lib, "comsuppw.lib")
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-static std::string convert_wide_to_ansi(const std::wstring& widestring) {
-    auto nchars = WideCharToMultiByte(
-                CP_ACP,
-                0,
-                widestring.c_str(),
-                static_cast<int>(widestring.length() + 1),
-                nullptr,
-                0,
-                nullptr,
-                nullptr);
-    std::string converted_string{};
-    converted_string.resize(nchars);
-    WideCharToMultiByte(CP_ACP,
-                        0,
-                        widestring.c_str(),
-                        -1,
-                        &converted_string[0],
-            static_cast<int>(widestring.length()),
-            nullptr,
-            nullptr);
-    return converted_string;
+//static std::string convert_wide_to_ansi(const std::wstring& widestring) {
+//    auto nchars = WideCharToMultiByte(
+//                CP_ACP,
+//                0,
+//                widestring.c_str(),
+//                static_cast<int>(widestring.length() + 1),
+//                nullptr,
+//                0,
+//                nullptr,
+//                nullptr);
+//    std::string converted_string{};
+//    converted_string.resize(nchars);
+//    WideCharToMultiByte(CP_ACP,
+//                        0,
+//                        widestring.c_str(),
+//                        -1,
+//                        &converted_string[0],
+//            static_cast<int>(widestring.length()),
+//            nullptr,
+//            nullptr);
+//    return converted_string;
+//}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+static std::string get_founded_route(std::string_view ip_address){
+
+    MIB_IPFORWARDROW br{0};
+    ZeroMemory(&br, sizeof(MIB_IPFORWARDROW));
+    struct in_addr ia;
+    std::string sTmp{};
+    DWORD dwRes = GetBestRoute(inet_addr(ip_address.data()), 0, &br);
+    if( dwRes == NO_ERROR ){
+        ia.S_un.S_addr = (u_long) br.dwForwardDest;
+        sTmp = inet_ntoa(ia);
+        qDebug()<<"Best Route:"<< sTmp.data();
+    }
+    return sTmp;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 static std::string get_route_gateway()
@@ -52,12 +63,9 @@ static std::string get_route_gateway()
 
     DWORD dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     if (dwStatus == ERROR_INSUFFICIENT_BUFFER) {
-        // Allocate the memory for the table
         if (!(pIpForwardTable = (PMIB_IPFORWARDTABLE) malloc(dwSize))) {
-            //printf("Malloc failed. Out of memory.\n");
             return {"Out of memory"};
         }
-        // Now get the table.
         dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
     if (dwStatus != ERROR_SUCCESS) {
@@ -68,7 +76,6 @@ static std::string get_route_gateway()
     const DWORD end = pIpForwardTable->dwNumEntries;
     for (DWORD i = 0; i < end; i++) {
         if (pIpForwardTable->table[i].dwForwardDest == 0) {
-            // We have found the default gateway.
             IpAddr.S_un.S_addr =
                     (u_long) pIpForwardTable->table[i].dwForwardNextHop;
             strcpy_s(szGatewayIp, sizeof (szGatewayIp), inet_ntoa(IpAddr));
@@ -81,6 +88,80 @@ static std::string get_route_gateway()
 
     return route_gateway;
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+static std::string get_interface_ip(DWORD index){
+    std::string _ipaddr{'\0'};
+    std::vector<BYTE> buffer{};
+    IP_ADAPTER_INFO *adapter_info{nullptr};
+    DWORD result{ERROR_BUFFER_OVERFLOW};
+    ULONG buffer_len = sizeof(IP_ADAPTER_INFO) * 10;
+    while (result == ERROR_BUFFER_OVERFLOW){
+        buffer.resize(buffer_len);
+        adapter_info = reinterpret_cast<IP_ADAPTER_INFO*>(&buffer[0]);
+        result = GetAdaptersInfo(adapter_info, &buffer_len);
+        if (result == ERROR_NO_DATA){
+            return _ipaddr;
+        }
+    }//end while
+    if (result != NO_ERROR){
+        return _ipaddr;
+    }
+    IP_ADAPTER_INFO *adapter_iterator = adapter_info;
+    while(adapter_iterator){
+        if (adapter_iterator->Index == index)
+            break;
+        adapter_iterator = adapter_iterator->Next;
+    }//end while
+    if (adapter_iterator != nullptr || adapter_iterator != 0x0 || adapter_iterator != NULL)
+        _ipaddr = std::string(adapter_iterator->IpAddressList.IpAddress.String, 16);
+    else
+        _ipaddr = "127.0.0.1";
+    return _ipaddr;
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+namespace adpinfo {
+std::vector<std::tuple<std::string, std::string, std::string, std::string>>get_route_table(){
+
+    std::vector< std::tuple<std::string, std::string, std::string, std::string >>ret_table{};
+    PMIB_IPFORWARDTABLE p_table{nullptr};
+    struct in_addr ip_addr{};
+    DWORD size{};
+    p_table = (MIB_IPFORWARDTABLE *) HeapAlloc(GetProcessHeap(), 0, (sizeof (MIB_IPFORWARDTABLE)));
+    if (p_table == nullptr)
+    {
+        return ret_table;
+    }
+    if (GetIpForwardTable(p_table, &size, 0) == ERROR_INSUFFICIENT_BUFFER) {
+        HeapFree(GetProcessHeap(), 0, p_table);
+        p_table = (MIB_IPFORWARDTABLE *) HeapAlloc(GetProcessHeap(), 0, size);
+        if (p_table == nullptr) {
+            return ret_table;
+        }
+    }
+    DWORD ret = GetIpForwardTable(p_table, &size, 0);
+    if (ret == NO_ERROR) {
+        const int &numEntries =  static_cast<int>(p_table->dwNumEntries);
+        for (int i = 0; i <numEntries; ++i) {
+            char szDestIp[128]{};
+            char szMaskIp[128]{};
+            char szGatewayIp[128]{};
+            char szInterfaceIp[21]{};
+            ip_addr.S_un.S_addr = (u_long) p_table->table[i].dwForwardDest;
+            strcpy_s(szDestIp, sizeof (szDestIp), inet_ntoa(ip_addr));
+            ip_addr.S_un.S_addr = (u_long) p_table->table[i].dwForwardMask;
+            strcpy_s(szMaskIp, sizeof (szMaskIp), inet_ntoa(ip_addr));
+            ip_addr.S_un.S_addr = (u_long) p_table->table[i].dwForwardNextHop;
+            strcpy_s(szGatewayIp, sizeof (szGatewayIp), inet_ntoa(ip_addr));
+            const auto &ifname = get_interface_ip(p_table->table[i].dwForwardIfIndex);
+            const auto &ifnameSize = ifname.length() + 1;
+            strcpy_s(szInterfaceIp, ifnameSize, ifname.data());
+            const auto &mt = std::make_tuple(std::string(szDestIp), std::string(szMaskIp), std::string(szGatewayIp), std::string(szInterfaceIp));
+            ret_table.emplace_back(mt);
+        }//end for
+    }//end if
+    return ret_table;
+}
+}//end namespace adpinfo
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 namespace adpinfo {
 
@@ -144,13 +225,13 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
         std::string lgw = adapter_iterator->GatewayList.IpAddress.String;
         if (lgw.length() == 0 || lgw.find("0.0.0.0") != std::string::npos)
         {
+            lgw = get_founded_route("8.8.8.8");
             if (adapter_iterator->DhcpEnabled == 1)
             {
                 lgw = adapter_iterator->DhcpServer.IpAddress.String;
             }
         }
         _tmp->set_local_gateway(lgw);
-        //_tmp->set_local_gateway(adapter_iterator->GatewayList.IpAddress.String);
         _tmp->set_route_gateway(get_route_gateway());
         _adapters.emplace_back(_tmp);
         adapter_iterator = adapter_iterator->Next;

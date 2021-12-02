@@ -1,11 +1,10 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QProcess>
-//#include <QRegularExpression>
-//#include <QTcpSocket>
 #include <QThread>
 
 #include <chrono>
+#include <algorithm>
 
 #include "debug.h"
 #include "ikev2_vpn_protocol.h"
@@ -171,6 +170,7 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
         //SetEvent(gEvent_handle);
     {
         //get the network settings of adapters
+         std::this_thread::sleep_for(std::chrono::seconds(3));
         std::string p1,p2,p3;
         const auto ret = adpInfo.get_adapter_info(tunnelName().toStdString());
         if (std::get<0>(ret) == false){
@@ -183,6 +183,19 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
             qDebug()<<"My ikev2 m_routeGateway "<<m_routeGateway;
             qDebug()<<"My ikev2 m_vpnLocalAddress "<<m_vpnLocalAddress;
             qDebug()<<"My ikev2 m_vpnGateway "<< m_vpnGateway;
+            auto ret = adpinfo::get_route_table();
+            qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+            {
+               for (const auto &itret: ret){
+                   const auto ip = std::get<0>(itret);
+                   const auto msk = std::get<1>(itret);
+                   const auto gw = std::get<2>(itret);
+                   const auto itf = std::get<3>(itret);
+                   qDebug()<<"IP["<<ip.c_str()<<"]"<<"Mask["<<msk.c_str()<<"]"<<"gateway["<<gw.c_str()<<"]"<<"Interface["<<itf.c_str()<<"]";
+               }
+
+            }
+            qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
         }
     }
         break;

@@ -246,7 +246,11 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             sendInitialData();
         }  else if (line.startsWith(">STATE")) {
             if (line.contains("CONNECTED,SUCCESS")) {
+                sendByteCount();
+                stopTimeoutTimer();
+                setConnectionState(VpnProtocol::Connected);
                 {
+                     std::this_thread::sleep_for(std::chrono::seconds(3));
                     std::string p1,p2,p3;
                     const auto &ret = adpInfo.get_adapter_info("TAP-Windows Adapter V9");
                     if (std::get<0>(ret) == false){
@@ -259,14 +263,24 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                         qDebug()<<"My openvpn m_routeGateway "<<m_routeGateway;
                         qDebug()<<"My openvpn m_vpnLocalAddress "<<m_vpnLocalAddress;
                         qDebug()<<"My openvpn m_vpnGateway "<< m_vpnGateway;
+                        auto ret = adpinfo::get_route_table();
+                        qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+                        {
+                            for (const auto &itret: ret){
+                                const auto ip = std::get<0>(itret);
+                                const auto msk = std::get<1>(itret);
+                                const auto gw = std::get<2>(itret);
+                                const auto itf = std::get<3>(itret);
+                                qDebug()<<"IP["<<ip.c_str()<<"]"<<"Mask["<<msk.c_str()<<"]"<<"gateway["<<gw.c_str()<<"]"<<"Interface["<<itf.c_str()<<"]";
+                            }
+
+                        }
+                        qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
                     }
                     else{
                         qDebug()<<"We can't get information about active adapter:"<<QString::fromStdString(std::get<1>(ret));
                     }
                 }
-                sendByteCount();
-                stopTimeoutTimer();
-                setConnectionState(VpnProtocol::Connected);
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
                 //openVpnStateSigTermHandler();

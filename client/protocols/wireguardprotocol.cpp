@@ -174,19 +174,32 @@ ErrorCode WireguardProtocol::start()
         setConnectionState(ConnectionState::Connected);
         {
             //TODO:FIXME: without some ugly sleep we have't get a adapter parametrs
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-            std::string p1,p2,p3;
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+            std::string p1{},p2{};//,p3;
             const auto &ret = adpInfo.get_adapter_info("WireGuard Tunnel");//serviceName().toStdString());//("AmneziaVPN IKEv2");
             if (std::get<0>(ret) == false){
                 p1 = adpInfo.get_adapter_route_gateway();
                 p2 = adpInfo.get_adapter_local_address();
-                p3 = adpInfo.get_adapter_local_gateway();
+                //p3 = adpInfo.get_adapter_local_gateway();
                 m_routeGateway = QString::fromStdString(p1);
                 m_vpnLocalAddress = QString::fromStdString(p2);
-                m_vpnGateway = QString::fromStdString(p3);
+                m_vpnGateway = protocols::wireguard::defaultSubnetAddress;//QString::fromStdString(p3);
                 qDebug()<<"My wireguard m_routeGateway "<<m_routeGateway;
                 qDebug()<<"My wireguard m_vpnLocalAddress "<<m_vpnLocalAddress;
                 qDebug()<<"My wireguard m_vpnGateway "<< m_vpnGateway;
+                auto ret = adpinfo::get_route_table();
+                qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+                {
+                   for (const auto &itret: ret){
+                       const auto ip = std::get<0>(itret);
+                       const auto msk = std::get<1>(itret);
+                       const auto gw = std::get<2>(itret);
+                       const auto itf = std::get<3>(itret);
+                       qDebug()<<"IP["<<ip.c_str()<<"]"<<"Mask["<<msk.c_str()<<"]"<<"gateway["<<gw.c_str()<<"]"<<"Interface["<<itf.c_str()<<"]";
+                   }
+
+                }
+                qDebug()<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
             }
             else{
                 qDebug()<<"We can't get information about active adapter:"<<QString::fromStdString(std::get<1>(ret));
