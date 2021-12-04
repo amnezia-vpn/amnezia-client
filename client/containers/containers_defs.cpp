@@ -136,3 +136,32 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     }
 }
 
+bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
+{
+#ifdef Q_OS_WINDOWS
+    return true;
+
+#elif defined (Q_OS_IOS)
+    switch (c) {
+    case DockerContainer::WireGuard: return true;
+    case DockerContainer::OpenVpn: return true;
+    default: return false;
+    }
+#elif defined (Q_OS_MAC)
+    return false;
+
+#elif defined (Q_OS_ANDROID)
+    switch (c) {
+    case DockerContainer::WireGuard: return true;
+    case DockerContainer::OpenVpn: return true;
+    default: return false;
+    }
+
+#elif defined (Q_OS_LINUX)
+    return false;
+
+#else
+return false;
+#endif
+}
+
