@@ -24,7 +24,7 @@ constexpr char containers[] = "containers";
 constexpr char container[] = "container";
 constexpr char defaultContainer[] = "defaultContainer";
 
-constexpr char protocol[] = "protocol";
+constexpr char vpnproto[] = "protocol";
 constexpr char protocols[] = "protocols";
 
 constexpr char remote[] = "remote";
@@ -121,7 +121,7 @@ enum TransportProto {
 };
 Q_ENUM_NS(TransportProto)
 
-enum Protocol {
+enum Proto {
     Any = 0,
     OpenVpn,
     ShadowSocks,
@@ -136,7 +136,7 @@ enum Protocol {
     FileShare,
     Sftp
 };
-Q_ENUM_NS(Protocol)
+Q_ENUM_NS(Proto)
 
 enum ServiceType {
     None = 0,
@@ -153,29 +153,29 @@ class ProtocolProps : public QObject
     Q_OBJECT
 
 public:
-    Q_INVOKABLE static QList<Protocol> allProtocols();
+    Q_INVOKABLE static QList<Proto> allProtocols();
 
     // spelling may differ for various protocols - TCP for OpenVPN, tcp for others
     Q_INVOKABLE static TransportProto transportProtoFromString(QString p);
-    Q_INVOKABLE static QString transportProtoToString(TransportProto proto, Protocol p = Protocol::Any);
+    Q_INVOKABLE static QString transportProtoToString(TransportProto proto, Proto p = Proto::Any);
 
-    Q_INVOKABLE static Protocol protoFromString(QString p);
-    Q_INVOKABLE static QString protoToString(Protocol p);
+    Q_INVOKABLE static Proto protoFromString(QString p);
+    Q_INVOKABLE static QString protoToString(Proto p);
 
-    Q_INVOKABLE static QMap<Protocol, QString> protocolHumanNames();
-    Q_INVOKABLE static QMap<Protocol, QString> protocolDescriptions();
+    Q_INVOKABLE static QMap<Proto, QString> protocolHumanNames();
+    Q_INVOKABLE static QMap<Proto, QString> protocolDescriptions();
 
-    Q_INVOKABLE static ServiceType protocolService(Protocol p);
+    Q_INVOKABLE static ServiceType protocolService(Proto p);
 
-    Q_INVOKABLE static int defaultPort(Protocol p);
-    Q_INVOKABLE static bool defaultPortChangeable(Protocol p);
+    Q_INVOKABLE static int defaultPort(Proto p);
+    Q_INVOKABLE static bool defaultPortChangeable(Proto p);
 
-    Q_INVOKABLE static TransportProto defaultTransportProto(Protocol p);
-    Q_INVOKABLE static bool defaultTransportProtoChangeable(Protocol p);
+    Q_INVOKABLE static TransportProto defaultTransportProto(Proto p);
+    Q_INVOKABLE static bool defaultTransportProtoChangeable(Proto p);
 
 
-    Q_INVOKABLE static QString key_proto_config_data(Protocol p);
-    Q_INVOKABLE static QString key_proto_config_path(Protocol p);
+    Q_INVOKABLE static QString key_proto_config_data(Proto p);
+    Q_INVOKABLE static QString key_proto_config_path(Proto p);
 
 };
 
@@ -207,6 +207,6 @@ static void declareQmlProtocolEnum() {
 
 } // namespace amnezia
 
-QDebug operator<<(QDebug debug, const amnezia::Protocol &p);
+QDebug operator<<(QDebug debug, const amnezia::Proto &p);
 
 #endif // PROTOCOLS_DEFS_H

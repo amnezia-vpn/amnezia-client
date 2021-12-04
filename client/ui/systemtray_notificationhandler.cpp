@@ -74,7 +74,7 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
 }
 
-void SystemTrayNotificationHandler::setConnectionState(VpnProtocol::ConnectionState state)
+void SystemTrayNotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState state)
 {
     setTrayState(state);
     NotificationHandler::setConnectionState(state);
@@ -96,7 +96,7 @@ void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationR
 #endif
 }
 
-void SystemTrayNotificationHandler::setTrayState(VpnProtocol::ConnectionState state)
+void SystemTrayNotificationHandler::setTrayState(VpnProtocol::VpnConnectionState state)
 {
     qDebug() << "SystemTrayNotificationHandler::setTrayState" << state;
     QString resourcesPath = ":/images/tray/%1";

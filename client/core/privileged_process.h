@@ -20,11 +20,11 @@ public:
 
 };
 
-#endif // PRIVILEGED_PROCESS_H
-
 #else // defined Q_OS_IOS
 class IpcProcessInterfaceReplica {};
 class PrivilegedProcess {};
-#endif
+#endif // Q_OS_IOS
+
+#endif // PRIVILEGED_PROCESS_H
 
 

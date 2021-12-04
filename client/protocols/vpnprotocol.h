@@ -20,10 +20,10 @@ public:
     explicit VpnProtocol(const QJsonObject& configuration, QObject* parent = nullptr);
     virtual ~VpnProtocol() override = default;
 
-    enum ConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, Reconnecting, Error};
-    Q_ENUM(ConnectionState)
+    enum VpnConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, Reconnecting, Error};
+    Q_ENUM(VpnConnectionState)
 
-    static QString textConnectionState(ConnectionState connectionState);
+    static QString textConnectionState(VpnConnectionState connectionState);
 
     virtual ErrorCode prepare() { return ErrorCode::NoError; }
 
@@ -32,7 +32,7 @@ public:
     virtual ErrorCode start() = 0;
     virtual void stop() = 0;
 
-    ConnectionState connectionState() const;
+    VpnConnectionState connectionState() const;
     ErrorCode lastError() const;
     QString textConnectionState() const;
     void setLastError(ErrorCode lastError);
@@ -44,7 +44,7 @@ public:
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void connectionStateChanged(VpnProtocol::ConnectionState state);
+    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
@@ -52,13 +52,14 @@ public slots:
     virtual void onTimeout(); // todo: remove?
 
     void setBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void setConnectionState(VpnProtocol::ConnectionState state);
+    void setConnectionState(VpnProtocol::VpnConnectionState state);
 
 protected:
     void startTimeoutTimer();
     void stopTimeoutTimer();
 
-    ConnectionState m_connectionState;
+    VpnConnectionState m_connectionState;
+
     QString m_routeGateway;
     QString m_vpnLocalAddress;
     QString m_vpnGateway;

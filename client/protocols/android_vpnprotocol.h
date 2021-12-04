@@ -16,7 +16,7 @@ class AndroidVpnProtocol : public VpnProtocol
     Q_OBJECT
 
 public:
-    explicit AndroidVpnProtocol(Protocol protocol, const QJsonObject& configuration, QObject* parent = nullptr);
+    explicit AndroidVpnProtocol(Proto protocol, const QJsonObject& configuration, QObject* parent = nullptr);
     virtual ~AndroidVpnProtocol() override = default;
 
     ErrorCode start() override;
@@ -31,7 +31,7 @@ protected:
 
 
 private:
-    Protocol m_protocol;
+    Proto m_protocol;
 
 };
 

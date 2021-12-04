@@ -29,7 +29,7 @@ void ServerContainersLogic::onUpdatePage()
     emit updatePage();
 }
 
-void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, Protocol p)
+void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, Proto p)
 {
     qDebug()<< "ServerContainersLogic::onPushButtonProtoSettingsClicked" << c << p;
     uiLogic()->selectedDockerContainer = c;

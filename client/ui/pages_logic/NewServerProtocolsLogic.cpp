@@ -18,7 +18,7 @@ void NewServerProtocolsLogic::onUpdatePage()
 void NewServerProtocolsLogic::onPushButtonConfigureClicked(DockerContainer c, int port, TransportProto tp)
 {
     QMap<DockerContainer, QJsonObject> containers;
-    Protocol mainProto = ContainerProps::defaultProtocol(c);
+    Proto mainProto = ContainerProps::defaultProtocol(c);
 
     QJsonObject config {
         { config_key::container, ContainerProps::containerToString(c) },

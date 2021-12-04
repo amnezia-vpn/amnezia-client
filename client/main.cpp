@@ -116,15 +116,15 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(false);
 
-    qRegisterMetaType<VpnProtocol::ConnectionState>("VpnProtocol::ConnectionState");
+    qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
     qRegisterMetaType<DockerContainer>("DockerContainer");
     qRegisterMetaType<TransportProto>("TransportProto");
-    qRegisterMetaType<Protocol>("Protocol");
+    qRegisterMetaType<Proto>("Proto");
     qRegisterMetaType<ServiceType>("ServiceType");
     qRegisterMetaType<Page>("Page");
-    qRegisterMetaType<VpnProtocol::ConnectionState>("ConnectionState");
+    qRegisterMetaType<VpnProtocol::VpnConnectionState>("ConnectionState");
 
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     engine->rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
     engine->rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
     engine->rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
-    engine->rootContext()->setContextProperty("ServerContainersLogic", uiLogic->serverVpnProtocolsLogic());
+    engine->rootContext()->setContextProperty("ServerContainersLogic", uiLogic->serverprotocolsLogic());
     engine->rootContext()->setContextProperty("ShareConnectionLogic", uiLogic->shareConnectionLogic());
     engine->rootContext()->setContextProperty("SitesLogic", uiLogic->sitesLogic());
     engine->rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());

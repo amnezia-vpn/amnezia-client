@@ -27,29 +27,29 @@ QString ContainerProps::containerToString(amnezia::DockerContainer c){
     return "amnezia-" + containerKey.toLower();
 }
 
-QVector<amnezia::Protocol> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
+QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
 {
     switch (container) {
     case DockerContainer::None:
         return { };
 
     case DockerContainer::OpenVpn:
-        return { Protocol::OpenVpn };
+        return { Proto::OpenVpn };
 
     case DockerContainer::ShadowSocks:
-        return { Protocol::OpenVpn, Protocol::ShadowSocks };
+        return { Proto::OpenVpn, Proto::ShadowSocks };
 
     case DockerContainer::Cloak:
-        return { Protocol::OpenVpn, Protocol::ShadowSocks, Protocol::Cloak };
+        return { Proto::OpenVpn, Proto::ShadowSocks, Proto::Cloak };
 
     case DockerContainer::Ipsec:
-        return { Protocol::Ikev2 /*, Protocol::L2tp */};
+        return { Proto::Ikev2 /*, Protocol::L2tp */};
 
     case DockerContainer::Dns:
         return { };
 
     case DockerContainer::Sftp:
-        return { Protocol::Sftp};
+        return { Proto::Sftp};
 
     default:
         return { defaultProtocol(container) };
@@ -118,21 +118,21 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     }
 }
 
-Protocol ContainerProps::defaultProtocol(DockerContainer c)
+Proto ContainerProps::defaultProtocol(DockerContainer c)
 {
     switch (c) {
-    case DockerContainer::None :         return Protocol::Any;
-    case DockerContainer::OpenVpn :      return Protocol::OpenVpn;
-    case DockerContainer::Cloak :        return Protocol::Cloak;
-    case DockerContainer::ShadowSocks :  return Protocol::ShadowSocks;
-    case DockerContainer::WireGuard :    return Protocol::WireGuard;
-    case DockerContainer::Ipsec :        return Protocol::Ikev2;
+    case DockerContainer::None :         return Proto::Any;
+    case DockerContainer::OpenVpn :      return Proto::OpenVpn;
+    case DockerContainer::Cloak :        return Proto::Cloak;
+    case DockerContainer::ShadowSocks :  return Proto::ShadowSocks;
+    case DockerContainer::WireGuard :    return Proto::WireGuard;
+    case DockerContainer::Ipsec :        return Proto::Ikev2;
 
-    case DockerContainer::TorWebSite :   return Protocol::TorWebSite;
-    case DockerContainer::Dns :          return Protocol::Dns;
+    case DockerContainer::TorWebSite :   return Proto::TorWebSite;
+    case DockerContainer::Dns :          return Proto::Dns;
     //case DockerContainer::FileShare :    return Protocol::FileShare;
-    case DockerContainer::Sftp :         return Protocol::Sftp;
-    default:                             return Protocol::Any;
+    case DockerContainer::Sftp :         return Proto::Sftp;
+    default:                             return Proto::Any;
     }
 }
 
@@ -140,7 +140,6 @@ bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
 {
 #ifdef Q_OS_WINDOWS
     return true;
-#elif defined (Q_OS_MAC)
 
 #elif defined (Q_OS_IOS)
     switch (c) {
@@ -148,6 +147,9 @@ bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
     case DockerContainer::OpenVpn: return true;
     default: return false;
     }
+#elif defined (Q_OS_MAC)
+    return false;
+
 #elif defined (Q_OS_ANDROID)
     switch (c) {
     case DockerContainer::WireGuard: return true;
@@ -156,6 +158,7 @@ bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
     }
 
 #elif defined (Q_OS_LINUX)
+    return false;
 
 #else
 return false;

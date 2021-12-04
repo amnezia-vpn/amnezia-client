@@ -56,7 +56,7 @@ NotificationHandler::~NotificationHandler() {
     s_instance = nullptr;
 }
 
-void NotificationHandler::setConnectionState(VpnProtocol::ConnectionState state)
+void NotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState state)
 {
     if (state != VpnProtocol::Connected && state != VpnProtocol::Disconnected) {
         return;
@@ -66,14 +66,14 @@ void NotificationHandler::setConnectionState(VpnProtocol::ConnectionState state)
     QString message;
 
     switch (state) {
-    case VpnProtocol::ConnectionState::Connected:
+    case VpnProtocol::VpnConnectionState::Connected:
         m_connected = true;
 
         title = tr("AmneziaVPN");
         message = tr("VPN Connected");
         break;
 
-    case VpnProtocol::ConnectionState::Disconnected:
+    case VpnProtocol::VpnConnectionState::Disconnected:
         if (m_connected) {
             m_connected = false;
             title = tr("AmneziaVPN");

@@ -20,7 +20,7 @@
 #include "platforms/android/android_controller.h"
 
 
-AndroidVpnProtocol::AndroidVpnProtocol(Protocol protocol, const QJsonObject &configuration, QObject* parent)
+AndroidVpnProtocol::AndroidVpnProtocol(Proto protocol, const QJsonObject &configuration, QObject* parent)
     : VpnProtocol(configuration, parent),
       m_protocol(protocol)
 {

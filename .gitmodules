@@ -4,3 +4,6 @@
 [submodule "client/3rd/wireguard-tools"]
 	path = client/3rd/wireguard-tools
 	url = https://github.com/WireGuard/wireguard-tools/
+[submodule "client/3rd/wireguard-apple"]
+	path = client/3rd/wireguard-apple
+	url = https://github.com/WireGuard/wireguard-apple
