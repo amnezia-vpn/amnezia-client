@@ -18,22 +18,22 @@ Settings &VpnConfigurator::m_settings()
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, Protocol proto, ErrorCode *errorCode)
+    DockerContainer container, const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode)
 {
     switch (proto) {
-    case Protocol::OpenVpn:
+    case Proto::OpenVpn:
         return OpenVpnConfigurator::genOpenVpnConfig(credentials, container, containerConfig, errorCode);
 
-    case Protocol::ShadowSocks:
+    case Proto::ShadowSocks:
         return ShadowSocksConfigurator::genShadowSocksConfig(credentials, container, containerConfig, errorCode);
 
-    case Protocol::Cloak:
+    case Proto::Cloak:
         return CloakConfigurator::genCloakConfig(credentials, container, containerConfig, errorCode);
 
-    case Protocol::WireGuard:
+    case Proto::WireGuard:
         return WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, errorCode);
 
-    case Protocol::Ikev2:
+    case Proto::Ikev2:
         return Ikev2Configurator::genIkev2Config(credentials, container, containerConfig, errorCode);
 
     default:
@@ -41,23 +41,23 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     }
 }
 
-QString VpnConfigurator::processConfigWithLocalSettings(DockerContainer container, Protocol proto, QString config)
+QString VpnConfigurator::processConfigWithLocalSettings(DockerContainer container, Proto proto, QString config)
 {
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    if (proto == Protocol::OpenVpn) {
+    if (proto == Proto::OpenVpn) {
         return OpenVpnConfigurator::processConfigWithLocalSettings(config);
     }
     return config;
 }
 
-QString VpnConfigurator::processConfigWithExportSettings(DockerContainer container, Protocol proto, QString config)
+QString VpnConfigurator::processConfigWithExportSettings(DockerContainer container, Proto proto, QString config)
 {
     config.replace("$PRIMARY_DNS", m_settings().primaryDns());
     config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
 
-    if (proto == Protocol::OpenVpn) {
+    if (proto == Proto::OpenVpn) {
         return OpenVpnConfigurator::processConfigWithExportSettings(config);
     }
     return config;
@@ -66,7 +66,7 @@ QString VpnConfigurator::processConfigWithExportSettings(DockerContainer contain
 void VpnConfigurator::updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig,
     const QString &stdOut)
 {
-    Protocol mainProto = ContainerProps::defaultProtocol(container);
+    Proto mainProto = ContainerProps::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
         QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();

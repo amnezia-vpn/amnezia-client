@@ -39,7 +39,7 @@ public:
     void setVpnConfig(const QJsonObject &newVpnConfig);
 
 signals:
-    void connectionStateChanged(VpnProtocol::ConnectionState state);
+    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
 
     // This signal is emitted when the controller is initialized. Note that the
     // VPN tunnel can be already active. In this case, "connected" should be set

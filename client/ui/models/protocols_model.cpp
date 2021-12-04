@@ -28,7 +28,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    Protocol p = ProtocolProps::allProtocols().at(index.row());
+    Proto p = ProtocolProps::allProtocols().at(index.row());
     if (role == NameRole) {
         return ProtocolProps::protocolHumanNames().value(p);
     }

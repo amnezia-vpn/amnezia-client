@@ -57,10 +57,16 @@ ios: {
             ARCH_TAG = "ios_armv7"
         }
     }
+  
+  CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+      INCLUDEPATH += $$PWD/ios/iphone
+      HEADERS += $$PWD/ios/iphone/botan_all.h
+      SOURCES += $$PWD/ios/iphone/botan_all.cpp
+  }
 
-    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
-        INCLUDEPATH += $$PWD/ios/simulator
-        HEADERS += $$PWD/ios/simulator/botan_all.h
-        SOURCES += $$PWD/ios/simulator/botan_all.cpp
-    }
+#    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+#        INCLUDEPATH += $$PWD/ios/simulator
+#        HEADERS += $$PWD/ios/simulator/botan_all.h
+#        SOURCES += $$PWD/ios/simulator/botan_all.cpp
+#    }
 }

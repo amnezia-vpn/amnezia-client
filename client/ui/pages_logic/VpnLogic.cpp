@@ -78,7 +78,7 @@ void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
     set_labelSpeedSentText(VpnConnection::bytesPerSecToText(sentData));
 }
 
-void VpnLogic::onConnectionStateChanged(VpnProtocol::ConnectionState state)
+void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
 {
     qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
 

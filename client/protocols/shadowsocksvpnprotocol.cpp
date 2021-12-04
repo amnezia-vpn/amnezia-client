@@ -75,7 +75,7 @@ ErrorCode ShadowSocksVpnProtocol::start()
     m_ssProcess.waitForStarted();
 
     if (m_ssProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(ConnectionState::Connecting);
+        setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }
@@ -112,5 +112,5 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 
 void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &configuration)
 {
-    m_shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Protocol::ShadowSocks)).toObject();
+    m_shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::ShadowSocks)).toObject();
 }

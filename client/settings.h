@@ -52,10 +52,10 @@ public:
     void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
     void removeContainerConfig(int serverIndex, DockerContainer container);
 
-    QJsonObject protocolConfig(int serverIndex, DockerContainer container, Protocol proto);
-    void setProtocolConfig(int serverIndex, DockerContainer container, Protocol proto, const QJsonObject &config);
+    QJsonObject protocolConfig(int serverIndex, DockerContainer container, Proto proto);
+    void setProtocolConfig(int serverIndex, DockerContainer container, Proto proto, const QJsonObject &config);
 
-    void clearLastConnectionConfig(int serverIndex, DockerContainer container, Protocol proto = Protocol::Any);
+    void clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto = Proto::Any);
 
     bool haveAuthData(int serverIndex) const;
     QString nextAvailableServerName() const;

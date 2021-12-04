@@ -12,7 +12,7 @@ class ServerContainersLogic : public PageLogicBase
 public:
     Q_INVOKABLE void onUpdatePage() override;
 
-    Q_INVOKABLE void onPushButtonProtoSettingsClicked(DockerContainer c, Protocol p);
+    Q_INVOKABLE void onPushButtonProtoSettingsClicked(DockerContainer c, Proto p);
     Q_INVOKABLE void onPushButtonDefaultClicked(DockerContainer c);
     Q_INVOKABLE void onPushButtonShareClicked(DockerContainer c);
     Q_INVOKABLE void onPushButtonRemoveClicked(DockerContainer c);

@@ -46,13 +46,15 @@ public:
     Q_INVOKABLE static QMap<DockerContainer, QString> containerDescriptions();
 
     // these protocols will be displayed in container settings
-    Q_INVOKABLE static QVector<Protocol> protocolsForContainer(DockerContainer container);
+    Q_INVOKABLE static QVector<Proto> protocolsForContainer(DockerContainer container);
 
     Q_INVOKABLE static ServiceType containerService(DockerContainer c);
 
     // binding between Docker container and main protocol of given container
     // it may be changed fot future containers :)
-    Q_INVOKABLE static Protocol defaultProtocol(DockerContainer c);
+    Q_INVOKABLE static Proto defaultProtocol(DockerContainer c);
+
+    Q_INVOKABLE static bool isWorkingOnPlatform(DockerContainer c);
 };
 
 

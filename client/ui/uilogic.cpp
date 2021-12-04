@@ -88,21 +88,21 @@ UiLogic::UiLogic(QObject *parent) :
     m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);
-    m_serverVpnProtocolsLogic = new ServerContainersLogic(this);
+    m_serverprotocolsLogic = new ServerContainersLogic(this);
     m_shareConnectionLogic = new ShareConnectionLogic(this);
     m_sitesLogic = new SitesLogic(this);
     m_startPageLogic = new StartPageLogic(this);
     m_vpnLogic = new VpnLogic(this);
     m_wizardLogic = new WizardLogic(this);
 
-    m_protocolLogicMap.insert(Protocol::OpenVpn, new OpenVpnLogic(this));
-    m_protocolLogicMap.insert(Protocol::ShadowSocks, new ShadowSocksLogic(this));
-    m_protocolLogicMap.insert(Protocol::Cloak, new CloakLogic(this));
-    //m_protocolLogicMap->insert(Protocol::WireGuard, new WireguardLogic(this));
+    m_protocolLogicMap.insert(Proto::OpenVpn, new OpenVpnLogic(this));
+    m_protocolLogicMap.insert(Proto::ShadowSocks, new ShadowSocksLogic(this));
+    m_protocolLogicMap.insert(Proto::Cloak, new CloakLogic(this));
+    //m_protocolLogicMap->insert(Proto::WireGuard, new WireguardLogic(this));
 
-    m_protocolLogicMap.insert(Protocol::Dns, new OtherProtocolsLogic(this));
-    m_protocolLogicMap.insert(Protocol::Sftp, new OtherProtocolsLogic(this));
-    m_protocolLogicMap.insert(Protocol::TorWebSite, new OtherProtocolsLogic(this));
+    m_protocolLogicMap.insert(Proto::Dns, new OtherProtocolsLogic(this));
+    m_protocolLogicMap.insert(Proto::Sftp, new OtherProtocolsLogic(this));
+    m_protocolLogicMap.insert(Proto::TorWebSite, new OtherProtocolsLogic(this));
 
 }
 
@@ -110,7 +110,7 @@ UiLogic::~UiLogic()
 {
     emit hide();
 
-    if (m_vpnConnection->connectionState() != VpnProtocol::ConnectionState::Disconnected) {
+    if (m_vpnConnection->connectionState() != VpnProtocol::VpnConnectionState::Disconnected) {
         m_vpnConnection->disconnectFromVpn();
         for (int i = 0; i < 50; i++) {
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -176,7 +176,7 @@ void UiLogic::initalizeUiLogic()
     selectedServerIndex = m_settings.defaultServerIndex();
     //goToPage(Page::ServerContainers, true, false);
     //goToPage(Page::NewServerProtocols, true, false);
-    //onGotoProtocolPage(Protocol::OpenVpn);
+    //onGotoProtocolPage(Proto::OpenVpn);
 
 
     //ui->pushButton_general_settings_exit->hide();
@@ -241,7 +241,7 @@ void UiLogic::onUpdateAllPages()
          (PageLogicBase *) m_newServerProtocolsLogic,
          (PageLogicBase *) m_serverListLogic,
          (PageLogicBase *) m_serverSettingsLogic,
-         (PageLogicBase *) m_serverVpnProtocolsLogic,
+         (PageLogicBase *) m_serverprotocolsLogic,
          (PageLogicBase *) m_shareConnectionLogic,
          (PageLogicBase *) m_sitesLogic,
          (PageLogicBase *) m_startPageLogic,
@@ -615,7 +615,8 @@ ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
     return ErrorCode::NoError;
 }
 
-PageProtocolLogicBase *UiLogic::protocolLogic(Protocol p) {
+PageProtocolLogicBase *UiLogic::protocolLogic(Proto p)
+{
     PageProtocolLogicBase *logic = m_protocolLogicMap.value(p);
     if (logic) return logic;
     else {

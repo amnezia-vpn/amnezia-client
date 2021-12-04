@@ -92,8 +92,8 @@ public:
     Q_INVOKABLE QString containerDesc(int container);
 
     Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoShareProtocolPage(Protocol p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
+    Q_INVOKABLE void onGotoProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
+    Q_INVOKABLE void onGotoShareProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
 
     Q_INVOKABLE void onGotoCurrentProtocolsPage();
 
@@ -110,8 +110,8 @@ signals:
     void dialogConnectErrorTextChanged();
 
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
-    void goToProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
-    void goToShareProtocolPage(Protocol protocol, bool reset = true, bool slide = true);
+    void goToProtocolPage(Proto protocol, bool reset = true, bool slide = true);
+    void goToShareProtocolPage(Proto protocol, bool reset = true, bool slide = true);
 
     void closePage();
     void setStartPage(PageEnumNS::Page page, bool slide = true);
@@ -127,7 +127,6 @@ private:
 private slots:
     // containers - INOUT arg
     void installServer(QMap<DockerContainer, QJsonObject> &containers);
-
 
 private:
     PageEnumNS::Page currentPage();
@@ -172,14 +171,14 @@ public:
     NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
     ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
-    ServerContainersLogic *serverVpnProtocolsLogic()        { return m_serverVpnProtocolsLogic; }
+    ServerContainersLogic *serverprotocolsLogic()        { return m_serverprotocolsLogic; }
     ShareConnectionLogic *shareConnectionLogic()            { return m_shareConnectionLogic; }
     SitesLogic *sitesLogic()                                { return m_sitesLogic; }
     StartPageLogic *startPageLogic()                        { return m_startPageLogic; }
     VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
     WizardLogic *wizardLogic()                              { return m_wizardLogic; }
 
-    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Protocol p);
+    Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);
 
     QObject *qmlRoot() const;
     void setQmlRoot(QObject *newQmlRoot);
@@ -196,14 +195,14 @@ private:
     NewServerProtocolsLogic *m_newServerProtocolsLogic;
     ServerListLogic *m_serverListLogic;
     ServerSettingsLogic *m_serverSettingsLogic;
-    ServerContainersLogic *m_serverVpnProtocolsLogic;
+    ServerContainersLogic *m_serverprotocolsLogic;
     ShareConnectionLogic *m_shareConnectionLogic;
     SitesLogic *m_sitesLogic;
     StartPageLogic *m_startPageLogic;
     VpnLogic *m_vpnLogic;
     WizardLogic *m_wizardLogic;
 
-    QMap<Protocol, PageProtocolLogicBase *> m_protocolLogicMap;
+    QMap<Proto, PageProtocolLogicBase *> m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
     QThread m_vpnConnectionThread;

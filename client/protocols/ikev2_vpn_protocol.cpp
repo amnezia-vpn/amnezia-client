@@ -211,7 +211,7 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
 
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
-    m_config = configuration.value(ProtocolProps::key_proto_config_data(Protocol::Ikev2)).toObject();
+    m_config = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
 }
 
 ErrorCode Ikev2Protocol::start()

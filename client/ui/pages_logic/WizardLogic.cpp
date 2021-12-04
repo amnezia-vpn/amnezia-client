@@ -22,7 +22,7 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
 {
     QJsonObject cloakConfig {
         { config_key::container, ContainerProps::containerToString(DockerContainer::Cloak) },
-        { ProtocolProps::protoToString(Protocol::Cloak), QJsonObject {
+        { ProtocolProps::protoToString(Proto::Cloak), QJsonObject {
                 { config_key::site, lineEditHighWebsiteMaskingText() }}
         }
     };

@@ -71,6 +71,10 @@ HEADERS  += \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
+    logger.h \
+    loghandler.h \
+    loglevel.h \
+    constants.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -121,6 +125,9 @@ SOURCES  += \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
+    logger.cpp \
+    loghandler.cpp
+
 
 RESOURCES += \
     resources.qrc
@@ -129,6 +136,8 @@ TRANSLATIONS = \
     translations/amneziavpn_ru.ts
 
 win32 {
+    DEFINES += MVPN_WINDOWS
+
     OTHER_FILES += platform_win/vpnclient.rc
     RC_FILE = platform_win/vpnclient.rc
 
@@ -164,6 +173,8 @@ win32 {
 }
 
 macx {
+    DEFINES += MVPN_MACOS
+
     ICON   = $$PWD/images/app.icns
 
     HEADERS  += ui/macos_util.h
@@ -176,6 +187,8 @@ macx {
 }
 
 linux:!android {
+    DEFINES += MVPN_LINUX
+
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
 }
@@ -201,6 +214,7 @@ win32|macx|linux:!android {
 
 android {
    QT += androidextras
+   DEFINES += MVPN_ANDROID
 
    INCLUDEPATH += platforms/android
 
@@ -252,46 +266,90 @@ android {
 ios {
     message("Client ios build")
     CONFIG += static
+    CONFIG += file_copies
+
+    # For the authentication
+    LIBS += -framework AuthenticationServices
+
+    # For notifications
+    LIBS += -framework UIKit
+    LIBS += -framework Foundation
+    LIBS += -framework StoreKit
+    LIBS += -framework UserNotifications
+
+    DEFINES += MVPN_IOS
+
+    HEADERS += \
+      protocols/ios_vpnprotocol.h \
+      platforms/ios/iosnotificationhandler.h \
+      platforms/ios/json.h \
+      platforms/ios/bigint.h \
+      platforms/ios/bigintipv6addr.h \
+      platforms/ios/ipaddress.h \
+      platforms/ios/ipaddressrange.h
+  
+    SOURCES  += \
+      protocols/ios_vpnprotocol.mm \
+      platforms/ios/iosnotificationhandler.mm \
+      platforms/ios/json.cpp \
+      platforms/ios/iosglue.mm \
+      platforms/ios/ipaddress.cpp \
+      platforms/ios/ipaddressrange.cpp
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 
-    CONFIG(iphoneos, iphoneos|iphonesimulator) {
-        message("Building for iPhone OS")
-        QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
-        QMAKE_BUNDLE = AmneziaVPN
-        QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
-        QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
-        QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-        QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
-        QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
-
-        XCODEBUILD_FLAGS += -allowProvisioningUpdates
-
-        DEFINES += iphoneos
-
-        contains(QT_ARCH, arm64) {
-            message("Building for iOS/ARM v8 64-bit architecture")
-            ARCH_TAG = "ios_armv8_64"
-
-            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-            LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
-        } else {
-            message("Building for iOS/ARM v7 (32-bit) architecture")
-            ARCH_TAG = "ios_armv7"
-        }
+#    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+  iphoneos {
+    message("Building for iPhone OS")
+    QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
+    QMAKE_BUNDLE = AmneziaVPN
+    QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+    QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
+    QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
+    QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+    QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
+    QMAKE_INFO_PLIST= $$PWD/ios/app/Info.plist
+    
+    XCODEBUILD_FLAGS += -allowProvisioningUpdates
+    
+    DEFINES += iphoneos
+    
+    contains(QT_ARCH, arm64) {
+      message("Building for iOS/ARM v8 64-bit architecture")
+      ARCH_TAG = "ios_armv8_64"
+      
+      LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
+      LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+    } else {
+      message("Building for iOS/ARM v7 (32-bit) architecture")
+      ARCH_TAG = "ios_armv7"
     }
+  }
+#    }
+  
 
-    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
-        message("Building for iPhone Simulator")
-        ARCH_TAG = "ios_x86_64"
+#    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+#  iphonesimulator {
+#    message("Building for iPhone Simulator")
+#    ARCH_TAG = "ios_x86_64"
+#    
+#    DEFINES += iphonesimulator
+#    
+#    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
+#    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
+#  }
+#    }
 
-        DEFINES += iphonesimulator
+    NETWORKEXTENSION=1
+#    ! build_pass: system(ruby $$PWD/scripts/xcode_patcher.rb "$$PWD" "$$OUT_PWD/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "$$NETWORKEXTENSION"|| echo "Failed to merge xcode with wireguard")
 
-        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
-        LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
-    }
+
+
+#ruby %{sourceDir}/client/ios/xcode_patcher.rb "%{buildDir}/AmneziaVPN.xcodeproj" "2.0" "2.0.0" "ios" "1"
+    #cd client/ && /Users/md/Qt/5.15.2/ios/bin/qmake -o Makefile /Users/md/amnezia/desktop-client/client/client.pro -spec macx-ios-clang CONFIG+=iphonesimulator CONFIG+=simulator CONFIG+=qml_debug -after
+# %{sourceDir}/client/ios/xcode_patcher.rb %{buildDir}/client/AmneziaVPN.xcodeproj 2.0 2.0.0 ios 1
 }
 
 
