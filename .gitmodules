@@ -7,3 +7,6 @@
 [submodule "client/3rd/wireguard-apple"]
 	path = client/3rd/wireguard-apple
 	url = https://github.com/WireGuard/wireguard-apple
+[submodule "client/3rd/OpenVPNAdapter"]
+	path = client/3rd/OpenVPNAdapter
+	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git

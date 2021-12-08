@@ -39,6 +39,26 @@ error() {
   printv '' R "$1"
 }
 
+XCODEBUILD="/usr/bin/xcodebuild"
+WORKINGDIR=`pwd`
+
+compile_openvpn_adapter() {
+  cd 3rd/OpenVPNAdapter
+  
+  $XCODEBUILD -scheme OpenVPNAdapter -configuration Debug -xcconfig Configuration/amnezia.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project OpenVPNAdapter.xcodeproj
+  
+  cd ../../
+}
+
+prepare_to_build_vpn() {
+  cat $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/Project.xcconfig > $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig 
+  cat << EOF >> $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig 
+  PROJECT_TEMP_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/OpenVPNAdapter.build
+  CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Debug-iphoneos
+  BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Debug-iphoneos  
+EOF
+}
+
 die() {
   if [[ "$1" ]]; then
     error "$1"

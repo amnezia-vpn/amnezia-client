@@ -276,6 +276,11 @@ ios {
     LIBS += -framework StoreKit
     LIBS += -framework UserNotifications
 
+#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework
+#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework
+#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework
+#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework
+
     DEFINES += MVPN_IOS
 
     HEADERS += \
@@ -309,7 +314,7 @@ ios {
     QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
     QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
     QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
-    QMAKE_INFO_PLIST= $$PWD/ios/app/Info.plist
+    QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
     
     XCODEBUILD_FLAGS += -allowProvisioningUpdates
     

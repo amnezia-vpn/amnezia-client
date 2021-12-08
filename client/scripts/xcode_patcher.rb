@@ -61,7 +61,8 @@ class XCodeprojPatcher
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/app/WireGuard-Bridging-Header.h'
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
-        "$(PROJECT_DIR)/3rd"
+        "$(PROJECT_DIR)/3rd",
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
       ]
 
       # Versions and names
@@ -251,6 +252,11 @@ class XCodeprojPatcher
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+      config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
+        "$(inherited)",
+        "$(PROJECT_DIR)/3rd",
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
+      ]
 
       # Versions and names
       config.build_settings['MARKETING_VERSION'] ||= shortVersion
@@ -349,6 +355,18 @@ class XCodeprojPatcher
     frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
 
     # This fails: @target_main.add_dependency @target_extension
