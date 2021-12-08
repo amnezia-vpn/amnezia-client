@@ -46,7 +46,7 @@ public class IOSVpnProtocolImpl : NSObject {
         
         stateChangeCallback = callback
         
-        
+        NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(self.vpnStatusDidChange(notification:)),
                                                name: Notification.Name.NEVPNStatusDidChange,
@@ -70,15 +70,15 @@ public class IOSVpnProtocolImpl : NSObject {
 
             let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
             
-            if let name = tunnel?.localizedDescription, name == vpnName {
-                tunnel?.removeFromPreferences(completionHandler: { removeError in
-                    if let error = removeError {
-                        Logger.global?.log(message: "WireguardVPN Tunnel Remove from Prefs Error: \(error)")
-                        closure(ConnectionState.Error, nil)
-                        return
-                    }
-                })
-            }
+//            if let name = tunnel?.localizedDescription, name == vpnName {
+//                tunnel?.removeFromPreferences(completionHandler: { removeError in
+//                    if let error = removeError {
+//                        Logger.global?.log(message: "WireguardVPN Tunnel Remove from Prefs Error: \(error)")
+//                        closure(ConnectionState.Error, nil)
+//                        return
+//                    }
+//                })
+//            }
             
             if tunnel == nil {
                 Logger.global?.log(message: "Creating the tunnel")
@@ -117,6 +117,8 @@ public class IOSVpnProtocolImpl : NSObject {
         self.privateKey = PrivateKey(rawValue: privateKey)
         self.deviceIpv4Address = deviceIpv4Address
         self.deviceIpv6Address = deviceIpv6Address
+        
+        NotificationCenter.default.removeObserver(self)
 
         NotificationCenter.default.addObserver(self, selector: #selector(self.vpnStatusDidChange(notification:)), name: Notification.Name.NEVPNStatusDidChange, object: nil)
 
@@ -138,15 +140,15 @@ public class IOSVpnProtocolImpl : NSObject {
 
             let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
             
-            if let name = tunnel?.localizedDescription, name != vpnName {
-                tunnel?.removeFromPreferences(completionHandler: { removeError in
-                    if let error = removeError {
-                        Logger.global?.log(message: "OpenVpn Tunnel Remove from Prefs Error: \(error)")
-                        closure(ConnectionState.Error, nil)
-                        return
-                    }
-                })
-            }
+//            if let name = tunnel?.localizedDescription, name != vpnName {
+//                tunnel?.removeFromPreferences(completionHandler: { removeError in
+//                    if let error = removeError {
+//                        Logger.global?.log(message: "OpenVpn Tunnel Remove from Prefs Error: \(error)")
+//                        closure(ConnectionState.Error, nil)
+//                        return
+//                    }
+//                })
+//            }
             
             if tunnel == nil {
                 Logger.global?.log(message: "Creating the tunnel")

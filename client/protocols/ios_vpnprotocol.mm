@@ -19,6 +19,7 @@ namespace
 {
 IOSVpnProtocol* s_instance = nullptr;
 IOSVpnProtocolImpl* m_controller = nullptr;
+Proto currentProto = amnezia::Proto::Any;
 }
 
 IOSVpnProtocol::IOSVpnProtocol(Proto proto, const QJsonObject &configuration, QObject* parent)
@@ -51,8 +52,10 @@ bool IOSVpnProtocol::initialize()
 
         if (protoName == "wireguard") {
             setupWireguardProtocol(result);
+            currentProto = amnezia::Proto::WireGuard;
         } else if (protoName == "openvpn") {
             setupOpenVPNProtocol(result);
+            currentProto = amnezia::Proto::OpenVpn;
         } else {
             return false;
         }
@@ -65,20 +68,38 @@ ErrorCode IOSVpnProtocol::start()
 {
     bool ok;
     QtJson::JsonObject result = QtJson::parse(QJsonDocument(m_rawConfig).toJson(), ok).toMap();
+    qDebug() << "current protocol: " << currentProto;
+    qDebug() << "new protocol: " << m_protocol;
     qDebug() << "config: " << result;
     
     if(!ok) {
         qDebug() << QString("An error occurred during config parsing");
         return InternalError;
     }
+    
     QString protocol = result["protocol"].toString();
     
-    if (protocol == "wireguard") {
-        launchWireguardTunnel(result);
-    } else if (protocol == "openvpn") {
-        launchOpenVPNTunnel(result);
-    } else {
-        return InternalError;
+    switch (m_protocol) {
+        case amnezia::Proto::OpenVpn:
+            if (currentProto == amnezia::Proto::WireGuard) {
+                setupOpenVPNProtocol(result);
+                launchOpenVPNTunnel(result);
+                currentProto = amnezia::Proto::OpenVpn;
+                return NoError;
+            }
+            launchOpenVPNTunnel(result);
+            break;
+        case amnezia::Proto::WireGuard:
+            if (currentProto == amnezia::Proto::OpenVpn) {
+                setupWireguardProtocol(result);
+                launchWireguardTunnel(result);
+                currentProto = amnezia::Proto::WireGuard;
+                return NoError;
+            }
+            launchWireguardTunnel(result);
+            break;
+        default:
+            break;
     }
     
     return NoError;
@@ -270,6 +291,10 @@ void IOSVpnProtocol::setupWireguardProtocol(const QtJson::JsonObject &result)
         }
     }
     callback:^(BOOL a_connected) {
+        if (currentProto != m_protocol) {
+            qDebug() << "Protocols switched: " << a_connected;
+            return;
+        }
         qDebug() << "State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -327,6 +352,10 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
         }
     }
     callback:^(BOOL a_connected) {
+        if (currentProto != m_protocol) {
+            qDebug() << "Protocols switched: " << a_connected;
+            return;
+        }
         qDebug() << "OVPN State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
