@@ -82,20 +82,28 @@ ErrorCode IOSVpnProtocol::start()
     switch (m_protocol) {
         case amnezia::Proto::OpenVpn:
             if (currentProto == amnezia::Proto::WireGuard) {
-                setupOpenVPNProtocol(result);
+                if (m_controller) {
+                    stop();
+                    initialize();
+                }
                 launchOpenVPNTunnel(result);
                 currentProto = amnezia::Proto::OpenVpn;
                 return NoError;
             }
+            initialize();
             launchOpenVPNTunnel(result);
             break;
         case amnezia::Proto::WireGuard:
             if (currentProto == amnezia::Proto::OpenVpn) {
-                setupWireguardProtocol(result);
+                if (m_controller) {
+                    stop();
+                    initialize();
+                }
                 launchWireguardTunnel(result);
                 currentProto = amnezia::Proto::WireGuard;
                 return NoError;
             }
+            initialize();
             launchWireguardTunnel(result);
             break;
         default:
@@ -110,14 +118,20 @@ void IOSVpnProtocol::stop()
     if (!m_controller) {
         qDebug() << "Not correctly initialized";
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
-        });
-        
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
+
         return;
     }
     
     [m_controller disconnect];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        emit connectionStateChanged(Disconnected);
+    });
+    
+    [m_controller dealloc];
+    m_controller = nullptr;
 }
 
 void IOSVpnProtocol::resume_start()
@@ -302,9 +316,9 @@ void IOSVpnProtocol::setupWireguardProtocol(const QtJson::JsonObject &result)
             });
             return;
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
-        });
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
     }];
 }
 
@@ -344,7 +358,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
             }
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
-                [m_controller disconnect];
+//                [m_controller disconnect];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     emit connectionStateChanged(VpnConnectionState::Disconnected);
                 });
@@ -363,9 +377,9 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
             });
             return;
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
-        });
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
     }];
 }
 
@@ -439,7 +453,3 @@ void IOSVpnProtocol::launchOpenVPNTunnel(const QtJson::JsonObject &result)
         });
     }];
 }
-
-
-
-
