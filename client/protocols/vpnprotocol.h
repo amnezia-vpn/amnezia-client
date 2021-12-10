@@ -50,6 +50,8 @@ signals:
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
+    void route_avaible(QString ip, QString mask, QString gateway, QString interface_ip, unsigned long interface_index);
+
 public slots:
     virtual void onTimeout(); // todo: remove?
 

@@ -22,7 +22,7 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     connData.host = credentials.hostName;
     connData.clientId = Utils::getRandomString(16);
     connData.password = Utils::getRandomString(16);
-    connData.password = "";
+    //connData.password = "";
 
     QString certFileName = "/opt/amnezia/ikev2/clients/" + connData.clientId + ".p12";
 

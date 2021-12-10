@@ -112,7 +112,7 @@ static std::string get_interface_ip(DWORD index){
             break;
         adapter_iterator = adapter_iterator->Next;
     }//end while
-    if (adapter_iterator != nullptr || adapter_iterator != 0x0 || adapter_iterator != NULL)
+    if ( adapter_iterator != nullptr || adapter_iterator != 0x0 || adapter_iterator != NULL )
         _ipaddr = std::string(adapter_iterator->IpAddressList.IpAddress.String, 16);
     else
         _ipaddr = "127.0.0.1";
@@ -120,9 +120,11 @@ static std::string get_interface_ip(DWORD index){
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 namespace adpinfo {
-std::vector<std::tuple<std::string, std::string, std::string, std::string>>get_route_table(){
 
-    std::vector< std::tuple<std::string, std::string, std::string, std::string >>ret_table{};
+std::vector<route_table>get_route_table(std::string_view ipifaddrs){
+
+    /*std::tuple<std::string, std::string, std::string, std::string >*/
+    std::vector<route_table>ret_table{};
     PMIB_IPFORWARDTABLE p_table{nullptr};
     struct in_addr ip_addr{};
     DWORD size{};
@@ -155,8 +157,45 @@ std::vector<std::tuple<std::string, std::string, std::string, std::string>>get_r
             const auto &ifname = get_interface_ip(p_table->table[i].dwForwardIfIndex);
             const auto &ifnameSize = ifname.length() + 1;
             strcpy_s(szInterfaceIp, ifnameSize, ifname.data());
-            const auto &mt = std::make_tuple(std::string(szDestIp), std::string(szMaskIp), std::string(szGatewayIp), std::string(szInterfaceIp));
-            ret_table.emplace_back(mt);
+            if (ipifaddrs.length() == 0){
+                //std::make_tuple(std::string(szDestIp), std::string(szMaskIp), std::string(szGatewayIp), std::string(szInterfaceIp));
+                const route_table &mt = {
+                    std::string(szDestIp),
+                    std::string(szMaskIp),
+                    std::string(szGatewayIp),
+                    std::string(szInterfaceIp),
+                    p_table->table[i].dwForwardIfIndex
+                };
+                ret_table.emplace_back(mt);
+            }else{
+                bool in_not_empty = (ifname.find(ipifaddrs) != std::string::npos);
+                //bool in_as_destIp =  ( std::string(szDestIp).find(ipifaddrs) != std::string::npos);
+                bool destIp_as_zero = (std::string(szDestIp).find("0.0.0.0") != std::string::npos);
+                bool mask_as_zero = (std::string(szMaskIp).find("0.0.0.0") != std::string::npos);
+//                bool ip_the_same = (
+//                            std::string(szDestIp).find(ipifaddrs) != std::string::npos &&
+//                        std::string(szDestIp).find(szGatewayIp) != std::string::npos &&
+//                        std::string(szDestIp).find(szInterfaceIp) != std::string::npos
+//                        );
+//                bool not_default = (std::string(szDestIp).find("127.0.0.1") == std::string::npos);
+
+                if ( in_not_empty &&
+                     // in_as_destIp &&
+                      destIp_as_zero &&
+                      mask_as_zero//) || ( ip_the_same && not_default )
+                     )
+                {
+                    // finded
+                    const route_table &mt = {
+                        std::string(szDestIp),
+                        std::string(szMaskIp),
+                        std::string(szGatewayIp),
+                        std::string(szInterfaceIp),
+                        p_table->table[i].dwForwardIfIndex
+                    };//std::make_tuple(std::string(szDestIp), std::string(szMaskIp), std::string(szGatewayIp), std::string(szInterfaceIp));
+                    ret_table.emplace_back(mt);
+                }
+            }
         }//end for
     }//end if
     return ret_table;
@@ -223,14 +262,14 @@ RET_TYPE NetAdpInfo::collect_adapters_data(){
         _tmp->set_description(adapter_iterator->Description);
         _tmp->set_local_address(adapter_iterator->IpAddressList.IpAddress.String);
         std::string lgw = adapter_iterator->GatewayList.IpAddress.String;
-        if (lgw.length() == 0 || lgw.find("0.0.0.0") != std::string::npos)
-        {
-            //lgw = get_founded_route("8.8.8.8");
-            if (adapter_iterator->DhcpEnabled == 1)
-            {
-                lgw = adapter_iterator->DhcpServer.IpAddress.String;
-            }
-        }
+        //        if (lgw.length() == 0 || lgw.find("0.0.0.0") != std::string::npos)
+        //        {
+        //            //lgw = get_founded_route("8.8.8.8");
+        //            if (adapter_iterator->DhcpEnabled == 1)
+        //            {
+        //                lgw = adapter_iterator->DhcpServer.IpAddress.String;
+        //            }
+        //        }
         _tmp->set_local_gateway(lgw);
         _tmp->set_route_gateway(get_route_gateway());
         _adapters.emplace_back(_tmp);
@@ -251,10 +290,7 @@ RET_TYPE NetAdpInfo::get_adapter_info(std::string_view _adapter_name){
     for (auto i = 0; i< len; ++i){
         auto adap_name = _adapters[i]->get_name();
         auto adap_desc = _adapters[i]->get_description();
-        qDebug()<<"adap name : "<<QString::fromStdString(adap_name.data());
-        qDebug()<<"adap description : "<<QString::fromStdString(adap_desc.data());
-        qDebug()<<"find_string: "<<QString::fromStdString(_adapter_name.data());
-        if (adap_name.find(_adapter_name) != std::string::npos || adap_desc.find(_adapter_name) != std::string::npos){
+        if ( adap_name.find(_adapter_name) != std::string::npos || adap_desc.find(_adapter_name) != std::string::npos ){
             _index_of_adapter = i;
             return {false, ""};
         }
