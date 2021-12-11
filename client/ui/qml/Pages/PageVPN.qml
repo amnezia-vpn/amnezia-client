@@ -61,7 +61,7 @@ PageBase {
         }
         contentItem: Item {}
         antialiasing: true
-        enabled: VpnLogic.pushButtonConnectEnabled
+        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerWorkingOnPlatform
         opacity: VpnLogic.pushButtonConnectVisible ? 1 : 0
 
 //        transitions: Transition {
@@ -141,11 +141,14 @@ PageBase {
         id: error_text
         anchors.top: layout2.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
+        anchors.topMargin: 20
+        width: parent.width - 20
+
         height: 21
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
         text: VpnLogic.labelErrorText
+        color: "red"
     }
 
     Item {

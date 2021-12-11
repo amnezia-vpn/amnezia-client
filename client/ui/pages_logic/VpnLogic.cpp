@@ -51,6 +51,14 @@ void VpnLogic::onUpdatePage()
     DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
+
+    set_isContainerWorkingOnPlatform(ContainerProps::isWorkingOnPlatform(selectedContainer));
+    if (!isContainerWorkingOnPlatform()) {
+        set_labelErrorText(tr("AmneziaVPN not supporting selected protocol on this device. Select another protocol."));
+    }
+    else {
+        set_labelErrorText("");
+    }
 }
 
 
