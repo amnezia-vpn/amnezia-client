@@ -8,6 +8,8 @@
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 
+#include "3rd/AdpInfo/netadpinfo.h"
+
 using namespace amnezia;
 
 class QTimer;
@@ -48,6 +50,8 @@ signals:
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
+    void route_avaible(QString ip, QString mask, QString gateway, QString interface_ip, unsigned long interface_index);
+
 public slots:
     virtual void onTimeout(); // todo: remove?
 
@@ -63,6 +67,7 @@ protected:
     QString m_routeGateway;
     QString m_vpnLocalAddress;
     QString m_vpnGateway;
+    adpinfo::NetAdpInfo adpInfo;
 
     QJsonObject m_rawConfig;
 

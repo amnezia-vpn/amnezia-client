@@ -185,10 +185,10 @@ ErrorCode OpenVpnProtocol::start()
     }
     m_openVpnProcess->setProgram(openVpnExecPath());
     QStringList arguments({"--config" , configPath(),
-                      "--management", m_managementHost, QString::number(m_managementPort),
-                      "--management-client",
-                      "--log", vpnLogFileNamePath
-                     });
+                           "--management", m_managementHost, QString::number(m_managementPort),
+                           "--management-client",
+                           "--log", vpnLogFileNamePath
+                          });
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
@@ -234,7 +234,6 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
 {
     for (;;)  {
         QString line = m_managementServer.readLine().simplified();
-
         if (line.isEmpty()) {
             return;
         }
@@ -250,6 +249,42 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
                 sendByteCount();
                 stopTimeoutTimer();
                 setConnectionState(VpnProtocol::Connected);
+                {
+                    std::this_thread::sleep_for(std::chrono::seconds(4));
+                    std::string p1,p2,p3;
+                    const auto &ret = adpInfo.get_adapter_info("TAP-Windows Adapter V9");
+                    if (std::get<0>(ret) == false){
+                        p1 = adpInfo.get_adapter_route_gateway();
+                        p2 = adpInfo.get_adapter_local_address();
+                        p3 = adpInfo.get_adapter_local_gateway();
+                        m_routeGateway = QString::fromStdString(p1);
+                        m_vpnLocalAddress = QString::fromStdString(p2);
+                        m_vpnGateway = QString::fromStdString(p3);
+                        qDebug()<<"My openvpn m_routeGateway "<<m_routeGateway;
+                        qDebug()<<"My openvpn m_vpnLocalAddress "<<m_vpnLocalAddress;
+                        qDebug()<<"My openvpn m_vpnGateway "<< m_vpnGateway;
+                        auto ret = adpinfo::get_route_table(p2.c_str());
+                        {
+                            for (const auto &itret: ret){
+                                const auto ip = itret.szDestIp;//std::get<0>(itret);
+                                const auto msk = itret.szMaskIp;//std::get<1>(itret);
+                                const auto gw = itret.szGatewayIp;//std::get<2>(itret);
+                                const auto itf = itret.szInterfaceIp;//std::get<3>(itret);
+                                const auto itfInd = itret.ulIfIndex;
+                                qDebug()<<"IP["<<ip.c_str()<<"]"<<"Mask["<<msk.c_str()<<"]"<<"gateway["<<gw.c_str()<<"]"<<"Interface["<<itf.c_str()<<"]"<<"Interface index["<<itfInd<<"]";
+                                emit route_avaible(QString::fromStdString(ip),
+                                                   QString::fromStdString(msk),
+                                                   QString::fromStdString(gw),
+                                                   QString::fromStdString(itf),
+                                                   itfInd);
+                            }
+
+                        }
+                    }
+                    else{
+                        qDebug()<<"We can't get information about active adapter:"<<QString::fromStdString(std::get<1>(ret));
+                    }
+                }
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
                 //openVpnStateSigTermHandler();

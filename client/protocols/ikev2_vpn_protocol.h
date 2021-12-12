@@ -74,8 +74,8 @@ private:
 
 };
 
-#ifdef Q_OS_WIN
-DWORD CALLBACK rasCallback(UINT msg, RASCONNSTATE rascs, DWORD err);
-#endif
+//#ifdef Q_OS_WIN
+//DWORD CALLBACK rasCallback(UINT msg, RASCONNSTATE rascs, DWORD err);
+//#endif
 
 #endif // IPSEC_PROTOCOL_H

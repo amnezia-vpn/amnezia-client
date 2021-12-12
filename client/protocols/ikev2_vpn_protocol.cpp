@@ -1,11 +1,10 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QProcess>
-//#include <QRegularExpression>
-//#include <QTcpSocket>
 #include <QThread>
 
 #include <chrono>
+#include <algorithm>
 
 #include "debug.h"
 #include "ikev2_vpn_protocol.h"
@@ -14,11 +13,13 @@
 static Ikev2Protocol* self = nullptr;
 static std::mutex rasDialFuncMutex;
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 extern "C" {
 static void WINAPI RasDialFuncCallback(UINT unMsg,
                                        RASCONNSTATE rasconnstate,
                                        DWORD dwError );
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
@@ -62,38 +63,26 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
     case RASCS_OpenPort:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_OpenPort = %d\n", _connection_state);
-        //printf ("Opening port...\n");
         break;
     case RASCS_PortOpened:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_PortOpened = %d\n", _connection_state);
-        //printf ("Port opened.\n");
         break;
     case RASCS_ConnectDevice:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_ConnectDevice = %d\n", _connection_state);
-        //printf ("Connecting device...\n");
         break;
     case RASCS_DeviceConnected:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_DeviceConnected = %d\n", _connection_state);
-        //printf ("Device connected.\n");
         break;
     case RASCS_AllDevicesConnected:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_AllDevicesConnected = %d\n", _connection_state);
-        //printf ("All devices connected.\n");
         break;
     case RASCS_Authenticate:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_Authenticate = %d\n", _connection_state);
-        // printf ("Authenticating...\n");
         break;
     case RASCS_AuthNotify:
         qDebug()<<__FUNCTION__ << __LINE__;
@@ -103,119 +92,74 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
         } else {
             qDebug() << "RASCS_AuthNotify but no error" << dwError;
         }
-        //printf ("RASCS_AuthNotify = %d\n", _connection_state);
-        // printf ("Authentication notify.\n");
         break;
     case RASCS_AuthRetry:
         qDebug()<<__FUNCTION__ << __LINE__;
         setConnectionState(Preparing);
-        //printf ("RASCS_AuthRetry = %d\n", _connection_state);
-        //printf ("Retrying authentication...\n");
         break;
     case RASCS_AuthCallback:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_AuthCallback = %d\n", _connection_state);
-        //printf ("Authentication callback...\n");
         break;
     case RASCS_AuthChangePassword:
         qDebug()<<__FUNCTION__ << __LINE__;
-        // printf ("RASCS_AuthChangePassword = %d\n", _connection_state);
-        //printf ("Change password...\n");
         break;
     case RASCS_AuthProject:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_AuthProject = %d\n", _connection_state);
-        //printf ("Projection phase started...\n");
         break;
     case RASCS_AuthLinkSpeed:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_AuthLinkSpeed = %d\n", _connection_state);
-        //printf ("Negoting speed...\n");
         break;
     case RASCS_AuthAck:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_AuthAck = %d\n", _connection_state);
-        //printf ("Authentication acknowledge...\n");
         break;
     case RASCS_ReAuthenticate:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_ReAuthenticate = %d\n", _connection_state);
-        //printf ("Retrying Authentication...\n");
         break;
     case RASCS_Authenticated:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_Authenticated = %d\n", _connection_state);
-        //printf ("Authentication complete.\n");
         break;
     case RASCS_PrepareForCallback:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_PrepareForCallback = %d\n", _connection_state);
-        //printf ("Preparing for callback...\n");
         break;
     case RASCS_WaitForModemReset:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_WaitForModemReset = %d\n", _connection_state);
-        // printf ("Waiting for modem reset...\n");
         break;
     case RASCS_WaitForCallback:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_WaitForCallback = %d\n", _connection_state);
-        //printf ("Waiting for callback...\n");
         break;
     case RASCS_Projected:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_Projected = %d\n", _connection_state);
-        //printf ("Projection completed.\n");
         break;
 #if (WINVER >= 0x400)
     case RASCS_StartAuthentication:    // Windows 95 only
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_StartAuthentication = %d\n", _connection_state);
-        //printf ("Starting authentication...\n");
-
         break;
     case RASCS_CallbackComplete:       // Windows 95 only
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_CallbackComplete = %d\n", rasconnstate);
-        //printf ("Callback complete.\n");
         break;
     case RASCS_LogonNetwork:           // Windows 95 only
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_LogonNetwork = %d\n", _connection_state);
-        //printf ("Login to the network.\n");
         break;
 #endif
     case RASCS_SubEntryConnected:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_SubEntryConnected = %d\n", _connection_state);
-        //printf ("Subentry connected.\n");
         break;
     case RASCS_SubEntryDisconnected:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_SubEntryDisconnected = %d\n", _connection_state);
-        //printf ("Subentry disconnected.\n");
         break;
         //PAUSED STATES:
     case RASCS_Interactive:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_Interactive = %d\n", _connection_state);
-        //printf ("In Paused state: Interactive mode.\n");
         break;
     case RASCS_RetryAuthentication:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_RetryAuthentication = %d\n", _connection_state);
-        //printf ("In Paused state: Retry Authentication...\n");
         break;
     case RASCS_CallbackSetByCaller:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_CallbackSetByCaller = %d\n", _connection_state);
-        //printf ("In Paused state: Callback set by Caller.\n");
         break;
     case RASCS_PasswordExpired:
         setConnectionState(Error);
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_PasswordExpired = %d\n", _connection_state);
-        //printf ("In Paused state: Password has expired...\n");
         break;
 
     case RASCS_Connected: // = RASCS_DONE:
@@ -224,17 +168,47 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
         //printf ("RASCS_Connected = %d\n", _connection_state);
         //printf ("Connection completed.\n");
         //SetEvent(gEvent_handle);
+    {
+        //get the network settings of adapters
+        std::this_thread::sleep_for(std::chrono::seconds(4));
+        std::string p1,p2,p3;
+        const auto ret = adpInfo.get_adapter_info(tunnelName().toStdString());
+        if (std::get<0>(ret) == false){
+            p1 = adpInfo.get_adapter_route_gateway();
+            p2 = adpInfo.get_adapter_local_address();
+            p3 = adpInfo.get_adapter_local_gateway();
+            m_routeGateway = QString::fromStdString(p1);
+            m_vpnLocalAddress = QString::fromStdString(p2);
+            m_vpnGateway = QString::fromStdString(p3);
+            qDebug()<<"My ikev2 m_routeGateway "<<m_routeGateway;
+            qDebug()<<"My ikev2 m_vpnLocalAddress "<<m_vpnLocalAddress;
+            qDebug()<<"My ikev2 m_vpnGateway "<< m_vpnGateway;
+            auto ret = adpinfo::get_route_table(p2.c_str());
+            {
+               for (const auto &itret: ret){
+                   const auto ip = itret.szDestIp;//std::get<0>(itret);
+                   const auto msk = itret.szMaskIp;//std::get<1>(itret);
+                   const auto gw = itret.szGatewayIp;//std::get<2>(itret);
+                   const auto itf = itret.szInterfaceIp;//std::get<3>(itret);
+                   const auto itfInd = itret.ulIfIndex;
+                   qDebug()<<"IP["<<ip.c_str()<<"]"<<"Mask["<<msk.c_str()<<"]"<<"gateway["<<gw.c_str()<<"]"<<"Interface["<<itf.c_str()<<"]"<<"Interface index["<<itfInd<<"]";
+                   emit route_avaible(QString::fromStdString(ip),
+                                      QString::fromStdString(msk),
+                                      QString::fromStdString(gw),
+                                      QString::fromStdString(itf),
+                                      itfInd);
+               }
+
+            }
+        }
+    }
         break;
     case RASCS_Disconnected:
         setConnectionState(Disconnected);
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("RASCS_Disconnected = %d\n", _connection_state);
-        //printf ("Disconnecting...\n");
         break;
     default:
         qDebug()<<__FUNCTION__ << __LINE__;
-        //printf ("Unknown Status = %d\n", _connection_state);
-        //printf ("What are you going to do about it?\n");
         break;
     }
 }
@@ -271,40 +245,19 @@ ErrorCode Ikev2Protocol::start()
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
         certInstallProcess->setProgram("certutil");
-        QStringList arguments({"-f" , "-importpfx",
-                               "-p", m_config[config_key::password].toString(),
-                               certFile.fileName(), "NoExport"
+        QStringList arguments({"-f" , "-p", m_config[config_key::password].toString(),
+                               "-importpfx", certFile.fileName(), "NoExport"
                               });
         certInstallProcess->setArguments(arguments);
 
-        //        qDebug() << arguments.join(" ");
-        //        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
-        //            qDebug() << "PrivilegedProcess errorOccurred" << error;
-        //        });
-
-        //        connect(certInstallProcess.data(), &PrivilegedProcess::stateChanged, [certInstallProcess](QProcess::ProcessState newState) {
-        //            qDebug() << "PrivilegedProcess stateChanged" << newState;
-        //        });
-
-        //        connect(certInstallProcess.data(), &PrivilegedProcess::readyRead, [certInstallProcess]() {
-        //            auto req = certInstallProcess->readAll();
-        //            req.waitForFinished();
-        //            qDebug() << "PrivilegedProcess readyRead" << req.returnValue();
-        //        });
-
+        connect(certInstallProcess.data(), &PrivilegedProcess::errorOccurred, [certInstallProcess](QProcess::ProcessError error) {
+            qDebug() << "PrivilegedProcess errorOccurred" << error;
+        });
 
         certInstallProcess->start();
     }
-    // /*
+    ///*
     {
-        //        auto adapterRemoveProcess = new QProcess;
-
-        //        adapterRemoveProcess->setProgram("powershell");
-        //        QString arguments = QString("-command \"Remove-VpnConnection -Name '%1' -Force\"").arg(tunnelName());
-        //        adapterRemoveProcess->setNativeArguments(arguments);
-
-        //        adapterRemoveProcess->start();
-        //        adapterRemoveProcess->waitForFinished(5000);
         if ( disconnect_vpn()){
             qDebug()<<"VPN was disconnected";
         }
@@ -314,26 +267,9 @@ ErrorCode Ikev2Protocol::start()
     }
 
     {
-        {
-            if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
-                qDebug() <<"Can't create the VPN connect";
-            }
+        if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
+            qDebug() <<"Can't create the VPN connect";
         }
-        //        auto adapterInstallProcess = new QProcess;
-
-        //        adapterInstallProcess->setProgram("powershell");
-        //        QString arguments = QString("-command \"Add-VpnConnection "
-        //                                    "-ServerAddress '%1' "
-        //                                    "-Name '%2' "
-        //                                    "-TunnelType IKEv2 "
-        //                                    "-AuthenticationMethod MachineCertificate "
-        //                                    "-EncryptionLevel Required "
-        //                                    "-PassThru\"")
-        //                .arg(m_config[config_key::hostName].toString())
-        //                .arg(tunnelName());
-        //        adapterInstallProcess->setNativeArguments(arguments);
-        //        adapterInstallProcess->start();
-        //        adapterInstallProcess->waitForFinished(5000);
     }
 
     {
@@ -352,10 +288,6 @@ ErrorCode Ikev2Protocol::start()
                 .arg(tunnelName());
         adapterConfigProcess->setNativeArguments(arguments);
 
-        //        connect(adapterConfigProcess, &QProcess::readyRead, [adapterConfigProcess]() {
-        //            qDebug().noquote() << "adapterConfigProcess readyRead" << adapterConfigProcess->readAll();
-        //        });
-
         adapterConfigProcess->start();
         adapterConfigProcess->waitForFinished(5000);
     }
@@ -365,7 +297,6 @@ ErrorCode Ikev2Protocol::start()
             qDebug()<<"We can't connect to VPN";
         }
     }
-    //setConnectionState(Connecting);
     return ErrorCode::NoError;
 #else
     return ErrorCode::NoError;
@@ -433,7 +364,7 @@ bool Ikev2Protocol::disconnect_vpn(){
 
     return true;
 }
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void WINAPI RasDialFuncCallback(UINT unMsg,
                                 RASCONNSTATE rasconnstate,
                                 DWORD dwError ){
@@ -442,5 +373,6 @@ void WINAPI RasDialFuncCallback(UINT unMsg,
         self->newConnectionStateEventReceived(unMsg, rasconnstate, dwError);
     }
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif
