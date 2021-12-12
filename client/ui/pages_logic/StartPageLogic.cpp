@@ -167,6 +167,7 @@ void StartPageLogic::onPushButtonImport()
         m_settings.addServer(o);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
 
+        emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
     }
     else {
