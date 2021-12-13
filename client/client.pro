@@ -276,11 +276,6 @@ ios {
     LIBS += -framework StoreKit
     LIBS += -framework UserNotifications
 
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework
-
     DEFINES += MVPN_IOS
 
     HEADERS += \

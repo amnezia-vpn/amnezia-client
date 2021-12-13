@@ -35,8 +35,8 @@ bool IOSVpnProtocol::initialize()
     qDebug() << "Initializing Swift Controller";
     
     
-//    qDebug() << "config =>";
-//    qDebug() << QJsonDocument(m_rawConfig).toJson();
+    qDebug() << "RECEIVED CONFIG FROM SERVER SIDE  =>";
+    qDebug() << QJsonDocument(m_rawConfig).toJson();
     
     if (!m_controller) {
         bool ok;
@@ -48,7 +48,7 @@ bool IOSVpnProtocol::initialize()
         }
         
         QString protoName = result["protocol"].toString();
-        qDebug() << "protocol: " << protoName;
+        qDebug() << "PROTOCOL: " << protoName;
 
         if (protoName == "wireguard") {
             setupWireguardProtocol(result);
@@ -56,6 +56,26 @@ bool IOSVpnProtocol::initialize()
         } else if (protoName == "openvpn") {
             setupOpenVPNProtocol(result);
             currentProto = amnezia::Proto::OpenVpn;
+        } else if (protoName == "shadowsocks") {
+            currentProto = amnezia::Proto::ShadowSocks;
+            QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+            QString ovpnConfig = ovpn["config"].toString();
+            qDebug() << "OpenVPN Config:\n" << ovpn;
+            QtJson::JsonObject ssConfig = result["shadowsocks_config_data"].toMap();
+            QString ssLocalPort = ssConfig["local_port"].toString();
+            QString ssMethod = ssConfig["method"].toString();
+            QString ssPassword = ssConfig["password"].toString();
+            QString ssServer = ssConfig["server"].toString();
+            QString ssPort = ssConfig["server_port"].toString();
+            QString ssTimeout = ssConfig["timeout"].toString();
+            qDebug() << "\n\nSS CONFIG:";
+            qDebug() << " local port -" << ssLocalPort;
+            qDebug() << " method     -" << ssMethod;
+            qDebug() << " password   -" << ssPassword;
+            qDebug() << " server     -" << ssServer;
+            qDebug() << " port       -" << ssPort;
+            qDebug() << " timeout    -" << ssTimeout;
+            return false;
         } else {
             return false;
         }
