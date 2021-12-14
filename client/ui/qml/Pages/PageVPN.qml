@@ -20,6 +20,16 @@ PageBase {
         source: "qrc:/images/background_connected.png"
     }
 
+    LabelType {
+        x: 10
+        y: 5
+        width: 100
+        height: 21
+        text: VpnLogic.labelVersionText
+        color: "#dddddd"
+        font.pixelSize: 12
+    }
+
     ImageButtonType {
         x: parent.width - 40
         y: 10

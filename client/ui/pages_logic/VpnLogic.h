@@ -22,6 +22,7 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(bool, isContainerWorkingOnPlatform)
 
     AUTO_PROPERTY(QString, labelErrorText)
+    AUTO_PROPERTY(QString, labelVersionText)
 
     AUTO_PROPERTY(bool, radioButtonVpnModeAllSitesChecked)
     AUTO_PROPERTY(bool, radioButtonVpnModeForwardSitesChecked)

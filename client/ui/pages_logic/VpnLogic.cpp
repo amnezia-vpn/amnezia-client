@@ -4,6 +4,7 @@
 #include "vpnconnection.h"
 #include <functional>
 #include "../uilogic.h"
+#include "defines.h"
 
 
 VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
@@ -59,6 +60,8 @@ void VpnLogic::onUpdatePage()
     else {
         set_labelErrorText("");
     }
+    QString ver = QString("v. %2").arg(QString(APP_MAJOR_VERSION));
+    set_labelVersionText(ver);
 }
 
 
