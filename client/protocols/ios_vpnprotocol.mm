@@ -10,8 +10,6 @@
 
 #include <QByteArray>
 
-#include "json.h"
-
 #include "ipaddressrange.h"
 #include "ios_vpnprotocol.h"
 #include "core/errorstrings.h"
@@ -21,6 +19,7 @@ namespace
 {
 IOSVpnProtocol* s_instance = nullptr;
 IOSVpnProtocolImpl* m_controller = nullptr;
+Proto currentProto = amnezia::Proto::Any;
 }
 
 IOSVpnProtocol::IOSVpnProtocol(Proto proto, const QJsonObject &configuration, QObject* parent)
@@ -35,10 +34,9 @@ bool IOSVpnProtocol::initialize()
 {
     qDebug() << "Initializing Swift Controller";
     
-    static bool creating = false;
-    // No nested creation!
-    Q_ASSERT(creating == false);
-    creating = true;
+    
+//    qDebug() << "config =>";
+//    qDebug() << QJsonDocument(m_rawConfig).toJson();
     
     if (!m_controller) {
         bool ok;
@@ -49,142 +47,69 @@ bool IOSVpnProtocol::initialize()
             return false;
         }
         
-        QString vpnProto = result["protocol"].toString();
-        qDebug() << "protocol: " << vpnProto;
-        qDebug() << "config data => ";
-        QtJson::JsonObject config = result["wireguard_config_data"].toMap();
-        
-        QString privateKey = config["client_priv_key"].toString();
-        QByteArray key = QByteArray::fromBase64(privateKey.toLocal8Bit());
-        
-        qDebug() << "  - " << "client_priv_key: " << config["client_priv_key"].toString();
-        qDebug() << "  - " << "client_pub_key: " << config["client_pub_key"].toString();
-        qDebug() << "  - " << "interface config: " << config["config"].toString();
-        
-        QString addr = config["config"].toString().split("\n").takeAt(1).split(" = ").takeLast();
-        QString dns = config["config"].toString().split("\n").takeAt(2).split(" = ").takeLast();
-        QString privkey = config["config"].toString().split("\n").takeAt(3).split(" = ").takeLast();
-        QString pubkey = config["config"].toString().split("\n").takeAt(6).split(" = ").takeLast();
-        QString presharedkey = config["config"].toString().split("\n").takeAt(7).split(" = ").takeLast();
-        QString allowedips = config["config"].toString().split("\n").takeAt(8).split(" = ").takeLast();
-        QString endpoint = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast();
-        QString keepalive = config["config"].toString().split("\n").takeAt(10).split(" = ").takeLast();
-        qDebug() << "  - " << "[Interface] address: " << addr;
-        qDebug() << "  - " << "[Interface] dns: " << dns;
-        qDebug() << "  - " << "[Interface] private key: " << privkey;
-        qDebug() << "  - " << "[Peer] public key: " << pubkey;
-        qDebug() << "  - " << "[Peer] preshared key: " << presharedkey;
-        qDebug() << "  - " << "[Peer] allowed ips: " << allowedips;
-        qDebug() << "  - " << "[Peer] endpoint: " << endpoint;
-        qDebug() << "  - " << "[Peer] keepalive: " << keepalive;
-        
-        qDebug() << "  - " << "hostName: " << config["hostName"].toString();
-        qDebug() << "  - " << "psk_key: " << config["psk_key"].toString();
-        qDebug() << "  - " << "server_pub_key: " << config["server_pub_key"].toString();
-        
-        
-        
-        m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
-                                                         privateKey:key.toNSData()
-                                                  deviceIpv4Address:addr.toNSString()
-                                                  deviceIpv6Address:@"::/0"
-        closure:^(ConnectionState state, NSDate* date) {
-            qDebug() << "Creation completed with connection state:" << state;
-            creating = false;
-            
-            switch (state) {
-                case ConnectionStateError: {
-                    [m_controller dealloc];
-                    m_controller = nullptr;
-                    emit connectionStateChanged(VpnConnectionState::Error);
-                    return;
-                }
-                case ConnectionStateConnected: {
-                    Q_ASSERT(date);
-                    QDateTime qtDate(QDateTime::fromNSDate(date));
-                    emit connectionStateChanged(VpnConnectionState::Connected);
-                    return;
-                }
-                case ConnectionStateDisconnected:
-                    // Just in case we are connecting, let's call disconnect.
-                    [m_controller disconnect];
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
-                    return;
-            }
+        QString protoName = result["protocol"].toString();
+        qDebug() << "protocol: " << protoName;
+
+        if (protoName == "wireguard") {
+            setupWireguardProtocol(result);
+            currentProto = amnezia::Proto::WireGuard;
+        } else if (protoName == "openvpn") {
+            setupOpenVPNProtocol(result);
+            currentProto = amnezia::Proto::OpenVpn;
+        } else {
+            return false;
         }
-        callback:^(BOOL a_connected) {
-            qDebug() << "State changed: " << a_connected;
-            if (a_connected) {
-                emit connectionStateChanged(Connected);
-                return;
-            }
-//            emit connectionStateChanged(Disconnected);
-        }];
     }
     return true;
 }
+
 
 ErrorCode IOSVpnProtocol::start()
 {
     bool ok;
     QtJson::JsonObject result = QtJson::parse(QJsonDocument(m_rawConfig).toJson(), ok).toMap();
+    qDebug() << "current protocol: " << currentProto;
+    qDebug() << "new protocol: " << m_protocol;
+    qDebug() << "config: " << result;
     
     if(!ok) {
         qDebug() << QString("An error occurred during config parsing");
         return InternalError;
     }
+    
     QString protocol = result["protocol"].toString();
-    QtJson::JsonObject config = result["wireguard_config_data"].toMap();
     
-    QString clientPrivateKey = config["client_priv_key"].toString();
-    QByteArray key = QByteArray::fromBase64(clientPrivateKey.toLocal8Bit());
-    QString clientPubKey = config["client_pub_key"].toString();
-    
-    QString addr = config["config"].toString().split("\n").takeAt(1).split(" = ").takeLast();
-    QStringList dnsServersList = config["config"].toString().split("\n").takeAt(2).split(" = ").takeLast().split(", ");
-    QString privkey = config["config"].toString().split("\n").takeAt(3).split(" = ").takeLast();
-    QString pubkey = config["config"].toString().split("\n").takeAt(6).split(" = ").takeLast();
-    QString presharedkey = config["config"].toString().split("\n").takeAt(7).split(" = ").takeLast();
-    QStringList allowedIPList = config["config"].toString().split("\n").takeAt(8).split(" = ").takeLast().split(", ");
-    QString endpoint = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast();
-    QString serverAddr = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast().split(":").takeFirst();
-    QString port = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast().split(":").takeLast();
-    QString keepalive = config["config"].toString().split("\n").takeAt(10).split(" = ").takeLast();
-    
-    QString hostname = config["hostName"].toString();
-    QString pskKey = config["psk_key"].toString();
-    QString serverPubKey = config["server_pub_key"].toString();
-    
-    qDebug() << "IOSVPNProtocol starts for" << hostname;
-    qDebug() << "DNS:" << dnsServersList.takeFirst().toNSString();
-    qDebug() << "serverPublicKey:" << serverPubKey.toNSString();
-    qDebug() << "serverIpv4AddrIn:" << serverAddr.toNSString();
-    qDebug() << "serverPort:" << (uint32_t)port.toInt();
-    qDebug() << "allowed ip list" << allowedIPList;
-    
-    NSMutableArray<VPNIPAddressRange*>* allowedIPAddressRangesNS =
-        [NSMutableArray<VPNIPAddressRange*> arrayWithCapacity:allowedIPList.length()];
-    for (const IPAddressRange item : allowedIPList) {
-        VPNIPAddressRange* range =
-            [[VPNIPAddressRange alloc] initWithAddress:item.ipAddress().toNSString()
-                                   networkPrefixLength:item.range()
-                                                isIpv6:item.type() == IPAddressRange::IPv6];
-        [allowedIPAddressRangesNS addObject:[range autorelease]];
+    switch (m_protocol) {
+        case amnezia::Proto::OpenVpn:
+            if (currentProto == amnezia::Proto::WireGuard) {
+                if (m_controller) {
+                    stop();
+                    initialize();
+                }
+                launchOpenVPNTunnel(result);
+                currentProto = amnezia::Proto::OpenVpn;
+                return NoError;
+            }
+            initialize();
+            launchOpenVPNTunnel(result);
+            break;
+        case amnezia::Proto::WireGuard:
+            if (currentProto == amnezia::Proto::OpenVpn) {
+                if (m_controller) {
+                    stop();
+                    initialize();
+                }
+                launchWireguardTunnel(result);
+                currentProto = amnezia::Proto::WireGuard;
+                return NoError;
+            }
+            initialize();
+            launchWireguardTunnel(result);
+            break;
+        default:
+            break;
     }
     
-    [m_controller connectWithDnsServer:dnsServersList.takeFirst().toNSString()
-                     serverIpv6Gateway:@"FE80::1"
-                       serverPublicKey:serverPubKey.toNSString()
-                          presharedKey:pskKey.toNSString()
-                      serverIpv4AddrIn:serverAddr.toNSString()
-                            serverPort:port.toInt()
-                allowedIPAddressRanges:allowedIPAddressRangesNS
-                           ipv6Enabled:NO
-                                reason:0
-                       failureCallback:^() {
-        qDebug() << "IOSVPNProtocol - connection failed";
-        emit connectionStateChanged(Disconnected);
-    }];
     return NoError;
 }
 
@@ -192,11 +117,21 @@ void IOSVpnProtocol::stop()
 {
     if (!m_controller) {
         qDebug() << "Not correctly initialized";
-        emit connectionStateChanged(Disconnected);
+        
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
+
         return;
     }
     
     [m_controller disconnect];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        emit connectionStateChanged(Disconnected);
+    });
+    
+    [m_controller dealloc];
+    m_controller = nullptr;
 }
 
 void IOSVpnProtocol::resume_start()
@@ -296,3 +231,225 @@ void IOSVpnProtocol::cleanupBackendLogs()
     file.remove();
 }
 
+void IOSVpnProtocol::setupWireguardProtocol(const QtJson::JsonObject &result)
+{
+    static bool creating = false;
+    // No nested creation!
+    Q_ASSERT(creating == false);
+    creating = true;
+    
+    QtJson::JsonObject config = result["wireguard_config_data"].toMap();
+    
+    QString privateKey = config["client_priv_key"].toString();
+    QByteArray key = QByteArray::fromBase64(privateKey.toLocal8Bit());
+    
+    qDebug() << "  - " << "client_priv_key: " << config["client_priv_key"].toString();
+    qDebug() << "  - " << "client_pub_key: " << config["client_pub_key"].toString();
+    qDebug() << "  - " << "interface config: " << config["config"].toString();
+    
+    QString addr = config["config"].toString().split("\n").takeAt(1).split(" = ").takeLast();
+    QString dns = config["config"].toString().split("\n").takeAt(2).split(" = ").takeLast();
+    QString privkey = config["config"].toString().split("\n").takeAt(3).split(" = ").takeLast();
+    QString pubkey = config["config"].toString().split("\n").takeAt(6).split(" = ").takeLast();
+    QString presharedkey = config["config"].toString().split("\n").takeAt(7).split(" = ").takeLast();
+    QString allowedips = config["config"].toString().split("\n").takeAt(8).split(" = ").takeLast();
+    QString endpoint = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast();
+    QString keepalive = config["config"].toString().split("\n").takeAt(10).split(" = ").takeLast();
+    qDebug() << "  - " << "[Interface] address: " << addr;
+    qDebug() << "  - " << "[Interface] dns: " << dns;
+    qDebug() << "  - " << "[Interface] private key: " << privkey;
+    qDebug() << "  - " << "[Peer] public key: " << pubkey;
+    qDebug() << "  - " << "[Peer] preshared key: " << presharedkey;
+    qDebug() << "  - " << "[Peer] allowed ips: " << allowedips;
+    qDebug() << "  - " << "[Peer] endpoint: " << endpoint;
+    qDebug() << "  - " << "[Peer] keepalive: " << keepalive;
+    
+    qDebug() << "  - " << "hostName: " << config["hostName"].toString();
+    qDebug() << "  - " << "psk_key: " << config["psk_key"].toString();
+    qDebug() << "  - " << "server_pub_key: " << config["server_pub_key"].toString();
+    
+    
+    
+    m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
+                                                     privateKey:key.toNSData()
+                                              deviceIpv4Address:addr.toNSString()
+                                              deviceIpv6Address:@"::/0"
+    closure:^(ConnectionState state, NSDate* date) {
+        qDebug() << "Creation completed with connection state:" << state;
+        creating = false;
+        
+        switch (state) {
+            case ConnectionStateError: {
+                [m_controller dealloc];
+                m_controller = nullptr;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Error);
+                });
+                return;
+            }
+            case ConnectionStateConnected: {
+                Q_ASSERT(date);
+                QDateTime qtDate(QDateTime::fromNSDate(date));
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Connected);
+                });
+                return;
+            }
+            case ConnectionStateDisconnected:
+                // Just in case we are connecting, let's call disconnect.
+                [m_controller disconnect];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                });
+                return;
+        }
+    }
+    callback:^(BOOL a_connected) {
+        if (currentProto != m_protocol) {
+            qDebug() << "Protocols switched: " << a_connected;
+            return;
+        }
+        qDebug() << "State changed: " << a_connected;
+        if (a_connected) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                emit connectionStateChanged(Connected);
+            });
+            return;
+        }
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
+    }];
+}
+
+void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
+{
+    static bool creating = false;
+    // No nested creation!
+    Q_ASSERT(creating == false);
+    creating = true;
+    
+    QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+    QString ovpnConfig = ovpn["config"].toString();
+//    qDebug() << ovpn;
+    
+    m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
+                                                         config:ovpnConfig.toNSString()
+    closure:^(ConnectionState state, NSDate* date) {
+        qDebug() << "OVPN Creation completed with connection state:" << state;
+        creating = false;
+        
+        switch (state) {
+            case ConnectionStateError: {
+                [m_controller dealloc];
+                m_controller = nullptr;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Error);
+                });
+                return;
+            }
+            case ConnectionStateConnected: {
+                Q_ASSERT(date);
+                QDateTime qtDate(QDateTime::fromNSDate(date));
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Connected);
+                });
+                return;
+            }
+            case ConnectionStateDisconnected:
+                // Just in case we are connecting, let's call disconnect.
+//                [m_controller disconnect];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                });
+                return;
+        }
+    }
+    callback:^(BOOL a_connected) {
+        if (currentProto != m_protocol) {
+            qDebug() << "Protocols switched: " << a_connected;
+            return;
+        }
+        qDebug() << "OVPN State changed: " << a_connected;
+        if (a_connected) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                emit connectionStateChanged(Connected);
+            });
+            return;
+        }
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            emit connectionStateChanged(Disconnected);
+//        });
+    }];
+}
+
+void IOSVpnProtocol::launchWireguardTunnel(const QtJson::JsonObject &result)
+{
+    QtJson::JsonObject config = result["wireguard_config_data"].toMap();
+    
+    QString clientPrivateKey = config["client_priv_key"].toString();
+    QByteArray key = QByteArray::fromBase64(clientPrivateKey.toLocal8Bit());
+    QString clientPubKey = config["client_pub_key"].toString();
+    
+    QString addr = config["config"].toString().split("\n").takeAt(1).split(" = ").takeLast();
+    QStringList dnsServersList = config["config"].toString().split("\n").takeAt(2).split(" = ").takeLast().split(", ");
+    QString privkey = config["config"].toString().split("\n").takeAt(3).split(" = ").takeLast();
+    QString pubkey = config["config"].toString().split("\n").takeAt(6).split(" = ").takeLast();
+    QString presharedkey = config["config"].toString().split("\n").takeAt(7).split(" = ").takeLast();
+    QStringList allowedIPList = config["config"].toString().split("\n").takeAt(8).split(" = ").takeLast().split(", ");
+    QString endpoint = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast();
+    QString serverAddr = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast().split(":").takeFirst();
+    QString port = config["config"].toString().split("\n").takeAt(9).split(" = ").takeLast().split(":").takeLast();
+    QString keepalive = config["config"].toString().split("\n").takeAt(10).split(" = ").takeLast();
+    
+    QString hostname = config["hostName"].toString();
+    QString pskKey = config["psk_key"].toString();
+    QString serverPubKey = config["server_pub_key"].toString();
+    
+    qDebug() << "IOSVPNProtocol starts for" << hostname;
+    qDebug() << "DNS:" << dnsServersList.takeFirst().toNSString();
+    qDebug() << "serverPublicKey:" << serverPubKey.toNSString();
+    qDebug() << "serverIpv4AddrIn:" << serverAddr.toNSString();
+    qDebug() << "serverPort:" << (uint32_t)port.toInt();
+    qDebug() << "allowed ip list" << allowedIPList;
+    
+    NSMutableArray<VPNIPAddressRange*>* allowedIPAddressRangesNS =
+        [NSMutableArray<VPNIPAddressRange*> arrayWithCapacity:allowedIPList.length()];
+    for (const IPAddressRange item : allowedIPList) {
+        VPNIPAddressRange* range =
+            [[VPNIPAddressRange alloc] initWithAddress:item.ipAddress().toNSString()
+                                   networkPrefixLength:item.range()
+                                                isIpv6:item.type() == IPAddressRange::IPv6];
+        [allowedIPAddressRangesNS addObject:[range autorelease]];
+    }
+    
+    [m_controller connectWithDnsServer:dnsServersList.takeFirst().toNSString()
+                     serverIpv6Gateway:@"FE80::1"
+                       serverPublicKey:serverPubKey.toNSString()
+                          presharedKey:pskKey.toNSString()
+                      serverIpv4AddrIn:serverAddr.toNSString()
+                            serverPort:port.toInt()
+                allowedIPAddressRanges:allowedIPAddressRangesNS
+                           ipv6Enabled:NO
+                                reason:0
+                       failureCallback:^() {
+        qDebug() << "Wireguard Protocol - connection failed";
+        dispatch_async(dispatch_get_main_queue(), ^{
+            emit connectionStateChanged(Disconnected);
+        });
+    }];
+}
+
+void IOSVpnProtocol::launchOpenVPNTunnel(const QtJson::JsonObject &result)
+{
+    QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+    QString ovpnConfig = ovpn["config"].toString();
+    
+    [m_controller connectWithOvpnConfig:ovpnConfig.toNSString()
+                        failureCallback:^{
+        qDebug() << "IOSVPNProtocol - connection failed";
+        dispatch_async(dispatch_get_main_queue(), ^{
+            emit connectionStateChanged(Disconnected);
+        });
+    }];
+}

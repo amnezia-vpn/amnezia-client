@@ -3,6 +3,7 @@
 
 #include "vpnprotocol.h"
 #include "protocols/protocols_defs.h"
+#include "json.h"
 
 using namespace amnezia;
 
@@ -45,6 +46,12 @@ private:
     bool m_serviceConnected = false;
     bool m_checkingStatus = false;
     std::function<void(const QString&)> m_logCallback;
+    
+    void setupWireguardProtocol(const QtJson::JsonObject& result);
+    void setupOpenVPNProtocol(const QtJson::JsonObject& result);
+    
+    void launchWireguardTunnel(const QtJson::JsonObject &result);
+    void launchOpenVPNTunnel(const QtJson::JsonObject &result);
 };
 
 

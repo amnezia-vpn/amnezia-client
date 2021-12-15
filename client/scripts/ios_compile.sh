@@ -126,7 +126,7 @@ printn Y "Retrieve the wireguard-go version... "
 print G "done."
 
 printn Y "Cleaning the existing project... "
-rm -rf mozillavpn.xcodeproj/ || die "Failed to remove things"
+rm -rf AmneziaVPN.xcodeproj/ || die "Failed to remove things"
 print G "done."
 
 #print Y "Importing translation files..."
@@ -203,6 +203,16 @@ if [ "$OS" = "macos" ]; then
   WEMODE="CONFIG+=webextension"
 else
   print G none
+fi
+
+if [ "$OS" = "ios" ]; then
+  print Y "Prepare to build OpenVPNAdapter..."
+  prepare_to_build_vpn
+  print Y "Building OpenVPNAdapter..."
+  compile_openvpn_adapter
+else
+  print Y "No OpenVPNAdapter will be built"
+
 fi
 
 print Y "Creating the xcode project via qmake..."

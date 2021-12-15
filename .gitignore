@@ -47,6 +47,7 @@ client/amneziavpn_qml_plugin_import.cpp
 client/qmlcache_loader.cpp
 client/rep_ipc_interface_replica.h
 client/resources_qmlcache.qrc
+client/3rd/OpenVPNAdpter/build/
 
 # QtCreator
 
