@@ -19,6 +19,7 @@ public:
     static bool clearSavedRoutes();
     static int routeDeleteList(const QString &gw, const QStringList &ips);
     static void flushDns();
+    static void resetIpStack();
 };
 
 #endif // ROUTER_H

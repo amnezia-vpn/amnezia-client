@@ -289,6 +289,27 @@ void RouterWin::flushDns()
     //qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
 }
 
+void RouterWin::resetIpStack()
+{
+//    {
+//        QProcess p;
+//        QString command = QString("ipconfig /release");
+//        p.start(command);
+//    }
+    {
+        QProcess p;
+        QString command = QString("netsh int ip reset");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("netsh winsock reset");
+        p.start(command);
+        p.waitForFinished();
+    }
+}
+
 void RouterWin::suspendWcmSvc(bool suspend)
 {
     if (suspend == m_suspended) return;

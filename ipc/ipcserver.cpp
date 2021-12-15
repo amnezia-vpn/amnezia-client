@@ -83,6 +83,11 @@ void IpcServer::flushDns()
     return Router::flushDns();
 }
 
+void IpcServer::resetIpStack()
+{
+    Router::resetIpStack();
+}
+
 bool IpcServer::checkAndInstallDriver()
 {
 #ifdef Q_OS_WIN

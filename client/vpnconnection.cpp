@@ -47,6 +47,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 {
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
+            IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
             if (m_settings.routeMode() != Settings::VpnAllSites) {
