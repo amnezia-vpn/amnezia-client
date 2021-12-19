@@ -51,7 +51,7 @@ PageBase {
         height: width
 
         visible: !VpnLogic.pushButtonConnectVisible
-        paused: VpnLogic.pushButtonConnectVisible
+        paused: VpnLogic.pushButtonConnectVisible && !root.pageActive
         //VisibleBehavior on visible { }
     }
 

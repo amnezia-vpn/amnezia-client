@@ -22,6 +22,7 @@ class AppSettingsLogic;
 class GeneralSettingsLogic;
 class NetworkSettingsLogic;
 class NewServerProtocolsLogic;
+class QrDecoderLogic;
 class ServerConfiguringProgressLogic;
 class ServerListLogic;
 class ServerSettingsLogic;
@@ -99,8 +100,8 @@ public:
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
-    Q_INVOKABLE bool saveTextFile(const QString& desc, const QString& ext, const QString& data);
-    Q_INVOKABLE bool saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE void saveTextFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE void saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
     QString getDialogConnectErrorText() const;
@@ -167,8 +168,9 @@ public:
     AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
     GeneralSettingsLogic *generalSettingsLogic()            { return m_generalSettingsLogic; }
     NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
-    ServerConfiguringProgressLogic *serverConfiguringProgressLogic()  { return m_serverConfiguringProgressLogic; }
     NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
+    QrDecoderLogic *qrDecoderLogic()                        { return m_qrDecoderLogic; }
+    ServerConfiguringProgressLogic *serverConfiguringProgressLogic()  { return m_serverConfiguringProgressLogic; }
     ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
     ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
     ServerContainersLogic *serverprotocolsLogic()        { return m_serverprotocolsLogic; }
@@ -191,8 +193,9 @@ private:
     AppSettingsLogic *m_appSettingsLogic;
     GeneralSettingsLogic *m_generalSettingsLogic;
     NetworkSettingsLogic *m_networkSettingsLogic;
-    ServerConfiguringProgressLogic *m_serverConfiguringProgressLogic;
     NewServerProtocolsLogic *m_newServerProtocolsLogic;
+    QrDecoderLogic *m_qrDecoderLogic;
+    ServerConfiguringProgressLogic *m_serverConfiguringProgressLogic;
     ServerListLogic *m_serverListLogic;
     ServerSettingsLogic *m_serverSettingsLogic;
     ServerContainersLogic *m_serverprotocolsLogic;

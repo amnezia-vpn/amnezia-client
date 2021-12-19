@@ -28,7 +28,6 @@ Window  {
         UiLogic.onCloseWindow()
     }
 
-    //flags: Qt.FramelessWindowHint
     title: "AmneziaVPN"
 
     function gotoPage(type, page, reset, slide) {
@@ -41,6 +40,9 @@ Window  {
 
         console.debug("QML gotoPage " + type + " " + page + " " + p_obj)
 
+        if (pageLoader.depth > 0) {
+            pageLoader.currentItem.deactivated()
+        }
 
         if (slide) {
             pageLoader.push(p_obj, {}, StackView.PushTransition)
@@ -59,10 +61,15 @@ Window  {
         if (pageLoader.depth <= 1) {
             return
         }
+        pageLoader.currentItem.deactivated()
         pageLoader.pop()
     }
 
     function set_start_page(page, slide) {
+        if (pageLoader.depth > 0) {
+            pageLoader.currentItem.deactivated()
+        }
+
         pageLoader.clear()
         if (slide) {
             pageLoader.push(pages[page], {}, StackView.PushTransition)
@@ -103,8 +110,6 @@ Window  {
         anchors.fill: parent
         color: "white"
     }
-
-    //PageShareProtoAmnezia {}
 
     StackView {
         id: pageLoader

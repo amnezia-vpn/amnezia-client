@@ -12,6 +12,7 @@ PageBase {
 
     BackButton {
         id: back_from_start
+        visible: pageLoader.depth > 1
     }
 
     Caption {
@@ -103,12 +104,43 @@ PageBase {
             anchors.horizontalCenter: parent.horizontalCenter
             y: 210
             anchors.top: lineEdit_start_existing_code.bottom
-            anchors.topMargin: 40
+            anchors.topMargin: 10
             text: qsTr("Connect")
             onClicked: {
                 StartPageLogic.onPushButtonImport()
             }
         }
+
+
+        BlueButtonType {
+            id: qr_code_import_open
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: new_sever_import.bottom
+            anchors.topMargin: 40
+
+            text: qsTr("Open file")
+            visible: StartPageLogic.pushButtonConnectVisible
+            onClicked: {
+                StartPageLogic.onPushButtonImportOpenFile()
+            }
+            enabled: StartPageLogic.pushButtonConnectEnabled
+        }
+
+        BlueButtonType {
+            id: qr_code_import
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: qr_code_import_open.bottom
+            anchors.topMargin: 10
+
+            text: qsTr("Scan QR code")
+            visible: StartPageLogic.pushButtonConnectVisible
+            onClicked: {
+                UiLogic.goToPage(PageEnum.QrDecoder)
+            }
+            enabled: StartPageLogic.pushButtonConnectEnabled
+        }
+
+
     }
 
 
@@ -223,8 +255,6 @@ PageBase {
             visible: StartPageLogic.labelWaitInfoVisible
             wrapMode: Text.Wrap
         }
-
-
 
         BlueButtonType {
             id: new_sever_connect

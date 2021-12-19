@@ -2,7 +2,6 @@
 #define SHARE_CONNECTION_LOGIC_H
 
 #include "PageLogicBase.h"
-#include "3rd/QRCodeGenerator/QRCodeGenerator.h"
 
 class UiLogic;
 
@@ -14,7 +13,8 @@ public:
     AUTO_PROPERTY(bool, shareFullAccess)
 
     AUTO_PROPERTY(QString, textEditShareAmneziaCodeText)
-    AUTO_PROPERTY(QString, shareAmneziaQrCodeText)
+    AUTO_PROPERTY(QStringList, shareAmneziaQrCodeTextSeries)
+    AUTO_PROPERTY(int, shareAmneziaQrCodeTextSeriesLength)
 
     AUTO_PROPERTY(QString, textEditShareOpenVpnCodeText)
 
@@ -46,11 +46,10 @@ public:
     ~ShareConnectionLogic() = default;
 
     void updateSharingPage(int serverIndex, DockerContainer container);
-    QImage updateQRCodeImage(const QByteArray &data);
+    QList<QString> genQrCodeImageSeries(const QByteArray &data);
+
     QString imageToBase64(const QImage &image);
 
-private:
-    CQR_Encode m_qrEncode;
 
 };
 #endif // SHARE_CONNECTION_LOGIC_H

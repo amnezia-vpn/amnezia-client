@@ -1,11 +1,7 @@
-#include <QApplication>
 #include <QBuffer>
-#include <QClipboard>
-#include <QFileDialog>
-#include <QTimer>
-#include <QSaveFile>
-#include <QStandardPaths>
 #include <QImage>
+#include <QDataStream>
+#include <QZXing>
 
 #include "ShareConnectionLogic.h"
 
@@ -18,6 +14,7 @@
 #include "configurators/ssh_configurator.h"
 
 #include "defines.h"
+#include "core/defs.h"
 #include <functional>
 
 #include "../uilogic.h"
@@ -35,7 +32,8 @@ ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
 void ShareConnectionLogic::onUpdatePage()
 {
     set_textEditShareAmneziaCodeText(tr(""));
-    set_shareAmneziaQrCodeText("");
+    set_shareAmneziaQrCodeTextSeries({});
+    set_shareAmneziaQrCodeTextSeriesLength(0);
 
     set_textEditShareOpenVpnCodeText("");
 
@@ -56,7 +54,8 @@ void ShareConnectionLogic::onUpdatePage()
 void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 {
     set_textEditShareAmneziaCodeText("");
-    set_shareAmneziaQrCodeText("");
+    set_shareAmneziaQrCodeTextSeries({});
+    set_shareAmneziaQrCodeTextSeriesLength(0);
 
     QJsonObject serverConfig;
     // Full access
@@ -97,15 +96,15 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         }
     }
 
-    QByteArray ba = QJsonDocument(serverConfig).toBinaryData();
+    QByteArray ba = QJsonDocument(serverConfig).toJson();
     ba = qCompress(ba, 8);
     QString code = QString("vpn://%1").arg(QString(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
     set_textEditShareAmneziaCodeText(code);
 
-    if (ba.size() < 2900) {
-        QImage qr = updateQRCodeImage(ba.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
-        set_shareAmneziaQrCodeText(imageToBase64(qr));
-    }
+
+    QList<QString> qrChunks = genQrCodeImageSeries(ba);
+    set_shareAmneziaQrCodeTextSeries(qrChunks);
+    set_shareAmneziaQrCodeTextSeriesLength(qrChunks.size());
 }
 
 void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
@@ -147,7 +146,7 @@ void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
     ssString = "ss://" + ssString.toUtf8().toBase64();
     set_lineEditShareShadowSocksStringText(ssString);
 
-    QImage qr = updateQRCodeImage(ssString.toUtf8());
+    QImage qr = QZXing::encodeData(ssString.toUtf8(), QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
     set_shareShadowSocksQrCodeText(imageToBase64(qr));
 
     QString humanString = QString("Server: %3\n"
@@ -200,7 +199,8 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
     set_textEditShareWireGuardCodeText(cfg);
 
-    QImage qr = updateQRCodeImage(cfg.toUtf8());
+    QImage qr = QZXing::encodeData(cfg.toUtf8(), QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
+
     set_shareWireGuardQrCodeText(imageToBase64(qr));
 }
 
@@ -234,30 +234,29 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, DockerContainer co
     uiLogic()->selectedDockerContainer = container;
     uiLogic()->selectedServerIndex = serverIndex;
     set_shareFullAccess(container == DockerContainer::None);
+
+    m_shareAmneziaQrCodeTextSeries.clear();
+    set_shareAmneziaQrCodeTextSeriesLength(0);
 }
 
-QImage ShareConnectionLogic::updateQRCodeImage(const QByteArray &data)
+QList<QString> ShareConnectionLogic::genQrCodeImageSeries(const QByteArray &data)
 {
-    int levelIndex = 1;
-    int versionIndex = 0;
-    bool bExtent = true;
-    int maskIndex = -1;
+    double k = 1500;
 
-    m_qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, data.data() );
+    quint8 chunksCount = std::ceil(data.size() / k);
+    QList<QString> chunks;
+    for (int i = 0; i < data.size(); i = i + k) {
+        QByteArray chunk;
+        QDataStream s(&chunk, QIODevice::WriteOnly);
+        s << amnezia::qrMagicCode << chunksCount << (quint8)std::round(i/k) << data.mid(i, k);
 
-    int qrImageSize = m_qrEncode.m_nSymbleSize;
+        QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
-    int encodeImageSize = qrImageSize + ( QR_MARGIN * 2 );
-    QImage encodeImage( encodeImageSize, encodeImageSize, QImage::Format_Mono );
+        QImage qr = QZXing::encodeData(ba, QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
+        chunks.append(imageToBase64(qr));
+    }
 
-    encodeImage.fill( 1 );
-
-    for ( int i = 0; i < qrImageSize; i++ )
-        for ( int j = 0; j < qrImageSize; j++ )
-            if ( m_qrEncode.m_byModuleData[i][j] )
-                encodeImage.setPixel( i + QR_MARGIN, j + QR_MARGIN, 0 );
-
-    return encodeImage;
+    return chunks;
 }
 
 QString ShareConnectionLogic::imageToBase64(const QImage &image)
