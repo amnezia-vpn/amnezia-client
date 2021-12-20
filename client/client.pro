@@ -146,12 +146,14 @@ win32 {
     RC_FILE = platform_win/vpnclient.rc
 
     HEADERS += \
-       ui/framelesswindow.h \
+       protocols/ikev2_vpn_protocol_windows.h \
+       ui/framelesswindow.h
 
     SOURCES += \
+       protocols/ikev2_vpn_protocol_windows.cpp \
        ui/framelesswindow.cpp
 
-    VERSION = 1.0.0.0
+    VERSION = 2.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 
@@ -202,7 +204,6 @@ win32|macx|linux:!android {
    HEADERS  += \
       ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
-      protocols/ikev2_vpn_protocol.h \
       protocols/openvpnovercloakprotocol.h \
       protocols/shadowsocksvpnprotocol.h \
       protocols/wireguardprotocol.h \
@@ -210,7 +211,6 @@ win32|macx|linux:!android {
    SOURCES  += \
       ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
-      protocols/ikev2_vpn_protocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
       protocols/shadowsocksvpnprotocol.cpp \
       protocols/wireguardprotocol.cpp \

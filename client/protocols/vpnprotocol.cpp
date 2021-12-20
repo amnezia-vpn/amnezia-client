@@ -9,7 +9,10 @@
 #include "shadowsocksvpnprotocol.h"
 #include "openvpnovercloakprotocol.h"
 #include "wireguardprotocol.h"
-#include "ikev2_vpn_protocol.h"
+#endif
+
+#ifdef Q_OS_WINDOWS
+#include "ikev2_vpn_protocol_windows.h"
 #endif
 
 
