@@ -4,7 +4,7 @@
 #define APPLICATION_NAME    "AmneziaVPN"
 #define SERVICE_NAME        "AmneziaVPN-service"
 #define ORGANIZATION_NAME   "AmneziaVPN.ORG"
-#define APP_MAJOR_VERSION   "2.0.5"
-#define APP_VERSION         "2.0.5.0"
+#define APP_MAJOR_VERSION   "2.0.6"
+#define APP_VERSION         "2.0.6.0"
 
 #endif // DEFINES_H

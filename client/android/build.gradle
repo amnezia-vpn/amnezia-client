@@ -102,8 +102,8 @@ android {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 30
-        versionCode 5 // Change to a higher number
-        versionName "2.0.5" // Change to a higher number
+        versionCode 6 // Change to a higher number
+        versionName "2.0.6" // Change to a higher number
     }
 
    buildTypes {
