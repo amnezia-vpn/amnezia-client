@@ -123,9 +123,9 @@ UiLogic::~UiLogic()
         }
     }
 
+    m_vpnConnection->deleteLater();
     m_vpnConnectionThread.quit();
     m_vpnConnectionThread.wait(3000);
-    delete m_vpnConnection;
 
     qDebug() << "Application closed";
 }
