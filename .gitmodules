@@ -10,3 +10,6 @@
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
 	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+[submodule "client/3rd/qzxing"]
+	path = client/3rd/qzxing
+	url = https://github.com/ftylitak/qzxing.git

@@ -16,8 +16,9 @@
 #include "ui/pages_logic/AppSettingsLogic.h"
 #include "ui/pages_logic/GeneralSettingsLogic.h"
 #include "ui/pages_logic/NetworkSettingsLogic.h"
-#include "ui/pages_logic/ServerConfiguringProgressLogic.h"
 #include "ui/pages_logic/NewServerProtocolsLogic.h"
+#include "ui/pages_logic/QrDecoderLogic.h"
+#include "ui/pages_logic/ServerConfiguringProgressLogic.h"
 #include "ui/pages_logic/ServerContainersLogic.h"
 #include "ui/pages_logic/ServerListLogic.h"
 #include "ui/pages_logic/ServerSettingsLogic.h"
@@ -34,6 +35,8 @@
 
 #include "ui/uilogic.h"
 
+#include "QZXing.h"
+
 #include "debug.h"
 #include "defines.h"
 
@@ -46,6 +49,10 @@
 
 #ifdef Q_OS_WIN
 #include "Windows.h"
+#endif
+
+#if defined(Q_OS_ANDROID)
+#include "native.h"
 #endif
 
 static void loadTranslator()
@@ -78,6 +85,11 @@ int main(int argc, char *argv[])
 #else
     QApplication app(argc, argv);
 #endif
+
+#if defined(Q_OS_ANDROID)
+    NativeHelpers::registerApplicationInstance(&app);
+#endif
+
 
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
@@ -115,6 +127,8 @@ int main(int argc, char *argv[])
     }
 
     app.setQuitOnLastWindowClosed(false);
+
+    QZXing::registerQMLTypes();
 
     qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
@@ -156,8 +170,9 @@ int main(int argc, char *argv[])
     engine->rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
     engine->rootContext()->setContextProperty("GeneralSettingsLogic", uiLogic->generalSettingsLogic());
     engine->rootContext()->setContextProperty("NetworkSettingsLogic", uiLogic->networkSettingsLogic());
-    engine->rootContext()->setContextProperty("ServerConfiguringProgressLogic", uiLogic->serverConfiguringProgressLogic());
     engine->rootContext()->setContextProperty("NewServerProtocolsLogic", uiLogic->newServerProtocolsLogic());
+    engine->rootContext()->setContextProperty("QrDecoderLogic", uiLogic->qrDecoderLogic());
+    engine->rootContext()->setContextProperty("ServerConfiguringProgressLogic", uiLogic->serverConfiguringProgressLogic());
     engine->rootContext()->setContextProperty("ServerListLogic", uiLogic->serverListLogic());
     engine->rootContext()->setContextProperty("ServerSettingsLogic", uiLogic->serverSettingsLogic());
     engine->rootContext()->setContextProperty("ServerContainersLogic", uiLogic->serverprotocolsLogic());
