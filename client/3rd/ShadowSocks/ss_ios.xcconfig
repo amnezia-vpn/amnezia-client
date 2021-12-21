@@ -1,0 +1,24 @@
+SUPPORTED_PLATFORMS = iphoneos
+TARGETED_DEVICE_FAMILY = 1,2
+
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks
+//HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/libcares/include $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/libev/arm64/include $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/libsodium/include $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/mbedtls/include $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/pcre/arm64/include $(SRCROOT)/client/3rd/ShadowSocks/ShadowSocks/shadowsocks-libev/include
+
+//CLANG_CXX_LANGUAGE_STANDARD = gnu++14
+//CLANG_CXX_LIBRARY = libc++
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// iOS-specific settings
+//
+IPHONEOS_DEPLOYMENT_TARGET = 9.3
+
+SDKROOT[arch=arm64] = iphoneos
+SDKROOT[arch=armv7] = iphoneos
+SDKROOT[arch=armv7s] = iphoneos
+
+VALID_ARCHS[sdk=iphoneos*] = arm64
+
+PROJECT_TEMP_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/ShadowSocks.build
+CONFIGURATION_BUILD_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/Release-iphoneos
+BUILT_PRODUCTS_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/Release-iphoneos  

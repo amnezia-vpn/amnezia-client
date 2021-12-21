@@ -25,6 +25,7 @@ Makefile*
 *build-*
 
 # Qt-es
+client/Release-iphoneos/
 client/Debug-iphoneos/
 client/.xcode/
 client/.qmake.cache
@@ -48,7 +49,7 @@ client/qmlcache_loader.cpp
 client/rep_ipc_interface_replica.h
 client/resources_qmlcache.qrc
 client/3rd/OpenVPNAdpter/build/
-
+client/3rd/ShadowSocks/build/
 # QtCreator
 
 *.autosave

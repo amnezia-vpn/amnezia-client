@@ -10,9 +10,9 @@
 	<array>
 		<string>group.ru.kotit.AmneziaVPN.udev</string>
 	</array>
-    <key>keychain-access-groups</key>
-    <array>
-        <string>$(AppIdentifierPrefix)group.ru.kotit.AmneziaVPN.udev</string>
-    </array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)group.ru.kotit.AmneziaVPN.udev</string>
+	</array>
 </dict>
 </plist>

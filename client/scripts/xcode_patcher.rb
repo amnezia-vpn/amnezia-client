@@ -357,17 +357,27 @@ class XCodeprojPatcher
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework')
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework')
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework')
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework')
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+#   framework_ref = frameworks_group.new_file('3rd/PacketProcessor/build/Release-iphoneos/PacketProcessor.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2Socks.xcframework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
 
     # This fails: @target_main.add_dependency @target_extension
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)

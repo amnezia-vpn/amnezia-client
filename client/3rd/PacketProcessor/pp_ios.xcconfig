@@ -1,0 +1,22 @@
+SUPPORTED_PLATFORMS = iphoneos
+TARGETED_DEVICE_FAMILY = 1,2
+
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/client/3rd/PacketProcessor/PacketProcessor
+//CLANG_CXX_LANGUAGE_STANDARD = gnu++14
+//CLANG_CXX_LIBRARY = libc++
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// iOS-specific settings
+//
+IPHONEOS_DEPLOYMENT_TARGET = 9.3
+
+SDKROOT[arch=arm64] = iphoneos
+SDKROOT[arch=armv7] = iphoneos
+SDKROOT[arch=armv7s] = iphoneos
+
+VALID_ARCHS[sdk=iphoneos*] = arm64
+
+PROJECT_TEMP_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/PacketProcessor/build/PacketProcessor.build
+CONFIGURATION_BUILD_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/PacketProcessor/build/Release-iphoneos
+BUILT_PRODUCTS_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/PacketProcessor/build/Release-iphoneos  

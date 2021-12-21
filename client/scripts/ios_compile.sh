@@ -33,6 +33,9 @@ helpFunction() {
 print N "This script compiles AmneziaVPN for MacOS/iOS"
 print N ""
 
+#export QT_IOS_BIN="$HOME/Qt/5.15.2/ios/bin"
+#export PATH=$QT_IOS_BIN:$PATH
+
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -212,7 +215,28 @@ if [ "$OS" = "ios" ]; then
   compile_openvpn_adapter
 else
   print Y "No OpenVPNAdapter will be built"
+fi
 
+if [ "$OS" = "ios" ]; then
+  print Y "Prepare to build ShadowSocks..."
+  prepare_to_build_ss
+  print Y "Patching the ShadowSocks project..."
+  patch_ss
+  ruby ../../scripts/ss_project_patcher.rb "ShadowSocks.xcodeproj"
+  print G "done."
+  print Y "Building ShadowSocks Framework..."
+  compile_ss_frameworks
+else
+  print Y "No ShadowSocket Library will be built"
+fi
+
+if [ "$OS" = "ios" ]; then
+  print Y "Prepare to build Packet Processor..."
+  prepare_to_build_pp
+  print Y "Building PacketProcessor Framework..."
+  compile_packet_processor
+else
+  print Y "No Packet Processor will be built"
 fi
 
 print Y "Creating the xcode project via qmake..."
@@ -230,6 +254,11 @@ $QMAKE \
 print Y "Patching the xcode project..."
 ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || die "Failed to merge xcode with wireguard"
 print G "done."
+
+  if command -v "sed" &>/dev/null; then
+    sed -i '' '/<key>BuildSystemType<\/key>/d' AmneziaVPN.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+    sed -i '' '/<string>Original<\/string>/d' AmneziaVPN.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+  fi
 
 print Y "Opening in XCode..."
 open AmneziaVPN.xcodeproj

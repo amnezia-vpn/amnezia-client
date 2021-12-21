@@ -57,25 +57,8 @@ bool IOSVpnProtocol::initialize()
             setupOpenVPNProtocol(result);
             currentProto = amnezia::Proto::OpenVpn;
         } else if (protoName == "shadowsocks") {
+            setupShadowSocksProtocol(result);
             currentProto = amnezia::Proto::ShadowSocks;
-            QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
-            QString ovpnConfig = ovpn["config"].toString();
-            qDebug() << "OpenVPN Config:\n" << ovpn;
-            QtJson::JsonObject ssConfig = result["shadowsocks_config_data"].toMap();
-            QString ssLocalPort = ssConfig["local_port"].toString();
-            QString ssMethod = ssConfig["method"].toString();
-            QString ssPassword = ssConfig["password"].toString();
-            QString ssServer = ssConfig["server"].toString();
-            QString ssPort = ssConfig["server_port"].toString();
-            QString ssTimeout = ssConfig["timeout"].toString();
-            qDebug() << "\n\nSS CONFIG:";
-            qDebug() << " local port -" << ssLocalPort;
-            qDebug() << " method     -" << ssMethod;
-            qDebug() << " password   -" << ssPassword;
-            qDebug() << " server     -" << ssServer;
-            qDebug() << " port       -" << ssPort;
-            qDebug() << " timeout    -" << ssTimeout;
-            return false;
         } else {
             return false;
         }
@@ -101,7 +84,7 @@ ErrorCode IOSVpnProtocol::start()
     
     switch (m_protocol) {
         case amnezia::Proto::OpenVpn:
-            if (currentProto == amnezia::Proto::WireGuard) {
+            if (currentProto != m_protocol) {
                 if (m_controller) {
                     stop();
                     initialize();
@@ -114,7 +97,7 @@ ErrorCode IOSVpnProtocol::start()
             launchOpenVPNTunnel(result);
             break;
         case amnezia::Proto::WireGuard:
-            if (currentProto == amnezia::Proto::OpenVpn) {
+            if (currentProto != m_protocol) {
                 if (m_controller) {
                     stop();
                     initialize();
@@ -125,6 +108,19 @@ ErrorCode IOSVpnProtocol::start()
             }
             initialize();
             launchWireguardTunnel(result);
+            break;
+        case amnezia::Proto::ShadowSocks:
+            if (currentProto != m_protocol) {
+                if (m_controller) {
+                    stop();
+                    initialize();
+                }
+                launchShadowSocksTunnel(result);
+                currentProto = amnezia::Proto::ShadowSocks;
+                return NoError;
+            }
+            initialize();
+            launchShadowSocksTunnel(result);
             break;
         default:
             break;
@@ -288,8 +284,6 @@ void IOSVpnProtocol::setupWireguardProtocol(const QtJson::JsonObject &result)
     qDebug() << "  - " << "psk_key: " << config["psk_key"].toString();
     qDebug() << "  - " << "server_pub_key: " << config["server_pub_key"].toString();
     
-    
-    
     m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
                                                      privateKey:key.toNSData()
                                               deviceIpv4Address:addr.toNSString()
@@ -309,7 +303,7 @@ void IOSVpnProtocol::setupWireguardProtocol(const QtJson::JsonObject &result)
             }
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
-                QDateTime qtDate(QDateTime::fromNSDate(date));
+//                QDateTime qtDate(QDateTime::fromNSDate(date));
                 dispatch_async(dispatch_get_main_queue(), ^{
                     emit connectionStateChanged(VpnConnectionState::Connected);
                 });
@@ -370,7 +364,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
             }
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
-                QDateTime qtDate(QDateTime::fromNSDate(date));
+//                QDateTime qtDate(QDateTime::fromNSDate(date));
                 dispatch_async(dispatch_get_main_queue(), ^{
                     emit connectionStateChanged(VpnConnectionState::Connected);
                 });
@@ -400,6 +394,69 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QtJson::JsonObject &result)
 //        dispatch_async(dispatch_get_main_queue(), ^{
 //            emit connectionStateChanged(Disconnected);
 //        });
+    }];
+}
+
+void IOSVpnProtocol::setupShadowSocksProtocol(const QtJson::JsonObject &result)
+{
+    static bool creating = false;
+    // No nested creation!
+    Q_ASSERT(creating == false);
+    creating = true;
+    
+    QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+    QString ovpnConfig = ovpn["config"].toString();
+    qDebug() << "OpenVPN Config:\n" << ovpn;
+    QtJson::JsonObject ssConfig = result["shadowsocks_config_data"].toMap();
+    
+    m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
+                                                   tunnelConfig:ovpnConfig.toNSString()
+                                                       ssConfig:serializeSSConfig(ssConfig).toNSString()
+    closure:^(ConnectionState state, NSDate* date) {
+        qDebug() << "ShadowSocks creation completed with connection state:" << state;
+        creating = false;
+        
+        switch (state) {
+            case ConnectionStateError: {
+                [m_controller dealloc];
+                m_controller = nullptr;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Error);
+                });
+                return;
+            }
+            case ConnectionStateConnected: {
+                Q_ASSERT(date);
+    //                QDateTime qtDate(QDateTime::fromNSDate(date));
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Connected);
+                });
+                return;
+            }
+            case ConnectionStateDisconnected:
+                // Just in case we are connecting, let's call disconnect.
+    //                [m_controller disconnect];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                });
+                return;
+        }
+    }
+    callback:^(BOOL a_connected) {
+        if (currentProto != m_protocol) {
+            qDebug() << "Protocols switched: " << a_connected;
+            return;
+        }
+        qDebug() << "SS State changed: " << a_connected;
+        if (a_connected) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                emit connectionStateChanged(Connected);
+            });
+            return;
+        }
+    //        dispatch_async(dispatch_get_main_queue(), ^{
+    //            emit connectionStateChanged(Disconnected);
+    //        });
     }];
 }
 
@@ -467,9 +524,55 @@ void IOSVpnProtocol::launchOpenVPNTunnel(const QtJson::JsonObject &result)
     
     [m_controller connectWithOvpnConfig:ovpnConfig.toNSString()
                         failureCallback:^{
-        qDebug() << "IOSVPNProtocol - connection failed";
+        qDebug() << "IOSVPNProtocol (OpenVPN) - connection failed";
         dispatch_async(dispatch_get_main_queue(), ^{
             emit connectionStateChanged(Disconnected);
         });
     }];
+}
+
+void IOSVpnProtocol::launchShadowSocksTunnel(const QtJson::JsonObject &result) {
+    QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+    QString ovpnConfig = ovpn["config"].toString();
+    QtJson::JsonObject ssConfig = result["shadowsocks_config_data"].toMap();
+    QString ss = serializeSSConfig(ssConfig);
+    
+    [m_controller connectWithSsConfig:ss.toNSString()
+                           ovpnConfig:ovpnConfig.toNSString()
+                      failureCallback:^{
+        qDebug() << "IOSVPNProtocol (ShadowSocks) - connection failed";
+        dispatch_async(dispatch_get_main_queue(), ^{
+            emit connectionStateChanged(Disconnected);
+        });
+    }];
+}
+
+QString IOSVpnProtocol::serializeSSConfig(const QtJson::JsonObject &ssConfig) {
+    QString ssLocalPort = ssConfig["local_port"].toString();
+    QString ssMethod = ssConfig["method"].toString();
+    QString ssPassword = ssConfig["password"].toString();
+    QString ssServer = ssConfig["server"].toString();
+    QString ssPort = ssConfig["server_port"].toString();
+    QString ssTimeout = ssConfig["timeout"].toString();
+    qDebug() << "\n\nSS CONFIG:";
+    qDebug() << " local port -" << ssLocalPort;
+    qDebug() << " method     -" << ssMethod;
+    qDebug() << " password   -" << ssPassword;
+    qDebug() << " server     -" << ssServer;
+    qDebug() << " port       -" << ssPort;
+    qDebug() << " timeout    -" << ssTimeout;
+    
+    QJsonObject shadowSocksConfig = QJsonObject();
+    shadowSocksConfig.insert("local_addr", "127.0.0.1");
+    shadowSocksConfig.insert("local_port", ssConfig["local_port"].toInt());
+    shadowSocksConfig.insert("method", ssConfig["method"].toString());
+//    shadowSocksConfig.insert("method", "aes-256-gcm");
+    shadowSocksConfig.insert("password", ssConfig["password"].toString());
+    shadowSocksConfig.insert("server", ssConfig["server"].toString());
+    shadowSocksConfig.insert("server_port", ssConfig["server_port"].toInt());
+    shadowSocksConfig.insert("timeout", ssConfig["timeout"].toInt());
+    
+    QString ss = QString(QJsonDocument(shadowSocksConfig).toJson());
+    qDebug() << "SS Config JsonString:\n" << ss;
+    return ss;
 }

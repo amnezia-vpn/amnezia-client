@@ -10,3 +10,9 @@
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
 	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+[submodule "client/3rd/ShadowPath"]
+	path = client/3rd/ShadowPath
+	url = https://github.com/qman9501/ShadowPath
+[submodule "client/3rd/outline-go-tun2socks"]
+	path = client/3rd/outline-go-tun2socks
+	url = https://github.com/Jigsaw-Code/outline-go-tun2socks.git
