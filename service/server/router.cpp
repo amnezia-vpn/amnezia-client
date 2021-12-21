@@ -53,3 +53,14 @@ void Router::flushDns()
 #endif
 }
 
+void Router::resetIpStack()
+{
+#ifdef Q_OS_WIN
+    RouterWin::Instance().resetIpStack();
+#elif defined (Q_OS_MAC)
+    // todo fixme
+#elif defined Q_OS_LINUX
+    // todo fixme
+#endif
+}
+

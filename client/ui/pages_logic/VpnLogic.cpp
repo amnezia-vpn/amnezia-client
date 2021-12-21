@@ -4,6 +4,7 @@
 #include "vpnconnection.h"
 #include <functional>
 #include "../uilogic.h"
+#include "defines.h"
 
 
 VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
@@ -13,7 +14,6 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     m_radioButtonVpnModeAllSitesChecked{true},
     m_radioButtonVpnModeForwardSitesChecked{false},
     m_radioButtonVpnModeExceptSitesChecked{false},
-    m_pushButtonVpnAddSiteEnabled{true},
 
     m_labelSpeedReceivedText{tr("0 Mbps")},
     m_labelSpeedSentText{tr("0 Mbps")},
@@ -42,7 +42,6 @@ void VpnLogic::onUpdatePage()
     set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);
     set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
     set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
-    set_pushButtonVpnAddSiteEnabled(mode != Settings::VpnAllSites);
 
     const QJsonObject &server = uiLogic()->m_settings.defaultServer();
     QString serverString = QString("%2 (%3)")
@@ -53,22 +52,35 @@ void VpnLogic::onUpdatePage()
     DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
+
+    set_isContainerWorkingOnPlatform(ContainerProps::isWorkingOnPlatform(selectedContainer));
+    if (!isContainerWorkingOnPlatform()) {
+        set_labelErrorText(tr("AmneziaVPN not supporting selected protocol on this device. Select another protocol."));
+    }
+    else {
+        set_labelErrorText("");
+    }
+    QString ver = QString("v. %2").arg(QString(APP_MAJOR_VERSION));
+    set_labelVersionText(ver);
 }
 
 
 void VpnLogic::onRadioButtonVpnModeAllSitesClicked()
 {
     m_settings.setRouteMode(Settings::VpnAllSites);
+    onUpdatePage();
 }
 
 void VpnLogic::onRadioButtonVpnModeForwardSitesClicked()
 {
     m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
+    onUpdatePage();
 }
 
 void VpnLogic::onRadioButtonVpnModeExceptSitesClicked()
 {
     m_settings.setRouteMode(Settings::VpnAllExceptSites);
+    onUpdatePage();
 }
 
 void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)

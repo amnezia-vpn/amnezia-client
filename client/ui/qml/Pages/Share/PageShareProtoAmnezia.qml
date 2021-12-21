@@ -33,6 +33,13 @@ PageShareProtocolBase {
         contentHeight: content.height + 20
         clip: true
 
+        Behavior on contentY{
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutCubic
+            }
+        }
+
         ColumnLayout {
             id: content
             enabled: logic.pageEnabled
@@ -73,6 +80,7 @@ New encryption keys pair will be generated.")
                     ShareConnectionLogic.onPushButtonShareAmneziaGenerateClicked()
                     enabled = true
                     genConfigProcess = false
+                    fl.contentY = tfShareCode.mapToItem(fl.contentItem, 0, 0).y
                 }
             }
 
@@ -114,19 +122,32 @@ New encryption keys pair will be generated.")
             }
 
             Image {
-                id: label_share_code
+                id: image_share_code
                 Layout.topMargin: 20
                 Layout.fillWidth: true
                 Layout.preferredHeight: width
                 smooth: false
-                source: ShareConnectionLogic.shareAmneziaQrCodeText
-                visible: ShareConnectionLogic.shareAmneziaQrCodeText.length > 0
+
+                Timer {
+                    property int idx: 0
+                    interval: 1000
+                    running: root.pageActive && ShareConnectionLogic.shareAmneziaQrCodeTextSeriesLength > 0
+                    repeat: true
+                    onTriggered: {
+                        idx++
+                        if (idx >= ShareConnectionLogic.shareAmneziaQrCodeTextSeriesLength) {
+                            idx = 0
+                        }
+                        image_share_code.source = ShareConnectionLogic.shareAmneziaQrCodeTextSeries[idx]
+                    }
+                }
+
+                visible: ShareConnectionLogic.shareAmneziaQrCodeTextSeriesLength > 0
             }
 
             LabelType {
                 Layout.fillWidth: true
-                text: qsTr("Config too long to be displayed as QR code")
-                visible: ShareConnectionLogic.shareAmneziaQrCodeText.length == 0 && tfShareCode.textArea.length > 0
+                text: qsTr("Scan QR code using AmneziaVPN mobile")
             }
         }
     }

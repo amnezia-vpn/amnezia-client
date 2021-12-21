@@ -27,6 +27,11 @@ public:
 
     Q_INVOKABLE void onPushButtonConnect();
     Q_INVOKABLE void onPushButtonImport();
+    Q_INVOKABLE void onPushButtonImportOpenFile();
+
+    bool importConnection(const QJsonObject &profile);
+    bool importConnectionFromCode(QString code);
+    bool importConnectionFromQr(const QByteArray &data);
 
 public:
     explicit StartPageLogic(UiLogic *uiLogic, QObject *parent = nullptr);

@@ -5,14 +5,17 @@ TEMPLATE = app
 #CONFIG += console
 
 CONFIG += qtquickcompiler
+CONFIG += qzxing_multimedia \
+          enable_decoder_qr_code \
+          enable_encoder_qr_code
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
-include("3rd/QRCodeGenerator/QRCodeGenerator.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+include("3rd/QZXing/src/QZXing-components.pri")
 
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
@@ -48,6 +51,7 @@ HEADERS  += \
     ui/pages_logic/NetworkSettingsLogic.h \
    ui/pages_logic/NewServerProtocolsLogic.h \
     ui/pages_logic/PageLogicBase.h \
+   ui/pages_logic/QrDecoderLogic.h \
    ui/pages_logic/ServerConfiguringProgressLogic.h \
     ui/pages_logic/ServerContainersLogic.h \
     ui/pages_logic/ServerListLogic.h \
@@ -103,6 +107,7 @@ SOURCES  += \
     ui/pages_logic/NetworkSettingsLogic.cpp \
    ui/pages_logic/NewServerProtocolsLogic.cpp \
     ui/pages_logic/PageLogicBase.cpp \
+   ui/pages_logic/QrDecoderLogic.cpp \
    ui/pages_logic/ServerConfiguringProgressLogic.cpp \
     ui/pages_logic/ServerContainersLogic.cpp \
     ui/pages_logic/ServerListLogic.cpp \
@@ -141,12 +146,14 @@ win32 {
     RC_FILE = platform_win/vpnclient.rc
 
     HEADERS += \
-       ui/framelesswindow.h \
+       protocols/ikev2_vpn_protocol_windows.h \
+       ui/framelesswindow.h
 
     SOURCES += \
+       protocols/ikev2_vpn_protocol_windows.cpp \
        ui/framelesswindow.cpp
 
-    VERSION = 1.0.0.0
+    VERSION = 2.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
     QMAKE_TARGET_PRODUCT = "AmneziaVPN"
 
@@ -197,7 +204,6 @@ win32|macx|linux:!android {
    HEADERS  += \
       ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
-      protocols/ikev2_vpn_protocol.h \
       protocols/openvpnovercloakprotocol.h \
       protocols/shadowsocksvpnprotocol.h \
       protocols/wireguardprotocol.h \
@@ -205,7 +211,6 @@ win32|macx|linux:!android {
    SOURCES  += \
       ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
-      protocols/ikev2_vpn_protocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
       protocols/shadowsocksvpnprotocol.cpp \
       protocols/wireguardprotocol.cpp \
@@ -218,11 +223,13 @@ android {
    INCLUDEPATH += platforms/android
 
    HEADERS += \
+      platforms/android/native.h \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
       protocols/android_vpnprotocol.h
 
    SOURCES += \
+      platforms/android/native.cpp \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
       protocols/android_vpnprotocol.cpp

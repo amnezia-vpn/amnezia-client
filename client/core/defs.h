@@ -6,6 +6,8 @@
 
 namespace amnezia {
 
+constexpr const qint16 qrMagicCode = 1984;
+
 struct ServerCredentials
 {
     QString hostName;

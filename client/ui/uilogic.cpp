@@ -2,6 +2,7 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFile>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHostInfo>
@@ -16,7 +17,6 @@
 #include <QThread>
 #include <QTimer>
 #include <QRegularExpression>
-#include <QSaveFile>
 
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -51,8 +51,9 @@
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
-#include "pages_logic/ServerConfiguringProgressLogic.h"
 #include "pages_logic/NewServerProtocolsLogic.h"
+#include "pages_logic/QrDecoderLogic.h"
+#include "pages_logic/ServerConfiguringProgressLogic.h"
 #include "pages_logic/ServerListLogic.h"
 #include "pages_logic/ServerSettingsLogic.h"
 #include "pages_logic/ServerContainersLogic.h"
@@ -84,8 +85,9 @@ UiLogic::UiLogic(QObject *parent) :
     m_appSettingsLogic = new AppSettingsLogic(this);
     m_generalSettingsLogic = new GeneralSettingsLogic(this);
     m_networkSettingsLogic = new NetworkSettingsLogic(this);
-    m_serverConfiguringProgressLogic = new ServerConfiguringProgressLogic(this);
     m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
+    m_qrDecoderLogic = new QrDecoderLogic(this);
+    m_serverConfiguringProgressLogic = new ServerConfiguringProgressLogic(this);
     m_serverListLogic = new ServerListLogic(this);
     m_serverSettingsLogic = new ServerSettingsLogic(this);
     m_serverprotocolsLogic = new ServerContainersLogic(this);
@@ -121,9 +123,9 @@ UiLogic::~UiLogic()
         }
     }
 
+    m_vpnConnection->deleteLater();
     m_vpnConnectionThread.quit();
     m_vpnConnectionThread.wait(3000);
-    delete m_vpnConnection;
 
     qDebug() << "Application closed";
 }
@@ -263,9 +265,6 @@ void UiLogic::keyPressEvent(Qt::Key key)
     case Qt::Key_Q:
         qApp->quit();
         break;
-        //    case Qt::Key_0:
-        //        *((char*)-1) = 'x';
-        //        break;
     case Qt::Key_H:
         selectedServerIndex = m_settings.defaultServerIndex();
         selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
@@ -645,38 +644,36 @@ PageEnumNS::Page UiLogic::currentPage()
     return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
-bool UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
+void UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
-    if (fileName.isEmpty()) return false;
+    if (fileName.isEmpty()) return;
 
-    QSaveFile save(fileName);
+    QFile save(fileName);
     save.open(QIODevice::WriteOnly);
     save.write(data.toUtf8());
+    save.close();
 
     QFileInfo fi(fileName);
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
-
-    return save.commit();
 }
 
-bool UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
+void UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
-    if (fileName.isEmpty()) return false;
+    if (fileName.isEmpty()) return;
 
-    QSaveFile save(fileName);
+    QFile save(fileName);
     save.open(QIODevice::WriteOnly);
     save.write(QByteArray::fromBase64(data.toUtf8()));
+    save.close();
 
     QFileInfo fi(fileName);
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
-
-    return save.commit();
 }
 
 void UiLogic::copyToClipboard(const QString &text)

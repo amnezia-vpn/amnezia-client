@@ -1,5 +1,5 @@
-#ifndef IPSEC_PROTOCOL_H
-#define IPSEC_PROTOCOL_H
+#ifndef IKEV2_VPN_PROTOCOL_WINDOWS_H
+#define IKEV2_VPN_PROTOCOL_WINDOWS_H
 
 #include <QObject>
 #include <QProcess>
@@ -10,7 +10,6 @@
 #include "vpnprotocol.h"
 #include "core/ipcclient.h"
 
-#ifdef Q_OS_WIN
 #include <string>
 #include <memory>
 #include <atomic>
@@ -30,8 +29,6 @@
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "rasapi32.lib")
 #pragma comment(lib, "Crypt32.lib")
-
-#endif
 
 class Ikev2Protocol : public VpnProtocol
 {
@@ -54,14 +51,9 @@ public:
 private:
     void readIkev2Configuration(const QJsonObject &configuration);
 
-#ifdef Q_OS_WIN
-    //certificates variables
-
-#endif
 private:
     QJsonObject m_config;
 
-#ifdef Q_OS_WIN
     //RAS functions and parametrs
     HRASCONN        hRasConn{nullptr};
     bool create_new_vpn(const QString & vpn_name,
@@ -70,12 +62,8 @@ private:
 
     bool connect_to_vpn(const QString & vpn_name);
     bool disconnect_vpn();
-#endif
-
 };
 
-#ifdef Q_OS_WIN
 DWORD CALLBACK rasCallback(UINT msg, RASCONNSTATE rascs, DWORD err);
-#endif
 
-#endif // IPSEC_PROTOCOL_H
+#endif // IKEV2_VPN_PROTOCOL_WINDOWS_H

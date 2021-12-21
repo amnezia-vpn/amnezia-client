@@ -3,6 +3,13 @@
 #include "configurators/ssh_configurator.h"
 #include "../uilogic.h"
 
+#include <QFileDialog>
+#include <QStandardPaths>
+
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
+#endif
+
 StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_pushButtonConnectEnabled{true},
@@ -119,67 +126,97 @@ void StartPageLogic::onPushButtonConnect()
 
 void StartPageLogic::onPushButtonImport()
 {
-    QString s = lineEditStartExistingCodeText();
-    s.replace("vpn://", "");
-    QByteArray ba = QByteArray::fromBase64(s.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray ba_uncompressed = qUncompress(ba);
+    importConnectionFromCode(lineEditStartExistingCodeText());
+}
 
-    QJsonObject o;
-    if (!ba_uncompressed.isEmpty()) {
-        o = QJsonDocument::fromBinaryData(ba_uncompressed).object();
-    }
-    else {
-        o = QJsonDocument::fromJson(ba).object();
-    }
+void StartPageLogic::onPushButtonImportOpenFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn");
 
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+
+    importConnectionFromCode(QString(data));
+}
+
+bool StartPageLogic::importConnection(const QJsonObject &profile)
+{
     ServerCredentials credentials;
-    credentials.hostName = o.value("h").toString();
-    if (credentials.hostName.isEmpty()) credentials.hostName = o.value(config_key::hostName).toString();
+    credentials.hostName = profile.value(config_key::hostName).toString();
+    credentials.port = profile.value(config_key::port).toInt();
+    credentials.userName = profile.value(config_key::userName).toString();
+    credentials.password = profile.value(config_key::password).toString();
 
-    credentials.port = o.value("p").toInt();
-    if (credentials.port == 0) credentials.port = o.value(config_key::port).toInt();
-
-    credentials.userName = o.value("u").toString();
-    if (credentials.userName.isEmpty()) credentials.userName = o.value(config_key::userName).toString();
-
-    credentials.password = o.value("w").toString();
-    if (credentials.password.isEmpty()) credentials.password = o.value(config_key::password).toString();
-
-    if (credentials.isValid()) {
-        o.insert(config_key::hostName, credentials.hostName);
-        o.insert(config_key::port, credentials.port);
-        o.insert(config_key::userName, credentials.userName);
-        o.insert(config_key::password, credentials.password);
-
-        o.remove("h");
-        o.remove("p");
-        o.remove("u");
-        o.remove("w");
-    }
-    qDebug() << QString("Added server %3@%1:%2").
-                arg(credentials.hostName).
-                arg(credentials.port).
-                arg(credentials.userName);
+//    qDebug() << QString("Added server %3@%1:%2").
+//                arg(credentials.hostName).
+//                arg(credentials.port).
+//                arg(credentials.userName);
 
     //qDebug() << QString("Password") << credentials.password;
 
-    if (credentials.isValid() || o.contains(config_key::containers)) {
-        m_settings.addServer(o);
+    if (credentials.isValid() || profile.contains(config_key::containers)) {
+        m_settings.addServer(profile);
         m_settings.setDefaultServer(m_settings.serversCount() - 1);
 
+        emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
     }
     else {
         qDebug() << "Failed to import profile";
-        qDebug().noquote() << QJsonDocument(o).toJson();
-        return;
+        qDebug().noquote() << QJsonDocument(profile).toJson();
+        return false;
     }
 
-    if (!o.contains(config_key::containers)) {
+    if (!profile.contains(config_key::containers)) {
         uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
         uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
         uiLogic()->onUpdateAllPages();
 
         emit uiLogic()->goToPage(Page::ServerContainers);
     }
+
+    return true;
+}
+
+bool StartPageLogic::importConnectionFromCode(QString code)
+{
+    code.replace("vpn://", "");
+    QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
+    QByteArray ba_uncompressed = qUncompress(ba);
+    if (!ba_uncompressed.isEmpty()) {
+        ba = ba_uncompressed;
+    }
+
+    QJsonObject o;
+    o = QJsonDocument::fromJson(ba).object();
+    if (!o.isEmpty()) {
+        return importConnection(o);
+    }
+
+    o = QJsonDocument::fromBinaryData(ba).object();
+    if (!o.isEmpty()) {
+        return importConnection(o);
+    }
+    return false;
+}
+
+bool StartPageLogic::importConnectionFromQr(const QByteArray &data)
+{
+    qDebug() << "StartPageLogic::importConnectionFromQr" << data;
+    QJsonObject dataObj = QJsonDocument::fromJson(data).object();
+    if (!dataObj.isEmpty()) {
+        return importConnection(dataObj);
+    }
+
+    QByteArray ba_uncompressed = qUncompress(data);
+    if (!ba_uncompressed.isEmpty()) {
+        return importConnection(QJsonDocument::fromJson(ba_uncompressed).object());
+    }
+
+    return false;
 }

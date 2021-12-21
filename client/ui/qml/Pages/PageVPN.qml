@@ -20,6 +20,16 @@ PageBase {
         source: "qrc:/images/background_connected.png"
     }
 
+    LabelType {
+        x: 10
+        y: 5
+        width: 100
+        height: 21
+        text: VpnLogic.labelVersionText
+        color: "#dddddd"
+        font.pixelSize: 12
+    }
+
     ImageButtonType {
         x: parent.width - 40
         y: 10
@@ -41,7 +51,7 @@ PageBase {
         height: width
 
         visible: !VpnLogic.pushButtonConnectVisible
-        paused: VpnLogic.pushButtonConnectVisible
+        paused: VpnLogic.pushButtonConnectVisible && !root.pageActive
         //VisibleBehavior on visible { }
     }
 
@@ -61,7 +71,7 @@ PageBase {
         }
         contentItem: Item {}
         antialiasing: true
-        enabled: VpnLogic.pushButtonConnectEnabled
+        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerWorkingOnPlatform
         opacity: VpnLogic.pushButtonConnectVisible ? 1 : 0
 
 //        transitions: Transition {
@@ -141,11 +151,14 @@ PageBase {
         id: error_text
         anchors.top: layout2.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
+        anchors.topMargin: 20
+        width: parent.width - 20
+
         height: 21
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
         text: VpnLogic.labelErrorText
+        color: "red"
     }
 
     Item {
@@ -273,7 +286,7 @@ PageBase {
         width: parent.width - 40
         height: GC.isMobile() ? 0: 40
         text: qsTr("+ Add site")
-        enabled: VpnLogic.pushButtonVpnAddSiteEnabled
+        enabled: ! VpnLogic.radioButtonVpnModeAllSitesChecked
         background: Rectangle {
             anchors.fill: parent
             radius: 4

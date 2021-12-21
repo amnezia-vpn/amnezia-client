@@ -26,16 +26,16 @@
 #include "utils.h"
 #include "vpnconnection.h"
 
-VpnConnection::VpnConnection(QObject* parent) : QObject(parent)
-{
+VpnConnection::VpnConnection(QObject* parent) : QObject(parent),
+    m_settings(this)
 
+{
 }
 
 VpnConnection::~VpnConnection()
 {
-    //qDebug() << "VpnConnection::~VpnConnection() 1";
+    m_vpnProtocol->deleteLater();
     m_vpnProtocol.clear();
-    //qDebug() << "VpnConnection::~VpnConnection() 2";
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -47,6 +47,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 {
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
+            IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
             if (m_settings.routeMode() != Settings::VpnAllSites) {
@@ -219,7 +220,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     if (!m_IpcClient) {
-        m_IpcClient = new IpcClient;
+        m_IpcClient = new IpcClient(this);
     }
 
     if (!m_IpcClient->isSocketConnected()) {

@@ -11,7 +11,7 @@ win32 {
        -lcrypt32 \
 
    !contains(QMAKE_TARGET.arch, x86_64) {
-      INCLUDEPATH += $$PWD/windows/x86_64
+      INCLUDEPATH += $$PWD/windows/x86
       HEADERS += $$PWD/windows/x86/botan_all.h
       SOURCES += $$PWD/windows/x86/botan_all.cpp
    }

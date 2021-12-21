@@ -38,13 +38,9 @@ apply plugin: 'kotlinx-serialization'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'com.android.installreferrer:installreferrer:2.2'
-    implementation 'com.android.billingclient:billing-ktx:4.0.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
-    implementation 'com.adjust.sdk:adjust-android:4.28.2'
-    implementation 'com.google.android.gms:play-services-ads-identifier:17.0.1'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
 }
@@ -106,8 +102,8 @@ android {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 30
-        versionCode 2 // Change to a higher number
-        versionName "2.0.1" // Change to a higher number
+        versionCode 6 // Change to a higher number
+        versionName "2.0.6" // Change to a higher number
     }
 
    buildTypes {
