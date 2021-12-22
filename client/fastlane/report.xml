@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000294">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: Switch to certificates lane" time="0.000162">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: match" time="16.218694">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: notification" time="0.234117">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="4: clean_build_artifacts" time="0.000678">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="5: build_app" time="245.559392">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="6: testflight" time="66.240632">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="7: get_version_number" time="0.122953">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="8: get_build_number" time="1.192314">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="9: increment_build_number" time="2.5453">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

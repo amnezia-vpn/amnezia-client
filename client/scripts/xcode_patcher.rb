@@ -110,6 +110,9 @@ class XCodeprojPatcher
         config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] ||= '-Onone'
       end
     end
+    
+#   images_ref = @target_main.new_reference('ios/app/Images.xcassets')
+#   @target_main.add_resources([images_ref])
 
     if networkExtension
       # WireGuard group
@@ -252,10 +255,14 @@ class XCodeprojPatcher
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+#     config.build_settings['STRIP_BITCODE_FROM_COPIED_FILES'] = 'NO'
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
-        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos/",
+#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos/",
+#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios/"
       ]
 
       # Versions and names
@@ -341,6 +348,11 @@ class XCodeprojPatcher
       'platforms/ios/iostunnel.swift',
       'platforms/ios/iosglue.mm',
       'platforms/ios/ioslogger.swift',
+#     'platforms/ios/Shadowsocks.h',
+#     'platforms/ios/Shadowsocks.m',
+#     'platforms/ios/ShadowsocksConnectivity.h',
+#     'platforms/ios/ShadowsocksConnectivity.m',
+#     'platforms/ios/Subnet.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -369,14 +381,14 @@ class XCodeprojPatcher
     framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/PacketProcessor/build/Release-iphoneos/PacketProcessor.framework')
+#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
-    
-    framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2Socks.xcframework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket/CocoaAsyncSocket.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
 
     # This fails: @target_main.add_dependency @target_extension

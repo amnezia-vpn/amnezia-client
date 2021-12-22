@@ -25,13 +25,15 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>3</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Amnezia VPN needs access to the camera for reading QR-codes.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>AmneziaVPNLaunchScreen</string>
 	<key>UIRequiresFullScreen</key>

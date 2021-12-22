@@ -5,6 +5,8 @@
 #include "macos/gobridge/wireguard.h"
 #include "wireguard-go-version.h"
 #include "3rd/wireguard-apple/Sources/WireGuardKitC/WireGuardKitC.h"
+//#include "../../platforms/ios/Shadowsocks.h"
+
 
 #include <stdbool.h>
 #include <stdint.h>

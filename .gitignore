@@ -40,6 +40,7 @@ client/qrc_*.cpp
 client/ui_*.h
 client/ui_*.cpp
 client/Makefile*
+client/fastlane/build/
 client/*build-*
 client/AmneziaVPN.xcodeproj
 client/Debug-iphonesimulator/
