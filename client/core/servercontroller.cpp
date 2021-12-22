@@ -165,8 +165,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     };
 
     // mkdir
-    QFileInfo fi(path);
-    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  " + fi.absoluteDir().absolutePath();
+    QString mkdir = QString("sudo docker exec -i $CONTAINER_NAME mkdir -p  \"$(dirname %1)\"")
+            .arg(path);
+
     e = runScript(credentials,
         replaceVars(mkdir, genVarsForScript(credentials, container)));
     if (e) return e;
