@@ -16,7 +16,7 @@ public:
     explicit IOSVpnProtocol(amnezia::Proto proto, const QJsonObject& configuration, QObject* parent = nullptr);
     static IOSVpnProtocol* instance();
     
-    virtual ~IOSVpnProtocol() = default;
+    virtual ~IOSVpnProtocol() override = default;
 
     bool initialize();
 

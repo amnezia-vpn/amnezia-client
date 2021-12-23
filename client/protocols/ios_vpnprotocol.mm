@@ -82,6 +82,9 @@ ErrorCode IOSVpnProtocol::start()
     
     QString protocol = result["protocol"].toString();
     
+    if (!m_controller)
+        initialize();
+    
     switch (m_protocol) {
         case amnezia::Proto::OpenVpn:
             if (currentProto != m_protocol) {
