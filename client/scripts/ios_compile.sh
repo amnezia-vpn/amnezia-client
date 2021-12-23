@@ -140,8 +140,10 @@ print G "done."
 #python scripts/generate_glean.py || die "Failed to generate glean samples"
 
 printn Y "Extract the project version... "
+#SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
+#FULLVERSION=$(echo $SHORTVERSION | cut -d. -f1).$(date +"%Y%m%d%H%M")
 SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
-FULLVERSION=$(echo $SHORTVERSION | cut -d. -f1).$(date +"%Y%m%d%H%M")
+FULLVERSION=$(cat versionfull.pri | grep BUILDVERSION | grep defined | cut -d= -f2 | tr -d \ )
 print G "$SHORTVERSION - $FULLVERSION"
 
 MACOS_FLAGS="
@@ -230,14 +232,14 @@ else
   print Y "No ShadowSocket Library will be built"
 fi
 
-if [ "$OS" = "ios" ]; then
-  print Y "Prepare to build Packet Processor..."
-  prepare_to_build_pp
-  print Y "Building PacketProcessor Framework..."
-  compile_packet_processor
-else
-  print Y "No Packet Processor will be built"
-fi
+#if [ "$OS" = "ios" ]; then
+# print Y "Prepare to build Packet Processor..."
+# prepare_to_build_pp
+# print Y "Building PacketProcessor Framework..."
+# compile_packet_processor
+#else
+# print Y "No Packet Processor will be built"
+#fi
 
 print Y "Creating the xcode project via qmake..."
 $QMAKE \

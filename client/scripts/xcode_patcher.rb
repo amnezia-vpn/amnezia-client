@@ -62,7 +62,11 @@ class XCodeprojPatcher
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
-        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+#       "${PROJECT_DIR}/3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket",
       ]
 
       # Versions and names
@@ -71,6 +75,8 @@ class XCodeprojPatcher
       config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = configHash['APP_ID_MACOS'] if platform == 'macos'
       config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = configHash['APP_ID_IOS'] if platform == 'ios'
       config.build_settings['PRODUCT_NAME'] = 'AmneziaVPN'
+      config.build_settings['SYMROOT'] = 'build'
+      config.build_settings['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
 
       # other config
       config.build_settings['INFOPLIST_FILE'] ||= platform + '/app/Info.plist'
@@ -111,8 +117,12 @@ class XCodeprojPatcher
       end
     end
     
-#   images_ref = @target_main.new_reference('ios/app/Images.xcassets')
-#   @target_main.add_resources([images_ref])
+    # add assets to main target
+    assets_group = @project.main_group.new_group('Assets')
+    
+    assets_path = 'ios/Media.xcassets'
+    assets_ref = assets_group.new_reference(assets_path, :group)
+    @target_main.add_resources([assets_ref])
 
     if networkExtension
       # WireGuard group
@@ -260,9 +270,10 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos/",
-#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos/",
-#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios/"
+#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+#       "${PROJECT_DIR}/3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket",
       ]
 
       # Versions and names
@@ -386,7 +397,7 @@ class XCodeprojPatcher
 #   
 #   framework_ref = frameworks_group.new_file('3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket/CocoaAsyncSocket.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
-#   
+#
 #   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
     
