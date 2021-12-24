@@ -1,0 +1,134 @@
+[package]
+name = "shadowsocks-rust"
+version = "1.10.3"
+authors = ["Shadowsocks Contributors"]
+description = "shadowsocks is a fast tunnel proxy that helps you bypass firewalls."
+repository = "https://github.com/shadowsocks/shadowsocks-rust"
+readme = "README.md"
+documentation = "https://docs.rs/shadowsocks"
+keywords = ["shadowsocks", "proxy", "socks", "socks5", "firewall"]
+license = "MIT"
+edition = "2018"
+
+[badges]
+maintenance = { status = "passively-maintained" }
+
+[[bin]]
+name = "sslocal"
+path = "bin/sslocal.rs"
+required-features = ["local"]
+
+[[bin]]
+name = "ssserver"
+path = "bin/ssserver.rs"
+required-features = ["server"]
+
+[[bin]]
+name = "ssurl"
+path = "bin/ssurl.rs"
+required-features = ["utility"]
+
+[[bin]]
+name = "ssmanager"
+path = "bin/ssmanager.rs"
+required-features = ["manager"]
+
+[workspace]
+members = [
+    "crates/shadowsocks",
+    "crates/shadowsocks-service",
+]
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+incremental = false
+panic = "abort"
+
+[features]
+default = [
+    "logging",
+    "trust-dns",
+    "local",
+    "server",
+    "manager",
+    "utility",
+    "local-http",
+    "local-tunnel",
+    "local-socks4",
+    "multi-threaded",
+]
+
+# Enable local server
+local = ["shadowsocks-service/local"]
+# Enable remote server
+server = ["shadowsocks-service/server"]
+# Enable manager server
+manager = ["shadowsocks-service/manager"]
+# Enable utility
+utility = []
+
+# Enables trust-dns for replacing tokio's builtin DNS resolver
+trust-dns = ["shadowsocks-service/trust-dns"]
+dns-over-tls = ["shadowsocks-service/dns-over-tls"]
+dns-over-https = ["shadowsocks-service/dns-over-https"]
+
+# Enable logging output
+logging = ["log4rs"]
+
+# Enable DNS-relay
+local-dns = ["local", "shadowsocks-service/local-dns"]
+# Enable client flow statistic report
+# Currently is only used in Android
+local-flow-stat = ["local", "shadowsocks-service/local-flow-stat"]
+# Enable HTTP protocol for sslocal
+local-http = ["local", "shadowsocks-service/local-http"]
+local-http-native-tls = ["local-http", "shadowsocks-service/local-http-native-tls"]
+local-http-rustls = ["local-http", "shadowsocks-service/local-http-rustls"]
+# Enable REDIR protocol for sslocal
+# (transparent proxy)
+local-redir = ["local", "shadowsocks-service/local-redir"]
+# Enable tunnel protocol for sslocal
+local-tunnel = ["local", "shadowsocks-service/local-tunnel"]
+# Enable socks4 protocol for sslocal
+local-socks4 = ["local", "shadowsocks-service/local-socks4"]
+
+# Enable jemalloc for binaries
+jemalloc = ["jemallocator"]
+# Enable bundled tcmalloc
+tcmalloc-vendored = ["tcmalloc/bundled"]
+
+# Enable tokio's multi-threaded runtime
+multi-threaded = ["tokio/rt-multi-thread"]
+
+# Enable Stream Cipher Protocol
+# WARN: Stream Cipher Protocol is proved to be insecured
+# https://github.com/shadowsocks/shadowsocks-rust/issues/373
+# Users should always avoid using these ciphers in practice
+stream-cipher = ["shadowsocks-service/stream-cipher"]
+
+[dependencies]
+log = "0.4"
+log4rs = { version = "1.0", optional = true }
+
+clap = { version = "2", features = ["wrap_help", "suggestions"] }
+cfg-if = "1"
+qrcode = { version = "0.12", default-features = false }
+
+futures = "0.3"
+tokio = { version = "1", features = ["rt", "signal"] }
+
+mimalloc = { version = "0.1", optional = true }
+tcmalloc = { version = "0.3", optional = true }
+jemallocator = { version = "0.3", optional = true }
+
+shadowsocks-service = { version = "1.10.0", path = "./crates/shadowsocks-service" }
+
+[target.'cfg(unix)'.dependencies]
+daemonize = "0.4"
+
+[dev-dependencies]
+byteorder = "1.3"
+env_logger = "0.8"
+byte_string = "1.0"
+tokio = { version = "1", features = ["net", "time", "macros", "io-util"]}

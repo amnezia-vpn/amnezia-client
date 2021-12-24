@@ -1,0 +1,14 @@
+/target
+/build/release
+/build/target
+/build/install
+/build/*.sha256
+/dev
+/*.log
+/debian/*.log
+/.vscode
+/*.json
+/restart.sh
+/udp_echo_server.py
+/.idea
+/.devcontainer

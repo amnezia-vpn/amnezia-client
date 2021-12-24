@@ -37,12 +37,38 @@ apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'androidx.core:core-ktx:1.1.0'
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
+    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-rc01"
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
+
+
+    //Shadowsocks
+    def coroutinesVersion = '1.4.2'
+    def roomVersion = '2.2.6'
+    def workVersion = '2.5.0'
+    def lifecycleVersion = "2.3.0-rc01"
+
+    api 'androidx.appcompat:appcompat:1.2.0'
+
+    api 'androidx.fragment:fragment-ktx:1.3.0-rc02'
+    api "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
+    api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
+    api 'androidx.preference:preference:1.1.1'
+    api "androidx.room:room-runtime:$roomVersion"
+    api "androidx.work:work-multiprocess:$workVersion"
+    api "androidx.work:work-runtime-ktx:$workVersion"
+    api 'com.google.android.gms:play-services-oss-licenses:17.0.0'
+    api 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.firebase:firebase-analytics-ktx:18.0.2'
+    api 'com.google.firebase:firebase-crashlytics:17.3.1'
+    api 'com.jakewharton.timber:timber:4.7.1'
+    api 'dnsjava:dnsjava:3.3.1'
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
 }
 
 android {
@@ -71,7 +97,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
-            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
+            aidl.srcDirs = [qt5AndroidDir + '/aidl', 'aidl']
             res.srcDirs = [qt5AndroidDir + '/res', 'res']
             resources.srcDirs = ['resources']
             renderscript.srcDirs = ['src']
@@ -87,6 +113,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     lintOptions {

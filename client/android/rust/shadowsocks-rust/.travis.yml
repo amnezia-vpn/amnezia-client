@@ -1,0 +1,69 @@
+sudo: false
+language: rust
+jobs:
+  include:
+    - os: windows
+      rust: stable
+
+    - os: osx
+      rust: stable
+      osx_image: xcode11.3
+      env: SODIUM_USE_PKG_CONFIG=1
+
+    - os: linux
+      rust: stable
+      dist: bionic
+      env: SODIUM_USE_PKG_CONFIG=1
+    - os: linux
+      rust: beta
+      dist: bionic
+      env: SODIUM_USE_PKG_CONFIG=1
+    - os: linux
+      rust: nightly
+      dist: bionic
+      env: SODIUM_USE_PKG_CONFIG=1
+
+  allow_failures:
+    # FIXME: Travis build success but tests crash
+    - os: osx
+    - os: windows
+
+env:
+  - RUSTFLAGS="-Ctarget-feature=+aes,+ssse3" RUSTDOCFLAGS="-Ctarget-feature=+aes,+ssse3" RUST_BACKTRACE=1
+
+addons:
+  apt:
+    packages:
+      - libssl-dev
+      - libsodium-dev
+  homebrew:
+    packages:
+      - libsodium
+
+install:
+  # Install OpenSSL on Windows
+  - if [ "${TRAVIS_OS_NAME}" = "windows" ]; then
+    curl -Lo "openssl-1.0.2c-win64-mingw.zip" "https://dl.bintray.com/vszakats/generic/openssl-1.0.2c-win64-mingw.zip";
+    unzip "openssl-1.0.2c-win64-mingw.zip" -d "/c/OpenSSL";
+    export OPENSSL_LIB_DIR=/c/OpenSSL/openssl-1.0.2c-win64-mingw;
+    export OPENSSL_INCLUDE_DIR=/c/OpenSSL/openssl-1.0.2c-win64-mingw/include;
+    export OPENSSL_DIR=/c/OpenSSL/openssl-1.0.2c-win64-mingw;
+    fi
+  # - if [ "${TRAVIS_OS_NAME}" = "windows" ]; then
+  #   choco install openssl;
+  #   export OPENSSL_DIR='/c/Program Files/OpenSSL-Win64/';
+  #   export OPENSSL_STATIC=1;
+  #   fi
+
+script:
+  - cargo test --no-fail-fast
+  # - cargo test --no-fail-fast --no-default-features
+  # - cargo test --no-fail-fast --features aes-pmac-siv
+  # - cargo test --no-fail-fast --features single-threaded
+  # - cargo test --no-fail-fast --features openssl-vendored
+  # - cargo test --no-fail-fast --no-default-features --features "local-http local-http-rustls"
+  - if [ "${TRAVIS_OS_NAME}" = "linux" -o "${TRAVIS_OS_NAME}" = "osx" ]; then
+    cargo test --no-fail-fast --features local-redir;
+    fi
+
+# cache: cargo

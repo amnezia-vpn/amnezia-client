@@ -1,0 +1,19 @@
+#  This file is part of shadowsocks-rust.
+#
+#  This is a template unit file. Users may copy and rename the file into
+#  config directories to make new service instances. See systemd.unit(5)
+#  for details.
+
+[Unit]
+Description=Shadowsocks-rust Custom Client Service for %I
+Documentation=https://github.com/shadowsocks/shadowsocks-rust
+After=network.target
+
+[Service]
+Type=simple
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/sslocal --log-without-time -c /etc/shadowsocks-rust/%i.json
+
+[Install]
+WantedBy=multi-user.target
+

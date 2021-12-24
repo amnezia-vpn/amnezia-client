@@ -1,0 +1,119 @@
+[package]
+name = "shadowsocks-service"
+version = "1.10.2"
+authors = ["Shadowsocks Contributors"]
+description = "shadowsocks is a fast tunnel proxy that helps you bypass firewalls."
+repository = "https://github.com/shadowsocks/shadowsocks-rust"
+readme = "README.md"
+documentation = "https://docs.rs/shadowsocks"
+keywords = ["shadowsocks", "proxy", "socks", "socks5", "firewall"]
+license = "MIT"
+edition = "2018"
+
+[badges]
+maintenance = { status = "passively-maintained" }
+
+[features]
+full = [
+    "local",
+    "server",
+    "manager",
+    "trust-dns",
+    "local-http",
+    "local-redir",
+    "local-tunnel",
+    "local-socks4",
+]
+
+# Enable local server
+local = []
+# Enable remote server
+server = []
+# Enable manager server
+manager = ["server"]
+
+# Enables trust-dns for replacing tokio's builtin DNS resolver
+trust-dns = ["trust-dns-resolver", "shadowsocks/trust-dns"]
+dns-over-tls = ["trust-dns", "trust-dns-resolver/dns-over-tls", "trust-dns-resolver/dns-over-rustls"]
+dns-over-https = ["trust-dns", "trust-dns-resolver/dns-over-https", "trust-dns-resolver/dns-over-https-rustls"]
+
+# Enable DNS-relay
+local-dns = ["local", "trust-dns", "rand"]
+# Backward compatibility, DO NOT USE
+local-dns-relay = ["local-dns"]
+# Enable client flow statistic report
+# Currently is only used in Android
+local-flow-stat = ["local"]
+# Enable HTTP protocol for sslocal
+local-http = ["local", "hyper", "http", "tower"]
+local-http-native-tls = ["local-http", "tokio-native-tls", "native-tls"]
+local-http-rustls = ["local-http", "tokio-rustls", "webpki-roots", "rustls-native-certs"]
+# Enable REDIR protocol for sslocal
+# (transparent proxy)
+local-redir = ["local", "strum", "strum_macros", "mio"]
+# Enable tunnel protocol for sslocal
+local-tunnel = ["local"]
+# Enable socks4 protocol for sslocal
+local-socks4 = ["local"]
+
+# Enable Stream Cipher Protocol
+# WARN: Stream Cipher Protocol is proved to be insecured
+# https://github.com/shadowsocks/shadowsocks-rust/issues/373
+# Users should always avoid using these ciphers in practice
+stream-cipher = ["shadowsocks/stream-cipher"]
+
+[dependencies]
+log = "0.4"
+log4rs = "1.0"
+
+cfg-if = "1"
+qrcode = { version = "0.12", default-features = false }
+pin-project = "1.0"
+once_cell = "1.7"
+thiserror = "1.0"
+
+spin = { version = "0.9", features = ["std"] }
+lru_time_cache = "0.11"
+bytes = "1.0"
+byte_string = "1.0"
+byteorder = "1.3"
+rand = { version = "0.8", optional = true }
+
+futures = "0.3"
+tokio = { version = "1", features = ["io-util", "macros", "net", "parking_lot", "rt", "sync", "time"] }
+tokio-native-tls = { version = "0.3", optional = true }
+native-tls = { version = "0.2.7", optional = true, features = ["alpn"] }
+tokio-rustls = { version = "0.22", optional = true }
+webpki-roots = { version = "0.21", optional = true }
+rustls-native-certs = { version = "0.5", optional = true }
+async-trait = "0.1"
+mio = { version = "0.7", optional = true }
+
+socket2 = { version = "0.4", features = ["all"] }
+libc = "0.2"
+
+http = { version = "0.2", optional = true }
+hyper = { version = "0.14", optional = true, features = ["full"] }
+tower = { version = "0.4", optional = true }
+
+trust-dns-resolver = { version = "0.20.1", optional = true, features = ["serde-config"] }
+
+ipnet = "2.3"
+iprange = "0.6"
+regex = "1.4"
+
+serde = { version = "1.0", features = ["derive"] }
+json5 = "0.3"
+
+shadowsocks = { version = "1.10.0", path = "../shadowsocks" }
+
+strum = { version = "0.20", optional = true }
+strum_macros = { version = "0.20", optional = true }
+
+# Just for the ioctl call macro
+[target.'cfg(any(target_os = "macos", target_os = "ios", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
+nix = "0.20"
+
+[dev-dependencies]
+byteorder = "1.3"
+env_logger = "0.8"

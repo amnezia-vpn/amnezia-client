@@ -1,0 +1,3 @@
+debian/config.json usr/share/shadowsocks-rust
+debian/shadowsocks-rust-*.service lib/systemd/system
+

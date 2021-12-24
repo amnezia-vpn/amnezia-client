@@ -1,0 +1,60 @@
+[build]
+rustflags = [
+    # "--print", "native-static-libs",
+]
+
+[target.'cfg(target_arch = "x86_64")']
+rustflags = [
+    # "--print", "native-static-libs",
+
+    # Enable this for optimization for your local CPU
+    # "-C", "target-cpu=native",
+
+    # Common ISA that is supported by modern CPUs
+    # https://en.wikipedia.org/wiki/SSE4
+    # Disable this line if you find "Illegal Instructions" error when running the programs
+    "-C", "target-feature=+aes,+pclmul,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2",
+]
+
+[target.'cfg(target_arch = "x86")']
+rustflags = [
+    # "--print", "native-static-libs",
+
+    # Enable this for optimization for your local CPU
+    # "-C", "target-cpu=native",
+
+    # Common ISA that is supported by modern CPUs
+    # https://en.wikipedia.org/wiki/SSSE3
+    "-C", "target-feature=+aes,+pclmul,+sse,+sse2,+sse3,+ssse3",
+]
+
+[target.'cfg(target_arch = "arm")']
+rustflags = [
+    # "--print", "native-static-libs",
+
+    # Enable this for optimization for your local CPU
+    # "-C", "target-cpu=native",
+]
+
+# NOTE:
+#      Crypto: AES + PMULL + SHA1 + SHA2
+#      https://github.com/rust-lang/stdarch/blob/master/crates/std_detect/src/detect/arch/aarch64.rs#L26
+[target.'cfg(target_arch = "aarch64")']
+rustflags = [
+    # "--print", "native-static-libs",
+    
+    # Enable this for optimization for your local CPU
+    # "-C", "target-cpu=native",
+
+    # Common ISA that is supported by modern CPUs
+    # ARMv8-A, Cortex-A8
+    "-C", "target-feature=+aes,+crypto,+neon",
+]
+
+# NOTE:
+#    mips are commonly used in routers, so binary size is more important than speed
+# [target.'cfg(target_arch = "mips")']
+# rustflags = [
+#     "-C", "opt-level=z",
+#     "-C", "inline-threshold=225"
+# ]

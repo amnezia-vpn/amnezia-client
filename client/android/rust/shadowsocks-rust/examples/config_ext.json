@@ -1,0 +1,34 @@
+{
+    "locals": [
+        {
+            "local_address": "127.0.0.1",
+            "local_port": 1080
+        },
+        {
+            "local_address": "127.0.0.1",
+            "local_port": 3128,
+            "protocol": "http"
+        },
+        {
+            "local_address": "127.0.0.1",
+            "local_port": 53,
+            "protocol": "tunnel",
+            "forward_address": "8.8.8.8",
+            "forward_port": 53
+        }
+    ],
+    "servers": [
+        {
+            "server": "127.0.0.1",
+            "server_port": 8384,
+            "password": "password-svr2",
+            "method": "chacha20-ietf-poly1305"
+        },
+        {
+            "server": "127.0.0.1",
+            "server_port": 8385,
+            "password": "password-svr3",
+            "method": "aes-128-gcm"
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Disabled</key>
+        <false/>
+
+        <key>Label</key>
+        <string>com.zonyitoo.shadowsocks-rust</string>
+
+        <key>ProgramArguments</key>
+        <array>
+            <string>/usr/local/bin/sslocal</string>
+            <string>-c</string>
+            <string>/usr/local/etc/shadowsocks.json</string>
+        </array>
+
+        <key>RunAtLoad</key>
+        <true/>
+
+        <key>KeepAlive</key>
+        <dict>
+            <key>NetworkState</key>
+            <true/>
+        </dict>
+
+        <key>WorkingDirectory</key>
+        <string>/</string>
+
+        <key>StandardErrorPath</key>
+        <string>/tmp/shadowsocks-rust.stderr.log</string>
+
+        <key>StandardOutPath</key>
+        <string>/tmp/shadowsocks-rust.stdout.log</string>
+
+        <key>SoftResourceLimits</key>
+        <dict>
+            <key>NumberOfFiles</key>
+            <integer>10240</integer>
+        </dict>
+    </dict>
+</plist>

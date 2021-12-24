@@ -1,0 +1,239 @@
+version: 2.1
+
+orbs:
+    windows: circleci/windows@2.4.0
+
+jobs:
+    build-linux:
+        docker:
+            - image: circleci/rust:stretch
+
+        environment:
+            OPENSSL_STATIC: "1"
+            OPENSSL_LIB_DIR: "/usr/lib/x86_64-linux-gnu/"
+            OPENSSL_INCLUDE_DIR: "/usr/include/x86_64-linux-gnu/"
+            RUSTFLAGS: "-Ctarget-feature=+aes,+ssse3"
+
+        steps:
+            - checkout
+            - run:
+                  name: "APT Install Dependencies"
+                  command: |
+                      sudo apt-get update
+                      sudo apt-get install -y build-essential
+            - run:
+                  name: "Generate Cargo.lock"
+                  command: |
+                      rustc --version >rust-version
+                      test -e Cargo.lock || cargo generate-lockfile
+            - restore_cache:
+                  key: cargo-cache-{{ arch }}-{{ checksum "rust-version" }}-{{ checksum "Cargo.lock" }}
+            - run:
+                  name: "Build Release"
+                  command: BUILD_EXTRA_FEATURES="openssl-vendored local-redir" ./build-host-release
+                  no_output_timeout: 1h
+            - save_cache:
+                  paths:
+                      - /usr/local/cargo/registry
+                      - ./target
+                  key: cargo-cache-{{ arch }}-{{ checksum "rust-version" }}-{{ checksum "Cargo.lock" }}
+
+    build-windows:
+        executor: windows/default
+
+        environment:
+            OPENSSL_STATIC: "1"
+            OPENSSL_DIR: "C:\\OpenSSL"
+            RUSTFLAGS: "-Ctarget-feature=+aes,+ssse3"
+            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+
+        steps:
+            - checkout
+            - run:
+                  name: "Install Rust"
+                  command: |
+                      $ProgressPreference = "SilentlyContinue"
+                      Invoke-WebRequest -Uri "https://win.rustup.rs/" -OutFile "C:\rustup-init.exe"
+                      & C:\rustup-init.exe -y --default-toolchain "stable-x86_64-pc-windows-msvc" --no-modify-path --profile minimal
+
+                      $env:Path += ";C:\Users\circleci\.cargo\bin"
+                      rustc -Vv
+                      cargo --version
+
+                      rustc --version | Out-File -FilePath "rust-version"
+                      if (!(Test-Path "Cargo.lock" -PathType Leaf)) {
+                          cargo generate-lockfile
+                      }
+            - run:
+                  name: "Install OpenSSL"
+                  command: |
+                      $env:Path += ";C:\Users\circleci\.cargo\bin"
+
+                      $TargetTriple = (rustc -Vv | Select-String -Pattern "host: (.*)" | foreach {$_.Matches.Value}).split()[-1]
+                      if ($TargetTriple.StartsWith("x86_64-")) {
+                          $OpenSSLBits = "64"
+                      } else {
+                          $OpenSSLBits = "32"
+                      }
+                      $OpenSSLVersion = "1_1_0L"
+                      $OpenSSLFileName = "Win${OpenSSLBits}OpenSSL-${OpenSSLVersion}.exe"
+
+                      $ProgressPreference = "SilentlyContinue"
+                      Invoke-WebRequest -Uri "http://slproweb.com/download/${OpenSSLFileName}" -OutFile "${OpenSSLFileName}"
+                      Write-Host "* Done downloading ${OpenSSLFileName}"
+                      dir
+                      Start-Process "${OpenSSLFileName}" -ArgumentList "/SILENT /VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL" -Wait
+                      Write-Host "* Done installing ${OpenSSLFileName}"
+            - restore_cache:
+                  key: cargo-cache-{{ arch }}-{{ checksum "rust-version" }}-{{ checksum "Cargo.lock" }}
+            # - run: ./build-host-release
+            - run:
+                  name: "Package Release"
+                  command: |
+                      $ProgressPreference = "SilentlyContinue"
+                      $env:Path += ";C:\Users\circleci\.cargo\bin;."
+
+                      $PackageReleasePath = "${PWD}\build\release"
+
+                      Pushd target\release
+                      $Version = (sslocal -V).split()[-1]
+                      $TargetTriple = (rustc -Vv | Select-String -Pattern "host: (.*)" | foreach {$_.Matches.Value}).split()[-1]
+                      $PackageName = "shadowsocks-v${Version}.${TargetTriple}.zip"
+                      $PackagePath = "${PackageReleasePath}\${PackageName}"
+
+                      Write-Host "${Version}"
+                      Write-Host "${TargetTriple}"
+                      Write-Host "${PackagePath}"
+
+                      New-Item "${PackageReleasePath}" -ItemType Directory -ErrorAction SilentlyContinue
+                      $CompressParam = @{
+                          LiteralPath = "sslocal.exe", "ssserver.exe", "ssurl.exe", "ssmanager.exe"
+                          DestinationPath = "${PackagePath}"
+                      }
+                      Compress-Archive @CompressParam
+                      Popd
+
+                      $PackageChecksumPath = "${PackagePath}.sha256"
+                      $PackageHash = (Get-FileHash -Path "${PackagePath}" -Algorithm SHA256).Hash
+                      "${PackageHash}  ${PackageName}" | Out-File -FilePath "${PackageChecksumPath}"
+            - save_cache:
+                  paths:
+                      - C:\Users\circleci\.cargo\registry
+                      - target
+                  key: cargo-cache-{{ arch }}-{{ checksum "rust-version" }}-{{ checksum "Cargo.lock" }}
+            - store_artifacts:
+                  path: build\\release
+                  destination: releases
+            - persist_to_workspace:
+                  root: build
+                  paths:
+                      - release
+
+    build-docker:
+        machine:
+            image: ubuntu-1604:201903-01
+            docker_layer_caching: true
+
+        steps:
+            - checkout
+            - run:
+                  name: "APT Install Dependencies"
+                  command: |
+                      sudo apt-get update
+                      sudo apt-get install curl
+            - run:
+                  name: "Build docker images"
+                  command: |
+                      cd build
+                      docker build -t shadowsocks-rust:x86_64-pc-windows-gnu -f Dockerfile.x86_64-pc-windows-gnu .
+                      docker build -t shadowsocks-rust:x86_64-unknown-linux-musl -f Dockerfile.x86_64-unknown-linux-musl .
+                      docker build -t shadowsocks-rust:x86_64-unknown-linux-gnu -f Dockerfile.x86_64-unknown-linux-gnu .
+                      docker build -t shadowsocks-rust:arm-unknown-linux-gnueabihf -f Dockerfile.arm-unknown-linux-gnueabihf .
+                      docker build -t shadowsocks-rust:arm-unknown-linux-musleabi -f Dockerfile.arm-unknown-linux-musleabi .
+                      docker build -t shadowsocks-rust:aarch64-unknown-linux-gnu -f Dockerfile.aarch64-unknown-linux-gnu .
+            - run:
+                  name: "Install Rust"
+                  command: |
+                      curl "https://sh.rustup.rs" -o "rust-init.sh"
+                      chmod +x "rust-init.sh"
+                      ./rust-init.sh -y --default-toolchain stable --no-modify-path --profile minimal
+                      export PATH="$HOME/.cargo/bin:$PATH"
+                      echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
+                      rustup --version
+                      cargo --version
+                      rustc --version
+            - restore_cache:
+                  key: cargo-cache-{{ arch }}
+            - run: cargo install cross
+            - run:
+                  name: "Build Releases"
+                  command: |
+                      cd build
+                      ./build-release
+                  no_output_timeout: 2h
+            - save_cache:
+                  paths:
+                      - /usr/local/cargo/registry
+                      - ./target
+                  key: cargo-cache-{{ arch }}
+            - store_artifacts:
+                  path: ./build/release
+                  destination: releases
+            - persist_to_workspace:
+                  root: build
+                  paths:
+                      - release
+
+    publish-github-releases:
+        docker:
+            - image: circleci/golang:1.12
+        steps:
+            - attach_workspace:
+                  at: /tmp/workspace
+            - run:
+                  name: "Publish Release on GitHub"
+                  command: |
+                      ls -alh /tmp/workspace/release
+
+                      if [[ ! -z "${CIRCLE_TAG}" ]]; then
+                          go get github.com/tcnksm/ghr
+                          EXTRA_FLAGS="-replace"
+                          if [[ "${CIRCLE_TAG}" == *"-alpha."* ]]; then
+                              EXTRA_FLAGS="${EXTRA_FLAGS} -prerelease"
+                          fi
+                          ghr -t "${GITHUB_TOKEN}" \
+                              -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" \
+                              -c "${CIRCLE_SHA1}" \
+                              ${EXTRA_FLAGS} \
+                              "${CIRCLE_TAG}" /tmp/workspace/release
+                      else
+                          echo "Current build is not tagged."
+                      fi
+
+workflows:
+    version: 2
+    build-releases:
+        jobs:
+            - build-linux:
+                  filters:
+                      tags:
+                          only: /^v\d+\.\d+\.\d+(-alpha\.\d+)?$/
+            - build-windows:
+                  filters:
+                      tags:
+                          only: /^v\d+\.\d+\.\d+(-alpha\.\d+)?$/
+            - build-docker:
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /^v\d+\.\d+\.\d+(-alpha\.\d+)?$/
+            - publish-github-releases:
+                  requires:
+                      - build-windows
+                      - build-docker
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /^v\d+\.\d+\.\d+(-alpha\.\d+)?$/

@@ -1,0 +1,21 @@
+#  This file is part of shadowsocks-rust.
+#
+#  This file is default for Debian packaging. See also
+#  /etc/default/shadowsocks-rust for environment variables.
+
+[Unit]
+Description=Shadowsocks-rust Default Server Service
+Documentation=https://github.com/shadowsocks/shadowsocks-rust
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/default/shadowsocks-rust
+User=nobody
+Group=nogroup
+LimitNOFILE=32768
+ExecStart=/usr/bin/ssserver --log-without-time -c ${CONFFILE} ${DAEMON_ARGS}
+
+[Install]
+WantedBy=multi-user.target
+
