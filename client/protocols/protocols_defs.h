@@ -40,6 +40,7 @@ constexpr char server_priv_key[] = "server_priv_key";
 constexpr char server_pub_key[] = "server_pub_key";
 constexpr char psk_key[] = "psk_key";
 
+constexpr char client_ip[] = "client_ip"; // internal ip address
 
 constexpr char site[] = "site";
 constexpr char block_outside_dns[] = "block_outside_dns";

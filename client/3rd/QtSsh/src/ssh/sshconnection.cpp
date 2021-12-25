@@ -940,8 +940,8 @@ void SshConnectionPrivate::connectToHost()
             this, &SshConnectionPrivate::handleSocketConnected);
     connect(m_socket, &QIODevice::readyRead,
             this, &SshConnectionPrivate::handleIncomingData);
-    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this,
-        SLOT(handleSocketError()));
+    connect(m_socket, &QAbstractSocket::errorOccurred,
+            this, &SshConnectionPrivate::handleSocketError);
     connect(m_socket, &QAbstractSocket::disconnected,
             this, &SshConnectionPrivate::handleSocketDisconnected);
     connect(&m_timeoutTimer, &QTimer::timeout, this, &SshConnectionPrivate::handleTimeout);
