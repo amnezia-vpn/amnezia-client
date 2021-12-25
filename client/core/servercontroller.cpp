@@ -478,8 +478,10 @@ QJsonObject ServerController::createContainerInitialConfig(DockerContainer conta
 
 bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
-    const QJsonObject &oldProtoConfig = oldConfig[ContainerProps::containerToString(container)].toObject();
-    const QJsonObject &newProtoConfig = newConfig[ContainerProps::containerToString(container)].toObject();
+    Proto mainProto = ContainerProps::defaultProtocol(container);
+
+    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
     if (container == DockerContainer::OpenVpn) {
         if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) !=
