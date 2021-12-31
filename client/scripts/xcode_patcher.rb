@@ -11,8 +11,9 @@ class XCodeprojPatcher
 
   def run(file, shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
     open_project file
+    setup_project
     open_target_main
-
+    
     die 'IOS requires networkExtension mode' if not networkExtension and platform == 'ios'
 
     group = @project.main_group.new_group('Configuration')
@@ -43,6 +44,12 @@ class XCodeprojPatcher
     @project = Xcodeproj::Project.open(file)
     die 'Failed to open the project file: ' + file if @project.nil?
   end
+  
+  def setup_project
+    @project.build_configurations.each do |config|
+      config.build_settings['SYMROOT'] = 'build'
+    end
+  end
 
   def open_target_main
     @target_main = @project.targets.find { |target| target.to_s == 'AmneziaVPN' }
@@ -50,6 +57,7 @@ class XCodeprojPatcher
 
     die 'Unable to open AmneziaVPN target'
   end
+  
 
   def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
     @target_main.build_configurations.each do |config|
@@ -63,10 +71,11 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-#       "${PROJECT_DIR}/3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
       # Versions and names
@@ -265,15 +274,17 @@ class XCodeprojPatcher
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
-#     config.build_settings['STRIP_BITCODE_FROM_COPIED_FILES'] = 'NO'
+      config.build_settings['STRIP_BITCODE_FROM_COPIED_FILES'] = 'NO'
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/libleaf/include",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-#       "${PROJECT_DIR}/3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
       # Versions and names
@@ -357,13 +368,19 @@ class XCodeprojPatcher
 
     [
       'platforms/ios/iostunnel.swift',
-      'platforms/ios/iosglue.mm',
       'platforms/ios/ioslogger.swift',
-#     'platforms/ios/Shadowsocks.h',
-#     'platforms/ios/Shadowsocks.m',
-#     'platforms/ios/ShadowsocksConnectivity.h',
-#     'platforms/ios/ShadowsocksConnectivity.m',
-#     'platforms/ios/Subnet.swift',
+      'platforms/ios/iosinterface.swift',
+      'platforms/ios/ssprovider.swift',
+      'platforms/ios/iosglue.mm',
+      'platforms/ios/ssconnectivity.h',
+      'platforms/ios/ssconnectivity.m',
+      'platforms/ios/iosopenvpn2ssadapter.h',
+      'platforms/ios/iosopenvpn2ssadapter.m',
+      'platforms/ios/sspacket.h',
+      'platforms/ios/sspacket.m',
+      'platforms/ios/ssadapterpacketflow.h',
+      'platforms/ios/tun2ssprovider.swift',
+      'platforms/ios/tun2sockswriter.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -375,6 +392,9 @@ class XCodeprojPatcher
     frameworks_build_phase.clear
 
     framework_ref = frameworks_group.new_file('libwg-go.a')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
     frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
@@ -392,14 +412,19 @@ class XCodeprojPatcher
     framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
+    framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+
+    framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
+    frameworks_build_phase.add_file_reference(framework_ref)
+    
+#   framework_ref = frameworks_group.new_file('3rd/CocoaLumberjack/build/Release-iphoneos/CocoaLumberjack.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/PacketProcessor/PacketProcessor/CocoaAsyncSocket/CocoaAsyncSocket.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#
-#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
+    
+    
     
 
     # This fails: @target_main.add_dependency @target_extension

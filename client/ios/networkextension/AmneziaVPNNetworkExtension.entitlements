@@ -14,11 +14,5 @@
 	<array>
 		<string>$(AppIdentifierPrefix)group.org.amnezia.AmneziaVPN</string>
 	</array>
-<!--<key>com.apple.security.network.client</key>-->
-<!--<true/>-->
-<!--<key>com.apple.security.network.server</key>-->
-<!--<true/>-->
-<!--<key>com.apple.security.app-sandbox</key>-->
-<!--<true/>-->
 </dict>
 </plist>

@@ -19,3 +19,9 @@
 [submodule "client/3rd/qzxing"]
 	path = client/3rd/qzxing
 	url = https://github.com/ftylitak/qzxing.git
+[submodule "client/3rd/CocoaAsyncSocket"]
+	path = client/3rd/CocoaAsyncSocket
+	url = https://github.com/robbiehanson/CocoaAsyncSocket.git
+[submodule "client/3rd/CocoaLumberjack"]
+	path = client/3rd/CocoaLumberjack
+	url = https://github.com/CocoaLumberjack/CocoaLumberjack.git

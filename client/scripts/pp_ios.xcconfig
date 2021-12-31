@@ -1,7 +1,7 @@
 SUPPORTED_PLATFORMS = iphoneos
 TARGETED_DEVICE_FAMILY = 1,2
 
-HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/client/3rd/PacketProcessor/PacketProcessor
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/PacketProcessor
 //CLANG_CXX_LANGUAGE_STANDARD = gnu++14
 //CLANG_CXX_LIBRARY = libc++
 
@@ -16,7 +16,3 @@ SDKROOT[arch=armv7] = iphoneos
 SDKROOT[arch=armv7s] = iphoneos
 
 VALID_ARCHS[sdk=iphoneos*] = arm64
-
-PROJECT_TEMP_DIR = $(SRCROOT)/client/3rd/PacketProcessor/build/PacketProcessor.build
-CONFIGURATION_BUILD_DIR = $(SRCROOT)/client/3rd/PacketProcessor/build/Release-iphoneos
-BUILT_PRODUCTS_DIR = $(SRCROOT)/client/3rd/PacketProcessor/build/Release-iphoneos  

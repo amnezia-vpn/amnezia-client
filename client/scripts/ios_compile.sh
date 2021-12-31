@@ -232,13 +232,30 @@ else
   print Y "No ShadowSocket Library will be built"
 fi
 
+if [ "$OS" = "ios" ]; then
+  print Y "Prepare to build CocoaAsyncSocket..."
+  prepare_to_build_cas
+  print Y "Building CocoaAsyncSocket Framework..."
+  compile_cocoa_async_socket
+else
+  print Y "No CocoaAsyncSocket will be built"
+fi
+
+if [ "$OS" = "ios" ]; then
+  print Y "Prepare to build Tun2Socks..."
+  print Y "Building Tun2Socks Framework..."
+  compile_tun2socks
+else
+  print Y "No Tun2Socks will be built"
+fi
+
 #if [ "$OS" = "ios" ]; then
-# print Y "Prepare to build Packet Processor..."
-# prepare_to_build_pp
-# print Y "Building PacketProcessor Framework..."
-# compile_packet_processor
+# print Y "Prepare to build CocoaLamberjack..."
+# prepare_to_build_cl
+# print Y "Building CocoaLamberjack Framework..."
+# compile_cocoalamberjack
 #else
-# print Y "No Packet Processor will be built"
+# print Y "No CocoaLamberjack will be built"
 #fi
 
 print Y "Creating the xcode project via qmake..."

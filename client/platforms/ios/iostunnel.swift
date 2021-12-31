@@ -1,15 +1,41 @@
-// SPDX-License-Identifier: MIT
-// Copyright © 2018-2020 WireGuard LLC. All Rights Reserved.
-
 import Foundation
 import NetworkExtension
 import os
+import Darwin
 import OpenVPNAdapter
-//import ShadowSocks
-//import Tun2socks
+import Tun2socks
 
 enum TunnelProtoType: String {
     case wireguard, openvpn, shadowsocks, none
+}
+
+struct Constants {
+    static let kDefaultPathKey = "defaultPath"
+    static let processQueueName = "org.amnezia.process-packets"
+    static let ssQueueName = "org.amnezia.shadowsocks"
+    static let kActivationAttemptId = "activationAttemptId"
+    static let ovpnConfigKey = "ovpn"
+    static let ssConfigKey = "ss"
+    static let loggerTag = "NET"
+    static let ssRemoteHost = "server"
+    static let ssRemotePort = "server_port"
+    static let ssLocalAddressKey = "local_addr"
+    static let ssLocalPortKey = "local_port"
+    static let ssTimeoutKey = "timeout"
+    static let ssCipherKey = "method"
+    static let ssPasswordKey = "password"
+    static let kActionStart = "start"
+    static let kActionRestart = "restart"
+    static let kActionStop = "stop"
+    static let kActionGetTunnelId = "getTunnelId"
+    static let kActionIsServerReachable = "isServerReachable"
+    static let kMessageKeyAction = "action"
+    static let kMessageKeyTunnelid = "tunnelId"
+    static let kMessageKeyConfig = "config"
+    static let kMessageKeyErrorCode = "errorCode"
+    static let kMessageKeyHost = "host"
+    static let kMessageKeyPort = "port"
+    static let kMessageKeyOnDemand = "is-on-demand"
 }
 
 typealias ShadowsocksProxyCompletion = ((Int32, NSError?) -> Void)?
@@ -29,15 +55,20 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }()
     
     private var shadowSocksConfig: Data? = nil
+    private var openVPNConfig: Data? = nil
     var ssCompletion: ShadowsocksProxyCompletion = nil
     
-//    private var shadowSocksPort: Int32 = 0
-//    private var isShadowsocksRunning: Bool = false
-//    private let ssQueue = DispatchQueue(label: "org.amnezia.shadowsocks")
-    
-//    private var tun2socksWriter: AmneziaTun2SocksWriter? = nil
-//    private var tun2socksTunnel: Tun2socksOutlineTunnelProtocol? = nil
-//    private let processQueue = DispatchQueue(label: "org.amnezia.process-packets")
+    private var ssProvider: ShadowSocksTunnel? = nil
+    private var ssLocalPort: Int = 8585
+    private var ssRemoteHost = ""
+    private var leafProvider: TunProvider? = nil
+
+    private var tun2socksTunnel: Tun2socksOutlineTunnelProtocol? = nil
+    private var tun2socksWriter: Tun2socksTunWriter? = nil
+    private let processQueue = DispatchQueue(label: Constants.processQueueName)
+    private var connection: NWTCPConnection? = nil
+    private var session: NWUDPSession? = nil
+    private var observer: AnyObject?
    
     let vpnReachability = OpenVPNReachability()
 
@@ -46,15 +77,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var protoType: TunnelProtoType = .wireguard
     
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-        let activationAttemptId = options?["activationAttemptId"] as? String
+        let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
         let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
         
-        Logger.configureGlobal(tagged: "NET", withFilePath: FileManager.logFileURL?.path)
+        Logger.configureGlobal(tagged: Constants.loggerTag, withFilePath: FileManager.logFileURL?.path)
         
         if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
            let providerConfiguration = protocolConfiguration.providerConfiguration,
-           let _: Data = providerConfiguration["ovpn"] as? Data {
-            let withoutShadowSocks = providerConfiguration["ss"] as? Data == nil
+           let _: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data {
+            let withoutShadowSocks = providerConfiguration[Constants.ssConfigKey] as? Data == nil
             protoType = withoutShadowSocks ? .openvpn : .shadowsocks
         } else {
             protoType = .wireguard
@@ -88,47 +119,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-        guard let completionHandler = completionHandler else { return }
-        
-        if messageData.count == 1 && messageData[0] == 0 {
-            wgAdapter.getRuntimeConfiguration { settings in
-                var data: Data?
-                if let settings = settings {
-                    data = settings.data(using: .utf8)!
-                }
-                completionHandler(data)
-            }
-        } else if messageData.count >= 1 {
-            // Updates the tunnel configuration and responds with the active configuration
-            wg_log(.info, message: "Switching tunnel configuration")
-            guard let configString = String(data: messageData, encoding: .utf8)
-            else {
-                completionHandler(nil)
-                return
-            }
-            
-            do {
-                let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
-                wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
-                    if let error = error {
-                        wg_log(.error, message: "Failed to switch tunnel configuration: \(error.localizedDescription)")
-                        completionHandler(nil)
-                        return
-                    }
-                    
-                    self.wgAdapter.getRuntimeConfiguration { settings in
-                        var data: Data?
-                        if let settings = settings {
-                            data = settings.data(using: .utf8)!
-                        }
-                        completionHandler(data)
-                    }
-                }
-            } catch {
-                completionHandler(nil)
-            }
-        } else {
-            completionHandler(nil)
+        switch protoType {
+        case .wireguard:
+            handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+        case .openvpn:
+            handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+        case .shadowsocks:
+            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
+        case .none:
+            break
         }
     }
     
@@ -188,7 +187,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
            let providerConfiguration = protocolConfiguration.providerConfiguration,
-           let ovpnConfiguration: Data = providerConfiguration["ovpn"] as? Data else {
+              let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
             // TODO: handle errors properly
                wg_log(.error, message: "Can't start startOpenVPN()")
             return
@@ -200,65 +199,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private func startShadowSocks(completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfiguration = protocolConfiguration.providerConfiguration,
-              let ssConfiguration: Data = providerConfiguration["ss"] as? Data,
-              let ovpnConfiguration: Data = providerConfiguration["ovpn"] as? Data else {
+              let ssConfiguration: Data = providerConfiguration[Constants.ssConfigKey] as? Data,
+              let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
                   // TODO: handle errors properly
                   wg_log(.error, message: "Cannot start startShadowSocks()")
                   return
               }
         self.shadowSocksConfig = ssConfiguration
-
-//        guard let config = self.shadowSocksConfig else { return }
-//        guard let ssConfig = try? JSONSerialization.jsonObject(with: config, options: []) as? [String: Any] else {
-//            self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
-//                                     code: 100,
-//                                     userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
-//            return
-//        }
-//
-//        let sshost = ssConfig["local_addr"] as? String
-//        let ssport = ssConfig["local_port"] as? Int ?? 8585
-//        let method = ssConfig["method"] as? String
-//        let password = ssConfig["password"] as? String
-//
-//        var errorCode: Int = 0
-//        ShadowsocksCheckConnectivity(sshost, ssport, password, method, &errorCode, nil)
-//        if (errorCode != 0) {
-//            self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
-//                                   code: 100,
-//                                   userInfo: [NSLocalizedDescriptionKey: "Error checking ss connectivity: \(errorCode)"]))
-//            return
-//        }
-        
-        self.setupAndlaunchOpenVPN(withConfig: ovpnConfiguration) { error in
-            guard error == nil else {
-                wg_log(.error, message: "Start OpenVPN tunnel error : \(error?.localizedDescription ?? "none")")
-                completionHandler(error!)
-                return
-            }
-            wg_log(.error, message: "OpenVPN tunnel connected.")
-//            self.startTun2Socks(host: sshost, port: ssport, password: password, cipher: method, isUDPEnabled: false, error: nil)
-        }
-////        Thread.detachNewThread { [weak self] in
-////        setupAndLaunchShadowSocksProxy(withConfig: ssConfiguration, ssHandler: { [weak self] port, error in
-////            wg_log(.info,
-////                   message: "Prepare to start openvpn, self is \(self == nil ? "null" : "not null")")
-////            guard error == nil else {
-////                wg_log(.error, message: "Stopping tunnel: \(error?.localizedDescription ?? "none")")
-////                completionHandler(error!)
-////                return
-////            }
-////
-////            self?.setupAndlaunchOpenVPN(withConfig: ovpnConfiguration) { error in
-////                guard error == nil else {
-////                    wg_log(.error, message: "Start OpenVPN tunnel error : \(error?.localizedDescription ?? "none")")
-////                    completionHandler(error!)
-////                    return
-////                }
-////                wg_log(.error, message: "OpenVPN tunnel connected.")
-////            }
-////        })
-////        }
+        self.openVPNConfig = ovpnConfiguration
+        wg_log(.info, message: "Prepare to start shadowsocks/tun2socks/leaf")
+//        self.startSSProvider(completion: completionHandler)
+//        startTun2SocksTunnel(completion: completionHandler)
+        self.startLeafRedirector(completion: completionHandler)
     }
     
     private func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
@@ -290,49 +242,465 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     private func stopShadowSocks(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        stopOpenVPN(with: reason) {
-//            if self.tun2socksTunnel != nil && self.tun2socksTunnel!.isConnected() {
-//                self.tun2socksTunnel?.disconnect()
-//                try? self.tun2socksWriter?.close()
+        stopOpenVPN(with: reason) { [weak self] in
+            guard let `self` = self else { return }
+//            self.stopSSProvider(completionHandler: completionHandler)
+//            self.stopTun2SocksTunnel(completionHandler: completionHandler)
+            self.stopLeafRedirector(completion: completionHandler)
+        }
+    }
+    
+    private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        if messageData.count == 1 && messageData[0] == 0 {
+            wgAdapter.getRuntimeConfiguration { settings in
+                var data: Data?
+                if let settings = settings {
+                    data = settings.data(using: .utf8)!
+                }
+                completionHandler(data)
+            }
+        } else if messageData.count >= 1 {
+            // Updates the tunnel configuration and responds with the active configuration
+            wg_log(.info, message: "Switching tunnel configuration")
+            guard let configString = String(data: messageData, encoding: .utf8)
+            else {
+                completionHandler(nil)
+                return
+            }
+            
+            do {
+                let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
+                wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
+                    if let error = error {
+                        wg_log(.error, message: "Failed to switch tunnel configuration: \(error.localizedDescription)")
+                        completionHandler(nil)
+                        return
+                    }
+                    
+                    self.wgAdapter.getRuntimeConfiguration { settings in
+                        var data: Data?
+                        if let settings = settings {
+                            data = settings.data(using: .utf8)!
+                        }
+                        completionHandler(data)
+                    }
+                }
+            } catch {
+                completionHandler(nil)
+            }
+        } else {
+            completionHandler(nil)
+        }
+    }
+    
+    
+    private func handleShadowSocksAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        if let configString = String(data: messageData, encoding: .utf8) {
+            wg_log(.debug, message: configString)
+        }
+        
+        completionHandler(messageData)
+    }
+    
+    // MARK: -- Tun2sock provider methods
+    
+    private func startTun2SocksTunnel(completion: @escaping (Error?) -> Void) {
+        guard let ssConfiguration = self.shadowSocksConfig,
+              let ovpnConfiguration = self.openVPNConfig,
+              let ssConfig = try? JSONSerialization.jsonObject(with: ssConfiguration, options: []) as? [String: Any]
+        else {
+            wg_log(.info, message: "Cannot parse shadowsocks config")
+            let tun2socksError: NSError = .init(domain: "", code: 100, userInfo: nil)
+            completion(tun2socksError)
+            return
+        }
+        wg_log(.info, message: "SS Config: \(ssConfig)")
+        
+        guard let remoteHost = ssConfig[Constants.ssRemoteHost] as? String,
+              let remotePort = ssConfig[Constants.ssRemotePort] as? Int,
+              let method = ssConfig[Constants.ssCipherKey] as? String,
+              let password = ssConfig[Constants.ssPasswordKey] as? String else {
+                  wg_log(.error, message: "Cannot parse ss config")
+                  let tun2socksError: NSError = .init(domain: "", code: 100, userInfo: nil)
+                  completion(tun2socksError)
+                  return
+              }
+        
+        let connError: AutoreleasingUnsafeMutablePointer<NSError?>? = nil
+        ShadowsocksCheckConnectivity(remoteHost, remotePort, password, method, nil, connError)
+        if (connError?.pointee != nil) {
+            wg_log(.error, message: "Failed to start tun2socks tunnel with error: \(connError?.pointee?.localizedDescription ?? "oops")")
+            let tun2socksError: NSError = .init(domain: "", code: 100, userInfo: nil)
+            completion(tun2socksError)
+            return
+        }
+        setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, withShadowSocks: true) { vpnError in
+            guard vpnError == nil else {
+                wg_log(.error, message: "Failed to start openvpn with tun2socks tunnel with error: \(vpnError?.localizedDescription ?? "oops")")
+                let tun2socksError: NSError = .init(domain: "", code: 100, userInfo: nil)
+                completion(tun2socksError)
+                return
+            }
+//        let ipv4settings: NEIPv4Settings = .init(addresses: ["192.0.2.1"], subnetMasks: ["255.255.255.0"])
+//        ipv4settings.includedRoutes = [.default()]
+//        ipv4settings.excludedRoutes = []
+//
+//        let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
+//        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "192.0.2.2")
+//        settings.ipv4Settings = ipv4settings
+//        settings.dnsSettings = dnsSettings
+//        settings.mtu = 1600
+//
+//        setTunnelNetworkSettings(settings) { tunError in
+            let ifaces = Interface.allInterfaces()
+                .filter { $0.family == .ipv4 }
+                .map { iface in iface.name }
+            
+            wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+            self.tun2socksWriter = Tun2socksTunWriter()
+            let tunError: AutoreleasingUnsafeMutablePointer<NSError?>? = nil
+            self.tun2socksTunnel = Tun2socksConnectShadowsocksTunnel(self.tun2socksWriter, remoteHost, remotePort, password, method, false, tunError)
+            if (tunError?.pointee != nil) {
+                wg_log(.error, message: "Failed to start tun2socks tunnel with error: \(tunError?.pointee?.localizedDescription ?? "oops")")
+                let tun2socksError: NSError = .init(domain: "", code: 100, userInfo: nil)
+                completion(tun2socksError)
+                return
+            }
+            self.processQueue.async { self.processPackets() }
+            completion(nil)
+        }
+    }
+    
+    private func stopTun2SocksTunnel(completionHandler: @escaping () -> Void) {
+        if self.tun2socksTunnel != nil && self.tun2socksTunnel!.isConnected() {
+            self.tun2socksTunnel?.disconnect()
+        }
+        try? self.tun2socksWriter?.close()
+        completionHandler()
+    }
+    
+    private func processPackets() {
+        packetFlow.readPacketObjects { [weak self] packets in
+            guard let `self` = self else { return }
+            do {
+                let _ = try packets.map {
+                    var bytesWritten: Int = 0
+                    try self.tun2socksTunnel?.write($0.data, ret0_: &bytesWritten)
+                    self.processQueue.async {
+                        self.processPackets()
+                    }
+                }
+            } catch (let err) {
+                wg_log(.debug, message: "Error in tun2sock: \(err.localizedDescription)")
+            }
+        }
+    }
+    
+    // MARK: -- Leaf provider methods
+
+    private func prepareConfig(onInterface iface: String, fromSSConfig ssConfig: Data, andOvpnConfig ovpnConfig: Data) -> UnsafePointer<CChar>? {
+        guard let ssConfig = try? JSONSerialization.jsonObject(with: ssConfig, options: []) as? [String: Any] else {
+        self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
+                                 code: 100,
+                                 userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
+            return nil
+        }
+
+        guard let remoteHost = ssConfig[Constants.ssRemoteHost] as? String,
+              let remotePort = ssConfig[Constants.ssRemotePort] as? Int,
+              let method = ssConfig[Constants.ssCipherKey] as? String,
+              let password = ssConfig[Constants.ssPasswordKey] as? String else {
+                  self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
+                                           code: 100,
+                                           userInfo: [NSLocalizedDescriptionKey: "Cannot asign profile params for ss in tunnel"]))
+                  return nil
+              }
+
+        var insettings:  [String: Any] = .init()
+        insettings["name"] = iface
+        insettings["address"] = "10.8.0.4"
+        insettings["netmask"] = "255.255.255.0"
+        insettings["gateway"] = "10.8.0.1"
+        insettings["mtu"] = 1600
+
+        var inbounds: [String: Any] = .init()
+        inbounds["protocol"] = "tun"
+        inbounds["settings"] = insettings
+        inbounds["tag"] = "tun_in"
+
+        var outbounds: [String: Any] = .init()
+        var outsettings: [String: Any] = .init()
+        outsettings["address"] = remoteHost
+        outsettings["port"] = remotePort
+        outsettings["method"] = method
+        outsettings["password"] = password
+        outbounds["protocol"] = "shadowsocks"
+        outbounds["settings"] = outsettings
+        outbounds["tag"] = "shadowsocks_out"
+
+        var params: [String: Any] = .init()
+        params["inbounds"] = [inbounds]
+        params["outbounds"] =  [outbounds]
+
+        wg_log(.error, message: "Config dictionary: \(params)")
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return nil }
+
+        wg_log(.error, message: "JSON String: \(jsonString)")
+
+        var path = ""
+        if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
+                                                               in: .userDomainMask).first {
+            let pathWithFilename = documentDirectory.appendingPathComponent("config.json")
+            do {
+                try jsonString.write(to: pathWithFilename,
+                                     atomically: true,
+                                     encoding: .utf8)
+                path = pathWithFilename.path
+            } catch {
+                // Handle error
+            }
+        }
+        
+        return UnsafePointer(strdup(path))
+    }
+    
+    private func startLeafRedirector(completion: @escaping (Error?) -> Void) {
+        let ipv4settings: NEIPv4Settings = .init(addresses: ["10.8.0.4"], subnetMasks: ["255.255.255.0"])
+        ipv4settings.includedRoutes = [.default()]
+        ipv4settings.excludedRoutes = []
+        
+        let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
+        dnsSettings.matchDomains = []
+        let proxySettings: NEProxySettings = .init()
+        proxySettings.httpEnabled = true
+        proxySettings.httpServer = .init(address: "localhost", port: 8585)
+        proxySettings.httpsEnabled = true
+        proxySettings.httpsServer = .init(address: "localhost", port: 8585)
+        proxySettings.excludeSimpleHostnames = true
+        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "10.8.0.1")
+        settings.ipv4Settings = ipv4settings
+        settings.dnsSettings = dnsSettings
+        settings.proxySettings = proxySettings
+        settings.mtu = 1600
+        
+        self.setTunnelNetworkSettings(settings) { tunError in
+            let ifaces = Interface.allInterfaces()
+                .filter { $0.name.contains("tun") && $0.family == .ipv4 }
+                .map { iface in iface.name }
+            wg_log(.error, message: "Try on interface: \(ifaces)")
+            guard let ssConf = self.shadowSocksConfig,
+                  let ovpnConf = self.openVPNConfig,
+                  let config = self.prepareConfig(onInterface: ifaces.first ?? "utun2",
+                                                  fromSSConfig: ssConf,
+                                                  andOvpnConfig: ovpnConf) else {
+                      let ret: NSError = .init(domain: "", code: 100, userInfo: nil)
+                      completion(ret)
+                      return
+                  }
+            self.leafProvider = TunProvider(withConfig: config)
+            self.leafProvider?.testConfig(onPath: config) { configError in
+                wg_log(.error, message: "Config check status: \(configError!.desc)")
+                guard configError! == .noError else {
+                    wg_log(.error, message: "Config check status: \(configError!.desc)")
+                    let ret: NSError = .init(domain: "", code: 100, userInfo: nil)
+                    completion(ret)
+                    return
+                }
+                
+                wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+               
+                self.leafProvider?.startTunnel { tunError in
+                    wg_log(.error, message: "Leaf tunnel start status: \(tunError!.desc)")
+                    guard tunError! == .noError else {
+                        wg_log(.error, message: "Leaf tunnel start error: \(tunError!.desc)")
+                        let ret: NSError = .init(domain: "", code: 100, userInfo: nil)
+                        completion(ret)
+                        return
+                    }
+                    completion(nil)
+                }
+            }
+            
+        }
+    }
+
+    private func stopLeafRedirector(completion: @escaping () -> Void) {
+        leafProvider?.stopTunnel { error in
+            // TODO: handle errors
+            completion()
+        }
+    }
+    
+    // MARK: -- ShadowSocks Provider methods
+    
+    private func startSSProvider(completion: @escaping (Error?) -> Void) {
+        guard let ssConfig = self.shadowSocksConfig, let ovpnConfig = self.openVPNConfig else { return }
+        if ssProvider == nil {
+            guard let config = try? JSONSerialization.jsonObject(with: ssConfig, options: []) as? [String: Any],
+                  let remoteHost = config[Constants.ssRemoteHost] as? String,
+                  let port = config[Constants.ssLocalPortKey] as? Int else {
+            self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
+                                     code: 100,
+                                     userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
+                return
+            }
+            ssProvider = SSProvider(config: ssConfig, localPort: port)
+            ssLocalPort = port
+            ssRemoteHost = remoteHost
+        }
+        
+        ssProvider?.start(usingPacketFlow: packetFlow, withConnectivityCheck: false) { errorCode in
+            wg_log(.info, message: "After starting shadowsocks")
+            wg_log(.error, message: "Starting ShadowSocks State: \(String(describing: errorCode))")
+            if (errorCode != nil && errorCode! != .noError) {
+                wg_log(.error, message: "Error starting ShadowSocks: \(String(describing: errorCode))")
+                return
+            }
+
+//            self.setupAndHandleOpenVPNOverSSConnection(withConfig: ovpnConfig)
+            self.startAndHandleTunnelOverSS(completionHandler: completion)
+        }
+    }
+    
+    private func startAndHandleTunnelOverSS(completionHandler: @escaping (Error?) -> Void) {
+        let ipv4settings: NEIPv4Settings = .init(addresses: ["192.0.2.2"], subnetMasks: ["255.255.255.0"])
+        ipv4settings.includedRoutes = [.default()]
+        ipv4settings.excludedRoutes = []
+        
+        let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
+        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "192.0.2.1")
+        settings.ipv4Settings = ipv4settings
+        settings.dnsSettings = dnsSettings
+        settings.mtu = 1600
+        
+        setTunnelNetworkSettings(settings) { tunError in
+            let ifaces = Interface.allInterfaces()
+                .filter { $0.family == .ipv4 }
+                .map { iface in iface.name }
+            
+            wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+            let endpoint = NWHostEndpoint(hostname: "127.0.0.1", port: "\(self.ssLocalPort)")
+            self.session = self.createUDPSession(to: endpoint, from: nil)
+            self.observer = self.session!.observe(\.state, options: [.new]) { conn, _  in
+                switch conn.state {
+                case .ready:
+                    self.setupWriteToFlow()
+                    self.readFromFlow()
+                    completionHandler(nil)
+                case .cancelled, .failed, .invalid:
+                    self.stopSSProvider {
+                        self.cancelTunnelWithError(nil)
+                        completionHandler(nil)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+    }
+    
+    private func setupAndHandleOpenVPNOverSSConnection(withConfig ovpnConfig: Data) {
+        let endpoint = NWHostEndpoint(hostname: "127.0.0.1", port: "\(self.ssLocalPort)")
+        self.session = self.createUDPSession(to: endpoint, from: nil)
+//        self.connection = self.createTCPConnection(to: endpoint, enableTLS: false, tlsParameters: nil, delegate: nil)
+        self.observer = self.session!.observe(\.state, options: [.new]) { conn, _  in
+            switch conn.state {
+            case .ready:
+                self.processQueue.async {
+                    self.setupWriteToFlow()
+                }
+                self.processQueue.async {
+                    self.readFromFlow()
+                }
+                
+                self.setupAndlaunchOpenVPN(withConfig: ovpnConfig, withShadowSocks: true) { vpnError in
+                    wg_log(.info, message: "After starting openVPN")
+                    guard vpnError == nil else {
+                        wg_log(.error, message: "Failed to start openvpn with error: \(vpnError?.localizedDescription ?? "oops")")
+                        return
+                    }
+                }
+            case .cancelled, .failed, .invalid:
+                self.stopSSProvider {
+                    self.cancelTunnelWithError(nil)
+                }
+            default:
+                break
+            }
+        }
+    }
+    
+    private func readFromFlow() {
+        wg_log(.error, message: "Start reading packets to connection")
+        wg_log(.error, message: "Connection is \(session != nil ? "not null" : "null")")
+        packetFlow.readPackets { [weak self] packets, protocols in
+            wg_log(.error, message: "\(packets.count) outcoming packets proccessed of \(protocols.first?.stringValue ?? "unknown") type")
+            guard let `self` = self else { return }
+            self.session?.writeMultipleDatagrams(packets, completionHandler: { _ in
+                self.processQueue.async {
+                    self.readFromFlow()
+                }
+            })
+//            let _ = packets.map {
+//                wg_log(.error, message: "Packet: \($0.data) of \($0.protocolFamily)")
+//                self.connection?.write($0.data, completionHandler: { _ in })
+//                self.processQueue.async {
+//                    self.readFromFlow()
+//                }
 //            }
         }
     }
     
-//    private func startTun2Socks(host: String?, port: Int, password: String?, cipher: String?, isUDPEnabled: Bool, error: NSErrorPointer) {
-//        let isOn = self.tun2socksTunnel != nil && self.tun2socksTunnel!.isConnected()
-//        if isOn { tun2socksTunnel?.disconnect() }
-//        self.tun2socksWriter = AmneziaTun2SocksWriter(tunnelFlow: self.packetFlow)
-//        self.tun2socksTunnel = Tun2socksConnectShadowsocksTunnel(self.tun2socksWriter, host, port, password, cipher, isUDPEnabled, error)
-//        if (!isOn) {
-//            self.processQueue.sync { self.processPackets() }
-//        }
-//    }
-
-//    private func processPackets() {
-//        wg_log(.info, message: "Inside startTun2SocksPacketForwarder")
-//        packetFlow.readPacketObjects { [weak self] packets in
-//            guard let `self` = self else { return }
-//            do {
-//                let _ = try packets.map {
-//                    var bytesWritten: Int = 0
-//                    try self.tun2socksTunnel?.write($0.data, ret0_: &bytesWritten)
-//                    self.processQueue.sync {
-//                        self.processPackets()
-//                    }
-//                }
-//            } catch (let err) {
-//                wg_log(.debug, message: "Error in tun2sock: \(err.localizedDescription)")
+    private func setupWriteToFlow() {
+        wg_log(.error, message: "Start writing packets from connection")
+        wg_log(.error, message: "Connection is \(session != nil ? "not null" : "null")")
+        session?.setReadHandler({ ssdata, error in
+            wg_log(.error, message: "Packets are \(ssdata != nil ? "not null" : "null"), error: \(error?.localizedDescription ?? "none")")
+            guard error == nil, let packets = ssdata else { return }
+            wg_log(.error, message: "\(packets.count) incoming packets proccessed")
+            self.packetFlow.writePackets(packets, withProtocols: [NSNumber(value: AF_INET)])
+        }, maxDatagrams: Int.max)
+        
+//        connection?.readLength(1450, completionHandler: { [weak self] ssdata, readError in
+//            wg_log(.error, message: "Packets are \(ssdata != nil ? "not null" : "null")")
+//            guard let `self` = self, let packets = ssdata else { return }
+//            wg_log(.error, message: "Packet: \(packets) or error: \(readError?.localizedDescription ?? "")")
+//            self.packetFlow.writePackets([packets], withProtocols: [NSNumber(value: AF_INET)])
+//            self.processQueue.async {
+//                self.writeToFlow()
 //            }
-//        }
-//    }
+//        })
+    }
     
-    private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, completionHandler: @escaping (Error?) -> Void) {
+    private func stopSSProvider(completionHandler: @escaping () -> Void) {
+        self.ssProvider?.stop { _ in
+            if let provider = self.ssProvider, let threadId = provider.ssLocalThreadId {
+                pthread_kill(threadId, SIGUSR1)
+            }
+            self.ssProvider = nil
+            completionHandler()
+        }
+    }
+    
+    private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
         let str = String(decoding: ovpnConfiguration, as: UTF8.self)
         wg_log(.info, message: "OPENVPN config: \(str)")
         
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = ovpnConfiguration
+        if viaSS {
+//            configuration.settings = [
+//                "remote": "137.74.6.148 1194",
+//                "proto": "tcp",
+//                "link-mtu": "1480",
+//                "tun-mtu": "1460",
+//            ]
+        }
         let evaluation: OpenVPNConfigurationEvaluation
         do {
             evaluation = try ovpnAdapter.apply(configuration: configuration)
@@ -352,102 +720,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         
         startHandler = completionHandler
         ovpnAdapter.connect(using: packetFlow)
+        
+        let ifaces = Interface.allInterfaces()
+            .filter { $0.family == .ipv4 }
+            .map { iface in iface.name }
+        
+        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
     }
     
-//    private func setupAndLaunchShadowSocksProxy(withConfig config: Data, ssHandler: ShadowsocksProxyCompletion) {
-//        let str = String(decoding: config, as: UTF8.self)
-//        wg_log(.info, message: "config: \(str)")
-//        ssCompletion = ssHandler
-//        guard let ssConfig = try? JSONSerialization.jsonObject(with: config, options: []) as? [String: Any] else {
-//            ssHandler?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
-//                                 code: 100,
-//                                 userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
-//            return
-//        }
-//
-//        wg_log(.info, message: "SS Config: \(ssConfig)")
-//
-//        guard let remoteHost = ssConfig["server"] as? String, // UnsafeMutablePointer<CChar>,
-//              let remotePort = ssConfig["server_port"] as? Int32,
-//              let localAddress = ssConfig["local_addr"] as? String, //UnsafeMutablePointer<CChar>,
-//              let localPort = ssConfig["local_port"] as? Int32,
-//              let method = ssConfig["method"] as? String, //UnsafeMutablePointer<CChar>,
-//              let password = ssConfig["password"] as? String,//UnsafeMutablePointer<CChar>,
-//              let timeout = ssConfig["timeout"] as? Int32
-//        else {
-//            ssHandler?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
-//                                 code: 100,
-//                                 userInfo: [NSLocalizedDescriptionKey: "Cannot assing profile params for ss in tunnel"]))
-//            return
-//        }
-//
-//        /* An example profile
-//         *
-//         * const profile_t EXAMPLE_PROFILE = {
-//         *  .remote_host = "example.com",
-//         *  .local_addr = "127.0.0.1",
-//         *  .method = "bf-cfb",
-//         *  .password = "barfoo!",
-//         *  .remote_port = 8338,
-//         *  .local_port = 1080,
-//         *  .timeout = 600;
-//         *  .acl = NULL,
-//         *  .log = NULL,
-//         *  .fast_open = 0,
-//         *  .mode = 0,
-//         *  .verbose = 0
-//         * };
-//         */
-//
-//        var profile: profile_t = .init()
-//        memset(&profile, 0, MemoryLayout<profile_t>.size)
-//        profile.remote_host = strdup(remoteHost)
-//        profile.remote_port = remotePort
-//        profile.local_addr = strdup(localAddress)
-//        profile.local_port = localPort
-//        profile.method = strdup(method)
-//        profile.password = strdup(password)
-//        profile.timeout = timeout
-//        profile.acl = nil
-//        profile.log = nil
-//        profile.mtu = 1600
-//        profile.fast_open = 1
-//        profile.mode = 0
-//        profile.verbose = 1
-//
-//        wg_log(.debug, message: "Prepare to start shadowsocks proxy server...")
-//        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-//        ssQueue.sync { [weak self] in
-//            let success = start_ss_local_server_with_callback(profile, { socks_fd,  udp_fd, data in
-//                wg_log(.debug, message: "Inside cb callback")
-//                wg_log(.debug, message: "Params: socks_fd -> \(socks_fd), udp_fd -> \(udp_fd)")
-//                if let obs = data {
-//                    wg_log(.debug, message: "Prepare to call onShadowsocksCallback() with socks port \(socks_fd) and udp port \(udp_fd)")
-//                    let mySelf = Unmanaged<PacketTunnelProvider>.fromOpaque(obs).takeUnretainedValue()
-//                    mySelf.onShadowsocksCallback(fd: socks_fd)
-//                }
-//            }, observer)
-//            if success != -1 {
-//                wg_log(.error, message: "ss proxy started on port \(localPort)")
-//                self?.shadowSocksPort = localPort
-//                self?.isShadowsocksRunning = true
-//            } else {
-//                wg_log(.error, message: "Failed to start ss proxy")
-//            }
-//        }
-//    }
-//
-//    private func onShadowsocksCallback(fd: Int32) {
-//        wg_log(.debug, message: "Inside onShadowsocksCallback() with port \(fd)")
-//        var error: NSError? = nil
-//        if fd > 0 {
-////            shadowSocksPort = getSockPort(for: fd)
-//            isShadowsocksRunning = true
-//        } else {
-//            error = NSError(domain: Bundle.main.bundleIdentifier ?? "unknown", code: 100, userInfo: [NSLocalizedDescriptionKey : "Failed to start shadowsocks proxy"])
-//        }
-//        ssCompletion?(shadowSocksPort, error)
-//    }
+    // MARK: -- Network observing methods
     
     private func getSockPort(for fd: Int32) -> Int32 {
         var addr_in = sockaddr_in();
@@ -468,6 +749,40 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return 0
         }
     }
+    
+    private func startListeningForNetworkChanges() {
+        stopListeningForNetworkChanges()
+        addObserver(self, forKeyPath: Constants.kDefaultPathKey, options: .old, context: nil)
+    }
+
+    private func stopListeningForNetworkChanges() {
+        removeObserver(self, forKeyPath: Constants.kDefaultPathKey)
+    }
+
+    override func observeValue(forKeyPath keyPath: String?,
+                                     of object: Any?,
+                                     change: [NSKeyValueChangeKey : Any]?,
+                                     context: UnsafeMutableRawPointer?) {
+        guard Constants.kDefaultPathKey != keyPath else { return }
+        // Since iOS 11, we have observed that this KVO event fires repeatedly when connecting over Wifi,
+        // even though the underlying network has not changed (i.e. `isEqualToPath` returns false),
+        // leading to "wakeup crashes" due to excessive network activity. Guard against false positives by
+        // comparing the paths' string description, which includes properties not exposed by the class
+        guard let lastPath: NWPath = change?[.oldKey] as? NWPath,
+              let defPath = defaultPath,
+              lastPath != defPath || lastPath.description != defPath.description else {
+                  return
+              }
+        DispatchQueue.main.async { [weak self] in
+            guard let `self` = self, self.defaultPath != nil else { return }
+            self.handle(networkChange: self.defaultPath!) { _ in }
+        }
+    }
+
+    private func handle(networkChange changePath: NWPath, completion: @escaping (Error?) -> Void) {
+        wg_log(.info, message: "Tunnel restarted.")
+        startTunnel(options: nil, completionHandler: completion)
+    }
 }
 
 extension WireGuardLogLevel {
@@ -482,6 +797,8 @@ extension WireGuardLogLevel {
 }
 
 extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}
+
+extension NEPacketTunnelFlow: ShadowSocksAdapterPacketFlow {}
 
 extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     
@@ -561,19 +878,12 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     }
 }
 
-//class AmneziaTun2SocksWriter: Tun2socksTunWriter {
-//    private var tunnelFlow: NEPacketTunnelFlow
-//
-//    init(tunnelFlow: NEPacketTunnelFlow) {
-//        self.tunnelFlow = tunnelFlow
-//        super.init()
-//    }
-//
-//    override func write(_ p0: Data?, n: UnsafeMutablePointer<Int>?) throws {
-//        if let packets = p0 {
-//            tunnelFlow.writePackets([packets], withProtocols: [NSNumber(value: AF_INET)])
-//        }
-//    }
-//
-//    override func close() throws {}
-//}
+extension PacketTunnelProvider: Tun2socksTunWriterProtocol {
+    func write(_ p0: Data?, n: UnsafeMutablePointer<Int>?) throws {
+        if let packets = p0 {
+            self.packetFlow.writePackets([packets], withProtocols: [NSNumber(value: AF_INET)])
+        }
+    }
+    
+    func close() throws {}
+}

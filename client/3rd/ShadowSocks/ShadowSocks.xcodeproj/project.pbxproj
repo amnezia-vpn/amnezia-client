@@ -251,6 +251,8 @@
 		190B2449276D18CF002B86DD /* ccm.h in Headers */ = {isa = PBXBuildFile; fileRef = 190B23C3276D18CF002B86DD /* ccm.h */; };
 		190B28D6276D25DA002B86DD /* redir.c in Sources */ = {isa = PBXBuildFile; fileRef = 190B28D3276D25DA002B86DD /* redir.c */; };
 		190B28D8276D25DA002B86DD /* redir.h in Headers */ = {isa = PBXBuildFile; fileRef = 190B28D5276D25DA002B86DD /* redir.h */; };
+		196AAB6A2776263400602189 /* Clibsodium.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 196AAB672776262D00602189 /* Clibsodium.xcframework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		196AAB6D2776264F00602189 /* Clibsodium.xcframework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 196AAB672776262D00602189 /* Clibsodium.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		19835087276D2DED0002E2E9 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 19835086276D2CB40002E2E9 /* config.h */; };
 		19835092276D3C0D0002E2E9 /* libev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19835090276D3C0D0002E2E9 /* libev.a */; platformFilter = ios; };
 		198350A0276D3C4F0002E2E9 /* libcares.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1983509D276D3C4E0002E2E9 /* libcares.a */; platformFilter = ios; };
@@ -258,18 +260,25 @@
 		198350B2276D3C850002E2E9 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 198350A9276D3C850002E2E9 /* libpcre.a */; platformFilter = ios; };
 		198350B4276D3C850002E2E9 /* libpcrecpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 198350AB276D3C850002E2E9 /* libpcrecpp.a */; platformFilter = ios; };
 		198350BC276D3DAC0002E2E9 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 19835089276D3A4F0002E2E9 /* libresolv.tbd */; platformFilter = ios; };
-		198350E6276D606F0002E2E9 /* Clibsodium.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 198350E1276D5F430002E2E9 /* Clibsodium.xcframework */; };
-		198350E7276D606F0002E2E9 /* Clibsodium.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 198350E1276D5F430002E2E9 /* Clibsodium.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		198350E8276D606F0002E2E9 /* Embed Frameworks */ = {
+		196AAB66277625DF00602189 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				198350E7276D606F0002E2E9 /* Clibsodium.xcframework in Embed Frameworks */,
+				196AAB6D2776264F00602189 /* Clibsodium.xcframework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		196AAB6C2776263400602189 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -533,6 +542,7 @@
 		190B28D3276D25DA002B86DD /* redir.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = redir.c; sourceTree = "<group>"; };
 		190B28D4276D25DA002B86DD /* android.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = android.c; sourceTree = "<group>"; };
 		190B28D5276D25DA002B86DD /* redir.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = redir.h; sourceTree = "<group>"; };
+		196AAB672776262D00602189 /* Clibsodium.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Clibsodium.xcframework; path = ShadowSocks/libsodium/lib/Clibsodium.xcframework; sourceTree = "<group>"; };
 		19835086276D2CB40002E2E9 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		19835089276D3A4F0002E2E9 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/usr/lib/libresolv.tbd; sourceTree = DEVELOPER_DIR; };
 		19835090276D3C0D0002E2E9 /* libev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libev.a; sourceTree = "<group>"; };
@@ -549,7 +559,6 @@
 		198350BA276D3D9D0002E2E9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/usr/lib/libresolv.9.tbd; sourceTree = DEVELOPER_DIR; };
 		198350BD276D3E430002E2E9 /* libpthread.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpthread.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/usr/lib/libpthread.tbd; sourceTree = DEVELOPER_DIR; };
 		198350BF276D520F0002E2E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		198350E1276D5F430002E2E9 /* Clibsodium.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Clibsodium.xcframework; path = ShadowSocks/libsodium/lib/Clibsodium.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -563,7 +572,7 @@
 				198350B1276D3C850002E2E9 /* libpcreposix.a in Frameworks */,
 				198350B2276D3C850002E2E9 /* libpcre.a in Frameworks */,
 				198350A0276D3C4F0002E2E9 /* libcares.a in Frameworks */,
-				198350E6276D606F0002E2E9 /* Clibsodium.xcframework in Frameworks */,
+				196AAB6A2776263400602189 /* Clibsodium.xcframework in Frameworks */,
 				190B1E08276CFC69002B86DD /* libmbedx509.a in Frameworks */,
 				190B1E07276CFC69002B86DD /* libmbedcrypto.a in Frameworks */,
 				190B1E09276CFC69002B86DD /* libmbedtls.a in Frameworks */,
@@ -686,7 +695,7 @@
 		190B1E6B276D06F2002B86DD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				198350E1276D5F430002E2E9 /* Clibsodium.xcframework */,
+				196AAB672776262D00602189 /* Clibsodium.xcframework */,
 				198350BD276D3E430002E2E9 /* libpthread.tbd */,
 				198350BA276D3D9D0002E2E9 /* libresolv.9.tbd */,
 				198350B8276D3D840002E2E9 /* libexpat.tbd */,
@@ -1366,7 +1375,8 @@
 				190B121E276CF6B5002B86DD /* Sources */,
 				190B121F276CF6B5002B86DD /* Frameworks */,
 				190B1220276CF6B5002B86DD /* Resources */,
-				198350E8276D606F0002E2E9 /* Embed Frameworks */,
+				196AAB66277625DF00602189 /* CopyFiles */,
+				196AAB6C2776263400602189 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1632,14 +1642,16 @@
 		190B122A276CF6B5002B86DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				ARCHS = arm64;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1651,6 +1663,7 @@
 					"$(PROJECT_DIR)/ShadowSocks/libev/arm64/include",
 					"$(PROJECT_DIR)/ShadowSocks/mbedtls/include",
 					"$(PROJECT_DIR)/ShadowSocks/libcares/include/arm64",
+					"${PROJECT_DIR}/ShadowSocks/shadowsocks-libev/src",
 				);
 				INFOPLIST_FILE = ShadowSocks/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1669,7 +1682,9 @@
 					"$(PROJECT_DIR)/ShadowSocks/libcares/lib/arm64",
 					"$(PROJECT_DIR)/ShadowSocks/shadowsocks-libev/lib",
 					"$(PROJECT_DIR)/ShadowSocks/pcre/lib",
+					"$(PROJECT_DIR)/ShadowSocks/libsodium/lib",
 				);
+				MACH_O_TYPE = mh_dylib;
 				MARKETING_VERSION = 1.0;
 				OTHER_CFLAGS = (
 					"-DHAVE_CONFIG_H",
@@ -1692,14 +1707,16 @@
 		190B122B276CF6B5002B86DD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				ARCHS = arm64;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1711,6 +1728,7 @@
 					"$(PROJECT_DIR)/ShadowSocks/libev/arm64/include",
 					"$(PROJECT_DIR)/ShadowSocks/mbedtls/include",
 					"$(PROJECT_DIR)/ShadowSocks/libcares/include/arm64",
+					"${PROJECT_DIR}/ShadowSocks/shadowsocks-libev/src",
 				);
 				INFOPLIST_FILE = ShadowSocks/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1729,7 +1747,9 @@
 					"$(PROJECT_DIR)/ShadowSocks/libcares/lib/arm64",
 					"$(PROJECT_DIR)/ShadowSocks/shadowsocks-libev/lib",
 					"$(PROJECT_DIR)/ShadowSocks/pcre/lib",
+					"$(PROJECT_DIR)/ShadowSocks/libsodium/lib",
 				);
+				MACH_O_TYPE = mh_dylib;
 				MARKETING_VERSION = 1.0;
 				OTHER_CFLAGS = (
 					"-DHAVE_CONFIG_H",
