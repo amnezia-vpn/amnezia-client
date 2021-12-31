@@ -50,9 +50,6 @@ void QrDecoderLogic::onDetectedQrCode(const QString &code)
         s >> m_chunks[chunkId];
         set_receivedChunksCount(m_chunks.size());
 
-        qDebug() << "Received chunks:" << receivedChunksCount() << "/" << chunksCount << "cur" << chunkId << m_chunks[chunkId].size();
-        qDebug() << chunkId << m_chunks[chunkId];
-
         if (m_chunks.size() == totalChunksCount()) {
             QByteArray data;
             for (int i = 0; i < totalChunksCount(); ++i) {

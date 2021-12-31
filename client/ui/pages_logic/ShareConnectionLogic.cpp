@@ -2,6 +2,7 @@
 #include <QImage>
 #include <QDataStream>
 #include <QZXing>
+#include <QMessageBox>
 
 #include "ShareConnectionLogic.h"
 
@@ -15,6 +16,7 @@
 
 #include "defines.h"
 #include "core/defs.h"
+#include "core/errorstrings.h"
 #include <functional>
 
 #include "../uilogic.h"
@@ -194,6 +196,12 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
     ErrorCode e = ErrorCode::NoError;
     QString cfg = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, &e);
+    if (e) {
+        QMessageBox::warning(nullptr, APPLICATION_NAME,
+                             tr("Error occurred while configuring server.") + "\n" +
+                             errorString(e));
+        return;
+    }
     cfg = VpnConfigurator::processConfigWithExportSettings(container, Proto::WireGuard, cfg);
     cfg = QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString();
 

@@ -5,7 +5,7 @@
 
 NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_ipAddressValidatorRegex{Utils::ipAddressRegExp().pattern()}
+    m_ipAddressRegex{Utils::ipAddressRegExp()}
 {
 
 }
@@ -18,16 +18,14 @@ void NetworkSettingsLogic::onUpdatePage()
 
 void NetworkSettingsLogic::onLineEditDns1EditFinished(const QString &text)
 {
-    QRegExp reg{getIpAddressValidatorRegex()};
-    if (reg.exactMatch(text)) {
+    if (ipAddressRegex().exactMatch(text)) {
         m_settings.setPrimaryDns(text);
     }
 }
 
 void NetworkSettingsLogic::onLineEditDns2EditFinished(const QString &text)
 {
-    QRegExp reg{getIpAddressValidatorRegex()};
-    if (reg.exactMatch(text)) {
+    if (ipAddressRegex().exactMatch(text)) {
         m_settings.setSecondaryDns(text);
     }
 }
@@ -42,9 +40,4 @@ void NetworkSettingsLogic::onPushButtonResetDns2Clicked()
 {
     m_settings.setSecondaryDns(m_settings.cloudFlareNs2);
     onUpdatePage();
-}
-
-QString NetworkSettingsLogic::getIpAddressValidatorRegex() const
-{
-    return m_ipAddressValidatorRegex;
 }

@@ -37,7 +37,7 @@ PageBase {
             NetworkSettingsLogic.onLineEditDns1EditFinished(text)
         }
         validator: RegExpValidator {
-            regExp: NetworkSettingsLogic.ipAddressValidatorRegex
+            regExp: NetworkSettingsLogic.ipAddressRegex
         }
     }
     ImageButtonType {
@@ -74,7 +74,7 @@ PageBase {
             NetworkSettingsLogic.onLineEditDns2EditFinished(text)
         }
         validator: RegExpValidator {
-            regExp: NetworkSettingsLogic.ipAddressValidatorRegex
+            regExp: NetworkSettingsLogic.ipAddressRegex
         }
     }
     ImageButtonType {

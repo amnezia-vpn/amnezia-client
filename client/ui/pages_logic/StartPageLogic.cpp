@@ -2,6 +2,7 @@
 #include "core/errorstrings.h"
 #include "configurators/ssh_configurator.h"
 #include "../uilogic.h"
+#include "utils.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -23,7 +24,8 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{},
     m_pushButtonBackFromStartVisible{true},
-    m_pushButtonConnectVisible{true}
+    m_pushButtonConnectVisible{true},
+    m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
 
 }

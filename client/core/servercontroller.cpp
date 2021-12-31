@@ -165,8 +165,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     };
 
     // mkdir
-    QFileInfo fi(path);
-    QString mkdir = "sudo docker exec -i $CONTAINER_NAME mkdir -p  " + fi.absoluteDir().absolutePath();
+    QString mkdir = QString("sudo docker exec -i $CONTAINER_NAME mkdir -p  \"$(dirname %1)\"")
+            .arg(path);
+
     e = runScript(credentials,
         replaceVars(mkdir, genVarsForScript(credentials, container)));
     if (e) return e;
@@ -477,8 +478,10 @@ QJsonObject ServerController::createContainerInitialConfig(DockerContainer conta
 
 bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
-    const QJsonObject &oldProtoConfig = oldConfig[ContainerProps::containerToString(container)].toObject();
-    const QJsonObject &newProtoConfig = newConfig[ContainerProps::containerToString(container)].toObject();
+    Proto mainProto = ContainerProps::defaultProtocol(container);
+
+    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
     if (container == DockerContainer::OpenVpn) {
         if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) !=
@@ -666,9 +669,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) }});
 
     // Wireguard vars
-    vars.append({{"$WIREGUARD_SUBNET_IP", openvpnConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) }});
-    vars.append({{"$WIREGUARD_SUBNET_CIDR", openvpnConfig.value(config_key::subnet_cidr).toString(protocols::wireguard::defaultSubnetCidr) }});
-    vars.append({{"$WIREGUARD_SUBNET_MASK", openvpnConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) }});
+    vars.append({{"$WIREGUARD_SUBNET_IP", wireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) }});
+    vars.append({{"$WIREGUARD_SUBNET_CIDR", wireguarConfig.value(config_key::subnet_cidr).toString(protocols::wireguard::defaultSubnetCidr) }});
+    vars.append({{"$WIREGUARD_SUBNET_MASK", wireguarConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) }});
 
     vars.append({{"$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) }});
 
