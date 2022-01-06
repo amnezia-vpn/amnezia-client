@@ -22,6 +22,7 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
     AUTO_PROPERTY(bool, pushButtonConnectVisible)
 
+    READONLY_PROPERTY(QRegExp, ipAddressPortRegex)
 public:
     Q_INVOKABLE void onUpdatePage() override;
 

@@ -15,6 +15,7 @@ public:
     struct ConnectionData {
         QString clientPrivKey; // client private key
         QString clientPubKey; // client public key
+        QString clientIP; // internal client IP address
         QString serverPubKey; // tls-auth key
         QString pskKey; // preshared key
         QString host; // host ip
@@ -29,7 +30,7 @@ public:
 
 private:
     static ConnectionData prepareWireguardConfig(const ServerCredentials &credentials,
-        DockerContainer container, ErrorCode *errorCode = nullptr);
+        DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     static ConnectionData genClientKeys();
 

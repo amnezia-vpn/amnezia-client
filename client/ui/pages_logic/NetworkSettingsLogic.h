@@ -11,7 +11,7 @@ class NetworkSettingsLogic : public PageLogicBase
 
     AUTO_PROPERTY(QString, lineEditDns1Text)
     AUTO_PROPERTY(QString, lineEditDns2Text)
-    READONLY_PROPERTY(QString, ipAddressValidatorRegex)
+    READONLY_PROPERTY(QRegExp, ipAddressRegex)
 
 public:
     Q_INVOKABLE void onUpdatePage() override;
@@ -25,6 +25,5 @@ public:
     explicit NetworkSettingsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~NetworkSettingsLogic() = default;
 
-    QString getIpAddressValidatorRegex() const;
 };
 #endif // NETWORK_SETTINGS_LOGIC_H

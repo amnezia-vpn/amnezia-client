@@ -186,7 +186,7 @@ PageBase {
             id: label_server_ip
             x: 40
             anchors.top: new_sever_get_info.bottom
-            text: qsTr("Server IP address")
+            text: qsTr("Server IP address [:port]")
         }
         TextFieldType {
             id: new_server_ip
@@ -195,6 +195,10 @@ PageBase {
             text: StartPageLogic.lineEditIpText
             onEditingFinished: {
                 StartPageLogic.lineEditIpText = text
+            }
+
+            validator: RegExpValidator {
+                regExp: StartPageLogic.ipAddressPortRegex
             }
         }
 

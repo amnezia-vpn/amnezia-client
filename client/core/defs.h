@@ -60,6 +60,7 @@ enum ErrorCode
     OpenVpnAdaptersInUseError,
     OpenVpnUnknownError,
     OpenVpnTapAdapterError,
+    AddressPoolError,
 
     // 3rd party utils errors
     OpenSslFailed,
