@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Build
 import android.os.PowerManager
 import android.text.format.Formatter
@@ -72,7 +73,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
 
     private val builder = NotificationCompat.Builder(service as Context, channel)
             .setWhen(0)
-            .setColor(ContextCompat.getColor(service, R.color.material_primary_500))
+            .setColor(ContextCompat.getColor(service, android.R.color.holo_blue_dark))
             .setTicker(service.getString(R.string.forward_success))
             .setContentTitle(profileName)
             .setContentIntent(Core.configureIntent(service))
@@ -83,7 +84,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     init {
         service as Context
         val closeAction = NotificationCompat.Action.Builder(
-                R.drawable.ic_navigation_close,
+                R.drawable.ic_service_active,
                 service.getText(R.string.stop),
                 PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE).setPackage(service.packageName), 0)).apply {
             setShowsUserInterface(false)

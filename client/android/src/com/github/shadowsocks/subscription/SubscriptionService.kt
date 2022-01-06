@@ -77,10 +77,10 @@ class SubscriptionService : Service(), CoroutineScope {
             worker = launch {
                 val urls = Subscription.instance.urls
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
-                    color = ContextCompat.getColor(this@SubscriptionService, R.color.material_primary_500)
+                    color = ContextCompat.getColor(this@SubscriptionService, android.R.color.holo_blue_dark)
                     priority = NotificationCompat.PRIORITY_LOW
                     addAction(NotificationCompat.Action.Builder(
-                            R.drawable.ic_navigation_close,
+                            R.drawable.ic_service_active,
                             getText(R.string.stop),
                             PendingIntent.getBroadcast(this@SubscriptionService, 0,
                                     Intent(Action.ABORT).setPackage(packageName), 0)).apply {

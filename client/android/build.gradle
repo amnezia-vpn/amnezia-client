@@ -66,6 +66,7 @@ dependencies {
     api 'com.google.firebase:firebase-crashlytics:17.3.1'
     api 'com.jakewharton.timber:timber:4.7.1'
     api 'dnsjava:dnsjava:3.3.1'
+    api 'com.github.shadowsocks:plugin:2.0.0'
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
@@ -99,6 +100,9 @@ android {
             java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
             aidl.srcDirs = [qt5AndroidDir + '/aidl', 'aidl']
             res.srcDirs = [qt5AndroidDir + '/res', 'res']
+//            java.srcDirs = ['/src', 'src', 'java']
+//            aidl.srcDirs = ['/aidl', 'aidl']
+//            res.srcDirs = ['/res', 'res']
             resources.srcDirs = ['resources']
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
