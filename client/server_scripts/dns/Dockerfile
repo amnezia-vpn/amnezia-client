@@ -40,6 +40,46 @@ stub-zone:\n\
    stub-first: yes\n\
 \n\
 forward-zone:\n\
+   name: ygg.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: anon.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: btn.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: conf.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: index.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: merch.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: mirror.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: mob.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: screen.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
+   name: srv.\n\
+   forward-addr: 127.0.0.1@5300\n\
+\n\
+forward-zone:\n\
    name: .\n\
    forward-tls-upstream: yes\n\
    forward-addr: 1.1.1.1@853  #cloudflare-dns.com\n\
