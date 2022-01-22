@@ -108,7 +108,7 @@ PageBase {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentServer
+            text: VpnLogic.labelCurrentServer + " →"
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
@@ -136,7 +136,7 @@ PageBase {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentService
+            text: VpnLogic.labelCurrentService + " →"
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16

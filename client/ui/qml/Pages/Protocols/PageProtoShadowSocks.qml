@@ -11,7 +11,6 @@ PageProtocolBase {
     protocol: ProtocolEnum.ShadowSocks
     logic: UiLogic.protocolLogic(protocol)
 
-    enabled: logic.pageEnabled
     BackButton {
         id: back
     }

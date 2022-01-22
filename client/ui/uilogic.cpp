@@ -650,6 +650,7 @@ void UiLogic::saveTextFile(const QString& desc, const QString& ext, const QStrin
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
     if (fileName.isEmpty()) return;
+    if (!fileName.endsWith(ext)) fileName.append(ext);
 
     QFile save(fileName);
     save.open(QIODevice::WriteOnly);
@@ -666,6 +667,7 @@ void UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QStr
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
 
     if (fileName.isEmpty()) return;
+    if (!fileName.endsWith(ext)) fileName.append(ext);
 
     QFile save(fileName);
     save.open(QIODevice::WriteOnly);
