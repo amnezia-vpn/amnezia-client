@@ -1,5 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQml.Models 2.15
 import Qt.labs.platform 1.0
 import QtQuick.Dialogs 1.0
 import PageEnum 1.0
@@ -11,6 +12,8 @@ PageBase {
     id: root
     page: PageEnum.Sites
     logic: SitesLogic
+
+    property int lastIndex: 0
 
     BackButton {
         id: back
@@ -104,20 +107,27 @@ PageBase {
         }
     }
 
-    ListView {
-        id: tb
-        x: 20
-        anchors.top: sites_add.bottom
-        anchors.topMargin: 10
-        width: parent.width - 40
-        anchors.bottom: sites_delete.top
-        anchors.bottomMargin: 10
-        spacing: 1
-        clip: true
-        property int currentRow: -1
+    DelegateModel {
+        id: visualModel
         model: SitesLogic.tableViewSitesModel
-
-        delegate: Item {
+        groups: [
+            DelegateModelGroup {
+                id : delegateModelGroup
+                name: "multiSelect"
+                function removeAll(){
+                    var count = delegateModelGroup.count;
+                    if (count !== 0){
+                        delegateModelGroup.remove(0,count);
+                    }
+                }
+            }
+        ]
+        delegate: Rectangle {
+            id: item
+            focus: true
+            height: 25
+            width: root.width
+            color: item.DelegateModel.inMultiSelect ? '#63b4fb' : 'transparent'
             implicitWidth: 170 * 2
             implicitHeight: 30
             Item {
@@ -171,23 +181,101 @@ PageBase {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: {
-                    tb.currentRow = index
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked:{
+                    tb.focus = true
+                    if(mouse.button === Qt.RightButton){
+                        //copyPasteMenu.popup()
+                        console.log("RightButton")
+                    }
+                    if(mouse.button === Qt.LeftButton){
+                        switch(mouse.modifiers){
+                        case Qt.ControlModifier :
+                            item.DelegateModel.inMultiSelect = !item.DelegateModel.inMultiSelect
+                            break;
+                        case Qt.ShiftModifier :
+                            delegateModelGroup.removeAll();
+                            var start = lastIndex <= index? lastIndex: index;
+                            var end = lastIndex >= index? lastIndex: index;
+                            for(var i = start;i <= end;i++){
+                                visualModel.items.get(i).inMultiSelect = true
+                            }
+                            break;
+                        default:
+                            delegateModelGroup.removeAll();
+                            item.DelegateModel.inMultiSelect = true
+                            lastIndex = index
+                            break;
+                        }
+                    }
                 }
             }
         }
     }
 
+    ListView {
+        id: tb
+        x: 20
+        anchors.top: sites_add.bottom
+        anchors.topMargin: 10
+        width: parent.width - 40
+        anchors.bottom: sites_delete.top
+        anchors.bottomMargin: 10
+        spacing: 1
+        clip: true
+        focus: true
+        activeFocusOnTab: true
+        keyNavigationEnabled: true
+        property int currentRow: -1
+        //model: SitesLogic.tableViewSitesModel
+        model: visualModel
+
+    }
+
     BlueButtonType {
         id: sites_delete
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
+        anchors.bottom: select_all.top
+        anchors.bottomMargin: 10
         anchors.horizontalCenter: parent.horizontalCenter
         height: 31
         font.pixelSize: 16
         text: qsTr("Delete selected")
         onClicked: {
-            SitesLogic.onPushButtonSitesDeleteClicked(tb.currentRow)
+            var items = []
+            for(var i = 0; i < visualModel.count; i++){
+                if (visualModel.items.get(i).inMultiSelect) items.push(i)
+            }
+
+            console.debug(items)
+            SitesLogic.onPushButtonSitesDeleteClicked(items)
+        }
+    }
+
+    BlueButtonType {
+        id: select_all
+        anchors.bottom: sites_export.top
+        anchors.bottomMargin: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 31
+        font.pixelSize: 16
+        text: qsTr("Select all")
+        onClicked: {
+            for(var i = 0; i < visualModel.count; i++){
+                visualModel.items.get(i).inMultiSelect = true
+            }
+        }
+    }
+
+    BlueButtonType {
+        id: sites_export
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 31
+        font.pixelSize: 16
+        text: qsTr("Export all")
+        onClicked: {
+            SitesLogic.onPushButtonSitesExportClicked()
         }
     }
 }

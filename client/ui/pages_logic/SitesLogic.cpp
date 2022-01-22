@@ -98,27 +98,32 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
     }
 }
 
-void SitesLogic::onPushButtonSitesDeleteClicked(int row)
+void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
 {
     Settings::RouteMode mode = m_settings.routeMode();
 
     auto siteModel = qobject_cast<SitesModel*> (tableViewSitesModel());
-    if (!siteModel) {
-        return;
-    }
-    if (row < 0 || row >= siteModel->rowCount()) {
+    if (!siteModel || items.isEmpty()) {
         return;
     }
 
-    {
-        QStringList sites;
+    QStringList sites;
+    QStringList ips;
+
+    for (const QString &s: items) {
+        bool ok;
+        int row = s.toInt(&ok);
+        if (!ok || row < 0 || row >= siteModel->rowCount()) return;
         sites.append(siteModel->data(row, 0).toString());
-        m_settings.removeVpnSites(mode, sites);
+
+        if (uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+            ips.append(siteModel->data(row, 1).toString());
+        }
     }
+
+    m_settings.removeVpnSites(mode, sites);
 
     if (uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
-        QStringList ips;
-        ips.append(siteModel->data(row, 1).toString());
         uiLogic()->m_vpnConnection->deleteRoutes(ips);
         uiLogic()->m_vpnConnection->flushDns();
     }
@@ -154,5 +159,18 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
     uiLogic()->m_vpnConnection->flushDns();
 
     onUpdatePage();
+}
+
+void SitesLogic::onPushButtonSitesExportClicked()
+{
+    Settings::RouteMode mode = m_settings.routeMode();
+
+    QVariantMap sites = m_settings.vpnSites(mode);
+
+    QString data;
+    for (auto s : sites.keys()) {
+        data += s + "\t" + sites.value(s).toString() + "\n";
+    }
+    uiLogic()->saveTextFile("Sites", ".txt", data);
 }
 
