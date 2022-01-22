@@ -47,6 +47,7 @@ public:
     void flushDns();
 
     const QString &remoteAddress() const;
+    void addSitesRoutes(const QString &gw, Settings::RouteMode mode);
 
 public slots:
     void connectToVpn(int serverIndex,
