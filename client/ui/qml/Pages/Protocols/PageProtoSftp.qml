@@ -96,11 +96,23 @@ PageProtocolBase {
 //- Install the latest version of SSHFS-Win. Choose the x64 or x86 installer according to your computer's architecture [https://github.com/billziss-gh/sshfs-win/releases]"
         onLinkActivated: Qt.openUrlExternally(link)
 
-        text:"In order to mount remote SFTP folder as local drive, perform following steps:
+        readonly property string windows_text: "In order to mount remote SFTP folder as local drive, perform following steps:
 <ul>
 <li>Install the latest version of <a href=\"https://github.com/billziss-gh/winfsp/releases/latest\">WinFsp</a>.</li>
 <li>Install the latest version of <a href=\"https://github.com/billziss-gh/sshfs-win/releases\">SSHFS-Win</a>. Choose the x64 or x86 installer according to your computer's architecture.</li>
 </ul>"
+
+        readonly property string macos_text: "In order to mount remote SFTP folder as local folder, perform following steps:
+<ul>
+<li>Install the latest version of <a href=\"https://osxfuse.github.io/\">macFUSE</a>.</li>
+</ul>"
+
+        text: {
+            if (Qt.platform.os == "windows") return windows_text
+            else if (Qt.platform.os == "osx") return macos_text
+            else if (Qt.platform.os == "linux") return ""
+            else return ""
+        }
     }
 
     CheckBoxType {
@@ -110,7 +122,7 @@ PageProtocolBase {
         x: 30
         width: parent.width
         height: 21
-        text: qsTr("Restore drive after restart")
+        text: qsTr("Restore drive when client starts")
         checked: logic.checkBoxSftpRestoreChecked
         onCheckedChanged: {
             logic.checkBoxSftpRestoreChecked = checked

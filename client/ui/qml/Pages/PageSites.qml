@@ -120,6 +120,11 @@ PageBase {
                         delegateModelGroup.remove(0,count);
                     }
                 }
+                function selectAll(){
+                    for(var i = 0; i < visualModel.count; i++){
+                        visualModel.items.get(i).inMultiSelect = true
+                    }
+                }
             }
         ]
         delegate: Rectangle {
@@ -213,35 +218,6 @@ PageBase {
         }
     }
 
-    Keys.onPressed: {
-        if (event.key == Qt.Key_PageUp) {
-            let idx = tb.indexAt(1, tb.contentY)
-            tb.positionViewAtIndex(idx-20, ListView.Beginning)
-            event.accepted = true
-        }
-        else if (event.key == Qt.Key_PageDown) {
-            let idx = tb.indexAt(1, tb.contentY)
-            tb.positionViewAtIndex(idx+20, ListView.Beginning)
-            event.accepted = true
-        }
-        else if (event.key == Qt.Key_Home) {
-            tb.positionViewAtBeginning()
-            event.accepted = true
-        }
-        else if (event.key == Qt.Key_End) {
-            tb.positionViewAtEnd()
-            event.accepted = true
-        }
-        else if (event.key == Qt.Key_Delete) {
-            let items = []
-            for(let i = 0; i < visualModel.count; i++){
-                if (visualModel.items.get(i).inMultiSelect) items.push(i)
-            }
-            SitesLogic.onPushButtonSitesDeleteClicked(items)
-            event.accepted = true
-        }
-    }
-
     ListView {
         id: tb
         x: 20
@@ -256,8 +232,40 @@ PageBase {
         activeFocusOnTab: true
         keyNavigationEnabled: true
         property int currentRow: -1
-        //model: SitesLogic.tableViewSitesModel
         model: visualModel
+
+        Keys.onPressed: {
+            if (event.key === Qt.Key_PageUp) {
+                let idx = tb.indexAt(1, tb.contentY)
+                tb.positionViewAtIndex(idx-20, ListView.Beginning)
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_PageDown) {
+                let idx = tb.indexAt(1, tb.contentY)
+                tb.positionViewAtIndex(idx+20, ListView.Beginning)
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Home) {
+                tb.positionViewAtBeginning()
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_End) {
+                tb.positionViewAtEnd()
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Delete) {
+                let items = []
+                for(let i = 0; i < visualModel.count; i++){
+                    if (visualModel.items.get(i).inMultiSelect) items.push(i)
+                }
+                SitesLogic.onPushButtonSitesDeleteClicked(items)
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_A) {
+                delegateModelGroup.selectAll()
+                event.accepted = true
+            }
+        }
 
     }
 
@@ -288,9 +296,7 @@ PageBase {
         font.pixelSize: 16
         text: qsTr("Select all")
         onClicked: {
-            for(var i = 0; i < visualModel.count; i++){
-                visualModel.items.get(i).inMultiSelect = true
-            }
+            delegateModelGroup.selectAll()
         }
     }
 

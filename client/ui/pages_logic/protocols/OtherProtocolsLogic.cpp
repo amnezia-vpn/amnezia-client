@@ -85,7 +85,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
         }
     });
 
-//    QString cmd = QString("net use \\\\sshfs\\%1@51.77.32.168!%2 /USER:%1 %3")
+//    QString cmd = QString("net use \\\\sshfs\\%1@x.x.x.x!%2 /USER:%1 %3")
 //            .arg(labelTftpUserNameText())
 //            .arg(labelTftpPortText())
 //            .arg(labelTftpPasswordText());
