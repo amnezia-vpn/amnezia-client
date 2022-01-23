@@ -4,7 +4,7 @@
     include(common.pri)
     qtservice-uselib:SUBDIRS=buildlib
     SUBDIRS+=server
-    win32 {
-        SUBDIRS+=wireguard-service
-    }
+}
+win32 {
+    SUBDIRS+=wireguard-service
 }
