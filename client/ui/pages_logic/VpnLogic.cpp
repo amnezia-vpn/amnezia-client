@@ -33,15 +33,24 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
             onConnect();
         });
     }
+    else {
+        onConnectionStateChanged(VpnProtocol::Disconnected);
+    }
 }
 
 
 void VpnLogic::onUpdatePage()
 {
     Settings::RouteMode mode = m_settings.routeMode();
-    set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);
-    set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
-    set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
+    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
+
+    set_isCustomRoutesSupported  (selectedContainer == DockerContainer::OpenVpn ||
+                                  selectedContainer == DockerContainer::ShadowSocks||
+                                  selectedContainer == DockerContainer::Cloak);
+
+    set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites || !isCustomRoutesSupported());
+    set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites && isCustomRoutesSupported());
+    set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites && isCustomRoutesSupported());
 
     const QJsonObject &server = uiLogic()->m_settings.defaultServer();
     QString serverString = QString("%2 (%3)")
@@ -49,7 +58,6 @@ void VpnLogic::onUpdatePage()
             .arg(server.value(config_key::hostName).toString());
     set_labelCurrentServer(serverString);
 
-    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
 

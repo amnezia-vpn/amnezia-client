@@ -28,7 +28,7 @@ RadioButton {
         font.family: "Lato"
         font.styleName: "normal"
         font.pixelSize: 16
-        color: "#181922"
+        color: enabled ? "#181922" : "#686972"
         verticalAlignment: Text.AlignVCenter
         leftPadding: root.indicator.width + root.spacing
     }

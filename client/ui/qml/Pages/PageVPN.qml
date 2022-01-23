@@ -259,6 +259,7 @@ PageBase {
             onClicked: VpnLogic.onRadioButtonVpnModeAllSitesClicked(true)
         }
         RadioButtonType {
+            enabled: VpnLogic.isCustomRoutesSupported
             x: 0
             y: 60
             width: 341
@@ -268,6 +269,7 @@ PageBase {
             onClicked: VpnLogic.onRadioButtonVpnModeExceptSitesClicked(true)
         }
         RadioButtonType {
+            enabled: VpnLogic.isCustomRoutesSupported
             x: 0
             y: 30
             width: 341

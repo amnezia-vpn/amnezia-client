@@ -213,20 +213,6 @@ private:
 
     NotificationHandler* m_notificationHandler;
 
-
-    //    QRegExpValidator m_ipAddressValidator;
-    //    QRegExpValidator m_ipAddressPortValidator;
-    //    QRegExpValidator m_ipNetwok24Validator;
-    //    QRegExpValidator m_ipPortValidator;
-
-    //    QPoint offset;
-    //    bool needToHideCustomTitlebar = false;
-
-    //    void showEvent(QShowEvent *event) override;
-    //    void hideEvent(QHideEvent *event) override;
-
-
-    //    QStack<Page> pagesStack;
     int selectedServerIndex = -1; // server index to use when proto settings page opened
     DockerContainer selectedDockerContainer; // same
     ServerCredentials installCredentials; // used to save cred between pages new_server and new_server_protocols and wizard

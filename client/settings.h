@@ -82,6 +82,7 @@ public:
     QVariantMap vpnSites(RouteMode mode) const { return m_settings.value("Conf/" + routeModeString(mode)).toMap(); }
     void setVpnSites(RouteMode mode, const QVariantMap &sites) { m_settings.setValue("Conf/"+ routeModeString(mode), sites); m_settings.sync(); }
     void addVpnSite(RouteMode mode, const QString &site, const QString &ip= "");
+    void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites); // map <site, ip>
     QStringList getVpnIps(RouteMode mode) const;
     void removeVpnSite(RouteMode mode, const QString &site);
 

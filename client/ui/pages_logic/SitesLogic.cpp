@@ -142,18 +142,53 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
     Settings::RouteMode mode = m_settings.routeMode();
 
     QStringList ips;
+    QMap<QString, QString> sites;
+
     while (!file.atEnd()) {
         QString line = file.readLine();
+        QStringList line_ips;
+        QStringList line_sites;
 
-        int pos = 0;
-        QRegExp rx = Utils::ipAddressWithSubnetRegExp();
-        while ((pos = rx.indexIn(line, pos)) != -1) {
-            ips << rx.cap(0);
-            pos += rx.matchedLength();
+        int posDomain = 0;
+        QRegExp domainRx = Utils::domainRegExp();
+        while ((posDomain = domainRx.indexIn(line, posDomain)) != -1) {
+            line_sites.append(domainRx.cap(0));
+            posDomain += domainRx.matchedLength();
         }
+
+        int posIp = 0;
+        QRegExp ipRx = Utils::ipAddressWithSubnetRegExp();
+        while ((posIp = ipRx.indexIn(line, posIp)) != -1) {
+            line_ips.append(ipRx.cap(0));
+            posIp += ipRx.matchedLength();
+        }
+
+        // domain regex cover ip regex, so remove ips from sites
+        for (const QString& ip: line_ips) {
+            line_sites.removeAll(ip);
+        }
+
+        if (line_sites.size() == 1 && line_ips.size() == 1) {
+            sites.insert(line_sites.at(0), line_ips.at(0));
+        }
+        else if (line_sites.size() > 0 && line_ips.size() == 0) {
+            for (const QString& site: line_sites) {
+                sites.insert(site, "");
+            }
+        }
+        else {
+            for (const QString& site: line_sites) {
+                sites.insert(site, "");
+            }
+            for (const QString& ip: line_ips) {
+                ips.append(ip);
+            }
+        }
+
     }
 
     m_settings.addVpnIps(mode, ips);
+    m_settings.addVpnSites(mode, sites);
 
     uiLogic()->m_vpnConnection->addRoutes(QStringList() << ips);
     uiLogic()->m_vpnConnection->flushDns();

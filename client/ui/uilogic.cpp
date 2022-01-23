@@ -149,24 +149,6 @@ void UiLogic::initalizeUiLogic()
     connect(m_notificationHandler, &NotificationHandler::connectRequested, vpnLogic(), &VpnLogic::onConnect);
     connect(m_notificationHandler, &NotificationHandler::disconnectRequested, vpnLogic(), &VpnLogic::onDisconnect);
 
-    //    if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
-    //        needToHideCustomTitlebar = true;
-    //    }
-
-    //#if defined Q_OS_MAC
-    //    fixWidget(this);
-    //    needToHideCustomTitlebar = true;
-    //#endif
-
-    //    if (needToHideCustomTitlebar) {
-    //        ui->widget_tittlebar->hide();
-    //        resize(width(), 640);
-    //        ui->stackedWidget_main->move(0,0);
-    //    }
-
-    // Post initialization
-    //emit goToPage(Page::Start, true, false);
-
     if (m_settings.serversCount() > 0) {
         if (m_settings.defaultServerIndex() < 0) m_settings.setDefaultServer(0);
         emit goToPage(Page::Vpn, true, false);
@@ -176,37 +158,9 @@ void UiLogic::initalizeUiLogic()
     }
 
     selectedServerIndex = m_settings.defaultServerIndex();
-    //goToPage(Page::ServerContainers, true, false);
-    //goToPage(Page::NewServerProtocols, true, false);
-    //onGotoProtocolPage(Proto::OpenVpn);
-
-
-    //ui->pushButton_general_settings_exit->hide();
-
 
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
-
-
-
-    vpnLogic()->onConnectionStateChanged(VpnProtocol::Disconnected);
-
-
-    //    m_ipAddressValidator.setRegExp(Utils::ipAddressRegExp());
-    //    m_ipAddressPortValidator.setRegExp(Utils::ipAddressPortRegExp());
-    //    m_ipNetwok24Validator.setRegExp(Utils::ipNetwork24RegExp());
-    //    m_ipPortValidator.setRegExp(Utils::ipPortRegExp());
-
-    //    ui->lineEdit_new_server_ip->setValidator(&m_ipAddressPortValidator);
-    //    ui->lineEdit_network_settings_dns1->setValidator(&m_ipAddressValidator);
-    //    ui->lineEdit_network_settings_dns2->setValidator(&m_ipAddressValidator);
-
-    //    ui->lineEdit_proto_openvpn_subnet->setValidator(&m_ipNetwok24Validator);
-
-    //    ui->lineEdit_proto_openvpn_port->setValidator(&m_ipPortValidator);
-    //    ui->lineEdit_proto_shadowsocks_port->setValidator(&m_ipPortValidator);
-    //    ui->lineEdit_proto_cloak_port->setValidator(&m_ipPortValidator);
-
 }
 
 QString UiLogic::getDialogConnectErrorText() const
@@ -225,10 +179,13 @@ void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
 void UiLogic::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) {
-        show();
-    } else {
-#if defined Q_OS_MACX
-        setDockIconVisible(false);
+        emit show();
+    }
+    else {
+#ifdef Q_OS_WIN
+        emit hide();
+#elif defined Q_OS_MACX
+    // TODO: fix: setDockIconVisible(false);
 #endif
     }
 }
@@ -302,7 +259,6 @@ void UiLogic::keyPressEvent(Qt::Key key)
 //            break;
 //        }
 
-        //if (! ui->stackedWidget_main->isAnimationRunning() && ui->stackedWidget_main->currentWidget()->isEnabled()) {
             emit closePage();
         //}
     default:

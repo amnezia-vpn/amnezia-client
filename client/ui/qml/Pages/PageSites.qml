@@ -213,6 +213,35 @@ PageBase {
         }
     }
 
+    Keys.onPressed: {
+        if (event.key == Qt.Key_PageUp) {
+            let idx = tb.indexAt(1, tb.contentY)
+            tb.positionViewAtIndex(idx-20, ListView.Beginning)
+            event.accepted = true
+        }
+        else if (event.key == Qt.Key_PageDown) {
+            let idx = tb.indexAt(1, tb.contentY)
+            tb.positionViewAtIndex(idx+20, ListView.Beginning)
+            event.accepted = true
+        }
+        else if (event.key == Qt.Key_Home) {
+            tb.positionViewAtBeginning()
+            event.accepted = true
+        }
+        else if (event.key == Qt.Key_End) {
+            tb.positionViewAtEnd()
+            event.accepted = true
+        }
+        else if (event.key == Qt.Key_Delete) {
+            let items = []
+            for(let i = 0; i < visualModel.count; i++){
+                if (visualModel.items.get(i).inMultiSelect) items.push(i)
+            }
+            SitesLogic.onPushButtonSitesDeleteClicked(items)
+            event.accepted = true
+        }
+    }
+
     ListView {
         id: tb
         x: 20
@@ -241,12 +270,11 @@ PageBase {
         font.pixelSize: 16
         text: qsTr("Delete selected")
         onClicked: {
-            var items = []
-            for(var i = 0; i < visualModel.count; i++){
+            let items = []
+            for(let i = 0; i < visualModel.count; i++){
                 if (visualModel.items.get(i).inMultiSelect) items.push(i)
             }
 
-            console.debug(items)
             SitesLogic.onPushButtonSitesDeleteClicked(items)
         }
     }

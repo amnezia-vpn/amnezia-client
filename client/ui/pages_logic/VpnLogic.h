@@ -24,6 +24,8 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelErrorText)
     AUTO_PROPERTY(QString, labelVersionText)
 
+    AUTO_PROPERTY(bool, isCustomRoutesSupported)
+
     AUTO_PROPERTY(bool, radioButtonVpnModeAllSitesChecked)
     AUTO_PROPERTY(bool, radioButtonVpnModeForwardSitesChecked)
     AUTO_PROPERTY(bool, radioButtonVpnModeExceptSitesChecked)

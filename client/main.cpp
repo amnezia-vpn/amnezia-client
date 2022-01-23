@@ -196,13 +196,12 @@ int main(int argc, char *argv[])
         uiLogic->setQmlRoot(engine->rootObjects().at(0));
     }
 
-    // TODO - fix
-//#ifdef Q_OS_WIN
-//    if (parser.isSet("a")) mainWindow.showOnStartup();
-//    else mainWindow.show();
-//#else
-//    mainWindow.showOnStartup();
-//#endif
+#ifdef Q_OS_WIN
+    if (parser.isSet("a")) uiLogic->showOnStartup();
+    else emit uiLogic->show();
+#else
+    uiLogic->showOnStartup();
+#endif
 
 
      // TODO - fix
