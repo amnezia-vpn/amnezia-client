@@ -200,6 +200,7 @@ linux:!android {
 }
 
 win32|macx|linux:!android {
+   DEFINES += AMNEZIA_DESKTOP
 
    HEADERS  += \
       ui/systemtray_notificationhandler.h \

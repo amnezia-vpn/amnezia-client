@@ -16,7 +16,7 @@ PageProtocolBase {
 
     Caption {
         id: caption
-        text: qsTr("SFTF settings")
+        text: qsTr("SFTP settings")
     }
 
     Rectangle {
@@ -105,6 +105,7 @@ PageProtocolBase {
         readonly property string macos_text: "In order to mount remote SFTP folder as local folder, perform following steps:
 <ul>
 <li>Install the latest version of <a href=\"https://osxfuse.github.io/\">macFUSE</a>.</li>
+<li>Install the latest version of <a href=\"https://osxfuse.github.io/\">SSHFS</a>.</li>
 </ul>"
 
         text: {
@@ -117,6 +118,7 @@ PageProtocolBase {
 
     CheckBoxType {
         id: check_persist
+        visible: false
         anchors.bottom: pb_mount.top
         anchors.bottomMargin: 10
         x: 30
@@ -134,6 +136,7 @@ PageProtocolBase {
 
     BlueButtonType {
         id: pb_mount
+        visible: GC.isDesktop()
         enabled: logic.pushButtonSftpMountEnabled
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

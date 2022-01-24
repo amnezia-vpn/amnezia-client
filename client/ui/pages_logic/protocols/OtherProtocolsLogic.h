@@ -34,8 +34,12 @@ private:
     Settings m_settings;
     UiLogic *m_uiLogic;
 
-#ifdef Q_OS_WINDOWS
+#ifdef AMNEZIA_DESKTOP
     QList <QProcess *> m_sftpMountProcesses;
+#endif
+
+#ifdef Q_OS_WINDOWS
+    QString getNextDriverLetter() const;
 #endif
 
 };
