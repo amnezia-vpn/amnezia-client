@@ -142,5 +142,7 @@
         <file>images/connected.png</file>
         <file>images/disconnected.png</file>
         <file>ui/qml/Pages/PageQrDecoder.qml</file>
+        <file>ui/qml/Pages/PageAbout.qml</file>
+        <file>ui/qml/Controls/RichLabelType.qml</file>
     </qresource>
 </RCC>

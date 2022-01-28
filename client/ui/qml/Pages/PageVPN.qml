@@ -22,12 +22,39 @@ PageBase {
 
     LabelType {
         x: 10
-        y: 5
+        y: 10
         width: 100
         height: 21
         text: VpnLogic.labelVersionText
         color: "#dddddd"
         font.pixelSize: 12
+    }
+
+    BasicButtonType {
+        y: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+        background: Item {}
+
+
+        contentItem: Text {
+            anchors.fill: parent
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 18
+            font.underline: true
+
+            text: qsTr("Donate")
+            color: "#D4D4D4"
+
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: {
+            UiLogic.goToPage(PageEnum.About)
+        }
     }
 
     ImageButtonType {

@@ -12,6 +12,9 @@
 #include <functional>
 
 #include "../uilogic.h"
+#include "../pages_logic/VpnLogic.h"
+#include "vpnconnection.h"
+
 
 ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent)
@@ -42,8 +45,17 @@ void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, 
 
 void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
 {
+    if (m_settings.defaultContainer(uiLogic()->selectedServerIndex) == c) return;
+
     m_settings.setDefaultContainer(uiLogic()->selectedServerIndex, c);
     uiLogic()->onUpdateAllPages();
+
+    if (uiLogic()->selectedServerIndex != m_settings.defaultServerIndex()) return;
+    if (!uiLogic()->m_vpnConnection) return;
+    if (!uiLogic()->m_vpnConnection->isConnected()) return;
+
+    uiLogic()->vpnLogic()->onDisconnect();
+    uiLogic()->vpnLogic()->onConnect();
 }
 
 void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)

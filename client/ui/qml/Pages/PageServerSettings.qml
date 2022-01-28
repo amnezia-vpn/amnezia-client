@@ -28,7 +28,16 @@ PageBase {
         horizontalAlignment: Text.AlignHCenter
         text: ServerSettingsLogic.labelCurrentVpnProtocolText
     }
-    LabelType {
+//    LabelType {
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        y: 120
+//        width: 341
+//        height: 31
+//        font.pixelSize: 20
+//        horizontalAlignment: Text.AlignHCenter
+//        text: ServerSettingsLogic.labelServerText
+//    }
+    TextFieldType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 120
         width: 341
@@ -36,7 +45,10 @@ PageBase {
         font.pixelSize: 20
         horizontalAlignment: Text.AlignHCenter
         text: ServerSettingsLogic.labelServerText
+        readOnly: true
+        background: Item {}
     }
+
     LabelType {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 530
