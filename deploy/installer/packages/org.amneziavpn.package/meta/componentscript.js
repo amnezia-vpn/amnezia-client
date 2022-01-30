@@ -84,10 +84,11 @@ Component.prototype.createOperations = function()
             console.log("Microsoft Visual C++ 2017 Redistributable already installed");
         }
 
+        let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         component.addElevatedOperation("Execute",
-                                       ["sc", "create", serviceName(), "binpath=", installer.value("TargetDir").replace(/\//g, '\\') + "\\" + serviceName() + ".exe",
+                                       ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
                                         "start=", "auto", "depend=", "BFE/nsi"],
-                                       "UNDOEXECUTE", ["post-uninstall.exe"]);
+                                       "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
 
     } else if (runningOnMacOS()) {
         component.addElevatedOperation("Execute", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "@TargetDir@/post_uninstall.sh");
