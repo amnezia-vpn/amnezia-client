@@ -15,5 +15,8 @@ class IpcInterface
 
     SLOT( bool checkAndInstallDriver() );
     SLOT( QStringList getTapList() );
+
+    SLOT( void cleanUp() );
+    SLOT( void setLogsEnabled(bool enabled) );
 };
 

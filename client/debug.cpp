@@ -6,13 +6,15 @@
 
 #include <iostream>
 
+#include <core/ipcclient.h>
+
 #include "debug.h"
 #include "defines.h"
 #include "utils.h"
 
 QFile Debug::m_file;
 QTextStream Debug::m_textStream;
-QString Debug::m_logFileName;
+QString Debug::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 
 void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
@@ -40,11 +42,8 @@ bool Debug::init()
         return false;
     }
 
-    m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
-
-
     m_file.setFileName(appDir.filePath(m_logFileName));
-    if (!m_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    if (!m_file.open(QIODevice::Append)) {
         qWarning() << "Cannot open log file:" << m_logFileName;
         return false;
     }
@@ -87,4 +86,53 @@ bool Debug::openServiceLogsFolder()
 QString Debug::appLogFileNamePath()
 {
     return m_file.fileName();
+}
+
+void Debug::clearLogs()
+{
+    bool isLogActive = m_file.isOpen();
+    m_file.close();
+
+
+    QString path = userLogsDir();
+    QDir appDir(path);
+    QFile file;
+    file.setFileName(appDir.filePath(m_logFileName));
+
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    file.resize(0);
+    file.close();
+
+    if (isLogActive) {
+        init();
+    }
+}
+
+void Debug::clearServiceLogs()
+{
+    IpcClient *m_IpcClient = new IpcClient;
+
+    if (!m_IpcClient->isSocketConnected()) {
+        if (!IpcClient::init(m_IpcClient)) {
+            qWarning() << "Error occured when init IPC client";
+            return;
+        }
+    }
+
+    if (m_IpcClient->Interface()) {
+        m_IpcClient->Interface()->setLogsEnabled(false);
+        m_IpcClient->Interface()->cleanUp();
+    }
+    else {
+        qWarning() << "Error occured cleaning up service logs";
+    }
+}
+
+void Debug::cleanUp()
+{
+    clearLogs();
+    QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    dir.removeRecursively();
+
+    clearServiceLogs();
 }

@@ -67,6 +67,9 @@ public:
     bool isStartMinimized() const { return m_settings.value("Conf/startMinimized", false).toBool(); }
     void setStartMinimized(bool enabled) { m_settings.setValue("Conf/startMinimized", enabled); }
 
+    bool isSaveLogs() const { return m_settings.value("Conf/saveLogs", false).toBool(); }
+    void setSaveLogs(bool enabled) { m_settings.setValue("Conf/saveLogs", enabled); }
+
     enum RouteMode {
         VpnAllSites,
         VpnOnlyForwardSites,

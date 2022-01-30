@@ -18,7 +18,9 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 OtherProtocolsLogic::OtherProtocolsLogic(UiLogic *logic, QObject *parent):
-    PageProtocolLogicBase(logic, parent)
+    PageProtocolLogicBase(logic, parent),
+    m_checkBoxSftpRestoreChecked{false}
+
 {
 
 }

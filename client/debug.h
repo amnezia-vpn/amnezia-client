@@ -14,6 +14,9 @@ public:
     static bool openLogsFolder();
     static bool openServiceLogsFolder();
     static QString appLogFileNamePath();
+    static void clearLogs();
+    static void clearServiceLogs();
+    static void cleanUp();
 
 private:
     static QString userLogsDir();

@@ -81,9 +81,19 @@ PageBase {
                     Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                 }
             }
-            BlueButtonType {
+
+            CheckBoxType {
                 Layout.fillWidth: true
                 Layout.topMargin: 15
+                text: qsTr("Keep logs")
+                checked: AppSettingsLogic.checkBoxSaveLogsChecked
+                onCheckedChanged: {
+                    AppSettingsLogic.checkBoxSaveLogsChecked = checked
+                    AppSettingsLogic.onCheckBoxSaveLogsCheckedToggled(checked)
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
                 Layout.preferredHeight: 41
                 text: qsTr("Open logs folder")
                 onClicked: {
@@ -97,10 +107,30 @@ PageBase {
                 Layout.preferredHeight: 41
                 text: qsTr("Export logs")
                 onClicked: {
-                    AppSettingsLogic.onPushButtonOpenLogsClicked()
+                    AppSettingsLogic.onPushButtonExportLogsClicked()
                 }
             }
 
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 15
+                Layout.preferredHeight: 41
+
+                property string start_text: qsTr("Clear logs")
+                property string end_text: qsTr("Cleared")
+                text: start_text
+
+                Timer {
+                    id: timer
+                    interval: 1000; running: false; repeat: false
+                    onTriggered: parent.text = parent.start_text
+                }
+                onClicked: {
+                    text = end_text
+                    timer.running = true
+                    AppSettingsLogic.onPushButtonClearLogsClicked()
+                }
+            }
         }
     }
 
