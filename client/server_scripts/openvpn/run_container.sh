@@ -1,5 +1,10 @@
 # Run container
-sudo docker run -d --restart always --cap-add=NET_ADMIN -p $OPENVPN_PORT:$OPENVPN_PORT/$OPENVPN_TRANSPORT_PROTO --name $CONTAINER_NAME $CONTAINER_NAME
+sudo docker run \
+   -d --restart always \
+   --cap-add=NET_ADMIN \
+   -p $OPENVPN_PORT:$OPENVPN_PORT/$OPENVPN_TRANSPORT_PROTO \
+   --name $CONTAINER_NAME $CONTAINER_NAME
+
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
 
 # Create tun device if not exist
