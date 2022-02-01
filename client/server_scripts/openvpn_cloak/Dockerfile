@@ -2,6 +2,10 @@ FROM alpine:latest
 
 LABEL maintainer="AmneziaVPN"
 
+ARG SS_RELEASE="v1.13.1"
+ARG CLOAK_RELEASE="v2.5.5"
+ARG SERVER_ARCH
+
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools
 RUN apk --update upgrade --no-cache
@@ -13,10 +17,16 @@ RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
-RUN curl -L https://github.com/cbeuw/Cloak/releases/download/v2.5.3/ck-server-linux-amd64-v2.5.3 > /usr/bin/ck-server
+RUN if [ $SERVER_ARCH="x86_64" ]; then CK_ARCH="amd64"; \
+    elif [ $SERVER_ARCH="i686" ]; then CK_ARCH="386"; \
+    elif [ $SERVER_ARCH="aarch64" ]; then CK_ARCH="arm64"; \
+    elif [ $SERVER_ARCH="arm" ]; then CK_ARCH="arm"; \
+    else exit -1; fi && \
+    curl -L https://github.com/cbeuw/Cloak/releases/download/${CLOAK_RELEASE}/ck-server-linux-${CK_ARCH}-${CLOAK_RELEASE} > /usr/bin/ck-server
 RUN chmod a+x /usr/bin/ck-server
 
-RUN curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/v1.10.9/shadowsocks-v1.10.9.x86_64-unknown-linux-musl.tar.xz  > /usr/bin/ss.tar.xz
+RUN curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/${SS_RELEASE}/shadowsocks-${SS_RELEASE}.${SERVER_ARCH}-unknown-linux-musl.tar.xz  > /usr/bin/ss.tar.xz
+
 RUN tar -Jxvf /usr/bin/ss.tar.xz -C /usr/bin/
 RUN chmod a+x /usr/bin/ssserver
 
