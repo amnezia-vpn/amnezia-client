@@ -24,6 +24,8 @@ SOURCES = \
         systemservice.cpp
 
 win32 {
+include(../killswitch/killswitch.pri)
+
 HEADERS += \
         tapcontroller_win.h \
         router_win.h

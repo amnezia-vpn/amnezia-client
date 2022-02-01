@@ -10,6 +10,7 @@
 #include "router.h"
 
 #ifdef Q_OS_WIN
+#include "windowsfirewall.h"
 #include "tapcontroller_win.h"
 #endif
 
@@ -38,6 +39,9 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
 LocalServer::~LocalServer()
 {
+    auto cf = WindowsFirewall::instance();
+    cf->disableKillSwitch();
+    qDebug()<<"KillSwitch deactivated";
     qDebug() << "Local server stopped";
 }
 

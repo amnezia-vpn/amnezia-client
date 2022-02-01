@@ -27,13 +27,12 @@ RouterWin &RouterWin::Instance()
 
 int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 {
-//    qDebug().noquote() << QString("ROUTE ADD List: IPs size:%1, GW: %2")
-//                          .arg(ips.size())
-//                          .arg(gw);
+    //    qDebug().noquote() << QString("ROUTE ADD List: IPs size:%1, GW: %2")
+    //                          .arg(ips.size())
+    //                          .arg(gw);
 
-//    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
-//                          .arg(ips.join("\n"));
-
+    //    qDebug().noquote() << QString("ROUTE ADD List: IPs:\n%1")
+    //                          .arg(ips.join("\n"));
 
     if (!Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
@@ -204,12 +203,12 @@ bool RouterWin::clearSavedRoutes()
 
 int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
 {
-//    qDebug().noquote() << QString("ROUTE DELETE List: IPs size:%1, GW: %2")
-//                          .arg(ips.size())
-//                          .arg(gw);
+    //    qDebug().noquote() << QString("ROUTE DELETE List: IPs size:%1, GW: %2")
+    //                          .arg(ips.size())
+    //                          .arg(gw);
 
-//    qDebug().noquote() << QString("ROUTE DELETE List: IPs:\n%1")
-//                          .arg(ips.join("\n"));
+    //    qDebug().noquote() << QString("ROUTE DELETE List: IPs:\n%1")
+    //                          .arg(ips.join("\n"));
 
     PMIB_IPFORWARDTABLE pIpForwardTable = NULL;
     DWORD dwSize = 0;
@@ -291,11 +290,11 @@ void RouterWin::flushDns()
 
 void RouterWin::resetIpStack()
 {
-//    {
-//        QProcess p;
-//        QString command = QString("ipconfig /release");
-//        p.start(command);
-//    }
+    //    {
+    //        QProcess p;
+    //        QString command = QString("ipconfig /release");
+    //        p.start(command);
+    //    }
     {
         QProcess p;
         QString command = QString("netsh int ip reset");
@@ -346,90 +345,90 @@ DWORD RouterWin::GetServicePid(LPCWSTR serviceName)
 
 BOOL RouterWin::ListProcessThreads( DWORD dwOwnerPID )
 {
-  HANDLE hThreadSnap = INVALID_HANDLE_VALUE;
-  THREADENTRY32 te32;
+    HANDLE hThreadSnap = INVALID_HANDLE_VALUE;
+    THREADENTRY32 te32;
 
-  // Take a snapshot of all running threads
-  hThreadSnap = CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, 0 );
-  if( hThreadSnap == INVALID_HANDLE_VALUE )
-    return( FALSE );
+    // Take a snapshot of all running threads
+    hThreadSnap = CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, 0 );
+    if( hThreadSnap == INVALID_HANDLE_VALUE )
+        return( FALSE );
 
-  // Fill in the size of the structure before using it.
-  te32.dwSize = sizeof(THREADENTRY32);
+    // Fill in the size of the structure before using it.
+    te32.dwSize = sizeof(THREADENTRY32);
 
-  // Retrieve information about the first thread,
-  // and exit if unsuccessful
-  if( !Thread32First( hThreadSnap, &te32 ) )
-  {
-    //printError( TEXT("Thread32First") ); // show cause of failure
-    CloseHandle( hThreadSnap );          // clean the snapshot object
-    return( FALSE );
-  }
-
-  // Now walk the thread list of the system,
-  // and display information about each thread
-  // associated with the specified process
-  //HANDLE threadHandle;
-  do
-  {
-    if( te32.th32OwnerProcessID == dwOwnerPID )
+    // Retrieve information about the first thread,
+    // and exit if unsuccessful
+    if( !Thread32First( hThreadSnap, &te32 ) )
     {
-        HANDLE threadHandle = OpenThread (PROCESS_QUERY_INFORMATION, FALSE, te32.th32ThreadID);
-         qDebug() << "OpenThread GetLastError:"<< te32.th32ThreadID << GetLastError() << threadHandle;
-        ULONG64 cycles = 0;
-        BOOL ok = QueryThreadCycleTime(threadHandle, &cycles);
-        qDebug() << "QueryThreadCycleTime GetLastError:" << ok << GetLastError();
-
-        qDebug() << "Thread cycles:" << te32.th32ThreadID << cycles;
-//      _tprintf( TEXT("\n\n     THREAD ID      = 0x%08X"), te32.th32ThreadID );
-//      _tprintf( TEXT("\n     Base priority  = %d"), te32.tpBasePri );
-//      _tprintf( TEXT("\n     Delta priority = %d"), te32.tpDeltaPri );
-//      _tprintf( TEXT("\n"));
-
-        CloseHandle(threadHandle);
+        //printError( TEXT("Thread32First") ); // show cause of failure
+        CloseHandle( hThreadSnap );          // clean the snapshot object
+        return( FALSE );
     }
-  } while( Thread32Next(hThreadSnap, &te32 ) );
 
-  CloseHandle( hThreadSnap );
-  return( TRUE );
+    // Now walk the thread list of the system,
+    // and display information about each thread
+    // associated with the specified process
+    //HANDLE threadHandle;
+    do
+    {
+        if( te32.th32OwnerProcessID == dwOwnerPID )
+        {
+            HANDLE threadHandle = OpenThread (PROCESS_QUERY_INFORMATION, FALSE, te32.th32ThreadID);
+            qDebug() << "OpenThread GetLastError:"<< te32.th32ThreadID << GetLastError() << threadHandle;
+            ULONG64 cycles = 0;
+            BOOL ok = QueryThreadCycleTime(threadHandle, &cycles);
+            qDebug() << "QueryThreadCycleTime GetLastError:" << ok << GetLastError();
+
+            qDebug() << "Thread cycles:" << te32.th32ThreadID << cycles;
+            //      _tprintf( TEXT("\n\n     THREAD ID      = 0x%08X"), te32.th32ThreadID );
+            //      _tprintf( TEXT("\n     Base priority  = %d"), te32.tpBasePri );
+            //      _tprintf( TEXT("\n     Delta priority = %d"), te32.tpDeltaPri );
+            //      _tprintf( TEXT("\n"));
+
+            CloseHandle(threadHandle);
+        }
+    } while( Thread32Next(hThreadSnap, &te32 ) );
+
+    CloseHandle( hThreadSnap );
+    return( TRUE );
 }
 
 BOOL RouterWin::EnableDebugPrivilege(VOID)
 {
-  HANDLE           hToken = NULL;
-  TOKEN_PRIVILEGES priv;
+    HANDLE           hToken = NULL;
+    TOKEN_PRIVILEGES priv;
 
-  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
-    return FALSE;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
+        return FALSE;
 
-  if (!LookupPrivilegeValueW(NULL, SE_DEBUG_NAME, &priv.Privileges[0].Luid))
-    return FALSE;
+    if (!LookupPrivilegeValueW(NULL, SE_DEBUG_NAME, &priv.Privileges[0].Luid))
+        return FALSE;
 
-  priv.PrivilegeCount           = 1;
-  priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    priv.PrivilegeCount           = 1;
+    priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
-  return AdjustTokenPrivileges(hToken, FALSE, &priv, sizeof(priv), NULL, NULL);
+    return AdjustTokenPrivileges(hToken, FALSE, &priv, sizeof(priv), NULL, NULL);
 }
 
 BOOL RouterWin::InitNtFunctions(VOID)
 {
-  HMODULE hModule;
+    HMODULE hModule;
 
-  hModule = GetModuleHandleW(L"ntdll.dll");
-  if (hModule == NULL)
-    return FALSE;
+    hModule = GetModuleHandleW(L"ntdll.dll");
+    if (hModule == NULL)
+        return FALSE;
 
-  //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
-  NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
-  if (NtSuspendProcess == NULL)
-    return FALSE;
+    //NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendThread");
+    NtSuspendProcess = (decltype(NtSuspendProcess))GetProcAddress(hModule, "NtSuspendProcess");
+    if (NtSuspendProcess == NULL)
+        return FALSE;
 
-  //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
-  NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
-  if (NtResumeProcess == NULL)
-    return FALSE;
+    //NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeThread");
+    NtResumeProcess = (decltype(NtResumeProcess))GetProcAddress(hModule, "NtResumeProcess");
+    if (NtResumeProcess == NULL)
+        return FALSE;
 
-  return TRUE;
+    return TRUE;
 }
 
 BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
