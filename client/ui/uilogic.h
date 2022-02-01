@@ -100,8 +100,8 @@ public:
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
 
-    Q_INVOKABLE void saveTextFile(const QString& desc, const QString& ext, const QString& data);
-    Q_INVOKABLE void saveBinaryFile(const QString& desc, const QString& ext, const QString& data);
+    Q_INVOKABLE void saveTextFile(const QString& desc, QString ext, const QString& data);
+    Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
     QString getDialogConnectErrorText() const;

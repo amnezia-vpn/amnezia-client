@@ -17,17 +17,41 @@ PageBase {
         id: caption
         text: qsTr("DNS Servers")
     }
+
+    CheckBoxType {
+        id: cb_amnezia_dns
+        anchors.top: caption.bottom
+        x: 30
+        width: parent.width - 60
+        text: qsTr("Use AmneziaDNS service (recommended)")
+        checked: NetworkSettingsLogic.checkBoxUseAmneziaDnsChecked
+        onCheckedChanged: {
+            NetworkSettingsLogic.checkBoxUseAmneziaDnsChecked = checked
+            NetworkSettingsLogic.onCheckBoxUseAmneziaDnsToggled(checked)
+        }
+    }
+
+    LabelType {
+        id: lb_amnezia_dns
+        x: 30
+        anchors.top: cb_amnezia_dns.bottom
+        width: parent.width - 60
+        text: qsTr("Use AmneziaDNS container on your server, when it installed.\n
+Your AmneziaDNS server available only when it installed and VPN connected, it has internal IP address 172.29.172.254\n
+If AmneziaDNS service is not installed on the same server, or this option is unchecked, the following DNS servers will be used:")
+    }
+
     LabelType {
         id: l1
-        x: 40
-        anchors.top: caption.bottom
-        width: parent.width - 40
+        x: 30
+        anchors.top: lb_amnezia_dns.bottom
+        width: parent.width - 30
         height: 21
         text: qsTr("Primary DNS server")
     }
     TextFieldType {
         id: dns1
-        x: 40
+        x: 30
         anchors.top: l1.bottom
         width: parent.width - 90
         height: 40
@@ -55,16 +79,16 @@ PageBase {
 
     LabelType {
         id: l2
-        x: 40
+        x: 30
         anchors.top: dns1.bottom
         anchors.topMargin: 20
-        width: parent.width - 40
+        width: parent.width - 60
         height: 21
         text: qsTr("Secondray DNS server")
     }
     TextFieldType {
         id: dns2
-        x: 40
+        x: 30
         anchors.top: l2.bottom
         width: parent.width - 90
         height: 40

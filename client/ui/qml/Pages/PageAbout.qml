@@ -58,7 +58,17 @@ PageBase {
         anchors.topMargin: 20
         font.pixelSize: 22
         text: qsTr("Donate")
+        width: undefined
         anchors.top: label_support.bottom
+    }
+
+    LabelType {
+        anchors.bottom: caption3.bottom
+        anchors.left: caption3.right
+        anchors.leftMargin: 5
+        font.pixelSize: 24
+        text: "♥"
+        color: "red"
     }
 
     RichLabelType {

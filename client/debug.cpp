@@ -62,6 +62,20 @@ QString Debug::userLogsDir()
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
 }
 
+QString Debug::userLogsFilePath()
+{
+    return userLogsDir() + QDir::separator() + m_logFileName;
+}
+
+QString Debug::getLogs()
+{
+    m_file.flush();
+    QFile file(userLogsFilePath());
+
+    file.open(QIODevice::ReadOnly);
+    return file.readAll();
+}
+
 bool Debug::openLogsFolder()
 {
     QString path = userLogsDir();
@@ -93,11 +107,7 @@ void Debug::clearLogs()
     bool isLogActive = m_file.isOpen();
     m_file.close();
 
-
-    QString path = userLogsDir();
-    QDir appDir(path);
-    QFile file;
-    file.setFileName(appDir.filePath(m_logFileName));
+    QFile file(userLogsFilePath());
 
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);

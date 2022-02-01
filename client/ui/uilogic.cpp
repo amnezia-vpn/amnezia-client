@@ -600,10 +600,11 @@ PageEnumNS::Page UiLogic::currentPage()
     return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
-void UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
+void UiLogic::saveTextFile(const QString& desc, QString ext, const QString& data)
 {
+    ext.replace("*", "");
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
 
     if (fileName.isEmpty()) return;
     if (!fileName.endsWith(ext)) fileName.append(ext);
@@ -617,10 +618,11 @@ void UiLogic::saveTextFile(const QString& desc, const QString& ext, const QStrin
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 
-void UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
+void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &data)
 {
+    ext.replace("*", "");
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
 
     if (fileName.isEmpty()) return;
     if (!fileName.endsWith(ext)) fileName.append(ext);

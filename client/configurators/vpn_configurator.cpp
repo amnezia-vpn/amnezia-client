@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 
 #include "containers/containers_defs.h"
+#include "utils.h"
 
 Settings &VpnConfigurator::m_settings()
 {
@@ -41,24 +42,59 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     }
 }
 
-QString VpnConfigurator::processConfigWithLocalSettings(DockerContainer container, Proto proto, QString config)
+QPair<QString, QString> VpnConfigurator::getDnsForConfig(int serverIndex)
 {
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    QPair<QString, QString> dns;
+
+    bool useAmneziaDns = m_settings().useAmneziaDns();
+    const QJsonObject &server = m_settings().server(serverIndex);
+
+    dns.first = server.value(config_key::dns1).toString();
+    dns.second = server.value(config_key::dns2).toString();
+
+    if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
+        if (useAmneziaDns && m_settings().containers(serverIndex).contains(DockerContainer::Dns)) {
+            dns.first = protocols::dns::amneziaDnsIp;
+        }
+        else dns.first = m_settings().primaryDns();
+    }
+    if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
+        dns.second = m_settings().secondaryDns();
+    }
+
+    qDebug() << "VpnConfigurator::getDnsForConfig" << dns.first << dns.second;
+    return dns;
+}
+
+QString &VpnConfigurator::processConfigWithDnsSettings(int serverIndex, DockerContainer container,
+    Proto proto, QString &config)
+{
+    auto dns = getDnsForConfig(serverIndex);
+
+    config.replace("$PRIMARY_DNS", dns.first);
+    config.replace("$SECONDARY_DNS", dns.second);
+
+    return config;
+}
+
+QString &VpnConfigurator::processConfigWithLocalSettings(int serverIndex, DockerContainer container,
+    Proto proto, QString &config)
+{
+    processConfigWithDnsSettings(serverIndex, container, proto, config);
 
     if (proto == Proto::OpenVpn) {
-        return OpenVpnConfigurator::processConfigWithLocalSettings(config);
+        config = OpenVpnConfigurator::processConfigWithLocalSettings(config);
     }
     return config;
 }
 
-QString VpnConfigurator::processConfigWithExportSettings(DockerContainer container, Proto proto, QString config)
+QString &VpnConfigurator::processConfigWithExportSettings(int serverIndex, DockerContainer container,
+    Proto proto, QString &config)
 {
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    processConfigWithDnsSettings(serverIndex, container, proto, config);
 
     if (proto == Proto::OpenVpn) {
-        return OpenVpnConfigurator::processConfigWithExportSettings(config);
+        config = OpenVpnConfigurator::processConfigWithExportSettings(config);
     }
     return config;
 }

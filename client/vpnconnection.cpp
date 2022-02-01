@@ -55,8 +55,11 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                 //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
+            QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
+            QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
+
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
-                QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
+                QStringList() << dns1 << dns2);
 
 
             if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
@@ -194,12 +197,12 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
-    auto lastVpnConfig = getLastVpnConfig(containerConfig);
+    QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
 
     QString configData;
     if (lastVpnConfig.contains(proto)) {
         configData = lastVpnConfig.value(proto);
-        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
         qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
@@ -210,7 +213,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
         QString configDataBeforeLocalProcessing = configData;
 
-        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
 
         if (errorCode && e) {
@@ -256,6 +259,11 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
+    auto dns = VpnConfigurator::getDnsForConfig(serverIndex);
+
+    vpnConfiguration[config_key::dns1] = dns.first;
+    vpnConfiguration[config_key::dns2] = dns.second;
+
     return vpnConfiguration;
 }
 
@@ -285,11 +293,8 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        //qDebug() << "VpnConnection::connectToVpn 1";
         m_vpnProtocol->stop();
-        //qDebug() << "VpnConnection::connectToVpn 2";
         m_vpnProtocol.reset();
-        //qDebug() << "VpnConnection::connectToVpn 3";
     }
 
     ErrorCode e = ErrorCode::NoError;

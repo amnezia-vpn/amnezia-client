@@ -4,6 +4,10 @@
 #include "defines.h"
 #include "ui/qautostart.h"
 
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QStandardPaths>
+
 using namespace amnezia;
 using namespace PageEnumNS;
 
@@ -61,7 +65,22 @@ void AppSettingsLogic::onPushButtonOpenLogsClicked()
 
 void AppSettingsLogic::onPushButtonExportLogsClicked()
 {
+    QString log = Debug::getLogs();
+    QString ext = ".log";
 
+    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save log"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
+
+    if (fileName.isEmpty()) return;
+    if (!fileName.endsWith(ext)) fileName.append(ext);
+
+    QFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(log.toUtf8());
+    save.close();
+
+    QFileInfo fi(fileName);
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 
 void AppSettingsLogic::onPushButtonClearLogsClicked()

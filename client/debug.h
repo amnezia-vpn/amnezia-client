@@ -18,6 +18,9 @@ public:
     static void clearServiceLogs();
     static void cleanUp();
 
+    static QString userLogsFilePath();
+    static QString getLogs();
+
 private:
     static QString userLogsDir();
 
