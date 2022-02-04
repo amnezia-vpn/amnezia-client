@@ -181,6 +181,8 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
+    engine->rootContext()->setContextProperty("Debug", &Debug::Instance());
+
     engine->rootContext()->setContextProperty("UiLogic", uiLogic);
 
     engine->rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());

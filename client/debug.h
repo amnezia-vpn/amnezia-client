@@ -7,9 +7,21 @@
 #include <QString>
 #include <QTextStream>
 
-class Debug
+#include "ui/property_helper.h"
+
+class Debug : public QObject
 {
+    Q_OBJECT
+    AUTO_PROPERTY(QString, sshLog)
+    AUTO_PROPERTY(QString, allLog)
+
 public:
+    static Debug& Instance();
+
+    static void appendSshLog(const QString &log);
+    static void appendAllLog(const QString &log);
+
+
     static bool init();
     static bool openLogsFolder();
     static bool openServiceLogsFolder();
@@ -19,9 +31,13 @@ public:
     static void cleanUp();
 
     static QString userLogsFilePath();
-    static QString getLogs();
+    static QString getLogFile();
 
 private:
+    Debug() {}
+    Debug(Debug const &) = delete;
+    Debug& operator= (Debug const&) = delete;
+
     static QString userLogsDir();
 
     static QFile m_file;

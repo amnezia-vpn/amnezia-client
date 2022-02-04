@@ -28,8 +28,28 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
     }
 
     Debug::m_textStream << qFormatLogMessage(type, context, msg) << endl << flush;
+    Debug::appendAllLog(qFormatLogMessage(type, context, msg));
 
     std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
+}
+
+Debug &Debug::Instance()
+{
+    static Debug s;
+    return s;
+}
+
+void Debug::appendSshLog(const QString &log)
+{
+    QString dt = QDateTime::currentDateTime().toString();
+    Instance().m_sshLog.append(dt + ": " + log + "\n");
+    emit Instance().sshLogChanged(Instance().sshLog());
+}
+
+void Debug::appendAllLog(const QString &log)
+{
+    Instance().m_allLog.append(log + "\n");
+    emit Instance().allLogChanged(Instance().allLog());
 }
 
 bool Debug::init()
@@ -67,7 +87,7 @@ QString Debug::userLogsFilePath()
     return userLogsDir() + QDir::separator() + m_logFileName;
 }
 
-QString Debug::getLogs()
+QString Debug::getLogFile()
 {
     m_file.flush();
     QFile file(userLogsFilePath());

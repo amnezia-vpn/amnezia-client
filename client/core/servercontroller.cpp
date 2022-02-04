@@ -79,6 +79,8 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
 
         qDebug().noquote() << "EXEC" << lineToExec;
+        Debug::appendSshLog("Run command:" + lineToExec);
+
         QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(lineToExec.toUtf8());
 
         if (!proc) {
@@ -101,7 +103,9 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, &wait, [proc, cbReadStdOut](){
             QString s = proc->readAllStandardOutput();
+
             if (s != "." && !s.isEmpty()) {
+                Debug::appendSshLog("Output: " + s);
                 qDebug().noquote() << "stdout" << s;
             }
             if (cbReadStdOut) cbReadStdOut(s, proc);
@@ -110,6 +114,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, &wait, [proc, cbReadStdErr](){
             QString s = proc->readAllStandardError();
             if (s != "." && !s.isEmpty()) {
+                Debug::appendSshLog("Output: " + s);
                 qDebug().noquote() << "stderr" << s;
             }
             if (cbReadStdErr) cbReadStdErr(s, proc);
@@ -135,6 +140,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<void (const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
+    Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;

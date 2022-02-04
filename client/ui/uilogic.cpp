@@ -214,6 +214,9 @@ void UiLogic::onUpdateAllPages()
 void UiLogic::keyPressEvent(Qt::Key key)
 {
     switch (key) {
+    case Qt::Key_AsciiTilde:
+    case Qt::Key_QuoteLeft: emit toggleLogPanel();
+        break;
     case Qt::Key_L: Debug::openLogsFolder();
         break;
     case Qt::Key_K: Debug::openServiceLogsFolder();

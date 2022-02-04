@@ -121,6 +121,7 @@ signals:
     void show();
     void hide();
     void raise();
+    void toggleLogPanel();
 
 private:
     QString m_dialogConnectErrorText;

@@ -65,7 +65,7 @@ void AppSettingsLogic::onPushButtonOpenLogsClicked()
 
 void AppSettingsLogic::onPushButtonExportLogsClicked()
 {
-    QString log = Debug::getLogs();
+    QString log = Debug::getLogFile();
     QString ext = ".log";
 
     QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save log"),
