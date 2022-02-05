@@ -5,6 +5,7 @@
 #include <functional>
 #include "../uilogic.h"
 #include "defines.h"
+#include <configurators/vpn_configurator.h>
 
 
 VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
@@ -60,6 +61,16 @@ void VpnLogic::onUpdatePage()
 
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
+
+    auto dns = VpnConfigurator::getDnsForConfig(m_settings.defaultServerIndex());
+    set_amneziaDnsEnabled(dns.first == protocols::dns::amneziaDnsIp);
+    if (dns.first == protocols::dns::amneziaDnsIp) {
+        set_labelCurrentDns("On your server");
+    }
+    else {
+        set_labelCurrentDns(dns.first + ", " + dns.second);
+    }
+
 
     set_isContainerWorkingOnPlatform(ContainerProps::isWorkingOnPlatform(selectedContainer));
     if (!isContainerWorkingOnPlatform()) {

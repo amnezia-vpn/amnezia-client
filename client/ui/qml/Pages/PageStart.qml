@@ -240,8 +240,7 @@ PageBase {
             anchors.horizontalCenter: parent.horizontalCenter
 
             height: 71
-            echoMode: TextInput.Password
-            font.pixelSize: 9
+            font.pixelSize: 10
             verticalAlignment: Text.AlignTop
             text: StartPageLogic.textEditSshKeyText
             onEditingFinished: {
@@ -264,6 +263,7 @@ PageBase {
             id: new_sever_connect
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: new_server_ssh_key.bottom
+            anchors.topMargin: 10
 
             text: StartPageLogic.pushButtonConnectText
             visible: StartPageLogic.pushButtonConnectVisible

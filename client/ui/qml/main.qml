@@ -24,6 +24,8 @@ Window  {
     visible: true
     width: GC.screenWidth
     height: GC.isDesktop() ? GC.screenHeight + titleBar.height : GC.screenHeight
+    minimumWidth: 360
+    minimumHeight: GC.isDesktop() ? 640 : 0
     Keys.enabled: true
     onClosing: {
         console.debug("QML onClosing signal")

@@ -28,6 +28,7 @@ PageBase {
         onCheckedChanged: {
             NetworkSettingsLogic.checkBoxUseAmneziaDnsChecked = checked
             NetworkSettingsLogic.onCheckBoxUseAmneziaDnsToggled(checked)
+            UiLogic.onUpdateAllPages()
         }
     }
 
@@ -59,21 +60,23 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
         onEditingFinished: {
             NetworkSettingsLogic.lineEditDns1Text = text
             NetworkSettingsLogic.onLineEditDns1EditFinished(text)
+            UiLogic.onUpdateAllPages()
         }
         validator: RegExpValidator {
             regExp: NetworkSettingsLogic.ipAddressRegex
         }
     }
-    ImageButtonType {
+    SvgButtonType {
         id: resetDNS1
         anchors. left: dns1.right
         anchors.leftMargin: 10
         anchors.verticalCenter: dns1.verticalCenter
         width: 24
         height: 24
-        icon.source: "qrc:/images/reload.png"
+        icon.source: "qrc:/images/svg/refresh_black_24dp.svg"
         onClicked: {
             NetworkSettingsLogic.onPushButtonResetDns1Clicked()
+            UiLogic.onUpdateAllPages()
         }
     }
 
@@ -96,21 +99,23 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
         onEditingFinished: {
             NetworkSettingsLogic.lineEditDns2Text = text
             NetworkSettingsLogic.onLineEditDns2EditFinished(text)
+            UiLogic.onUpdateAllPages()
         }
         validator: RegExpValidator {
             regExp: NetworkSettingsLogic.ipAddressRegex
         }
     }
-    ImageButtonType {
+    SvgButtonType {
         id: resetDNS2
         anchors. left: dns2.right
         anchors.leftMargin: 10
         anchors.verticalCenter: dns2.verticalCenter
         width: 24
         height: 24
-        icon.source: "qrc:/images/reload.png"
+        icon.source: "qrc:/images/svg/refresh_black_24dp.svg"
         onClicked: {
             NetworkSettingsLogic.onPushButtonResetDns2Clicked()
+            UiLogic.onUpdateAllPages()
         }
     }
 
