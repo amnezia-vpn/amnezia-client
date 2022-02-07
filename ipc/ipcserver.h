@@ -8,7 +8,7 @@
 #include "ipc.h"
 #include "ipcserverprocess.h"
 
-#include "rep_ipcinterface_source.h"
+#include "rep_ipc_interface_source.h"
 
 class IpcServer : public IpcInterfaceSource
 {
@@ -20,8 +20,11 @@ public:
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
     virtual void flushDns() override;
+    virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;
     virtual QStringList getTapList() override;
+    virtual void cleanUp() override;
+    virtual void setLogsEnabled(bool enabled) override;
 
 private:
     int m_localpid = 0;

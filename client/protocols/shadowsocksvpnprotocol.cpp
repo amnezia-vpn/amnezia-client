@@ -3,7 +3,7 @@
 
 #include "debug.h"
 #include "utils.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
@@ -20,11 +20,14 @@ ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
     qDebug() << "ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol";
     ShadowSocksVpnProtocol::stop();
     QThread::msleep(200);
+#ifndef Q_OS_IOS
     m_ssProcess.close();
+#endif
 }
 
 ErrorCode ShadowSocksVpnProtocol::start()
 {
+#ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ss-local", false))) {
         Utils::killProcessByName(Utils::executable("ss-local", false));
     }
@@ -36,8 +39,12 @@ ErrorCode ShadowSocksVpnProtocol::start()
     m_shadowSocksCfgFile.write(QJsonDocument(m_shadowSocksConfig).toJson());
     m_shadowSocksCfgFile.close();
 
+#ifdef Q_OS_LINUX
+    QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName();
+#else
     QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName()
                                      << "--no-delay";
+#endif
 
     qDebug().noquote() << "ShadowSocksVpnProtocol::start()"
                        << shadowSocksExecPath() << args.join(" ");
@@ -68,11 +75,14 @@ ErrorCode ShadowSocksVpnProtocol::start()
     m_ssProcess.waitForStarted();
 
     if (m_ssProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(ConnectionState::Connecting);
+        setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }
     else return ErrorCode::ShadowSocksExecutableMissing;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 void ShadowSocksVpnProtocol::stop()
@@ -80,7 +90,9 @@ void ShadowSocksVpnProtocol::stop()
     OpenVpnProtocol::stop();
 
     qDebug() << "ShadowSocksVpnProtocol::stop()";
+#ifndef Q_OS_IOS
     m_ssProcess.terminate();
+#endif
 
 #ifdef Q_OS_WIN
     Utils::signalCtrl(m_ssProcess.processId(), CTRL_C_EVENT);
@@ -91,6 +103,8 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 {
 #ifdef Q_OS_WIN
     return Utils::executable(QString("ss/ss-local"), true);
+#elif defined Q_OS_LINUX
+    return Utils::usrExecutable(QString("ss-local"));
 #else
     return Utils::executable(QString("/ss-local"), true);
 #endif
@@ -98,5 +112,5 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 
 void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &configuration)
 {
-    m_shadowSocksConfig = configuration.value(config::key_shadowsocks_config_data).toObject();
+    m_shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::ShadowSocks)).toObject();
 }

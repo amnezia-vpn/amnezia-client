@@ -1,3 +1,15 @@
 [submodule "3rd/QtSsh"]
 	path = 3rd/QtSsh
 	url = https://github.com/amnezia-vpn/QtSsh.git
+[submodule "client/3rd/wireguard-tools"]
+	path = client/3rd/wireguard-tools
+	url = https://github.com/WireGuard/wireguard-tools/
+[submodule "client/3rd/wireguard-apple"]
+	path = client/3rd/wireguard-apple
+	url = https://github.com/WireGuard/wireguard-apple
+[submodule "client/3rd/OpenVPNAdapter"]
+	path = client/3rd/OpenVPNAdapter
+	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+[submodule "client/3rd/qzxing"]
+	path = client/3rd/qzxing
+	url = https://github.com/ftylitak/qzxing.git

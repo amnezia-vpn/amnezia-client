@@ -70,19 +70,18 @@ rem if not exist "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%" break
 echo "Deploying..."
 
 copy "%WORK_DIR:"=%\service\server\release\%APP_NAME:"=%-service.exe"	%OUT_APP_DIR%
-copy "%WORK_DIR:"=%\platform\post-uninstall\release\post-uninstall.exe"	%OUT_APP_DIR%
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
 signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
  
-"%QT_BIN_DIR:"=%\windeployqt" --release --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 
 signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll
 
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
-
+copy "%WORK_DIR:"=%\service\wireguard-service\release\wireguard-service.exe"	%OUT_APP_DIR%\wireguard\
 
 cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer  %RELEASE_DIR:"=%\installer /s /e /y /i /f

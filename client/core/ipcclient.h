@@ -5,38 +5,47 @@
 #include <QObject>
 
 #include "ipc.h"
-#include "rep_ipcinterface_replica.h"
+#include "rep_ipc_interface_replica.h"
+
+#include "privileged_process.h"
 
 class IpcClient : public QObject
 {
     Q_OBJECT
 public:
-   static IpcClient &Instance();
-   static bool init();
-   static QSharedPointer<IpcInterfaceReplica> Interface() { return Instance().m_ipcClient; }
-   static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
+   explicit IpcClient(QObject *parent = nullptr);
+
+   static IpcClient *Instance();
+   static bool init(IpcClient *instance);
+   static QSharedPointer<IpcInterfaceReplica> Interface();
+   static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
+
+   bool isSocketConnected() const;
 
 signals:
 
 private:
-    explicit IpcClient(QObject *parent = nullptr);
+    ~IpcClient() override;
 
     QRemoteObjectNode m_ClientNode;
     QSharedPointer<IpcInterfaceReplica> m_ipcClient;
-    QSharedPointer<QLocalSocket> m_localSocket;
+    QPointer<QLocalSocket> m_localSocket;
 
     struct ProcessDescriptor {
         ProcessDescriptor () {
             replicaNode = QSharedPointer<QRemoteObjectNode>(new QRemoteObjectNode());
-            ipcProcess = QSharedPointer<IpcProcessInterfaceReplica>();
+            ipcProcess = QSharedPointer<PrivilegedProcess>();
             localSocket = QSharedPointer<QLocalSocket>();
         }
-        QSharedPointer<IpcProcessInterfaceReplica> ipcProcess;
+        QSharedPointer<PrivilegedProcess> ipcProcess;
         QSharedPointer<QRemoteObjectNode> replicaNode;
         QSharedPointer<QLocalSocket> localSocket;
     };
 
     QMap<int, QSharedPointer<ProcessDescriptor>> m_processNodes;
+    bool m_isSocketConnected {false};
+
+    static IpcClient *m_instance;
 };
 
 #endif // IPCCLIENT_H

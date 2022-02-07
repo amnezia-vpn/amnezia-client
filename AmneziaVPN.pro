@@ -1,3 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS = client service platform
+SUBDIRS = client
 
+!ios:!android {
+   SUBDIRS += service
+}

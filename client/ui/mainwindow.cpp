@@ -40,7 +40,7 @@
 #include "ui/server_widget.h"
 #include "ui_server_widget.h"
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined Q_OS_LINUX
 #include "ui/macos_util.h"
 #endif
 
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
         needToHideCustomTitlebar = true;
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC
     fixWidget(this);
     needToHideCustomTitlebar = true;
 #endif
@@ -178,7 +178,7 @@ void MainWindow::showOnStartup()
 {
     if (! m_settings.isStartMinimized()) show();
     else {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
         setDockIconVisible(false);
 #endif
     }
@@ -411,7 +411,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::showEvent(QShowEvent *event)
 {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
     if (!event->spontaneous()) {
         setDockIconVisible(true);
     }
@@ -425,7 +425,7 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::hideEvent(QHideEvent *event)
 {
-#ifdef Q_OS_MACX
+#if defined Q_OS_MACX
     if (!event->spontaneous()) {
         setDockIconVisible(false);
     }
@@ -778,18 +778,18 @@ ErrorCode MainWindow::doInstallAction(const std::function<ErrorCode()> &action, 
     ErrorCode e = action();
     qDebug() << "doInstallAction finished with code" << e;
 
-    if (e) {
-        if (page) page->setEnabled(true);
-        if (button) button->setVisible(true);
-        if (info) info->setVisible(false);
+//    if (e) {
+//        if (page) page->setEnabled(true);
+//        if (button) button->setVisible(true);
+//        if (info) info->setVisible(false);
 
-        QMessageBox::warning(this, APPLICATION_NAME,
-                             tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
+//        QMessageBox::warning(this, APPLICATION_NAME,
+//                             tr("Error occurred while configuring server.") + "\n" +
+//                             errorString(e));
 
-        progress->hide();
-        return e;
-    }
+//        progress->hide();
+//        return e;
+//    }
 
     // just ui progressbar tweak
     timer.stop();
@@ -1473,6 +1473,64 @@ void MainWindow::setupProtocolsPageConnections()
 
         qDebug() << "Protocol saved with code:" << e << "for" << selectedServerIndex << selectedDockerContainer;
     });
+
+
+    connect(ui->pushButton_proto_tor_web_site_cont_install, &QPushButton::clicked, this, [this](bool checked){
+        DockerContainer container = DockerContainer::WebSiteInTor;
+        if (checked) {
+            ErrorCode e;
+
+            e = ServerController::runScript(ServerController::sshParams(m_settings.serverCredentials(selectedServerIndex)),
+                "sudo docker stop amnezia-tor");
+
+            e = ServerController::runScript(ServerController::sshParams(m_settings.serverCredentials(selectedServerIndex)),
+                "sudo docker rm -f amnezia-tor");
+
+            e = ServerController::runScript(ServerController::sshParams(m_settings.serverCredentials(selectedServerIndex)),
+                "sudo docker stop amnezia-wp-tor");
+
+            e = ServerController::runScript(ServerController::sshParams(m_settings.serverCredentials(selectedServerIndex)),
+                "sudo docker rm -f amnezia-wp-tor");
+
+            e = doInstallAction([this, container](){
+                return ServerController::setupContainer(m_settings.serverCredentials(selectedServerIndex), container);
+            },
+            ui->page_server_protocols, ui->progressBar_protocols_container_reinstall,
+            nullptr, nullptr);
+
+
+            QString stdOut;
+            auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+                stdOut += data + "\n";
+            };
+            auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+                stdOut += data + "\n";
+            };
+
+            e = ServerController::runScript(ServerController::sshParams(m_settings.serverCredentials(selectedServerIndex)),
+                "sudo docker exec -i amnezia-tor onions",
+                        cbReadStdOut, cbReadStdErr);
+
+            qDebug() << "amnezia-tor onions" << stdOut;
+
+            QStringList l = stdOut.split(",");
+            for (QString s : l) {
+                if (s.contains(":80")) {
+                    ui->label_tor_web_site->setText(s);
+                }
+            }
+
+        }
+        else {
+            ui->pushButton_proto_tor_web_site_cont_install->setEnabled(false);
+            ErrorCode e = ServerController::removeContainer(m_settings.serverCredentials(selectedServerIndex), container);
+            m_settings.removeContainerConfig(selectedServerIndex, container);
+            ui->pushButton_proto_tor_web_site_cont_install->setEnabled(true);
+
+        }
+
+        //updateProtocolsPage();
+    });
 }
 
 void MainWindow::setupNewServerPageConnections()
@@ -1754,7 +1812,7 @@ void MainWindow::setTrayState(VpnProtocol::ConnectionState state)
 
 void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-#ifndef Q_OS_MAC
+#if defined Q_OS_MACX || defined Q_OS_LINUX
     if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
         show();
         raise();

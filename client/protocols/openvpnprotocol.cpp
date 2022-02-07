@@ -57,7 +57,7 @@ void OpenVpnProtocol::stop()
     }
 }
 
-ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
+ErrorCode OpenVpnProtocol::prepare()
 {
     if (!IpcClient::Interface()) {
         return ErrorCode::AmneziaServiceConnectionFailed;
@@ -77,30 +77,24 @@ ErrorCode OpenVpnProtocol::checkAndSetupTapDriver()
 
 void OpenVpnProtocol::killOpenVpnProcess()
 {
+#ifndef Q_OS_IOS
     if (m_openVpnProcess){
         m_openVpnProcess->close();
     }
+#endif
 }
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(config::key_openvpn_config_data)) {
+    if (configuration.contains(ProtocolProps::key_proto_config_data(Proto::OpenVpn))) {
+        QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::OpenVpn)).toObject();
+
         m_configFile.open();
-        m_configFile.write(configuration.value(config::key_openvpn_config_data).toString().toUtf8());
+        m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
         m_configFile.close();
         m_configFileName = m_configFile.fileName();
 
         qDebug().noquote() << QString("Set config data") << m_configFileName;
-    }
-    else if (configuration.contains(config::key_openvpn_config_path)) {
-        m_configFileName = configuration.value(config::key_openvpn_config_path).toString();
-        QFileInfo file(m_configFileName);
-
-        if (file.fileName().isEmpty()) {
-            m_configFileName = defaultConfigFileName();
-        }
-
-        qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
     }
 }
 
@@ -142,6 +136,8 @@ QString OpenVpnProtocol::openVpnExecPath() const
 {
 #ifdef Q_OS_WIN
     return Utils::executable("openvpn/openvpn", true);
+#elif defined Q_OS_LINUX
+    return Utils::usrExecutable("openvpn");
 #else
     return Utils::executable("/openvpn", true);
 #endif
@@ -149,6 +145,7 @@ QString OpenVpnProtocol::openVpnExecPath() const
 
 ErrorCode OpenVpnProtocol::start()
 {
+#ifndef Q_OS_IOS
     //qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
@@ -162,15 +159,15 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
-    Utils::createEmptyFile(vpnLogFileNamePath);
+//    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
+//    Utils::createEmptyFile(vpnLogFileNamePath);
 
     if (!m_managementServer.start(m_managementHost, m_managementPort)) {
         setLastError(ErrorCode::OpenVpnManagementServerError);
         return lastError();
     }
 
-    setConnectionState(ConnectionState::Connecting);
+    setConnectionState(VpnConnectionState::Connecting);
 
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -189,22 +186,21 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setProgram(openVpnExecPath());
     QStringList arguments({"--config" , configPath(),
                       "--management", m_managementHost, QString::number(m_managementPort),
-                      "--management-client",
-                      "--log", vpnLogFileNamePath
+                      "--management-client"/*, "--log", vpnLogFileNamePath */
                      });
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, [&](QProcess::ProcessError error) {
-        qDebug() << "IpcProcessInterfaceReplica errorOccurred" << error;
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::errorOccurred, [&](QProcess::ProcessError error) {
+        qDebug() << "PrivilegedProcess errorOccurred" << error;
     });
 
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::stateChanged, [&](QProcess::ProcessState newState) {
-        qDebug() << "IpcProcessInterfaceReplica stateChanged" << newState;
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::stateChanged, [&](QProcess::ProcessState newState) {
+        qDebug() << "PrivilegedProcess stateChanged" << newState;
     });
 
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::finished, this, [&]() {
-        setConnectionState(ConnectionState::Disconnected);
+    connect(m_openVpnProcess.data(), &PrivilegedProcess::finished, this, [&]() {
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
     m_openVpnProcess->start();
@@ -212,6 +208,9 @@ ErrorCode OpenVpnProtocol::start()
     //startTimeoutTimer();
 
     return ErrorCode::NoError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 bool OpenVpnProtocol::sendTermSignal()

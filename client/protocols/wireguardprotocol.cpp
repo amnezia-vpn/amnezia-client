@@ -19,13 +19,17 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* 
 
 WireguardProtocol::~WireguardProtocol()
 {
-    qDebug() << "WireguardProtocol::~WireguardProtocol()";
+    //qDebug() << "WireguardProtocol::~WireguardProtocol() 1";
     WireguardProtocol::stop();
     QThread::msleep(200);
+    //qDebug() << "WireguardProtocol::~WireguardProtocol() 2";
 }
 
 void WireguardProtocol::stop()
 {
+    //qDebug() << "WireguardProtocol::stop() 1";
+
+#ifndef Q_OS_IOS
     if (!QFileInfo::exists(wireguardExecPath())) {
         qCritical() << "Wireguard executable missing!";
         setLastError(ErrorCode::ExecutableMissing);
@@ -50,52 +54,47 @@ void WireguardProtocol::stop()
     m_wireguardStopProcess->setProgram(wireguardExecPath());
 
 
-    QStringList arguments({"/uninstalltunnelservice", serviceName(), });
+    QStringList arguments({"--remove", configPath()});
     m_wireguardStopProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
 
-    connect(m_wireguardStopProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this, [this](QProcess::ProcessError error) {
-        qDebug() << "WireguardProtocol::WireguardProtocol errorOccurred" << error;
-        setConnectionState(ConnectionState::Disconnected);
+    connect(m_wireguardStopProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        qDebug() << "WireguardProtocol::WireguardProtocol Stop errorOccurred" << error;
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
-    connect(m_wireguardStopProcess.data(), &IpcProcessInterfaceReplica::stateChanged, this, [this](QProcess::ProcessState newState) {
+    connect(m_wireguardStopProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
         qDebug() << "WireguardProtocol::WireguardProtocol Stop stateChanged" << newState;
     });
 
     m_wireguardStopProcess->start();
+    m_wireguardStopProcess->waitForFinished(10000);
 
     setConnectionState(VpnProtocol::Disconnected);
+#endif
+
+    //qDebug() << "WireguardProtocol::stop() 2";
 }
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(config::key_wireguard_config_data)) {
-        if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
-            return;
-        }
+    QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toObject();
 
-        m_isConfigLoaded = true;
-
-        m_configFile.write(configuration.value(config::key_wireguard_config_data).toString().toUtf8());
-        m_configFile.close();
-        m_configFileName = m_configFile.fileName();
-
-        qDebug().noquote() << QString("Set config data") << m_configFileName;
-        qDebug().noquote() << QString("Set config data") << configuration.value(config::key_wireguard_config_data).toString().toUtf8();
+    if (!m_configFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qCritical() << "Failed to save wireguard config to" << m_configFile.fileName();
+        return;
     }
-//    else if (configuration.contains(config::key_wireguard_config_path)) {
-//        m_configFileName = configuration.value(config::key_wireguard_config_path).toString();
-//        QFileInfo file(m_configFileName);
 
-//        if (file.fileName().isEmpty()) {
-//            m_configFileName = defaultConfigFileName();
-//        }
+    m_isConfigLoaded = true;
 
-//        qDebug().noquote() << QString("Set config file: '%1'").arg(configPath());
-//    }
+    m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
+    m_configFile.close();
+    m_configFileName = m_configFile.fileName();
+
+    qDebug().noquote() << QString("Set config data") << m_configFileName;
+    qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toString().toUtf8();
+
 }
 
 //bool WireguardProtocol::openVpnProcessIsRunning() const
@@ -121,7 +120,9 @@ void WireguardProtocol::updateRouteGateway(QString line)
 QString WireguardProtocol::wireguardExecPath() const
 {
 #ifdef Q_OS_WIN
-    return Utils::executable("wireguard/wireguard", true);
+    return Utils::executable("wireguard/wireguard-service", true);
+#elif defined Q_OS_LINUX
+    return Utils::usrExecutable("wg");
 #else
     return Utils::executable("/wireguard", true);
 #endif
@@ -129,12 +130,15 @@ QString WireguardProtocol::wireguardExecPath() const
 
 ErrorCode WireguardProtocol::start()
 {
+    //qDebug() << "WireguardProtocol::start() 1";
+
+#ifndef Q_OS_IOS
     if (!m_isConfigLoaded) {
         setLastError(ErrorCode::ConfigMissing);
         return lastError();
     }
 
-    //qDebug() << "Start OpenVPN connection";
+    //qDebug() << "Start Wireguard connection";
     WireguardProtocol::stop();
 
     if (!QFileInfo::exists(wireguardExecPath())) {
@@ -147,7 +151,7 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-    setConnectionState(ConnectionState::Connecting);
+    setConnectionState(VpnConnectionState::Connecting);
 
     m_wireguardStartProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -167,45 +171,51 @@ ErrorCode WireguardProtocol::start()
     m_wireguardStartProcess->setProgram(wireguardExecPath());
 
 
-    QStringList arguments({"/installtunnelservice", configPath(), });
+    QStringList arguments({"--add", configPath()});
     m_wireguardStartProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this, [this](QProcess::ProcessError error) {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol errorOccurred" << error;
-        setConnectionState(ConnectionState::Disconnected);
+        setConnectionState(VpnConnectionState::Disconnected);
     });
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::stateChanged, this, [this](QProcess::ProcessState newState) {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
         qDebug() << "WireguardProtocol::WireguardProtocol stateChanged" << newState;
     });
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::finished, this, [this]() {
-        setConnectionState(ConnectionState::Connected);
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [this]() {
+        setConnectionState(VpnConnectionState::Connected);
     });
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::readyRead, this, [this]() {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyRead, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAll();
         reply.waitForFinished(1000);
         qDebug() << "WireguardProtocol::WireguardProtocol readyRead" << reply.returnValue();
     });
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, [this]() {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyReadStandardOutput, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAllStandardOutput();
         reply.waitForFinished(1000);
         qDebug() << "WireguardProtocol::WireguardProtocol readAllStandardOutput" << reply.returnValue();
     });
 
-    connect(m_wireguardStartProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, [this]() {
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyReadStandardError, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAllStandardError();
         reply.waitForFinished(1000);
         qDebug() << "WireguardProtocol::WireguardProtocol readAllStandardError" << reply.returnValue();
     });
 
     m_wireguardStartProcess->start();
+    m_wireguardStartProcess->waitForFinished(10000);
+
+    //qDebug() << "WireguardProtocol::start() 2";
 
     return ErrorCode::NoError;
+#else
+    return ErrorCode::NotImplementedError;
+#endif
 }
 
 void WireguardProtocol::updateVpnGateway(const QString &line)

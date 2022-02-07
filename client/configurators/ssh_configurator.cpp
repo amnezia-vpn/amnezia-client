@@ -19,6 +19,7 @@ using namespace QSsh;
 
 QString SshConfigurator::convertOpenSShKey(const QString &key)
 {
+#ifndef Q_OS_IOS
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -49,10 +50,14 @@ QString SshConfigurator::convertOpenSShKey(const QString &key)
     tmp.open();
 
     return tmp.readAll();
+#else
+    return key;
+#endif
 }
 
 void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
 {
+#ifndef Q_OS_IOS
     QProcess *p = new QProcess();
     p->setReadChannelMode(QProcess::SeparateChannels);
 
@@ -74,6 +79,7 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
 #endif
 
     p->startDetached();
+#endif
 }
 
 QProcessEnvironment SshConfigurator::prepareEnv()

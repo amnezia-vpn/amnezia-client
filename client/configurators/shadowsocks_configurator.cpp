@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &credentials,
     DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)

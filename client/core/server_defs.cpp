@@ -12,5 +12,5 @@
 
 QString amnezia::server::getDockerfileFolder(amnezia::DockerContainer container)
 {
-    return "/opt/amnezia/" + containerToString(container);
+    return "/opt/amnezia/" + ContainerProps::containerToString(container);
 }

@@ -6,6 +6,8 @@
 
 namespace amnezia {
 
+constexpr const qint16 qrMagicCode = 1984;
+
 struct ServerCredentials
 {
     QString hostName;
@@ -49,7 +51,6 @@ enum ErrorCode
 
     // Distro errors
     OpenVpnExecutableMissing,
-    EasyRsaExecutableMissing,
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
@@ -59,23 +60,17 @@ enum ErrorCode
     OpenVpnAdaptersInUseError,
     OpenVpnUnknownError,
     OpenVpnTapAdapterError,
+    AddressPoolError,
 
     // 3rd party utils errors
+    OpenSslFailed,
     OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
     CloakExecutableCrashed
 };
 
-namespace config {
-// config keys
-const char key_openvpn_config_data[] = "openvpn_config_data";
-const char key_openvpn_config_path[] = "openvpn_config_path";
-const char key_shadowsocks_config_data[] = "shadowsocks_config_data";
-const char key_cloak_config_data[] = "cloak_config_data";
-const char key_wireguard_config_data[] = "wireguard_config_data";
-
-}
-
 } // namespace amnezia
+
+Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // DEFS_H

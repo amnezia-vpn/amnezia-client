@@ -5,8 +5,11 @@
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
+#include "debug.h"
 #include "defs.h"
-#include "protocols/protocols_defs.h"
+#include "settings.h"
+
+#include "containers/containers_defs.h"
 
 #include "sftpdefs.h"
 
@@ -28,9 +31,12 @@ public:
 
     static ErrorCode removeAllContainers(const ServerCredentials &credentials);
     static ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
-    static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     static ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &oldConfig, const QJsonObject &newConfig = QJsonObject());
+        const QJsonObject &oldConfig, QJsonObject &newConfig);
+
+    // create initial config - generate passwords, etc
+    static QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
 
     static bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
@@ -43,14 +49,18 @@ public:
         const ServerCredentials &credentials, const QString &file, const QString &path,
         QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
 
-    static QString getTextFileFromContainer(DockerContainer container,
+    static QByteArray getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
 
     static ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 
     static QString replaceVars(const QString &script, const Vars &vars);
 
-    static ErrorCode runScript(const QSsh::SshConnectionParameters &sshParams, QString script,
+    static ErrorCode runScript(const ServerCredentials &credentials, QString script,
+        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
+        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+
+    static ErrorCode runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
         const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
 
@@ -64,10 +74,11 @@ private:
     static ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     static ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     static ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
-    static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
-    static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    static ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
+    static ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     static ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
+    static Settings &m_settings();
 };
 
 #endif // SERVERCONTROLLER_H

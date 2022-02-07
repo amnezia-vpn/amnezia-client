@@ -1,27 +1,32 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sshchannelmanager_p.h"
 
@@ -38,6 +43,8 @@
 #include "sshsendfacility_p.h"
 #include "sshtcpipforwardserver.h"
 #include "sshtcpipforwardserver_p.h"
+#include "sshx11channel_p.h"
+#include "sshx11inforetriever_p.h"
 
 #include <QList>
 
@@ -58,52 +65,21 @@ void SshChannelManager::handleChannelRequest(const SshIncomingPacket &packet)
 
 void SshChannelManager::handleChannelOpen(const SshIncomingPacket &packet)
 {
-    SshChannelOpen channelOpen = packet.extractChannelOpen();
-
-    SshTcpIpForwardServer::Ptr server;
-
-    foreach (const SshTcpIpForwardServer::Ptr &candidate, m_listeningForwardServers) {
-        if (candidate->port() == channelOpen.remotePort
-                && candidate->bindAddress().toUtf8() == channelOpen.remoteAddress) {
-            server = candidate;
-            break;
-        }
-    };
-
-
-    if (server.isNull()) {
-        // Apparently the server knows a remoteAddress we are not aware of. There are plenty of ways
-        // to make that happen: /etc/hosts on the server, different writings for localhost,
-        // different DNS servers, ...
-        // Rather than trying to figure that out, we just use the first listening forwarder with the
-        // same port.
-        foreach (const SshTcpIpForwardServer::Ptr &candidate, m_listeningForwardServers) {
-            if (candidate->port() == channelOpen.remotePort) {
-                server = candidate;
-                break;
-            }
-        };
-    }
-
-    if (server.isNull()) {
-        SshOpenFailureType reason = (channelOpen.remotePort == 0) ?
-                    SSH_OPEN_UNKNOWN_CHANNEL_TYPE : SSH_OPEN_ADMINISTRATIVELY_PROHIBITED;
-        try {
-            m_sendFacility.sendChannelOpenFailurePacket(channelOpen.remoteChannel, reason,
-                                                        QByteArray());
-        }  catch (const std::exception &e) {
-            qCWarning(sshLog, "Botan error: %s", e.what());
-        }
+    const SshChannelOpenGeneric channelOpen = packet.extractChannelOpen();
+    if (channelOpen.channelType == SshIncomingPacket::ForwardedTcpIpType) {
+        handleChannelOpenForwardedTcpIp(channelOpen);
         return;
     }
-
-    SshForwardedTcpIpTunnel::Ptr tunnel(new SshForwardedTcpIpTunnel(m_nextLocalChannelId++,
-                                                                    m_sendFacility));
-    tunnel->d->handleOpenSuccess(channelOpen.remoteChannel, channelOpen.remoteWindowSize,
-                                 channelOpen.remoteMaxPacketSize);
-    tunnel->open(QIODevice::ReadWrite);
-    server->setNewConnection(tunnel);
-    insertChannel(tunnel->d, tunnel);
+    if (channelOpen.channelType == "x11") {
+        handleChannelOpenX11(channelOpen);
+        return;
+    }
+    try {
+        m_sendFacility.sendChannelOpenFailurePacket(channelOpen.commonData.remoteChannel,
+                                                    SSH_OPEN_UNKNOWN_CHANNEL_TYPE, QByteArray());
+    }  catch (const std::exception &e) {
+        qCWarning(sshLog, "Botan error: %s", e.what());
+    }
 }
 
 void SshChannelManager::handleChannelOpenFailure(const SshIncomingPacket &packet)
@@ -114,7 +90,7 @@ void SshChannelManager::handleChannelOpenFailure(const SshIncomingPacket &packet
        it.value()->handleOpenFailure(failure.reasonString);
    } catch (const SshServerException &e) {
        removeChannel(it);
-       throw e;
+       throw;
    }
    removeChannel(it);
 }
@@ -223,13 +199,50 @@ AbstractSshChannel *SshChannelManager::lookupChannel(quint32 channelId,
     bool allowNotFound)
 {
     ChannelIterator it = lookupChannelAsIterator(channelId, allowNotFound);
-    return it == m_channels.end() ? 0 : it.value();
+    return it == m_channels.end() ? nullptr : it.value();
 }
 
 QSsh::SshRemoteProcess::Ptr SshChannelManager::createRemoteProcess(const QByteArray &command)
 {
     SshRemoteProcess::Ptr proc(new SshRemoteProcess(command, m_nextLocalChannelId++, m_sendFacility));
     insertChannel(proc->d, proc);
+    connect(proc->d, &SshRemoteProcessPrivate::destroyed, this, [this] {
+        m_x11ForwardingRequests.removeOne(static_cast<SshRemoteProcessPrivate *>(sender()));
+    });
+    connect(proc->d, &SshRemoteProcessPrivate::x11ForwardingRequested, this,
+            [this, proc = proc->d](const QString &displayName) {
+        if (!x11DisplayName().isEmpty()) {
+            if (x11DisplayName() != displayName) {
+                proc->failToStart(tr("Cannot forward to display %1 on SSH connection that is "
+                                     "already forwarding to display %2.")
+                                  .arg(displayName, x11DisplayName()));
+                return;
+            }
+            if (!m_x11DisplayInfo.cookie.isEmpty())
+                proc->startProcess(m_x11DisplayInfo);
+            else
+                m_x11ForwardingRequests << proc;
+            return;
+        }
+        m_x11DisplayInfo.displayName = displayName;
+        m_x11ForwardingRequests << proc;
+        auto * const x11InfoRetriever = new SshX11InfoRetriever(displayName, this);
+        const auto failureHandler = [this](const QString &errorMessage) {
+            for (SshRemoteProcessPrivate * const proc : qAsConst(m_x11ForwardingRequests))
+                proc->failToStart(errorMessage);
+            m_x11ForwardingRequests.clear();
+        };
+        connect(x11InfoRetriever, &SshX11InfoRetriever::failure, this, failureHandler);
+        const auto successHandler = [this](const X11DisplayInfo &displayInfo) {
+            m_x11DisplayInfo = displayInfo;
+            for (SshRemoteProcessPrivate * const proc : qAsConst(m_x11ForwardingRequests))
+                proc->startProcess(displayInfo);
+            m_x11ForwardingRequests.clear();
+        };
+        connect(x11InfoRetriever, &SshX11InfoRetriever::success, this, successHandler);
+        qCDebug(sshLog) << "starting x11 info retriever";
+        x11InfoRetriever->start();
+    });
     return proc;
 }
 
@@ -266,7 +279,7 @@ SshTcpIpForwardServer::Ptr SshChannelManager::createForwardServer(const QString 
         switch (state) {
         case SshTcpIpForwardServer::Closing:
             m_listeningForwardServers.removeOne(server);
-            // fall through
+            Q_FALLTHROUGH();
         case SshTcpIpForwardServer::Initializing:
             m_waitingForwardServers.append(server);
             break;
@@ -284,6 +297,77 @@ void SshChannelManager::insertChannel(AbstractSshChannel *priv,
     connect(priv, &AbstractSshChannel::timeout, this, &SshChannelManager::timeout);
     m_channels.insert(priv->localChannelId(), priv);
     m_sessions.insert(priv, pub);
+}
+
+void SshChannelManager::handleChannelOpenForwardedTcpIp(
+        const SshChannelOpenGeneric &channelOpenGeneric)
+{
+    const SshChannelOpenForwardedTcpIp channelOpen
+            = SshIncomingPacket::extractChannelOpenForwardedTcpIp(channelOpenGeneric);
+
+    SshTcpIpForwardServer::Ptr server;
+
+    foreach (const SshTcpIpForwardServer::Ptr &candidate, m_listeningForwardServers) {
+        if (candidate->port() == channelOpen.remotePort
+                && candidate->bindAddress().toUtf8() == channelOpen.remoteAddress) {
+            server = candidate;
+            break;
+        }
+    };
+
+
+    if (server.isNull()) {
+        // Apparently the server knows a remoteAddress we are not aware of. There are plenty of ways
+        // to make that happen: /etc/hosts on the server, different writings for localhost,
+        // different DNS servers, ...
+        // Rather than trying to figure that out, we just use the first listening forwarder with the
+        // same port.
+        foreach (const SshTcpIpForwardServer::Ptr &candidate, m_listeningForwardServers) {
+            if (candidate->port() == channelOpen.remotePort) {
+                server = candidate;
+                break;
+            }
+        };
+    }
+
+    if (server.isNull()) {
+        try {
+            m_sendFacility.sendChannelOpenFailurePacket(channelOpen.common.remoteChannel,
+                                                        SSH_OPEN_ADMINISTRATIVELY_PROHIBITED,
+                                                        QByteArray());
+        }  catch (const std::exception &e) {
+            qCWarning(sshLog, "Botan error: %s", e.what());
+        }
+        return;
+    }
+
+    SshForwardedTcpIpTunnel::Ptr tunnel(new SshForwardedTcpIpTunnel(m_nextLocalChannelId++,
+                                                                    m_sendFacility));
+    tunnel->d->handleOpenSuccess(channelOpen.common.remoteChannel,
+                                 channelOpen.common.remoteWindowSize,
+                                 channelOpen.common.remoteMaxPacketSize);
+    tunnel->open(QIODevice::ReadWrite);
+    server->setNewConnection(tunnel);
+    insertChannel(tunnel->d, tunnel);
+}
+
+void SshChannelManager::handleChannelOpenX11(const SshChannelOpenGeneric &channelOpenGeneric)
+{
+    qCDebug(sshLog) << "incoming X11 channel open request";
+    const SshChannelOpenX11 channelOpen
+            = SshIncomingPacket::extractChannelOpenX11(channelOpenGeneric);
+    if (m_x11DisplayInfo.cookie.isEmpty()) {
+        throw SSH_SERVER_EXCEPTION(SSH_DISCONNECT_PROTOCOL_ERROR,
+                                   "Server attempted to open an unrequested X11 channel.");
+    }
+    SshX11Channel * const x11Channel = new SshX11Channel(m_x11DisplayInfo,
+                                                         m_nextLocalChannelId++,
+                                                         m_sendFacility);
+    x11Channel->setParent(this);
+    x11Channel->handleOpenSuccess(channelOpen.common.remoteChannel,
+                                  channelOpen.common.remoteWindowSize,
+                                  channelOpen.common.remoteMaxPacketSize);
+    insertChannel(x11Channel, QSharedPointer<QObject>());
 }
 
 int SshChannelManager::closeAllChannels(CloseAllMode mode)

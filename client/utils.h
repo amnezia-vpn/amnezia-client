@@ -14,6 +14,7 @@ public:
     static QString getRandomString(int len);
 
     static QString executable(const QString& baseName, bool absPath);
+    static QString usrExecutable(const QString& baseName);
     static QString systemLogPath();
     static bool createEmptyFile(const QString& path);
     static bool initializePath(const QString& path);
@@ -34,6 +35,7 @@ public:
 
     static QRegExp ipPortRegExp() { return QRegExp("^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$"); }
 
+    static QRegExp domainRegExp() { return QRegExp("(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}"); }
     static bool processIsRunning(const QString& fileName);
     static void killProcessByName(const QString &name);
 

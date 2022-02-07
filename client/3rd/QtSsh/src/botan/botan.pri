@@ -1,50 +1,72 @@
-INCLUDEPATH *= $$PWD/..
-HEADERS += $$PWD/botan.h
+INCLUDEPATH += $$PWD/include
+DEPENDPATH += $$PWD
 
-SOURCES += $$PWD/botan.cpp
+CONFIG += c++17
 
-CONFIG += exceptions
-
-DEPENDPATH += .
-
-DEFINES += BOTAN_DLL=
-unix:DEFINES += BOTAN_TARGET_OS_HAS_GETTIMEOFDAY BOTAN_HAS_ALLOC_MMAP \
-    BOTAN_HAS_ENTROPY_SRC_DEV_RANDOM BOTAN_HAS_ENTROPY_SRC_EGD BOTAN_HAS_ENTROPY_SRC_FTW \
-    BOTAN_HAS_ENTROPY_SRC_UNIX BOTAN_HAS_MUTEX_PTHREAD BOTAN_HAS_PIPE_UNIXFD_IO
-*linux*:DEFINES += BOTAN_TARGET_OS_IS_LINUX BOTAN_TARGET_OS_HAS_CLOCK_GETTIME \
-    BOTAN_TARGET_OS_HAS_DLOPEN BOTAN_TARGET_OS_HAS_GMTIME_R BOTAN_TARGET_OS_HAS_POSIX_MLOCK \
-    BOTAN_HAS_DYNAMICALLY_LOADED_ENGINE BOTAN_HAS_DYNAMIC_LOADER
-macx:DEFINES += BOTAN_TARGET_OS_IS_DARWIN
-*g++*:DEFINES += BOTAN_BUILD_COMPILER_IS_GCC
-*clang*:DEFINES += BOTAN_BUILD_COMPILER_IS_CLANG
-*icc*:DEFINES += BOTAN_BUILD_COMPILER_IS_INTEL
-
-CONFIG(x86_64):DEFINES += BOTAN_TARGET_ARCH_IS_X86_64
+INCLUDEPATH += $$PWD/include/external
 
 win32 {
-    DEFINES += BOTAN_TARGET_OS_IS_WINDOWS \
-        BOTAN_TARGET_OS_HAS_LOADLIBRARY BOTAN_TARGET_OS_HAS_WIN32_GET_SYSTEMTIME \
-        BOTAN_TARGET_OS_HAS_WIN32_VIRTUAL_LOCK \
-        BOTAN_HAS_ENTROPY_SRC_CAPI BOTAN_HAS_ENTROPY_SRC_WIN32 \
-        BOTAN_HAS_MUTEX_WIN32
+   QMAKE_CXXFLAGS += -bigobj
+   LIBS += \
+       -lcrypt32 \
 
-    msvc {
-        QMAKE_CXXFLAGS_EXCEPTIONS_ON = -EHs
-        QMAKE_CXXFLAGS += -wd4251 -wd4290 -wd4250 -wd4297 -wd4267 -wd4334
-        DEFINES += BOTAN_BUILD_COMPILER_IS_MSVC BOTAN_TARGET_OS_HAS_GMTIME_S _SCL_SECURE_NO_WARNINGS
-    } else {
-        QMAKE_CFLAGS += -fpermissive -finline-functions -Wno-long-long
-        QMAKE_CXXFLAGS += -fpermissive -finline-functions -Wno-long-long
+   !contains(QMAKE_TARGET.arch, x86_64) {
+      INCLUDEPATH += $$PWD/windows/x86
+      HEADERS += $$PWD/windows/x86/botan_all.h
+      SOURCES += $$PWD/windows/x86/botan_all.cpp
+   }
+   else {
+      INCLUDEPATH += $$PWD/windows/x86_64
+      HEADERS += $$PWD/windows/x86_64/botan_all.h
+      SOURCES += $$PWD/windows/x86_64/botan_all.cpp
+   }
+}
+
+macx:!ios {
+    INCLUDEPATH += $$PWD/macos
+    HEADERS += $$PWD/macos/botan_all.h
+    SOURCES += $$PWD/macos/botan_all.cpp
+}
+
+linux-g++ {
+    INCLUDEPATH += $$PWD/linux
+    HEADERS += $$PWD/linux/botan_all.h
+    SOURCES += $$PWD/linux/botan_all.cpp
+
+    LIBS += -ldl
+}
+
+android {
+   for (abi, ANDROID_ABIS): {
+      equals(ANDROID_TARGET_ARCH,$$abi) {
+         INCLUDEPATH += $$PWD/android/$${abi}
+         HEADERS += $$PWD/android/$${abi}/botan_all.h
+         SOURCES += $$PWD/android/$${abi}/botan_all.cpp
+      }
+   }
+}
+
+ios: {
+    CONFIG(iphoneos, iphoneos|iphonesimulator) {
+        contains(QT_ARCH, arm64) {
+            INCLUDEPATH += $$PWD/ios/iphone
+            HEADERS += $$PWD/ios/iphone/botan_all.h
+            SOURCES += $$PWD/ios/iphone/botan_all.cpp
+        } else {
+            message("Building for iOS/ARM v7 (32-bit) architecture")
+            ARCH_TAG = "ios_armv7"
+        }
     }
-    LIBS += -ladvapi32 -luser32
-}
+  
+  CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+      INCLUDEPATH += $$PWD/ios/iphone
+      HEADERS += $$PWD/ios/iphone/botan_all.h
+      SOURCES += $$PWD/ios/iphone/botan_all.cpp
+  }
 
-unix:*-g++* {
-    QMAKE_CFLAGS += -fPIC -fpermissive -finline-functions -Wno-long-long
-    QMAKE_CXXFLAGS += -fPIC -fpermissive -finline-functions -Wno-long-long
+#    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+#        INCLUDEPATH += $$PWD/ios/simulator
+#        HEADERS += $$PWD/ios/simulator/botan_all.h
+#        SOURCES += $$PWD/ios/simulator/botan_all.cpp
+#    }
 }
-
-linux*|freebsd* {
-    LIBS += -lrt $$QMAKE_LIBS_DYNLOAD
-}
-

@@ -2,7 +2,7 @@
 #include "core/servercontroller.h"
 
 #include "utils.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 
 #include <QCryptographicHash>
 #include <QDebug>
@@ -20,11 +20,14 @@ OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
     qDebug() << "OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol";
     OpenVpnOverCloakProtocol::stop();
     QThread::msleep(200);
+#ifndef Q_OS_IOS
     m_ckProcess.close();
+#endif
 }
 
 ErrorCode OpenVpnOverCloakProtocol::start()
 {
+#ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
         Utils::killProcessByName(Utils::executable("ck-client", false));
     }
@@ -41,7 +44,8 @@ ErrorCode OpenVpnOverCloakProtocol::start()
                                      << "-p" << m_cloakConfig.value(config_key::port).toString(amnezia::protocols::cloak::defaultPort)
                                      << "-l" << amnezia::protocols::openvpn::defaultPort;
 
-    if (m_cloakConfig.value(config_key::transport_proto).toString() == protocols::UDP) {
+    ProtocolEnumNS::TransportProto tp = ProtocolProps::transportProtoFromString(m_cloakConfig.value(config_key::transport_proto).toString());
+    if (tp == ProtocolEnumNS::TransportProto::Udp) {
         args << "-u";
     }
 
@@ -74,11 +78,12 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_ckProcess.waitForStarted();
 
     if (m_ckProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(ConnectionState::Connecting);
+        setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }
     else return ErrorCode::CloakExecutableMissing;
+#endif
 }
 
 void OpenVpnOverCloakProtocol::stop()
@@ -92,7 +97,9 @@ void OpenVpnOverCloakProtocol::stop()
     Utils::signalCtrl(m_ckProcess.processId(), CTRL_C_EVENT);
 #endif
 
+#ifndef Q_OS_IOS
     m_ckProcess.terminate();
+#endif
 }
 
 QString OpenVpnOverCloakProtocol::cloakExecPath()
@@ -106,5 +113,5 @@ QString OpenVpnOverCloakProtocol::cloakExecPath()
 
 void OpenVpnOverCloakProtocol::readCloakConfiguration(const QJsonObject &configuration)
 {
-    m_cloakConfig = configuration.value(config::key_cloak_config_data).toObject();
+    m_cloakConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::Cloak)).toObject();
 }

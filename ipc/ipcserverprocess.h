@@ -2,8 +2,9 @@
 #define IPCSERVERPROCESS_H
 
 #include <QObject>
-#include "rep_ipcinterface_source.h"
 
+#ifndef Q_OS_IOS
+#include "rep_ipc_process_interface_source.h"
 
 class IpcServerProcess : public IpcProcessInterfaceSource
 {
@@ -32,5 +33,15 @@ signals:
 private:
     QSharedPointer<QProcess> m_process;
 };
+
+#else
+class IpcServerProcess : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit IpcServerProcess(QObject *parent = nullptr);
+};
+#endif
 
 #endif // IPCSERVERPROCESS_H

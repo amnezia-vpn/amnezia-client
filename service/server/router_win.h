@@ -39,6 +39,7 @@ public:
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
     void flushDns();
+    void resetIpStack();
 
     void suspendWcmSvc(bool suspend);
 

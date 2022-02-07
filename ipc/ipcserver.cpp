@@ -5,6 +5,8 @@
 #include <QLocalSocket>
 
 #include "router.h"
+#include "log.h"
+
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #endif
@@ -33,7 +35,7 @@ int IpcServer::createPrivilegedProcess()
 
     // Make sure any connections are handed to QtRO
     QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
-        qDebug() << "LocalServer new connection";
+        qDebug() << "IpcServer new connection";
         if (pd.serverNode) {
             pd.serverNode->addHostSideConnection(pd.localServer->nextPendingConnection());
             pd.serverNode->enableRemoting(pd.ipcProcess.data());
@@ -48,15 +50,15 @@ int IpcServer::createPrivilegedProcess()
         qDebug() << "QRemoteObjectHost::destroyed";
     });
 
-    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
-        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
-//        if (m_processes.contains(pid)) {
-//            m_processes[pid].ipcProcess.reset();
-//            m_processes[pid].serverNode.reset();
-//            m_processes[pid].localServer.reset();
-//            m_processes.remove(pid);
-//        }
-    });
+//    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
+//        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
+////        if (m_processes.contains(pid)) {
+////            m_processes[pid].ipcProcess.reset();
+////            m_processes[pid].serverNode.reset();
+////            m_processes[pid].localServer.reset();
+////            m_processes.remove(pid);
+////        }
+//    });
 
     m_processes.insert(m_localpid, pd);
 
@@ -83,6 +85,11 @@ void IpcServer::flushDns()
     return Router::flushDns();
 }
 
+void IpcServer::resetIpStack()
+{
+    Router::resetIpStack();
+}
+
 bool IpcServer::checkAndInstallDriver()
 {
 #ifdef Q_OS_WIN
@@ -99,4 +106,21 @@ QStringList IpcServer::getTapList()
 #else
     return QStringList();
 #endif
+}
+
+void IpcServer::cleanUp()
+{
+    qDebug() << "IpcServer::cleanUp";
+    Log::deinit();
+    Log::cleanUp();
+}
+
+void IpcServer::setLogsEnabled(bool enabled)
+{
+    if (enabled) {
+        Log::init();
+    }
+    else {
+        Log::deinit();
+    }
 }

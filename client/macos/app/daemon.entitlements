@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.application-identifier</key>
+	<string>$(DEVELOPMENT_TEAM).$(APP_ID_MACOS)</string>
+
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(DEVELOPMENT_TEAM).*</string>
+	</array>
+
+	<key>com.apple.developer.team-identifier</key>
+	<string>$(DEVELOPMENT_TEAM)</string>
+
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>$(DEVELOPMENT_TEAM).$(GROUP_ID_MACOS)</string>
+	</array>
+
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<key>com.apple.security.network.server</key>
+	<true/>
+</dict>
+</plist>

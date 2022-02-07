@@ -1,27 +1,32 @@
-/****************************************************************************
+/**************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** This file is part of Qt Creator
 **
-** This file is part of Qt Creator.
+** Copyright (c) 2012 Nokia Corporation and/or its subsidiary(-ies).
 **
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** Contact: http://www.qt-project.org/
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
-****************************************************************************/
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+**
+**************************************************************************/
 
 #include "sftpoperation_p.h"
 
@@ -114,8 +119,9 @@ AbstractSftpOperationWithHandle::AbstractSftpOperationWithHandle(SftpJobId jobId
 AbstractSftpOperationWithHandle::~AbstractSftpOperationWithHandle() { }
 
 
-SftpListDir::SftpListDir(SftpJobId jobId, const QString &path)
-    : AbstractSftpOperationWithHandle(jobId, path)
+SftpListDir::SftpListDir(SftpJobId jobId, const QString &path,
+    const QSharedPointer<SftpDownloadDir> &parentJob)
+    : AbstractSftpOperationWithHandle(jobId, path), parentJob(parentJob)
 {
 }
 
@@ -143,7 +149,7 @@ SftpOutgoingPacket & SftpCreateFile::initialPacket(SftpOutgoingPacket &packet)
 const int AbstractSftpTransfer::MaxInFlightCount = 10; // Experimentally found to be enough.
 
 AbstractSftpTransfer::AbstractSftpTransfer(SftpJobId jobId, const QString &remotePath,
-    const QSharedPointer<QFile> &localFile)
+    const QSharedPointer<QIODevice> &localFile)
     : AbstractSftpOperationWithHandle(jobId, remotePath),
       localFile(localFile), fileSize(0), offset(0), inFlightCount(0),
       statRequested(false)
@@ -167,8 +173,10 @@ void AbstractSftpTransfer::calculateInFlightCount(quint32 chunkSize)
 
 
 SftpDownload::SftpDownload(SftpJobId jobId, const QString &remotePath,
-    const QSharedPointer<QFile> &localFile)
-    : AbstractSftpTransfer(jobId, remotePath, localFile), eofId(SftpInvalidJob)
+    const QSharedPointer<QIODevice> &localFile, SftpOverwriteMode mode,
+    const QSharedPointer<QSsh::Internal::SftpDownloadDir> &parentJob)
+    : AbstractSftpTransfer(jobId, remotePath, localFile), eofId(SftpInvalidJob), mode(mode),
+      parentJob(parentJob)
 {
 }
 
@@ -180,7 +188,7 @@ SftpOutgoingPacket &SftpDownload::initialPacket(SftpOutgoingPacket &packet)
 
 
 SftpUploadFile::SftpUploadFile(SftpJobId jobId, const QString &remotePath,
-    const QSharedPointer<QFile> &localFile, SftpOverwriteMode mode,
+    const QSharedPointer<QIODevice> &localFile, SftpOverwriteMode mode,
     const SftpUploadDir::Ptr &parentJob)
     : AbstractSftpTransfer(jobId, remotePath, localFile),
       parentJob(parentJob), mode(mode)
@@ -192,25 +200,33 @@ SftpOutgoingPacket &SftpUploadFile::initialPacket(SftpOutgoingPacket &packet)
 {
     state = OpenRequested;
     quint32 permissions = 0;
-    const QFile::Permissions &qtPermissions = localFile->permissions();
-    if (qtPermissions & QFile::ExeOther)
-        permissions |= 1 << 0;
-    if (qtPermissions & QFile::WriteOther)
-        permissions |= 1 << 1;
-    if (qtPermissions & QFile::ReadOther)
-        permissions |= 1 << 2;
-    if (qtPermissions & QFile::ExeGroup)
-        permissions |= 1<< 3;
-    if (qtPermissions & QFile::WriteGroup)
-        permissions |= 1<< 4;
-    if (qtPermissions & QFile::ReadGroup)
-        permissions |= 1<< 5;
-    if (qtPermissions & QFile::ExeOwner)
-        permissions |= 1<< 6;
-    if (qtPermissions & QFile::WriteOwner)
+    QFileDevice *fileDevice = qobject_cast<QFileDevice*>(localFile.data());
+    if (fileDevice) {
+        const QFile::Permissions &qtPermissions = fileDevice->permissions();
+        if (qtPermissions & QFile::ExeOther)
+            permissions |= 1 << 0;
+        if (qtPermissions & QFile::WriteOther)
+            permissions |= 1 << 1;
+        if (qtPermissions & QFile::ReadOther)
+            permissions |= 1 << 2;
+        if (qtPermissions & QFile::ExeGroup)
+            permissions |= 1<< 3;
+        if (qtPermissions & QFile::WriteGroup)
+            permissions |= 1<< 4;
+        if (qtPermissions & QFile::ReadGroup)
+            permissions |= 1<< 5;
+        if (qtPermissions & QFile::ExeOwner)
+            permissions |= 1<< 6;
+        if (qtPermissions & QFile::WriteOwner)
+            permissions |= 1<< 7;
+        if (qtPermissions & QFile::ReadOwner)
+            permissions |= 1<< 8;
+    } else {
+        // write owner
         permissions |= 1<< 7;
-    if (qtPermissions & QFile::ReadOwner)
+        // read owner
         permissions |= 1<< 8;
+    }
     return packet.generateOpenFileForWriting(remotePath, mode, permissions, jobId);
 }
 

@@ -25,19 +25,13 @@ public:
     static QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
-    static QString processConfigWithLocalSettings(QString config);
-    static QString processConfigWithExportSettings(QString config);
+    static QString processConfigWithLocalSettings(QString jsonConfig);
+    static QString processConfigWithExportSettings(QString jsonConfig);
 
     static ErrorCode signCert(DockerContainer container,
         const ServerCredentials &credentials, QString clientId);
 
 private:
-    static QString getEasyRsaShPath();
-
-    static QProcessEnvironment prepareEnv();
-    static ErrorCode initPKI(const QString &path);
-    static ErrorCode genReq(const QString &path, const QString &clientId);
-
     static ConnectionData createCertRequest();
 
     static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,

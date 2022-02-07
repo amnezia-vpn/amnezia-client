@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QQmlEngine>
 
 namespace amnezia {
 namespace config_key {
@@ -14,15 +15,21 @@ constexpr char password[] = "password";
 constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
+constexpr char dns1[] = "dns1";
+constexpr char dns2[] = "dns2";
+
+
 constexpr char description[] = "description";
+constexpr char cert[] = "cert";
+constexpr char config[] = "config";
 
 
 constexpr char containers[] = "containers";
 constexpr char container[] = "container";
 constexpr char defaultContainer[] = "defaultContainer";
 
+constexpr char vpnproto[] = "protocol";
 constexpr char protocols[] = "protocols";
-//constexpr char protocol[] = "protocol";
 
 constexpr char remote[] = "remote";
 constexpr char transport_proto[] = "transport_proto";
@@ -30,6 +37,14 @@ constexpr char cipher[] = "cipher";
 constexpr char hash[] = "hash";
 constexpr char ncp_disable[] = "ncp_disable";
 constexpr char tls_auth[] = "tls_auth";
+
+constexpr char client_priv_key[] = "client_priv_key";
+constexpr char client_pub_key[] = "client_pub_key";
+constexpr char server_priv_key[] = "server_priv_key";
+constexpr char server_pub_key[] = "server_pub_key";
+constexpr char psk_key[] = "psk_key";
+
+constexpr char client_ip[] = "client_ip"; // internal ip address
 
 constexpr char site[] = "site";
 constexpr char block_outside_dns[] = "block_outside_dns";
@@ -40,25 +55,13 @@ constexpr char subnet_cidr[] = "subnet_cidr";
 
 // proto config keys
 constexpr char last_config[] = "last_config";
-
-constexpr char openvpn[] = "openvpn";
-constexpr char shadowsocks[] = "shadowsocks";
-constexpr char cloak[] = "cloak";
-constexpr char wireguard[] = "wireguard";
-
-// containers config keys
-constexpr char amnezia_openvpn[] = "amnezia-openvpn";
-constexpr char amnezia_shadowsocks[] = "amnezia-shadowsocks";
-constexpr char amnezia_openvpn_cloak[] = "amnezia-openvpn-cloak";
-constexpr char amnezia_wireguard[] = "amnezia-wireguard";
 }
 
 namespace protocols {
 
-
-
-constexpr char UDP[] = "udp"; // case sens
-constexpr char TCP[] = "tcp";
+namespace dns {
+constexpr char amneziaDnsIp[] = "172.29.172.254";
+}
 
 namespace openvpn {
 constexpr char defaultSubnetAddress[] = "10.8.0.0";
@@ -110,38 +113,108 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 }
 
+namespace sftp {
+constexpr char defaultUserName[] = "sftp_user";
+
+} // namespace sftp
 
 } // namespace protocols
 
-enum class Protocol {
-    Any,
+namespace ProtocolEnumNS {
+Q_NAMESPACE
+
+enum TransportProto {
+    Udp,
+    Tcp
+};
+Q_ENUM_NS(TransportProto)
+
+enum Proto {
+    Any = 0,
     OpenVpn,
     ShadowSocks,
     Cloak,
-    WireGuard
+    WireGuard,
+    Ikev2,
+    L2tp,
+
+    // non-vpn
+    TorWebSite,
+    Dns,
+    FileShare,
+    Sftp
 };
-QVector<Protocol> allProtocols();
+Q_ENUM_NS(Proto)
 
-Protocol protoFromString(QString proto);
-QString protoToString(Protocol proto);
+enum ServiceType {
+    None = 0,
+    Vpn,
+    Other
+};
+Q_ENUM_NS(ServiceType)
+} // namespace ProtocolEnumNS
+
+using namespace ProtocolEnumNS;
+
+class ProtocolProps : public QObject
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE static QList<Proto> allProtocols();
+
+    // spelling may differ for various protocols - TCP for OpenVPN, tcp for others
+    Q_INVOKABLE static TransportProto transportProtoFromString(QString p);
+    Q_INVOKABLE static QString transportProtoToString(TransportProto proto, Proto p = Proto::Any);
+
+    Q_INVOKABLE static Proto protoFromString(QString p);
+    Q_INVOKABLE static QString protoToString(Proto p);
+
+    Q_INVOKABLE static QMap<Proto, QString> protocolHumanNames();
+    Q_INVOKABLE static QMap<Proto, QString> protocolDescriptions();
+
+    Q_INVOKABLE static ServiceType protocolService(Proto p);
+
+    Q_INVOKABLE static int defaultPort(Proto p);
+    Q_INVOKABLE static bool defaultPortChangeable(Proto p);
+
+    Q_INVOKABLE static TransportProto defaultTransportProto(Proto p);
+    Q_INVOKABLE static bool defaultTransportProtoChangeable(Proto p);
 
 
-enum class DockerContainer {
-    None,
-    OpenVpn,
-    OpenVpnOverShadowSocks,
-    OpenVpnOverCloak,
-    WireGuard
+    Q_INVOKABLE static QString key_proto_config_data(Proto p);
+    Q_INVOKABLE static QString key_proto_config_path(Proto p);
+
 };
 
-DockerContainer containerFromString(const QString &container);
-QString containerToString(DockerContainer container);
+static void declareQmlProtocolEnum() {
+    qmlRegisterUncreatableMetaObject(
+                ProtocolEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "ProtocolEnum",
+                "Error: only enums"
+                );
 
-QVector<Protocol> protocolsForContainer(DockerContainer container);
+    qmlRegisterUncreatableMetaObject(
+                ProtocolEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "TransportProto",
+                "Error: only enums"
+                );
+
+    qmlRegisterUncreatableMetaObject(
+                ProtocolEnumNS::staticMetaObject,
+                "ProtocolEnum",
+                1, 0,
+                "ServiceType",
+                "Error: only enums"
+                );
+}
 
 } // namespace amnezia
 
-QDebug operator<<(QDebug debug, const amnezia::Protocol &p);
-QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c);
+QDebug operator<<(QDebug debug, const amnezia::Proto &p);
 
 #endif // PROTOCOLS_DEFS_H

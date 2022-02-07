@@ -1,0 +1,144 @@
+buildscript {
+   ext{
+       kotlin_version = "1.4.30-M1"
+       //  for libwg
+       appcompatVersion = '1.1.0'
+       annotationsVersion = '1.0.1'
+       databindingVersion = '3.3.1'
+       jsr305Version = '3.0.2'
+       streamsupportVersion = '1.7.0'
+       threetenabpVersion = '1.1.1'
+       groupName = 'org.amnezia.vpn'
+   }
+
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+    }
+}
+
+repositories {
+    google()
+    jcenter()
+    mavenCentral()
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlinx-serialization'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
+    implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
+}
+
+android {
+    /*******************************************************
+     * The following variables:
+     * - androidBuildToolsVersion,
+     * - androidCompileSdkVersion
+     * - qt5AndroidDir - holds the path to qt android files
+     *                   needed to build any Qt application
+     *                   on Android.
+     *
+     * are defined in gradle.properties file. This file is
+     * updated by QtCreator and androiddeployqt tools.
+     * Changing them manually might break the compilation!
+     *******************************************************/
+
+    compileSdkVersion androidCompileSdkVersion.toInteger()
+
+    //buildToolsVersion '28.0.3'
+
+    dexOptions {
+       javaMaxHeapSize "3g"
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
+            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qt5AndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+       }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    // Do not compress Qt binary resources file
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion = 24
+        targetSdkVersion = 30
+        versionCode 8 // Change to a higher number
+        versionName "2.0.8" // Change to a higher number
+    }
+
+   buildTypes {
+       release {
+           // That would enable treeshaking and remove java code that is just called from qt
+           minifyEnabled false
+           externalNativeBuild {
+               cmake {
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+               }
+           }
+       }
+       debug {
+           //applicationIdSuffix ".debug"
+           //versionNameSuffix "-debug"
+           externalNativeBuild {
+               cmake {
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+               }
+           }
+       }
+   }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'wireguard/CMakeLists.txt'
+//       }
+//   }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'openvpn/src/main/cpp/CMakeLists.txt'
+//       }
+//   }
+}
+
+
+

@@ -5,139 +5,16 @@
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <QJsonObject>
 
 #include "core/server_defs.h"
-#include "protocols/protocols_defs.h"
+#include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
 #include "utils.h"
 
-QString OpenVpnConfigurator::getEasyRsaShPath()
-{
-#ifdef Q_OS_WIN
-    // easyrsa sh path should looks like
-    QString easyRsaShPath = QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\easyrsa\\easyrsa";
-    qDebug().noquote() << "EasyRsa sh path" << easyRsaShPath;
-
-    return easyRsaShPath;
-#else
-    return QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/easyrsa";
-#endif
-}
-
-QProcessEnvironment OpenVpnConfigurator::prepareEnv()
-{
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString pathEnvVar = env.value("PATH");
-
-#ifdef Q_OS_WIN
-    pathEnvVar.clear();
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
-#else
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
-#endif
-
-    env.insert("PATH", pathEnvVar);
-    //qDebug().noquote() << "ENV PATH" << pathEnvVar;
-    return env;
-}
-
-ErrorCode OpenVpnConfigurator::initPKI(const QString &path)
-{
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
-#ifdef Q_OS_WIN
-    p.setProcessEnvironment(prepareEnv());
-    p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2\"").arg(getEasyRsaShPath()).arg("init-pki"));
-    qDebug().noquote() << "EasyRsa tmp path" << path;
-    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
-#else
-    p.setProgram(getEasyRsaShPath());
-    p.setArguments(QStringList() << "init-pki");
-#endif
-
-    p.setWorkingDirectory(path);
-
-    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-        qDebug().noquote() <<  "Init PKI" << p.readAll();
-    });
-
-    p.start();
-    p.waitForFinished();
-
-    if (p.exitCode() == 0) return ErrorCode::NoError;
-    else return ErrorCode::EasyRsaError;
-}
-
-ErrorCode OpenVpnConfigurator::genReq(const QString &path, const QString &clientId)
-{
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
-#ifdef Q_OS_WIN
-    p.setProcessEnvironment(prepareEnv());
-    p.setProgram("cmd.exe");
-    p.setNativeArguments(QString("/C \"ash.exe \"%1\" %2 %3 %4\"")
-                         .arg(getEasyRsaShPath())
-                         .arg("gen-req").arg(clientId).arg("nopass"));
-
-    qDebug().noquote() << "EasyRsa args" << p.nativeArguments();
-#else
-    p.setArguments(QStringList() << "gen-req" << clientId << "nopass");
-    p.setProgram(getEasyRsaShPath());
-#endif
-
-    p.setWorkingDirectory(path);
-
-    QObject::connect(&p, &QProcess::channelReadyRead, [&](){
-        QString data = p.readAll();
-        qDebug().noquote() << data;
-
-        if (data.contains("Common Name (eg: your user, host, or server name)")) {
-            p.write("\n");
-        }
-    });
-
-    p.start();
-    p.waitForFinished();
-
-    if (p.exitCode() == 0) return ErrorCode::NoError;
-    else return ErrorCode::EasyRsaError;
-}
-
-
-OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
-{
-    OpenVpnConfigurator::ConnectionData connData;
-    connData.clientId = Utils::getRandomString(32);
-
-    QTemporaryDir dir;
-    //    if (dir.isValid()) {
-    //            // dir.path() returns the unique directory path
-    //    }
-
-    QString path = dir.path();
-
-    initPKI(path);
-    ErrorCode errorCode = genReq(path, connData.clientId);
-
-    Q_UNUSED(errorCode)
-
-    QFile req(path + "/pki/reqs/" + connData.clientId + ".req");
-    req.open(QIODevice::ReadOnly);
-    connData.request = req.readAll();
-
-    QFile key(path + "/pki/private/" + connData.clientId + ".key");
-    key.open(QIODevice::ReadOnly);
-    connData.privKey = key.readAll();
-
-    //    qDebug().noquote() << connData.request;
-    //    qDebug().noquote() << connData.privKey;
-
-    return connData;
-}
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
     DockerContainer container, ErrorCode *errorCode)
@@ -146,7 +23,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::EasyRsaExecutableMissing;
+        if (errorCode) *errorCode = ErrorCode::OpenSslFailed;
         return connData;
     }
 
@@ -213,19 +90,20 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("</tls-auth>", "");
     }
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC || defined(Q_OS_LINUX)
     config.replace("block-outside-dns", "");
 #endif
 
-    //qDebug().noquote() << config;
-    return config;
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    return QJsonDocument(jConfig).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
+QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
 {
-    // TODO replace DNS if it already set
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    QString config = json[config_key::config].toString();
 
     if (m_settings().routeMode() != Settings::VpnAllSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
@@ -236,7 +114,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
         }
     }
 
-#ifdef Q_OS_MAC
+#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     config.replace("block-outside-dns", "");
     QString dnsConf = QString(
                 "\nscript-security 2\n"
@@ -247,23 +125,25 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString config)
     config.append(dnsConf);
 #endif
 
-    return config;
+    json[config_key::config] = config;
+    return QJsonDocument(json).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(QString config)
+QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
 {
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    QString config = json[config_key::config].toString();
 
     if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
         config.append("redirect-gateway def1 bypass-dhcp\n");
     }
 
-#ifdef Q_OS_MAC
+#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     config.replace("block-outside-dns", "");
 #endif
 
-    return config;
+    json[config_key::config] = config;
+    return QJsonDocument(json).toJson();
 }
 
 ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
@@ -271,17 +151,112 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                              "easyrsa import-req %2/%3.req %3\"")
-            .arg(amnezia::containerToString(container))
+            .arg(ContainerProps::containerToString(container))
             .arg(amnezia::protocols::openvpn::clientsDirPath)
             .arg(clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
                                     "easyrsa sign-req client %2\"")
-            .arg(amnezia::containerToString(container))
+            .arg(ContainerProps::containerToString(container))
             .arg(clientId);
 
     QStringList scriptList {script_import, script_sign};
     QString script = ServerController::replaceVars(scriptList.join("\n"), ServerController::genVarsForScript(credentials, container));
 
-    return ServerController::runScript(ServerController::sshParams(credentials), script);
+    return ServerController::runScript(credentials, script);
+}
+
+OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
+{
+    ConnectionData connData;
+    connData.clientId = Utils::getRandomString(32);
+
+    int             ret = 0;
+    int             nVersion = 1;
+
+    QByteArray clientIdUtf8 = connData.clientId.toUtf8();
+
+    EVP_PKEY * pKey = EVP_PKEY_new();
+    q_check_ptr(pKey);
+    RSA * rsa = RSA_generate_key(2048, RSA_F4, nullptr, nullptr);
+    q_check_ptr(rsa);
+    EVP_PKEY_assign_RSA(pKey, rsa);
+
+
+    // 2. set version of x509 req
+    X509_REQ *x509_req = X509_REQ_new();
+    ret = X509_REQ_set_version(x509_req, nVersion);
+    if (ret != 1) {
+        qWarning() << "Could not get X509!";
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
+    }
+
+    // 3. set subject of x509 req
+    X509_NAME *x509_name = X509_REQ_get_subject_name(x509_req);
+
+    X509_NAME_add_entry_by_txt(x509_name, "C",  MBSTRING_ASC,
+                               (unsigned char *)"ORG", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(x509_name, "O",  MBSTRING_ASC,
+                               (unsigned char *)"", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(x509_name, "CN", MBSTRING_ASC,
+                               reinterpret_cast<unsigned char const *>(clientIdUtf8.data()), clientIdUtf8.size(), -1, 0);
+
+    // 4. set public key of x509 req
+    ret = X509_REQ_set_pubkey(x509_req, pKey);
+    if (ret != 1){
+        qWarning() << "Could not set pubkey!";
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
+    }
+
+    // 5. set sign key of x509 req
+    ret = X509_REQ_sign(x509_req, pKey, EVP_sha256());    // return x509_req->signature->length
+    if (ret <= 0){
+        qWarning() << "Could not sign request!";
+        X509_REQ_free(x509_req);
+        EVP_PKEY_free(pKey);
+        return connData;
+    }
+
+    // save private key
+    BIO * bp_private = BIO_new(BIO_s_mem());
+    q_check_ptr(bp_private);
+    if (PEM_write_bio_PrivateKey(bp_private, pKey, nullptr, nullptr, 0, nullptr, nullptr) != 1)
+    {
+        qFatal("PEM_write_bio_PrivateKey");
+        EVP_PKEY_free(pKey);
+        BIO_free_all(bp_private);
+        X509_REQ_free(x509_req);
+        return connData;
+    }
+
+    const char * buffer = nullptr;
+    size_t size = BIO_get_mem_data(bp_private, &buffer);
+    q_check_ptr(buffer);
+    connData.privKey = QByteArray(buffer, size);
+    if (connData.privKey.isEmpty()) {
+        qFatal("Failed to generate a random private key");
+        EVP_PKEY_free(pKey);
+        BIO_free_all(bp_private);
+        X509_REQ_free(x509_req);
+        return connData;
+    }
+    BIO_free_all(bp_private);
+
+    // save req
+    BIO * bio_req = BIO_new(BIO_s_mem());
+    PEM_write_bio_X509_REQ(bio_req, x509_req);
+
+    BUF_MEM *bio_buf;
+    BIO_get_mem_ptr(bio_req, &bio_buf);
+    connData.request = QByteArray(bio_buf->data, bio_buf->length);
+    BIO_free(bio_req);
+
+
+    EVP_PKEY_free(pKey); // this will also free the rsa key
+
+    return connData;
 }

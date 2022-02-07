@@ -6,6 +6,8 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
+#include "containers/containers_defs.h"
+
 using namespace amnezia;
 
 class QTimer;
@@ -18,18 +20,19 @@ public:
     explicit VpnProtocol(const QJsonObject& configuration, QObject* parent = nullptr);
     virtual ~VpnProtocol() override = default;
 
-    enum ConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, Reconnecting, Error};
-    Q_ENUM(ConnectionState)
+    enum VpnConnectionState {Unknown, Disconnected, Preparing, Connecting, Connected, Disconnecting, Reconnecting, Error};
+    Q_ENUM(VpnConnectionState)
 
-    static QString textConnectionState(ConnectionState connectionState);
+    static QString textConnectionState(VpnConnectionState connectionState);
 
+    virtual ErrorCode prepare() { return ErrorCode::NoError; }
 
     virtual bool isConnected() const;
     virtual bool isDisconnected() const;
     virtual ErrorCode start() = 0;
     virtual void stop() = 0;
 
-    ConnectionState connectionState() const;
+    VpnConnectionState connectionState() const;
     ErrorCode lastError() const;
     QString textConnectionState() const;
     void setLastError(ErrorCode lastError);
@@ -37,23 +40,26 @@ public:
     QString routeGateway() const;
     QString vpnGateway() const;
 
+    static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void connectionStateChanged(VpnProtocol::ConnectionState state);
+    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
 
-protected slots:
-    virtual void onTimeout();
+public slots:
+    virtual void onTimeout(); // todo: remove?
+
+    void setBytesChanged(quint64 receivedBytes, quint64 sentBytes);
+    void setConnectionState(VpnProtocol::VpnConnectionState state);
 
 protected:
     void startTimeoutTimer();
     void stopTimeoutTimer();
 
-    virtual void setBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    virtual void setConnectionState(VpnProtocol::ConnectionState state);
+    VpnConnectionState m_connectionState;
 
-    ConnectionState m_connectionState;
     QString m_routeGateway;
     QString m_vpnLocalAddress;
     QString m_vpnGateway;

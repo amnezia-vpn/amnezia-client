@@ -28,6 +28,11 @@ function runningOnMacOS()
     return (systemInfo.kernelType === "darwin");
 }
 
+function runningOnLinux()
+{
+    return (systemInfo.kernelType === "linux");
+}
+
 function vcRuntimeIsInstalled()
 {
     return (installer.findPath("msvcp140.dll", [installer.value("RootDir")+ "\\Windows\\System32\\"]).length !== 0)
@@ -79,13 +84,16 @@ Component.prototype.createOperations = function()
             console.log("Microsoft Visual C++ 2017 Redistributable already installed");
         }
 
+        let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         component.addElevatedOperation("Execute",
-                                       ["sc", "create", serviceName(), "binpath=", installer.value("TargetDir").replace(/\//g, '\\') + "\\" + serviceName() + ".exe",
+                                       ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
                                         "start=", "auto", "depend=", "BFE/nsi"],
-                                       "UNDOEXECUTE", ["post-uninstall.exe"]);
+                                       "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
 
     } else if (runningOnMacOS()) {
         component.addElevatedOperation("Execute", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "@TargetDir@/post_uninstall.sh");
+    } else if (runningOnLinux()) {
+	component.addElevatedOperation("Execute", "bash", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "bash", "@TargetDir@/post_uninstall.sh");
     }
 }
 
@@ -112,7 +120,9 @@ Component.prototype.installationFinished = function()
 
         } else if (runningOnMacOS()) {
             command = "/Applications/" + appName() + ".app/Contents/MacOS/" + appName();
-        }
+        } else if (runningOnLinux()) {
+	    command = "@TargetDir@/client/" + appName();
+	}
 
         installer.dropAdminRights()
 

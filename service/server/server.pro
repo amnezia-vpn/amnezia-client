@@ -46,7 +46,7 @@ LIBS += \
 
 macx {
 HEADERS += \
-    router_mac.h
+    router_mac.h \
     helper_route_mac.h
 
 SOURCES += \
@@ -54,15 +54,17 @@ SOURCES += \
     helper_route_mac.c
 }
 
-include(../src/qtservice.pri)
+linux {
+HEADERS += \
+    router_linux.h
 
-#CONFIG(release, debug|release) {
-#    DESTDIR = $$PWD/../../../AmneziaVPN-build/server/release
-#    MOC_DIR = $$DESTDIR
-#    OBJECTS_DIR = $$DESTDIR
-#    RCC_DIR = $$DESTDIR
-#}
+SOURCES += \
+    router_linux.cpp
+}
+
+include(../src/qtservice.pri)
 
 INCLUDEPATH += "$$PWD/../../client"
 
-REPC_SOURCE += ../../ipc/ipcinterface.rep
+REPC_SOURCE += ../../ipc/ipc_interface.rep
+!ios: REPC_SOURCE += ../../ipc/ipc_process_interface.rep

@@ -21,7 +21,7 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-    ErrorCode checkAndSetupTapDriver();
+    ErrorCode prepare() override;
     static QString defaultConfigFileName();
     static QString defaultConfigPath();
 
@@ -51,7 +51,7 @@ private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
 
-    QSharedPointer<IpcProcessInterfaceReplica> m_openVpnProcess;
+    QSharedPointer<PrivilegedProcess> m_openVpnProcess;
 };
 
 #endif // OPENVPNPROTOCOL_H
