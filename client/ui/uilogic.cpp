@@ -112,6 +112,7 @@ UiLogic::~UiLogic()
 {
     emit hide();
 
+#ifdef AMNEZIA_DESKTOP
     if (m_vpnConnection->connectionState() != VpnProtocol::VpnConnectionState::Disconnected) {
         m_vpnConnection->disconnectFromVpn();
         for (int i = 0; i < 50; i++) {
@@ -122,6 +123,7 @@ UiLogic::~UiLogic()
             }
         }
     }
+#endif
 
     m_vpnConnection->deleteLater();
     m_vpnConnectionThread.quit();

@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick
+QT += widgets core gui network xml remoteobjects quick svg
 
 TARGET = AmneziaVPN
 TEMPLATE = app
