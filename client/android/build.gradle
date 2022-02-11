@@ -172,6 +172,20 @@ android {
 //           path 'openvpn/src/main/cpp/CMakeLists.txt'
 //       }
 //   }
+
+    /**
+     * Shadowsocks libraries build
+     * Prerequisites
+     * JDK 11+
+     * Android SDK, NDK
+     * Rust with Android targets installed
+     * Keep in mind naming of the compiled folders
+     */
+//    externalNativeBuild{
+//        $ cd core/src/main/rust/shadowsocks-rust
+//        $ rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+//    }
+
 }
 
 

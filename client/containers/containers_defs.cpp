@@ -154,6 +154,7 @@ bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
+    case DockerContainer::ShadowSocks: return true;
     default: return false;
     }
 

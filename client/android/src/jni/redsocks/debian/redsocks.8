@@ -1,0 +1,53 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH REDSOCKS 8 "November 14, 2011"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+redsocks \- rediect any TCP connection to a SOCKS or HTTP proxy
+.SH SYNOPSIS
+.B redsocks
+.RI [ options ]
+.SH DESCRIPTION
+\fBredsocks\fP is a daemon running on the local system, that will transparently
+tunnel any TCP connection via a remote SOCKS4, SOCKS5 or HTTP proxy server. It
+uses the system firewall's redirection facility to intercept TCP connections,
+thus the redirection is system-wide, with fine-grained control, and does 
+not depend on LD_PRELOAD libraries.
+.PP
+Redsocks supports tunneling TCP connections and UDP packets. It has
+authentication support for both, SOCKS and HTTP proxies.
+.PP
+Also included is a small DNS server returning answers with the "truncated" flag
+set for any UDP query, forcing the resolver to use TCP.
+.SH OPTIONS
+.TP
+.B \-p pidfile
+Write the process ID to \fIpidfile\fP.
+.TP
+.B \-c config
+Use \fIconfig\fP as configuration file.
+.TP
+.B \-t
+Test configuration file syntax.
+.SH SEE ALSO
+.BR iptables (8),
+/etc/redsocks.conf
+.br
+.SH AUTHOR
+redsocks was written by Leonid Evdokimov <leon@darkk.net.ru>
+.PP
+This manual page was written by Apollon Oikonomopoulos <apoikos@gmail.com>,
+for the Debian project (and may be used by others).

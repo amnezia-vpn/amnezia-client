@@ -76,7 +76,11 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             .setColor(ContextCompat.getColor(service, android.R.color.holo_blue_dark))
             .setTicker(service.getString(R.string.forward_success))
             .setContentTitle(profileName)
-            .setContentIntent(Core.configureIntent(service))
+//            .setContentIntent(Core.configureIntent(service))
+            .apply {
+                val intent = Core.configureIntent(service)
+                if (intent != null) setContentIntent(intent)
+            }
             .setSmallIcon(R.drawable.ic_service_active)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)

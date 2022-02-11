@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+
+(cd .. && make)
+cp -a ../redsocks ./regw/redsocks
+
+for img in *; do
+    if [ -d "$img" -a -f "$img/Dockerfile" ]; then
+        sudo docker build -t redsocks/"$img" ./"$img"/
+    fi
+done

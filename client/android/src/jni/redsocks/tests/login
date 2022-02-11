@@ -1,0 +1,13 @@
+#!/bin/sh
+vm=$1
+shift
+if [ $# = 0 ]; then
+    set -- /bin/bash
+fi
+if [ -t 0 -a -t 1 -a -t 2 ]; then
+    tty="--tty"
+else
+    tty=""
+fi
+set -x
+sudo docker exec --interactive $tty "$vm" "$@"

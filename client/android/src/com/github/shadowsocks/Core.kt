@@ -61,7 +61,7 @@ import kotlin.reflect.KClass
 object Core : Configuration.Provider {
     lateinit var app: Application
         @VisibleForTesting set
-    lateinit var configureIntent: (Context) -> PendingIntent
+    lateinit var configureIntent: (Context) -> PendingIntent?
     val activity by lazy { app.getSystemService<ActivityManager>()!! }
     val clipboard by lazy { app.getSystemService<ClipboardManager>()!! }
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
@@ -84,27 +84,37 @@ object Core : Configuration.Provider {
 
 //    var currentProfile: ProfileManager.ExpandedProfile? = ProfileManager.expand(ProfileManager.getProfile(0)!!)
 
-    fun switchProfile(id: Long): Profile {
-        if(id == -111L) {
-            val result = ProfileManager.createProfile(Profile(name = "prof1", host = "46.105.227.215", remotePort = 6789, password = "iKyM65z2BX", method = "chacha20-ietf-poly1305"))
-            DataStore.profileId = result.id
-            return result
-        }else if (id == -222L){
-            val result = ProfileManager.createProfile(Profile(name = "prof2", host = "195.123.212.198", remotePort = 3656, password = "bpkpwwapckfdarn", method = "camellia-256-cfb", plugin = PluginCreator.getPluginString("v2ray-plugin", "tls;host=ayu.alfamsolutions.online;path=/asiojn")))
-            DataStore.profileId = result.id
-            return result
-        }else if (id == -333L){
-            val result = ProfileManager.createProfile(Profile(name = "prof3", host = "195.123.212.198", remotePort = 3656, password = "bpkpwwapckfdarn", method = "camellia-256-cfb", plugin = PluginCreator.getPluginString("v2ray-plugin", "tls;host=ayu.alfamsolutions.online;path=/asiojn")))
-            DataStore.profileId = result.id
-            return result
-        }else {
-            val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
-            DataStore.profileId = result.id
-            return result
-        }
+    fun setProfile(profile: Profile): Profile {
+        val result = ProfileManager.createProfile(profile)
+        DataStore.profileId = result.id
+        return result
+
+//        if(id == -111L) {
+//            val result = ProfileManager.createProfile(
+    //            Profile(
+    //            name = "prof1",
+    //            host = "46.105.227.215",
+    //            remotePort = 6789,
+    //            password = "iKyM65z2BX",
+    //            method = "chacha20-ietf-poly1305"))
+//            DataStore.profileId = result.id
+//            return result
+//        }else if (id == -222L){
+//            val result = ProfileManager.createProfile(Profile(name = "prof2", host = "195.123.212.198", remotePort = 3656, password = "bpkpwwapckfdarn", method = "camellia-256-cfb", plugin = PluginCreator.getPluginString("v2ray-plugin", "tls;host=ayu.alfamsolutions.online;path=/asiojn")))
+//            DataStore.profileId = result.id
+//            return result
+//        }else if (id == -333L){
+//            val result = ProfileManager.createProfile(Profile(name = "prof3", host = "195.123.212.198", remotePort = 3656, password = "bpkpwwapckfdarn", method = "camellia-256-cfb", plugin = PluginCreator.getPluginString("v2ray-plugin", "tls;host=ayu.alfamsolutions.online;path=/asiojn")))
+//            DataStore.profileId = result.id
+//            return result
+//        }else {
+//            val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
+//            DataStore.profileId = result.id
+//            return result
+//        }
     }
 
-    fun init(app: Application, configureClass: Class<out Any>) {
+    fun init(app: Application, configureClass: Class<out Any>?) {
         this.app = app
         this.configureIntent = {
             PendingIntent.getActivity(it, 0, Intent(it, configureClass)

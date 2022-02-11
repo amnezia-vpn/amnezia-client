@@ -1,0 +1,4 @@
+version=3
+
+# Use githubredir.debian.net for the time being
+http://githubredir.debian.net/github/darkk/redsocks (.*).tar.gz

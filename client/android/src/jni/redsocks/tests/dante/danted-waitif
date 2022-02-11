@@ -1,0 +1,5 @@
+#!/bin/sh -x
+while ! ip link show ethw up 2>/dev/null | grep -q UP; do
+    sleep 0.1
+done
+exec /usr/sbin/danted "$@"

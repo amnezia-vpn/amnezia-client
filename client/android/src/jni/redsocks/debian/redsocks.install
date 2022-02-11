@@ -1,0 +1,2 @@
+redsocks /usr/sbin
+debian/redsocks.conf /etc

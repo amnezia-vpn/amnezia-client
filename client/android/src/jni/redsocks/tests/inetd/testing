@@ -1,0 +1,47 @@
+service daytime
+{
+	disable		= no
+	type		= INTERNAL
+	id		= daytime-stream
+	socket_type	= stream
+	protocol	= tcp
+	user		= root
+	wait		= no
+	flags		= IPv6
+}
+
+service discard
+{
+	disable		= no
+	type		= INTERNAL
+	id		= discard-stream
+	socket_type	= stream
+	protocol	= tcp
+	user		= root
+	wait		= no
+	flags		= IPv6
+}
+
+service echo
+{
+	disable		= no
+	type		= INTERNAL
+	id		= echo-stream
+	socket_type	= stream
+	protocol	= tcp
+	user		= root
+	wait		= no
+	flags		= IPv6
+}
+
+service chargen
+{
+	disable		= no
+	type		= INTERNAL
+	id		= chargen-stream
+	socket_type	= stream
+	protocol	= tcp
+	user		= root
+	wait		= no
+	flags		= IPv6
+}

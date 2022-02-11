@@ -266,6 +266,8 @@ android {
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopvpnutil.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpn3.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnexec.so
+
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libsslocal.so
    }
 }
 

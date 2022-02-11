@@ -1,0 +1,13 @@
+# Defaults for redsocks initscript
+# sourced by /etc/init.d/redsocks
+# installed at /etc/default/redsocks by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Enable during startup?
+START=no
+
+# Configuration file
+CONFFILE="/etc/redsocks.conf"

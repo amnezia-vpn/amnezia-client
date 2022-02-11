@@ -1,0 +1,5 @@
+#!/bin/bash -x
+docker ps
+vms=$(echo gw web inetd regw dante-{0..1} squid-{8..9} tank{10..26})
+docker stop --time 1 $vms
+docker rm $vms

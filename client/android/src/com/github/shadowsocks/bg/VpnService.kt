@@ -163,7 +163,11 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
-                .setConfigureIntent(Core.configureIntent(this))
+//                .setConfigureIntent(Core.configureIntent(this))
+                .apply {
+                    val intent = Core.configureIntent(this@VpnService)
+                    if (intent != null) setConfigureIntent(intent)
+                }
                 .setSession(profile.formattedName)
                 .setMtu(VPN_MTU)
                 .addAddress(PRIVATE_VLAN4_CLIENT, 30)
