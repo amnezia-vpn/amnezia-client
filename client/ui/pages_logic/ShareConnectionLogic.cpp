@@ -1,8 +1,12 @@
 #include <QBuffer>
 #include <QImage>
 #include <QDataStream>
-#include <QZXing>
+//#include <QZXing>
 #include <QMessageBox>
+
+#include "QZXing.h"
+#include "QZXingImageProvider.h"
+#include "QZXingFilter.h"
 
 #include "ShareConnectionLogic.h"
 

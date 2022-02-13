@@ -165,6 +165,7 @@ class VPNService : android.net.VpnService() {
                 return 0
             }
         }
+        NotificationUtil.show(this) // Go foreground
         return 1
     }
 
@@ -402,8 +403,6 @@ class VPNService : android.net.VpnService() {
         prefs.edit()
             .putString("lastConf", mConfig.toString())
             .apply()
-
-        NotificationUtil.show(this) // Go foreground
     }
 
     companion object {
