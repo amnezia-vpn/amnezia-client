@@ -97,7 +97,7 @@ constexpr char ckBypassUidKeyPath[] = "/opt/amnezia/cloak/cloak_bypass_uid.key";
 constexpr char ckAdminKeyPath[] = "/opt/amnezia/cloak/cloak_admin_uid.key";
 constexpr char defaultPort[] = "443";
 constexpr char defaultRedirSite[] = "tile.openstreetmap.org";
-constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
+constexpr char defaultCipher[] = "chacha20-poly1305";
 
 }
 

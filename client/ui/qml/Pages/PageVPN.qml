@@ -59,9 +59,11 @@ PageBase {
 
     ImageButtonType {
         x: parent.width - 40
-        y: 10
-        width: 31
-        height: 31
+        y: 0
+        width: 41
+        height: 41
+        imgMarginHover: 8
+        imgMargin: 9
         icon.source: "qrc:/images/settings_grey.png"
         onClicked: {
             UiLogic.goToPage(PageEnum.GeneralSettings)
@@ -98,7 +100,7 @@ PageBase {
         }
         contentItem: Item {}
         antialiasing: true
-        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerWorkingOnPlatform
+        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerSupportedByCurrentPlatform
         opacity: VpnLogic.pushButtonConnectVisible ? 1 : 0
 
 //        transitions: Transition {
@@ -128,14 +130,14 @@ PageBase {
         LabelType {
             Layout.alignment: Qt.AlignRight
             height: 21
-            text: qsTr("Server") + ": "
+            text: ( VpnLogic.isContainerHaveAuthData ? qsTr("Server") : qsTr("Profile")) + ": "
         }
 
         BasicButtonType {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentServer + " →"
+            text: VpnLogic.labelCurrentServer + (VpnLogic.isContainerHaveAuthData ? " →" : "")
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
@@ -163,12 +165,12 @@ PageBase {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentService + " →"
+            text: VpnLogic.labelCurrentService + (VpnLogic.isContainerHaveAuthData ? " →" : "")
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             onClicked: {
-                UiLogic.onGotoCurrentProtocolsPage()
+                if (VpnLogic.isContainerHaveAuthData)  UiLogic.onGotoCurrentProtocolsPage()
             }
         }
     }
@@ -192,12 +194,12 @@ PageBase {
             height: 21
             implicitWidth: implicitContentWidth > root.width * 0.6 ?  root.width * 0.6 : implicitContentWidth + leftPadding + rightPadding
             background: Item {}
-            text: VpnLogic.labelCurrentDns + " →"
+            text: VpnLogic.labelCurrentDns + (VpnLogic.isContainerHaveAuthData ? " →" : "")
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             onClicked: {
-                UiLogic.goToPage(PageEnum.NetworkSettings)
+                if (VpnLogic.isContainerHaveAuthData) UiLogic.goToPage(PageEnum.NetworkSettings)
             }
         }
 

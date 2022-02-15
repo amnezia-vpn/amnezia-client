@@ -42,6 +42,7 @@ PageBase {
             anchors.right: parent.right
 
             CheckBoxType {
+                visible: !GC.isMobile()
                 Layout.fillWidth: true
                 text: qsTr("Auto connect")
                 checked: AppSettingsLogic.checkBoxAutoConnectChecked
@@ -51,6 +52,7 @@ PageBase {
                 }
             }
             CheckBoxType {
+                visible: !GC.isMobile()
                 Layout.fillWidth: true
                 text: qsTr("Auto start")
                 checked: AppSettingsLogic.checkBoxAutostartChecked
@@ -60,6 +62,7 @@ PageBase {
                 }
             }
             CheckBoxType {
+                visible: !GC.isMobile()
                 Layout.fillWidth: true
                 text: qsTr("Start minimized")
                 checked: AppSettingsLogic.checkBoxStartMinimizedChecked
@@ -74,6 +77,7 @@ PageBase {
                 text: AppSettingsLogic.labelVersionText
             }
             BlueButtonType {
+                visible: !GC.isMobile()
                 Layout.fillWidth: true
                 Layout.preferredHeight: 41
                 text: qsTr("Check for updates")

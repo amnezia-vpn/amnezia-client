@@ -17,6 +17,7 @@
 #include <QThread>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QQmlFile>
 
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -605,21 +606,52 @@ PageEnumNS::Page UiLogic::currentPage()
     return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
-void UiLogic::saveTextFile(const QString& desc, QString ext, const QString& data)
+void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QString ext, const QString& data)
 {
+//    ext.replace("*", "");
+//    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+//        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
+
+//    if (fileName.isEmpty()) return;
+//    if (!fileName.endsWith(ext)) fileName.append(ext);
+
+//    QFile save(fileName);
+//    save.open(QIODevice::WriteOnly);
+//    save.write(data.toUtf8());
+//    save.close();
+
+//    QFileInfo fi(fileName);
+//    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+
     ext.replace("*", "");
-    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
-
+    QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QUrl fileName;
+#ifdef AMNEZIA_DESKTOP
+    fileName = QFileDialog::getSaveFileUrl(nullptr, desc,
+        QUrl::fromLocalFile(docDir + "/" + suggestedName), "*" + ext);
     if (fileName.isEmpty()) return;
-    if (!fileName.endsWith(ext)) fileName.append(ext);
+    if (!fileName.toString().endsWith(ext)) fileName = QUrl(fileName.toString() + ext);
+#elif defined Q_OS_ANDROID
+    fileName = QFileDialog::getSaveFileUrl(nullptr, suggestedName,
+        QUrl::fromLocalFile(docDir), "*" + ext);
+#endif
 
-    QFile save(fileName);
+    qDebug() << "UiLogic::saveTextFile" << fileName;
+    if (fileName.isEmpty()) return;
+
+#ifdef AMNEZIA_DESKTOP
+    QFile save(fileName.toLocalFile());
+#else
+    qDebug() << "UiLogic::saveTextFile" << QQmlFile::urlToLocalFileOrQrc(fileName);
+    QFile save(QQmlFile::urlToLocalFileOrQrc(fileName));
+#endif
+
     save.open(QIODevice::WriteOnly);
     save.write(data.toUtf8());
     save.close();
 
-    QFileInfo fi(fileName);
+    QFileInfo fi(fileName.toLocalFile());
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 

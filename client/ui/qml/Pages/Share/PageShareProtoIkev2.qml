@@ -102,7 +102,7 @@ PageShareProtocolBase {
                 visible: tfCert.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Export p12 certificate"), "*.p12", tfCert.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Export p12 certificate"), "amnezia_ikev2_cert_for_windows.p12", "*.p12", tfCert.textArea.text)
                 }
             }
 
@@ -117,7 +117,7 @@ PageShareProtocolBase {
                 visible: tfMobileConfig.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Export config for Apple"), "*.plist", tfMobileConfig.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Export config for Apple"), "amnezia_for_apple.plist", "*.plist", tfMobileConfig.textArea.text)
                 }
             }
 
@@ -132,7 +132,7 @@ PageShareProtocolBase {
                 visible: tfStrongSwanConfig.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Export config for StrongSwan"), "*.profile", tfStrongSwanConfig.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Export config for StrongSwan"), "amnezia_for_StrongSwan.profile", "*.profile", tfStrongSwanConfig.textArea.text)
                 }
             }
         }

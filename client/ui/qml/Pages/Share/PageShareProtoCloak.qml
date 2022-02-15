@@ -99,7 +99,7 @@ PageShareProtocolBase {
                 visible: tfShareCode.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Save AmneziaVPN config"), "*.json", tfShareCode.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Save AmneziaVPN config"), "amnezia_config_cloak.json", "*.json", tfShareCode.textArea.text)
                 }
             }
 

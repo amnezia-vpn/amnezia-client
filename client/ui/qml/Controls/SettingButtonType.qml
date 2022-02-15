@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 BasicButtonType {
     id: root
     property alias textItem: textItem
+    height: 30
 
     background: Item {}
     contentItem: Item {
