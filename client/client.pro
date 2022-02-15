@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick
+QT += widgets core gui network xml remoteobjects quick svg
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -200,6 +200,7 @@ linux:!android {
 }
 
 win32|macx|linux:!android {
+   DEFINES += AMNEZIA_DESKTOP
 
    HEADERS  += \
       ui/systemtray_notificationhandler.h \

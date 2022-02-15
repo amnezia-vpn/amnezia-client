@@ -15,6 +15,10 @@ constexpr char password[] = "password";
 constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
+constexpr char dns1[] = "dns1";
+constexpr char dns2[] = "dns2";
+
+
 constexpr char description[] = "description";
 constexpr char cert[] = "cert";
 constexpr char config[] = "config";
@@ -55,6 +59,9 @@ constexpr char last_config[] = "last_config";
 
 namespace protocols {
 
+namespace dns {
+constexpr char amneziaDnsIp[] = "172.29.172.254";
+}
 
 namespace openvpn {
 constexpr char defaultSubnetAddress[] = "10.8.0.0";

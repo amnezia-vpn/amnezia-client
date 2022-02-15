@@ -228,6 +228,21 @@ void Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip
     setVpnSites(mode, sites);
 }
 
+void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
+{
+    QVariantMap allSites = vpnSites(mode);
+    for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+        const QString &site = i.key();
+        const QString &ip = i.value();
+
+        if (allSites.contains(site) && allSites.value(site) == ip) continue;
+
+        allSites.insert(site, ip);
+    }
+
+    setVpnSites(mode, allSites);
+}
+
 QStringList Settings::getVpnIps(RouteMode mode) const
 {
     QStringList ips;

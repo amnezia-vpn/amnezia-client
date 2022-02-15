@@ -16,6 +16,9 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelStateText)
     AUTO_PROPERTY(QString, labelCurrentServer)
     AUTO_PROPERTY(QString, labelCurrentService)
+    AUTO_PROPERTY(QString, labelCurrentDns)
+    AUTO_PROPERTY(bool, amneziaDnsEnabled)
+
     AUTO_PROPERTY(bool, pushButtonConnectEnabled)
     AUTO_PROPERTY(bool, pushButtonConnectVisible)
     AUTO_PROPERTY(bool, widgetVpnModeEnabled)
@@ -23,6 +26,8 @@ class VpnLogic : public PageLogicBase
 
     AUTO_PROPERTY(QString, labelErrorText)
     AUTO_PROPERTY(QString, labelVersionText)
+
+    AUTO_PROPERTY(bool, isCustomRoutesSupported)
 
     AUTO_PROPERTY(bool, radioButtonVpnModeAllSitesChecked)
     AUTO_PROPERTY(bool, radioButtonVpnModeForwardSitesChecked)

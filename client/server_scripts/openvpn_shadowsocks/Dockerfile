@@ -1,7 +1,7 @@
 FROM alpine:latest
 LABEL maintainer="AmneziaVPN"
 
-ARG SS_RELEASE="v1.11.2"
+ARG SS_RELEASE="v1.13.1"
 ARG SERVER_ARCH
 
 #Install required packages

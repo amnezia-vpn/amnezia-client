@@ -70,7 +70,6 @@ rem if not exist "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%" break
 echo "Deploying..."
 
 copy "%WORK_DIR:"=%\service\server\release\%APP_NAME:"=%-service.exe"	%OUT_APP_DIR%
-copy "%WORK_DIR:"=%\platform\post-uninstall\release\post-uninstall.exe"	%OUT_APP_DIR%
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
@@ -83,8 +82,6 @@ signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://ti
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 copy "%WORK_DIR:"=%\service\wireguard-service\release\wireguard-service.exe"	%OUT_APP_DIR%\wireguard\
-
-del %OUT_APP_DIR%\botand.dll
 
 cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer  %RELEASE_DIR:"=%\installer /s /e /y /i /f

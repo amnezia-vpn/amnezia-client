@@ -38,8 +38,6 @@ void QrDecoderLogic::onDetectedQrCode(const QString &code)
 
 
     if (magic == amnezia::qrMagicCode) {
-        qDebug() << "QrDecoderLogic::onDetectedQrCode magic code detected" << magic << ba.size();
-
         quint8 chunksCount; s >> chunksCount;
         if (totalChunksCount() != chunksCount) {
             m_chunks.clear();

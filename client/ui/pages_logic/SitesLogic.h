@@ -18,8 +18,10 @@ public:
     Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onPushButtonAddCustomSitesClicked();
-    Q_INVOKABLE void onPushButtonSitesDeleteClicked(int row);
+    Q_INVOKABLE void onPushButtonSitesDeleteClicked(QStringList items);
     Q_INVOKABLE void onPushButtonSitesImportClicked(const QString &fileName);
+    Q_INVOKABLE void onPushButtonSitesExportClicked();
+
 
 public:
     explicit SitesLogic(UiLogic *uiLogic, QObject *parent = nullptr);

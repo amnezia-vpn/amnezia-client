@@ -28,8 +28,8 @@ void ServerSettingsLogic::onUpdatePage()
     set_pushButtonClearVisible(m_settings.haveAuthData(uiLogic()->selectedServerIndex));
     set_pushButtonClearClientCacheVisible(m_settings.haveAuthData(uiLogic()->selectedServerIndex));
     set_pushButtonShareFullVisible(m_settings.haveAuthData(uiLogic()->selectedServerIndex));
-    QJsonObject server = m_settings.server(uiLogic()->selectedServerIndex);
-    QString port = server.value(config_key::port).toString();
+    const QJsonObject &server = m_settings.server(uiLogic()->selectedServerIndex);
+    const QString &port = server.value(config_key::port).toString();
     set_labelServerText(QString("%1@%2%3%4")
                                      .arg(server.value(config_key::userName).toString())
                                      .arg(server.value(config_key::hostName).toString())

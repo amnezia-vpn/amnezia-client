@@ -5,6 +5,7 @@
 #include <functional>
 #include "../uilogic.h"
 #include "defines.h"
+#include <configurators/vpn_configurator.h>
 
 
 VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
@@ -33,15 +34,24 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
             onConnect();
         });
     }
+    else {
+        onConnectionStateChanged(VpnProtocol::Disconnected);
+    }
 }
 
 
 void VpnLogic::onUpdatePage()
 {
     Settings::RouteMode mode = m_settings.routeMode();
-    set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites);
-    set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites);
-    set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites);
+    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
+
+    set_isCustomRoutesSupported  (selectedContainer == DockerContainer::OpenVpn ||
+                                  selectedContainer == DockerContainer::ShadowSocks||
+                                  selectedContainer == DockerContainer::Cloak);
+
+    set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites || !isCustomRoutesSupported());
+    set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites && isCustomRoutesSupported());
+    set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites && isCustomRoutesSupported());
 
     const QJsonObject &server = uiLogic()->m_settings.defaultServer();
     QString serverString = QString("%2 (%3)")
@@ -49,9 +59,18 @@ void VpnLogic::onUpdatePage()
             .arg(server.value(config_key::hostName).toString());
     set_labelCurrentServer(serverString);
 
-    DockerContainer selectedContainer = m_settings.defaultContainer(m_settings.defaultServerIndex());
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
+
+    auto dns = VpnConfigurator::getDnsForConfig(m_settings.defaultServerIndex());
+    set_amneziaDnsEnabled(dns.first == protocols::dns::amneziaDnsIp);
+    if (dns.first == protocols::dns::amneziaDnsIp) {
+        set_labelCurrentDns("On your server");
+    }
+    else {
+        set_labelCurrentDns(dns.first + ", " + dns.second);
+    }
+
 
     set_isContainerWorkingOnPlatform(ContainerProps::isWorkingOnPlatform(selectedContainer));
     if (!isContainerWorkingOnPlatform()) {

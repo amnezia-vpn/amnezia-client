@@ -8,10 +8,13 @@ BasicButtonType {
     background: Item {}
     contentItem: Item {
         anchors.fill: parent
-        Image {
-            source: root.icon.source
+        SvgImageType {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
+            svg.source: root.icon.source
+            color: "#100A44"
+            width: 25
+            height: 25
         }
         Text {
             id: textItem

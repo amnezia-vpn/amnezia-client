@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
     Utils::initializePath(Utils::systemLogPath());
 
-    Log::initialize();
+    Log::init();
 
     if (argc == 2) {
         qInfo() << "Started as console application";

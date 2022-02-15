@@ -16,7 +16,7 @@ PageProtocolBase {
 
     Caption {
         id: caption
-        text: qsTr("SFTF settings")
+        text: qsTr("SFTP settings")
     }
 
     Rectangle {
@@ -77,40 +77,42 @@ PageProtocolBase {
         }
     }
 
-    LabelType {
+    RichLabelType {
         anchors.bottom: check_persist.top
         anchors.bottomMargin: 10
         width: parent.width - 60
         x: 30
         font.pixelSize: 14
-        textFormat: Text.RichText
 
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-            acceptedButtons: Qt.NoButton
-        }
-
-//        text: "In order to mount remote SFTP folder as local drive, perform following steps:
-//- Install the latest version of WinFsp [https://github.com/billziss-gh/winfsp/releases/latest].
-//- Install the latest version of SSHFS-Win. Choose the x64 or x86 installer according to your computer's architecture [https://github.com/billziss-gh/sshfs-win/releases]"
-        onLinkActivated: Qt.openUrlExternally(link)
-
-        text:"In order to mount remote SFTP folder as local drive, perform following steps:
+        readonly property string windows_text: "In order to mount remote SFTP folder as local drive, perform following steps:
 <ul>
 <li>Install the latest version of <a href=\"https://github.com/billziss-gh/winfsp/releases/latest\">WinFsp</a>.</li>
 <li>Install the latest version of <a href=\"https://github.com/billziss-gh/sshfs-win/releases\">SSHFS-Win</a>. Choose the x64 or x86 installer according to your computer's architecture.</li>
 </ul>"
+
+        readonly property string macos_text: "In order to mount remote SFTP folder as local folder, perform following steps:
+<ul>
+<li>Install the latest version of <a href=\"https://osxfuse.github.io/\">macFUSE</a>.</li>
+<li>Install the latest version of <a href=\"https://osxfuse.github.io/\">SSHFS</a>.</li>
+</ul>"
+
+        text: {
+            if (Qt.platform.os == "windows") return windows_text
+            else if (Qt.platform.os == "osx") return macos_text
+            else if (Qt.platform.os == "linux") return ""
+            else return ""
+        }
     }
 
     CheckBoxType {
         id: check_persist
+        visible: false
         anchors.bottom: pb_mount.top
         anchors.bottomMargin: 10
         x: 30
         width: parent.width
         height: 21
-        text: qsTr("Restore drive after restart")
+        text: qsTr("Restore drive when client starts")
         checked: logic.checkBoxSftpRestoreChecked
         onCheckedChanged: {
             logic.checkBoxSftpRestoreChecked = checked
@@ -122,6 +124,7 @@ PageProtocolBase {
 
     BlueButtonType {
         id: pb_mount
+        visible: GC.isDesktop()
         enabled: logic.pushButtonSftpMountEnabled
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

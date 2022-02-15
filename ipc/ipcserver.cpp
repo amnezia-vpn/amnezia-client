@@ -5,6 +5,8 @@
 #include <QLocalSocket>
 
 #include "router.h"
+#include "log.h"
+
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #endif
@@ -33,7 +35,7 @@ int IpcServer::createPrivilegedProcess()
 
     // Make sure any connections are handed to QtRO
     QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
-        qDebug() << "LocalServer new connection";
+        qDebug() << "IpcServer new connection";
         if (pd.serverNode) {
             pd.serverNode->addHostSideConnection(pd.localServer->nextPendingConnection());
             pd.serverNode->enableRemoting(pd.ipcProcess.data());
@@ -104,4 +106,21 @@ QStringList IpcServer::getTapList()
 #else
     return QStringList();
 #endif
+}
+
+void IpcServer::cleanUp()
+{
+    qDebug() << "IpcServer::cleanUp";
+    Log::deinit();
+    Log::cleanUp();
+}
+
+void IpcServer::setLogsEnabled(bool enabled)
+{
+    if (enabled) {
+        Log::init();
+    }
+    else {
+        Log::deinit();
+    }
 }

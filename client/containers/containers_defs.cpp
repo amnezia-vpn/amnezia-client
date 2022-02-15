@@ -149,7 +149,11 @@ bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
     default: return false;
     }
 #elif defined (Q_OS_MAC)
-    return false;
+    switch (c) {
+    case DockerContainer::WireGuard: return false;
+    case DockerContainer::Ipsec: return false;
+    default: return true;
+    }
 
 #elif defined (Q_OS_ANDROID)
     switch (c) {

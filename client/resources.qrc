@@ -27,11 +27,9 @@
         <file>fonts/Lato-Thin.ttf</file>
         <file>fonts/Lato-ThinItalic.ttf</file>
         <file>images/AmneziaVPN.png</file>
-        <file>images/server_settings.png</file>
         <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
         <file>server_scripts/setup_host_firewall.sh</file>
-        <file>images/reload.png</file>
         <file>server_scripts/openvpn_cloak/Dockerfile</file>
         <file>server_scripts/openvpn_cloak/configure_container.sh</file>
         <file>server_scripts/openvpn_cloak/start.sh</file>
@@ -42,7 +40,6 @@
         <file>images/check.png</file>
         <file>images/uncheck.png</file>
         <file>images/settings_grey.png</file>
-        <file>images/plus.png</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/remove_all_containers.sh</file>
         <file>server_scripts/openvpn_cloak/run_container.sh</file>
@@ -142,5 +139,23 @@
         <file>images/connected.png</file>
         <file>images/disconnected.png</file>
         <file>ui/qml/Pages/PageQrDecoder.qml</file>
+        <file>ui/qml/Pages/PageAbout.qml</file>
+        <file>ui/qml/Controls/RichLabelType.qml</file>
+        <file>images/svg/gpp_good_black_24dp.svg</file>
+        <file>ui/qml/Controls/SvgImageType.qml</file>
+        <file>images/svg/gpp_maybe_black_24dp.svg</file>
+        <file>images/svg/close_black_24dp.svg</file>
+        <file>images/svg/delete_black_24dp.svg</file>
+        <file>images/svg/done_black_24dp.svg</file>
+        <file>images/svg/format_list_bulleted_black_24dp.svg</file>
+        <file>images/svg/logout_black_24dp.svg</file>
+        <file>images/svg/miscellaneous_services_black_24dp.svg</file>
+        <file>images/svg/refresh_black_24dp.svg</file>
+        <file>images/svg/settings_black_24dp.svg</file>
+        <file>images/svg/share_black_24dp.svg</file>
+        <file>images/svg/vpn_key_black_24dp.svg</file>
+        <file>images/svg/control_point_black_24dp.svg</file>
+        <file>images/svg/settings_suggest_black_24dp.svg</file>
+        <file>ui/qml/Controls/SvgButtonType.qml</file>
     </qresource>
 </RCC>

@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtGraphicalEffects 1.15
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -31,9 +32,9 @@ PageBase {
         anchors.top: l1.bottom
         anchors.topMargin: GC.isMobile() ? 0: 15
         x: 30
-        width: parent.width - 40
+        width: parent.width - 80
         height: GC.isMobile() ? 0: 30
-        icon.source: "qrc:/images/settings.png"
+        icon.source: "qrc:/images/svg/settings_black_24dp.svg"
         text: qsTr("App settings")
         onClicked: {
             UiLogic.goToPage(PageEnum.AppSettings)
@@ -57,7 +58,7 @@ PageBase {
         anchors.topMargin: 15
         width: parent.width - 40
         height: 30
-        icon.source: "qrc:/images/settings.png"
+        icon.source: "qrc:/images/svg/settings_suggest_black_24dp.svg"
         text: qsTr("Network settings")
         onClicked: {
             UiLogic.goToPage(PageEnum.NetworkSettings)
@@ -81,7 +82,7 @@ PageBase {
         anchors.topMargin: 15
         width: 330
         height: 30
-        icon.source: "qrc:/images/server_settings.png"
+        icon.source: "qrc:/images/svg/vpn_key_black_24dp.svg"
         text: qsTr("Server Settings")
         onClicked: {
             GeneralSettingsLogic.onPushButtonGeneralSettingsServerSettingsClicked()
@@ -105,7 +106,7 @@ PageBase {
         anchors.topMargin: 15
         width: 330
         height: 30
-        icon.source: "qrc:/images/share.png"
+        icon.source: "qrc:/images/svg/share_black_24dp.svg"
         text: qsTr("Share connection")
         enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable
         onClicked: {
@@ -130,7 +131,7 @@ PageBase {
         anchors.topMargin: 15
         width: 330
         height: 30
-        icon.source: "qrc:/images/server_settings.png"
+        icon.source: "qrc:/images/svg/format_list_bulleted_black_24dp.svg"
         text: qsTr("Servers")
         onClicked: {
             UiLogic.goToPage(PageEnum.ServersList)
@@ -154,7 +155,7 @@ PageBase {
         anchors.topMargin: 15
         width: 330
         height: 30
-        icon.source: "qrc:/images/plus.png"
+        icon.source: "qrc:/images/svg/control_point_black_24dp.svg"
         text: qsTr("Add server")
         onClicked: {
             UiLogic.goToPage(PageEnum.Start)
@@ -178,7 +179,7 @@ PageBase {
         anchors.bottomMargin: 20
         width: 330
         height: 30
-        icon.source: "qrc:/images/settings.png"
+        icon.source: "qrc:/images/svg/logout_black_24dp.svg"
         text: qsTr("Exit")
         onClicked: {
             Qt.quit()

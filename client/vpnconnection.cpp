@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
+#include <QHostInfo>
 #include <QJsonObject>
 
 #include <configurators/openvpn_configurator.h>
@@ -56,20 +57,26 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                 //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
+            QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
+            QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
+
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(),
-                QStringList() << m_settings.primaryDns() << m_settings.secondaryDns());
+                QStringList() << dns1 << dns2);
 
 
             if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), m_settings.getVpnIps(Settings::VpnOnlyForwardSites));
+                QTimer::singleShot(1000, m_vpnProtocol.data(), [this](){
+                    addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings.routeMode());
+                });
             }
             else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), m_settings.getVpnIps(Settings::VpnAllExceptSites));
+                addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings.routeMode());
             }
+
 
         }
         else if (state == VpnProtocol::Error) {
@@ -87,6 +94,49 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 const QString &VpnConnection::remoteAddress() const
 {
     return m_remoteAddress;
+}
+
+void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
+{
+    QStringList ips;
+    QStringList sites;
+    const QVariantMap &m = m_settings.vpnSites(mode);
+    for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
+        if (Utils::checkIpSubnetFormat(i.key())) {
+            ips.append(i.key());
+        }
+        else {
+            if (Utils::checkIpSubnetFormat(i.value().toString())) {
+                ips.append(i.value().toString());
+            }
+            sites.append(i.key());
+        }
+    }
+    ips.removeDuplicates();
+
+    // add all IPs immediately
+    IpcClient::Interface()->routeAddList(gw, ips);
+
+    // re-resolve domains
+    for (const QString &site: sites) {
+            const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo){
+                const QList<QHostAddress> &addresses = hostInfo.addresses();
+                QString ipv4Addr;
+                for (const QHostAddress &addr: hostInfo.addresses()) {
+                    if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
+                        const QString &ip = addr.toString();
+                        //qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
+                        if (!ips.contains(ip)) {
+                            IpcClient::Interface()->routeAddList(gw, QStringList() << ip);
+                            m_settings.addVpnSite(mode, site, ip);
+                        }
+                        flushDns();
+                        break;
+                    }
+                }
+            };
+            QHostInfo::lookupHost(site, this, cbResolv);
+    }
 }
 
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
@@ -149,12 +199,12 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
-    auto lastVpnConfig = getLastVpnConfig(containerConfig);
+    QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
 
     QString configData;
     if (lastVpnConfig.contains(proto)) {
         configData = lastVpnConfig.value(proto);
-        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
         qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
@@ -165,7 +215,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
         QString configDataBeforeLocalProcessing = configData;
 
-        configData = VpnConfigurator::processConfigWithLocalSettings(container, proto, configData);
+        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
 
         if (errorCode && e) {
@@ -211,6 +261,11 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
+    auto dns = VpnConfigurator::getDnsForConfig(serverIndex);
+
+    vpnConfiguration[config_key::dns1] = dns.first;
+    vpnConfiguration[config_key::dns2] = dns.second;
+
     return vpnConfiguration;
 }
 
@@ -240,11 +295,8 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        //qDebug() << "VpnConnection::connectToVpn 1";
         m_vpnProtocol->stop();
-        //qDebug() << "VpnConnection::connectToVpn 2";
         m_vpnProtocol.reset();
-        //qDebug() << "VpnConnection::connectToVpn 3";
     }
 
     ErrorCode e = ErrorCode::NoError;

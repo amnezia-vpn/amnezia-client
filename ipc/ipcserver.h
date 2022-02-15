@@ -23,6 +23,8 @@ public:
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;
     virtual QStringList getTapList() override;
+    virtual void cleanUp() override;
+    virtual void setLogsEnabled(bool enabled) override;
 
 private:
     int m_localpid = 0;

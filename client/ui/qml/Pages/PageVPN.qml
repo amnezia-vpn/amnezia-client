@@ -22,12 +22,39 @@ PageBase {
 
     LabelType {
         x: 10
-        y: 5
+        y: 10
         width: 100
         height: 21
         text: VpnLogic.labelVersionText
         color: "#dddddd"
         font.pixelSize: 12
+    }
+
+    BasicButtonType {
+        y: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+        background: Item {}
+
+
+        contentItem: Text {
+            anchors.fill: parent
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 18
+            font.underline: true
+
+            text: qsTr("Donate")
+            color: "#D4D4D4"
+
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: {
+            UiLogic.goToPage(PageEnum.About)
+        }
     }
 
     ImageButtonType {
@@ -108,7 +135,7 @@ PageBase {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentServer
+            text: VpnLogic.labelCurrentServer + " →"
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
@@ -129,14 +156,14 @@ PageBase {
         LabelType {
             Layout.alignment: Qt.AlignRight
             height: 21
-            text: qsTr("Service") + ": "
+            text: qsTr("Proto") + ": "
         }
 
         BasicButtonType {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentService
+            text: VpnLogic.labelCurrentService + " →"
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
@@ -146,10 +173,46 @@ PageBase {
         }
     }
 
+    RowLayout {
+        id: layout3
+        anchors.top: layout2.bottom
+        anchors.topMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+
+
+        LabelType {
+            Layout.alignment: Qt.AlignRight
+            height: 21
+            text: qsTr("DNS") + ": "
+        }
+
+        BasicButtonType {
+            Layout.alignment: Qt.AlignLeft
+            height: 21
+            implicitWidth: implicitContentWidth > root.width * 0.6 ?  root.width * 0.6 : implicitContentWidth + leftPadding + rightPadding
+            background: Item {}
+            text: VpnLogic.labelCurrentDns + " →"
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            onClicked: {
+                UiLogic.goToPage(PageEnum.NetworkSettings)
+            }
+        }
+
+        SvgImageType {
+            svg.source: VpnLogic.amneziaDnsEnabled ? "qrc:/images/svg/gpp_good_black_24dp.svg" : "qrc:/images/svg/gpp_maybe_black_24dp.svg"
+            color: VpnLogic.amneziaDnsEnabled ?  "#22aa33" : "orange"
+            width: 25
+            height: 25
+        }
+    }
+
 
     LabelType {
         id: error_text
-        anchors.top: layout2.bottom
+        anchors.top: layout3.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 20
         width: parent.width - 20
@@ -259,6 +322,7 @@ PageBase {
             onClicked: VpnLogic.onRadioButtonVpnModeAllSitesClicked(true)
         }
         RadioButtonType {
+            enabled: VpnLogic.isCustomRoutesSupported
             x: 0
             y: 60
             width: 341
@@ -268,6 +332,7 @@ PageBase {
             onClicked: VpnLogic.onRadioButtonVpnModeExceptSitesClicked(true)
         }
         RadioButtonType {
+            enabled: VpnLogic.isCustomRoutesSupported
             x: 0
             y: 30
             width: 341
