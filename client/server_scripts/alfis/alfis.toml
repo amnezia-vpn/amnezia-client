@@ -1,0 +1,43 @@
+# The hash of first block in a chain to know with which nodes to work
+origin = "0000001D2A77D63477172678502E51DE7F346061FF7EB188A2445ECA3FC0780E"
+# Paths to your key files to load automatically
+key_files = ["key1.toml", "key2.toml", "key3.toml", "key4.toml", "key5.toml"]
+# How many last blocks to check on start
+check_blocks = 8
+
+# Network settings
+[net]
+# All bootstap nodes
+peers = ["peer-v4.alfis.name:4244", "peer-v6.alfis.name:4244", "peer-ygg.alfis.name:4244"]
+# Your node will listen on that address for other nodes to connect
+listen = "[::]:4244"
+# Set true if you want your IP to participate in peer-exchange, or false otherwise
+public = true
+# Allow connections to/from Yggdrasil only (https://yggdrasil-network.github.io)
+yggdrasil_only = false
+
+# DNS resolver options
+[dns]
+# Your DNS resolver will be listening on this address and port (Usual port is 53)
+listen = "0.0.0.0:53"
+# How many threads to spawn by DNS server
+threads = 50
+# AdGuard DNS servers to filter ads and trackers
+forwarders = ["https://dns.adguard.com/dns-query"]
+#forwarders = ["94.140.14.14:53", "94.140.15.15:53"]
+# Cloudflare servers
+#forwarders = ["https://cloudflare-dns.com/dns-query"]
+#forwarders = ["1.1.1.1:53", "1.0.0.1:53"]
+
+# Bootstrap DNS-servers to resolve domains of DoH providers
+bootstraps = ["9.9.9.9:53", "94.140.14.140:53"]
+
+# Hosts file support (resolve local names or block ads)
+#hosts = ["system", "adblock.txt"]
+
+#Mining options
+[mining]
+# How many CPU threads to spawn for mining, zero = number of CPU cores
+threads = 0
+# Set lower priority for mining threads
+lower = true

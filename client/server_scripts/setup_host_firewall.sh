@@ -1,4 +1,5 @@
 sudo sysctl -w net.ipv4.ip_forward=1
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
 sudo iptables -C INPUT -p icmp --icmp-type echo-request -j DROP || sudo iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
 
 #sudo iptables -P FORWARD ACCEPT
