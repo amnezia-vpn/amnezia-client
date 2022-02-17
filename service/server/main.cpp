@@ -17,7 +17,7 @@ public:
         qDebug()<<__FUNCTION__;
         auto cf = WindowsFirewall::instance();
         cf->init();
-        //cf->disableKillSwitch();
+        cf->disableKillSwitch();
     }
     ~KillSwitch(){
         qDebug()<<__FUNCTION__;
@@ -25,6 +25,7 @@ public:
         cf->disableKillSwitch();
     }
 };
+std::unique_ptr<KillSwitch>ks;
 #endif
 
 int runApplication(int argc, char** argv)
@@ -35,14 +36,13 @@ int runApplication(int argc, char** argv)
     return app.exec();
 }
 
-
 int main(int argc, char **argv)
 {
     Utils::initializePath(Utils::systemLogPath());
     Log::initialize();
 
 #ifdef Q_OS_WIN
-    KillSwitch ks;
+    ks = std::make_unique<KillSwitch>();
 #endif
 
     if (argc == 2) {
