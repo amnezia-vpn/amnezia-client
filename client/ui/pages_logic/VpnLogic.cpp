@@ -1,7 +1,10 @@
+#include <QApplication>
+
 #include "VpnLogic.h"
 
 #include "core/errorstrings.h"
 #include "vpnconnection.h"
+#include <QTimer>
 #include <functional>
 #include "../uilogic.h"
 #include "defines.h"
@@ -239,6 +242,6 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 
 void VpnLogic::onDisconnect()
 {
-    set_pushButtonConnectChecked(false);
+    onConnectionStateChanged(VpnProtocol::Disconnected);
     emit disconnectFromVpn();
 }

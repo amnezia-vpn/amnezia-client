@@ -1,3 +1,4 @@
+#include <QDateTime>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -6,11 +7,13 @@
 
 #include <iostream>
 
-#include <core/ipcclient.h>
-
 #include "debug.h"
 #include "defines.h"
 #include "utils.h"
+
+#ifdef AMNEZIA_DESKTOP
+#include <core/ipcclient.h>
+#endif
 
 QFile Debug::m_file;
 QTextStream Debug::m_textStream;
@@ -140,6 +143,7 @@ void Debug::clearLogs()
 
 void Debug::clearServiceLogs()
 {
+#ifdef AMNEZIA_DESKTOP
     IpcClient *m_IpcClient = new IpcClient;
 
     if (!m_IpcClient->isSocketConnected()) {
@@ -156,6 +160,7 @@ void Debug::clearServiceLogs()
     else {
         qWarning() << "Error occured cleaning up service logs";
     }
+#endif
 }
 
 void Debug::cleanUp()

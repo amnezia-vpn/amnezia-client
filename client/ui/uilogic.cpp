@@ -30,7 +30,6 @@
 #include "core/errorstrings.h"
 
 #include "containers/containers_defs.h"
-#include "protocols/shadowsocksvpnprotocol.h"
 
 #include "ui/qautostart.h"
 
@@ -136,6 +135,11 @@ UiLogic::~UiLogic()
 void UiLogic::initalizeUiLogic()
 {
 #ifdef Q_OS_ANDROID
+    connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
+        if (connected) {
+            vpnLogic()->onConnectionStateChanged(VpnProtocol::Connected);
+        }
+    });
     if (!AndroidController::instance()->initialize()) {
          qDebug() << QString("Init failed") ;
          emit VpnProtocol::Error;

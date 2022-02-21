@@ -8,6 +8,7 @@
 
 #include "core/errorstrings.h"
 #include <core/servercontroller.h>
+#include <QTimer>
 
 ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
