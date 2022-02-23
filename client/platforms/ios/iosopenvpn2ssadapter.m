@@ -76,6 +76,7 @@ static void SocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFData
 
 - (void)dealloc {
     [self invalidateSocketsIfNeeded];
+    [super dealloc];
 }
 
 # pragma mark - Socket configuration

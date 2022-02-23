@@ -24,6 +24,10 @@ ui_*.h
 Makefile*
 *build-*
 
+# fastlane
+client/fastlane/report.xml
+client/fastlane/build/*
+
 # Qt-es
 client/Release-iphoneos/
 client/Debug-iphoneos/

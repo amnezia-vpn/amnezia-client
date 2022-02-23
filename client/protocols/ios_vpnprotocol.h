@@ -47,6 +47,8 @@ private:
     bool m_checkingStatus = false;
     std::function<void(const QString&)> m_logCallback;
     
+    bool m_isChangingState = false;
+    
     void setupWireguardProtocol(const QtJson::JsonObject& result);
     void setupOpenVPNProtocol(const QtJson::JsonObject& result);
     void setupShadowSocksProtocol(const QtJson::JsonObject& result);

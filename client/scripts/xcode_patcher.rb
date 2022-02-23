@@ -71,10 +71,10 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+#       "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
 #       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
@@ -279,13 +279,14 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-        "$(PROJECT_DIR)/3rd/libleaf/include",
-        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/libleaf/lib",
+#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+#       "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
 #       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
+#     config.build_settings['LIBRARY_SEARCH_PATHS'] = [config.build_settings['LIBRARY_SEARCH_PATHS'], "$(PROJECT_DIR)/3rd/libleaf/lib"]
 
       # Versions and names
       config.build_settings['MARKETING_VERSION'] ||= shortVersion
@@ -370,17 +371,17 @@ class XCodeprojPatcher
       'platforms/ios/iostunnel.swift',
       'platforms/ios/ioslogger.swift',
       'platforms/ios/iosinterface.swift',
-      'platforms/ios/ssprovider.swift',
+#     'platforms/ios/ssprovider.swift',
       'platforms/ios/iosglue.mm',
-      'platforms/ios/ssconnectivity.h',
-      'platforms/ios/ssconnectivity.m',
-      'platforms/ios/iosopenvpn2ssadapter.h',
-      'platforms/ios/iosopenvpn2ssadapter.m',
-      'platforms/ios/sspacket.h',
-      'platforms/ios/sspacket.m',
-      'platforms/ios/ssadapterpacketflow.h',
-      'platforms/ios/tun2ssprovider.swift',
-      'platforms/ios/tun2sockswriter.swift',
+#     'platforms/ios/ssconnectivity.h',
+#     'platforms/ios/ssconnectivity.m',
+#     'platforms/ios/iosopenvpn2ssadapter.h',
+#     'platforms/ios/iosopenvpn2ssadapter.m',
+#     'platforms/ios/sspacket.h',
+#     'platforms/ios/sspacket.m',
+#     'platforms/ios/ssadapterpacketflow.h',
+#     'platforms/ios/tun2ssprovider.swift',
+#     'platforms/ios/tun2sockswriter.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -394,32 +395,32 @@ class XCodeprojPatcher
     framework_ref = frameworks_group.new_file('libwg-go.a')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
+#   frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-    
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-    
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
     framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-    
-    framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-
-    framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#
+#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
 #   framework_ref = frameworks_group.new_file('3rd/CocoaLumberjack/build/Release-iphoneos/CocoaLumberjack.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)

@@ -297,7 +297,7 @@ public class IOSVpnProtocolImpl : NSObject {
                        ovpnConfig: String,
                        failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
         
         self.openVPNConfig = ovpnConfig
         self.shadowSocksConfig = ssConfig
@@ -316,7 +316,7 @@ public class IOSVpnProtocolImpl : NSObject {
     
     @objc func connect(ovpnConfig: String, failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
         
         let addr: String = ovpnConfig
             .splitToArray(separator: "\n", trimmingCharacters: nil)
@@ -332,7 +332,7 @@ public class IOSVpnProtocolImpl : NSObject {
 
     @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
 
         // Let's remove the previous config if it exists.
         (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
@@ -526,7 +526,7 @@ public class IOSVpnProtocolImpl : NSObject {
 
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
         Logger.global?.log(message: "Check status")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
         
         let protoType = (tunnel!.localizedDescription ?? "").toTunnelType
         

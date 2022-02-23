@@ -3,7 +3,7 @@ import NetworkExtension
 import os
 import Darwin
 import OpenVPNAdapter
-import Tun2socks
+//import Tun2socks
 
 enum TunnelProtoType: String {
     case wireguard, openvpn, shadowsocks, none
@@ -58,17 +58,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private var openVPNConfig: Data? = nil
     var ssCompletion: ShadowsocksProxyCompletion = nil
     
-    private var ssProvider: ShadowSocksTunnel? = nil
-    private var ssLocalPort: Int = 8585
-    private var ssRemoteHost = ""
-    private var leafProvider: TunProvider? = nil
-
-    private var tun2socksTunnel: Tun2socksOutlineTunnelProtocol? = nil
-    private var tun2socksWriter: Tun2socksTunWriter? = nil
-    private let processQueue = DispatchQueue(label: Constants.processQueueName)
-    private var connection: NWTCPConnection? = nil
-    private var session: NWUDPSession? = nil
-    private var observer: AnyObject?
+//    private var ssProvider: ShadowSocksTunnel? = nil
+//    private var ssLocalPort: Int = 8585
+//    private var ssRemoteHost = ""
+//    private var leafProvider: TunProvider? = nil
+//
+//    private var tun2socksTunnel: Tun2socksOutlineTunnelProtocol? = nil
+//    private var tun2socksWriter: Tun2socksTunWriter? = nil
+//    private let processQueue = DispatchQueue(label: Constants.processQueueName)
+//    private var connection: NWTCPConnection? = nil
+//    private var session: NWUDPSession? = nil
+//    private var observer: AnyObject?
    
     let vpnReachability = OpenVPNReachability()
 
@@ -99,7 +99,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .openvpn:
             startOpenVPN(completionHandler: completionHandler)
         case .shadowsocks:
-            startShadowSocks(completionHandler: completionHandler)
+            break
+//            startShadowSocks(completionHandler: completionHandler)
         case .none:
             break
         }
@@ -112,7 +113,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .openvpn:
             stopOpenVPN(with: reason, completionHandler: completionHandler)
         case .shadowsocks:
-            stopShadowSocks(with: reason, completionHandler: completionHandler)
+            break
+//            stopShadowSocks(with: reason, completionHandler: completionHandler)
         case .none:
             break
         }
@@ -125,7 +127,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .openvpn:
             handleWireguardAppMessage(messageData, completionHandler: completionHandler)
         case .shadowsocks:
-            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
+            break
+//            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
         case .none:
             break
         }
@@ -195,7 +198,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         
         setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
     }
-    
+/*
     private func startShadowSocks(completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfiguration = protocolConfiguration.providerConfiguration,
@@ -212,7 +215,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 //        startTun2SocksTunnel(completion: completionHandler)
         self.startLeafRedirector(completion: completionHandler)
     }
-    
+*/
     private func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         wg_log(.info, staticMessage: "Stopping tunnel")
         
@@ -240,7 +243,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
         ovpnAdapter.disconnect()
     }
-    
+/*
     private func stopShadowSocks(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         stopOpenVPN(with: reason) { [weak self] in
             guard let `self` = self else { return }
@@ -249,7 +252,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             self.stopLeafRedirector(completion: completionHandler)
         }
     }
-    
+*/
     private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
@@ -294,7 +297,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
     
-    
+/*
     private func handleShadowSocksAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if let configString = String(data: messageData, encoding: .utf8) {
@@ -303,9 +306,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         
         completionHandler(messageData)
     }
-    
+*/
     // MARK: -- Tun2sock provider methods
-    
+/*
     private func startTun2SocksTunnel(completion: @escaping (Error?) -> Void) {
         guard let ssConfiguration = self.shadowSocksConfig,
               let ovpnConfiguration = self.openVPNConfig,
@@ -397,7 +400,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             }
         }
     }
-    
+
     // MARK: -- Leaf provider methods
 
     private func prepareConfig(onInterface iface: String, fromSSConfig ssConfig: Data, andOvpnConfig ovpnConfig: Data) -> UnsafePointer<CChar>? {
@@ -420,9 +423,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         var insettings:  [String: Any] = .init()
         insettings["name"] = iface
-        insettings["address"] = "10.8.0.4"
+        insettings["address"] = "127.0.0.2"
         insettings["netmask"] = "255.255.255.0"
-        insettings["gateway"] = "10.8.0.1"
+        insettings["gateway"] = "127.0.0.1"
         insettings["mtu"] = 1600
 
         var inbounds: [String: Any] = .init()
@@ -469,22 +472,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     private func startLeafRedirector(completion: @escaping (Error?) -> Void) {
-        let ipv4settings: NEIPv4Settings = .init(addresses: ["10.8.0.4"], subnetMasks: ["255.255.255.0"])
+        let ipv4settings: NEIPv4Settings = .init(addresses: ["127.0.0.2"], subnetMasks: ["255.255.255.0"])
         ipv4settings.includedRoutes = [.default()]
         ipv4settings.excludedRoutes = []
         
         let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
         dnsSettings.matchDomains = []
-        let proxySettings: NEProxySettings = .init()
-        proxySettings.httpEnabled = true
-        proxySettings.httpServer = .init(address: "localhost", port: 8585)
-        proxySettings.httpsEnabled = true
-        proxySettings.httpsServer = .init(address: "localhost", port: 8585)
-        proxySettings.excludeSimpleHostnames = true
-        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "10.8.0.1")
+        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "127.0.0.1")
         settings.ipv4Settings = ipv4settings
         settings.dnsSettings = dnsSettings
-        settings.proxySettings = proxySettings
         settings.mtu = 1600
         
         self.setTunnelNetworkSettings(settings) { tunError in
@@ -567,38 +563,42 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     private func startAndHandleTunnelOverSS(completionHandler: @escaping (Error?) -> Void) {
-        let ipv4settings: NEIPv4Settings = .init(addresses: ["192.0.2.2"], subnetMasks: ["255.255.255.0"])
-        ipv4settings.includedRoutes = [.default()]
-        ipv4settings.excludedRoutes = []
+//        let ipv4settings: NEIPv4Settings = .init(addresses: ["192.0.2.2"], subnetMasks: ["255.255.255.0"])
+//        let addedRoute1 = NEIPv4Route(destinationAddress: "0.0.0.0", subnetMask: "0.0.0.0")
+//        addedRoute1.gatewayAddress = "192.0.2.1"
+//        ipv4settings.includedRoutes = [addedRoute1]
+//        ipv4settings.excludedRoutes = []
+//
+//        let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
+//        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "192.0.2.1")
+//        settings.ipv4Settings = ipv4settings
+//        settings.dnsSettings = dnsSettings
+//        settings.mtu = 1600
+//
+//        setTunnelNetworkSettings(settings) { tunError in
+//
+//        }
         
-        let dnsSettings: NEDNSSettings = .init(servers: ["1.1.1.1", "9.9.9.9", "208.67.222.222", "208.67.220.220"])
-        let settings: NEPacketTunnelNetworkSettings = .init(tunnelRemoteAddress: "192.0.2.1")
-        settings.ipv4Settings = ipv4settings
-        settings.dnsSettings = dnsSettings
-        settings.mtu = 1600
+        let ifaces = Interface.allInterfaces()
+            .filter { $0.family == .ipv4 }
+            .map { iface in iface.name }
         
-        setTunnelNetworkSettings(settings) { tunError in
-            let ifaces = Interface.allInterfaces()
-                .filter { $0.family == .ipv4 }
-                .map { iface in iface.name }
-            
-            wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
-            let endpoint = NWHostEndpoint(hostname: "127.0.0.1", port: "\(self.ssLocalPort)")
-            self.session = self.createUDPSession(to: endpoint, from: nil)
-            self.observer = self.session!.observe(\.state, options: [.new]) { conn, _  in
-                switch conn.state {
-                case .ready:
-                    self.setupWriteToFlow()
-                    self.readFromFlow()
+        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+        let endpoint = NWHostEndpoint(hostname: "127.0.0.1", port: "\(self.ssLocalPort)")
+        self.session = self.createUDPSession(to: endpoint, from: nil)
+        self.setupWriteToFlow()
+        self.observer = self.session!.observe(\.state, options: [.new]) { conn, _  in
+            switch conn.state {
+            case .ready:
+                self.readFromFlow()
+                completionHandler(nil)
+            case .cancelled, .failed, .invalid:
+                self.stopSSProvider {
+                    self.cancelTunnelWithError(nil)
                     completionHandler(nil)
-                case .cancelled, .failed, .invalid:
-                    self.stopSSProvider {
-                        self.cancelTunnelWithError(nil)
-                        completionHandler(nil)
-                    }
-                default:
-                    break
                 }
+            default:
+                break
             }
         }
     }
@@ -685,7 +685,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler()
         }
     }
-    
+*/
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
         let str = String(decoding: ovpnConfiguration, as: UTF8.self)
@@ -798,7 +798,7 @@ extension WireGuardLogLevel {
 
 extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}
 
-extension NEPacketTunnelFlow: ShadowSocksAdapterPacketFlow {}
+/* extension NEPacketTunnelFlow: ShadowSocksAdapterPacketFlow {} */
 
 extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     
@@ -877,7 +877,7 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         wg_log(.info, message: logMessage)
     }
 }
-
+/*
 extension PacketTunnelProvider: Tun2socksTunWriterProtocol {
     func write(_ p0: Data?, n: UnsafeMutablePointer<Int>?) throws {
         if let packets = p0 {
@@ -887,3 +887,4 @@ extension PacketTunnelProvider: Tun2socksTunWriterProtocol {
     
     func close() throws {}
 }
+*/
