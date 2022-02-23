@@ -206,6 +206,6 @@ void SitesLogic::onPushButtonSitesExportClicked()
     for (auto s : sites.keys()) {
         data += s + "\t" + sites.value(s).toString() + "\n";
     }
-    uiLogic()->saveTextFile("Sites", ".txt", data);
+    uiLogic()->saveTextFile("Export Sites", "sites.txt", ".txt", data);
 }
 

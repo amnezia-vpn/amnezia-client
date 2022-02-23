@@ -117,7 +117,7 @@ New encryption keys pair will be generated.")
                 visible: tfShareCode.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Save AmneziaVPN config"), "*.vpn", tfShareCode.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Save AmneziaVPN config"), "amnezia_config.vpn", "*.vpn", tfShareCode.textArea.text)
                 }
             }
 

@@ -8,8 +8,11 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
-#include "core/ipcclient.h"
 #include "settings.h"
+
+#ifdef AMNEZIA_DESKTOP
+#include "core/ipcclient.h"
+#endif
 
 using namespace amnezia;
 
@@ -74,8 +77,10 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
-    IpcClient *m_IpcClient {nullptr};
 
+#ifdef AMNEZIA_DESKTOP
+    IpcClient *m_IpcClient {nullptr};
+#endif
 };
 
 #endif // VPNCONNECTION_H

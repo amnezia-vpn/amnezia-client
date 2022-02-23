@@ -10,7 +10,12 @@
 #include <configurators/wireguard_configurator.h>
 #include <configurators/vpn_configurator.h>
 #include <core/servercontroller.h>
+
+#ifdef AMNEZIA_DESKTOP
+#include "ipc.h"
+#include "core/ipcclient.h"
 #include <protocols/wireguardprotocol.h>
+#endif
 
 #ifdef Q_OS_ANDROID
 #include "android_controller.h"
@@ -20,9 +25,6 @@
 #ifdef Q_OS_IOS
 #include <protocols/ios_vpnprotocol.h>
 #endif
-
-#include "ipc.h"
-#include "core/ipcclient.h"
 
 #include "utils.h"
 #include "vpnconnection.h"
@@ -48,6 +50,7 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
 {
+#ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
             IpcClient::Interface()->resetIpStack();
@@ -87,7 +90,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
             }
         }
     }
-
+#endif
     emit connectionStateChanged(state);
 }
 
@@ -98,6 +101,7 @@ const QString &VpnConnection::remoteAddress() const
 
 void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
 {
+#ifdef AMNEZIA_DESKTOP
     QStringList ips;
     QStringList sites;
     const QVariantMap &m = m_settings.vpnSites(mode);
@@ -137,6 +141,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
             };
             QHostInfo::lookupHost(site, this, cbResolv);
     }
+#endif
 }
 
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
@@ -146,6 +151,7 @@ QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
 
 void VpnConnection::addRoutes(const QStringList &ips)
 {
+#ifdef AMNEZIA_DESKTOP
     if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
         if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
@@ -154,10 +160,12 @@ void VpnConnection::addRoutes(const QStringList &ips)
             IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips);
         }
     }
+#endif
 }
 
 void VpnConnection::deleteRoutes(const QStringList &ips)
 {
+#ifdef AMNEZIA_DESKTOP
     if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
         if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeDeleteList(vpnProtocol()->vpnGateway(), ips);
@@ -166,11 +174,14 @@ void VpnConnection::deleteRoutes(const QStringList &ips)
             IpcClient::Interface()->routeDeleteList(m_vpnProtocol->routeGateway(), ips);
         }
     }
+#endif
 }
 
 void VpnConnection::flushDns()
 {
+#ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) IpcClient::Interface()->flushDns();
+#endif
 }
 
 ErrorCode VpnConnection::lastError() const
@@ -351,6 +362,7 @@ void VpnConnection::disconnectFromVpn()
 {
     // qDebug() << "Disconnect from VPN 1";
 
+#ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 
@@ -358,8 +370,15 @@ void VpnConnection::disconnectFromVpn()
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
         response.waitForFinished(1000);
     }
+#endif
+
+
 
     if (!m_vpnProtocol.data()) {
+        emit connectionStateChanged(VpnProtocol::Disconnected);
+#ifdef Q_OS_ANDROID
+        AndroidController::instance()->stop();
+#endif
         return;
     }
     m_vpnProtocol.data()->stop();

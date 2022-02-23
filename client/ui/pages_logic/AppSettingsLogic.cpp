@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "defines.h"
 #include "ui/qautostart.h"
+#include "ui/uilogic.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -65,22 +66,7 @@ void AppSettingsLogic::onPushButtonOpenLogsClicked()
 
 void AppSettingsLogic::onPushButtonExportLogsClicked()
 {
-    QString log = Debug::getLogFile();
-    QString ext = ".log";
-
-    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save log"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
-
-    if (fileName.isEmpty()) return;
-    if (!fileName.endsWith(ext)) fileName.append(ext);
-
-    QFile save(fileName);
-    save.open(QIODevice::WriteOnly);
-    save.write(log.toUtf8());
-    save.close();
-
-    QFileInfo fi(fileName);
-    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Debug::getLogFile());
 }
 
 void AppSettingsLogic::onPushButtonClearLogsClicked()

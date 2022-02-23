@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#ifndef Q_OS_IOS
 #include "rep_ipc_process_interface_replica.h"
 // This class is dangerous - instance of this class casted from base class,
 // so it support only functions
@@ -19,11 +18,6 @@ public:
     void waitForFinished(int msecs);
 
 };
-
-#else // defined Q_OS_IOS
-class IpcProcessInterfaceReplica {};
-class PrivilegedProcess {};
-#endif // Q_OS_IOS
 
 #endif // PRIVILEGED_PROCESS_H
 

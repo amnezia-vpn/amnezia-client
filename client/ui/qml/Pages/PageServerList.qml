@@ -16,16 +16,16 @@ PageBase {
     }
     Caption {
         id: caption
-        text: qsTr("Servers list")
+        text: qsTr("Servers")
         width: undefined
     }
 
     SvgButtonType {
-        anchors.bottom: caption.bottom
+        anchors.verticalCenter: caption.verticalCenter
         anchors.leftMargin: 10
         anchors.left: caption.right
-        width: 24
-        height: 24
+        width: 27
+        height: 27
 
         icon.source: "qrc:/images/svg/control_point_black_24dp.svg"
         onClicked: {

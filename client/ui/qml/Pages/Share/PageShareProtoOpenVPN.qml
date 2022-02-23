@@ -98,7 +98,7 @@ PageShareProtocolBase {
                 visible: tfShareCode.textArea.length > 0
 
                 onClicked: {
-                    UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "*.ovpn", tfShareCode.textArea.text)
+                    UiLogic.saveTextFile(qsTr("Save OpenVPN config"), "amnezia_for_openvpn.ovpn", "*.ovpn", tfShareCode.textArea.text)
                 }
             }
         }
