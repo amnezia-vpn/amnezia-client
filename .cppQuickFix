@@ -1,0 +1,3 @@
+[CppEditor.QuickFix]
+GettersOutsideClassFrom=-1
+SettersOutsideClassFrom=-1
