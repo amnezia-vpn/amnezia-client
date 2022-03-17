@@ -1,6 +1,6 @@
 buildscript {
    ext{
-       kotlin_version = "1.4.30-M1"
+       kotlin_version = "1.5.0"
        //  for libwg
        appcompatVersion = '1.1.0'
        annotationsVersion = '1.0.1'
@@ -43,6 +43,15 @@ dependencies {
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
+    //ss
+    implementation "androidx.preference:preference:1.1.0"
+    implementation "androidx.work:work-runtime-ktx:2.3.4"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "androidx.room:room-runtime:2.2.5" // runtime
+    implementation "dnsjava:dnsjava:2.1.9"
+    implementation "com.google.code.gson:gson:2.8.5"
+    implementation "org.connectbot.jsocks:jsocks:1.0.0"
+    annotationProcessor "androidx.room:room-compiler:2.3.0"
 }
 
 android {
@@ -88,6 +97,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
 
     lintOptions {
         abortOnError false
