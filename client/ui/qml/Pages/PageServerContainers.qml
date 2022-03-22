@@ -41,6 +41,10 @@ PageBase {
     SelectContainer {
         id: container_selector
 
+        onAboutToHide: {
+            pageLoader.focus = true
+        }
+
         onContainerSelected: {
             var containerProto =  ContainerProps.defaultProtocol(c_index)
 

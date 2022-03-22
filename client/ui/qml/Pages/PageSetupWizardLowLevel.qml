@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.15
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -14,38 +15,56 @@ PageBase {
         id: back_from_setup_wizard
     }
     Caption {
+        id: caption
         text: qsTr("Setup Wizard")
     }
-    Item {
-        x: 10
-        y: 70
-        width: 361
-        height: 561
-        LabelType {
-            x: 30
-            y: 10
-            width: 321
-            height: 341
-            verticalAlignment: Text.AlignTop
-            text: qsTr('AmneziaVPN will install OpenVPN protocol with public/private key pairs generated on server and client sides. You can also configure connection on your mobile device by copying exported ".ovpn" file to your device and setting up official OpenVPN client. We recommend do not use messengers for sending connection profile - it contains VPN private keys.')
-        }
-        LabelType {
-            x: 30
-            y: 400
-            width: 321
-            height: 71
-            text: qsTr('OpenVPN profile will be installed')
-            verticalAlignment: Text.AlignBottom
-        }
-        BlueButtonType {
-            id: next_button
-            x: 30
-            y: 490
-            width: 301
-            height: 40
-            text: qsTr("Start configuring")
-            onClicked: {
-                WizardLogic.onPushButtonLowFinishClicked()
+
+    Flickable {
+        id: fl
+        width: root.width
+        anchors.top: caption.bottom
+        anchors.topMargin: 20
+        anchors.bottom: root.bottom
+        anchors.bottomMargin: 20
+        anchors.left: root.left
+        anchors.leftMargin: 30
+        anchors.right: root.right
+        anchors.rightMargin: 30
+
+        contentHeight: content.height
+        clip: true
+
+        ColumnLayout {
+            id: content
+            enabled: logic.pageEnabled
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            LabelType {
+                Layout.fillWidth: true
+                verticalAlignment: Text.AlignTop
+                text: qsTr('AmneziaVPN will install the OpenVPN protocol with public/private key pairs generated on both server and client sides.
+
+You can also configure the connection on your mobile device by copying the exported ".ovpn" file to your device, and setting up the official OpenVPN client.
+
+We recommend not to use messaging applications for sending the connection profile - it contains VPN private keys.')
+            }
+            LabelType {
+                Layout.fillWidth: true
+                Layout.topMargin: 15
+                text: qsTr('OpenVPN profile will be installed')
+                verticalAlignment: Text.AlignBottom
+            }
+            BlueButtonType {
+                id: next_button
+                Layout.fillWidth: true
+                Layout.topMargin: 15
+                Layout.preferredHeight: 41
+                text: qsTr("Start configuring")
+                onClicked: {
+                    WizardLogic.onPushButtonLowFinishClicked()
+                }
             }
         }
     }

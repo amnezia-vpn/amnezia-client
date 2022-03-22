@@ -3,11 +3,13 @@ import QtQuick.Controls 2.12
 
 CheckBox {
     id: root
+    property int imageWidth : 20
+    property int imageHeight : 20
     indicator: Image {
-//        y: 5
+        id: indicator
         anchors.verticalCenter: root.verticalCenter
-        height: 20
-        width: 20
+        height: imageHeight
+        width: imageWidth
         source: root.checked ? "qrc:/images/controls/check_on.png"
                              : "qrc:/images/controls/check_off.png"
     }

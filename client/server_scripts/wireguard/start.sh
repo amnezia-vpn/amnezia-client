@@ -18,8 +18,11 @@ iptables -A OUTPUT -o wg0 -j ACCEPT
 
 # Allow forwarding traffic only from the VPN.
 iptables -A FORWARD -i wg0 -o eth0 -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -j ACCEPT
+iptables -A FORWARD -i wg0 -o eth1 -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -j ACCEPT
+
 iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 iptables -t nat -A POSTROUTING -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth1 -j MASQUERADE
 
 tail -f /dev/null

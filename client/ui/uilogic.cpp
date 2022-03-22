@@ -17,6 +17,7 @@
 #include <QThread>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QQmlFile>
 
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -29,7 +30,6 @@
 #include "core/errorstrings.h"
 
 #include "containers/containers_defs.h"
-#include "protocols/shadowsocksvpnprotocol.h"
 
 #include "ui/qautostart.h"
 
@@ -112,6 +112,7 @@ UiLogic::~UiLogic()
 {
     emit hide();
 
+#ifdef AMNEZIA_DESKTOP
     if (m_vpnConnection->connectionState() != VpnProtocol::VpnConnectionState::Disconnected) {
         m_vpnConnection->disconnectFromVpn();
         for (int i = 0; i < 50; i++) {
@@ -122,6 +123,7 @@ UiLogic::~UiLogic()
             }
         }
     }
+#endif
 
     m_vpnConnection->deleteLater();
     m_vpnConnectionThread.quit();
@@ -133,6 +135,11 @@ UiLogic::~UiLogic()
 void UiLogic::initalizeUiLogic()
 {
 #ifdef Q_OS_ANDROID
+    connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
+        if (connected) {
+            vpnLogic()->onConnectionStateChanged(VpnProtocol::Connected);
+        }
+    });
     if (!AndroidController::instance()->initialize()) {
          qDebug() << QString("Init failed") ;
          emit VpnProtocol::Error;
@@ -214,6 +221,9 @@ void UiLogic::onUpdateAllPages()
 void UiLogic::keyPressEvent(Qt::Key key)
 {
     switch (key) {
+    case Qt::Key_AsciiTilde:
+    case Qt::Key_QuoteLeft: emit toggleLogPanel();
+        break;
     case Qt::Key_L: Debug::openLogsFolder();
         break;
     case Qt::Key_K: Debug::openServiceLogsFolder();
@@ -600,27 +610,60 @@ PageEnumNS::Page UiLogic::currentPage()
     return static_cast<PageEnumNS::Page>(currentPageValue());
 }
 
-void UiLogic::saveTextFile(const QString& desc, const QString& ext, const QString& data)
+void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QString ext, const QString& data)
 {
-    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+//    ext.replace("*", "");
+//    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
+//        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
 
+//    if (fileName.isEmpty()) return;
+//    if (!fileName.endsWith(ext)) fileName.append(ext);
+
+//    QFile save(fileName);
+//    save.open(QIODevice::WriteOnly);
+//    save.write(data.toUtf8());
+//    save.close();
+
+//    QFileInfo fi(fileName);
+//    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+
+    ext.replace("*", "");
+    QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QUrl fileName;
+#ifdef AMNEZIA_DESKTOP
+    fileName = QFileDialog::getSaveFileUrl(nullptr, desc,
+        QUrl::fromLocalFile(docDir + "/" + suggestedName), "*" + ext);
     if (fileName.isEmpty()) return;
-    if (!fileName.endsWith(ext)) fileName.append(ext);
+    if (!fileName.toString().endsWith(ext)) fileName = QUrl(fileName.toString() + ext);
+#elif defined Q_OS_ANDROID
+    fileName = QFileDialog::getSaveFileUrl(nullptr, suggestedName,
+        QUrl::fromLocalFile(docDir), "*" + ext);
+#endif
 
-    QFile save(fileName);
+    qDebug() << "UiLogic::saveTextFile" << fileName;
+    if (fileName.isEmpty()) return;
+
+#ifdef AMNEZIA_DESKTOP
+    QFile save(fileName.toLocalFile());
+#else
+    qDebug() << "UiLogic::saveTextFile" << QQmlFile::urlToLocalFileOrQrc(fileName);
+    QFile save(QQmlFile::urlToLocalFileOrQrc(fileName));
+#endif
+
     save.open(QIODevice::WriteOnly);
     save.write(data.toUtf8());
     save.close();
 
-    QFileInfo fi(fileName);
+    QFileInfo fi(fileName.toLocalFile());
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 
-void UiLogic::saveBinaryFile(const QString &desc, const QString &ext, const QString &data)
+void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &data)
 {
+    ext.replace("*", "");
     QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), ext);
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
 
     if (fileName.isEmpty()) return;
     if (!fileName.endsWith(ext)) fileName.append(ext);

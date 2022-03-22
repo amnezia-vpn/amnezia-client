@@ -5,6 +5,7 @@
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
+#include "debug.h"
 #include "defs.h"
 #include "settings.h"
 

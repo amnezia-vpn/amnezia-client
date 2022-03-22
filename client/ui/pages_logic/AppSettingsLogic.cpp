@@ -3,6 +3,11 @@
 #include "debug.h"
 #include "defines.h"
 #include "ui/qautostart.h"
+#include "ui/uilogic.h"
+
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QStandardPaths>
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -11,7 +16,8 @@ AppSettingsLogic::AppSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_checkBoxAutostartChecked{false},
     m_checkBoxAutoConnectChecked{false},
-    m_checkBoxStartMinimizedChecked{false}
+    m_checkBoxStartMinimizedChecked{false},
+    m_checkBoxSaveLogsChecked{false}
 {
 
 }
@@ -21,6 +27,7 @@ void AppSettingsLogic::onUpdatePage()
     set_checkBoxAutostartChecked(Autostart::isAutostart());
     set_checkBoxAutoConnectChecked(m_settings.isAutoConnect());
     set_checkBoxStartMinimizedChecked(m_settings.isStartMinimized());
+    set_checkBoxSaveLogsChecked(m_settings.isSaveLogs());
 
     QString ver = QString("%1: %2 (%3)")
             .arg(tr("Software version"))
@@ -47,7 +54,23 @@ void AppSettingsLogic::onCheckBoxStartMinimizedToggled(bool checked)
     m_settings.setStartMinimized(checked);
 }
 
+void AppSettingsLogic::onCheckBoxSaveLogsCheckedToggled(bool checked)
+{
+    m_settings.setSaveLogs(checked);
+}
+
 void AppSettingsLogic::onPushButtonOpenLogsClicked()
 {
     Debug::openLogsFolder();
+}
+
+void AppSettingsLogic::onPushButtonExportLogsClicked()
+{
+    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Debug::getLogFile());
+}
+
+void AppSettingsLogic::onPushButtonClearLogsClicked()
+{
+    Debug::clearLogs();
+    Debug::clearServiceLogs();
 }

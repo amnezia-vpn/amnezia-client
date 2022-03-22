@@ -136,7 +136,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     }
 }
 
-bool ContainerProps::isWorkingOnPlatform(DockerContainer c)
+bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 {
 #ifdef Q_OS_WINDOWS
     return true;

@@ -15,8 +15,11 @@ public:
     static QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
 
-    static QString processConfigWithLocalSettings(DockerContainer container, Proto proto, QString config);
-    static QString processConfigWithExportSettings(DockerContainer container, Proto proto, QString config);
+    static QPair<QString, QString> getDnsForConfig(int serverIndex);
+    static QString &processConfigWithDnsSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
+
+    static QString &processConfigWithLocalSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
+    static QString &processConfigWithExportSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
 
     // workaround for containers which is not support normal configaration
     static void updateContainerConfigAfterInstallation(DockerContainer container,

@@ -77,24 +77,12 @@ PageProtocolBase {
         }
     }
 
-    LabelType {
+    RichLabelType {
         anchors.bottom: check_persist.top
         anchors.bottomMargin: 10
         width: parent.width - 60
         x: 30
         font.pixelSize: 14
-        textFormat: Text.RichText
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-            acceptedButtons: Qt.NoButton
-        }
-
-//        text: "In order to mount remote SFTP folder as local drive, perform following steps:
-//- Install the latest version of WinFsp [https://github.com/billziss-gh/winfsp/releases/latest].
-//- Install the latest version of SSHFS-Win. Choose the x64 or x86 installer according to your computer's architecture [https://github.com/billziss-gh/sshfs-win/releases]"
-        onLinkActivated: Qt.openUrlExternally(link)
 
         readonly property string windows_text: "In order to mount remote SFTP folder as local drive, perform following steps:
 <ul>

@@ -9,8 +9,13 @@
 class Log
 {
 public:
-    static bool initialize();
+    static bool init();
+    static void deinit();
+
     static QString serviceLogFileNamePath();
+
+    static void clearLogs();
+    static void cleanUp();
 
 private:
     friend void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);

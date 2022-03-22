@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick
+QT += widgets core gui network xml remoteobjects quick svg
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -31,9 +31,7 @@ HEADERS  += \
     containers/containers_defs.h \
     core/defs.h \
     core/errorstrings.h \
-    core/ipcclient.h \
     configurators/openvpn_configurator.h \
-   core/privileged_process.h \
    core/scripts_registry.h \
    core/server_defs.h \
     core/servercontroller.h \
@@ -88,9 +86,7 @@ SOURCES  += \
    configurators/wireguard_configurator.cpp \
     containers/containers_defs.cpp \
    core/errorstrings.cpp \
-    core/ipcclient.cpp \
     configurators/openvpn_configurator.cpp \
-   core/privileged_process.cpp \
    core/scripts_registry.cpp \
    core/server_defs.cpp \
     core/servercontroller.cpp \
@@ -205,6 +201,8 @@ win32|macx|linux:!android {
    DEFINES += AMNEZIA_DESKTOP
 
    HEADERS  += \
+      core/ipcclient.h \
+      core/privileged_process.h \
       ui/systemtray_notificationhandler.h \
       protocols/openvpnprotocol.h \
       protocols/openvpnovercloakprotocol.h \
@@ -212,11 +210,16 @@ win32|macx|linux:!android {
       protocols/wireguardprotocol.h \
 
    SOURCES  += \
+      core/ipcclient.cpp \
+      core/privileged_process.cpp \
       ui/systemtray_notificationhandler.cpp \
       protocols/openvpnprotocol.cpp \
       protocols/openvpnovercloakprotocol.cpp \
       protocols/shadowsocksvpnprotocol.cpp \
       protocols/wireguardprotocol.cpp \
+
+   REPC_REPLICA += ../ipc/ipc_interface.rep
+   REPC_REPLICA += ../ipc/ipc_process_interface.rep
 }
 
 android {
@@ -367,6 +370,4 @@ ios {
 }
 
 
-REPC_REPLICA += ../ipc/ipc_interface.rep
-!ios: REPC_REPLICA += ../ipc/ipc_process_interface.rep
 

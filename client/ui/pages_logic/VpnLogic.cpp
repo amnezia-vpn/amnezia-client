@@ -1,10 +1,14 @@
+#include <QApplication>
+
 #include "VpnLogic.h"
 
 #include "core/errorstrings.h"
 #include "vpnconnection.h"
+#include <QTimer>
 #include <functional>
 #include "../uilogic.h"
 #include "defines.h"
+#include <configurators/vpn_configurator.h>
 
 
 VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
@@ -18,6 +22,8 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     m_labelSpeedReceivedText{tr("0 Mbps")},
     m_labelSpeedSentText{tr("0 Mbps")},
     m_labelStateText{},
+    m_isContainerHaveAuthData{false},
+    m_isContainerSupportedByCurrentPlatform{false},
     m_widgetVpnModeEnabled{false}
 {
     connect(uiLogic()->m_vpnConnection, &VpnConnection::bytesChanged, this, &VpnLogic::onBytesChanged);
@@ -48,6 +54,8 @@ void VpnLogic::onUpdatePage()
                                   selectedContainer == DockerContainer::ShadowSocks||
                                   selectedContainer == DockerContainer::Cloak);
 
+    set_isContainerHaveAuthData(m_settings.haveAuthData(m_settings.defaultServerIndex()));
+
     set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites || !isCustomRoutesSupported());
     set_radioButtonVpnModeForwardSitesChecked(mode == Settings::VpnOnlyForwardSites && isCustomRoutesSupported());
     set_radioButtonVpnModeExceptSitesChecked(mode == Settings::VpnAllExceptSites && isCustomRoutesSupported());
@@ -61,8 +69,18 @@ void VpnLogic::onUpdatePage()
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
 
-    set_isContainerWorkingOnPlatform(ContainerProps::isWorkingOnPlatform(selectedContainer));
-    if (!isContainerWorkingOnPlatform()) {
+    auto dns = VpnConfigurator::getDnsForConfig(m_settings.defaultServerIndex());
+    set_amneziaDnsEnabled(dns.first == protocols::dns::amneziaDnsIp);
+    if (dns.first == protocols::dns::amneziaDnsIp) {
+        set_labelCurrentDns("On your server");
+    }
+    else {
+        set_labelCurrentDns(dns.first + ", " + dns.second);
+    }
+
+
+    set_isContainerSupportedByCurrentPlatform(ContainerProps::isSupportedByCurrentPlatform(selectedContainer));
+    if (!isContainerSupportedByCurrentPlatform()) {
         set_labelErrorText(tr("AmneziaVPN not supporting selected protocol on this device. Select another protocol."));
     }
     else {
@@ -224,6 +242,6 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 
 void VpnLogic::onDisconnect()
 {
-    set_pushButtonConnectChecked(false);
+    onConnectionStateChanged(VpnProtocol::Disconnected);
     emit disconnectFromVpn();
 }

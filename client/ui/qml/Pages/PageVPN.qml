@@ -22,7 +22,7 @@ PageBase {
 
     LabelType {
         x: 10
-        y: 5
+        y: 10
         width: 100
         height: 21
         text: VpnLogic.labelVersionText
@@ -30,11 +30,40 @@ PageBase {
         font.pixelSize: 12
     }
 
+    BasicButtonType {
+        y: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+        background: Item {}
+
+
+        contentItem: Text {
+            anchors.fill: parent
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 18
+            font.underline: true
+
+            text: qsTr("Donate")
+            color: "#D4D4D4"
+
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: {
+            UiLogic.goToPage(PageEnum.About)
+        }
+    }
+
     ImageButtonType {
         x: parent.width - 40
-        y: 10
-        width: 31
-        height: 31
+        y: 0
+        width: 41
+        height: 41
+        imgMarginHover: 8
+        imgMargin: 9
         icon.source: "qrc:/images/settings_grey.png"
         onClicked: {
             UiLogic.goToPage(PageEnum.GeneralSettings)
@@ -71,7 +100,7 @@ PageBase {
         }
         contentItem: Item {}
         antialiasing: true
-        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerWorkingOnPlatform
+        enabled: VpnLogic.pushButtonConnectEnabled && VpnLogic.isContainerSupportedByCurrentPlatform
         opacity: VpnLogic.pushButtonConnectVisible ? 1 : 0
 
 //        transitions: Transition {
@@ -101,14 +130,14 @@ PageBase {
         LabelType {
             Layout.alignment: Qt.AlignRight
             height: 21
-            text: qsTr("Server") + ": "
+            text: ( VpnLogic.isContainerHaveAuthData ? qsTr("Server") : qsTr("Profile")) + ": "
         }
 
         BasicButtonType {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentServer + " →"
+            text: VpnLogic.labelCurrentServer + (VpnLogic.isContainerHaveAuthData ? " →" : "")
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
@@ -129,27 +158,63 @@ PageBase {
         LabelType {
             Layout.alignment: Qt.AlignRight
             height: 21
-            text: qsTr("Service") + ": "
+            text: qsTr("Proto") + ": "
         }
 
         BasicButtonType {
             Layout.alignment: Qt.AlignLeft
             height: 21
             background: Item {}
-            text: VpnLogic.labelCurrentService + " →"
+            text: VpnLogic.labelCurrentService + (VpnLogic.isContainerHaveAuthData ? " →" : "")
             font.family: "Lato"
             font.styleName: "normal"
             font.pixelSize: 16
             onClicked: {
-                UiLogic.onGotoCurrentProtocolsPage()
+                if (VpnLogic.isContainerHaveAuthData)  UiLogic.onGotoCurrentProtocolsPage()
             }
+        }
+    }
+
+    RowLayout {
+        id: layout3
+        anchors.top: layout2.bottom
+        anchors.topMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 21
+
+
+        LabelType {
+            Layout.alignment: Qt.AlignRight
+            height: 21
+            text: qsTr("DNS") + ": "
+        }
+
+        BasicButtonType {
+            Layout.alignment: Qt.AlignLeft
+            height: 21
+            implicitWidth: implicitContentWidth > root.width * 0.6 ?  root.width * 0.6 : implicitContentWidth + leftPadding + rightPadding
+            background: Item {}
+            text: VpnLogic.labelCurrentDns + (VpnLogic.isContainerHaveAuthData ? " →" : "")
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            onClicked: {
+                if (VpnLogic.isContainerHaveAuthData) UiLogic.goToPage(PageEnum.NetworkSettings)
+            }
+        }
+
+        SvgImageType {
+            svg.source: VpnLogic.amneziaDnsEnabled ? "qrc:/images/svg/gpp_good_black_24dp.svg" : "qrc:/images/svg/gpp_maybe_black_24dp.svg"
+            color: VpnLogic.amneziaDnsEnabled ?  "#22aa33" : "orange"
+            width: 25
+            height: 25
         }
     }
 
 
     LabelType {
         id: error_text
-        anchors.top: layout2.bottom
+        anchors.top: layout3.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 20
         width: parent.width - 20

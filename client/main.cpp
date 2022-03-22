@@ -86,13 +86,13 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 #endif
 
-#if defined(Q_OS_ANDROID)
-    NativeHelpers::registerApplicationInstance(&app);
-#endif
-
 
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
+#endif
+
+#if defined(Q_OS_ANDROID)
+    NativeHelpers::registerApplicationInstance(&app);
 #endif
 
     loadTranslator();
@@ -120,10 +120,26 @@ int main(int argc, char *argv[])
     QCommandLineOption c_autostart {{"a", "autostart"}, "System autostart"};
     parser.addOption(c_autostart);
 
+    QCommandLineOption c_cleanup {{"c", "cleanup"}, "Cleanup logs"};
+    parser.addOption(c_cleanup);
+
     parser.process(app);
 
-    if (!Debug::init()) {
-        qWarning() << "Initialization of debug subsystem failed";
+    if (parser.isSet(c_cleanup)) {
+        Debug::cleanUp();
+        QTimer::singleShot(100,[&app]{
+            app.quit();
+        });
+        app.exec();
+        return 0;
+    }
+
+    Settings settings;
+
+    if (settings.isSaveLogs()) {
+        if (!Debug::init()) {
+            qWarning() << "Initialization of debug subsystem failed";
+        }
     }
 
     app.setQuitOnLastWindowClosed(false);
@@ -165,6 +181,8 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
+    engine->rootContext()->setContextProperty("Debug", &Debug::Instance());
+
     engine->rootContext()->setContextProperty("UiLogic", uiLogic);
 
     engine->rootContext()->setContextProperty("AppSettingsLogic", uiLogic->appSettingsLogic());
@@ -203,18 +221,16 @@ int main(int argc, char *argv[])
     uiLogic->showOnStartup();
 #endif
 
-
-     // TODO - fix
-//#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-//    if (app.isPrimary()) {
-//        QObject::connect(&app, &SingleApplication::instanceStarted, &mainWindow, [&](){
-//            qDebug() << "Secondary instance started, showing this window instead";
-//            mainWindow.show();
-//            mainWindow.showNormal();
-//            mainWindow.raise();
-//        });
-//    }
-//#endif
+    // TODO - fix
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (app.isPrimary()) {
+        QObject::connect(&app, &SingleApplication::instanceStarted, uiLogic, [&](){
+            qDebug() << "Secondary instance started, showing this window instead";
+            emit uiLogic->show();
+            emit uiLogic->raise();
+        });
+    }
+#endif
 
     return app.exec();
 }

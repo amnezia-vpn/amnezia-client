@@ -15,6 +15,10 @@ constexpr char password[] = "password";
 constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
+constexpr char dns1[] = "dns1";
+constexpr char dns2[] = "dns2";
+
+
 constexpr char description[] = "description";
 constexpr char cert[] = "cert";
 constexpr char config[] = "config";
@@ -55,6 +59,9 @@ constexpr char last_config[] = "last_config";
 
 namespace protocols {
 
+namespace dns {
+constexpr char amneziaDnsIp[] = "172.29.172.254";
+}
 
 namespace openvpn {
 constexpr char defaultSubnetAddress[] = "10.8.0.0";
@@ -90,7 +97,7 @@ constexpr char ckBypassUidKeyPath[] = "/opt/amnezia/cloak/cloak_bypass_uid.key";
 constexpr char ckAdminKeyPath[] = "/opt/amnezia/cloak/cloak_admin_uid.key";
 constexpr char defaultPort[] = "443";
 constexpr char defaultRedirSite[] = "tile.openstreetmap.org";
-constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
+constexpr char defaultCipher[] = "chacha20-poly1305";
 
 }
 

@@ -16,20 +16,23 @@ PageBase {
     }
     Caption {
         id: caption
-        text: qsTr("Servers list")
+        text: qsTr("Servers")
         width: undefined
     }
-    ImageButtonType {
-        anchors.bottom: caption.bottom
+
+    SvgButtonType {
+        anchors.verticalCenter: caption.verticalCenter
         anchors.leftMargin: 10
         anchors.left: caption.right
-        width: 24
-        height: 24
-        icon.source: "qrc:/images/plus.png"
+        width: 27
+        height: 27
+
+        icon.source: "qrc:/images/svg/control_point_black_24dp.svg"
         onClicked: {
             UiLogic.goToPage(PageEnum.Start);
         }
     }
+
     ListView {
         id: listWidget_servers
         x: 20
@@ -124,13 +127,13 @@ PageBase {
                 checked: is_default
                 enabled: !is_default
             }
-            ImageButtonType {
+            SvgButtonType {
                 id: pushButtonSetting
                 x: parent.width - 70
                 y: 15
                 width: 30
                 height: 30
-                icon.source: "qrc:/images/settings.png"
+                icon.source: "qrc:/images/svg/settings_black_24dp.svg"
                 opacity: 0
 
                 OpacityAnimator {

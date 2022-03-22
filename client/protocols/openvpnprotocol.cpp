@@ -159,8 +159,8 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
-    Utils::createEmptyFile(vpnLogFileNamePath);
+//    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
+//    Utils::createEmptyFile(vpnLogFileNamePath);
 
     if (!m_managementServer.start(m_managementHost, m_managementPort)) {
         setLastError(ErrorCode::OpenVpnManagementServerError);
@@ -186,8 +186,7 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setProgram(openVpnExecPath());
     QStringList arguments({"--config" , configPath(),
                       "--management", m_managementHost, QString::number(m_managementPort),
-                      "--management-client",
-                      "--log", vpnLogFileNamePath
+                      "--management-client"/*, "--log", vpnLogFileNamePath */
                      });
     m_openVpnProcess->setArguments(arguments);
 
