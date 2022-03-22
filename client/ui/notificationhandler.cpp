@@ -12,7 +12,7 @@
 #else
 
 #  if defined(Q_OS_LINUX)
-#    include "platforms/linux/linuxsystemtraynotificationhandler.h"
+#    include "linuxsystemtraynotificationhandler.h"
 #  endif
 
 #  include "systemtray_notificationhandler.h"

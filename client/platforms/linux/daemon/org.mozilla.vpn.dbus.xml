@@ -1,0 +1,46 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.mozilla.vpn.dbus">
+    <method name="version">
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="activate">
+      <arg type="b" direction="out"/>
+      <arg name="jsonConfig" type="s" direction="in"/>
+    </method>
+    <method name="deactivate">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="status">
+      <arg name="jsonStatus" type="s" direction="out"/>
+    </method>
+    <method name="runningApps">
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="firewallApp">
+      <arg type="b" direction="out"/>
+      <arg name="appName" type="s" direction="in"/>
+      <arg name="state" type="s" direction="in"/>
+    </method>
+    <method name="firewallPid">
+      <arg type="b" direction="out"/>
+      <arg name="rootpid" type="i" direction="in"/>
+      <arg name="state" type="s" direction="in"/>
+    </method>
+    <method name="firewallClear">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="getLogs">
+      <arg name="logs" type="s" direction="out"/>
+    </method>
+    <method name="cleanupLogs">
+    </method>
+    <signal name="connected">
+      <arg name="hopindex" type="i" direction="out"/>
+    </signal>
+    <signal name="disconnected">
+      <arg name="hopindex" type="i" direction="out"/>
+    </signal>
+  </interface>
+</node>
+
