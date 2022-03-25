@@ -38,6 +38,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+    platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     settings.h \
     ui/notificationhandler.h \
@@ -93,6 +94,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+    platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
@@ -190,6 +192,12 @@ macx {
 
 linux:!android {
     DEFINES += MVPN_LINUX
+
+HEADERS  += \
+   platforms/linux/linuxsystemtraynotificationhandler.h \
+
+SOURCES += \
+   platforms/linux/linuxsystemtraynotificationhandler.cpp \
 
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a

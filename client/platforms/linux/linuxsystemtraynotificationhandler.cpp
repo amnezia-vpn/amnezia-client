@@ -18,7 +18,7 @@ namespace {
 Logger logger(LOG_LINUX, "LinuxSystemTrayNotificationHandler");
 }  // namespace
 
-// static
+//static
 bool LinuxSystemTrayNotificationHandler::requiredCustomImpl() {
   if (!QDBusConnection::sessionBus().isConnected()) {
     return false;

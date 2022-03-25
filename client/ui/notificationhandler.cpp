@@ -27,7 +27,7 @@ NotificationHandler* NotificationHandler::create(QObject* parent) {
 #else
 
 #  if defined(Q_OS_LINUX)
-    if (LinuxSystemTrayNotificationHandler::requiredCustomImpl()) {
+    if (LinuxSystemTrayNotificationHandler::requiredCustomImpl() == true) {
         return new LinuxSystemTrayNotificationHandler(parent);
     }
 #  endif
