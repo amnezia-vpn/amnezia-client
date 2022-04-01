@@ -54,7 +54,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                     val json = buffer?.let { String(it) }
                     val config = JSONObject(json)
                     Log.v(tag, "Stored new Tunnel config in Service")
-
+                    Log.i(tag, "Config: $config")
                     if (!mService.checkPermissions()) {
                         mResumeConfig = config
                         // The Permission prompt was already

@@ -273,6 +273,7 @@ android {
 
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libss-local.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libtun2socks.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libredsocks.so
    }
 }
 
@@ -369,6 +370,8 @@ ios {
     #cd client/ && /Users/md/Qt/5.15.2/ios/bin/qmake -o Makefile /Users/md/amnezia/desktop-client/client/client.pro -spec macx-ios-clang CONFIG+=iphonesimulator CONFIG+=simulator CONFIG+=qml_debug -after
 # %{sourceDir}/client/ios/xcode_patcher.rb %{buildDir}/client/AmneziaVPN.xcodeproj 2.0 2.0.0 ios 1
 }
+
+DISTFILES +=
 
 
 

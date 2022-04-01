@@ -39,7 +39,6 @@ class VPNService : android.net.VpnService() {
         Log.e(tag, "Wireguard Version ${wgVersion()}")
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
         mAlreadyInitialised = true
-
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -82,10 +81,7 @@ class VPNService : android.net.VpnService() {
             val lastConfString = prefs.getString("lastConf", "")
             if (lastConfString.isNullOrEmpty()) {
                 // We have nothing to connect to -> Exit
-                Log.e(
-                    tag,
-                    "VPN service was triggered without defining a Server or having a tunnel"
-                )
+                Log.e(tag,"VPN service was triggered without defining a Server or having a tunnel")
                 return super.onStartCommand(intent, flags, startId)
             }
             this.mConfig = JSONObject(lastConfString)
@@ -156,10 +152,13 @@ class VPNService : android.net.VpnService() {
         }
         Log.i(tag, "Permission okay")
         mConfig = json!!
+        Log.i(tag, "Config: " + mConfig)
         mProtocol = mConfig!!.getString("protocol")
+        Log.i(tag, "Protocol: " + mProtocol)
         when (mProtocol) {
             "openvpn" -> startOpenVpn()
             "wireguard" -> startWireGuard()
+            "shadowsocks" -> startShadowsocks()
             else -> {
                 Log.e(tag, "No protocol")
                 return 0
@@ -363,6 +362,19 @@ class VPNService : android.net.VpnService() {
 
     fun getVpnConfig(): JSONObject {
         return mConfig!!
+    }
+
+    private fun startShadowsocks() {
+        Log.e(tag, "startShadowsocks method enters")
+        if(mConfig != null) {
+           try {
+
+            } catch(e: Exception) {
+              Log.e(tag, "Error in startShadowsocks: $e")
+            }
+        } else {
+            Log.e(tag, "Invalid config file!!")
+        }
     }
 
     private fun startOpenVpn() {
