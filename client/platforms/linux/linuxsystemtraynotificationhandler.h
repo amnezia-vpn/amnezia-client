@@ -24,7 +24,8 @@ class LinuxSystemTrayNotificationHandler final
   void notify(Message type, const QString& title, const QString& message,
               int timerMsec) override;
   void setTrayState(VpnProtocol::VpnConnectionState state);
-
+  void setTrayIcon(const QString &iconPath);
+  void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
  private slots:
   void actionInvoked(uint actionId, QString action);
 
