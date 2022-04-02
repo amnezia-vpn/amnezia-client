@@ -23,11 +23,25 @@ class LinuxSystemTrayNotificationHandler final
  private:
   void notify(Message type, const QString& title, const QString& message,
               int timerMsec) override;
+  void setTrayState(VpnProtocol::VpnConnectionState state);
 
  private slots:
   void actionInvoked(uint actionId, QString action);
 
  private:
+  QMenu m_menu;
+  QSystemTrayIcon m_systemTrayIcon;
+
+  QAction* m_trayActionConnect = nullptr;
+  QAction* m_trayActionDisconnect = nullptr;
+  QAction* m_preferencesAction = nullptr;
+  QAction* m_statusLabel = nullptr;
+  QAction* m_separator = nullptr;
+
+  const QString ConnectedTrayIconName = "active.png";
+  const QString DisconnectedTrayIconName = "default.png";
+  const QString ErrorTrayIconName = "error.png";
+
   uint m_lastNotificationId = 0;
 };
 

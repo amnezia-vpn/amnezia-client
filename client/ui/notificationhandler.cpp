@@ -12,7 +12,7 @@
 #else
 
 #  if defined(Q_OS_LINUX)
-#    include "linuxsystemtraynotificationhandler.h"
+#    include "platforms/linux/linuxsystemtraynotificationhandler.h"
 #  endif
 
 #  include "systemtray_notificationhandler.h"
@@ -27,7 +27,7 @@ NotificationHandler* NotificationHandler::create(QObject* parent) {
 #else
 
 #  if defined(Q_OS_LINUX)
-    if (LinuxSystemTrayNotificationHandler::requiredCustomImpl() == true) {
+    if (LinuxSystemTrayNotificationHandler::requiredCustomImpl()) {
         return new LinuxSystemTrayNotificationHandler(parent);
     }
 #  endif
