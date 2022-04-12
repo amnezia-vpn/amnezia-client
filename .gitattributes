@@ -1,0 +1,4 @@
+deploy/data/windows/x64/tap/windows_7/OemVista.inf eol=crlf
+deploy/data/windows/x64/tap/windows_10/OemVista.inf eol=crlf
+deploy/data/windows/x32/tap/windows_7/OemVista.inf eol=crlf
+deploy/data/windows/x32/tap/windows_10/OemVista.inf eol=crlf
