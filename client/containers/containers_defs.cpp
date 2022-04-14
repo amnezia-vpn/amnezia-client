@@ -162,7 +162,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     }
 
 #elif defined (Q_OS_LINUX)
-    return false;
+    return true;
 
 #else
 return false;
