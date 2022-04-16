@@ -271,9 +271,9 @@ android {
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpn3.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnexec.so
 
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libss-local.so
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libtun2socks.so
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libredsocks.so
+#      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libss-local.so
+#      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libtun2socks.so
+#      ANDROID_EXTRA_LIBS += $$PWD/android/lib/shadowsocks/$${abi}/libredsocks.so
    }
 }
 

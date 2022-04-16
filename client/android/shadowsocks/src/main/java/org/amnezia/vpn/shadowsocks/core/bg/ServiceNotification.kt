@@ -36,7 +36,7 @@ import androidx.core.content.getSystemService
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.aidl.IShadowsocksServiceCallback
 import org.amnezia.vpn.shadowsocks.core.aidl.TrafficStats
-import org.amnezia.vpn.R
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.utils.Action
 import org.amnezia.vpn.shadowsocks.core.utils.broadcastReceiver
 

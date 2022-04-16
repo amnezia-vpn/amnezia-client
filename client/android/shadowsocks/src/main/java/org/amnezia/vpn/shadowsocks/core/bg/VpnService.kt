@@ -31,7 +31,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import org.amnezia.vpn.shadowsocks.core.Core
-import org.amnezia.vpn.R
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.VpnRequestActivity
 import org.amnezia.vpn.shadowsocks.core.acl.Acl
 import org.amnezia.vpn.shadowsocks.core.net.ConcurrentLocalSocketListener

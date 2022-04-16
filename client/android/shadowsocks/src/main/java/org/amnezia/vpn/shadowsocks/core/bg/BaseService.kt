@@ -32,6 +32,7 @@ import org.amnezia.vpn.shadowsocks.core.Core.app
 import org.amnezia.vpn.shadowsocks.core.aidl.IShadowsocksService
 import org.amnezia.vpn.shadowsocks.core.aidl.IShadowsocksServiceCallback
 import org.amnezia.vpn.shadowsocks.core.aidl.TrafficStats
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.plugin.PluginManager
 import org.amnezia.vpn.shadowsocks.core.utils.Action
 import org.amnezia.vpn.shadowsocks.core.utils.broadcastReceiver
@@ -44,7 +45,6 @@ import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
-import org.amnezia.vpn.R
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.

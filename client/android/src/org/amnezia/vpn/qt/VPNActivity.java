@@ -19,10 +19,12 @@ public class VPNActivity extends org.qtproject.qt5.android.bindings.QtActivity {
 
   @Override
   public void onBackPressed() {
+//      super.onBackPressed();
     try {
       if (!handleBackButton()) {
         // Move the activity into paused state if back button was pressed
         moveTaskToBack(true);
+//           finish();
       }
     } catch (Exception e) {
     }

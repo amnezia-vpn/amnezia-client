@@ -27,7 +27,7 @@ import androidx.lifecycle.ViewModel
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.Core.app
 import org.amnezia.vpn.shadowsocks.core.acl.Acl
-import org.amnezia.vpn.R
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Key
 import org.amnezia.vpn.shadowsocks.core.utils.disconnectFromMain

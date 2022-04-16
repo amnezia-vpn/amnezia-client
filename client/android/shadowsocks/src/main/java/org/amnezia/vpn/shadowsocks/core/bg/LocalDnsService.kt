@@ -22,6 +22,7 @@ package org.amnezia.vpn.shadowsocks.core.bg
 
 import org.amnezia.vpn.shadowsocks.core.Core.app
 import org.amnezia.vpn.shadowsocks.core.acl.Acl
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.net.LocalDnsServer
 import org.amnezia.vpn.shadowsocks.core.net.Socks5Endpoint
 import org.amnezia.vpn.shadowsocks.core.net.Subnet
@@ -30,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.net.URI
 import java.util.*
-import org.amnezia.vpn.R
 
 object LocalDnsService {
     private val googleApisTester =

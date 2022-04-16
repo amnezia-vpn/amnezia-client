@@ -39,7 +39,6 @@ import androidx.core.content.getSystemService
 import androidx.work.Configuration
 import androidx.work.WorkManager
 
-import org.amnezia.vpn.R
 import org.amnezia.vpn.shadowsocks.core.acl.Acl
 import org.amnezia.vpn.shadowsocks.core.aidl.ShadowsocksConnection
 import org.amnezia.vpn.shadowsocks.core.database.Profile

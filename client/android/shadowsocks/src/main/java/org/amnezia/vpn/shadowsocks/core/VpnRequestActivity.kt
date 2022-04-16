@@ -30,7 +30,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 
-import org.amnezia.vpn.R
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Key
 import org.amnezia.vpn.shadowsocks.core.utils.broadcastReceiver

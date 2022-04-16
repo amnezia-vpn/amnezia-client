@@ -34,7 +34,7 @@ import androidx.core.os.bundleOf
 
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.Core.app
-import org.amnezia.vpn.R
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.utils.printLog
 import org.amnezia.vpn.shadowsocks.core.utils.signaturesCompat
 import org.amnezia.vpn.shadowsocks.plugin.PluginContract
