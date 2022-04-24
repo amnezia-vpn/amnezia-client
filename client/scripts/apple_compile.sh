@@ -33,9 +33,6 @@ helpFunction() {
 print N "This script compiles AmneziaVPN for MacOS/iOS"
 print N ""
 
-#export QT_IOS_BIN="$HOME/Qt/5.15.2/ios/bin"
-#export PATH=$QT_IOS_BIN:$PATH
-
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -132,16 +129,7 @@ printn Y "Cleaning the existing project... "
 rm -rf AmneziaVPN.xcodeproj/ || die "Failed to remove things"
 print G "done."
 
-#print Y "Importing translation files..."
-#git submodule update --remote --depth 1 i18n || die "Failed to fetch newest translation files"
-#python scripts/importLanguages.py $([[ "$OS" = "macos" ]] && echo "-m" || echo "") || die "Failed to import languages"
-#
-#print Y "Generating glean samples..."
-#python scripts/generate_glean.py || die "Failed to generate glean samples"
-
 printn Y "Extract the project version... "
-#SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
-#FULLVERSION=$(echo $SHORTVERSION | cut -d. -f1).$(date +"%Y%m%d%H%M")
 SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
 FULLVERSION=$(cat versionfull.pri | grep BUILDVERSION | grep defined | cut -d= -f2 | tr -d \ )
 print G "$SHORTVERSION - $FULLVERSION"
@@ -248,15 +236,6 @@ if [ "$OS" = "ios" ]; then
 else
   print Y "No Tun2Socks will be built"
 fi
-
-#if [ "$OS" = "ios" ]; then
-# print Y "Prepare to build CocoaLamberjack..."
-# prepare_to_build_cl
-# print Y "Building CocoaLamberjack Framework..."
-# compile_cocoalamberjack
-#else
-# print Y "No CocoaLamberjack will be built"
-#fi
 
 print Y "Creating the xcode project via qmake..."
 $QMAKE \

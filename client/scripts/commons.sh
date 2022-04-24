@@ -74,16 +74,6 @@ EOF
 
 patch_ss() {
   cd 3rd/ShadowSocks
-  
-#  $PATCH -p1 -N --dry-run --silent < ../../scripts/ss_patch.diff 2>/dev/null
-  #If the patch has not been applied then the $? which is the exit status 
-  #for last command would have a success status code = 0
-#  if [ $? -eq 0 ];
-#  then
-#    #apply the patch
-#    $PATCH -p1 < ../../scripts/ss_patch.diff
-#  fi
-  
 }
 
 compile_ss_frameworks() {
@@ -94,21 +84,6 @@ compile_ss_frameworks() {
   fi
   cd ../../
 }
-
-#prepare_to_build_pp() {
-# cat $WORKINGDIR/scripts/pp_ios.xcconfig > $WORKINGDIR/3rd/PacketProcessor/pp_ios.xcconfig
-# cat << EOF >> $WORKINGDIR/3rd/PacketProcessor/pp_ios.xcconfig
-#PROJECT_TEMP_DIR = $WORKINGDIR/3rd/PacketProcessor/build/OpenVPNAdapter.build
-#CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/PacketProcessor/build/Release-iphoneos
-#BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/PacketProcessor/build/Release-iphoneos
-#EOF
-#}
-#
-#compile_packet_processor() {
-# cd 3rd/PacketProcessor
-# $XCODEBUILD -scheme PacketProcessor -configuration Release -xcconfig pp_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project PacketProcessor.xcodeproj
-# cd ../../
-#}
 
 prepare_to_build_cas() {
   cat $WORKINGDIR/scripts/cas_ios.xcconfig > $WORKINGDIR/3rd/CocoaAsyncSocket/cas_ios.xcconfig
