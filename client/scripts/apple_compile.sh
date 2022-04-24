@@ -15,7 +15,7 @@ ADJUST="CONFIG-=adjust"
 
 helpFunction() {
   print G "Usage:"
-  print N "\t$0 <ios> [-d|--debug] [-n|--networkextension] [-a|--adjusttoken <adjust_token>]"
+  print N "\t$0 <macos|ios|> [-d|--debug] [-n|--networkextension] [-a|--adjusttoken <adjust_token>]"
   print N ""
   print N "By default, the project is compiled in release mode. Use -d or --debug for a debug build."
   print N "Use -n or --networkextension to force the network-extension component for MacOS too."
@@ -189,7 +189,7 @@ elif [ "$OS" = "ios" ]; then
     ADJUST="CONFIG+=adjust"
   fi
 else
-  die "Why we are here?"
+  die "Why are we here?"
 fi
 
 VPNMODE=
