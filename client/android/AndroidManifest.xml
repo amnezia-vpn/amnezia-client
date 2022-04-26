@@ -77,7 +77,10 @@
             <!-- extract android style -->
             <meta-data android:name="android.app.splash_screen_drawable" android:resource="@drawable/splashscreen"/>
         </activity>
-        <service android:name=".VPNService" android:process=":QtOnlyProcess">
+        <service android:name=".VPNService" android:permission="android.permission.BIND_VPN_SERVICE" android:process=":QtOnlyProcess">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
             <meta-data android:name="android.app.qt_sources_resource_id" android:resource="@array/qt_sources"/>
             <meta-data android:name="android.app.repository" android:value="default"/>
             <meta-data android:name="android.app.qt_libs_resource_id" android:resource="@array/qt_libs"/>

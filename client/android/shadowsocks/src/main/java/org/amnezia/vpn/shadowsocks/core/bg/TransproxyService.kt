@@ -29,15 +29,16 @@ import java.io.File
 class TransproxyService : Service(), LocalDnsService.Interface {
     override val data = BaseService.Data(this)
     override val tag: String get() = "ShadowsocksTransproxyService"
-    override fun createNotification(profileName: String): ServiceNotification =
-            ServiceNotification(this, profileName, "service-transproxy", true)
+//    override fun createNotification(profileName: String): ServiceNotification =
+//        ServiceNotification(this, profileName, "service-transproxy", true)
 
     override fun onBind(intent: Intent) = super.onBind(intent)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
-            super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+        super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
 
     private fun startRedsocksDaemon() {
-        File(Core.deviceStorage.noBackupFilesDir, "redsocks.conf").writeText("""base {
+        File(Core.deviceStorage.noBackupFilesDir, "redsocks.conf").writeText(
+            """base {
  log_debug = off;
  log_info = off;
  log = stderr;
@@ -51,9 +52,15 @@ redsocks {
  port = ${DataStore.portProxy};
  type = socks5;
 }
-""")
-        data.processes!!.start(listOf(
-                File(applicationInfo.nativeLibraryDir, Executable.REDSOCKS).absolutePath, "-c", "redsocks.conf"))
+"""
+        )
+        data.processes!!.start(
+            listOf(
+                File(applicationInfo.nativeLibraryDir, Executable.REDSOCKS).absolutePath,
+                "-c",
+                "redsocks.conf"
+            )
+        )
     }
 
     override suspend fun startProcesses() {

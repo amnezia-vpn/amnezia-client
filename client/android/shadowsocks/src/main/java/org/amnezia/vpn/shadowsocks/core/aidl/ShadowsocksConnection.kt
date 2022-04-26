@@ -31,7 +31,7 @@ import android.os.RemoteException
 import org.amnezia.vpn.shadowsocks.core.bg.BaseService
 import org.amnezia.vpn.shadowsocks.core.bg.ProxyService
 import org.amnezia.vpn.shadowsocks.core.bg.TransproxyService
-import org.amnezia.vpn.shadowsocks.core.bg.VpnService
+import org.amnezia.vpn.shadowsocks.core.bg.ShadowsocksVpnService
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Action
 import org.amnezia.vpn.shadowsocks.core.utils.Key
@@ -45,7 +45,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
             Key.modeProxy -> ProxyService::class
-            Key.modeVpn -> VpnService::class
+            Key.modeVpn -> ShadowsocksVpnService::class
             Key.modeTransproxy -> TransproxyService::class
             else -> throw UnknownError()
         }.java

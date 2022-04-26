@@ -75,9 +75,9 @@ object Key {
 }
 
 object Action {
-    const val SERVICE = "com.kyle.shadowsocks.SERVICE"
-    const val CLOSE = "com.kyle.shadowsocks.CLOSE"
-    const val RELOAD = "com.kyle.shadowsocks.RELOAD"
+    const val SERVICE = "org.amnezia.vpn.shadowsocks.SERVICE"
+    const val CLOSE = "org.amnezia.vpn.shadowsocks.CLOSE"
+    const val RELOAD = "org.amnezia.vpn.shadowsocks.RELOAD"
 
-    const val EXTRA_PROFILE_ID = "com.kyle.shadowsocks.EXTRA_PROFILE_ID"
+    const val EXTRA_PROFILE_ID = "org.amnezia.vpn.shadowsocks.EXTRA_PROFILE_ID"
 }

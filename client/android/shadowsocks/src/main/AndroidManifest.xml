@@ -30,48 +30,45 @@
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg" />
 
-        <service
-            android:name="org.amnezia.vpn.shadowsocks.core.bg.VpnService"
-            android:directBootAware="true"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_VPN_SERVICE"
-            android:process=":bg"
-            tools:targetApi="n">
-            <intent-filter>
-                <action android:name="android.net.VpnService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
-                android:value="true" />
-        </service>
+<!--        <service-->
+<!--            android:name="org.amnezia.vpn.shadowsocks.core.bg.ShadowsocksVpnService"-->
+<!--            android:directBootAware="true"-->
+<!--            android:exported="false"-->
+<!--            android:label="@string/app_name"-->
+<!--            android:permission="android.permission.BIND_VPN_SERVICE"-->
+<!--            android:process=":BG"-->
+<!--            tools:targetApi="n">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.net.VpnService" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
 
-        <service
-            android:name="org.amnezia.vpn.shadowsocks.core.bg.TransproxyService"
-            android:directBootAware="true"
-            android:exported="false"
-            android:process=":bg"
-            tools:targetApi="n" />
+<!--        <service-->
+<!--            android:name="org.amnezia.vpn.shadowsocks.core.bg.TransproxyService"-->
+<!--            android:directBootAware="true"-->
+<!--            android:exported="false"-->
+<!--            android:process=":QtOnlyProcess"-->
+<!--            tools:targetApi="n" />-->
 
-        <service
-            android:name="org.amnezia.vpn.shadowsocks.core.bg.ProxyService"
-            android:directBootAware="true"
-            android:exported="false"
-            android:process=":bg"
-            tools:targetApi="n" />
+<!--        <service-->
+<!--            android:name="org.amnezia.vpn.shadowsocks.core.bg.ProxyService"-->
+<!--            android:directBootAware="true"-->
+<!--            android:exported="false"-->
+<!--            android:process=":QtOnlyProcess"-->
+<!--            tools:targetApi="n" />-->
 
-        <activity
-            android:name="org.amnezia.vpn.shadowsocks.core.VpnRequestActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:taskAffinity=""
-            android:theme="@style/Theme.AppCompat.Translucent" />
+<!--        <activity-->
+<!--            android:name="org.amnezia.vpn.shadowsocks.core.VpnRequestActivity"-->
+<!--            android:excludeFromRecents="true"-->
+<!--            android:launchMode="singleTask"-->
+<!--            android:taskAffinity=""-->
+<!--            android:theme="@style/Theme.AppCompat.Translucent" />-->
 
         <receiver
             android:name="org.amnezia.vpn.shadowsocks.core.BootReceiver"
             android:directBootAware="true"
             android:enabled="false"
-            android:process=":bg">
+            android:process=":QtOnlyProcess">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
@@ -87,48 +84,48 @@
         <service
             android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <service
             android:name="androidx.work.impl.background.systemjob.SystemJobService"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
 
         <receiver
             android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
             android:directBootAware="true"
-            android:process=":bg"
+            android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
     </application>
 </manifest>

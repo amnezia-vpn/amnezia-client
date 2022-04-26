@@ -38,10 +38,10 @@ import androidx.core.os.bundleOf
  *    ...
  *    &lt;application&gt;
  *        ...
- *        &lt;provider android:name="com.kyle.shadowsocks.$PLUGIN_ID.BinaryProvider"
- *                     android:authorities="com.kyle.shadowsocks.plugin.$PLUGIN_ID.BinaryProvider"&gt;
+ *        &lt;provider android:name="org.amnezia.vpn.shadowsocks.$PLUGIN_ID.BinaryProvider"
+ *                     android:authorities="org.amnezia.vpn.shadowsocks.plugin.$PLUGIN_ID.BinaryProvider"&gt;
  *            &lt;intent-filter&gt;
- *                &lt;category android:name="com.kyle.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" /&gt;
+ *                &lt;category android:name="org.amnezia.vpn.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" /&gt;
  *            &lt;/intent-filter&gt;
  *        &lt;/provider&gt;
  *        ...

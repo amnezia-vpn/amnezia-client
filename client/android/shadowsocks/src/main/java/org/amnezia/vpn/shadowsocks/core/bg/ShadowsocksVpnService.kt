@@ -30,6 +30,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
+import android.util.Log
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.VpnRequestActivity
@@ -51,7 +52,7 @@ import java.net.URL
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
-class VpnService : BaseVpnService(), LocalDnsService.Interface {
+open class ShadowsocksVpnService : BaseVpnService(), LocalDnsService.Interface {
     companion object {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
@@ -95,8 +96,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override val data = BaseService.Data(this)
     override val tag: String get() = "ShadowsocksVpnService"
-    override fun createNotification(profileName: String): ServiceNotification =
-            ServiceNotification(this, profileName, "service-vpn")
+
+    val NOTIFICATION_CHANNEL_ID = "com.amnezia.vpnNotification"
+//    override fun createNotification(profileName: String): ServiceNotification =
+//            ServiceNotification(this, profileName, NOTIFICATION_CHANNEL_ID)
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
@@ -117,7 +120,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         else -> super<LocalDnsService.Interface>.onBind(intent)
     }
 
-    override fun onRevoke() = stopRunner()
+    override fun onRevoke() {
+        stopRunner()
+    }
 
     override fun killProcesses(scope: CoroutineScope) {
         super.killProcesses(scope)
@@ -136,7 +141,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             } else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
         }
         stopRunner()
-        return Service.START_NOT_STICKY
+        return Service.START_STICKY
     }
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
