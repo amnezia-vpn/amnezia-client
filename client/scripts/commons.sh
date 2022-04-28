@@ -109,6 +109,8 @@ compile_tun2socks() {
   if GOOS=ios GOARCH=arm64 GOFLAGS="-tags=ios" CC=iphoneos-clang CXX=iphoneos-clang++ CGO_CFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_CXXFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_LDFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_ENABLED=1 DARWIN_SDK=iphoneos gomobile bind -a -ldflags="-w -s" -bundleid org.amnezia.tun2socks -target=ios/arm64 -tags ios -o ./build/ios/Tun2Socks.xcframework github.com/Jigsaw-Code/outline-go-tun2socks/outline/apple github.com/Jigsaw-Code/outline-go-tun2socks/outline/shadowsocks ; then
     print Y "Tun2Socks built successfully"
   else
+    print "Please check that path to bin folder with gomobile is in your PATH"
+    print "Usually it's in GOPATH/bin, e.g. /usr/local/go/bin"
     killProcess "Tun2Socks build failed"
   fi
   cd ../../
