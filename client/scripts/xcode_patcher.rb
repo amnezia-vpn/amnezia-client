@@ -29,7 +29,7 @@ class XCodeprojPatcher
 
     if networkExtension
       setup_target_extension shortVersion, fullVersion, platform, configHash
-      setup_target_gobridge
+      setup_target_gobridge platform
     else
       setup_target_wireguardgo
       setup_target_wireguardtools
@@ -137,8 +137,10 @@ class XCodeprojPatcher
       # WireGuard group
       group = @project.main_group.new_group('WireGuard')
 
+      version_file_path = platform == 'ios' ? '3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h' : 'macos/gobridge/wireguard-go-version.h'
+
       [
-        'macos/gobridge/wireguard-go-version.h',
+        version_file_path,
         '3rd/wireguard-apple/Sources/Shared/Keychain.swift',
         '3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift',
         '3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift',
@@ -450,15 +452,17 @@ class XCodeprojPatcher
     appex_file.settings = { "ATTRIBUTES" => ['RemoveHeadersOnCopy'] }
   end
 
-  def setup_target_gobridge
+  def setup_target_gobridge(platform)
     target_gobridge = legacy_target = @project.new(Xcodeproj::Project::PBXLegacyTarget)
 
-    target_gobridge.build_working_directory = 'macos/gobridge'
+    bridge_platofrm = platform == 'ios' ? 'iOS' : 'macOS'
+
+    target_gobridge.build_working_directory = platform == 'ios' ? '3rd/wireguard-apple/Sources/WireGuardKitGo' : 'macos/gobridge'
     target_gobridge.build_tool_path = 'make'
     target_gobridge.pass_build_settings_in_environment = '1'
     target_gobridge.build_arguments_string = '$(ACTION)'
-    target_gobridge.name = 'WireGuardGoBridge'
-    target_gobridge.product_name = 'WireGuardGoBridge'
+    target_gobridge.name = "WireGuardGoBridge<#{bridge_platofrm}>"
+    target_gobridge.product_name = "WireGuardGoBridge<#{bridge_platofrm}>"
 
     @project.targets << target_gobridge
     @target_extension.add_dependency target_gobridge
