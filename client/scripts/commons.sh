@@ -106,6 +106,8 @@ compile_cocoa_async_socket() {
 
 compile_tun2socks() {
   cd 3rd/outline-go-tun2socks
+  go get -d ./...
+  go get -u golang.org/x/sys
   if GOOS=ios GOARCH=arm64 GOFLAGS="-tags=ios" CC=iphoneos-clang CXX=iphoneos-clang++ CGO_CFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_CXXFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_LDFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_ENABLED=1 DARWIN_SDK=iphoneos gomobile bind -a -ldflags="-w -s" -bundleid org.amnezia.tun2socks -target=ios/arm64 -tags ios -o ./build/ios/Tun2Socks.xcframework github.com/Jigsaw-Code/outline-go-tun2socks/outline/apple github.com/Jigsaw-Code/outline-go-tun2socks/outline/shadowsocks ; then
     print Y "Tun2Socks built successfully"
   else
