@@ -12,6 +12,7 @@ OS=
 NETWORKEXTENSION=
 ADJUST_SDK_TOKEN=
 ADJUST="CONFIG-=adjust"
+WORKINGDIR=`pwd`
 
 helpFunction() {
   print G "Usage:"
@@ -121,8 +122,19 @@ fi
 
 $QMAKE -v &>/dev/null || die "qmake doesn't exist or it fails"
 
-printn Y "Retrieve the wireguard-go version... "
-(cd macos/gobridge && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > macos/gobridge/wireguard-go-version.h
+print Y "Retrieve the wireguard-go version... "
+if [ "$OS" = "macos" ]; then
+  (cd macos/gobridge && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > macos/gobridge/wireguard-go-version.h
+elif [ "$OS" = "ios" ]; then
+  if [ ! -f 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h ]; then
+    print Y "Creating wireguard-go-version.h file"
+    touch 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h
+    cat <<EOF >> $WORKINGDIR/3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h 
+#define WIREGUARD_GO_VERSION "0.0.0"
+EOF
+  fi
+  (cd 3rd/wireguard-apple/Sources/WireGuardKitGo && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h
+fi
 print G "done."
 
 printn Y "Cleaning the existing project... "
