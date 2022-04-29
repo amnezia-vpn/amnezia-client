@@ -76,7 +76,7 @@ fetch() {
     return
   fi
 
-  die "You must have 'wget' or 'curl' installed."
+  killProcess "You must have 'wget' or 'curl' installed."
 }
 
 sha256() {
@@ -90,7 +90,7 @@ sha256() {
     return 0
   fi
 
-  die "You must have 'sha256sum' or 'openssl' installed."
+  killProcess "You must have 'sha256sum' or 'openssl' installed."
 }
 
 if [[ "$OS" != "macos" ]] && [[ "$OS" != "ios" ]] && [[ "$OS" != "macostest" ]]; then
@@ -108,7 +108,7 @@ if [[ "$OS" == "ios" ]]; then
 fi
 
 if ! [ -d "ios" ] || ! [ -d "macos" ]; then
-  die "This script must be executed at the root of the repository."
+  killProcess "This script must be executed at the root of the repository."
 fi
 
 QMAKE=qmake
@@ -120,7 +120,7 @@ elif [ "$OS" = "ios" ] && ! [ "$QT_IOS_BIN" = "" ]; then
   QMAKE=$QT_IOS_BIN/qmake
 fi
 
-$QMAKE -v &>/dev/null || die "qmake doesn't exist or it fails"
+$QMAKE -v &>/dev/null || killProcess "qmake doesn't exist or it fails"
 
 print Y "Retrieve the wireguard-go version... "
 if [ "$OS" = "macos" ]; then
@@ -138,7 +138,7 @@ fi
 print G "done."
 
 printn Y "Cleaning the existing project... "
-rm -rf AmneziaVPN.xcodeproj/ || die "Failed to remove things"
+rm -rf AmneziaVPN.xcodeproj/ || killProcess "Failed to remove things"
 print G "done."
 
 printn Y "Extract the project version... "
@@ -189,7 +189,7 @@ elif [ "$OS" = "ios" ]; then
     ADJUST="CONFIG+=adjust"
   fi
 else
-  die "Why are we here?"
+  killProcess "Why are we here?"
 fi
 
 VPNMODE=
@@ -259,10 +259,10 @@ $QMAKE \
   $WEMODE \
   $PLATFORM \
   $ADJUST \
-  ./client.pro || die "Compilation failed"
+  ./client.pro || killProcess "Compilation failed"
 
 print Y "Patching the xcode project..."
-ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || die "Failed to merge xcode with wireguard"
+ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || killProcess "Failed to merge xcode with wireguard"
 print G "done."
 
   if command -v "sed" &>/dev/null; then
