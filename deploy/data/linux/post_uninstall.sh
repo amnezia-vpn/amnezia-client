@@ -41,6 +41,10 @@ if test -f /usr/sbin/$APP_NAME; then
         sudo rm -rf /usr/sbin/$APP_NAME >> $LOG_FILE
 fi
 
+if test -f /usr/sbin/$APP_NAME-service; then
+        sudo rm -rf /usr/sbin/$APP_NAME-service >> $LOG_FILE
+fi
+
 getent passwd {1000..6000} | while IFS=: read -r name password uid gid gecos home shell; do
 	if test -f /home/$name/Desktop/$APP_NAME\ client.desktop; then
 		sudo rm -rf /home/$name/Desktop/$APP_NAME\ client.desktop >> $LOG_FILE
