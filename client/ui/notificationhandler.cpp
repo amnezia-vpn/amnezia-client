@@ -11,10 +11,6 @@
 #  include "platforms/android/android_notificationhandler.h"
 #else
 
-#  if defined(Q_OS_LINUX)
-#    //include "platforms/linux/linuxsystemtraynotificationhandler.h"
-#  endif
-
 #  include "systemtray_notificationhandler.h"
 #endif
 

@@ -192,13 +192,6 @@ macx {
 
 linux:!android {
     DEFINES += MVPN_LINUX
-
-HEADERS  += \
-   platforms/linux/linuxsystemtraynotificationhandler.h \
-
-SOURCES += \
-   platforms/linux/linuxsystemtraynotificationhandler.cpp \
-
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
 
