@@ -3,6 +3,6 @@
 Type=Application
 Name=AmneziaVPN client
 Comment=AmneziaVPN client
-Exec=/home/dev/github/amnezia/AppDir/build_release_v2/client/bin/AmneziaVPN
+Exec=AmneziaVPN
 Icon=AmneziaVPN_Logo.png
 Categories=VPN
