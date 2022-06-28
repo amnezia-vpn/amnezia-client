@@ -96,7 +96,7 @@ object NotificationUtil {
         val header = "" + prefs.getString("fallbackNotificationHeader", "Mozilla VPN")
 
         // Create the Intent that Should be Fired if the User Clicks the notification
-        val mainActivityName = "org.amnezia.vpn.qt.VPNActivity"
+        val mainActivityName = "org.qtproject.qt5.android.bindings.QtActivity"
         val activity = Class.forName(mainActivityName)
         val intent = Intent(service, activity)
         val pendingIntent = PendingIntent.getActivity(service, 0, intent, 0)
