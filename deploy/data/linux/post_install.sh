@@ -29,11 +29,9 @@ sudo chmod +x $APP_PATH/client/bin/easyrsa >> $LOG_FILE
 
 sudo cp $APP_PATH/service/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 
-sudo ln -s $APP_PATH/client/lib/* /usr/lib/ >> $LOG_FILE
-
 sudo systemctl start $APP_NAME >> $LOG_FILE
 sudo systemctl enable $APP_NAME >> $LOG_FILE
-sudo ln -s $APP_PATH/client/bin/$APP_NAME /usr/sbin/ >> $LOG_FILE
+sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/sbin/$APP_NAME >> $LOG_FILE
 
 
 echo "user desktop creation loop started" >> $LOG_FILE

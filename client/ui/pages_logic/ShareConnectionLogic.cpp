@@ -25,6 +25,10 @@
 
 #include "../uilogic.h"
 
+#ifdef __linux__
+    #include <math.h>
+#endif
+
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_textEditShareOpenVpnCodeText{},

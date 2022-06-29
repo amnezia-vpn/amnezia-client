@@ -15,7 +15,7 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
-include("3rd/QZXing/src/QZXing-components.pri")
+include("3rd/qzxing/src/QZXing-components.pri")
 
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
@@ -38,6 +38,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+    platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     settings.h \
     ui/notificationhandler.h \
@@ -93,6 +94,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+    platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
@@ -190,9 +192,10 @@ macx {
 
 linux:!android {
     DEFINES += MVPN_LINUX
-
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+
+    INCLUDEPATH += $$PWD/platforms/linux
 }
 
 win32|macx|linux:!android {
