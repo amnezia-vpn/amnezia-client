@@ -55,7 +55,11 @@ EOF
 
 compile_openvpn_adapter() {
   cd 3rd/OpenVPNAdapter
-  $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project OpenVPNAdapter.xcodeproj
+  if $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project OpenVPNAdapter.xcodeproj ; then
+    print Y "OpenVPNAdapter built successfully"
+  else
+    killProcess "OpenVPNAdapter build failed"
+  fi
   cd ../../
 }
 
@@ -70,37 +74,16 @@ EOF
 
 patch_ss() {
   cd 3rd/ShadowSocks
-  
-#  $PATCH -p1 -N --dry-run --silent < ../../scripts/ss_patch.diff 2>/dev/null
-  #If the patch has not been applied then the $? which is the exit status 
-  #for last command would have a success status code = 0
-#  if [ $? -eq 0 ];
-#  then
-#    #apply the patch
-#    $PATCH -p1 < ../../scripts/ss_patch.diff
-#  fi
-  
 }
 
 compile_ss_frameworks() {
-  $XCODEBUILD -scheme ShadowSocks -configuration Release -xcconfig ss_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project ShadowSocks.xcodeproj
+  if $XCODEBUILD -scheme ShadowSocks -configuration Release -xcconfig ss_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project ShadowSocks.xcodeproj ; then
+    print Y "ShadowSocks built successfully"
+  else
+    killProcess "ShadowSocks build failed"
+  fi
   cd ../../
 }
-
-#prepare_to_build_pp() {
-# cat $WORKINGDIR/scripts/pp_ios.xcconfig > $WORKINGDIR/3rd/PacketProcessor/pp_ios.xcconfig
-# cat << EOF >> $WORKINGDIR/3rd/PacketProcessor/pp_ios.xcconfig
-#PROJECT_TEMP_DIR = $WORKINGDIR/3rd/PacketProcessor/build/OpenVPNAdapter.build
-#CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/PacketProcessor/build/Release-iphoneos
-#BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/PacketProcessor/build/Release-iphoneos
-#EOF
-#}
-#
-#compile_packet_processor() {
-# cd 3rd/PacketProcessor
-# $XCODEBUILD -scheme PacketProcessor -configuration Release -xcconfig pp_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project PacketProcessor.xcodeproj
-# cd ../../
-#}
 
 prepare_to_build_cas() {
   cat $WORKINGDIR/scripts/cas_ios.xcconfig > $WORKINGDIR/3rd/CocoaAsyncSocket/cas_ios.xcconfig
@@ -113,13 +96,25 @@ EOF
 
 compile_cocoa_async_socket() {
   cd 3rd/CocoaAsyncSocket
-  $XCODEBUILD -scheme 'iOS Framework' -configuration Release -xcconfig cas_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project CocoaAsyncSocket.xcodeproj
+  if $XCODEBUILD -scheme 'iOS Framework' -configuration Release -xcconfig cas_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project CocoaAsyncSocket.xcodeproj ; then
+    print Y "CocoaAsyncSocket built successfully"
+  else
+    killProcess "CocoaAsyncSocket build failed"
+  fi
   cd ../../
 }
 
 compile_tun2socks() {
   cd 3rd/outline-go-tun2socks
-  GOOS=ios GOARCH=arm64 GOFLAGS="-tags=ios" CC=iphoneos-clang CXX=iphoneos-clang++ CGO_CFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_CXXFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_LDFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_ENABLED=1 DARWIN_SDK=iphoneos gomobile bind -a -ldflags="-w -s" -bundleid org.amnezia.tun2socks -target=ios/arm64 -tags ios -o ./build/ios/Tun2Socks.xcframework github.com/Jigsaw-Code/outline-go-tun2socks/outline/apple github.com/Jigsaw-Code/outline-go-tun2socks/outline/shadowsocks
+  go get -d ./...
+  go get -u golang.org/x/sys
+  if GOOS=ios GOARCH=arm64 GOFLAGS="-tags=ios" CC=iphoneos-clang CXX=iphoneos-clang++ CGO_CFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_CXXFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_LDFLAGS="-isysroot iphoneos -miphoneos-version-min=12.0 -fembed-bitcode -arch arm64" CGO_ENABLED=1 DARWIN_SDK=iphoneos gomobile bind -a -ldflags="-w -s" -bundleid org.amnezia.tun2socks -target=ios/arm64 -tags ios -o ./build/ios/Tun2Socks.xcframework github.com/Jigsaw-Code/outline-go-tun2socks/outline/apple github.com/Jigsaw-Code/outline-go-tun2socks/outline/shadowsocks ; then
+    print Y "Tun2Socks built successfully"
+  else
+    print "Please check that path to bin folder with gomobile is in your PATH"
+    print "Usually it's in GOPATH/bin, e.g. /usr/local/go/bin"
+    killProcess "Tun2Socks build failed"
+  fi
   cd ../../
 }
 
@@ -134,11 +129,15 @@ EOF
 
 compile_cocoalamberjack() {
   cd 3rd/CocoaLumberjack
-  $XCODEBUILD -scheme 'CocoaLumberjack' -configuration Release -xcconfig cl_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project Lumberjack.xcodeproj
+  if $XCODEBUILD -scheme 'CocoaLumberjack' -configuration Release -xcconfig cl_ios.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project Lumberjack.xcodeproj ; then
+    print Y "CocoaLumberjack built successfully"
+  else
+    killProcess "CocoaLumberjack build failed"
+  fi
   cd ../../
 }
 
-die() {
+killProcess() {
   if [[ "$1" ]]; then
     error "$1"
   else

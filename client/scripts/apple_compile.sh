@@ -12,10 +12,11 @@ OS=
 NETWORKEXTENSION=
 ADJUST_SDK_TOKEN=
 ADJUST="CONFIG-=adjust"
+WORKINGDIR=`pwd`
 
 helpFunction() {
   print G "Usage:"
-  print N "\t$0 <ios> [-d|--debug] [-n|--networkextension] [-a|--adjusttoken <adjust_token>]"
+  print N "\t$0 <macos|ios|> [-d|--debug] [-n|--networkextension] [-a|--adjusttoken <adjust_token>]"
   print N ""
   print N "By default, the project is compiled in release mode. Use -d or --debug for a debug build."
   print N "Use -n or --networkextension to force the network-extension component for MacOS too."
@@ -32,9 +33,6 @@ helpFunction() {
 
 print N "This script compiles AmneziaVPN for MacOS/iOS"
 print N ""
-
-#export QT_IOS_BIN="$HOME/Qt/5.15.2/ios/bin"
-#export PATH=$QT_IOS_BIN:$PATH
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -78,7 +76,7 @@ fetch() {
     return
   fi
 
-  die "You must have 'wget' or 'curl' installed."
+  killProcess "You must have 'wget' or 'curl' installed."
 }
 
 sha256() {
@@ -92,7 +90,7 @@ sha256() {
     return 0
   fi
 
-  die "You must have 'sha256sum' or 'openssl' installed."
+  killProcess "You must have 'sha256sum' or 'openssl' installed."
 }
 
 if [[ "$OS" != "macos" ]] && [[ "$OS" != "ios" ]] && [[ "$OS" != "macostest" ]]; then
@@ -110,7 +108,7 @@ if [[ "$OS" == "ios" ]]; then
 fi
 
 if ! [ -d "ios" ] || ! [ -d "macos" ]; then
-  die "This script must be executed at the root of the repository."
+  killProcess "This script must be executed at the root of the repository."
 fi
 
 QMAKE=qmake
@@ -122,26 +120,28 @@ elif [ "$OS" = "ios" ] && ! [ "$QT_IOS_BIN" = "" ]; then
   QMAKE=$QT_IOS_BIN/qmake
 fi
 
-$QMAKE -v &>/dev/null || die "qmake doesn't exist or it fails"
+$QMAKE -v &>/dev/null || killProcess "qmake doesn't exist or it fails"
 
-printn Y "Retrieve the wireguard-go version... "
-(cd macos/gobridge && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > macos/gobridge/wireguard-go-version.h
+print Y "Retrieve the wireguard-go version... "
+if [ "$OS" = "macos" ]; then
+  (cd macos/gobridge && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > macos/gobridge/wireguard-go-version.h
+elif [ "$OS" = "ios" ]; then
+  if [ ! -f 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h ]; then
+    print Y "Creating wireguard-go-version.h file"
+    touch 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h
+    cat <<EOF >> $WORKINGDIR/3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h 
+#define WIREGUARD_GO_VERSION "0.0.0"
+EOF
+  fi
+  (cd 3rd/wireguard-apple/Sources/WireGuardKitGo && go list -m golang.zx2c4.com/wireguard | sed -n 's/.*v\([0-9.]*\).*/#define WIREGUARD_GO_VERSION "\1"/p') > 3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h
+fi
 print G "done."
 
 printn Y "Cleaning the existing project... "
-rm -rf AmneziaVPN.xcodeproj/ || die "Failed to remove things"
+rm -rf AmneziaVPN.xcodeproj/ || killProcess "Failed to remove things"
 print G "done."
 
-#print Y "Importing translation files..."
-#git submodule update --remote --depth 1 i18n || die "Failed to fetch newest translation files"
-#python scripts/importLanguages.py $([[ "$OS" = "macos" ]] && echo "-m" || echo "") || die "Failed to import languages"
-#
-#print Y "Generating glean samples..."
-#python scripts/generate_glean.py || die "Failed to generate glean samples"
-
 printn Y "Extract the project version... "
-#SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
-#FULLVERSION=$(echo $SHORTVERSION | cut -d. -f1).$(date +"%Y%m%d%H%M")
 SHORTVERSION=$(cat version.pri | grep VERSION | grep defined | cut -d= -f2 | tr -d \ )
 FULLVERSION=$(cat versionfull.pri | grep BUILDVERSION | grep defined | cut -d= -f2 | tr -d \ )
 print G "$SHORTVERSION - $FULLVERSION"
@@ -189,7 +189,7 @@ elif [ "$OS" = "ios" ]; then
     ADJUST="CONFIG+=adjust"
   fi
 else
-  die "Why we are here?"
+  killProcess "Why are we here?"
 fi
 
 VPNMODE=
@@ -249,15 +249,6 @@ else
   print Y "No Tun2Socks will be built"
 fi
 
-#if [ "$OS" = "ios" ]; then
-# print Y "Prepare to build CocoaLamberjack..."
-# prepare_to_build_cl
-# print Y "Building CocoaLamberjack Framework..."
-# compile_cocoalamberjack
-#else
-# print Y "No CocoaLamberjack will be built"
-#fi
-
 print Y "Creating the xcode project via qmake..."
 $QMAKE \
   VERSION=$SHORTVERSION \
@@ -268,10 +259,10 @@ $QMAKE \
   $WEMODE \
   $PLATFORM \
   $ADJUST \
-  ./client.pro || die "Compilation failed"
+  ./client.pro || killProcess "Compilation failed"
 
 print Y "Patching the xcode project..."
-ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || die "Failed to merge xcode with wireguard"
+ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || killProcess "Failed to merge xcode with wireguard"
 print G "done."
 
   if command -v "sed" &>/dev/null; then
