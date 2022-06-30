@@ -1,2 +1,2 @@
 # current build 7
-!defined(BUILDVERSION, var):BUILDVERSION = 9
+!defined(BUILDVERSION, var):BUILDVERSION = 10

@@ -71,10 +71,10 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-#       "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
 #       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
@@ -271,7 +271,7 @@ class XCodeprojPatcher
     @target_extension.build_configurations.each do |config|
       config.base_configuration_reference = @configFile
 
-      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= '"$(inherited) @executable_path/../Frameworks"'
+      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= '"$(inherited) @executable_path/../Frameworks @executable_path/../../Frameworks"'
       config.build_settings['SWIFT_VERSION'] ||= '5.0'
       config.build_settings['CLANG_ENABLE_MODULES'] ||= 'YES'
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
@@ -282,11 +282,11 @@ class XCodeprojPatcher
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/libleaf/lib",
-#       "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/libleaf/lib",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
 #       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
-#       "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
 #       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 #     config.build_settings['LIBRARY_SEARCH_PATHS'] = [config.build_settings['LIBRARY_SEARCH_PATHS'], "$(PROJECT_DIR)/3rd/libleaf/lib"]
