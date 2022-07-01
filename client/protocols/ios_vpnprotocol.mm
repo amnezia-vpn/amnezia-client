@@ -149,9 +149,7 @@ void IOSVpnProtocol::stop()
     
     [m_controller disconnect];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        emit connectionStateChanged(Disconnected);
-    });
+    emit connectionStateChanged(Disconnected);
     
     [m_controller dealloc];
     m_controller = nullptr;
