@@ -75,7 +75,8 @@ HEADERS  += \
     logger.h \
     loghandler.h \
     loglevel.h \
-    constants.h
+    constants.h \
+    platforms/ios/QRCodeReader.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -126,8 +127,8 @@ SOURCES  += \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     logger.cpp \
-    loghandler.cpp
-
+    loghandler.cpp \
+    platforms/ios/QRCodeReader.cpp
 
 RESOURCES += \
     resources.qrc
@@ -297,14 +298,18 @@ ios {
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
       platforms/ios/ipaddressrange.h
-  
-    SOURCES  += \
+
+    SOURCES -= \
+      platforms/ios/QRCodeReader.cpp
+
+    SOURCES += \
       protocols/ios_vpnprotocol.mm \
       platforms/ios/iosnotificationhandler.mm \
       platforms/ios/json.cpp \
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
-      platforms/ios/ipaddressrange.cpp
+      platforms/ios/ipaddressrange.cpp \
+      platforms/ios/QRCodeReader.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE

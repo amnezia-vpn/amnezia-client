@@ -135,7 +135,11 @@ PageBase {
             text: qsTr("Scan QR code")
             visible: StartPageLogic.pushButtonConnectVisible
             onClicked: {
-                UiLogic.goToPage(PageEnum.QrDecoder)
+                if (Qt.platform.os == "ios") {
+                    UiLogic.goToPage(PageEnum.QrDecoderIos)
+                } else {
+                    UiLogic.goToPage(PageEnum.QrDecoder)
+                }
             }
             enabled: StartPageLogic.pushButtonConnectEnabled
         }
