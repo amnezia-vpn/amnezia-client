@@ -296,15 +296,17 @@ ios {
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
-      platforms/ios/ipaddressrange.h
-  
+      platforms/ios/ipaddressrange.h \
+      platforms/ios/QRCodeReader.h
+
     SOURCES  += \
       protocols/ios_vpnprotocol.mm \
       platforms/ios/iosnotificationhandler.mm \
       platforms/ios/json.cpp \
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
-      platforms/ios/ipaddressrange.cpp
+      platforms/ios/ipaddressrange.cpp \
+      platforms/ios/QRCodeReader.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
