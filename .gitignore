@@ -24,7 +24,12 @@ ui_*.h
 Makefile*
 *build-*
 
+# fastlane
+client/fastlane/report.xml
+client/fastlane/build/*
+
 # Qt-es
+client/Release-iphoneos/
 client/Debug-iphoneos/
 client/.xcode/
 client/.qmake.cache
@@ -39,6 +44,7 @@ client/qrc_*.cpp
 client/ui_*.h
 client/ui_*.cpp
 client/Makefile*
+client/fastlane/build/
 client/*build-*
 client/AmneziaVPN.xcodeproj
 client/Debug-iphonesimulator/
@@ -48,7 +54,7 @@ client/qmlcache_loader.cpp
 client/rep_ipc_interface_replica.h
 client/resources_qmlcache.qrc
 client/3rd/OpenVPNAdpter/build/
-
+client/3rd/ShadowSocks/build/
 # QtCreator
 
 *.autosave

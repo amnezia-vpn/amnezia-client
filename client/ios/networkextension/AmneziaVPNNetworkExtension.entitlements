@@ -8,11 +8,11 @@
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.ru.kotit.AmneziaVPN.udev</string>
+		<string>group.org.amnezia.AmneziaVPN</string>
 	</array>
-    <key>keychain-access-groups</key>
-    <array>
-        <string>$(AppIdentifierPrefix)group.ru.kotit.AmneziaVPN.udev</string>
-    </array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)group.org.amnezia.AmneziaVPN</string>
+	</array>
 </dict>
 </plist>

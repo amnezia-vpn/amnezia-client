@@ -1,0 +1,197 @@
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+project_name = "AmneziaVPN"
+project_scheme = "AmneziaVPN"
+project_identifier = "org.amnezia.AmneziaVPN"
+itunes_username = "dartsyms@gmail.com"
+
+before_all do
+    ENV['GYM_SCHEME'] = project_scheme
+end
+
+def tag_name(version_number, build_number)
+    "#{version_number}_#{build_number}"
+end
+
+def incrementBuild
+    increment_build_number(xcodeproj: "./#{project_name}.xcodeproj")
+end
+
+default_platform :ios
+
+# Fastfile actions accept additional configuration, but
+# don't worry, fastlane will prompt you for required
+# info which you can add here later
+lane :beta do
+  # build your iOS app
+  build_app(
+    scheme: "AmneziaVPN",
+    export_method: "ad-hoc"
+  )
+end
+
+lane :incrementVersion do
+    increment_build_number(
+      xcodeproj: "./#{project_name}.xcodeproj"
+    )
+
+    version_number = get_version_number(
+      xcodeproj: "./#{project_name}.xcodeproj",
+      target: project_name
+    )
+
+    build_number = get_build_number(
+      xcodeproj: "./#{project_name}.xcodeproj"
+    )
+
+    puts "Version = #{version_number} Build = #{build_number}"
+end
+
+desc "Update Certificates, Run All tests, Build app"
+desc "Add tag to git, send to Testflight, slack notification"
+lane :addToTestFlight do
+    certificates
+    clean_build_artifacts
+   
+    build_app(
+    scheme: project_scheme,
+    configuration: "Release", # Debug / Release
+    export_method: "app-store", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
+    clean: true,
+    include_bitcode: false,
+    include_symbols: true,
+    export_options: {
+      provisioningProfiles: {
+        "org.amnezia.AmneziaVPN"=>"match AppStore org.amnezia.AmneziaVPN",
+        "org.amnezia.AmneziaVPN.network-extension"=>"match AppStore AmneziaVPN networkextension",
+      }
+    },
+    output_directory: "fastlane/build/", # Destination directory. Defaults to current directory.
+    output_name: "#{project_name}.ipa"
+  )
+
+  testflight(
+    username: itunes_username,
+    app_identifier: project_identifier,
+    ipa: "fastlane/build/#{project_name}.ipa",
+    skip_waiting_for_build_processing: true
+  )
+
+  # Section for Slack
+  version_number = get_version_number(
+    xcodeproj: "./#{project_name}.xcodeproj",
+    target: project_name
+  )
+
+  build_number = get_build_number(
+    xcodeproj: "./#{project_name}.xcodeproj"
+  )
+
+  msg = "Build v.#{version_number} (#{build_number}) was Created for TestFlight"
+  puts msg
+  # msgToSlack(msg, true)
+  increment_build_number
+end
+
+lane :certificates do
+  match(
+    username: itunes_username,
+    type: "appstore",
+    app_identifier: [project_identifier],
+    readonly: true,
+    git_url: "https://github.com/amnezia-vpn/amnezia-ios-certificates.git"
+  )
+  notification(subtitle: "Finished", message: "Certificates done")
+end
+
+lane :adhoc_certificates do
+  match(
+    username: itunes_username,
+    type: "adhoc",
+    app_identifier: [project_identifier],
+    readonly: true,
+    git_url: "https://github.com/amnezia-vpn/amnezia-ios-certificates.git"
+  )
+  notification(subtitle: "Finished", message: "Certificates done")
+end
+
+lane :createAPNS do
+  get_push_certificate(
+    force: true, # create a new profile, even if the old one is still valid
+    app_identifier: project_identifier, # optional app identifier,
+    username: itunes_username,
+    p12_password: apns_pass,
+    pem_name: apns_pem_name,
+    output_path: "fastlane/APNS",
+    save_private_key: true,
+    new_profile: proc do |profile_path| # this block gets called when a new profile was generated
+      puts profile_path # the absolute path to the new PEM file
+      # insert the code to upload the PEM file to the server
+    end
+  )
+
+  # msgToSlack("Successfully APNS Created", true)
+end
+
+desc "Distribute app via Firebase for testers"
+lane :firebase_test do
+    adhoc_certificates
+    build_ios_app(
+        scheme: project_scheme,
+        output_directory: "./fastlane/builds/#{project_scheme}",
+        output_name: "#{project_scheme}.ipa",
+        export_options: {
+           method: "ad-hoc",
+           compileBitcode: false
+        },
+        clean: true,
+        include_bitcode: true,
+        include_symbols: true,
+        skip_package_ipa: false
+    )
+
+#   firebase_app_distribution(
+#       app: "1:880592554695:ios:af464a9ed02207f6284ce2",
+#       testers: "dartsyms@gmail.com, shogun14@yandex.ru, qa@wevied.com",
+#       release_notes: "Another build: ready to test."
+#   )
+
+    clean_build_artifacts
+    increment_build_number
+end
+
+desc "Distribute app via Firebase for testers"
+lane :distribute_firebase do
+    adhoc_certificates
+    clean_build_artifacts
+    
+    build_ios_app(
+        scheme: project_scheme,
+        output_directory: "./fastlane/builds/#{project_scheme}",
+        output_name: "#{project_scheme}.ipa",
+        export_options: {
+           method: "ad-hoc",
+           compileBitcode: false
+        },
+        clean: true,
+        include_bitcode: true,
+        include_symbols: true,
+        skip_package_ipa: false
+    )
+
+#   firebase_app_distribution(
+#       app: "1:880592554695:ios:af464a9ed02207f6284ce2",
+#       testers: "dartsyms@gmail.com, shogun14@yandex.ru, qa@wevied.com",
+#       release_notes: "Another build: ready to test."
+#   )
+end
+
+def msgToSlack(msg, result)
+   slack(
+       message: msg,
+       success: result,
+       default_payloads: [:lane, :test_result, :git_branch, :git_author] # Optional, lets you specify a whitelist of default payloads to include. Pass an empty array to suppress all the default payloads.
+    # Don't add this key, or pass nil, if you want all the default payloads. The available default payloads are: `lane`, `test_result`, `git_branch`, `git_author`, `last_git_commit_message`, `last_git_commit_hash`.
+   )
+end
