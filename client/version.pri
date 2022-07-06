@@ -3,4 +3,4 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # current version 2.0.8
 
-!defined(VERSION, var):VERSION = 2.0.8
+!defined(VERSION, var):VERSION = 2.0.10

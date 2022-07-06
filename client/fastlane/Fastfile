@@ -64,7 +64,7 @@ lane :addToTestFlight do
     export_options: {
       provisioningProfiles: {
         "org.amnezia.AmneziaVPN"=>"match AppStore org.amnezia.AmneziaVPN",
-        "org.amnezia.AmneziaVPN.network-extension"=>"match AppStore AmneziaVPN networkextension",
+        "org.amnezia.AmneziaVPN.network-extension"=>"match AppStore org.amnezia.AmneziaVPN.network-extension",
       }
     },
     output_directory: "fastlane/build/", # Destination directory. Defaults to current directory.
