@@ -5,52 +5,52 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000202">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000215">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to certificates lane" time="0.000147">
+      <testcase classname="fastlane.lanes" name="1: Switch to certificates lane" time="0.000162">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: match" time="3.026268">
+      <testcase classname="fastlane.lanes" name="2: match" time="2.707099">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: notification" time="0.229412">
+      <testcase classname="fastlane.lanes" name="3: notification" time="0.226435">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: clean_build_artifacts" time="0.000472">
+      <testcase classname="fastlane.lanes" name="4: clean_build_artifacts" time="0.000648">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: build_app" time="252.779327">
+      <testcase classname="fastlane.lanes" name="5: build_app" time="259.546685">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="6: testflight" time="74.486177">
+      <testcase classname="fastlane.lanes" name="6: testflight" time="84.84052">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="7: get_version_number" time="0.116256">
+      <testcase classname="fastlane.lanes" name="7: get_version_number" time="0.114899">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="8: get_build_number" time="1.150152">
+      <testcase classname="fastlane.lanes" name="8: get_build_number" time="1.332216">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="9: increment_build_number" time="2.241544">
+      <testcase classname="fastlane.lanes" name="9: increment_build_number" time="2.325473">
         
       </testcase>
     
