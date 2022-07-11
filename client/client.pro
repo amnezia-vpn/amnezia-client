@@ -300,7 +300,9 @@ ios {
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
-      platforms/ios/ipaddressrange.h
+      platforms/ios/ipaddressrange.h \
+      platforms/ios/QtAppDelegate.h \
+      platforms/ios/QtAppDelegate-C-Interface.h
 
     SOURCES -= \
       platforms/ios/QRCodeReader.cpp
@@ -312,7 +314,8 @@ ios {
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
       platforms/ios/ipaddressrange.cpp \
-      platforms/ios/QRCodeReader.mm
+      platforms/ios/QRCodeReader.mm \
+      platforms/ios/QtAppDelegate.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
