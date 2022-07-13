@@ -48,6 +48,8 @@
 #include "platforms/android/android_controller.h"
 #endif
 
+#include "platforms/ios/MobileUtils.h"
+
 #include "pages_logic/AppSettingsLogic.h"
 #include "pages_logic/GeneralSettingsLogic.h"
 #include "pages_logic/NetworkSettingsLogic.h"
@@ -612,21 +614,10 @@ PageEnumNS::Page UiLogic::currentPage()
 
 void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QString ext, const QString& data)
 {
-//    ext.replace("*", "");
-//    QString fileName = QFileDialog::getSaveFileName(nullptr, desc,
-//        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*" + ext);
-
-//    if (fileName.isEmpty()) return;
-//    if (!fileName.endsWith(ext)) fileName.append(ext);
-
-//    QFile save(fileName);
-//    save.open(QIODevice::WriteOnly);
-//    save.write(data.toUtf8());
-//    save.close();
-
-//    QFileInfo fi(fileName);
-//    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
-
+#ifdef Q_OS_IOS
+    shareTempFile(suggestedName, ext, data);
+    return;
+#endif
 
     ext.replace("*", "");
     QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
@@ -680,4 +671,24 @@ void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &da
 void UiLogic::copyToClipboard(const QString &text)
 {
     qApp->clipboard()->setText(text);
+}
+
+void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QString& data) {
+    ext.replace("*", "");
+    QString fileName = QDir::tempPath() + "/" + suggestedName;
+
+    if (fileName.isEmpty()) return;
+    if (!fileName.endsWith(ext)) fileName.append(ext);
+
+    QFile::remove(fileName);
+    qDebug() << "UiLogic::shareTempFile" << fileName;
+
+    QFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(data.toUtf8());
+    save.close();
+
+    QStringList filesToSend;
+    filesToSend.append(fileName);
+    MobileUtils::shareText(filesToSend);
 }
