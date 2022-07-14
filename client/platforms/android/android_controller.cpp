@@ -22,7 +22,7 @@
 // Actions that are Requestable
 const int ACTION_ACTIVATE = 1;
 const int ACTION_DEACTIVATE = 2;
-const int ACTION_REGISTERLISTENER = 3;
+const int ACTION_REGISTER_LISTENER = 3;
 const int ACTION_REQUEST_STATISTIC = 4;
 const int ACTION_REQUEST_GET_LOG = 5;
 const int ACTION_REQUEST_CLEANUP_LOG = 6;
@@ -155,7 +155,6 @@ void AndroidController::shareConfig(const QString& configContent, const QString&
     rootObject["suggestedName"] = suggestedName;
     QJsonDocument doc(rootObject);
     QAndroidParcel parcel;
-    //parcel.writeData(data.toUtf8());
     parcel.writeData(doc.toJson());
     m_serviceBinder.transact(ACTION_SHARE_CONFIG, parcel, nullptr);
 }
@@ -210,7 +209,7 @@ void AndroidController::onServiceConnected(
   // Send the Service our Binder to recive incoming Events
   QAndroidParcel binderParcel;
   binderParcel.writeBinder(m_binder);
-  m_serviceBinder.transact(ACTION_REGISTERLISTENER, binderParcel, nullptr);
+  m_serviceBinder.transact(ACTION_REGISTER_LISTENER, binderParcel, nullptr);
 }
 
 void AndroidController::onServiceDisconnected(const QString& name) {

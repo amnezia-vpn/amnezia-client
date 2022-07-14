@@ -112,11 +112,11 @@ class VPNService : android.net.VpnService() {
         }
         set(value) {
             if (value) {
-                mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
+                mBinder.dispatchEvent(VPNServiceBinder.Events.CONNECTED, "")
                 mConnectionTime = System.currentTimeMillis()
                 return
             }
-            mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
+            mBinder.dispatchEvent(VPNServiceBinder.Events.DISCONNECTED, "")
             mConnectionTime = 0
         }
     val status: JSONObject
