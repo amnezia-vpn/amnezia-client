@@ -24,22 +24,22 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     /**
      * The codes this Binder does accept in [onTransact]
      */
-    object ACTIONS {
-        const val activate = 1
-        const val deactivate = 2
-        const val registerEventListener = 3
-        const val requestStatistic = 4
-        const val requestGetLog = 5
-        const val requestCleanupLog = 6
-        const val resumeActivate = 7
-        const val setNotificationText = 8
-        const val setFallBackNotification = 9
+    object Actions {
+        const val ACTIVATE = 1
+        const val DEACTIVATE = 2
+        const val REGISTER_EVENT_LISTENER = 3
+        const val REQUEST_STATISTICS = 4
+        const val REQUEST_GET_LOG = 5
+        const val REQUEST_CLEANUP_LOG = 6
+        const val RESUME_ACTIVATE = 7
+        const val SET_NOTIFICATION_TEXT = 8
+        const val SET_NOTIFICATION_FALLBACK = 9
         const val SHARE_CONFIG = 10
     }
 
     /**
      * Gets called when the VPNServiceBinder gets a request from a Client.
-     * The [code] determines what action is requested. - see [ACTIONS]
+     * The [code] determines what action is requested. - see [Actions]
      * [data] may contain a utf-8 encoded json string with optional args or is null.
      * [reply] is a pointer to a buffer in the clients memory, to reply results.
      * we use this to send result data.
@@ -50,7 +50,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         Log.i(tag, "GOT TRANSACTION " + code)
 
         when (code) {
-            ACTIONS.activate -> {
+            Actions.ACTIVATE -> {
                 try {
                     Log.i(tag, "Activiation Requested, parsing Config")
                     // [data] is here a json containing the wireguard/openvpn conf
@@ -69,12 +69,12 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                     this.mService.turnOn(config)
                 } catch (e: Exception) {
                     Log.e(tag, "An Error occurred while enabling the VPN: ${e.localizedMessage}")
-                    dispatchEvent(EVENTS.activationError, e.localizedMessage)
+                    dispatchEvent(Events.ACTIVATION_ERROR, e.localizedMessage)
                 }
                 return true
             }
 
-            ACTIONS.resumeActivate -> {
+            Actions.RESUME_ACTIVATE -> {
                 // [data] is empty
                 // Activate the current tunnel
                 try {
@@ -85,46 +85,46 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 return true
             }
 
-            ACTIONS.deactivate -> {
+            Actions.DEACTIVATE -> {
                 // [data] here is empty
                 this.mService.turnOff()
                 return true
             }
 
-            ACTIONS.registerEventListener -> {
+            Actions.REGISTER_EVENT_LISTENER -> {
                 // [data] contains the Binder that we need to dispatch the Events
                 val binder = data.readStrongBinder()
                 mListener = binder
                 val obj = JSONObject()
                 obj.put("connected", mService.isUp)
                 obj.put("time", mService.connectionTime)
-                dispatchEvent(EVENTS.init, obj.toString())
+                dispatchEvent(Events.INIT, obj.toString())
                 return true
             }
 
-            ACTIONS.requestStatistic -> {
-                dispatchEvent(EVENTS.statisticUpdate, mService.status.toString())
+            Actions.REQUEST_STATISTICS -> {
+                dispatchEvent(Events.STATISTIC_UPDATE, mService.status.toString())
                 return true
             }
 
-            ACTIONS.requestGetLog -> {
+            Actions.REQUEST_GET_LOG -> {
                 // Grabs all the Logs and dispatch new Log Event
-                dispatchEvent(EVENTS.backendLogs, Log.getContent())
+                dispatchEvent(Events.BACKEND_LOGS, Log.getContent())
                 return true
             }
-            ACTIONS.requestCleanupLog -> {
+            Actions.REQUEST_CLEANUP_LOG -> {
                 Log.clearFile()
                 return true
             }
-            ACTIONS.setNotificationText -> {
+            Actions.SET_NOTIFICATION_TEXT -> {
                 NotificationUtil.update(data)
                 return true
             }
-            ACTIONS.setFallBackNotification -> {
+            Actions.SET_NOTIFICATION_FALLBACK -> {
                 NotificationUtil.saveFallBackMessage(data, mService)
                 return true
             }
-            ACTIONS.SHARE_CONFIG -> {
+            Actions.SHARE_CONFIG -> {
                 val byteArray = data.createByteArray()
                 val json = byteArray?.let { String(it) }
                 val config = JSONObject(json)
@@ -201,9 +201,9 @@ class VPNServiceBinder(service: VPNService) : Binder() {
 
     /**
      * Dispatches an Event to all registered Binders
-     * [code] the Event that happened - see [EVENTS]
+     * [code] the Event that happened - see [Events]
      * To register an Eventhandler use [onTransact] with
-     * [ACTIONS.registerEventListener]
+     * [Actions.REGISTER_EVENT_LISTENER]
      */
     fun dispatchEvent(code: Int, payload: String?) {
         try {
@@ -223,12 +223,12 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     /**
      *  The codes we Are Using in case of [dispatchEvent]
      */
-    object EVENTS {
-        const val init = 0
-        const val connected = 1
-        const val disconnected = 2
-        const val statisticUpdate = 3
-        const val backendLogs = 4
-        const val activationError = 5
+    object Events {
+        const val INIT = 0
+        const val CONNECTED = 1
+        const val DISCONNECTED = 2
+        const val STATISTIC_UPDATE = 3
+        const val BACKEND_LOGS = 4
+        const val ACTIVATION_ERROR = 5
     }
 }
