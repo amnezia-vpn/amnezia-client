@@ -637,8 +637,9 @@ void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QS
     if (fileName.isEmpty()) return;
     if (!fileName.toString().endsWith(ext)) fileName = QUrl(fileName.toString() + ext);
 #elif defined Q_OS_ANDROID
-    fileName = QFileDialog::getSaveFileUrl(nullptr, suggestedName,
-        QUrl::fromLocalFile(docDir), "*" + ext);
+    qDebug() << "UiLogic::shareConfig" << data;
+    AndroidController::instance()->shareConfig(data, suggestedName);
+    return;
 #endif
 
     qDebug() << "UiLogic::saveTextFile" << fileName;

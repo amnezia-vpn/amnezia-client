@@ -89,6 +89,10 @@
             android:permission="android.permission.BIND_VPN_SERVICE">
         </service>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
+
+        <provider android:name="androidx.core.content.FileProvider" android:authorities="org.amnezia.vpn.fileprovider" android:exported="false" android:grantUriPermissions="true">
+                <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/fileprovider"/>
+        </provider>
     </application>
 
 </manifest>
