@@ -271,7 +271,11 @@ class XCodeprojPatcher
     @target_extension.build_configurations.each do |config|
       config.base_configuration_reference = @configFile
 
-      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= '"$(inherited) @executable_path/../Frameworks @executable_path/../../Frameworks"'
+      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= [
+        '$(inherited)',
+        '@executable_path/../Frameworks',
+        '@executable_path/../../Frameworks'
+      ]
       config.build_settings['SWIFT_VERSION'] ||= '5.0'
       config.build_settings['CLANG_ENABLE_MODULES'] ||= 'YES'
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
