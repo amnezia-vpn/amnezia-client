@@ -27,6 +27,7 @@ public:
 
     void checkStatus();
     void setNotificationText(const QString& title, const QString& message, int timerSec);
+    void shareConfig(const QString& data, const QString& suggestedName);
     void setFallbackConnectedNotification();
     void getBackendLogs(std::function<void(const QString&)>&& callback);
     void cleanupBackendLogs();

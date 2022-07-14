@@ -29,6 +29,7 @@ const int ACTION_REQUEST_CLEANUP_LOG = 6;
 const int ACTION_RESUME_ACTIVATE = 7;
 const int ACTION_SET_NOTIFICATION_TEXT = 8;
 const int ACTION_SET_NOTIFICATION_FALLBACK = 9;
+const int ACTION_SHARE_CONFIG = 10;
 
 // Event Types that will be Dispatched after registration
 const int EVENT_INIT = 0;
@@ -146,6 +147,17 @@ void AndroidController::setNotificationText(const QString& title,
   QAndroidParcel data;
   data.writeData(doc.toJson());
   m_serviceBinder.transact(ACTION_SET_NOTIFICATION_TEXT, data, nullptr);
+}
+
+void AndroidController::shareConfig(const QString& configContent, const QString& suggestedName) {
+    QJsonObject rootObject;
+    rootObject["data"] = configContent;
+    rootObject["suggestedName"] = suggestedName;
+    QJsonDocument doc(rootObject);
+    QAndroidParcel parcel;
+    //parcel.writeData(data.toUtf8());
+    parcel.writeData(doc.toJson());
+    m_serviceBinder.transact(ACTION_SHARE_CONFIG, parcel, nullptr);
 }
 
 /*

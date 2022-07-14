@@ -99,6 +99,10 @@
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
+
+        <provider android:name="androidx.core.content.FileProvider" android:authorities="org.amnezia.vpn.fileprovider" android:exported="false" android:grantUriPermissions="true">
+                <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/fileprovider"/>
+        </provider>
     </application>
 
 </manifest>
