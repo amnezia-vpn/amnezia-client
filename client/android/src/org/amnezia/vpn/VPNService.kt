@@ -416,7 +416,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         stopSelf()
     }
 
-
     private fun ovpnTurnOff() {
         mOpenVPNThreadv3?.stop()
         mOpenVPNThreadv3 = null

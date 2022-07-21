@@ -24,6 +24,37 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file" android:host="*"/>
+                <data android:scheme="content" android:host="*"/>
+                <data android:scheme="*" android:host="*"/>
+                <data android:pathPattern=".*\\.vpn" />
+                <data android:pathPattern=".*\\.cfg" />
+                <data android:mimeType="text/plain"/>
+                <data android:mimeType="application/octet-stream"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file" android:host="*"/>
+                <data android:scheme="content"/>
+                <data android:pathPattern=".*\\.cfg"/>
+                <data android:pathPattern=".*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.vpn"/>
+            </intent-filter>
             <!-- Application arguments -->
             <!-- meta-data android:name="android.app.arguments" android:value="arg1 arg2 arg3"/ -->
             <!-- Application arguments -->

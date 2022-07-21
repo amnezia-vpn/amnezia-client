@@ -5,6 +5,10 @@
 #include <QAndroidServiceConnection>
 
 #include "protocols/vpnprotocol.h"
+
+#include "ui/uilogic.h"
+#include "ui/pages_logic/StartPageLogic.h"
+
 using namespace amnezia;
 
 
@@ -19,7 +23,7 @@ public:
 
     virtual ~AndroidController() override = default;
 
-    bool initialize();
+    bool initialize(StartPageLogic *startPageLogic);
 
     ErrorCode start();
     void stop();
@@ -31,6 +35,7 @@ public:
     void setFallbackConnectedNotification();
     void getBackendLogs(std::function<void(const QString&)>&& callback);
     void cleanupBackendLogs();
+    void importConfig(const QString& data);
 
     // from QAndroidServiceConnection
     void onServiceConnected(const QString& name, const QAndroidBinder& serviceBinder) override;
@@ -56,6 +61,8 @@ protected:
 
 
 private:
+    StartPageLogic *m_startPageLogic;
+
     //Protocol m_protocol;
     QJsonObject m_vpnConfig;
 

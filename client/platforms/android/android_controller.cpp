@@ -38,6 +38,7 @@ const int EVENT_DISCONNECTED = 2;
 const int EVENT_STATISTIC_UPDATE = 3;
 const int EVENT_BACKEND_LOGS = 4;
 const int EVENT_ACTIVATION_ERROR = 5;
+const int EVENT_CONFIG_IMPORT = 6;
 
 namespace {
 AndroidController* s_instance = nullptr;
@@ -58,8 +59,9 @@ AndroidController* AndroidController::instance() {
     return s_instance;
 }
 
-bool AndroidController::initialize()
+bool AndroidController::initialize(StartPageLogic *startPageLogic)
 {
+    m_startPageLogic = startPageLogic;
     qDebug() << "Initializing";
 
     // Hook in the native implementation for startActivityForResult into the JNI
@@ -198,6 +200,10 @@ void AndroidController::cleanupBackendLogs() {
   m_serviceBinder.transact(ACTION_REQUEST_CLEANUP_LOG, nullParcel, nullptr);
 }
 
+void AndroidController::importConfig(const QString& data){
+    m_startPageLogic->importConnectionFromCode(data);
+}
+
 void AndroidController::onServiceConnected(
     const QString& name, const QAndroidBinder& serviceBinder) {
   qDebug() << "Server " + name + " connected";
@@ -290,7 +296,13 @@ bool AndroidController::VPNBinder::onTransact(int code,
     case EVENT_ACTIVATION_ERROR:
       qDebug() << "Transact: error";
       emit m_controller->connectionStateChanged(VpnProtocol::Error);
-
+      break;
+    case EVENT_CONFIG_IMPORT:
+      qDebug() << "Transact: config import";
+      doc = QJsonDocument::fromJson(data.readData());
+      buffer = doc.object()["config"].toString();
+      qDebug() << "Transact: config string" << buffer;
+      m_controller->importConfig(buffer);
     default:
       qWarning() << "Transact: Invalid!";
       break;
