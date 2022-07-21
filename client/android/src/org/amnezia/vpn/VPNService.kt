@@ -234,7 +234,6 @@ class VPNService : android.net.VpnService() {
         stopSelf();
     }
 
-
     private fun ovpnTurnOff() {
         mOpenVPNThreadv3?.stop()
         mOpenVPNThreadv3 = null

@@ -100,8 +100,8 @@ android {
 
     defaultConfig {
         resConfig "en"
-        minSdkVersion = 24
-        targetSdkVersion = 30
+        minSdkVersion 24
+        targetSdkVersion 30
         versionCode 10 // Change to a higher number
         versionName "2.0.10" // Change to a higher number
     }

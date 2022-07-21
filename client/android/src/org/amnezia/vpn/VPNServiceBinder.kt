@@ -4,7 +4,6 @@
 
 package org.amnezia.vpn
 
-import android.content.Context
 import android.content.Intent
 import android.os.*
 import android.os.StrictMode.VmPolicy
@@ -52,7 +51,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         when (code) {
             Actions.ACTIVATE -> {
                 try {
-                    Log.i(tag, "Activiation Requested, parsing Config")
+                    Log.i(tag, "Activation Requested, parsing Config")
                     // [data] is here a json containing the wireguard/openvpn conf
                     val buffer = data.createByteArray()
                     val json = buffer?.let { String(it) }
@@ -130,9 +129,9 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 val config = JSONObject(json)
                 val configContent = config.getString("data")
                 val suggestedName = config.getString("suggestedName")
-                val filePath = saveAsFile(mService, configContent, suggestedName)
+                val filePath = saveAsFile(configContent, suggestedName)
                 Log.i(tag, "save file: $filePath")
-                shareFile(mService, filePath, tag)
+                shareFile(filePath)
                 return true
             }
             IBinder.LAST_CALL_TRANSACTION -> {
@@ -150,19 +149,14 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         return false
     }
 
-    private fun saveAsFile(
-        context: Context,
-        configContent: String?,
-        suggestedFileName: String
-    ): String {
-        val rootDirPath = context.filesDir.absolutePath
+    private fun saveAsFile(configContent: String?, suggestedFileName: String): String {
+        val rootDirPath = mService.filesDir.absolutePath
         //val rootDirPath = context.cacheDir.absolutePath
         val rootDir = File(rootDirPath)
         if (!rootDir.exists()) {
             rootDir.mkdirs()
         }
-        val fileName =
-            if (TextUtils.isEmpty(suggestedFileName)) "amnezia.cfg" else suggestedFileName
+        val fileName = if (!TextUtils.isEmpty(suggestedFileName)) suggestedFileName else "amnezia.cfg"
         val file = File(rootDir, fileName)
         try {
             file.bufferedWriter().use { out -> out.write(configContent) }
@@ -173,7 +167,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         return ""
     }
 
-    private fun shareFile(context: Context, attachmentFile: String?, message: String?) {
+    private fun shareFile(attachmentFile: String?) {
         try {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/*"
@@ -181,21 +175,16 @@ class VPNServiceBinder(service: VPNService) : Binder() {
 
             // authority is defined in the Manifest
             val file = File(attachmentFile)
-            val uri = FileProvider.getUriForFile(
-                context,
-                BuildConfig.APPLICATION_ID + ".fileprovider",
-                file
-            )
+            val uri = FileProvider.getUriForFile(mService, "${BuildConfig.APPLICATION_ID}.fileprovider", file)
             val builder = VmPolicy.Builder()
             StrictMode.setVmPolicy(builder.build())
             intent.putExtra(Intent.EXTRA_STREAM, uri)
-            //intent.putExtra(Intent.EXTRA_TEXT, message)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             val createChooser = Intent.createChooser(intent, "Config sharing")
             createChooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(createChooser)
+            mService.startActivity(createChooser)
         } catch (e: Exception) {
-            Log.i(tag, e.localizedMessage)
+            Log.i(tag, e.message.toString())
         }
     }
 
@@ -215,9 +204,17 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 }
             }
         } catch (e: DeadObjectException) {
+            e.printStackTrace()
             // If the QT Process is killed (not just inactive)
             // we cant access isBinderAlive, so nothing to do here.
         }
+    }
+
+    fun importConfig(config: String ) {
+        val obj = JSONObject()
+        obj.put("config", config)
+        val resultString = obj.toString();
+        dispatchEvent(Events.CONFIG_IMPORT, resultString)
     }
 
     /**
@@ -230,5 +227,6 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         const val STATISTIC_UPDATE = 3
         const val BACKEND_LOGS = 4
         const val ACTIVATION_ERROR = 5
+        const val CONFIG_IMPORT = 6
     }
 }
