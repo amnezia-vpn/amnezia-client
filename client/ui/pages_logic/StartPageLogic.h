@@ -1,6 +1,7 @@
 #ifndef START_PAGE_LOGIC_H
 #define START_PAGE_LOGIC_H
 
+#include "defines.h"
 #include "PageLogicBase.h"
 
 class UiLogic;

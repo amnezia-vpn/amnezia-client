@@ -6,6 +6,7 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QDir>
 
 #ifdef Q_OS_ANDROID
 #include "platforms/android/android_controller.h"
@@ -27,7 +28,26 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_pushButtonConnectVisible{true},
     m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
+#ifdef Q_OS_LINUX
+    QStringList config_path = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation);
 
+    QDir conf_path(config_path[0] + "/" + ORGANIZATION_NAME);
+    if( !conf_path.exists() && config_path.size() > 0 && config_path[0].contains("home"))
+    {
+        //make config directory and set permissions
+        conf_path.mkdir(config_path[0] + "/" + ORGANIZATION_NAME);
+        QFile::setPermissions(config_path[0] + "/" + ORGANIZATION_NAME, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+
+        QStringList config_location = QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation);
+
+        //make config file and set permissions
+        QFile conf_file(config_location[0] + ".conf");
+        conf_file.open(QIODevice::WriteOnly);
+        conf_file.close();
+
+        QFile::setPermissions(config_location[0] + ".conf", QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+    }
+#endif
 }
 
 void StartPageLogic::onUpdatePage()
