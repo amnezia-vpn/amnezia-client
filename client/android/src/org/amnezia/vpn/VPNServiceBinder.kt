@@ -180,7 +180,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
             StrictMode.setVmPolicy(builder.build())
             intent.putExtra(Intent.EXTRA_STREAM, uri)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            val createChooser = Intent.createChooser(intent, "Config sharing")
+            val createChooser = Intent.createChooser(intent, "Share file")
             createChooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             mService.startActivity(createChooser)
         } catch (e: Exception) {

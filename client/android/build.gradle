@@ -42,7 +42,7 @@ dependencies {
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
 }
 
 android {
@@ -85,6 +85,9 @@ android {
     }
 
     compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }

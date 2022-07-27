@@ -337,7 +337,9 @@ class VPNService : android.net.VpnService() {
                 peerBuilder.addAllowedIp(network)
             }
         }
-        peerBuilder.setEndpoint(InetEndpoint.parse(peerConfig["Endpoint"]))
+        val endpointConfig = peerConfig["Endpoint"]
+        val endpoint = InetEndpoint.parse(endpointConfig)
+        peerBuilder.setEndpoint(endpoint)
         peerConfig["PersistentKeepalive"]?.let {
             peerBuilder.setPersistentKeepalive(it.toInt())
         }
