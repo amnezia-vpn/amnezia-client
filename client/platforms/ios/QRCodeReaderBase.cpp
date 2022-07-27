@@ -1,4 +1,4 @@
-#include "QRCodeReader.h"
+#include "QRCodeReaderBase.h"
 
 QRCodeReader::QRCodeReader()
 {
@@ -11,4 +11,4 @@ QRect QRCodeReader::cameraSize() {
 
 void QRCodeReader::startReading() {}
 void QRCodeReader::stopReading() {}
-void QRCodeReader::setCameraSize(QRect) {};
+void QRCodeReader::setCameraSize(QRect) {}

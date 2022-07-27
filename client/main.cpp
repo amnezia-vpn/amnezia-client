@@ -37,7 +37,7 @@
 
 #include "QZXing.h"
 
-#include "platforms/ios/QRCodeReader.h"
+#include "platforms/ios/QRCodeReaderBase.h"
 
 #include "debug.h"
 #include "defines.h"
