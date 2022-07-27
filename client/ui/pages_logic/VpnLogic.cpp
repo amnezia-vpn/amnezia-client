@@ -118,7 +118,10 @@ void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
 void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
 {
     qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
-
+    if (uiLogic()->m_vpnConnection == NULL) {
+        qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state) << "невозможно, соединение отсутствует (уничтожено ранее)";
+        return;
+    }
     bool pbConnectEnabled = false;
     bool pbConnectChecked = false;
 

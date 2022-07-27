@@ -37,6 +37,8 @@
 
 #include "QZXing.h"
 
+#include "platforms/ios/QRCodeReaderBase.h"
+
 #include "debug.h"
 #include "defines.h"
 
@@ -167,6 +169,7 @@ int main(int argc, char *argv[])
     declareQmlContainerEnum();
 
     qmlRegisterType<PageType>("PageType", 1, 0, "PageType");
+    qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
 
     QScopedPointer<ContainerProps> containerProps(new ContainerProps);
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", containerProps.get());

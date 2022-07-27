@@ -37,8 +37,10 @@ VpnConnection::VpnConnection(QObject* parent) : QObject(parent),
 
 VpnConnection::~VpnConnection()
 {
-    m_vpnProtocol->deleteLater();
-    m_vpnProtocol.clear();
+    if (m_vpnProtocol != nullptr) {
+        m_vpnProtocol->deleteLater();
+        m_vpnProtocol.clear();
+    }
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
