@@ -12,6 +12,8 @@ public:
     static bool readSecureFile(QIODevice &device, QSettings::SettingsMap &map);
     static bool writeSecureFile(QIODevice &device, const QSettings::SettingsMap &map);
 
+    static void chiperSettings(const QSettings &oldSetting, QSettings &newSetting);
+
     const QSettings::Format& format() const;
 
 private:

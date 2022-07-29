@@ -136,18 +136,22 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-//    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
-//    if (!oldSettings.allKeys().isEmpty()) {
-//        QSettings newSettings(QSettings::Format::CustomFormat1, QSettings::UserScope,
-//                              ORGANIZATION_NAME, APPLICATION_NAME);
-//        QString oldSettingsFileName = oldSettings.fileName();
-//        QString newSettingsFileName = newSettings.fileName();
+    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
+    if (!oldSettings.allKeys().isEmpty()) {
+        QSettings newSettingsForPath(QSettings::Format::CustomFormat1, QSettings::UserScope,
+                                     ORGANIZATION_NAME, APPLICATION_NAME);
+        QString oldSettingsFileName = oldSettings.fileName();
+        QString newSettingsFileName = newSettingsForPath.fileName();
+
+        qDebug() << "New config removed:" << QFile::remove(newSettingsFileName);
+        QSettings newSettings(newSettingsFileName, QSettings::Format::NativeFormat);
+        SecureFormat::chiperSettings(oldSettings, newSettings);
+
 //        qDebug() << "oldSettingsFileName:" << oldSettingsFileName;
 //        qDebug() << "newSettingsFileName:" << newSettingsFileName;
-////        qDebug() << "New config removed:" << QFile::remove(newSettingsFileName);
 //        qDebug() << "Old config copied:" << QFile::copy(oldSettingsFileName, newSettingsFileName);
 ////        qDebug() << "Old config removed:" << QFile::remove(oldSettingsFileName);
-//    }
+    }
 
     Settings settings;
 

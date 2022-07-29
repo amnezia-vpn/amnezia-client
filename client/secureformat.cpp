@@ -1,6 +1,7 @@
 #include "secureformat.h"
 
 #include <QTextStream>
+#include <QVariantMap>
 #include <QDebug>
 
 #include "openssl/evp.h"
@@ -15,11 +16,8 @@ int gcm_encrypt(unsigned char *plaintext, int plaintext_len,
                 unsigned char *ciphertext)
 {
     EVP_CIPHER_CTX *ctx;
-
     int len;
-
     int ciphertext_len;
-
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
@@ -120,24 +118,6 @@ SecureFormat::SecureFormat()
                                          readSecureFile,
                                          writeSecureFile);
     qDebug() << "SecureFormat" << m_format;
-    
-    unsigned char plainText[] = "Hello world!";
-    qDebug("%s", plainText);
-    unsigned char key[] = "12345qwerty";
-    unsigned char iv[] = "000000000000";
-    unsigned char chipherText[1024];
-    unsigned char decryptPlainText[1024];
-    gcm_encrypt(plainText, std::strlen((const char *)plainText),
-                key,
-                iv, 12,
-                chipherText);
-    qDebug("%s", chipherText);
-    
-    gcm_decrypt(chipherText, std::strlen((const char *)chipherText),
-                key,
-                iv, 12,
-                decryptPlainText);
-    qDebug("%s", decryptPlainText);
 }
 
 bool SecureFormat::readSecureFile(QIODevice& device, QSettings::SettingsMap& map) {
@@ -148,7 +128,9 @@ bool SecureFormat::readSecureFile(QIODevice& device, QSettings::SettingsMap& map
     QTextStream inStream(&device);
     while (!inStream.atEnd()) {
         QString line = inStream.readLine();
-        qDebug() << "SecureFormat::readSecureFile" << line;
+        qDebug() << "SecureFormat::readSecureFile: " << line;
+        QStringList keyValue = line.split("<=>");
+        map.insert(keyValue.first(), keyValue.last());
     }
 
     return true;
@@ -160,8 +142,58 @@ bool SecureFormat::writeSecureFile(QIODevice& device, const QSettings::SettingsM
     }
 
     QTextStream outStream(&device);
+    auto keys = map.keys();
+    for (auto key : keys) {
+        outStream << key << "<=>" << map.value(key).toString();
+        qDebug() << "SecureFormat::writeSecureFile: " << key << "<=>" << map.value(key).toString();
+    }
 
     return true;
+}
+
+void SecureFormat::chiperSettings(const QSettings &oldSetting, QSettings &newSetting) {
+    QVariantMap keysValuesPairs;
+    QStringList keys = oldSetting.allKeys();
+    QStringListIterator it(keys);
+    while ( it.hasNext() ) {
+        QString currentKey = it.next();
+        keysValuesPairs.insert(currentKey, oldSetting.value(currentKey));
+    }
+
+    unsigned char gcmkey[] = "12345qwerty";
+    unsigned char iv[] = "000000000000";
+
+    for (const QString& key : keys) {
+        QString value = keysValuesPairs.value(key).toString();
+
+        int plainTextSize = value.toUtf8().size();
+        unsigned char* plainText = new unsigned char[plainTextSize];
+        std::memcpy(plainText, value.toUtf8().constData(), plainTextSize);
+
+        unsigned char chipherText[UINT16_MAX];
+        int chipherTextSize = gcm_encrypt(plainText, plainTextSize,
+                                          gcmkey,
+                                          iv, 12,
+                                          chipherText);
+        QByteArray qChipherArray = QByteArray::fromRawData((const char *)chipherText, chipherTextSize);
+
+//        unsigned char decryptPlainText[UINT16_MAX];
+//        gcm_decrypt((unsigned char*)qChipherArray.data(), qChipherArray.size(),
+//                    gcmkey,
+//                    iv, 12,
+//                    decryptPlainText);
+//        QString qDecryptPlainText = QString::fromUtf8((const char *)decryptPlainText);
+//        qDebug() << "qDecryptPlainText:" << qDecryptPlainText;
+
+        newSetting.setValue(key, qChipherArray);
+    }
+
+//    newSetting.sync();
+//    qDebug() << "newSetting.allKeys(): " << newSetting.allKeys();
+//    for (const QString& key : newSetting.allKeys()) {
+//        QString value = keysValuesPairs.value(key).toString();
+//        qDebug() << "newSetting value: " << value;
+//    }
 }
 
 const QSettings::Format& SecureFormat::format() const{
