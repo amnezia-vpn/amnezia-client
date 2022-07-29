@@ -40,6 +40,7 @@ HEADERS  += \
     managementserver.h \
     platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
+    secureformat.h \
     settings.h \
     ui/notificationhandler.h \
     ui/models/containers_model.h \
@@ -97,6 +98,7 @@ SOURCES  += \
     managementserver.cpp \
     platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
+    secureformat.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \
