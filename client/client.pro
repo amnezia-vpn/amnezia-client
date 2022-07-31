@@ -38,6 +38,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+    platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     settings.h \
@@ -95,6 +96,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+    platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
@@ -300,10 +302,13 @@ ios {
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
-      platforms/ios/ipaddressrange.h
+      platforms/ios/ipaddressrange.h \
+      platforms/ios/QtAppDelegate.h \
+      platforms/ios/QtAppDelegate-C-Interface.h
 
     SOURCES -= \
-      platforms/ios/QRCodeReader.cpp
+      platforms/ios/QRCodeReader.cpp \
+      platforms/ios/MobileUtils.cpp
 
     SOURCES += \
       protocols/ios_vpnprotocol.mm \
@@ -313,6 +318,8 @@ ios {
       platforms/ios/ipaddress.cpp \
       platforms/ios/ipaddressrange.cpp \
       platforms/ios/QRCodeReaderBase.mm
+      platforms/ios/QtAppDelegate.mm \
+      platforms/ios/MobileUtils.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
