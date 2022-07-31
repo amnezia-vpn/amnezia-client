@@ -15,6 +15,6 @@ PageShareProtocolBase {
 
     Caption {
         id: caption
-        text: qsTr("Share TOR Web site")
+        text: qsTr("Share Tor Web site")
     }
 }

@@ -1,3 +1,3 @@
 sleep 5
 # get onions list
-onions
+cat /var/lib/tor/hidden_service/hostname

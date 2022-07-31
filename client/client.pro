@@ -78,7 +78,7 @@ HEADERS  += \
     loghandler.h \
     loglevel.h \
     constants.h \
-    platforms/ios/QRCodeReader.h
+    platforms/ios/QRCodeReaderBase.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -132,7 +132,7 @@ SOURCES  += \
     protocols/vpnprotocol.cpp \
     logger.cpp \
     loghandler.cpp \
-    platforms/ios/QRCodeReader.cpp
+    platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \
     resources.qrc
@@ -317,7 +317,7 @@ ios {
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
       platforms/ios/ipaddressrange.cpp \
-      platforms/ios/QRCodeReader.mm \
+      platforms/ios/QRCodeReaderBase.mm
       platforms/ios/QtAppDelegate.mm \
       platforms/ios/MobileUtils.mm
 

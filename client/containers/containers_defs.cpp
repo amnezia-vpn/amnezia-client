@@ -77,7 +77,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::WireGuard, "WireGuard"},
         {DockerContainer::Ipsec, QObject::tr("IPsec")},
 
-        {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
+        {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")}
@@ -94,7 +94,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
         {DockerContainer::Ipsec, QObject::tr("IPsec container")},
 
-        {DockerContainer::TorWebSite, QObject::tr("Web site in TOR network")},
+        {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")}

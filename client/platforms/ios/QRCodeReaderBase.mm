@@ -1,4 +1,4 @@
-#include "QRCodeReader.h"
+#include "QRCodeReaderBase.h"
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
