@@ -109,12 +109,9 @@ void VpnConfigurator::updateContainerConfigAfterInstallation(DockerContainer con
 
         qDebug() << "amnezia-tor onions" << stdOut;
 
-        QStringList l = stdOut.split(",");
-        for (QString s : l) {
-            if (s.contains(":80")) {
-                protocol.insert(config_key::site, s);
-            }
-        }
+        QString onion = stdOut;
+        onion.replace("\n", "");
+        protocol.insert(config_key::site, onion);
 
         containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
     }

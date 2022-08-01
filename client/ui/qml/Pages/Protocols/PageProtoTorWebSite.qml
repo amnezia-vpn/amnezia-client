@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.15
 import ProtocolEnum 1.0
 import "../"
 import "../../Controls"
@@ -16,43 +17,54 @@ PageProtocolBase {
 
     Caption {
         id: caption
-        text: qsTr("TOR Web site settings")
+        text: qsTr("Tor Web Site settings")
     }
 
-    Rectangle {
-        id: frame_settings
-        width: parent.width
+
+    ColumnLayout {
+        id: content
+        enabled: logic.pageEnabled
         anchors.top: caption.bottom
+        anchors.left: root.left
+        anchors.right: root.right
+        anchors.bottom: pb_save.top
+        anchors.margins: 20
         anchors.topMargin: 10
 
-        border.width: 1
-        border.color: "lightgray"
-        anchors.bottomMargin: 5
-        anchors.horizontalCenter: parent.horizontalCenter
-        radius: 2
-        Grid {
-            id: grid
-            anchors.fill: parent
-            columns: 2
-            horizontalItemAlignment: Grid.AlignHCenter
-            verticalItemAlignment: Grid.AlignVCenter
-            topPadding: 5
-            leftPadding: 30
-            rightPadding: 30
-            spacing: 5
 
+
+        RowLayout {
+            Layout.fillWidth: true
 
             LabelType {
-                width: 130
+                id: lbl_onion
+                Layout.preferredWidth: 0.3 * root.width - 10
                 text: qsTr("Web site onion address")
             }
             TextFieldType {
                 id: tf_site_address
-                width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
+                Layout.fillWidth: true
                 text: logic.labelTorWebSiteAddressText
                 readOnly: true
             }
+        }
 
+        ShareConnectionButtonCopyType {
+            Layout.fillWidth: true
+            Layout.topMargin: 5
+            copyText: tf_site_address.text
+        }
+
+        RichLabelType {
+            Layout.fillWidth: true
+            Layout.topMargin: 15
+            text: qsTr("Notes:<ul>
+<li>Use <a href=\"https://www.torproject.org/download/\">Tor Browser</a> to open this url.</li>
+<li>After installation it takes several minutes while your onion site will become available in the Tor Network.</li>
+<li>When configuring WordPress set the domain as this onion address.</li>
+</ul>
+")
         }
     }
+
 }

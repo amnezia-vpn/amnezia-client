@@ -38,6 +38,7 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+    platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     secureformat.h \
@@ -78,7 +79,7 @@ HEADERS  += \
     loghandler.h \
     loglevel.h \
     constants.h \
-    platforms/ios/QRCodeReader.h
+    platforms/ios/QRCodeReaderBase.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -96,6 +97,7 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+    platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     secureformat.cpp \
@@ -132,7 +134,7 @@ SOURCES  += \
     protocols/vpnprotocol.cpp \
     logger.cpp \
     loghandler.cpp \
-    platforms/ios/QRCodeReader.cpp
+    platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \
     resources.qrc
@@ -302,10 +304,13 @@ ios {
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
-      platforms/ios/ipaddressrange.h
+      platforms/ios/ipaddressrange.h \
+      platforms/ios/QtAppDelegate.h \
+      platforms/ios/QtAppDelegate-C-Interface.h
 
     SOURCES -= \
-      platforms/ios/QRCodeReader.cpp
+      platforms/ios/QRCodeReader.cpp \
+      platforms/ios/MobileUtils.cpp
 
     SOURCES += \
       protocols/ios_vpnprotocol.mm \
@@ -314,7 +319,9 @@ ios {
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
       platforms/ios/ipaddressrange.cpp \
-      platforms/ios/QRCodeReader.mm
+      platforms/ios/QRCodeReaderBase.mm
+      platforms/ios/QtAppDelegate.mm \
+      platforms/ios/MobileUtils.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE

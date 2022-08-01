@@ -1,5 +1,5 @@
-#ifndef QRCODEREADER_H
-#define QRCODEREADER_H
+#ifndef QRCODEREADERBASE_H
+#define QRCODEREADERBASE_H
 
 #include <QObject>
 #include <QRect>
@@ -25,4 +25,4 @@ private:
     QRect m_cameraSize;
 };
 
-#endif // QRCODEREADER_H
+#endif // QRCODEREADERBASE_H

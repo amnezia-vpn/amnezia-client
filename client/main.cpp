@@ -37,7 +37,7 @@
 
 #include "QZXing.h"
 
-#include "platforms/ios/QRCodeReader.h"
+#include "platforms/ios/QRCodeReaderBase.h"
 
 #include "debug.h"
 #include "defines.h"
@@ -55,6 +55,10 @@
 
 #if defined(Q_OS_ANDROID)
 #include "native.h"
+#endif
+
+#if defined(Q_OS_IOS)
+#include "QtAppDelegate-C-Interface.h"
 #endif
 
 static void loadTranslator()
@@ -88,13 +92,16 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 #endif
 
-
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
 #endif
 
 #if defined(Q_OS_ANDROID)
     NativeHelpers::registerApplicationInstance(&app);
+#endif
+
+#if defined(Q_OS_IOS)
+    QtAppDelegateInitialize();
 #endif
 
     loadTranslator();
@@ -219,6 +226,10 @@ int main(int argc, char *argv[])
     engine->rootContext()->setContextProperty("StartPageLogic", uiLogic->startPageLogic());
     engine->rootContext()->setContextProperty("VpnLogic", uiLogic->vpnLogic());
     engine->rootContext()->setContextProperty("WizardLogic", uiLogic->wizardLogic());
+
+#if defined(Q_OS_IOS)
+    setStartPageLogic(uiLogic->startPageLogic());
+#endif
 
     engine->load(url);
 
