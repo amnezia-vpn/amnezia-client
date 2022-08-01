@@ -319,7 +319,7 @@ ios {
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
       platforms/ios/ipaddressrange.cpp \
-      platforms/ios/QRCodeReaderBase.mm
+      platforms/ios/QRCodeReaderBase.mm \
       platforms/ios/QtAppDelegate.mm \
       platforms/ios/MobileUtils.mm
 
