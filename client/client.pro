@@ -309,7 +309,7 @@ ios {
       platforms/ios/QtAppDelegate-C-Interface.h
 
     SOURCES -= \
-      platforms/ios/QRCodeReader.cpp \
+      platforms/ios/QRCodeReaderBase.cpp \
       platforms/ios/MobileUtils.cpp
 
     SOURCES += \
