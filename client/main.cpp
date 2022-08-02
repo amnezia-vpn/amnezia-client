@@ -38,6 +38,7 @@
 #include "QZXing.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
+#include "platforms/ios/MobileUtils.h"
 
 #include "debug.h"
 #include "defines.h"
@@ -143,22 +144,23 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
-    if (!oldSettings.allKeys().isEmpty()) {
-        QSettings newSettingsForPath(QSettings::Format::CustomFormat1, QSettings::UserScope,
-                                     ORGANIZATION_NAME, APPLICATION_NAME);
-        QString oldSettingsFileName = oldSettings.fileName();
-        QString newSettingsFileName = newSettingsForPath.fileName();
-
-        qDebug() << "New config removed:" << QFile::remove(newSettingsFileName);
-        QSettings newSettings(newSettingsFileName, QSettings::Format::NativeFormat);
-        SecureFormat::chiperSettings(oldSettings, newSettings);
-
+//    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
+//    if (!oldSettings.allKeys().isEmpty()) {
+//        QSettings newSettings(QSettings::Format::CustomFormat1, QSettings::SystemScope,
+//                              ORGANIZATION_NAME, APPLICATION_NAME);
+//        QString oldSettingsFileName = oldSettings.fileName();
+//        QString newSettingsFileName = newSettings.fileName();
 //        qDebug() << "oldSettingsFileName:" << oldSettingsFileName;
 //        qDebug() << "newSettingsFileName:" << newSettingsFileName;
-//        qDebug() << "Old config copied:" << QFile::copy(oldSettingsFileName, newSettingsFileName);
-////        qDebug() << "Old config removed:" << QFile::remove(oldSettingsFileName);
-    }
+
+//        qDebug() << "New config removed:" << QFile::remove(newSettingsFileName);
+//        SecureFormat::chiperSettings(oldSettings, newSettings);
+////        qDebug() << "Old config copied:" << QFile::copy(oldSettingsFileName, newSettingsFileName);
+//////        qDebug() << "Old config removed:" << QFile::remove(oldSettingsFileName);
+//    }
+
+    MobileUtils::writeToKeychain("testKey", "12345");
+    qDebug() << "MobileUtils::readFromKeychain(\"testKey\"):" << MobileUtils::readFromKeychain("testKey");
 
     Settings settings;
 

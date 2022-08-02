@@ -1,6 +1,9 @@
 #include "MobileUtils.h"
 
 #include <UIKit/UIKit.h>
+#include <Security/Security.h>
+
+#include <QDebug>
 
 static UIViewController* getViewController() {
     NSArray *windows = [[UIApplication sharedApplication]windows];
@@ -30,4 +33,63 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     if (popController) {
         popController.sourceView = qtController.view;
     }
+}
+
+bool deleteFromKeychain(const QString& tag) {
+    NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *deleteQuery = @{ (id)kSecClass: (id)kSecClassKey,
+                                   (id)kSecAttrApplicationTag: nsTag,
+                                 };
+
+    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)deleteQuery);
+    if (status != errSecSuccess) {
+        qDebug() << "Error deleteFromKeychain" << status;
+        return false;
+    } else {
+        qDebug() << "OK deleteFromKeychain";
+        return true;
+    }
+}
+
+void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
+    deleteFromKeychain(tag);
+
+    NSData* nsValue = [value.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary* addQuery = @{ (id)kSecValueData: nsValue,
+                                (id)kSecClass: (id)kSecClassKey,
+                                (id)kSecAttrApplicationTag: nsTag,
+                              };
+
+    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)addQuery, NULL);
+    if (status != errSecSuccess) {
+        qDebug() << "Error writeToKeychain" << status;
+    } else {
+        qDebug() << "OK writeToKeychain";
+    }
+}
+
+QString MobileUtils::readFromKeychain(const QString& tag) {
+    NSData* nsValue = NULL;
+    NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *getQuery = @{ (id)kSecReturnData: @YES,
+                                (id)kSecClass: (id)kSecClassKey,
+                                (id)kSecAttrApplicationTag: nsTag,
+                              };
+    
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)getQuery,
+                                          (CFTypeRef *)&nsValue);
+    if (status != errSecSuccess) {
+        qDebug() << "Error readFromKeychain" << status;
+    } else {
+        qDebug() << "OK readFromKeychain" << nsValue;
+    }
+
+    QString result;
+    if (nsValue) {
+        result = QByteArray::fromNSData(nsValue);
+        CFRelease(nsValue);
+    }
+    
+    return result;
 }

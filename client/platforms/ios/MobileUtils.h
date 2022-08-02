@@ -12,6 +12,9 @@ public:
 
 public slots:
     static void shareText(const QStringList& filesToSend);
+
+    static void writeToKeychain(const QString& tag, const QString& value);
+    static QString readFromKeychain(const QString& tag);
 };
 
 #endif // MOBILEUTILS_H

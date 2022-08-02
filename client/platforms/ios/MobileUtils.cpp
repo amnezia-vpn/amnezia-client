@@ -1,10 +1,6 @@
 #include "MobileUtils.h"
 
-MobileUtils::MobileUtils()
-{
+void MobileUtils::shareText(const QStringList&) {}
 
-}
-
-void MobileUtils::shareText(const QStringList& filesToSend) {
-
-}
+void MobileUtils::writeToKeychain(const QString&, const QString&) {}
+QString MobileUtils::readFromKeychain(const QString&) { return {}; }
