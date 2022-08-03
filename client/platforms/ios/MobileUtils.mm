@@ -35,10 +35,15 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     }
 }
 
+const QString service = "org.amnezia.AmneziaVPN";
+
 bool deleteFromKeychain(const QString& tag) {
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *deleteQuery = @{ (id)kSecClass: (id)kSecClassKey,
-                                   (id)kSecAttrApplicationTag: nsTag,
+    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+
+    NSDictionary *deleteQuery = @{ (id)kSecAttrService: nsService,
+                                   (id)kSecAttrAccount: nsTag,
+                                   (id)kSecClass: (id)kSecClassGenericPassword,
                                  };
 
     OSStatus status = SecItemDelete((__bridge CFDictionaryRef)deleteQuery);
@@ -54,11 +59,14 @@ bool deleteFromKeychain(const QString& tag) {
 void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
     deleteFromKeychain(tag);
 
-    NSData* nsValue = [value.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary* addQuery = @{ (id)kSecValueData: nsValue,
-                                (id)kSecClass: (id)kSecClassKey,
-                                (id)kSecAttrApplicationTag: nsTag,
+    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* nsValue = [value.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+
+    NSDictionary* addQuery = @{ (id)kSecAttrService: nsService,
+                                (id)kSecAttrAccount: nsTag,
+                                (id)kSecClass: (id)kSecClassGenericPassword,
+                                (id)kSecValueData: nsValue,
                               };
 
     OSStatus status = SecItemAdd((__bridge CFDictionaryRef)addQuery, NULL);
@@ -70,11 +78,15 @@ void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
 }
 
 QString MobileUtils::readFromKeychain(const QString& tag) {
-    NSData* nsValue = NULL;
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *getQuery = @{ (id)kSecReturnData: @YES,
-                                (id)kSecClass: (id)kSecClassKey,
-                                (id)kSecAttrApplicationTag: nsTag,
+    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* nsValue = NULL;
+
+    NSDictionary *getQuery = @{ (id)kSecAttrService: nsService,
+                                (id)kSecAttrAccount: nsTag,
+                                (id)kSecClass: (id)kSecClassGenericPassword,
+                                (id)kSecMatchLimit: (id)kSecMatchLimitOne,
+                                (id)kSecReturnData: @YES,
                               };
     
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)getQuery,
