@@ -35,14 +35,10 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     }
 }
 
-const QString service = "org.amnezia.AmneziaVPN";
-
 bool deleteFromKeychain(const QString& tag) {
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
 
-    NSDictionary *deleteQuery = @{ (id)kSecAttrService: nsService,
-                                   (id)kSecAttrAccount: nsTag,
+    NSDictionary *deleteQuery = @{ (id)kSecAttrAccount: nsTag,
                                    (id)kSecClass: (id)kSecClassGenericPassword,
                                  };
 
@@ -60,11 +56,9 @@ void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
     deleteFromKeychain(tag);
 
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
     NSData* nsValue = [value.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
 
-    NSDictionary* addQuery = @{ (id)kSecAttrService: nsService,
-                                (id)kSecAttrAccount: nsTag,
+    NSDictionary* addQuery = @{ (id)kSecAttrAccount: nsTag,
                                 (id)kSecClass: (id)kSecClassGenericPassword,
                                 (id)kSecValueData: nsValue,
                               };
@@ -79,11 +73,9 @@ void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
 
 QString MobileUtils::readFromKeychain(const QString& tag) {
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSData* nsService = [service.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
     NSData* nsValue = NULL;
 
-    NSDictionary *getQuery = @{ (id)kSecAttrService: nsService,
-                                (id)kSecAttrAccount: nsTag,
+    NSDictionary *getQuery = @{ (id)kSecAttrAccount: nsTag,
                                 (id)kSecClass: (id)kSecClassGenericPassword,
                                 (id)kSecMatchLimit: (id)kSecMatchLimitOne,
                                 (id)kSecReturnData: @YES,
