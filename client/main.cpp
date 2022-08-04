@@ -144,26 +144,30 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-//    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
-//    if (!oldSettings.allKeys().isEmpty()) {
-//        QSettings newSettings(QSettings::Format::CustomFormat1, QSettings::SystemScope,
-//                              ORGANIZATION_NAME, APPLICATION_NAME);
-//        QString oldSettingsFileName = oldSettings.fileName();
-//        QString newSettingsFileName = newSettings.fileName();
-//        qDebug() << "oldSettingsFileName:" << oldSettingsFileName;
-//        qDebug() << "newSettingsFileName:" << newSettingsFileName;
+    {
+        Settings settingsTemp;
+    }
 
-//        qDebug() << "New config removed:" << QFile::remove(newSettingsFileName);
-//        SecureFormat::chiperSettings(oldSettings, newSettings);
-////        qDebug() << "Old config copied:" << QFile::copy(oldSettingsFileName, newSettingsFileName);
-//////        qDebug() << "Old config removed:" << QFile::remove(oldSettingsFileName);
-//    }
+    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
+    QSettings newSettings(QSettings::Format::CustomFormat1, QSettings::UserScope,
+                          ORGANIZATION_NAME, APPLICATION_NAME);
+    
+//    QString newSettingsFileName = newSettings.fileName();
+//    QFile::remove(newSettingsFileName);
+    
+    if (!oldSettings.allKeys().isEmpty() && newSettings.allKeys().isEmpty()) {
+        QString oldSettingsFileName = oldSettings.fileName();
+        QString newSettingsFileName = newSettings.fileName();
+        qDebug() << "oldSettingsFileName:" << oldSettingsFileName << QFile::exists(oldSettingsFileName) << oldSettings.isWritable();
+        qDebug() << "newSettingsFileName:" << newSettingsFileName << QFile::exists(newSettingsFileName) << newSettings.isWritable();
 
-    MobileUtils::writeToKeychain("testKey", "12345");
-    qDebug() << "MobileUtils::readFromKeychain(\"testKey\"):" << MobileUtils::readFromKeychain("testKey");
+        SecureFormat::chiperSettings(oldSettings, newSettings);
+    }
+
+//    MobileUtils::writeToKeychain("testKey", "12345");
+//    qDebug() << "MobileUtils::readFromKeychain(\"testKey\"):" << MobileUtils::readFromKeychain("testKey");
 
     Settings settings;
-
     if (settings.isSaveLogs()) {
         if (!Debug::init()) {
             qWarning() << "Initialization of debug subsystem failed";
