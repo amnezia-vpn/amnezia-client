@@ -185,7 +185,7 @@ bool SecureFormat::writeSecureFile(QIODevice& device, const QSettings::SettingsM
     for (auto key : keys) {
         QString value = map.value(key).toString();
         QByteArray qEncryptArray = encryptText(value);
-        outStream << key << "<=>" << qEncryptArray;
+        outStream << key << "<=>" << qEncryptArray << "\n";
 
         qDebug() << "SecureFormat::writeSecureFile: " << key << "<=>" << qEncryptArray;
     }
