@@ -4,6 +4,9 @@
 #include <QSettings>
 #include <QIODevice>
 
+QByteArray encryptText(const QByteArray &value);
+QByteArray decryptText(const QByteArray& qEncryptArray);
+
 class SecureFormat
 {
 public:

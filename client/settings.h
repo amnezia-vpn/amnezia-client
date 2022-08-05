@@ -12,6 +12,7 @@
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 #include "secureformat.h"
+#include "secure_qsettings.h"
 
 using namespace amnezia;
 
@@ -112,8 +113,8 @@ public:
 //    static constexpr char openNicNs13[] = "144.76.103.143";
 
 private:
-    static SecureFormat m_secureFormat;
-    QSettings m_settings;
+    //static SecureFormat m_secureFormat;
+    SecureQSettings m_settings;
 };
 
 #endif // SETTINGS_H

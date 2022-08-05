@@ -8,15 +8,14 @@
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
 
-SecureFormat Settings::m_secureFormat;
+//SecureFormat Settings::m_secureFormat;
 
 Settings::Settings(QObject* parent) :
     QObject(parent),
-    m_settings(m_secureFormat.format(), QSettings::UserScope,
-               ORGANIZATION_NAME, APPLICATION_NAME, this)
+    m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
 {
     qDebug() << "Settings::Settings()" << this;
-    qDebug() << "Settings::Settings()" << m_settings.fileName();
+//    qDebug() << "Settings::Settings()" << m_settings.fileName();
     // Import old settings
     if (serversCount() == 0) {
         QString user = m_settings.value("Server/userName").toString();

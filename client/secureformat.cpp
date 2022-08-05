@@ -17,6 +17,7 @@ int generate_key_and_iv(unsigned char *iv, unsigned char *key) {
 //                   NULL,
 //                   key_file_buf, key_size, 1, // const unsigned char *data, int datal, int count,
 //                   key, iv);
+    return 0;
 }
 
 int gcm_encrypt(unsigned char *plaintext, int plaintext_len,
@@ -124,10 +125,10 @@ int gcm_decrypt(unsigned char *ciphertext, int ciphertext_len,
 unsigned char gcmkey[] = "12345qwerty";
 unsigned char iv[] = "000000000000";
 
-QByteArray encryptText(const QString& value) {
-    int plainTextSize = value.toUtf8().size();
+QByteArray encryptText(const QByteArray& value) {
+    int plainTextSize = value.size();
     unsigned char* plainText = new unsigned char[plainTextSize];
-    std::memcpy(plainText, value.toUtf8().constData(), plainTextSize);
+    std::memcpy(plainText, value.constData(), plainTextSize);
 
     unsigned char chipherText[UINT16_MAX];
     int chipherTextSize = gcm_encrypt(plainText, plainTextSize,
@@ -138,13 +139,13 @@ QByteArray encryptText(const QString& value) {
     return QByteArray::fromRawData((const char *)chipherText, chipherTextSize);
 }
 
-QString decryptText(const QByteArray& qEncryptArray) {
+QByteArray decryptText(const QByteArray& qEncryptArray) {
     unsigned char decryptPlainText[UINT16_MAX];
     gcm_decrypt((unsigned char*)qEncryptArray.data(), qEncryptArray.size(),
                 gcmkey,
                 iv, 12,
                 decryptPlainText);
-    return QString::fromUtf8((const char *)decryptPlainText);
+    return QByteArray::fromRawData((const char *)decryptPlainText, qEncryptArray.size());
 }
 
 SecureFormat::SecureFormat()
@@ -176,40 +177,40 @@ bool SecureFormat::readSecureFile(QIODevice& device, QSettings::SettingsMap& map
 }
 
 bool SecureFormat::writeSecureFile(QIODevice& device, const QSettings::SettingsMap& map) {
-    if (!device.isOpen()) {
-        return false;
-    }
+//    if (!device.isOpen()) {
+//        return false;
+//    }
 
-    QTextStream outStream(&device);
-    auto keys = map.keys();
-    for (auto key : keys) {
-        QString value = map.value(key).toString();
-        QByteArray qEncryptArray = encryptText(value);
-        outStream << key << "<=>" << qEncryptArray << "\n";
+//    QTextStream outStream(&device);
+//    auto keys = map.keys();
+//    for (auto key : keys) {
+//        QString value = map.value(key).toString();
+//        QByteArray qEncryptArray = encryptText(value);
+//        outStream << key << "<=>" << qEncryptArray << "\n";
 
-        qDebug() << "SecureFormat::writeSecureFile: " << key << "<=>" << qEncryptArray;
-    }
+//        qDebug() << "SecureFormat::writeSecureFile: " << key << "<=>" << qEncryptArray;
+//    }
 
     return true;
 }
 
 void SecureFormat::chiperSettings(const QSettings &oldSetting, QSettings &newSetting) {
-    QVariantMap keysValuesPairs;
-    QStringList keys = oldSetting.allKeys();
-    QStringListIterator it(keys);
-    while ( it.hasNext() ) {
-        QString currentKey = it.next();
-        keysValuesPairs.insert(currentKey, oldSetting.value(currentKey));
-    }
+//    QVariantMap keysValuesPairs;
+//    QStringList keys = oldSetting.allKeys();
+//    QStringListIterator it(keys);
+//    while ( it.hasNext() ) {
+//        QString currentKey = it.next();
+//        keysValuesPairs.insert(currentKey, oldSetting.value(currentKey));
+//    }
 
-    for (const QString& key : keys) {
-        QString value = keysValuesPairs.value(key).toString();
-        QByteArray qEncryptArray = encryptText(value);
+//    for (const QString& key : keys) {
+//        QString value = keysValuesPairs.value(key).toString();
+//        QByteArray qEncryptArray = encryptText(value);
 
-        newSetting.setValue(key, qEncryptArray);
-    }
+//        newSetting.setValue(key, qEncryptArray);
+//    }
 
-    newSetting.sync();
+//    newSetting.sync();
 }
 
 const QSettings::Format& SecureFormat::format() const{

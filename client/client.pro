@@ -41,6 +41,7 @@ HEADERS  += \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
+    secure_qsettings.h \
     secureformat.h \
     settings.h \
     ui/notificationhandler.h \
@@ -100,6 +101,7 @@ SOURCES  += \
     platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
+    secure_qsettings.cpp \
     secureformat.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
