@@ -112,8 +112,10 @@ public:
 //    static constexpr char openNicNs5[] = "94.103.153.176";
 //    static constexpr char openNicNs13[] = "144.76.103.143";
 
+    QByteArray backupAppConfig() const { return m_settings.backupAppConfig(); }
+    void restoreAppConfig(const QByteArray &cfg) { m_settings.restoreAppConfig(cfg); }
+
 private:
-    //static SecureFormat m_secureFormat;
     SecureQSettings m_settings;
 };
 

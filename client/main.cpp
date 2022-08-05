@@ -148,21 +148,7 @@ int main(int argc, char *argv[])
         Settings settingsTemp;
     }
 
-    QSettings oldSettings(ORGANIZATION_NAME, APPLICATION_NAME);
-    QSettings newSettings(QSettings::Format::CustomFormat1, QSettings::UserScope,
-                          ORGANIZATION_NAME, APPLICATION_NAME);
-    
-//    QString newSettingsFileName = newSettings.fileName();
-//    QFile::remove(newSettingsFileName);
-    
-    if (!oldSettings.allKeys().isEmpty() && newSettings.allKeys().isEmpty()) {
-        QString oldSettingsFileName = oldSettings.fileName();
-        QString newSettingsFileName = newSettings.fileName();
-        qDebug() << "oldSettingsFileName:" << oldSettingsFileName << QFile::exists(oldSettingsFileName) << oldSettings.isWritable();
-        qDebug() << "newSettingsFileName:" << newSettingsFileName << QFile::exists(newSettingsFileName) << newSettings.isWritable();
 
-        SecureFormat::chiperSettings(oldSettings, newSettings);
-    }
 
 //    MobileUtils::writeToKeychain("testKey", "12345");
 //    qDebug() << "MobileUtils::readFromKeychain(\"testKey\"):" << MobileUtils::readFromKeychain("testKey");

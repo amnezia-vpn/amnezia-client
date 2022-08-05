@@ -74,3 +74,26 @@ void AppSettingsLogic::onPushButtonClearLogsClicked()
     Debug::clearLogs();
     Debug::clearServiceLogs();
 }
+
+void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
+{
+    uiLogic()->saveTextFile("Backup application config", "AmneziaVPN.backup", ".backup", m_settings.backupAppConfig());
+}
+
+void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open backup"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
+
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+
+    m_settings.restoreAppConfig(data);
+
+    emit uiLogic()->goToPage(Page::Vpn);
+    emit uiLogic()->setStartPage(Page::Vpn);
+}
+

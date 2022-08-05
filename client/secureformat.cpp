@@ -148,71 +148,7 @@ QByteArray decryptText(const QByteArray& qEncryptArray) {
     return QByteArray::fromRawData((const char *)decryptPlainText, qEncryptArray.size());
 }
 
-SecureFormat::SecureFormat()
-{
-    m_format = QSettings::registerFormat("sconf",
-                                         readSecureFile,
-                                         writeSecureFile);
-    qDebug() << "SecureFormat" << m_format;
-}
 
-bool SecureFormat::readSecureFile(QIODevice& device, QSettings::SettingsMap& map) {
-    if (!device.isOpen()) {
-        return false;
-    }
 
-    QTextStream inStream(&device);
-    while (!inStream.atEnd()) {
-        QString line = inStream.readLine();
 
-        QStringList keyValue = line.split("<=>");
-        QString key = keyValue.first();
-        QString value = decryptText(keyValue.last().toUtf8());
-        map.insert(key, value);
 
-        qDebug() << "SecureFormat::readSecureFile: " << key << "<=>" << value;
-    }
-
-    return true;
-}
-
-bool SecureFormat::writeSecureFile(QIODevice& device, const QSettings::SettingsMap& map) {
-//    if (!device.isOpen()) {
-//        return false;
-//    }
-
-//    QTextStream outStream(&device);
-//    auto keys = map.keys();
-//    for (auto key : keys) {
-//        QString value = map.value(key).toString();
-//        QByteArray qEncryptArray = encryptText(value);
-//        outStream << key << "<=>" << qEncryptArray << "\n";
-
-//        qDebug() << "SecureFormat::writeSecureFile: " << key << "<=>" << qEncryptArray;
-//    }
-
-    return true;
-}
-
-void SecureFormat::chiperSettings(const QSettings &oldSetting, QSettings &newSetting) {
-//    QVariantMap keysValuesPairs;
-//    QStringList keys = oldSetting.allKeys();
-//    QStringListIterator it(keys);
-//    while ( it.hasNext() ) {
-//        QString currentKey = it.next();
-//        keysValuesPairs.insert(currentKey, oldSetting.value(currentKey));
-//    }
-
-//    for (const QString& key : keys) {
-//        QString value = keysValuesPairs.value(key).toString();
-//        QByteArray qEncryptArray = encryptText(value);
-
-//        newSetting.setValue(key, qEncryptArray);
-//    }
-
-//    newSetting.sync();
-}
-
-const QSettings::Format& SecureFormat::format() const{
-    return m_format;
-}

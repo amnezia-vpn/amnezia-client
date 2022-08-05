@@ -24,7 +24,6 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{},
     m_pushButtonBackFromStartVisible{true},
-    m_pushButtonConnectVisible{true},
     m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
 
@@ -41,7 +40,6 @@ void StartPageLogic::onUpdatePage()
 
     set_labelWaitInfoVisible(false);
     set_labelWaitInfoText("");
-    set_pushButtonConnectVisible(true);
 
     set_pushButtonConnectKeyChecked(false);
 

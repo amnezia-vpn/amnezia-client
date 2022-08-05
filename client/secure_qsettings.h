@@ -11,12 +11,19 @@ public:
 
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
-    void sync() { m_setting.sync(); }
-    void remove(const QString &key) { m_setting.remove(key); }
+    void remove(const QString &key);
+    void sync();
+
+    QByteArray backupAppConfig() const;
+    void restoreAppConfig(const QByteArray &base64Cfg);
 
 private:
     QSettings m_setting;
     bool encrypted {false};
+
+    mutable QMap<QString, QVariant> m_cache;
+
+    QStringList encryptedKeys; // encode only key listed here
 };
 
 #endif // SECUREQSETTINGS_H

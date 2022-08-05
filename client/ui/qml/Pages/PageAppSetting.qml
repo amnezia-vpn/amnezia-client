@@ -107,7 +107,7 @@ PageBase {
 
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 15
+                Layout.topMargin: 10
                 Layout.preferredHeight: 41
                 text: qsTr("Export logs")
                 onClicked: {
@@ -117,7 +117,7 @@ PageBase {
 
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 15
+                Layout.topMargin: 10
                 Layout.preferredHeight: 41
 
                 property string start_text: qsTr("Clear logs")
@@ -133,6 +133,31 @@ PageBase {
                     text = end_text
                     timer.running = true
                     AppSettingsLogic.onPushButtonClearLogsClicked()
+                }
+            }
+
+            LabelType {
+                Layout.fillWidth: true
+                Layout.topMargin: 30
+                text: qsTr("Backup and restore configuration")
+            }
+
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                Layout.preferredHeight: 41
+                text: qsTr("Backup app config")
+                onClicked: {
+                    AppSettingsLogic.onPushButtonBackupAppConfigClicked()
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                Layout.preferredHeight: 41
+                text: qsTr("Restore app config")
+                onClicked: {
+                    AppSettingsLogic.onPushButtonRestoreAppConfigClicked()
                 }
             }
         }
