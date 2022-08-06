@@ -1,5 +1,5 @@
 #include "secure_qsettings.h"
-#include "secureformat.h"
+#include "encryption_helper.h"
 
 #include <QDataStream>
 #include <QDebug>
@@ -9,10 +9,18 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
       m_setting(organization, application, parent),
       encryptedKeys({"Servers/serversList"})
 {
-    encrypted = m_setting.value("Conf/encrypted").toBool();
+    // load keys from system key storage
+#ifdef Q_OS_IOS
+    key = MobileUtils::readFromKeychain(settingsKeyTag);
+    iv = MobileUtils::readFromKeychain(settingsIvTag);
+#endif
+    key = "12345qwerty00000";
+    iv = "000000000000000";
+
+    bool encrypted = m_setting.value("Conf/encrypted").toBool();
 
     // convert settings to encrypted
-    if (! encrypted) {
+    if (encryptionRequired() && ! encrypted) {
         for (const QString &key : m_setting.allKeys()) {
             if (encryptedKeys.contains(key)) {
                 const QVariant &val = value(key);
@@ -21,7 +29,6 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
         }
         m_setting.setValue("Conf/encrypted", true);
         m_setting.sync();
-        encrypted = true;
     }
 }
 
@@ -32,7 +39,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     }
 
     QVariant retVal;
-    if (encrypted && encryptedKeys.contains(key)) {
+    if (encryptionRequired() && encryptedKeys.contains(key)) {
         if (!m_setting.contains(key)) return defaultValue;
 
         QByteArray encryptedValue = m_setting.value(key).toByteArray();
@@ -52,16 +59,21 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
-    QByteArray decryptedValue;
-    {
-        QDataStream ds(&decryptedValue, QIODevice::WriteOnly);
-        ds << value;
+    if (encryptionRequired() && encryptedKeys.contains(key)) {
+        QByteArray decryptedValue;
+        {
+            QDataStream ds(&decryptedValue, QIODevice::WriteOnly);
+            ds << value;
+        }
+
+        QByteArray encryptedValue = encryptText(decryptedValue);
+        m_setting.setValue(key, encryptedValue);
+    }
+    else {
+        m_setting.setValue(key, value);
     }
 
-    QByteArray encryptedValue = encryptText(decryptedValue);
-    m_setting.setValue(key, encryptedValue);
     m_cache.insert(key, value);
-
     sync();
 }
 
@@ -109,6 +121,32 @@ void SecureQSettings::restoreAppConfig(const QByteArray &base64Cfg)
     }
 
     sync();
+}
+
+
+QByteArray SecureQSettings::encryptText(const QByteArray& value) const {
+    char cipherText[UINT16_MAX];
+    int cipherTextSize = gcm_encrypt(value.constData(), value.size(),
+        key.constData(), iv.constData(), iv_len, cipherText);
+
+    return QByteArray::fromRawData((const char *)cipherText, cipherTextSize);
+}
+
+QByteArray SecureQSettings::decryptText(const QByteArray& ba) const {
+    char decryptPlainText[UINT16_MAX];
+    gcm_decrypt(ba.data(), ba.size(),
+        key.constData(), iv.constData(), iv_len, decryptPlainText);
+
+    return QByteArray::fromRawData(decryptPlainText, ba.size());
+}
+
+bool SecureQSettings::encryptionRequired() const
+{
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
+    return true;
+#endif
+
+    return false;
 }
 
 

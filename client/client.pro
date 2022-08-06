@@ -37,12 +37,12 @@ HEADERS  += \
     core/servercontroller.h \
     debug.h \
     defines.h \
+    encryption_helper.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     secure_qsettings.h \
-    secureformat.h \
     settings.h \
     ui/notificationhandler.h \
     ui/models/containers_model.h \
@@ -96,13 +96,13 @@ SOURCES  += \
    core/server_defs.cpp \
     core/servercontroller.cpp \
     debug.cpp \
+    encryption_helper.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     secure_qsettings.cpp \
-    secureformat.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \

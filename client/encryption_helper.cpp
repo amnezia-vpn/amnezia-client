@@ -1,10 +1,29 @@
-#include "secureformat.h"
+#include "encryption_helper.h"
 
 #include <QTextStream>
 #include <QVariantMap>
 #include <QDebug>
 
 #include "openssl/evp.h"
+
+int gcm_encrypt(const char *plaintext, int plaintext_len,
+                const char *key, const char *iv, int iv_len,
+                char *ciphertext)
+{
+    return gcm_encrypt((uchar*)plaintext, plaintext_len,
+                       (uchar*)key, (uchar*)iv, iv_len,
+                       (uchar*)ciphertext);
+}
+
+int gcm_decrypt(const char *ciphertext, int ciphertext_len,
+                const char *key,
+                const char *iv, int iv_len,
+                char *plaintext)
+{
+    return gcm_decrypt((uchar*)ciphertext, ciphertext_len,
+                       (uchar*)key, (uchar*)iv, iv_len,
+                       (uchar*)plaintext);
+}
 
 void handleErrors() {
     qDebug() << "handleErrors";
@@ -20,9 +39,9 @@ int generate_key_and_iv(unsigned char *iv, unsigned char *key) {
     return 0;
 }
 
-int gcm_encrypt(unsigned char *plaintext, int plaintext_len,
-                unsigned char *key,
-                unsigned char *iv, int iv_len,
+int gcm_encrypt(const unsigned char *plaintext, int plaintext_len,
+                const unsigned char *key,
+                const unsigned char *iv, int iv_len,
                 unsigned char *ciphertext)
 {
     EVP_CIPHER_CTX *ctx;
@@ -69,9 +88,9 @@ int gcm_encrypt(unsigned char *plaintext, int plaintext_len,
     return ciphertext_len;
 }
 
-int gcm_decrypt(unsigned char *ciphertext, int ciphertext_len,
-                unsigned char *key,
-                unsigned char *iv, int iv_len,
+int gcm_decrypt(const unsigned char *ciphertext, int ciphertext_len,
+                const unsigned char *key,
+                const unsigned char *iv, int iv_len,
                 unsigned char *plaintext)
 {
     EVP_CIPHER_CTX *ctx;
@@ -121,34 +140,4 @@ int gcm_decrypt(unsigned char *ciphertext, int ciphertext_len,
         return -1;
     }
 }
-
-unsigned char gcmkey[] = "12345qwerty";
-unsigned char iv[] = "000000000000";
-
-QByteArray encryptText(const QByteArray& value) {
-    int plainTextSize = value.size();
-    unsigned char* plainText = new unsigned char[plainTextSize];
-    std::memcpy(plainText, value.constData(), plainTextSize);
-
-    unsigned char chipherText[UINT16_MAX];
-    int chipherTextSize = gcm_encrypt(plainText, plainTextSize,
-                                      gcmkey,
-                                      iv, 12,
-                                      chipherText);
-    delete[] plainText;
-    return QByteArray::fromRawData((const char *)chipherText, chipherTextSize);
-}
-
-QByteArray decryptText(const QByteArray& qEncryptArray) {
-    unsigned char decryptPlainText[UINT16_MAX];
-    gcm_decrypt((unsigned char*)qEncryptArray.data(), qEncryptArray.size(),
-                gcmkey,
-                iv, 12,
-                decryptPlainText);
-    return QByteArray::fromRawData((const char *)decryptPlainText, qEncryptArray.size());
-}
-
-
-
-
 
