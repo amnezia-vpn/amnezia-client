@@ -49,31 +49,10 @@ if test -f /usr/local/sbin/$APP_NAME; then
         sudo rm -f /usr/local/sbin/$APP_NAME >> $LOG_FILE
 fi
 
-#getent passwd {1000..6000} | while IFS=: read -r name password uid gid gecos home shell; do
-#	if test -f /home/$name/Desktop/$APP_NAME\ client.desktop; then
-#		sudo rm -rf /home/$name/Desktop/$APP_NAME\ client.desktop >> $LOG_FILE
-#	fi
-#
-#        if test -f /home/$name/Desktop/$APP_NAME.desktop; then
-#                sudo rm -rf /home/$name/Desktop/$APP_NAME.desktop >> $LOG_FILE
-#        fi
-#
-#	if test -f /home/$name/.config/$APP_NAME.ORG; then
-#		sudo rm -rf /home/$name/.config/$APP_NAME.ORG >> $LOG_FILE
-#	fi
-#
-#	if test -f /home/$name/.local/share/$APP_NAME.ORG; then
-#		sudo rm -rf /home/$name/.local/share/$APP_NAME.ORG >> $LOG_FILE
-#	fi
-#
-#	if test -f /home/$name/.local/share/$APP_NAME; then
-#                sudo rm -rf /home/$name/.local/share/$APP_NAME >> $LOG_FILE
-#        fi
-#
-#	if test -f /home/$name/.icons/AmneziaVPN_Logo.png; then
-#		sudo rm -rf /home/$name/.icons/AmneziaVPN_Logo.png >> $LOG_FILE
-#	fi
-#done
+if test -f /usr/share/applications/$APP_NAME.desktop; then
+	sudo rm -f /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
+
+fi
 
 date >> $LOG_FILE
 echo "Service after uninstall status:" >> $LOG_FILE
