@@ -76,7 +76,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
         {Proto::Ikev2, "IKEv2"},
         {Proto::L2tp, "L2TP"},
 
-        {Proto::TorWebSite, "Web site in TOR network"},
+        {Proto::TorWebSite, "Web site in Tor network"},
         {Proto::Dns, "DNS Service"},
         {Proto::FileShare, "File Sharing Service"},
         {Proto::Sftp, QObject::tr("Sftp service")}

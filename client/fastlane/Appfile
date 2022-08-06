@@ -1,0 +1,7 @@
+app_identifier(["org.amnezia.AmneziaVPN", "org.amnezia.AmneziaVPN.network-extension"]) # The bundle identifier of your app
+apple_id("dartsyms@gmail.com") # Your Apple email address
+
+itc_team_id("122591025") #  App Store Connect Team ID
+team_id("X7UJ388FXK") # Developer Portal Team ID
+#itc_team_id("119381903")
+#team_id("7VAGZXD78P")

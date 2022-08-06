@@ -26,7 +26,12 @@ if sudo systemctl is-active --quiet $APP_NAME; then
 fi
 
 sudo chmod +x $APP_PATH/client/bin/easyrsa >> $LOG_FILE
+<<<<<<< HEAD
 sudo chmod 555 $APP_PATH/client/bin/update-resolv-conf.sh
+=======
+sudo chmod --- $APP_PATH/client/bin/update-resolv-conf.sh
+sudo chmod +rx $APP_PATH/client/bin/update-resolv-conf.sh
+>>>>>>> df94a87a51bdddfefb665fd8e898ef16b1501a46
 
 sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 

@@ -157,5 +157,7 @@
         <file>images/svg/control_point_black_24dp.svg</file>
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>ui/qml/Controls/SvgButtonType.qml</file>
+        <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
+        <file>server_scripts/website_tor/Dockerfile</file>
     </qresource>
 </RCC>
