@@ -29,6 +29,8 @@ public class IOSVpnProtocolImpl : NSObject {
     private var privateKey : PrivateKey? = nil
     private var deviceIpv4Address: String? = nil
     private var deviceIpv6Address: String? = nil
+    private var openVPNConfig: String? = nil
+    private var shadowSocksConfig: String? = nil
 
     @objc enum ConnectionState: Int { case Error, Connected, Disconnected }
     
@@ -45,6 +47,8 @@ public class IOSVpnProtocolImpl : NSObject {
         precondition(!vpnBundleID.isEmpty)
         
         stateChangeCallback = callback
+        self.openVPNConfig = config
+        self.shadowSocksConfig = nil
         
         NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.addObserver(self,
@@ -117,6 +121,8 @@ public class IOSVpnProtocolImpl : NSObject {
         self.privateKey = PrivateKey(rawValue: privateKey)
         self.deviceIpv4Address = deviceIpv4Address
         self.deviceIpv6Address = deviceIpv6Address
+        self.openVPNConfig = nil
+        self.shadowSocksConfig = nil
         
         NotificationCenter.default.removeObserver(self)
 
@@ -160,6 +166,63 @@ public class IOSVpnProtocolImpl : NSObject {
             
             Logger.global?.log(message: "Tunnel already exists")
             print("Tunnel already exists")
+
+            self!.tunnel = tunnel
+            
+            if tunnel?.connection.status == .connected {
+                closure(ConnectionState.Connected, tunnel?.connection.connectedDate)
+            } else {
+                closure(ConnectionState.Disconnected, nil)
+            }
+        }
+    }
+    
+    @objc init(bundleID: String,
+               tunnelConfig: String,
+               ssConfig: String,
+               closure: @escaping (ConnectionState, Date?) -> Void,
+               callback: @escaping (Bool) -> Void) {
+        super.init()
+        
+        vpnBundleID = bundleID;
+        precondition(!vpnBundleID.isEmpty)
+        
+        stateChangeCallback = callback
+        self.openVPNConfig = tunnelConfig
+        self.shadowSocksConfig = ssConfig
+        
+        NotificationCenter.default.removeObserver(self)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(self.vpnStatusDidChange(notification:)), name: Notification.Name.NEVPNStatusDidChange, object: nil)
+
+        NETunnelProviderManager.loadAllFromPreferences { [weak self] managers, error in
+            if let error = error {
+                Logger.global?.log(message: "Loading from preference failed: \(error)")
+                closure(ConnectionState.Error, nil)
+                return
+            }
+
+            if self == nil {
+                Logger.global?.log(message: "We are shutting down.")
+                return
+            }
+
+            let nsManagers = managers ?? []
+            Logger.global?.log(message: "We have received \(nsManagers.count) managers.")
+            print("We have received \(nsManagers.count) managers.")
+
+            let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
+            
+            if tunnel == nil {
+                Logger.global?.log(message: "Creating the tunnel via shadowsocks")
+                print("Creating the tunnel via SS")
+                self!.tunnel = NETunnelProviderManager()
+                closure(ConnectionState.Disconnected, nil)
+                return
+            }
+            
+            Logger.global?.log(message: "Tunnel already exists")
+            print("SS Tunnel already exists")
 
             self!.tunnel = tunnel
             
@@ -230,9 +293,30 @@ public class IOSVpnProtocolImpl : NSObject {
         return true
     }
     
+    @objc func connect(ssConfig: String,
+                       ovpnConfig: String,
+                       failureCallback: @escaping () -> Void) {
+        Logger.global?.log(message: "Connecting")
+//        assert(tunnel != nil)
+        
+        self.openVPNConfig = ovpnConfig
+        self.shadowSocksConfig = ssConfig
+        
+        let addr: String = ovpnConfig
+            .splitToArray(separator: "\n", trimmingCharacters: nil)
+            .first {  $0.starts(with: "remote ") }
+            .splitToArray(separator: " ", trimmingCharacters: nil)[1]
+        print("server: \(addr)")
+        
+        // Let's remove the previous config if it exists.
+        (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
+        
+        self.configureTunnel(withShadowSocks: self.shadowSocksConfig, serverAddress: addr, config: self.openVPNConfig, failureCallback: failureCallback)
+    }
+    
     @objc func connect(ovpnConfig: String, failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
         
         let addr: String = ovpnConfig
             .splitToArray(separator: "\n", trimmingCharacters: nil)
@@ -248,7 +332,7 @@ public class IOSVpnProtocolImpl : NSObject {
 
     @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
         Logger.global?.log(message: "Connecting")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
 
         // Let's remove the previous config if it exists.
         (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
@@ -299,6 +383,8 @@ public class IOSVpnProtocolImpl : NSObject {
             failureCallback()
             return
         }
+        
+        guard tunnel != nil else { failureCallback(); return }
         proto.providerBundleIdentifier = vpnBundleID
 
         tunnel!.protocolConfiguration = proto
@@ -351,6 +437,47 @@ public class IOSVpnProtocolImpl : NSObject {
         }
     }
     
+    func configureTunnel(withShadowSocks ssConfig: String?, serverAddress: String, config: String?, failureCallback: @escaping () -> Void) {
+        guard let ss = ssConfig, let ovpn = config else { failureCallback(); return }
+        let tunnelProtocol = NETunnelProviderProtocol()
+        tunnelProtocol.serverAddress = serverAddress
+        tunnelProtocol.providerBundleIdentifier = vpnBundleID
+        tunnelProtocol.providerConfiguration = ["ovpn": Data(ovpn.utf8), "ss": Data(ss.utf8)]
+        tunnel?.protocolConfiguration = tunnelProtocol
+        tunnel?.localizedDescription = "Amnezia ShadowSocks"
+        tunnel?.isEnabled = true
+
+        tunnel?.saveToPreferences { [unowned self] saveError in
+            if let error = saveError {
+                Logger.global?.log(message: "Connect ShadowSocks Tunnel Save Error: \(error)")
+                failureCallback()
+                return
+            }
+
+            Logger.global?.log(message: "Saving ShadowSocks tunnel succeeded")
+
+            self.tunnel?.loadFromPreferences { error in
+                if let error = error {
+                    Logger.global?.log(message: "Connect ShadowSocks Tunnel Load Error: \(error)")
+                    failureCallback()
+                    return
+                }
+
+                Logger.global?.log(message: "Loading the ShadowSocks tunnel succeeded")
+                print("Loading the ss tunnel succeeded")
+
+                do {
+                    print("starting ss tunnel")
+                    try self.tunnel?.connection.startVPNTunnel()
+                } catch let error {
+                    Logger.global?.log(message: "Something went wrong: \(error)")
+                    failureCallback()
+                    return
+                }
+            }
+        }
+    }
+    
     func configureOpenVPNTunnel(serverAddress: String, config: String, failureCallback: @escaping () -> Void) {
         let tunnelProtocol = NETunnelProviderProtocol()
         tunnelProtocol.serverAddress = serverAddress
@@ -393,13 +520,13 @@ public class IOSVpnProtocolImpl : NSObject {
 
     @objc func disconnect() {
         Logger.global?.log(message: "Disconnecting")
-        assert(tunnel != nil)
+        guard tunnel != nil else { return }
         (tunnel!.connection as? NETunnelProviderSession)?.stopTunnel()
     }
 
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
         Logger.global?.log(message: "Check status")
-        assert(tunnel != nil)
+//        assert(tunnel != nil)
         
         let protoType = (tunnel!.localizedDescription ?? "").toTunnelType
         
@@ -408,10 +535,58 @@ public class IOSVpnProtocolImpl : NSObject {
             checkWireguardStatus(callback: callback)
         case .openvpn:
             checkOVPNStatus(callback: callback)
+        case .shadowsocks:
+            checkShadowSocksStatus(callback: callback)
         case .empty:
             break
         }
         
+    }
+    
+    private func checkShadowSocksStatus(callback: @escaping (String, String, String) -> Void) {
+        Logger.global?.log(message: "Check ShadowSocks")
+        guard let proto = tunnel?.protocolConfiguration as? NETunnelProviderProtocol else {
+            callback("", "", "")
+            return
+        }
+        
+        guard let ssData = proto.providerConfiguration?["ss"] as? Data,
+              let ssConfig = try? JSONSerialization.jsonObject(with: ssData, options: []) as? [String: Any],
+              let serverIpv4Gateway = ssConfig["remote_host"] as? String else  {
+            callback("", "", "")
+            return
+        }
+        
+        print("server IP: \(serverIpv4Gateway)")
+        
+        let deviceIpv4Address = getTunIPAddress()
+        print("device IP: \(serverIpv4Gateway)")
+        if deviceIpv4Address == nil {
+            callback("", "", "")
+            return
+        }
+        
+        guard let session = tunnel?.connection as? NETunnelProviderSession else {
+            callback("", "", "")
+            return
+        }
+        
+        do {
+            try session.sendProviderMessage(Data([UInt8(0)])) { [callback] data in
+                guard let data = data,
+                      let configString = String(data: data, encoding: .utf8)
+                else {
+                    Logger.global?.log(message: "Failed to convert data to string")
+                    callback("", "", "")
+                    return
+                }
+
+                callback("\(serverIpv4Gateway)", "\(deviceIpv4Address!)", configString)
+            }
+        } catch {
+            Logger.global?.log(message: "Failed to retrieve data from session")
+            callback("", "", "")
+        }
     }
     
     private func checkOVPNStatus(callback: @escaping (String, String, String) -> Void) {
@@ -463,7 +638,6 @@ public class IOSVpnProtocolImpl : NSObject {
             Logger.global?.log(message: "Failed to retrieve data from session")
             callback("", "", "")
         }
-        
     }
     
     private func checkWireguardStatus(callback: @escaping (String, String, String) -> Void) {
@@ -549,7 +723,7 @@ public class IOSVpnProtocolImpl : NSObject {
 }
 
 enum TunnelType: String {
-    case wireguard, openvpn, empty
+    case wireguard, openvpn, shadowsocks, empty
 }
 
 extension String {
@@ -557,6 +731,7 @@ extension String {
         switch self {
         case "wireguard": return .wireguard
         case "openvpn": return .openvpn
+        case "shadowsocks": return .shadowsocks
         default:
             return .empty
         }

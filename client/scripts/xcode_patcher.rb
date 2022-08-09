@@ -11,8 +11,9 @@ class XCodeprojPatcher
 
   def run(file, shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
     open_project file
+    setup_project
     open_target_main
-
+    
     die 'IOS requires networkExtension mode' if not networkExtension and platform == 'ios'
 
     group = @project.main_group.new_group('Configuration')
@@ -28,7 +29,7 @@ class XCodeprojPatcher
 
     if networkExtension
       setup_target_extension shortVersion, fullVersion, platform, configHash
-      setup_target_gobridge
+      setup_target_gobridge platform
     else
       setup_target_wireguardgo
       setup_target_wireguardtools
@@ -43,6 +44,12 @@ class XCodeprojPatcher
     @project = Xcodeproj::Project.open(file)
     die 'Failed to open the project file: ' + file if @project.nil?
   end
+  
+  def setup_project
+    @project.build_configurations.each do |config|
+      config.build_settings['SYMROOT'] = 'build'
+    end
+  end
 
   def open_target_main
     @target_main = @project.targets.find { |target| target.to_s == 'AmneziaVPN' }
@@ -50,6 +57,7 @@ class XCodeprojPatcher
 
     die 'Unable to open AmneziaVPN target'
   end
+  
 
   def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
     @target_main.build_configurations.each do |config|
@@ -62,7 +70,12 @@ class XCodeprojPatcher
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
-        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
       # Versions and names
@@ -71,6 +84,8 @@ class XCodeprojPatcher
       config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = configHash['APP_ID_MACOS'] if platform == 'macos'
       config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = configHash['APP_ID_IOS'] if platform == 'ios'
       config.build_settings['PRODUCT_NAME'] = 'AmneziaVPN'
+      config.build_settings['SYMROOT'] = 'build'
+      config.build_settings['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
 
       # other config
       config.build_settings['INFOPLIST_FILE'] ||= platform + '/app/Info.plist'
@@ -89,6 +104,7 @@ class XCodeprojPatcher
       config.build_settings['ENABLE_BITCODE'] ||= 'NO' if platform == 'ios'
       config.build_settings['SDKROOT'] = 'iphoneos' if platform == 'ios'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO' if platform == 'ios'
+      config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin:/usr/local/bin:/opt/homebrew/bin'
 
       groupId = "";
       if (platform == 'macos')
@@ -110,13 +126,22 @@ class XCodeprojPatcher
         config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] ||= '-Onone'
       end
     end
+    
+    # add assets to main target
+    assets_group = @project.main_group.new_group('Assets')
+    
+    assets_path = 'ios/Media.xcassets'
+    assets_ref = assets_group.new_reference(assets_path, :group)
+    @target_main.add_resources([assets_ref])
 
     if networkExtension
       # WireGuard group
       group = @project.main_group.new_group('WireGuard')
 
+      version_file_path = platform == 'ios' ? '3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard-go-version.h' : 'macos/gobridge/wireguard-go-version.h'
+
       [
-        'macos/gobridge/wireguard-go-version.h',
+        version_file_path,
         '3rd/wireguard-apple/Sources/Shared/Keychain.swift',
         '3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift',
         '3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift',
@@ -246,17 +271,29 @@ class XCodeprojPatcher
     @target_extension.build_configurations.each do |config|
       config.base_configuration_reference = @configFile
 
-      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= '"$(inherited) @executable_path/../Frameworks"'
+      config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= [
+        '$(inherited)',
+        '@executable_path/../Frameworks',
+        '@executable_path/../../Frameworks'
+      ]
       config.build_settings['SWIFT_VERSION'] ||= '5.0'
       config.build_settings['CLANG_ENABLE_MODULES'] ||= 'YES'
       config.build_settings['SWIFT_OBJC_BRIDGING_HEADER'] ||= 'macos/networkextension/WireGuardNetworkExtension-Bridging-Header.h'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+      config.build_settings['STRIP_BITCODE_FROM_COPIED_FILES'] = 'NO'
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= [
         "$(inherited)",
         "$(PROJECT_DIR)/3rd",
-        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Debug-iphoneos"
+        "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/libleaf/lib",
+        "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
+#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
+        "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
+        "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
+#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
+#     config.build_settings['LIBRARY_SEARCH_PATHS'] = [config.build_settings['LIBRARY_SEARCH_PATHS'], "$(PROJECT_DIR)/3rd/libleaf/lib"]
 
       # Versions and names
       config.build_settings['MARKETING_VERSION'] ||= shortVersion
@@ -288,6 +325,7 @@ class XCodeprojPatcher
           "-framework",
           "OpenGLES",
         ]
+        config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin'
       end
 
       groupId = "";
@@ -339,8 +377,19 @@ class XCodeprojPatcher
 
     [
       'platforms/ios/iostunnel.swift',
-      'platforms/ios/iosglue.mm',
       'platforms/ios/ioslogger.swift',
+      'platforms/ios/iosinterface.swift',
+#     'platforms/ios/ssprovider.swift',
+      'platforms/ios/iosglue.mm',
+#     'platforms/ios/ssconnectivity.h',
+#     'platforms/ios/ssconnectivity.m',
+#     'platforms/ios/iosopenvpn2ssadapter.h',
+#     'platforms/ios/iosopenvpn2ssadapter.m',
+#     'platforms/ios/sspacket.h',
+#     'platforms/ios/sspacket.m',
+#     'platforms/ios/ssadapterpacketflow.h',
+#     'platforms/ios/tun2ssprovider.swift',
+#     'platforms/ios/tun2sockswriter.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -353,21 +402,39 @@ class XCodeprojPatcher
 
     framework_ref = frameworks_group.new_file('libwg-go.a')
     frameworks_build_phase.add_file_reference(framework_ref)
+    
+#   framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
+#   frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework')
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+    
+    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#   
+#   framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
+#
+#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+#   framework_ref = frameworks_group.new_file('3rd/CocoaLumberjack/build/Release-iphoneos/CocoaLumberjack.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+    
+    
 
     # This fails: @target_main.add_dependency @target_extension
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)
@@ -391,15 +458,17 @@ class XCodeprojPatcher
     appex_file.settings = { "ATTRIBUTES" => ['RemoveHeadersOnCopy'] }
   end
 
-  def setup_target_gobridge
+  def setup_target_gobridge(platform)
     target_gobridge = legacy_target = @project.new(Xcodeproj::Project::PBXLegacyTarget)
 
-    target_gobridge.build_working_directory = 'macos/gobridge'
+    bridge_platofrm = platform == 'ios' ? 'iOS' : 'macOS'
+
+    target_gobridge.build_working_directory = platform == 'ios' ? '3rd/wireguard-apple/Sources/WireGuardKitGo' : 'macos/gobridge'
     target_gobridge.build_tool_path = 'make'
     target_gobridge.pass_build_settings_in_environment = '1'
     target_gobridge.build_arguments_string = '$(ACTION)'
-    target_gobridge.name = 'WireGuardGoBridge'
-    target_gobridge.product_name = 'WireGuardGoBridge'
+    target_gobridge.name = "WireGuardGoBridge<#{bridge_platofrm}>"
+    target_gobridge.product_name = "WireGuardGoBridge<#{bridge_platofrm}>"
 
     @project.targets << target_gobridge
     @target_extension.add_dependency target_gobridge

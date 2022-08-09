@@ -15,7 +15,7 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
-include("3rd/QZXing/src/QZXing-components.pri")
+include("3rd/qzxing/src/QZXing-components.pri")
 
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
@@ -38,6 +38,8 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
+    platforms/ios/MobileUtils.h \
+    platforms/linux/leakdetector.h \
    protocols/protocols_defs.h \
     settings.h \
     ui/notificationhandler.h \
@@ -75,7 +77,8 @@ HEADERS  += \
     logger.h \
     loghandler.h \
     loglevel.h \
-    constants.h
+    constants.h \
+    platforms/ios/QRCodeReaderBase.h
 
 SOURCES  += \
    configurators/cloak_configurator.cpp \
@@ -93,6 +96,8 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
+    platforms/ios/MobileUtils.cpp \
+    platforms/linux/leakdetector.cpp \
    protocols/protocols_defs.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
@@ -126,8 +131,8 @@ SOURCES  += \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     logger.cpp \
-    loghandler.cpp
-
+    loghandler.cpp \
+    platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \
     resources.qrc
@@ -190,9 +195,10 @@ macx {
 
 linux:!android {
     DEFINES += MVPN_LINUX
-
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+
+    INCLUDEPATH += $$PWD/platforms/linux
 }
 
 win32|macx|linux:!android {
@@ -287,11 +293,6 @@ ios {
     LIBS += -framework StoreKit
     LIBS += -framework UserNotifications
 
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/LZ4.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/mbedTLS.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNClient.framework
-#    LIBS += $$PWD/3rd/OpenVPNAdapter/build/Debug-iphoneos/OpenVPNAdapter.framework
-
     DEFINES += MVPN_IOS
 
     HEADERS += \
@@ -301,15 +302,24 @@ ios {
       platforms/ios/bigint.h \
       platforms/ios/bigintipv6addr.h \
       platforms/ios/ipaddress.h \
-      platforms/ios/ipaddressrange.h
-  
-    SOURCES  += \
+      platforms/ios/ipaddressrange.h \
+      platforms/ios/QtAppDelegate.h \
+      platforms/ios/QtAppDelegate-C-Interface.h
+
+    SOURCES -= \
+      platforms/ios/QRCodeReader.cpp \
+      platforms/ios/MobileUtils.cpp
+
+    SOURCES += \
       protocols/ios_vpnprotocol.mm \
       platforms/ios/iosnotificationhandler.mm \
       platforms/ios/json.cpp \
       platforms/ios/iosglue.mm \
       platforms/ios/ipaddress.cpp \
-      platforms/ios/ipaddressrange.cpp
+      platforms/ios/ipaddressrange.cpp \
+      platforms/ios/QRCodeReaderBase.mm \
+      platforms/ios/QtAppDelegate.mm \
+      platforms/ios/MobileUtils.mm
 
     Q_ENABLE_BITCODE.value = NO
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE

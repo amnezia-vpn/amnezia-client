@@ -26,7 +26,7 @@ PageBase {
     }
 
     Connections {
-        target: QrDecoderLogic
+        target: Qt.platform.os != "ios" ? QrDecoderLogic : nil
         function onStartDecode() {
             console.debug("Starting QR decoder")
             loader.sourceComponent = component
@@ -51,6 +51,7 @@ PageBase {
 
         Item {
             anchors.fill: parent
+
             Camera
             {
                 id:camera
@@ -76,7 +77,7 @@ PageBase {
                 Rectangle {
                     color: "black"
                     opacity: 0.5
-                    width: videoOutput.contentRect.width *0.15
+                    width: videoOutput.contentRect.width * 0.15
                     height: videoOutput.contentRect.height
                     x: (videoOutput.width - videoOutput.contentRect.width)/2
                     anchors.verticalCenter: videoOutput.verticalCenter
@@ -85,28 +86,28 @@ PageBase {
                 Rectangle {
                     color: "black"
                     opacity: 0.5
-                    width: videoOutput.contentRect.width *0.15
+                    width: videoOutput.contentRect.width * 0.15
                     height: videoOutput.contentRect.height
-                    x: videoOutput.width/2 + videoOutput.contentRect.width/2 - videoOutput.contentRect.width *0.15
+                    x: videoOutput.width/2 + videoOutput.contentRect.width/2 - videoOutput.contentRect.width * 0.15
                     anchors.verticalCenter: videoOutput.verticalCenter
                 }
 
                 Rectangle {
                     color: "black"
                     opacity: 0.5
-                    width: videoOutput.contentRect.width *0.7
-                    height: videoOutput.contentRect.height *0.15
-                    x: (videoOutput.width - videoOutput.contentRect.width)/2 + videoOutput.contentRect.width *0.15
+                    width: videoOutput.contentRect.width * 0.7
+                    height: videoOutput.contentRect.height * 0.15
+                    x: (videoOutput.width - videoOutput.contentRect.width)/2 + videoOutput.contentRect.width * 0.15
                     y: (videoOutput.height - videoOutput.contentRect.height)/2
                 }
 
                 Rectangle {
                     color: "black"
                     opacity: 0.5
-                    width: videoOutput.contentRect.width *0.7
-                    height: videoOutput.contentRect.height *0.15
-                    x: (videoOutput.width - videoOutput.contentRect.width)/2 + videoOutput.contentRect.width *0.15
-                    y: videoOutput.height/2 + videoOutput.contentRect.height/2 - videoOutput.contentRect.height *0.15
+                    width: videoOutput.contentRect.width * 0.7
+                    height: videoOutput.contentRect.height * 0.15
+                    x: (videoOutput.width - videoOutput.contentRect.width)/2 + videoOutput.contentRect.width * 0.15
+                    y: videoOutput.height/2 + videoOutput.contentRect.height/2 - videoOutput.contentRect.height * 0.15
                 }
 
                 LabelType {

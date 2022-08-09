@@ -1,0 +1,87 @@
+diff --git a/ShadowPath/Privoxy/pcre/pcreposix.c b/ShadowPath/Privoxy/pcre/pcreposix.c
+--- a/ShadowPath/Privoxy/pcre/pcreposix.c
++++ b/ShadowPath/Privoxy/pcre/pcreposix.c
+@@ -146,13 +146,13 @@ message = (errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
+ length = strlen(message) + 1;
+ 
+ addmessage = " at offset ";
+-addlength = (preg != NULL && (int)preg->re_erroffset != -1)?
++addlength = (preg != NULL && (int)preg->re_nsub != -1)?
+   strlen(addmessage) + 6 : 0;
+ 
+ if (errbuf_size > 0)
+   {
+   if (addlength > 0 && errbuf_size >= length + addlength)
+-    sprintf(errbuf, "%s%s%-6d", message, addmessage, (int)preg->re_erroffset);
++    sprintf(errbuf, "%s%s%-6d", message, addmessage, (int)preg->re_nsub);
+   else
+     {
+     strncpy(errbuf, message, errbuf_size - 1);
+@@ -173,7 +173,7 @@ return length + addlength;
+ void
+ pcre_regfree(regex_t *preg)
+ {
+-(pcre_free)(preg->re_pcre);
++(pcre_free)(preg->re_g);
+ }
+ 
+ 
+@@ -203,12 +203,12 @@ int options = 0;
+ if ((cflags & REG_ICASE) != 0) options |= PCRE_CASELESS;
+ if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
+ 
+-preg->re_pcre = pcre_compile(pattern, options, &errorptr, &erroffset, NULL);
+-preg->re_erroffset = erroffset;
++preg->re_g = pcre_compile(pattern, options, &errorptr, &erroffset, NULL);
++preg->re_nsub = erroffset;
+ 
+-if (preg->re_pcre == NULL) return pcre_posix_error_code(errorptr);
++if (preg->re_g == NULL) return pcre_posix_error_code(errorptr);
+ 
+-preg->re_nsub = pcre_info(preg->re_pcre, NULL, NULL);
++preg->re_nsub = pcre_info(preg->re_g, NULL, NULL);
+ return 0;
+ }
+ 
+@@ -235,7 +235,7 @@ int *ovector = NULL;
+ if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
+ if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
+ 
+-preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
++preg->re_nsub = (size_t)(-1);   /* Only has meaning after compile */
+ 
+ if (nmatch > 0)
+   {
+@@ -243,7 +243,7 @@ if (nmatch > 0)
+   if (ovector == NULL) return REG_ESPACE;
+   }
+ 
+-rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string), 0, options,
++rc = pcre_exec(preg->re_g, NULL, string, (int)strlen(string), 0, options,
+   ovector, nmatch * 3);
+ 
+ if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
+diff --git a/ShadowPath/shadowsocks-libev/src/http.h b/ShadowPath/shadowsocks-libev/src/http.h
+index 914815a..e312dd3 100644
+--- a/ShadowPath/shadowsocks-libev/src/http.h
++++ b/ShadowPath/shadowsocks-libev/src/http.h
+@@ -29,6 +29,6 @@
+ #include <stdio.h>
+ #include "protocol.h"
+ 
+-const protocol_t *const http_protocol;
++extern const protocol_t *const http_protocol;
+ 
+ #endif
+diff --git a/ShadowPath/shadowsocks-libev/src/tls.h b/ShadowPath/shadowsocks-libev/src/tls.h
+index 3998913..ddbee11 100644
+--- a/ShadowPath/shadowsocks-libev/src/tls.h
++++ b/ShadowPath/shadowsocks-libev/src/tls.h
+@@ -28,6 +28,6 @@
+ 
+ #include "protocol.h"
+ 
+-const protocol_t *const tls_protocol;
++extern const protocol_t *const tls_protocol;
+ 
+ #endif

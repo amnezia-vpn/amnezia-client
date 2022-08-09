@@ -1,5 +1,6 @@
 # Run container
 sudo docker run \
+--log-driver none \
 -d --restart always \
 --cap-add=NET_ADMIN \
 -p $SHADOWSOCKS_SERVER_PORT:$SHADOWSOCKS_SERVER_PORT/tcp \

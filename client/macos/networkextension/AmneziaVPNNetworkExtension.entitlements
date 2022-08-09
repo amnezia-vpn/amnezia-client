@@ -34,5 +34,9 @@
 
 	<key>com.apple.security.network.server</key>
 	<true/>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.private.network.socket-delegate</key>
+	<true/>
 </dict>
 </plist>
