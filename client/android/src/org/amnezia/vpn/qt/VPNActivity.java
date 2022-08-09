@@ -17,6 +17,8 @@ public class VPNActivity extends org.qtproject.qt5.android.bindings.QtActivity {
     return super.onKeyDown(keyCode, event);
   }
 
+// TODO finalize
+// https://github.com/mozilla-mobile/mozilla-vpn-client/blob/6acff5dd9f072380a04c3fa12e9f3c98dbdd7a26/src/platforms/android/androidvpnactivity.h
   @Override
   public void onBackPressed() {
 //      super.onBackPressed();

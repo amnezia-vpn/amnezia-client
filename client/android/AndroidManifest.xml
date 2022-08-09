@@ -93,7 +93,7 @@
             <meta-data android:name="android.app.static_init_classes" android:value="-- %%INSERT_INIT_CLASSES%% --"/>
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
-        <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper">
+        <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper" android:permission="android.permission.BIND_VPN_SERVICE">
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->

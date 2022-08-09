@@ -43,7 +43,6 @@ apply plugin: 'kotlin-kapt'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation 'androidx.core:core-ktx:1.1.0'
-    //implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
@@ -144,6 +143,18 @@ android {
            }
        }
    }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'wireguard/CMakeLists.txt'
+//       }
+//   }
+
+//   externalNativeBuild {
+//       cmake {
+//           path 'openvpn/src/main/cpp/CMakeLists.txt'
+//       }
+//   }
 }
 
 
