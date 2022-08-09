@@ -7,8 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/opt/AmneziaVPN/service/bin/AmneziaVPN-service
-Environment="LD_LIBRARY_PATH=/opt/AmneziaVPN/client/lib/"
+ExecStart=/opt/AmneziaVPN/service/AmneziaVPN-service.sh
 
 [Install]
 WantedBy=multi-user.target
