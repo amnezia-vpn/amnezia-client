@@ -2,6 +2,7 @@
 #define START_PAGE_LOGIC_H
 
 #include "PageLogicBase.h"
+#include "defines.h"
 
 class UiLogic;
 
