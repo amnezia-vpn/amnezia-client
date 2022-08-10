@@ -132,24 +132,13 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
     qDebug() << "Set VPN route gateway" << m_routeGateway;
 }
 
-QString OpenVpnProtocol::openVpnExecPath() const
-{
-#ifdef Q_OS_WIN
-    return Utils::executable("openvpn/openvpn", true);
-#elif defined Q_OS_LINUX
-    return Utils::usrExecutable("openvpn");
-#else
-    return Utils::executable("/openvpn", true);
-#endif
-}
-
 ErrorCode OpenVpnProtocol::start()
 {
 #ifndef Q_OS_IOS
     //qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
-    if (!QFileInfo::exists(openVpnExecPath())) {
+    if (!QFileInfo::exists(Utils::openVpnExecPath())) {
         setLastError(ErrorCode::OpenVpnExecutableMissing);
         return lastError();
     }
@@ -183,7 +172,7 @@ ErrorCode OpenVpnProtocol::start()
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
-    m_openVpnProcess->setProgram(openVpnExecPath());
+    m_openVpnProcess->setProgram(PermittedProcess::OpenVPN);
     QStringList arguments({"--config" , configPath(),
                       "--management", m_managementHost, QString::number(m_managementPort),
                       "--management-client"/*, "--log", vpnLogFileNamePath */

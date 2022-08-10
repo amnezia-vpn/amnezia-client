@@ -1,4 +1,5 @@
 #include "ipcserverprocess.h"
+#include "ipc.h"
 #include <QProcess>
 
 #ifndef Q_OS_IOS
@@ -38,16 +39,19 @@ IpcServerProcess::~IpcServerProcess()
     qDebug() << "IpcServerProcess::~IpcServerProcess";
 }
 
-void IpcServerProcess::start(const QString &program, const QStringList &arguments)
-{
-    m_process->start(program, arguments);
-    qDebug() << "IpcServerProcess started, " << arguments;
+//void IpcServerProcess::start(const QString &program, const QStringList &arguments)
+//{
+//    m_process->start(program, arguments);
+//    qDebug() << "IpcServerProcess started, " << arguments;
 
-    m_process->waitForStarted();
-}
+//    m_process->waitForStarted();
+//}
 
 void IpcServerProcess::start()
 {
+    if (m_process->program().isEmpty()) {
+        qDebug() << "IpcServerProcess failed to start, program is empty";
+    }
     m_process->start();
     qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
 
@@ -81,9 +85,9 @@ void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
     m_process->setProcessChannelMode(mode);
 }
 
-void IpcServerProcess::setProgram(const QString &program)
+void IpcServerProcess::setProgram(int programId)
 {
-    m_process->setProgram(program);
+    m_process->setProgram(amnezia::permittedProcessPath(static_cast<amnezia::PermittedProcess>(programId)));
 }
 
 void IpcServerProcess::setWorkingDirectory(const QString &dir)

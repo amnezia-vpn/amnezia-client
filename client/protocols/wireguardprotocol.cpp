@@ -30,7 +30,7 @@ void WireguardProtocol::stop()
     //qDebug() << "WireguardProtocol::stop() 1";
 
 #ifndef Q_OS_IOS
-    if (!QFileInfo::exists(wireguardExecPath())) {
+    if (!QFileInfo::exists(Utils::wireguardExecPath())) {
         qCritical() << "Wireguard executable missing!";
         setLastError(ErrorCode::ExecutableMissing);
         return;
@@ -51,7 +51,7 @@ void WireguardProtocol::stop()
         return;
     }
 
-    m_wireguardStopProcess->setProgram(wireguardExecPath());
+    m_wireguardStopProcess->setProgram(PermittedProcess::Wireguard);
 
 
     QStringList arguments({"--remove", configPath()});
@@ -117,17 +117,6 @@ void WireguardProtocol::updateRouteGateway(QString line)
     qDebug() << "Set VPN route gateway" << m_routeGateway;
 }
 
-QString WireguardProtocol::wireguardExecPath() const
-{
-#ifdef Q_OS_WIN
-    return Utils::executable("wireguard/wireguard-service", true);
-#elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg");
-#else
-    return Utils::executable("/wireguard", true);
-#endif
-}
-
 ErrorCode WireguardProtocol::start()
 {
     //qDebug() << "WireguardProtocol::start() 1";
@@ -141,7 +130,7 @@ ErrorCode WireguardProtocol::start()
     //qDebug() << "Start Wireguard connection";
     WireguardProtocol::stop();
 
-    if (!QFileInfo::exists(wireguardExecPath())) {
+    if (!QFileInfo::exists(Utils::wireguardExecPath())) {
         setLastError(ErrorCode::ExecutableMissing);
         return lastError();
     }
@@ -168,7 +157,7 @@ ErrorCode WireguardProtocol::start()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    m_wireguardStartProcess->setProgram(wireguardExecPath());
+    m_wireguardStartProcess->setProgram(PermittedProcess::Wireguard);
 
 
     QStringList arguments({"--add", configPath()});

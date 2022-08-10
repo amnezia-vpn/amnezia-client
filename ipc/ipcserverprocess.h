@@ -13,7 +13,7 @@ public:
     explicit IpcServerProcess(QObject *parent = nullptr);
     virtual ~IpcServerProcess();
 
-    void start(const QString &program, const QStringList &arguments) override;
+    //void start(const QString &program, const QStringList &arguments) override;
     void start() override;
     void close() override;
 
@@ -21,7 +21,7 @@ public:
     void setInputChannelMode(QProcess::InputChannelMode mode) override;
     void setNativeArguments(const QString &arguments) override;
     void setProcessChannelMode(QProcess::ProcessChannelMode mode) override;
-    void setProgram(const QString &program) override;
+    void setProgram(int programId) override;
     void setWorkingDirectory(const QString &dir) override;
 
     QByteArray readAll() override;
