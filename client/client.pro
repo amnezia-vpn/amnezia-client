@@ -1,4 +1,5 @@
 QT += widgets core gui network xml remoteobjects quick svg
+equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -15,6 +16,8 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+
+win32-msvc*: DEFINES += __STDC_CONSTANT_MACROS
 include("3rd/qzxing/src/QZXing-components.pri")
 
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include

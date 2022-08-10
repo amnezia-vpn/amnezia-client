@@ -2,6 +2,7 @@ TARGET   = AmneziaVPN-service
 TEMPLATE = app
 CONFIG   += console qt no_batch
 QT += core network remoteobjects
+equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 HEADERS = \
         ../../client/utils.h \
