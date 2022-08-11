@@ -15,6 +15,8 @@ fi
 tar xzf	$APP_PATH/$APP_NAME.tar.gz -C $APP_PATH
 rm -f	$APP_PATH/$APP_NAME.tar.gz
 sudo chmod -R a-w $APP_PATH/
+sudo chown -R root $APP_PATH/
+sudo chgrp -R wheel $APP_PATH/
 
 rm -rf	$LOG_FOLDER
 mkdir -p $LOG_FOLDER
