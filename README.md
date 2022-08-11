@@ -20,8 +20,6 @@ AmneziaVPN uses a number of open source projects to work:
 - [OpenVPN](https://openvpn.net/)
 - [ShadowSocks](https://shadowsocks.org/)
 - [Qt](https://www.qt.io/)
-- [EasyRSA](https://github.com/OpenVPN/easy-rsa) - part of OpenVPN
-- [CygWin](https://www.cygwin.com/) - only for Windiws, used for launching EasyRSA scripts
 - [QtSsh](https://github.com/jaredtao/QtSsh) - forked form Qt Creator
 - and more...
 
