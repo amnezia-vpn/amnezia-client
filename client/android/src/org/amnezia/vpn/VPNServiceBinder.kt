@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.*
 import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.json.JSONObject
 import java.io.File
@@ -68,7 +69,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                     this.mService.turnOn(config)
                 } catch (e: Exception) {
                     Log.e(tag, "An Error occurred while enabling the VPN: ${e.localizedMessage}")
-                    dispatchEvent(Events.ACTIVATION_ERROR, e.localizedMessage)
+                    dispatchEvent(Events.activationError, e.localizedMessage)
                 }
                 return true
             }
@@ -97,18 +98,18 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 val obj = JSONObject()
                 obj.put("connected", mService.isUp)
                 obj.put("time", mService.connectionTime)
-                dispatchEvent(Events.INIT, obj.toString())
+                dispatchEvent(Events.init, obj.toString())
                 return true
             }
 
             Actions.REQUEST_STATISTICS -> {
-                dispatchEvent(Events.STATISTIC_UPDATE, mService.status.toString())
+                dispatchEvent(Events.statisticUpdate, mService.status.toString())
                 return true
             }
 
             Actions.REQUEST_GET_LOG -> {
                 // Grabs all the Logs and dispatch new Log Event
-                dispatchEvent(Events.BACKEND_LOGS, Log.getContent())
+                dispatchEvent(Events.backendLogs, Log.getContent())
                 return true
             }
             Actions.REQUEST_CLEANUP_LOG -> {
@@ -191,7 +192,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     /**
      * Dispatches an Event to all registered Binders
      * [code] the Event that happened - see [Events]
-     * To register an Eventhandler use [onTransact] with
+     * To register an Event handler use [onTransact] with
      * [Actions.REGISTER_EVENT_LISTENER]
      */
     fun dispatchEvent(code: Int, payload: String?) {
@@ -200,7 +201,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 if (it.isBinderAlive) {
                     val data = Parcel.obtain()
                     data.writeByteArray(payload?.toByteArray(charset("UTF-8")))
-                    it.transact(code, data, Parcel.obtain(), 0)
+                    it.transact(code, data, Parcel.obtain(), IBinder.FLAG_ONEWAY)
                 }
             }
         } catch (e: DeadObjectException) {
@@ -213,20 +214,20 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     fun importConfig(config: String ) {
         val obj = JSONObject()
         obj.put("config", config)
-        val resultString = obj.toString();
-        dispatchEvent(Events.CONFIG_IMPORT, resultString)
+        val resultString = obj.toString()
+        dispatchEvent(Events.configImport, resultString)
     }
 
     /**
      *  The codes we Are Using in case of [dispatchEvent]
      */
     object Events {
-        const val INIT = 0
-        const val CONNECTED = 1
-        const val DISCONNECTED = 2
-        const val STATISTIC_UPDATE = 3
-        const val BACKEND_LOGS = 4
-        const val ACTIVATION_ERROR = 5
-        const val CONFIG_IMPORT = 6
+        const val init = 0
+        const val connected = 1
+        const val disconnected = 2
+        const val statisticUpdate = 3
+        const val backendLogs = 4
+        const val activationError = 5
+        const val configImport = 6
     }
 }

@@ -17,14 +17,89 @@
     <!-- %%INSERT_FEATURES -->
 
     <supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
-
-    <application android:name=".qt.AmneziaApp" android:hardwareAccelerated="true" android:label="-- %%INSERT_APP_NAME%% --" android:extractNativeLibs="true" android:icon="@drawable/icon">
-        <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:name=".qt.VPNActivity" android:label="-- %%INSERT_APP_NAME%% --" android:screenOrientation="unspecified" android:launchMode="singleTop" android:theme="@style/splashScreenTheme">
+    <application android:hardwareAccelerated="true" android:name=".qt.AmneziaApp" android:label="-- %%INSERT_APP_NAME%% --" android:extractNativeLibs="true" android:icon="@drawable/icon">
+        <activity
+            android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
+            android:name=".qt.VPNActivity"
+            android:label="-- %%INSERT_APP_NAME%% --"
+            android:screenOrientation="unspecified"
+            android:resizeableActivity="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/splashScreenTheme"
+            android:process=":QtOnlyProcess"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:scheme="content" />
+                <data android:mimeType= "*/*" />
+                <data android:host="*" />
+            </intent-filter>
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:pathPattern=".*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\.vpn" />
+            </intent-filter>
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\.vpn" />
+            </intent-filter>
+
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.vpn" />
+            </intent-filter>
+            <!--File explorer filter-->
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:pathPattern=".*\\.vpn" />
+            </intent-filter>
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.vpn" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"  android:host="*" android:pathPattern=".*\\.vpn" android:mimeType="*/*"  />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>

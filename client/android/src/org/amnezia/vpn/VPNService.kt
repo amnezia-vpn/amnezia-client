@@ -277,11 +277,11 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         }
         set(value) {
             if (value) {
-                mBinder.dispatchEvent(VPNServiceBinder.Events.CONNECTED, "")
+                mBinder.dispatchEvent(VPNServiceBinder.Events.connected, "")
                 mConnectionTime = System.currentTimeMillis()
                 return
             }
-            mBinder.dispatchEvent(VPNServiceBinder.Events.DISCONNECTED, "")
+            mBinder.dispatchEvent(VPNServiceBinder.Events.disconnected, "")
             mConnectionTime = 0
         }
     val status: JSONObject
