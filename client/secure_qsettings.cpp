@@ -1,5 +1,6 @@
 #include "secure_qsettings.h"
 #include "encryption_helper.h"
+#include "platforms/ios/MobileUtils.h"
 
 #include <QDataStream>
 #include <QDebug>
@@ -11,8 +12,8 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
 {
     // load keys from system key storage
 #ifdef Q_OS_IOS
-    key = MobileUtils::readFromKeychain(settingsKeyTag);
-    iv = MobileUtils::readFromKeychain(settingsIvTag);
+    key = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsKeyTag).toUtf8());
+    iv = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsIvTag).toUtf8());
 #endif
     key = "12345qwerty00000";
     iv = "000000000000000";
