@@ -18,16 +18,18 @@ jobs:
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
         - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
          
+      install:
+      - |
+        if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
+        brew install p7zip && \
+        python3 -m pip install --upgrade pip && \
+        pip install -U aqtinstall requests py7zr && \
+        pip show aqtinstall && \
+        aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O $HOME/Qt && \
+        aqt install-tool mac desktop tools_ifw  -O /C/Qt ; \
+        fi
+
       script:
-        - |
-          if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
-          brew install p7zip && \
-          python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
-          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O $HOME/Qt && \
-          aqt install-tool macos desktop tools_ifw  -O /C/Qt ; \
-          fi
         - bash deploy/build_macos.sh 
 
       deploy:
@@ -40,6 +42,7 @@ jobs:
           tags: true
           branch: master
     
+    # ------------------------------------------------------
     - name: Windows_x64
       os: windows
       
@@ -50,13 +53,12 @@ jobs:
         - QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2019_64\\bin"
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=64
-        
-      before_install:
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
+        - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+
+      install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then choco install python --version 3.9.1; fi
-        
-      script:
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build"
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools"
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then \
           python -m pip install --upgrade pip && \
@@ -65,15 +67,17 @@ jobs:
           aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
+
+      script:
+        - dir "%MSVC_PATH%\VC\Auxiliary\Build"
+        - dir "%MSVC_PATH%\Common7\Tools"
         - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\" -arch=amd64" >> winbuild.bat
-        - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\" -arch=amd64" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
-
         
       deploy:
         provider: releases
@@ -85,6 +89,7 @@ jobs:
           tags: true
           branch: master
 
+# ------------------------------------------------------
     - name: Windows_x32
       os: windows
 
@@ -95,27 +100,29 @@ jobs:
         - QT_BIN_DIR="c:\\Qt\\${QT_VERSION}\\msvc2019\\bin"
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=32
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
+        - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
 
-      before_install:
+      install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then choco install python --version 3.9.1; fi
-
-      script:
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build"
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools"
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then \
           python -m pip install --upgrade pip && \
           pip3 install -U aqtinstall requests py7zr && \
           pip3 show aqtinstall && \
-          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_32 -m all -O /C/Qt && \
+          aqt install-qt windows desktop $QT_VERSION win32_msvc2019 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\"" > winbuild.bat
-        - echo set BUILD_ARCH=$BUILD_ARCH >> winbuild.bat
+
+      script:
+        - dir "%MSVC_PATH%\VC\Auxiliary\Build"
+        - dir "%MSVC_PATH%\Common7\Tools"
+        - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
-        - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\"" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
 
@@ -142,3 +149,4 @@ cache:
     - $HOME/Qt
     - /C/Qt
     - $HOME/Library/Caches/Homebrew
+    - "/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
