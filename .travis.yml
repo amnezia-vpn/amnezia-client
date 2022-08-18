@@ -25,7 +25,7 @@ jobs:
           python3 -m pip install --upgrade pip && \
           pip install -U aqtinstall requests py7zr && \
           pip show aqtinstall && \
-          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O $HOME/Qt \
+          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O $HOME/Qt && \
           aqt install-tool macos desktop tools_ifw  -O /C/Qt \
           fi
         - bash deploy/build_macos.sh 
@@ -62,7 +62,7 @@ jobs:
           python -m pip install --upgrade pip && \
           pip3 install -U aqtinstall requests py7zr && \
           pip3 show aqtinstall && \
-          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O /C/Qt \
+          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt \
           fi
         - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
@@ -107,7 +107,7 @@ jobs:
           python -m pip install --upgrade pip && \
           pip3 install -U aqtinstall requests py7zr && \
           pip3 show aqtinstall && \
-          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_32 -m all -O /C/Qt \
+          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_32 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt \
           fi
         - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\"" > winbuild.bat
