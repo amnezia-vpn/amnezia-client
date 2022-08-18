@@ -25,7 +25,7 @@ jobs:
         python3 -m pip install --upgrade pip && \
         pip install -U aqtinstall requests py7zr && \
         pip show aqtinstall && \
-        aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O $HOME/Qt && \
+        aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
         aqt install-tool mac desktop tools_ifw  -O /C/Qt ; \
         fi
 
@@ -57,7 +57,7 @@ jobs:
         - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
 
       install:
-        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then \
@@ -104,7 +104,7 @@ jobs:
         - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
 
       install:
-        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then \
