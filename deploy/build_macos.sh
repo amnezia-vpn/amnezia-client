@@ -78,38 +78,39 @@ rm -f $BUNDLE_DIR/Contents/macOS/post_install.sh $BUNDLE_DIR/Contents/macOS/post
 
 if [ "${MAC_CERT_PW+x}" ]; then
 
-CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
-WWDRCA=$DEPLOY_DIR/WWDRCA.cer
-KEYCHAIN=amnezia.build.keychain
-TEMP_PASS=tmp_pass
+  CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
+  WWDRCA=$DEPLOY_DIR/WWDRCA.cer
+  KEYCHAIN=amnezia.build.keychain
+  TEMP_PASS=tmp_pass
 
-security create-keychain -p $TEMP_PASS $KEYCHAIN || true
-security default-keychain -s $KEYCHAIN
-security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+  security create-keychain -p $TEMP_PASS $KEYCHAIN || true
+  security default-keychain -s $KEYCHAIN
+  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
 
-security default-keychain
-security list-keychains
+  security default-keychain
+  security list-keychains
 
-security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign || true
-security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign || true
+  security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign || true
+  security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign || true
 
-security set-key-partition-list -S apple-tool:,apple: -k $TEMP_PASS $KEYCHAIN
-security find-identity -p codesigning
+  security set-key-partition-list -S apple-tool:,apple: -k $TEMP_PASS $KEYCHAIN
+  security find-identity -p codesigning
 
-echo "Signing App bundle..."
-/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $BUNDLE_DIR
-/usr/bin/codesign --verify -vvvv $BUNDLE_DIR || true
-spctl -a -vvvv $BUNDLE_DIR || true
+  echo "Signing App bundle..."
+  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $BUNDLE_DIR
+  /usr/bin/codesign --verify -vvvv $BUNDLE_DIR || true
+  spctl -a -vvvv $BUNDLE_DIR || true
 
-echo "Notatizing App bundle..."
-/usr/bin/ditto -c -k --keepParent $BUNDLE_DIR $PROJECT_DIR/Bundle_to_notarize.zip
-xcrun altool --notarize-app -f $PROJECT_DIR/Bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
-rm $PROJECT_DIR/Bundle_to_notarize.zip
-sleep 600
-xcrun stapler staple $BUNDLE_DIR
-xcrun stapler validate $BUNDLE_DIR
-spctl -a -vvvv $BUNDLE_DIR || true
-
+  if [ "${NOTARIZE_APP+x}" ]; then
+    echo "Notatizing App bundle..."
+    /usr/bin/ditto -c -k --keepParent $BUNDLE_DIR $PROJECT_DIR/Bundle_to_notarize.zip
+    xcrun altool --notarize-app -f $PROJECT_DIR/Bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
+    rm $PROJECT_DIR/Bundle_to_notarize.zip
+    sleep 600
+    xcrun stapler staple $BUNDLE_DIR
+    xcrun stapler validate $BUNDLE_DIR
+    spctl -a -vvvv $BUNDLE_DIR || true
+  fi
 fi
 
 echo "Packaging installer..."

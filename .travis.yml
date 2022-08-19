@@ -54,8 +54,10 @@ jobs:
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=64
         - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
 
       install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH_WIN"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then \
@@ -98,8 +100,10 @@ jobs:
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=32
         - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
 
       install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH_WIN"; fi
         - if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
           if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then \
@@ -142,7 +146,7 @@ jobs:
       install:
         - |
           if [ ! -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then \
-          apt install -yy p7zip python3 && \
+          sudo apt install -yy p7zip python3 && \
           python3 -m pip install --upgrade pip && \
           pip install -U aqtinstall requests py7zr && \
           pip show aqtinstall && \
@@ -190,18 +194,19 @@ jobs:
         - QT_VERSION=5.15.2
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
         - USE_ANDROID_NDK_VERSION=21d
+        - ANDROID_NDK_HOME=$HOME/NDK
 
       install:
         - |
           if [ ! -f $HOME/Qt/$QT_VERSION/android/bin/qmake ]; then \
-          apt install -yy p7zip python3 && \
+          sudo apt install -yy p7zip python3 && \
           python3 -m pip install --upgrade pip && \
           pip install -U aqtinstall requests py7zr && \
           pip show aqtinstall && \
-          aqt install-qt linux android $QT_VERSION armv7 -m all -O $HOME/Qt && \
-          aqt install-qt linux android $QT_VERSION arm64_v8a -m all -O $HOME/Qt && \
-          aqt install-qt linux android $QT_VERSION x86_64 -m all -O $HOME/Qt && \
-          aqt install-qt linux android $QT_VERSION x86 -m all -O $HOME/Qt && \
+          aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
+          aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
+          aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
+          aqt install-qt linux android $QT_VERSION android_x86 -m all -O $HOME/Qt ; \
           fi
         - |
           export TERM=dumb &&
@@ -242,3 +247,5 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
+    - $ANDROID_NDK_HOME
+    - $MSVC_PATH
