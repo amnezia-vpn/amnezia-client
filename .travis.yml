@@ -151,6 +151,7 @@ jobs:
 # ------------------------------------------------------
     - name: Linux
       os: linux
+      dist: focal
 
       env:
         - QT_VERSION=5.15.2
@@ -192,6 +193,7 @@ jobs:
     - name: Android
       os: linux
       language: android
+      dist: focal
 
       components:
         # Uncomment the lines below if you want to
@@ -280,7 +282,7 @@ jobs:
           python3 -m pip install --upgrade pip && \
           pip install -U aqtinstall requests py7zr && \
           pip show aqtinstall && \
-          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt && \
+          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
           fi
         - brew install golang && go install golang.org/x/mobile/cmd/gomobile@latest && gomobile init && \
 
