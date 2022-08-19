@@ -41,6 +41,11 @@ jobs:
           tags: true
           branch: master
     
+      cache:
+        directories:
+          - $HOME/Qt
+          - $HOME/Library/Caches/Homebrew
+
     # ------------------------------------------------------
     - name: Windows_x64
       os: windows
@@ -86,6 +91,11 @@ jobs:
         on:
           tags: true
           branch: master
+
+      cache:
+        directories:
+          - /C/Qt
+          - $MSVC_PATH
 
 # ------------------------------------------------------
     - name: Windows_x32
@@ -133,6 +143,11 @@ jobs:
           tags: true
           branch: master
 
+      cache:
+        directories:
+          - /C/Qt
+          - $MSVC_PATH
+
 # ------------------------------------------------------
     - name: Linux
       os: linux
@@ -150,8 +165,8 @@ jobs:
           sudo apt install -yy p7zip python3 python3-pip && \
           python3 -m pip install --user $(whoami) --upgrade pip && \
           export PATH=$HOME/.local/bin:$PATH && \
-          python3 -m pip3 install -U aqtinstall requests py7zr && \
-          python3 -m pip3 show aqtinstall && \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
           python3 -m aqt install-qt linux desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
           python3 -m aqt install-tool linux desktop tools_ifw  -O $HOME/Qt ; \
           fi
@@ -168,6 +183,10 @@ jobs:
         on:
           tags: true
           branch: master
+
+      cache:
+        directories:
+          - $HOME/Qt
 
 # ------------------------------------------------------
     - name: Android
@@ -205,8 +224,8 @@ jobs:
           sudo apt install -yy p7zip python3 python3-pip && \
           python3 -m pip install --user $(whoami) --upgrade pip && \
           export PATH=$HOME/.local/bin:$PATH && \
-          python3 -m pip3 install -U aqtinstall requests py7zr && \
-          python3 -m pip3 show aqtinstall && \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
           python3 -m aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
           python3 -m aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
           python3 -m aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
@@ -236,11 +255,19 @@ jobs:
           tags: true
           branch: master
 
+      cache:
+        directories:
+          - $HOME/Qt
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+          - $HOME/.android/build-cache
+          - $ANDROID_NDK_HOME
+
 # ------------------------------------------------------
     - name: iOS
       os: osx
       osx_image: xcode13.4
-      language: objective-c
+      language: cpp
       
       env:
         - QT_VERSION=5.15.2
@@ -260,19 +287,13 @@ jobs:
       script:
         - bash deploy/build_ios.sh
     
+      cache:
+        directories:
+          - $HOME/Qt
+          - $HOME/Library/Caches/Homebrew
   
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
   # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
   
-cache:
-  directories:
-    - $HOME/Qt
-    - /C/Qt
-    - $HOME/Library/Caches/Homebrew
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-    - $HOME/.android/build-cache
-    - $ANDROID_NDK_HOME
-    - $MSVC_PATH
