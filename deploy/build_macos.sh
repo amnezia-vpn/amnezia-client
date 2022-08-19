@@ -3,6 +3,13 @@ echo "Build script started ..."
 
 set -o errexit -o nounset
 
+while getopts n: flag
+do
+    case "${flag}" in
+        n) NOTARIZE_APP=1;;
+    esac
+done
+
 # Hold on to current directory
 PROJECT_DIR=$(pwd)
 DEPLOY_DIR=$PROJECT_DIR/deploy
@@ -27,7 +34,7 @@ INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 
 PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
 QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
-DMG_FILENAME=$PROJECT_DIR/${APP_NAME}_unsigned.dmg
+DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Seacrh Qt
 if [ -z "${QT_VERSION+x}" ]; then
@@ -121,37 +128,39 @@ echo "Building installer..."
 $QIF_BIN_DIR/binarycreator --offline-only -v -c $BUILD_DIR/installer/config/macos.xml -p $BUILD_DIR/installer/packages -f $INSTALLER_BUNDLE_DIR
 
 if [ "${MAC_CERT_PW+x}" ]; then
-echo "Signing installer bundle..."
-security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $INSTALLER_BUNDLE_DIR
-/usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
+  echo "Signing installer bundle..."
+  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $INSTALLER_BUNDLE_DIR
+  /usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
 
-echo "Notatizing installer bundle..."
-/usr/bin/ditto -c -k --keepParent $INSTALLER_BUNDLE_DIR $PROJECT_DIR/Installer_bundle_to_notarize.zip
-xcrun altool --notarize-app -f $PROJECT_DIR/Installer_bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
-rm $PROJECT_DIR/Installer_bundle_to_notarize.zip
-sleep 600
-xcrun stapler staple $INSTALLER_BUNDLE_DIR
-xcrun stapler validate $INSTALLER_BUNDLE_DIR
-spctl -a -vvvv $INSTALLER_BUNDLE_DIR || true
-
+  if [ "${NOTARIZE_APP+x}" ]; then
+    echo "Notatizing installer bundle..."
+    /usr/bin/ditto -c -k --keepParent $INSTALLER_BUNDLE_DIR $PROJECT_DIR/Installer_bundle_to_notarize.zip
+    xcrun altool --notarize-app -f $PROJECT_DIR/Installer_bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
+    rm $PROJECT_DIR/Installer_bundle_to_notarize.zip
+    sleep 600
+    xcrun stapler staple $INSTALLER_BUNDLE_DIR
+    xcrun stapler validate $INSTALLER_BUNDLE_DIR
+    spctl -a -vvvv $INSTALLER_BUNDLE_DIR || true
+  fi
 fi
 
 echo "Building DMG installer..."
 hdiutil create -volname $APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
-echo "Signing DMG installer..."
-security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $DMG_FILENAME
-/usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
+  echo "Signing DMG installer..."
+  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "Developer ID Application: Privacy Technologies OU (X7UJ388FXK)" $DMG_FILENAME
+  /usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
 
-echo "Notatizing DMG installer..."
-xcrun altool --notarize-app -f $DMG_FILENAME -t osx --primary-bundle-id $APP_DOMAIN -u $APPLE_DEV_EMAIL -p $APPLE_DEV_PASSWORD
-sleep 600
-xcrun stapler staple $DMG_FILENAME
-xcrun stapler validate $DMG_FILENAME
-
+  if [ "${NOTARIZE_APP+x}" ]; then
+    echo "Notatizing DMG installer..."
+    xcrun altool --notarize-app -f $DMG_FILENAME -t osx --primary-bundle-id $APP_DOMAIN -u $APPLE_DEV_EMAIL -p $APPLE_DEV_PASSWORD
+    sleep 600
+    xcrun stapler staple $DMG_FILENAME
+    xcrun stapler validate $DMG_FILENAME
+  fi
 fi
 
 echo "Finished, artifact is $DMG_FILENAME"
