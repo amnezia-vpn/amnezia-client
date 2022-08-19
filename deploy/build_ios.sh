@@ -39,9 +39,8 @@ $QT_BIN_DIR/qmake -v
 
 # Build App
 echo "Building App..."
-cd PROJECT_DIR=$(pwd)/client
-
-./scripts/apple_compile.sh ios
+cd $PROJECT_DIR/client
+$PROJECT_DIR/client/scripts/apple_compile.sh ios
 
 # Build and run tests here
 

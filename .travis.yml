@@ -10,7 +10,8 @@ jobs:
       os: osx
       osx_image: xcode13.4
       language: cpp
-      
+      cache: ccache
+
       env:
         - QT_VERSION=5.15.2
         - QIF_VERSION=4.4
@@ -152,6 +153,7 @@ jobs:
     - name: Linux
       os: linux
       dist: focal
+      cache: ccache
 
       addons:
         apt:
@@ -159,6 +161,8 @@ jobs:
           - p7zip
           - python3
           - python3-pip
+          - libgl-dev
+          - mesa-common-dev
 
       env:
         - QT_VERSION=5.15.2
@@ -198,7 +202,8 @@ jobs:
     - name: Android
       os: linux
       language: android
-      dist: focal
+      dist: xenial
+      cache: ccache
 
       addons:
         apt:
@@ -207,23 +212,24 @@ jobs:
           - python3
           - python3-pip
 
-      components:
-        # Uncomment the lines below if you want to
-        # use the latest revision of Android SDK Tools
-        # - tools
-        # - platform-tools
+      android:
+        components:
+          # Uncomment the lines below if you want to
+          # use the latest revision of Android SDK Tools
+          # - tools
+          # - platform-tools
 
-        # The BuildTools version used by your project
-        - build-tools-30.0.2
+          # The BuildTools version used by your project
+          - build-tools-30.0.2
 
-        # The SDK version used to compile your project
-        - android-30
+          # The SDK version used to compile your project
+          - android-30
 
-        # Additional components
-        - extra
-        - extra-google-google_play_services
-        - extra-google-m2repository
-        - extra-android-m2repository
+          # Additional components
+          - extra
+          - extra-google-google_play_services
+          - extra-google-m2repository
+          - extra-android-m2repository
 
       env:
         - QT_VERSION=5.15.2
