@@ -19,7 +19,7 @@ jobs:
          
       install:
       - |
-        if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
+        if [ ! -f $QT_BIN_DIR/qmake ]; then \
         brew install p7zip && \
         python3 -m pip install --upgrade pip && \
         pip install -U aqtinstall requests py7zr && \
@@ -145,12 +145,13 @@ jobs:
 
       install:
         - |
-          if [ ! -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then \
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
           sudo apt-get update && \
           sudo apt install -yy p7zip python3 python3-pip && \
-          python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
+          python3 -m pip install --user $(whoami) --upgrade pip && \
+          export PATH=$HOME/.local/bin:$PATH && \
+          python3 -m pip3 install -U aqtinstall requests py7zr && \
+          python3 -m pip3 show aqtinstall && \
           python3 -m aqt install-qt linux desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
           python3 -m aqt install-tool linux desktop tools_ifw  -O $HOME/Qt ; \
           fi
@@ -199,12 +200,13 @@ jobs:
 
       install:
         - |
-          if [ ! -f $HOME/Qt/$QT_VERSION/android/bin/qmake ]; then \
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
           sudo apt-get update && \
           sudo apt install -yy p7zip python3 python3-pip && \
-          python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
+          python3 -m pip install --user $(whoami) --upgrade pip && \
+          export PATH=$HOME/.local/bin:$PATH && \
+          python3 -m pip3 install -U aqtinstall requests py7zr && \
+          python3 -m pip3 show aqtinstall && \
           python3 -m aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
           python3 -m aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
           python3 -m aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
@@ -234,7 +236,30 @@ jobs:
           tags: true
           branch: master
 
+# ------------------------------------------------------
+    - name: iOS
+      os: osx
+      osx_image: xcode13.4
+      language: objective-c
+      
+      env:
+        - QT_VERSION=5.15.2
+        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
+         
+      install:
+        - |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          brew install p7zip && \
+          python3 -m pip install --upgrade pip && \
+          pip install -U aqtinstall requests py7zr && \
+          pip show aqtinstall && \
+          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt && \
+          fi
+        - brew install golang && go install golang.org/x/mobile/cmd/gomobile@latest && gomobile init && \
 
+      script:
+        - bash deploy/build_ios.sh
+    
   
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
