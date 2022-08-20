@@ -46,7 +46,6 @@ enum ErrorCode
     FailedToSaveConfigData,
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
-    EasyRsaError,
     ConfigMissing,
 
     // Distro errors

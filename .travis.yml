@@ -1,5 +1,3 @@
-language: cpp
-
 branches:
   only:
     - master
@@ -10,135 +8,328 @@ jobs:
   include:
     - name: MacOS
       os: osx
-      osx_image: xcode12.5
-      
+      osx_image: xcode13.4
+      language: cpp
+
       env:
+        - PATH=/usr/local/opt/ccache/libexec:$PATH
         - QT_VERSION=5.15.2
-        - QIF_VERSION=4.1
+        - QIF_VERSION=4.4
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
         - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
          
+      install:
+      - |
+        if [ ! -f $QT_BIN_DIR/qmake ]; then \
+        brew install p7zip ccache && \
+        python3 -m pip install --upgrade pip && \
+        pip install -U aqtinstall requests py7zr && \
+        pip show aqtinstall && \
+        aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
+        aqt install-tool mac desktop tools_ifw  -O $HOME/Qt ; \
+        fi
+
       script:
-        - |
-          if [ ! -f $HOME/Qt/$QT_VERSION/clang_64/bin/qmake ]; then \
-          brew install p7zip && \
-          python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
-          python3 -m aqt install --outputdir $HOME/Qt $QT_VERSION mac desktop clang_64 -m qtbase && \
-          python3 -m aqt tool --outputdir $HOME/Qt mac tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./};
-          fi
         - bash deploy/build_macos.sh 
+
+      after_script:
+        - ccache --show-stats
 
       deploy:
         provider: releases
         token: $GH_TOKEN
-        skip_cleanup: true
+        cleanup: false
         file:
-        - "AmneziaVPN_unsigned.dmg"
+        - "AmneziaVPN.dmg"
         on:
           tags: true
           branch: master
     
+      cache:
+        - ccache
+        - directories:
+          - $HOME/Qt
+          - $HOME/Library/Caches/Homebrew
+
+    # ------------------------------------------------------
     - name: Windows_x64
       os: windows
-      
+      language: cpp
+
       env:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
-        - QT_VERSION=5.14.2
-        - QIF_VERSION=4.1
-        - QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2017_64\\bin"
+        - QT_VERSION=5.15.2
+        - QIF_VERSION=4.4
+        - QT_BIN_DIR="c:\\Qt\\$QT_VERSION\\msvc2019_64\\bin"
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=64
-        
-      before_install:
-        - if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then choco install python --version 3.9.1; fi
-        
-      script:
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+        - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
+
+      install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH_WIN"; fi
+        - if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
-          if [ ! -f /C/Qt/$QT_VERSION/msvc2017_64/bin/qmake ]; then \
+          if [ ! -f /C/Qt/$QT_VERSION/msvc2019_64/bin/qmake ]; then \
           python -m pip install --upgrade pip && \
           pip3 install -U aqtinstall requests py7zr && \
           pip3 show aqtinstall && \
-          python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win64_msvc2017_64 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
+          aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O /C/Qt && \
+          aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
+
+      script:
         - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\" -arch=amd64" >> winbuild.bat
-        - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\" -arch=amd64" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
-
         
       deploy:
         provider: releases
         token: $GH_TOKEN
-        skip_cleanup: true
+        cleanup: false
         file:
         - "AmneziaVPN_x64.exe"
         on:
           tags: true
           branch: master
 
+      cache:
+        directories:
+          - /C/Qt
+          - $MSVC_PATH
+
+# ------------------------------------------------------
     - name: Windows_x32
       os: windows
+      language: cpp
 
       env:
         - PATH=/c/Python39:/c/Python39/Scripts:$PATH
-        - QT_VERSION=5.14.2
-        - QIF_VERSION=4.1
-        - QT_BIN_DIR="c:\\Qt\\${QT_VERSION}\\msvc2017\\bin"
+        - QT_VERSION=5.15.2
+        - QIF_VERSION=4.4
+        - QT_BIN_DIR="c:\\Qt\\${QT_VERSION}\\msvc2019\\bin"
         - QIF_BIN_DIR="c:\\Qt\\Tools\\QtInstallerFramework\\${QIF_VERSION}\\bin"
         - BUILD_ARCH=32
+        - MSVC_PATH_WIN="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+        - MSVC_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2019/Community"
 
-      before_install:
-        - if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then choco install python --version 3.9.1; fi
-
-      script:
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
-        - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+      install:
+        - if [ ! -f "$MSVC_PATH/VC/Auxiliary/Build/vcvars64.bat" ]; then choco install --ignorepackagecodes --no-progress -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --nocache --installPath $MSVC_PATH_WIN"; fi
+        - if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then choco install python --version 3.9.1; fi
         - |
-          if [ ! -f /C/Qt/$QT_VERSION/msvc2017/bin/qmake ]; then \
+          if [ ! -f /C/Qt/$QT_VERSION/msvc2019/bin/qmake ]; then \
           python -m pip install --upgrade pip && \
           pip3 install -U aqtinstall requests py7zr && \
           pip3 show aqtinstall && \
-          python -m aqt install --outputdir /C/Qt $QT_VERSION windows desktop win32_msvc2017 -m qtbase && \
-          python -m aqt tool --outputdir /C/Qt windows tools_ifw $QIF_VERSION qt.tools.ifw.${QIF_VERSION/./}; \
+          aqt install-qt windows desktop $QT_VERSION win32_msvc2019 -m all -O /C/Qt && \
+          aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\Common7\\Tools\\VsDevCmd.bat\"" > winbuild.bat
-        - echo set BUILD_ARCH=$BUILD_ARCH >> winbuild.bat
+
+      script:
+        - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
         - echo set QT_BIN_DIR="$QT_BIN_DIR" >> winbuild.bat
         - echo set QIF_BIN_DIR="$QIF_BIN_DIR" >> winbuild.bat
-        - echo call \""C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
-        - echo set WIN_CERT_PW=$WIN_CERT_PW >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\VC\\Auxiliary\\Build\\vcvars${BUILD_ARCH}.bat\"" >> winbuild.bat
+        - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\"" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
 
       deploy:
         provider: releases
         token: $GH_TOKEN
-        skip_cleanup: true
+        cleanup: false
         file:
         - "AmneziaVPN_x32.exe"
         on:
           tags: true
           branch: master
 
-deploy:
-  skip_cleanup: true
+      cache:
+        directories:
+          - /C/Qt
+          - $MSVC_PATH
+
+# ------------------------------------------------------
+    - name: Linux
+      os: linux
+      dist: focal
+
+      addons:
+        apt:
+          packages:
+          - p7zip
+          - python3
+          - python3-pip
+          - libgl-dev
+          - mesa-common-dev
+          - libpulse-dev
+
+      env:
+        - QT_VERSION=5.15.2
+        - QIF_VERSION=4.4
+        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
+        - QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+
+      install:
+        - |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          python3 -m pip install --user $(whoami) --upgrade pip && \
+          export PATH=$HOME/.local/bin:$PATH && \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt linux desktop $QT_VERSION gcc_64 -m all -O $HOME/Qt && \
+          python3 -m aqt install-tool linux desktop tools_ifw  -O $HOME/Qt ; \
+          fi
+
+      script:
+        - bash deploy/build_linux.sh
+
+      after_script:
+        - ccache --show-stats
+
+      deploy:
+        provider: releases
+        token: $GH_TOKEN
+        cleanup: false
+        file:
+        - "AmneziaVPN.bundle"
+        on:
+          tags: true
+          branch: master
+
+      cache:
+        - ccache
+        - directories:
+          - $HOME/Qt
+
+# ------------------------------------------------------
+    - name: Android
+      os: linux
+      language: android
+      dist: xenial
+
+      addons:
+        apt:
+          packages:
+          - p7zip
+          - python3
+          - python3-pip
+
+      android:
+        components:
+          # Uncomment the lines below if you want to
+          # use the latest revision of Android SDK Tools
+          # - tools
+          # - platform-tools
+
+          # The BuildTools version used by your project
+          - build-tools-30.0.2
+
+          # The SDK version used to compile your project
+          - android-30
+
+          # Additional components
+          - extra
+          - extra-google-google_play_services
+          - extra-google-m2repository
+          - extra-android-m2repository
+
+      env:
+        - QT_VERSION=5.15.2
+        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
+        - USE_ANDROID_NDK_VERSION=21d
+        - ANDROID_NDK_HOME=$HOME/NDK
+
+      install:
+        - |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          export PATH=$HOME/.local/bin:$PATH && \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
+          python3 -m aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
+          python3 -m aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
+          python3 -m aqt install-qt linux android $QT_VERSION android_x86 -m all -O $HOME/Qt ; \
+          fi
+        - |
+          export TERM=dumb &&
+          curl -L https://dl.google.com/android/repository/android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip -O &&
+          unzip ./android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip > /dev/null &&
+          rm android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip &&
+          export ANDROID_NDK_HOME=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
+          export LOCAL_ANDROID_NDK_HOME="$ANDROID_NDK_HOME" &&
+          export LOCAL_ANDROID_NDK_HOST_PLATFORM="linux-x86_64" &&
+          export PATH=$PATH:${ANDROID_NDK_HOME} &&
+          env
+
+      script:
+        - bash deploy/build_android.sh
+
+      after_script:
+        - ccache --show-stats
+
+      deploy:
+        provider: releases
+        token: $GH_TOKEN
+        cleanup: false
+        file:
+        - "AmneziaVPN.aab"
+        on:
+          tags: true
+          branch: master
+
+      cache:
+        - ccache
+        - directories:
+          - $HOME/Qt
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+          - $HOME/.android/build-cache
+          - $ANDROID_NDK_HOME
+
+# ------------------------------------------------------
+    - name: iOS
+      os: osx
+      osx_image: xcode13.4
+      language: cpp
+      
+      env:
+        - PATH=/usr/local/opt/ccache/libexec:~/go/bin:$PATH
+        - QT_VERSION=5.15.2
+        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
+        - QT_IOS_BIN=$QT_BIN_DIR
+         
+      install:
+        - |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          brew install p7zip ccache && \
+          python3 -m pip install --upgrade pip && \
+          pip install -U aqtinstall requests py7zr && \
+          pip show aqtinstall && \
+          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
+          fi
+        - brew install golang
+        - go install golang.org/x/mobile/cmd/gomobile@latest
+        - gomobile init
+
+      script:
+        - bash deploy/build_ios.sh
+
+      after_script:
+        - ccache --show-stats
+    
+      cache:
+        - ccache
+        - directories:
+          - $HOME/Qt
+          - $HOME/Library/Caches/Homebrew
   
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
   # Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
   
-cache:
-  directories:
-    - $HOME/Qt
-    - /C/Qt
-    - $HOME/Library/Caches/Homebrew
