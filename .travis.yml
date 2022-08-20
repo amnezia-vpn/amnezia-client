@@ -10,9 +10,9 @@ jobs:
       os: osx
       osx_image: xcode13.4
       language: cpp
-      cache: ccache
 
       env:
+        - PATH=/usr/local/opt/ccache/libexec:$PATH
         - QT_VERSION=5.15.2
         - QIF_VERSION=4.4
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
@@ -21,7 +21,7 @@ jobs:
       install:
       - |
         if [ ! -f $QT_BIN_DIR/qmake ]; then \
-        brew install p7zip && \
+        brew install p7zip ccache && \
         python3 -m pip install --upgrade pip && \
         pip install -U aqtinstall requests py7zr && \
         pip show aqtinstall && \
@@ -31,6 +31,9 @@ jobs:
 
       script:
         - bash deploy/build_macos.sh 
+
+      after_script:
+        - ccache --show-stats
 
       deploy:
         provider: releases
@@ -43,7 +46,8 @@ jobs:
           branch: master
     
       cache:
-        directories:
+        - ccache
+        - directories:
           - $HOME/Qt
           - $HOME/Library/Caches/Homebrew
 
@@ -153,7 +157,6 @@ jobs:
     - name: Linux
       os: linux
       dist: focal
-      cache: ccache
 
       addons:
         apt:
@@ -163,6 +166,7 @@ jobs:
           - python3-pip
           - libgl-dev
           - mesa-common-dev
+          - libpulse-dev
 
       env:
         - QT_VERSION=5.15.2
@@ -184,6 +188,9 @@ jobs:
       script:
         - bash deploy/build_linux.sh
 
+      after_script:
+        - ccache --show-stats
+
       deploy:
         provider: releases
         token: $GH_TOKEN
@@ -195,7 +202,8 @@ jobs:
           branch: master
 
       cache:
-        directories:
+        - ccache
+        - directories:
           - $HOME/Qt
 
 # ------------------------------------------------------
@@ -203,7 +211,6 @@ jobs:
       os: linux
       language: android
       dist: xenial
-      cache: ccache
 
       addons:
         apt:
@@ -262,6 +269,9 @@ jobs:
       script:
         - bash deploy/build_android.sh
 
+      after_script:
+        - ccache --show-stats
+
       deploy:
         provider: releases
         token: $GH_TOKEN
@@ -273,7 +283,8 @@ jobs:
           branch: master
 
       cache:
-        directories:
+        - ccache
+        - directories:
           - $HOME/Qt
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
@@ -287,7 +298,7 @@ jobs:
       language: cpp
       
       env:
-        - PATH=$PATH:~/go/bin
+        - PATH=/usr/local/opt/ccache/libexec:~/go/bin:$PATH
         - QT_VERSION=5.15.2
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
         - QT_IOS_BIN=$QT_BIN_DIR
@@ -295,7 +306,7 @@ jobs:
       install:
         - |
           if [ ! -f $QT_BIN_DIR/qmake ]; then \
-          brew install p7zip && \
+          brew install p7zip ccache && \
           python3 -m pip install --upgrade pip && \
           pip install -U aqtinstall requests py7zr && \
           pip show aqtinstall && \
@@ -307,9 +318,13 @@ jobs:
 
       script:
         - bash deploy/build_ios.sh
+
+      after_script:
+        - ccache --show-stats
     
       cache:
-        directories:
+        - ccache
+        - directories:
           - $HOME/Qt
           - $HOME/Library/Caches/Homebrew
   
