@@ -7,6 +7,7 @@
 constexpr const char* settingsKeyTag = "settingsKeyTag";
 constexpr const char* settingsIvTag = "settingsIvTag";
 
+
 class SecureQSettings : public QObject
 {
 public:
@@ -26,15 +27,17 @@ public:
     bool encryptionRequired() const;
 
 private:
-    QSettings m_setting;
+    QSettings m_settings;
 
     mutable QMap<QString, QVariant> m_cache;
 
     QStringList encryptedKeys; // encode only key listed here
 
-    QByteArray key;
-    QByteArray iv;
-    int iv_len {16};
+    QByteArray m_key;
+    QByteArray m_iv;
+
+    const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
+
 };
 
 #endif // SECUREQSETTINGS_H

@@ -1,35 +1,37 @@
 #include "secure_qsettings.h"
-#include "encryption_helper.h"
 #include "platforms/ios/MobileUtils.h"
 
 #include <QDataStream>
 #include <QDebug>
+#include "utils.h"
+#include <QRandomGenerator>
+#include "QAead.h"
+#include "QBlockCipher.h"
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
     : QObject{parent},
-      m_setting(organization, application, parent),
+      m_settings(organization, application, parent),
       encryptedKeys({"Servers/serversList"})
 {
+    qDebug() << "SecureQSettings::SecureQSettings CTOR";
     // load keys from system key storage
 #ifdef Q_OS_IOS
-    key = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsKeyTag).toUtf8());
-    iv = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsIvTag).toUtf8());
+    m_key = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsKeyTag).toUtf8());
+    m_iv = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsIvTag).toUtf8());
 #endif
-    key = "12345qwerty00000";
-    iv = "000000000000000";
 
-    bool encrypted = m_setting.value("Conf/encrypted").toBool();
+    bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
-    // convert settings to encrypted
+    // convert settings to encrypted for if updated to >= 2.1.0
     if (encryptionRequired() && ! encrypted) {
-        for (const QString &key : m_setting.allKeys()) {
+        for (const QString &key : m_settings.allKeys()) {
             if (encryptedKeys.contains(key)) {
                 const QVariant &val = value(key);
                 setValue(key, val);
             }
         }
-        m_setting.setValue("Conf/encrypted", true);
-        m_setting.sync();
+        m_settings.setValue("Conf/encrypted", true);
+        m_settings.sync();
     }
 }
 
@@ -39,18 +41,36 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
         return m_cache.value(key);
     }
 
+    if (!m_settings.contains(key)) return defaultValue;
+
     QVariant retVal;
-    if (encryptionRequired() && encryptedKeys.contains(key)) {
-        if (!m_setting.contains(key)) return defaultValue;
 
-        QByteArray encryptedValue = m_setting.value(key).toByteArray();
-        QByteArray decryptedValue = decryptText(encryptedValue);
+    // check if value is not encrypted, v. < 2.0.x
+    retVal = m_settings.value(key);
+    if (retVal.isValid()) {
+        if (retVal.userType() == QVariant::ByteArray &&
+                retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
-        QDataStream ds(&decryptedValue, QIODevice::ReadOnly);
-        ds >> retVal;
+            if (m_key.isEmpty() || m_iv.isEmpty()) {
+                qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";
+                return {};
+            }
+
+            QByteArray encryptedValue = retVal.toByteArray().mid(magicString.size());
+
+            QByteArray decryptedValue = decryptText(encryptedValue);
+            QDataStream ds(&decryptedValue, QIODevice::ReadOnly);
+
+            ds >> retVal;
+
+            if (!retVal.isValid()) {
+                qWarning() << "SecureQSettings::value settings decryption failed";
+            }
+        }
     }
     else {
-        retVal = m_setting.value(key, defaultValue);
+        qWarning() << "SecureQSettings::value invalid QVariant value";
+        retVal = QVariant();
     }
 
     m_cache.insert(key, retVal);
@@ -61,17 +81,24 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
     if (encryptionRequired() && encryptedKeys.contains(key)) {
-        QByteArray decryptedValue;
-        {
-            QDataStream ds(&decryptedValue, QIODevice::WriteOnly);
-            ds << value;
+        if (!m_key.isEmpty() && !m_iv.isEmpty()) {
+            QByteArray decryptedValue;
+            {
+                QDataStream ds(&decryptedValue, QIODevice::WriteOnly);
+                ds << value;
+            }
+
+            QByteArray encryptedValue = encryptText(decryptedValue);
+            m_settings.setValue(key, magicString + encryptedValue);
+        }
+        else {
+            qCritical() << "SecureQSettings::setValue Encryption required, but key is empty";
+            return;
         }
 
-        QByteArray encryptedValue = encryptText(decryptedValue);
-        m_setting.setValue(key, encryptedValue);
     }
     else {
-        m_setting.setValue(key, value);
+        m_settings.setValue(key, value);
     }
 
     m_cache.insert(key, value);
@@ -80,7 +107,7 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
 
 void SecureQSettings::remove(const QString &key)
 {
-    m_setting.remove(key);
+    m_settings.remove(key);
     m_cache.remove(key);
 
     sync();
@@ -88,13 +115,13 @@ void SecureQSettings::remove(const QString &key)
 
 void SecureQSettings::sync()
 {
-    m_setting.sync();
+    m_settings.sync();
 }
 
 QByteArray SecureQSettings::backupAppConfig() const
 {
     QMap<QString, QVariant> cfg;
-    for (const QString &key : m_setting.allKeys()) {
+    for (const QString &key : m_settings.allKeys()) {
         cfg.insert(key, value(key));
     }
 
@@ -125,20 +152,16 @@ void SecureQSettings::restoreAppConfig(const QByteArray &base64Cfg)
 }
 
 
-QByteArray SecureQSettings::encryptText(const QByteArray& value) const {
-    char cipherText[UINT16_MAX];
-    int cipherTextSize = gcm_encrypt(value.constData(), value.size(),
-        key.constData(), iv.constData(), iv_len, cipherText);
-
-    return QByteArray::fromRawData((const char *)cipherText, cipherTextSize);
+QByteArray SecureQSettings::encryptText(const QByteArray& value) const
+{
+    QSimpleCrypto::QBlockCipher cipher;
+    return cipher.encryptAesBlockCipher(value, m_key, m_iv);
 }
 
-QByteArray SecureQSettings::decryptText(const QByteArray& ba) const {
-    char decryptPlainText[UINT16_MAX];
-    gcm_decrypt(ba.data(), ba.size(),
-        key.constData(), iv.constData(), iv_len, decryptPlainText);
-
-    return QByteArray::fromRawData(decryptPlainText, ba.size());
+QByteArray SecureQSettings::decryptText(const QByteArray& ba) const
+{
+    QSimpleCrypto::QBlockCipher cipher;
+    return cipher.decryptAesBlockCipher(ba, m_key, m_iv);
 }
 
 bool SecureQSettings::encryptionRequired() const

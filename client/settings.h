@@ -11,7 +11,6 @@
 
 #include "core/defs.h"
 #include "containers/containers_defs.h"
-#include "encryption_helper.h"
 #include "secure_qsettings.h"
 
 using namespace amnezia;

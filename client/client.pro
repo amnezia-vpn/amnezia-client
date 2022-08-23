@@ -16,7 +16,9 @@ include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 include("3rd/qzxing/src/QZXing-components.pri")
+include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
 
+INCLUDEPATH += $$PWD/3rd/QSimpleCrypto/include
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
 
@@ -37,7 +39,6 @@ HEADERS  += \
     core/servercontroller.h \
     debug.h \
     defines.h \
-    encryption_helper.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
@@ -96,7 +97,6 @@ SOURCES  += \
    core/server_defs.cpp \
     core/servercontroller.cpp \
     debug.cpp \
-    encryption_helper.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \
@@ -169,7 +169,6 @@ win32 {
         -lshlwapi \
         -liphlpapi \
         -lws2_32 \
-        -liphlpapi \
         -lgdi32
 
 

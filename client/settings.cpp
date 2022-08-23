@@ -8,7 +8,6 @@
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
 
-//SecureFormat Settings::m_secureFormat;
 
 Settings::Settings(QObject* parent) :
     QObject(parent),
