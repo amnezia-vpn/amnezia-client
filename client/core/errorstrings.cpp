@@ -35,10 +35,11 @@ QString errorString(ErrorCode code){
     case (FailedToSaveConfigData): return QObject::tr("Failed to save config to disk");
     case (OpenVpnConfigMissing): return QObject::tr("OpenVPN config missing");
     case (OpenVpnManagementServerError): return QObject::tr("OpenVPN management server error");
-    case (EasyRsaError): return QObject::tr("EasyRSA runtime error");
 
     // Distro errors
     case (OpenVpnExecutableMissing): return QObject::tr("OpenVPN executable missing");
+    case (ShadowSocksExecutableMissing): return QObject::tr("ShadowSocks (ss-local) executable missing");
+    case (CloakExecutableMissing): return QObject::tr("Cloak (ck-client) executable missing");
     case (AmneziaServiceConnectionFailed): return QObject::tr("Amnezia helper service error");
     case (OpenSslFailed): return QObject::tr("OpenSSL failed");
 

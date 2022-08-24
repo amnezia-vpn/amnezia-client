@@ -25,31 +25,20 @@ if sudo systemctl is-active --quiet $APP_NAME; then
 	sudo rm -rf /etc/systemd/system/$APP_NAME.service >> $LOG_FILE
 fi
 
-sudo chmod +x $APP_PATH/client/bin/easyrsa >> $LOG_FILE
-sudo chmod --- $APP_PATH/client/bin/update-resolv-conf.sh
-sudo chmod +rx $APP_PATH/client/bin/update-resolv-conf.sh
+sudo chmod -R a-w $APP_PATH/
 
-sudo cp $APP_PATH/service/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
+sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 
 sudo systemctl start $APP_NAME >> $LOG_FILE
 sudo systemctl enable $APP_NAME >> $LOG_FILE
-sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/sbin/$APP_NAME >> $LOG_FILE
-
+sudo chmod 555 $APP_PATH/client/$APP_NAME.sh >> $LOG_FILE
+sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/sbin/$APP_NAME >> $LOG_FILE
+sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
 
 echo "user desktop creation loop started" >> $LOG_FILE
-getent passwd {1000..6000} | while IFS=: read -r name password uid gid gecos home shell; do
-        echo "name: $name"
-        if ! test -f /home/$name/.icons; then
-                mkdir /home/$name/.icons/ >> $LOG_FILE
-        fi
+sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE
+sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
-        cp -f $APP_PATH/client/share/icons/AmneziaVPN_Logo.png /home/$name/.icons/ >> $LOG_FILE
-        cp $APP_PATH/client/$APP_NAME.desktop /home/$name/Desktop/ >> $LOG_FILE
-
-        sudo chown $name:$name /home/$name/.local/share/gvfs-metadata/home* >> $LOG_FILE
-        sudo -u $name dbus-launch gio set /home/$name/Desktop/AmneziaVPN.desktop "metadata::trusted" yes >> $LOG_FILE
-        sudo chown $name:$name /home/$name/Desktop/AmneziaVPN.desktop >> $LOG_FILE
-done
 echo "user desktop creation loop ended" >> $LOG_FILE
 
 date >> $LOG_FILE

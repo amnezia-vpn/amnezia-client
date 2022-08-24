@@ -1,3 +1,5 @@
+apply plugin: 'com.github.ben-manes.versions'
+
 buildscript {
    ext{
        kotlin_version = "1.4.30-M1"
@@ -19,6 +21,8 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
@@ -34,15 +38,22 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'kotlin-kapt'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation 'androidx.core:core-ktx:1.1.0'
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0-alpha02"
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "androidx.security:security-identity-credential:1.0.0-alpha02"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
+    implementation project(path: ':shadowsocks')
+}
+
+androidExtensions {
+    experimental = true
 }
 
 android {
@@ -77,6 +88,7 @@ android {
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
+            androidTest.assets.srcDirs += files("${qt5AndroidDir}/schemas".toString())
        }
     }
 
@@ -85,9 +97,13 @@ android {
     }
 
     compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
 
     lintOptions {
         abortOnError false
@@ -104,6 +120,10 @@ android {
         targetSdkVersion = 30
         versionCode 10 // Change to a higher number
         versionName "2.0.10" // Change to a higher number
+
+        javaCompileOptions.annotationProcessorOptions.arguments = [
+            "room.schemaLocation": "${qt5AndroidDir}/schemas".toString()
+        ]
     }
 
    buildTypes {

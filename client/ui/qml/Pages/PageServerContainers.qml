@@ -260,21 +260,16 @@ PageBase {
 
                         RowLayout {
                             id: row_container
-                            //width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
-
-//                            anchors.top: lb_container_name.top
-//                            anchors.bottom: lb_container_name.bottom
 
                             Text {
                                 id: lb_container_name
                                 text: name_role
                                 font.pixelSize: 17
-                                //font.bold: true
                                 color: "#100A44"
-                                topPadding: 5
-                                bottomPadding: 5
+                                topPadding: 16
+                                bottomPadding: 12
                                 leftPadding: 10
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -358,20 +353,24 @@ PageBase {
                         ListView {
                             id: tb_p
                             currentIndex: -1
-                            visible: index === tb_c.currentIndex
                             x: 10
                             anchors.top: row_container.bottom
 
                             width: parent.width - 40
-                            height: visible ? tb_p.contentItem.height : 0
+                            height: index === tb_c.currentIndex ? tb_p.contentItem.height : 0
+                            implicitHeight: height
 
                             spacing: 0
                             clip: true
                             interactive: false
                             model: proxyProtocolsModel
 
-                            VisibleBehavior on visible { }
 
+                            Behavior on height {
+                                NumberAnimation {
+                                    duration: 200
+                                }
+                            }
 
                             delegate: Item {
                                 id: dp_item
@@ -388,41 +387,19 @@ PageBase {
                                         width: parent.width
                                         height: 1
                                         color: "lightgray"
-                                        visible: index !== tb_p.currentIndex
+                                        visible: index > 0
                                     }
-//                                    Rectangle {
-//                                        anchors.top: lb_protocol_name.top
-//                                        anchors.bottom: lb_protocol_name.bottom
-//                                        width: parent.width
-
-//                                        color: "#63B4FB"
-//                                        visible: index === tb_p.currentIndex
-//                                    }
-
-//                                    Text {
-//                                        id: lb_protocol_name
-//                                        text: name_role
-//                                        font.pixelSize: 16
-//                                        topPadding: 5
-//                                        bottomPadding: 5
-//                                        leftPadding: 10
-//                                        verticalAlignment: Text.AlignVCenter
-//                                        wrapMode: Text.WordWrap
-//                                    }
 
                                     SettingButtonType {
                                         id: lb_protocol_name
-
-//                                        anchors.top: lb_protocol_name.top
-//                                        anchors.bottom: lb_protocol_name.bottom
                                         topPadding: 10
                                         bottomPadding: 10
-                                        leftPadding: 10
 
                                         anchors.left: parent.left
+                                        anchors.leftMargin: 10
 
                                         width: parent.width
-                                        height: 30
+                                        height: 45
                                         text: qsTr(name_role + " settings")
                                         textItem.font.pixelSize: 16
                                         icon.source: "qrc:/images/settings.png"
