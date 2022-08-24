@@ -40,6 +40,7 @@ namespace QSimpleCrypto
         /// \return Returns random bytes.
         ///
         QByteArray generateRandomBytes(const int& size);
+        QByteArray generateSecureRandomBytes(const int& size);
 
         ///
         /// \brief encryptAesBlockCipher - Function encrypts data with Aes Block Cipher algorithm.

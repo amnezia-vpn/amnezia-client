@@ -26,6 +26,8 @@ public:
 
     bool encryptionRequired() const;
 
+    QByteArray getEncKey() const;
+    QByteArray getEncIv() const;
 private:
     QSettings m_settings;
 
@@ -33,8 +35,8 @@ private:
 
     QStringList encryptedKeys; // encode only key listed here
 
-    QByteArray m_key;
-    QByteArray m_iv;
+    mutable QByteArray m_key;
+    mutable QByteArray m_iv;
 
     const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
 

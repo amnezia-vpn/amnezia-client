@@ -35,7 +35,7 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     }
 }
 
-bool deleteFromKeychain(const QString& tag) {
+bool MobileUtils::deleteFromKeychain(const QString& tag) {
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
 
     NSDictionary *deleteQuery = @{ (id)kSecAttrAccount: nsTag,
@@ -46,17 +46,14 @@ bool deleteFromKeychain(const QString& tag) {
     if (status != errSecSuccess) {
         qDebug() << "Error deleteFromKeychain" << status;
         return false;
-    } else {
-        qDebug() << "OK deleteFromKeychain";
-        return true;
     }
 }
 
-void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
+void MobileUtils::writeToKeychain(const QString& tag, const QByteArray& value) {
     deleteFromKeychain(tag);
 
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
-    NSData* nsValue = [value.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* nsValue = value.toNSData();
 
     NSDictionary* addQuery = @{ (id)kSecAttrAccount: nsTag,
                                 (id)kSecClass: (id)kSecClassGenericPassword,
@@ -66,12 +63,10 @@ void MobileUtils::writeToKeychain(const QString& tag, const QString& value) {
     OSStatus status = SecItemAdd((__bridge CFDictionaryRef)addQuery, NULL);
     if (status != errSecSuccess) {
         qDebug() << "Error writeToKeychain" << status;
-    } else {
-        qDebug() << "OK writeToKeychain";
     }
 }
 
-QString MobileUtils::readFromKeychain(const QString& tag) {
+QByteArray MobileUtils::readFromKeychain(const QString& tag) {
     NSData* nsTag = [tag.toNSString() dataUsingEncoding:NSUTF8StringEncoding];
     NSData* nsValue = NULL;
 
@@ -85,11 +80,9 @@ QString MobileUtils::readFromKeychain(const QString& tag) {
                                           (CFTypeRef *)&nsValue);
     if (status != errSecSuccess) {
         qDebug() << "Error readFromKeychain" << status;
-    } else {
-        qDebug() << "OK readFromKeychain" << nsValue;
     }
 
-    QString result;
+    QByteArray result;
     if (nsValue) {
         result = QByteArray::fromNSData(nsValue);
         CFRelease(nsValue);

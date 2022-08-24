@@ -14,11 +14,6 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
       encryptedKeys({"Servers/serversList"})
 {
     qDebug() << "SecureQSettings::SecureQSettings CTOR";
-    // load keys from system key storage
-#ifdef Q_OS_IOS
-    m_key = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsKeyTag).toUtf8());
-    m_iv = QByteArray::fromBase64(MobileUtils::readFromKeychain(settingsIvTag).toUtf8());
-#endif
 
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
@@ -51,7 +46,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
         if (retVal.userType() == QVariant::ByteArray &&
                 retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
-            if (m_key.isEmpty() || m_iv.isEmpty()) {
+            if (getEncKey().isEmpty() || getEncIv().isEmpty()) {
                 qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";
                 return {};
             }
@@ -65,6 +60,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 
             if (!retVal.isValid()) {
                 qWarning() << "SecureQSettings::value settings decryption failed";
+                retVal = QVariant();
             }
         }
     }
@@ -81,7 +77,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
     if (encryptionRequired() && encryptedKeys.contains(key)) {
-        if (!m_key.isEmpty() && !m_iv.isEmpty()) {
+        if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
             QByteArray decryptedValue;
             {
                 QDataStream ds(&decryptedValue, QIODevice::WriteOnly);
@@ -155,22 +151,75 @@ void SecureQSettings::restoreAppConfig(const QByteArray &base64Cfg)
 QByteArray SecureQSettings::encryptText(const QByteArray& value) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.encryptAesBlockCipher(value, m_key, m_iv);
+    return cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
 }
 
 QByteArray SecureQSettings::decryptText(const QByteArray& ba) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.decryptAesBlockCipher(ba, m_key, m_iv);
+    return cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
 }
 
 bool SecureQSettings::encryptionRequired() const
 {
-#if defined Q_OS_ANDROID || defined Q_OS_IOS
+#if defined Q_OS_IOS // || defined Q_OS_ANDROID
     return true;
 #endif
 
     return false;
+}
+
+QByteArray SecureQSettings::getEncKey() const
+{
+    // load keys from system key storage
+    m_key = MobileUtils::readFromKeychain(settingsKeyTag);
+
+    if (m_key.isEmpty()) {
+        // Create new key
+        QSimpleCrypto::QBlockCipher cipher;
+        QByteArray key = cipher.generateSecureRandomBytes(32);
+        if (key.isEmpty()) {
+            qCritical() << "SecureQSettings::getEncKey Unable to generate new enc key";
+        }
+
+        MobileUtils::writeToKeychain(settingsKeyTag, key);
+
+        // check
+        m_key = MobileUtils::readFromKeychain(settingsKeyTag);
+        if (key != m_key) {
+            qCritical() << "SecureQSettings::getEncKey Unable to store key in keychain" << key.size() << m_key.size();
+            return {};
+        }
+    }
+    //qDebug() << "SecureQSettings::getEncKey() key" << m_key.size();
+
+    return m_key;
+}
+
+QByteArray SecureQSettings::getEncIv() const
+{
+    // load keys from system key storage
+    m_iv = MobileUtils::readFromKeychain(settingsIvTag);
+
+    if (m_iv.isEmpty()) {
+        // Create new IV
+        QSimpleCrypto::QBlockCipher cipher;
+        QByteArray iv = cipher.generateSecureRandomBytes(32);
+        if (iv.isEmpty()) {
+            qCritical() << "SecureQSettings::getEncIv Unable to generate new enc IV";
+        }
+        MobileUtils::writeToKeychain(settingsIvTag, iv);
+
+        // check
+        m_iv = MobileUtils::readFromKeychain(settingsIvTag);
+        if (iv != m_iv) {
+            qCritical() << "SecureQSettings::getEncIv Unable to store IV in keychain" << iv.size() << m_iv.size();
+            return {};
+        }
+    }
+    //qDebug() << "SecureQSettings::getEncIv() iv" << m_iv.size();
+
+    return m_iv;
 }
 
 

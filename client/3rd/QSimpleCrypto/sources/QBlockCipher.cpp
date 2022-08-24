@@ -26,6 +26,15 @@ QByteArray QSimpleCrypto::QBlockCipher::generateRandomBytes(const int& size)
     return buffer;
 }
 
+QByteArray QSimpleCrypto::QBlockCipher::generateSecureRandomBytes(const int &size)
+{
+    unsigned char arr[sizeof(size)];
+    RAND_priv_bytes(arr, sizeof(size));
+
+    QByteArray buffer = QByteArray(reinterpret_cast<char*>(arr), size);
+    return buffer;
+}
+
 ///
 /// \brief QSimpleCrypto::QBlockCipher::encryptAesBlockCipher - Function encrypts data with Aes Block Cipher algorithm.
 /// \param data - Data that will be encrypted.

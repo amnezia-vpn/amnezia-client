@@ -2,5 +2,5 @@
 
 void MobileUtils::shareText(const QStringList&) {}
 
-void MobileUtils::writeToKeychain(const QString&, const QString&) {}
-QString MobileUtils::readFromKeychain(const QString&) { return {}; }
+void MobileUtils::writeToKeychain(const QString&, const QByteArray &) {}
+QByteArray MobileUtils::readFromKeychain(const QString&) { return {}; }
