@@ -191,7 +191,6 @@ QByteArray SecureQSettings::getEncKey() const
             return {};
         }
     }
-    //qDebug() << "SecureQSettings::getEncKey() key" << m_key.size();
 
     return m_key;
 }
@@ -217,7 +216,6 @@ QByteArray SecureQSettings::getEncIv() const
             return {};
         }
     }
-    //qDebug() << "SecureQSettings::getEncIv() iv" << m_iv.size();
 
     return m_iv;
 }
