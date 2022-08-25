@@ -29,9 +29,8 @@
 #include "utils.h"
 #include "vpnconnection.h"
 
-VpnConnection::VpnConnection(QObject* parent) : QObject(parent),
-    m_settings(this)
-
+VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject* parent) : QObject(parent),
+    m_settings(settings)
 {
 }
 
@@ -56,7 +55,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
-            if (m_settings.routeMode() != Settings::VpnAllSites) {
+            if (m_settings->routeMode() != Settings::VpnAllSites) {
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                 //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
@@ -67,17 +66,17 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 QStringList() << dns1 << dns2);
 
 
-            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+            if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                 QTimer::singleShot(1000, m_vpnProtocol.data(), [this](){
-                    addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings.routeMode());
+                    addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode());
                 });
             }
-            else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+            else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
-                addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings.routeMode());
+                addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
             }
 
 
@@ -85,7 +84,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
         else if (state == VpnProtocol::Error) {
             IpcClient::Interface()->flushDns();
 
-            if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+            if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                 IpcClient::Interface()->clearSavedRoutes();
             }
         }
@@ -104,7 +103,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
 #ifdef AMNEZIA_DESKTOP
     QStringList ips;
     QStringList sites;
-    const QVariantMap &m = m_settings.vpnSites(mode);
+    const QVariantMap &m = m_settings->vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
         if (Utils::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
@@ -132,7 +131,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
                         //qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
                         if (!ips.contains(ip)) {
                             IpcClient::Interface()->routeAddList(gw, QStringList() << ip);
-                            m_settings.addVpnSite(mode, site, ip);
+                            m_settings->addVpnSite(mode, site, ip);
                         }
                         flushDns();
                         break;
@@ -153,10 +152,10 @@ void VpnConnection::addRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
     if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
-        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
         }
-        else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+        else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips);
         }
     }
@@ -167,10 +166,10 @@ void VpnConnection::deleteRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
     if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
-        if (m_settings.routeMode() == Settings::VpnOnlyForwardSites) {
+        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeDeleteList(vpnProtocol()->vpnGateway(), ips);
         }
-        else if (m_settings.routeMode() == Settings::VpnAllExceptSites) {
+        else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
             IpcClient::Interface()->routeDeleteList(m_vpnProtocol->routeGateway(), ips);
         }
     }
@@ -237,9 +236,9 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
 
         if (serverIndex >= 0) {
             qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container << proto;
-            QJsonObject protoObject = m_settings.protocolConfig(serverIndex, container, proto);
+            QJsonObject protoObject = m_settings->protocolConfig(serverIndex, container, proto);
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
-            m_settings.setProtocolConfig(serverIndex, container, proto, protoObject);
+            m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
     }
 
@@ -284,7 +283,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
-                .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings.routeMode();
+                .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
 
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     if (!m_IpcClient) {

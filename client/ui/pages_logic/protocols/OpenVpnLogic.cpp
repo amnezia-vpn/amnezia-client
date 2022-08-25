@@ -81,10 +81,10 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
 
 void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings.protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::OpenVpn);
+    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::OpenVpn);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings.containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Proto::OpenVpn), protocolConfig);
 
@@ -118,14 +118,14 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return ServerController::updateContainer(m_settings.serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+        return ServerController::updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_openvpn, progressBar_proto_openvpn_reset,
     pushButton_proto_openvpn_save, label_proto_openvpn_info);
 
     if (!e) {
-        m_settings.setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
-        m_settings.clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+        m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
+        m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     }
     qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
 }

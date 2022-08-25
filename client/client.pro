@@ -24,25 +24,26 @@ DEPENDPATH += $$PWD/3rd/OpenSSL/include
 
 HEADERS  += \
     ../ipc/ipc.h \
-   configurators/cloak_configurator.h \
-   configurators/ikev2_configurator.h \
-   configurators/shadowsocks_configurator.h \
-   configurators/ssh_configurator.h \
-   configurators/vpn_configurator.h \
-   configurators/wireguard_configurator.h \
+    amnezia_application.h \
+    configurators/cloak_configurator.h \
+    configurators/ikev2_configurator.h \
+    configurators/shadowsocks_configurator.h \
+    configurators/ssh_configurator.h \
+    configurators/vpn_configurator.h \
+    configurators/wireguard_configurator.h \
     containers/containers_defs.h \
     core/defs.h \
     core/errorstrings.h \
     configurators/openvpn_configurator.h \
-   core/scripts_registry.h \
-   core/server_defs.h \
+    core/scripts_registry.h \
+    core/server_defs.h \
     core/servercontroller.h \
     debug.h \
     defines.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
-   protocols/protocols_defs.h \
+    protocols/protocols_defs.h \
     secure_qsettings.h \
     settings.h \
     ui/notificationhandler.h \
@@ -52,10 +53,10 @@ HEADERS  += \
     ui/pages_logic/AppSettingsLogic.h \
     ui/pages_logic/GeneralSettingsLogic.h \
     ui/pages_logic/NetworkSettingsLogic.h \
-   ui/pages_logic/NewServerProtocolsLogic.h \
+    ui/pages_logic/NewServerProtocolsLogic.h \
     ui/pages_logic/PageLogicBase.h \
-   ui/pages_logic/QrDecoderLogic.h \
-   ui/pages_logic/ServerConfiguringProgressLogic.h \
+    ui/pages_logic/QrDecoderLogic.h \
+    ui/pages_logic/ServerConfiguringProgressLogic.h \
     ui/pages_logic/ServerContainersLogic.h \
     ui/pages_logic/ServerListLogic.h \
     ui/pages_logic/ServerSettingsLogic.h \
@@ -64,16 +65,16 @@ HEADERS  += \
     ui/pages_logic/StartPageLogic.h \
     ui/pages_logic/VpnLogic.h \
     ui/pages_logic/WizardLogic.h \
-   ui/pages_logic/protocols/CloakLogic.h \
-   ui/pages_logic/protocols/OpenVpnLogic.h \
-   ui/pages_logic/protocols/OtherProtocolsLogic.h \
-   ui/pages_logic/protocols/PageProtocolLogicBase.h \
-   ui/pages_logic/protocols/ShadowSocksLogic.h \
+    ui/pages_logic/protocols/CloakLogic.h \
+    ui/pages_logic/protocols/OpenVpnLogic.h \
+    ui/pages_logic/protocols/OtherProtocolsLogic.h \
+    ui/pages_logic/protocols/PageProtocolLogicBase.h \
+    ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
-   ui/qautostart.h \
-   ui/models/sites_model.h \
+    ui/qautostart.h \
+    ui/models/sites_model.h \
     utils.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
@@ -84,24 +85,25 @@ HEADERS  += \
     platforms/ios/QRCodeReaderBase.h
 
 SOURCES  += \
-   configurators/cloak_configurator.cpp \
-   configurators/ikev2_configurator.cpp \
-   configurators/shadowsocks_configurator.cpp \
-   configurators/ssh_configurator.cpp \
-   configurators/vpn_configurator.cpp \
-   configurators/wireguard_configurator.cpp \
+    amnezia_application.cpp \
+    configurators/cloak_configurator.cpp \
+    configurators/ikev2_configurator.cpp \
+    configurators/shadowsocks_configurator.cpp \
+    configurators/ssh_configurator.cpp \
+    configurators/vpn_configurator.cpp \
+    configurators/wireguard_configurator.cpp \
     containers/containers_defs.cpp \
-   core/errorstrings.cpp \
+    core/errorstrings.cpp \
     configurators/openvpn_configurator.cpp \
-   core/scripts_registry.cpp \
-   core/server_defs.cpp \
+    core/scripts_registry.cpp \
+    core/server_defs.cpp \
     core/servercontroller.cpp \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
-   protocols/protocols_defs.cpp \
+    protocols/protocols_defs.cpp \
     secure_qsettings.cpp \
     settings.cpp \
     ui/notificationhandler.cpp \
@@ -110,10 +112,10 @@ SOURCES  += \
     ui/pages_logic/AppSettingsLogic.cpp \
     ui/pages_logic/GeneralSettingsLogic.cpp \
     ui/pages_logic/NetworkSettingsLogic.cpp \
-   ui/pages_logic/NewServerProtocolsLogic.cpp \
+    ui/pages_logic/NewServerProtocolsLogic.cpp \
     ui/pages_logic/PageLogicBase.cpp \
-   ui/pages_logic/QrDecoderLogic.cpp \
-   ui/pages_logic/ServerConfiguringProgressLogic.cpp \
+    ui/pages_logic/QrDecoderLogic.cpp \
+    ui/pages_logic/ServerConfiguringProgressLogic.cpp \
     ui/pages_logic/ServerContainersLogic.cpp \
     ui/pages_logic/ServerListLogic.cpp \
     ui/pages_logic/ServerSettingsLogic.cpp \
@@ -122,15 +124,15 @@ SOURCES  += \
     ui/pages_logic/StartPageLogic.cpp \
     ui/pages_logic/VpnLogic.cpp \
     ui/pages_logic/WizardLogic.cpp \
-   ui/pages_logic/protocols/CloakLogic.cpp \
-   ui/pages_logic/protocols/OpenVpnLogic.cpp \
-   ui/pages_logic/protocols/OtherProtocolsLogic.cpp \
-   ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
-   ui/pages_logic/protocols/ShadowSocksLogic.cpp \
+    ui/pages_logic/protocols/CloakLogic.cpp \
+    ui/pages_logic/protocols/OpenVpnLogic.cpp \
+    ui/pages_logic/protocols/OtherProtocolsLogic.cpp \
+    ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
+    ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
     ui/uilogic.cpp \
-   ui/qautostart.cpp \
-   ui/models/sites_model.cpp \
+    ui/qautostart.cpp \
+    ui/models/sites_model.cpp \
     utils.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
@@ -249,20 +251,20 @@ android {
 
 
    DISTFILES += \
-       android/AndroidManifest.xml \
-       android/build.gradle \
-       android/gradle/wrapper/gradle-wrapper.jar \
-       android/gradle/wrapper/gradle-wrapper.properties \
-       android/gradlew \
-       android/gradlew.bat \
-       android/gradle.properties \
-       android/res/values/libs.xml \
-       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
-       android/src/org/amnezia/vpn/VpnService.kt \
-       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
-       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
+      android/AndroidManifest.xml \
+      android/build.gradle \
+      android/gradle/wrapper/gradle-wrapper.jar \
+      android/gradle/wrapper/gradle-wrapper.properties \
+      android/gradlew \
+      android/gradlew.bat \
+      android/gradle.properties \
+      android/res/values/libs.xml \
+      android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
+      android/src/org/amnezia/vpn/VpnService.kt \
+      android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+      android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
-       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+      ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
       equals(ANDROID_TARGET_ARCH,$$abi) {

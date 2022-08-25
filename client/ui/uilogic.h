@@ -58,9 +58,11 @@ class UiLogic : public QObject
     Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
 
 public:
-    explicit UiLogic(QObject *parent = nullptr);
+    explicit UiLogic(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
+
+    friend class PageLogicBase;
 
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
@@ -212,7 +214,7 @@ private:
 
     VpnConnection* m_vpnConnection;
     QThread m_vpnConnectionThread;
-    Settings m_settings;
+    std::shared_ptr<Settings> m_settings;
 
     NotificationHandler* m_notificationHandler;
 

@@ -23,8 +23,8 @@ public:
 
 protected:
     UiLogic *uiLogic() const { return m_uiLogic; }
+    std::shared_ptr<Settings> m_settings;
 
-    Settings m_settings;
     UiLogic *m_uiLogic;
 
 signals:

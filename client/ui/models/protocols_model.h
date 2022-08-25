@@ -13,7 +13,7 @@ class ProtocolsModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    ProtocolsModel(QObject *parent = nullptr);
+    ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 public:
     enum SiteRoles {
         NameRole = Qt::UserRole + 1,
@@ -34,7 +34,7 @@ protected:
 private:
     int m_selectedServerIndex;
     DockerContainer m_selectedDockerContainer;
-    Settings m_settings;
+    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // PROTOCOLS_MODEL_H

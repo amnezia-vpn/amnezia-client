@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMutex>
 
 #include "core/defs.h"
 #include "containers/containers_defs.h"
@@ -116,6 +117,7 @@ public:
 
 private:
     SecureQSettings m_settings;
+    QMutex m_mutex;
 };
 
 #endif // SETTINGS_H

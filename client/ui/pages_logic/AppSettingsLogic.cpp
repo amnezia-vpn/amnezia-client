@@ -25,9 +25,9 @@ AppSettingsLogic::AppSettingsLogic(UiLogic *logic, QObject *parent):
 void AppSettingsLogic::onUpdatePage()
 {
     set_checkBoxAutostartChecked(Autostart::isAutostart());
-    set_checkBoxAutoConnectChecked(m_settings.isAutoConnect());
-    set_checkBoxStartMinimizedChecked(m_settings.isStartMinimized());
-    set_checkBoxSaveLogsChecked(m_settings.isSaveLogs());
+    set_checkBoxAutoConnectChecked(m_settings->isAutoConnect());
+    set_checkBoxStartMinimizedChecked(m_settings->isStartMinimized());
+    set_checkBoxSaveLogsChecked(m_settings->isSaveLogs());
 
     QString ver = QString("%1: %2 (%3)")
             .arg(tr("Software version"))
@@ -46,17 +46,17 @@ void AppSettingsLogic::onCheckBoxAutostartToggled(bool checked)
 
 void AppSettingsLogic::onCheckBoxAutoconnectToggled(bool checked)
 {
-    m_settings.setAutoConnect(checked);
+    m_settings->setAutoConnect(checked);
 }
 
 void AppSettingsLogic::onCheckBoxStartMinimizedToggled(bool checked)
 {
-    m_settings.setStartMinimized(checked);
+    m_settings->setStartMinimized(checked);
 }
 
 void AppSettingsLogic::onCheckBoxSaveLogsCheckedToggled(bool checked)
 {
-    m_settings.setSaveLogs(checked);
+    m_settings->setSaveLogs(checked);
 }
 
 void AppSettingsLogic::onPushButtonOpenLogsClicked()
@@ -77,7 +77,7 @@ void AppSettingsLogic::onPushButtonClearLogsClicked()
 
 void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
 {
-    uiLogic()->saveTextFile("Backup application config", "AmneziaVPN.backup", ".backup", m_settings.backupAppConfig());
+    uiLogic()->saveTextFile("Backup application config", "AmneziaVPN.backup", ".backup", m_settings->backupAppConfig());
 }
 
 void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
@@ -91,7 +91,7 @@ void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    m_settings.restoreAppConfig(data);
+    m_settings->restoreAppConfig(data);
 
     emit uiLogic()->goToPage(Page::Vpn);
     emit uiLogic()->setStartPage(Page::Vpn);

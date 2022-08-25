@@ -159,8 +159,8 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     //qDebug() << QString("Password") << credentials.password;
 
     if (credentials.isValid() || profile.contains(config_key::containers)) {
-        m_settings.addServer(profile);
-        m_settings.setDefaultServer(m_settings.serversCount() - 1);
+        m_settings->addServer(profile);
+        m_settings->setDefaultServer(m_settings->serversCount() - 1);
 
         emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
@@ -172,8 +172,8 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     }
 
     if (!profile.contains(config_key::containers)) {
-        uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
-        uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
+        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
+        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
         uiLogic()->onUpdateAllPages();
 
         emit uiLogic()->goToPage(Page::ServerContainers);
