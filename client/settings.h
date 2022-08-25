@@ -8,7 +8,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QMutex>
 
 #include "core/defs.h"
 #include "containers/containers_defs.h"
@@ -27,7 +26,6 @@ public:
 
     ServerCredentials defaultServerCredentials() const;
     ServerCredentials serverCredentials(int index) const;
-    //void setServerCredentials(const ServerCredentials &credentials);
 
     QJsonArray serversArray() const { return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array(); }
     void setServersArray(const QJsonArray &servers) { m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson()); }
@@ -117,7 +115,7 @@ public:
 
 private:
     SecureQSettings m_settings;
-    QMutex m_mutex;
+
 };
 
 #endif // SETTINGS_H

@@ -3,6 +3,9 @@
 
 #include <QSettings>
 #include <QObject>
+#include <QMutex>
+#include <QMutexLocker>
+
 
 constexpr const char* settingsKeyTag = "settingsKeyTag";
 constexpr const char* settingsIvTag = "settingsIvTag";
@@ -40,6 +43,7 @@ private:
 
     const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
 
+    mutable QMutex mutex;
 };
 
 #endif // SECUREQSETTINGS_H

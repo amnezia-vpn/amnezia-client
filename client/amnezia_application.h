@@ -13,13 +13,12 @@
 #include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-  #define AMNEZIA_BASE_CLASS SingleApplication
-  #define QAPPLICATION_CLASS QGuiApplication
-  #include "singleapplication.h"
-  //#undef QAPPLICATION_CLASS
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+  #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
-  #define AMNEZIA_BASE_CLASS QApplication
+  #define AMNEZIA_BASE_CLASS SingleApplication
+  #define QAPPLICATION_CLASS QApplication
+  #include "singleapplication.h"
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS
@@ -46,6 +45,9 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
     std::shared_ptr<ServerController> m_serverController;
+
+    ContainerProps* m_containerProps;
+    ProtocolProps* m_protocolProps;
 
     QTranslator* m_translator;
     QCommandLineParser m_parser;

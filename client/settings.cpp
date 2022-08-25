@@ -295,59 +295,9 @@ void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
     setVpnSites(mode, sitesMap);
 }
 
-//void Settings::addVpnForwardSite(const QString &site, const QString &ip)
-//{
-//    auto sites = vpnForwardSites();
-//    QStringList l = sites.value(site).toStringList();
-//    if (!l.contains(ip)) {
-//        l.append(ip);
-//        setVpnForwardSites(sites);
-//    }
-//}
-
-//QStringList Settings::getVpnForwardIps() const
-//{
-//    QStringList ips;
-//    const QVariantMap &m = vpnForwardSites();
-//    for (const QVariant &v : m) {
-//        ips.append(v.toStringList());
-//    }
-//    ips.removeDuplicates();
-//    return ips;
-//}
-
-//void Settings::addVpnExceptSite(const QString &site, const QString &ip)
-//{
-//    auto sites = vpnExceptSites();
-//    QStringList l = sites.value(site).toStringList();
-//    if (!l.contains(ip)) {
-//        l.append(ip);
-//        setVpnExceptSites(sites);
-//    }
-//}
-
-//QStringList Settings::getVpnExceptIps() const
-//{
-//    QStringList ips;
-//    const QVariantMap &m = vpnExceptSites();
-//    for (const QVariant &v : m) {
-//        ips.append(v.toStringList());
-//    }
-//    ips.removeDuplicates();
-//    return ips;
-//}
-
 QString Settings::primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString(); }
 
 QString Settings::secondaryDns() const { return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString(); }
-
-//void Settings::setServerCredentials(const ServerCredentials &credentials)
-//{
-//    setServerName(credentials.hostName);
-//    setServerPort(credentials.port);
-//    setUserName(credentials.userName);
-//    setPassword(credentials.password);
-//}
 
 ServerCredentials Settings::defaultServerCredentials() const
 {

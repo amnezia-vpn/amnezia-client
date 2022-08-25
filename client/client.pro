@@ -2,7 +2,6 @@ QT += widgets core gui network xml remoteobjects quick svg
 
 TARGET = AmneziaVPN
 TEMPLATE = app
-#CONFIG += console
 
 CONFIG += qtquickcompiler
 CONFIG += qzxing_multimedia \
@@ -287,7 +286,7 @@ android {
 }
 
 ios {
-    message("Client ios build")
+    message("Client iOS build")
     CONFIG += static
     CONFIG += file_copies
 

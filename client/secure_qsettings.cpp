@@ -32,6 +32,8 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
 
 QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue) const
 {
+    QMutexLocker locker(&mutex);
+
     if (m_cache.contains(key)) {
         return m_cache.value(key);
     }
@@ -76,6 +78,8 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
+    QMutexLocker locker(&mutex);
+
     if (encryptionRequired() && encryptedKeys.contains(key)) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
             QByteArray decryptedValue;
@@ -103,6 +107,8 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
 
 void SecureQSettings::remove(const QString &key)
 {
+    QMutexLocker locker(&mutex);
+
     m_settings.remove(key);
     m_cache.remove(key);
 
