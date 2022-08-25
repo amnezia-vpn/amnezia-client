@@ -1,14 +1,15 @@
 #ifndef PAGE_LOGIC_BASE_H
 #define PAGE_LOGIC_BASE_H
 
-#include "settings.h"
 #include "../pages.h"
 #include "../property_helper.h"
 
-using namespace amnezia;
 using namespace PageEnumNS;
 
 class UiLogic;
+class Settings;
+class VpnConfigurator;
+class ServerController;
 
 class PageLogicBase : public QObject
 {
@@ -22,10 +23,12 @@ public:
     Q_INVOKABLE virtual void onUpdatePage() {}
 
 protected:
+    UiLogic *m_uiLogic;
     UiLogic *uiLogic() const { return m_uiLogic; }
 
-    Settings m_settings;
-    UiLogic *m_uiLogic;
+    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<VpnConfigurator> m_configurator;
+    std::shared_ptr<ServerController> m_serverController;
 
 signals:
     void updatePage();

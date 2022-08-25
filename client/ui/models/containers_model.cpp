@@ -1,6 +1,7 @@
 #include "containers_model.h"
 
-ContainersModel::ContainersModel(QObject *parent) :
+ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent) :
+    m_settings(settings),
     QAbstractListModel(parent)
 {
 
@@ -37,13 +38,13 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         return ContainerProps::containerDescriptions().value(c);
     }
     if (role == DefaultRole) {
-        return c == m_settings.defaultContainer(m_selectedServerIndex);
+        return c == m_settings->defaultContainer(m_selectedServerIndex);
     }
     if (role == ServiceTypeRole) {
         return ContainerProps::containerService(c);
     }
     if (role == IsInstalledRole) {
-        return m_settings.containers(m_selectedServerIndex).contains(c);
+        return m_settings->containers(m_selectedServerIndex).contains(c);
     }
     return QVariant();
 }

@@ -3,6 +3,9 @@
 
 #include <functional>
 #include "PageLogicBase.h"
+#include "core/defs.h"
+
+using namespace amnezia;
 
 class UiLogic;
 

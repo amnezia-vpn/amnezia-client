@@ -1,7 +1,8 @@
 #include "sites_model.h"
 
-SitesModel::SitesModel(Settings::RouteMode mode, QObject *parent)
+SitesModel::SitesModel(std::shared_ptr<Settings> settings, Settings::RouteMode mode, QObject *parent)
     : QAbstractListModel(parent),
+      m_settings(settings),
       m_mode(mode)
 {
 }
@@ -68,7 +69,7 @@ void SitesModel::genCache() const
     qDebug() << "SitesModel::genCache";
     m_ipsCache.clear();
 
-    const QVariantMap &sites = m_settings.vpnSites(m_mode);
+    const QVariantMap &sites = m_settings->vpnSites(m_mode);
     auto i = sites.constBegin();
     while (i != sites.constEnd()) {
         m_ipsCache.append(qMakePair(i.key(), i.value().toString()));

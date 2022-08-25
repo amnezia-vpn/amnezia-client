@@ -1,6 +1,7 @@
 #include "StartPageLogic.h"
 #include "core/errorstrings.h"
 #include "configurators/ssh_configurator.h"
+#include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
 #include "utils.h"
 
@@ -24,7 +25,6 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{},
     m_pushButtonBackFromStartVisible{true},
-    m_pushButtonConnectVisible{true},
     m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
 
@@ -41,7 +41,6 @@ void StartPageLogic::onUpdatePage()
 
     set_labelWaitInfoVisible(false);
     set_labelWaitInfoText("");
-    set_pushButtonConnectVisible(true);
 
     set_pushButtonConnectKeyChecked(false);
 
@@ -50,8 +49,6 @@ void StartPageLogic::onUpdatePage()
 
 void StartPageLogic::onPushButtonConnect()
 {
-//    uiLogic()->goToPage(Page::NewServer);
-//    return;
     if (pushButtonConnectKeyChecked()){
         if (lineEditIpText().isEmpty() ||
                 lineEditLoginText().isEmpty() ||
@@ -68,7 +65,6 @@ void StartPageLogic::onPushButtonConnect()
             return;
         }
     }
-    qDebug() << "UiLogic::onPushButtonConnect checking new server";
 
     ServerCredentials serverCredentials;
     serverCredentials.hostName = lineEditIpText();
@@ -85,7 +81,7 @@ void StartPageLogic::onPushButtonConnect()
         }
 
         if (key.contains("OPENSSH") && key.contains("BEGIN") && key.contains("PRIVATE KEY")) {
-            key = SshConfigurator::convertOpenSShKey(key);
+            key = m_configurator->sshConfigurator->convertOpenSShKey(key);
         }
 
         serverCredentials.password = key;
@@ -99,7 +95,7 @@ void StartPageLogic::onPushButtonConnect()
 
     ErrorCode e = ErrorCode::NoError;
 #ifdef Q_DEBUG
-    //QString output = ServerController::checkSshConnection(serverCredentials, &e);
+    //QString output = m_serverController->checkSshConnection(serverCredentials, &e);
 #else
     QString output;
 #endif
@@ -153,16 +149,9 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     credentials.userName = profile.value(config_key::userName).toString();
     credentials.password = profile.value(config_key::password).toString();
 
-//    qDebug() << QString("Added server %3@%1:%2").
-//                arg(credentials.hostName).
-//                arg(credentials.port).
-//                arg(credentials.userName);
-
-    //qDebug() << QString("Password") << credentials.password;
-
     if (credentials.isValid() || profile.contains(config_key::containers)) {
-        m_settings.addServer(profile);
-        m_settings.setDefaultServer(m_settings.serversCount() - 1);
+        m_settings->addServer(profile);
+        m_settings->setDefaultServer(m_settings->serversCount() - 1);
 
         emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
@@ -174,8 +163,8 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     }
 
     if (!profile.contains(config_key::containers)) {
-        uiLogic()->selectedServerIndex = m_settings.defaultServerIndex();
-        uiLogic()->selectedDockerContainer = m_settings.defaultContainer(uiLogic()->selectedServerIndex);
+        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
+        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
         uiLogic()->onUpdateAllPages();
 
         emit uiLogic()->goToPage(Page::ServerContainers);
@@ -209,7 +198,6 @@ bool StartPageLogic::importConnectionFromCode(QString code)
 
 bool StartPageLogic::importConnectionFromQr(const QByteArray &data)
 {
-    qDebug() << "StartPageLogic::importConnectionFromQr" << data;
     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
     if (!dataObj.isEmpty()) {
         return importConnection(dataObj);

@@ -8,12 +8,17 @@
 #include <QJsonDocument>
 #include <QUuid>
 
-#include "sftpdefs.h"
-
-#include "core/server_defs.h"
 #include "containers/containers_defs.h"
+#include "core/server_defs.h"
 #include "core/scripts_registry.h"
+#include "core/servercontroller.h"
 #include "utils.h"
+
+Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
+    ConfiguratorBase(settings, serverController, parent)
+{
+
+}
 
 Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials,
     DockerContainer container, ErrorCode *errorCode)
@@ -35,16 +40,16 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
                              "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
             .arg(connData.clientId);
 
-    ErrorCode e = ServerController::runContainerScript(credentials, container, scriptCreateCert);
+    ErrorCode e = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
 
     QString scriptExportCert = QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"")
             .arg(connData.password)
             .arg(connData.clientId)
             .arg(certFileName);
-    e = ServerController::runContainerScript(credentials, container, scriptExportCert);
+    e = m_serverController->runContainerScript(credentials, container, scriptExportCert);
 
-    connData.clientCert = ServerController::getTextFileFromContainer(container, credentials, certFileName, &e);
-    connData.caCert = ServerController::getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
+    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, &e);
+    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();

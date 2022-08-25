@@ -13,7 +13,7 @@ class ContainersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    ContainersModel(QObject *parent = nullptr);
+    ContainersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 public:
     enum SiteRoles {
         NameRole = Qt::UserRole + 1,
@@ -33,7 +33,7 @@ protected:
 
 private:
     int m_selectedServerIndex;
-    Settings m_settings;
+    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // CONTAINERS_MODEL_H

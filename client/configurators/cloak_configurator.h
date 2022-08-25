@@ -3,15 +3,18 @@
 
 #include <QObject>
 
-#include "core/defs.h"
-#include "settings.h"
-#include "core/servercontroller.h"
+#include "configurator_base.h"
 
-class CloakConfigurator
+using namespace amnezia;
+
+class CloakConfigurator : ConfiguratorBase
 {
+    Q_OBJECT
 public:
+    CloakConfigurator(std::shared_ptr<Settings> settings,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
 
-    static QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
+    QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 };
 

@@ -121,7 +121,6 @@ QString Utils::getIPAddress(const QString& host)
 
     QList<QHostAddress> adresses = QHostInfo::fromName(host).addresses();
     if (!adresses.isEmpty()) {
-        qDebug() << "Resolved address for" << host << adresses.first().toString();
         return adresses.first().toString();
     }
     qDebug() << "Unable to resolve address for " << host;
