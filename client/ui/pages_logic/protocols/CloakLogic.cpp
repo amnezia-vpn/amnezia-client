@@ -89,7 +89,7 @@ void CloakLogic::onPushButtonSaveClicked()
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return ServerController::updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_func, progressBar_reset,
     pushButton_save_func, label_info_func);

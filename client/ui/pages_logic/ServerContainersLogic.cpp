@@ -67,7 +67,7 @@ void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
 void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
 {
     //buttonSetEnabledFunc(false);
-    ErrorCode e = ServerController::removeContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), container);
+    ErrorCode e = m_serverController->removeContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), container);
     m_settings->removeContainerConfig(uiLogic()->selectedServerIndex, container);
     //buttonSetEnabledFunc(true);
 
@@ -81,13 +81,13 @@ void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
 
 void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp)
 {
-    QJsonObject config = ServerController::createContainerInitialConfig(c, port, tp);
+    QJsonObject config = m_serverController->createContainerInitialConfig(c, port, tp);
 
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
     ErrorCode e = uiLogic()->serverConfiguringProgressLogic()->doInstallAction([this, c, &config](){
-        return ServerController::setupContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), c, config);
+        return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), c, config);
     });
 
     if (!e) {

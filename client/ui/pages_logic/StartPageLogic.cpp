@@ -1,6 +1,7 @@
 #include "StartPageLogic.h"
 #include "core/errorstrings.h"
 #include "configurators/ssh_configurator.h"
+#include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
 #include "utils.h"
 
@@ -83,7 +84,7 @@ void StartPageLogic::onPushButtonConnect()
         }
 
         if (key.contains("OPENSSH") && key.contains("BEGIN") && key.contains("PRIVATE KEY")) {
-            key = SshConfigurator::convertOpenSShKey(key);
+            key = m_configurator->sshConfigurator->convertOpenSShKey(key);
         }
 
         serverCredentials.password = key;
@@ -97,7 +98,7 @@ void StartPageLogic::onPushButtonConnect()
 
     ErrorCode e = ErrorCode::NoError;
 #ifdef Q_DEBUG
-    //QString output = ServerController::checkSshConnection(serverCredentials, &e);
+    //QString output = m_serverController->checkSshConnection(serverCredentials, &e);
 #else
     QString output;
 #endif

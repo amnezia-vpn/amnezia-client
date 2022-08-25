@@ -7,12 +7,11 @@
 
 #include "QZXing.h"
 
+#include "core/servercontroller.h"
 #include "debug.h"
 #include "defines.h"
 
-
 #include "platforms/ios/QRCodeReaderBase.h"
-//#include "platforms/ios/MobileUtils.h"
 
 #include "ui/pages.h"
 
@@ -49,14 +48,8 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
 {
     setQuitOnLastWindowClosed(false);
     m_settings = std::shared_ptr<Settings>(new Settings);
-
-//    QObject::connect(&app, &QCoreApplication::aboutToQuit, uiLogic, [&engine, uiLogic](){
-//        QObject::disconnect(engine, 0,0,0);
-//        delete engine;
-
-//        QObject::disconnect(uiLogic, 0,0,0);
-//        delete uiLogic;
-    //    });
+    m_serverController = std::shared_ptr<ServerController>(new ServerController(m_settings, this));
+    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, m_serverController, this));
 }
 
 AmneziaApplication::~AmneziaApplication()
@@ -71,7 +64,7 @@ AmneziaApplication::~AmneziaApplication()
 void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
-    m_uiLogic = new UiLogic(m_settings);
+    m_uiLogic = new UiLogic(m_settings, m_configurator, m_serverController);
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated,

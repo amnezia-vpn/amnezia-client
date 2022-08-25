@@ -1,6 +1,8 @@
 #include "PageLogicBase.h"
-#include "ui/uilogic.h"
 
+#include "ui/uilogic.h"
+#include "settings.h"
+#include "configurators/vpn_configurator.h"
 
 PageLogicBase::PageLogicBase(UiLogic *logic, QObject *parent):
     QObject(parent),
@@ -8,6 +10,8 @@ PageLogicBase::PageLogicBase(UiLogic *logic, QObject *parent):
     m_uiLogic(logic)
 {
     m_settings = logic->m_settings;
+    m_configurator = logic->m_configurator;
+    m_serverController = logic->m_serverController;
 }
 
 

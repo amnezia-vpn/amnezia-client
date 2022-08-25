@@ -1,6 +1,7 @@
 #include "NetworkSettingsLogic.h"
 
 #include "defines.h"
+#include "settings.h"
 #include "utils.h"
 
 NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):

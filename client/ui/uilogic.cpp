@@ -74,14 +74,17 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-UiLogic::UiLogic(std::shared_ptr<Settings> settings, QObject *parent) :
+UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
+    std::shared_ptr<ServerController> serverController,
+    QObject *parent) :
     QObject(parent),
     m_settings(settings),
-    m_dialogConnectErrorText{}
+    m_configurator(configurator),
+    m_serverController(serverController)
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
-    m_vpnConnection = new VpnConnection(settings);
+    m_vpnConnection = new VpnConnection(settings, configurator, serverController);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -173,19 +176,6 @@ void UiLogic::initalizeUiLogic()
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
 }
 
-QString UiLogic::getDialogConnectErrorText() const
-{
-    return m_dialogConnectErrorText;
-}
-
-void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
-{
-    if (m_dialogConnectErrorText != dialogConnectErrorText) {
-        m_dialogConnectErrorText = dialogConnectErrorText;
-        emit dialogConnectErrorTextChanged();
-    }
-}
-
 void UiLogic::showOnStartup()
 {
     if (! m_settings->isStartMinimized()) {
@@ -259,7 +249,7 @@ void UiLogic::keyPressEvent(Qt::Key key)
         onGotoCurrentProtocolsPage();
         break;
     case Qt::Key_T:
-        SshConfigurator::openSshTerminal(m_settings->serverCredentials(m_settings->defaultServerIndex()));
+        m_configurator->sshConfigurator->openSshTerminal(m_settings->serverCredentials(m_settings->defaultServerIndex()));
         break;
     case Qt::Key_Escape:
     case Qt::Key_Back:
@@ -443,9 +433,9 @@ bool UiLogic::installContainers(ServerCredentials credentials,
         progress.setTextVisibleFunc(true);
         progress.setTextFunc(QString("Installing %1 %2 %3").arg(cnt+1).arg(tr("of")).arg(containers.size()));
 
-        ErrorCode e = ServerController::setupContainer(credentials, i.key(), i.value());
+        ErrorCode e = m_serverController->setupContainer(credentials, i.key(), i.value());
         qDebug() << "Setup server finished with code" << e;
-        ServerController::disconnectFromHost(credentials);
+        m_serverController->disconnectFromHost(credentials);
 
         if (e) {
             if (page.setEnabledFunc) {

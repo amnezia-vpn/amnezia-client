@@ -11,6 +11,7 @@
 #include "settings.h"
 
 #include "ui/uilogic.h"
+#include "configurators/vpn_configurator.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
   #define AMNEZIA_BASE_CLASS SingleApplication
@@ -43,6 +44,8 @@ private:
     QQmlApplicationEngine *m_engine;
     UiLogic *m_uiLogic;
     std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<VpnConfigurator> m_configurator;
+    std::shared_ptr<ServerController> m_serverController;
 
     QTranslator* m_translator;
     QCommandLineParser m_parser;

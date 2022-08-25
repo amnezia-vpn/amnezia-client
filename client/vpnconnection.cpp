@@ -29,8 +29,12 @@
 #include "utils.h"
 #include "vpnconnection.h"
 
-VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject* parent) : QObject(parent),
-    m_settings(settings)
+VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
+    std::shared_ptr<VpnConfigurator> configurator,
+    std::shared_ptr<ServerController> serverController, QObject* parent) : QObject(parent),
+    m_settings(settings),
+    m_configurator(configurator),
+    m_serverController(serverController)
 {
 }
 
@@ -214,18 +218,18 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     QString configData;
     if (lastVpnConfig.contains(proto)) {
         configData = lastVpnConfig.value(proto);
-        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
+        configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
         qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
     else {
         qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << ProtocolProps::protoToString(proto);
-        configData = VpnConfigurator::genVpnProtocolConfig(credentials,
+        configData = m_configurator->genVpnProtocolConfig(credentials,
             container, containerConfig, proto, &e);
 
         QString configDataBeforeLocalProcessing = configData;
 
-        configData = VpnConfigurator::processConfigWithLocalSettings(serverIndex, container, proto, configData);
+        configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
 
         if (errorCode && e) {
@@ -271,7 +275,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
-    auto dns = VpnConfigurator::getDnsForConfig(serverIndex);
+    auto dns = m_configurator->getDnsForConfig(serverIndex);
 
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
@@ -345,7 +349,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
-    ServerController::disconnectFromHost(credentials);
+    m_serverController->disconnectFromHost(credentials);
 
     e = m_vpnProtocol.data()->start();
     if (e) emit VpnProtocol::Error;

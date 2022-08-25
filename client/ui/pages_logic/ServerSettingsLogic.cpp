@@ -52,10 +52,10 @@ void ServerSettingsLogic::onPushButtonClearServer()
         uiLogic()->vpnLogic()->onDisconnect();
     }
 
-    ErrorCode e = ServerController::removeAllContainers(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
-    ServerController::disconnectFromHost(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
+    ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
+    m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
     if (e) {
-        uiLogic()->setDialogConnectErrorText(
+        uiLogic()->set_dialogConnectErrorText(
                     tr("Error occurred while configuring server.") + "\n" +
                     errorString(e) + "\n" +
                     tr("See logs for details."));

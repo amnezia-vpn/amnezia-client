@@ -82,7 +82,7 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
     };
 
     ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return ServerController::updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     },
     page_proto_shadowsocks, progressBar_reset,
     pushButton_proto_shadowsocks_save, label_proto_shadowsocks_info);

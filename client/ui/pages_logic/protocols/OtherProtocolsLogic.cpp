@@ -5,7 +5,6 @@
 #include <QStandardPaths>
 
 #include "OtherProtocolsLogic.h"
-#include "core/servercontroller.h"
 #include <functional>
 #include "../../uilogic.h"
 #include "utils.h"

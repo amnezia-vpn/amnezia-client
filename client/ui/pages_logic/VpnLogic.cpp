@@ -69,7 +69,7 @@ void VpnLogic::onUpdatePage()
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentService(selectedContainerName);
 
-    auto dns = VpnConfigurator::getDnsForConfig(m_settings->defaultServerIndex());
+    auto dns = m_configurator->getDnsForConfig(m_settings->defaultServerIndex());
     set_amneziaDnsEnabled(dns.first == protocols::dns::amneziaDnsIp);
     if (dns.first == protocols::dns::amneziaDnsIp) {
         set_labelCurrentDns("On your server");
@@ -233,14 +233,6 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
     qApp->processEvents();
 
     emit connectToVpn(serverIndex, credentials, container, containerConfig);
-
-//    if (errorCode) {
-//        //ui->pushButton_connect->setChecked(false);
-//        uiLogic()->setDialogConnectErrorText(errorString(errorCode));
-//        emit uiLogic()->showConnectErrorDialog();
-//        return;
-//    }
-
 }
 
 void VpnLogic::onDisconnect()

@@ -26,6 +26,7 @@ HEADERS  += \
     ../ipc/ipc.h \
     amnezia_application.h \
     configurators/cloak_configurator.h \
+    configurators/configurator_base.h \
     configurators/ikev2_configurator.h \
     configurators/shadowsocks_configurator.h \
     configurators/ssh_configurator.h \
@@ -87,6 +88,7 @@ HEADERS  += \
 SOURCES  += \
     amnezia_application.cpp \
     configurators/cloak_configurator.cpp \
+    configurators/configurator_base.cpp \
     configurators/ikev2_configurator.cpp \
     configurators/shadowsocks_configurator.cpp \
     configurators/ssh_configurator.cpp \
