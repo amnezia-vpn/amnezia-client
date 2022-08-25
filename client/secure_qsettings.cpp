@@ -13,8 +13,6 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
       m_settings(organization, application, parent),
       encryptedKeys({"Servers/serversList"})
 {
-    qDebug() << "SecureQSettings::SecureQSettings CTOR";
-
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
     // convert settings to encrypted for if updated to >= 2.1.0

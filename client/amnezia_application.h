@@ -14,7 +14,7 @@
 #include "configurators/vpn_configurator.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-  #define AMNEZIA_BASE_CLASS QGuiApplication
+  #define AMNEZIA_BASE_CLASS QApplication
 #else
   #define AMNEZIA_BASE_CLASS SingleApplication
   #define QAPPLICATION_CLASS QApplication

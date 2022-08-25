@@ -219,11 +219,8 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     if (lastVpnConfig.contains(proto)) {
         configData = lastVpnConfig.value(proto);
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
-
-        qDebug() << "VpnConnection::createVpnConfiguration: using saved config for" << ProtocolProps::protoToString(proto);
     }
     else {
-        qDebug() << "VpnConnection::createVpnConfiguration: gen new config for" << ProtocolProps::protoToString(proto);
         configData = m_configurator->genVpnProtocolConfig(credentials,
             container, containerConfig, proto, &e);
 
@@ -363,8 +360,6 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 
 void VpnConnection::disconnectFromVpn()
 {
-    // qDebug() << "Disconnect from VPN 1";
-
 #ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
@@ -385,7 +380,6 @@ void VpnConnection::disconnectFromVpn()
         return;
     }
     m_vpnProtocol.data()->stop();
-    // qDebug() << "Disconnect from VPN 2";
 }
 
 VpnProtocol::VpnConnectionState VpnConnection::connectionState()

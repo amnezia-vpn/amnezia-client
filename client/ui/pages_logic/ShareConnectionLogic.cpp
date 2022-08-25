@@ -238,8 +238,6 @@ void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
     DockerContainer container = uiLogic()->selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
-    //const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
-
     Ikev2Configurator::ConnectionData connData = m_configurator->ikev2Configurator->prepareIkev2Config(credentials, container);
 
     QString cfg = m_configurator->ikev2Configurator->genIkev2Config(connData);

@@ -2,7 +2,6 @@
 #include "settings.h"
 #include "utils.h"
 
-#include <QDebug>
 #include "containers/containers_defs.h"
 
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
@@ -13,8 +12,6 @@ Settings::Settings(QObject* parent) :
     QObject(parent),
     m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
 {
-    qDebug() << "Settings::Settings()" << this;
-//    qDebug() << "Settings::Settings()" << m_settings.fileName();
     // Import old settings
     if (serversCount() == 0) {
         QString user = m_settings.value("Server/userName").toString();
@@ -181,7 +178,6 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     QJsonObject c = protocolConfig(serverIndex, container, proto);
     c.remove(config_key::last_config);
     setProtocolConfig(serverIndex, container, proto, c);
-    qDebug() << "Settings::clearLastConnectionConfig for" << serverIndex << container << proto;
 }
 
 bool Settings::haveAuthData(int serverIndex) const

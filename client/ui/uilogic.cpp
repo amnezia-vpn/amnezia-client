@@ -147,13 +147,11 @@ void UiLogic::initalizeUiLogic()
         }
     });
     if (!AndroidController::instance()->initialize()) {
-         qDebug() << QString("Init failed") ;
+         qCritical() << QString("Init failed") ;
          emit VpnProtocol::Error;
          return;
     }
 #endif
-
-    qDebug() << "UiLogic::initalizeUiLogic()";
 
     m_notificationHandler = NotificationHandler::create(qmlRoot());
 
@@ -235,7 +233,6 @@ void UiLogic::keyPressEvent(Qt::Key key)
 #endif
     case Qt::Key_C:
         qDebug().noquote() << "Def server" << m_settings->defaultServerIndex() << m_settings->defaultContainerName(m_settings->defaultServerIndex());
-        //qDebug().noquote() << QJsonDocument(m_settings->containerConfig(m_settings->defaultServerIndex(), m_settings->defaultContainer(m_settings->defaultServerIndex()))).toJson();
         qDebug().noquote() << QJsonDocument(m_settings->defaultServer()).toJson();
         break;
     case Qt::Key_A:
@@ -578,7 +575,7 @@ PageProtocolLogicBase *UiLogic::protocolLogic(Proto p)
     PageProtocolLogicBase *logic = m_protocolLogicMap.value(p);
     if (logic) return logic;
     else {
-        qDebug() << "UiLogic::protocolLogic Warning: logic missing for" << p;
+        qCritical() << "UiLogic::protocolLogic Warning: logic missing for" << p;
         return new PageProtocolLogicBase(this);
     }
 }
@@ -623,13 +620,11 @@ void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QS
         QUrl::fromLocalFile(docDir), "*" + ext);
 #endif
 
-    qDebug() << "UiLogic::saveTextFile" << fileName;
     if (fileName.isEmpty()) return;
 
 #ifdef AMNEZIA_DESKTOP
     QFile save(fileName.toLocalFile());
 #else
-    qDebug() << "UiLogic::saveTextFile" << QQmlFile::urlToLocalFileOrQrc(fileName);
     QFile save(QQmlFile::urlToLocalFileOrQrc(fileName));
 #endif
 
@@ -672,7 +667,6 @@ void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QSt
     if (!fileName.endsWith(ext)) fileName.append(ext);
 
     QFile::remove(fileName);
-    qDebug() << "UiLogic::shareTempFile" << fileName;
 
     QFile save(fileName);
     save.open(QIODevice::WriteOnly);

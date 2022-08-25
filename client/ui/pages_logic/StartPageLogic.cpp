@@ -49,8 +49,6 @@ void StartPageLogic::onUpdatePage()
 
 void StartPageLogic::onPushButtonConnect()
 {
-//    uiLogic()->goToPage(Page::NewServer);
-//    return;
     if (pushButtonConnectKeyChecked()){
         if (lineEditIpText().isEmpty() ||
                 lineEditLoginText().isEmpty() ||
@@ -67,7 +65,6 @@ void StartPageLogic::onPushButtonConnect()
             return;
         }
     }
-    qDebug() << "UiLogic::onPushButtonConnect checking new server";
 
     ServerCredentials serverCredentials;
     serverCredentials.hostName = lineEditIpText();
@@ -152,13 +149,6 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     credentials.userName = profile.value(config_key::userName).toString();
     credentials.password = profile.value(config_key::password).toString();
 
-//    qDebug() << QString("Added server %3@%1:%2").
-//                arg(credentials.hostName).
-//                arg(credentials.port).
-//                arg(credentials.userName);
-
-    //qDebug() << QString("Password") << credentials.password;
-
     if (credentials.isValid() || profile.contains(config_key::containers)) {
         m_settings->addServer(profile);
         m_settings->setDefaultServer(m_settings->serversCount() - 1);
@@ -208,7 +198,6 @@ bool StartPageLogic::importConnectionFromCode(QString code)
 
 bool StartPageLogic::importConnectionFromQr(const QByteArray &data)
 {
-    qDebug() << "StartPageLogic::importConnectionFromQr" << data;
     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
     if (!dataObj.isEmpty()) {
         return importConnection(dataObj);
