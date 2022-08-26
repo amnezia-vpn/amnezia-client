@@ -35,6 +35,9 @@
 #include "ui/pages_logic/protocols/OpenVpnLogic.h"
 #include "ui/pages_logic/protocols/ShadowSocksLogic.h"
 
+#if defined(Q_OS_IOS)
+#include "platforms/ios/QtAppDelegate-C-Interface.h"
+#endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication::AmneziaApplication(int &argc, char *argv[]):
@@ -95,7 +98,7 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("WizardLogic", m_uiLogic->wizardLogic());
 
 #if defined(Q_OS_IOS)
-    setStartPageLogic(uiLogic->startPageLogic());
+    setStartPageLogic(m_uiLogic->startPageLogic());
 #endif
 
     m_engine->load(url);

@@ -5,7 +5,6 @@
 #include "amnezia_application.h"
 #include "defines.h"
 
-
 #ifdef Q_OS_WIN
 #include "Windows.h"
 #endif
@@ -15,7 +14,7 @@
 #endif
 
 #if defined(Q_OS_IOS)
-#include "QtAppDelegate-C-Interface.h"
+#include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
 
