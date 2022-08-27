@@ -25,6 +25,10 @@ public:
     Q_INVOKABLE void onPushButtonExportLogsClicked();
     Q_INVOKABLE void onPushButtonClearLogsClicked();
 
+    Q_INVOKABLE void onPushButtonBackupAppConfigClicked();
+    Q_INVOKABLE void onPushButtonRestoreAppConfigClicked();
+
+
 public:
     explicit AppSettingsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~AppSettingsLogic() = default;

@@ -31,7 +31,6 @@ public:
     //QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:
-    Settings m_settings;
     UiLogic *m_uiLogic;
 
 #ifdef AMNEZIA_DESKTOP

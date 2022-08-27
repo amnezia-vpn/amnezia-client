@@ -25,3 +25,6 @@
 [submodule "client/3rd/CocoaLumberjack"]
 	path = client/3rd/CocoaLumberjack
 	url = https://github.com/CocoaLumberjack/CocoaLumberjack.git
+[submodule "client/3rd/qtkeychain"]
+	path = client/3rd/qtkeychain
+	url = https://github.com/frankosterfeld/qtkeychain.git

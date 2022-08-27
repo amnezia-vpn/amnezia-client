@@ -16,7 +16,10 @@
 #include "models/protocols_model.h"
 
 #include "notificationhandler.h"
-#include "settings.h"
+
+class Settings;
+class VpnConfigurator;
+class ServerController;
 
 class AppSettingsLogic;
 class GeneralSettingsLogic;
@@ -50,17 +53,18 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
+    AUTO_PROPERTY(QString, dialogConnectErrorText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
-    // TODO: review
-    Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
-
 public:
-    explicit UiLogic(QObject *parent = nullptr);
+    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
+
+    friend class PageLogicBase;
 
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
@@ -106,9 +110,6 @@ public:
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
 
-    QString getDialogConnectErrorText() const;
-    void setDialogConnectErrorText(const QString &dialogConnectErrorText);
-
 signals:
     void dialogConnectErrorTextChanged();
 
@@ -124,9 +125,6 @@ signals:
     void hide();
     void raise();
     void toggleLogPanel();
-
-private:
-    QString m_dialogConnectErrorText;
 
 private slots:
     // containers - INOUT arg
@@ -212,7 +210,10 @@ private:
 
     VpnConnection* m_vpnConnection;
     QThread m_vpnConnectionThread;
-    Settings m_settings;
+
+    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<VpnConfigurator> m_configurator;
+    std::shared_ptr<ServerController> m_serverController;
 
     NotificationHandler* m_notificationHandler;
 

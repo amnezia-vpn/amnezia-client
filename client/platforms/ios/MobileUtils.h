@@ -12,6 +12,7 @@ public:
 
 public slots:
     static void shareText(const QStringList& filesToSend);
+
 };
 
 #endif // MOBILEUTILS_H

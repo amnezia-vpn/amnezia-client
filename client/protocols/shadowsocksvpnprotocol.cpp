@@ -1,5 +1,4 @@
 #include "shadowsocksvpnprotocol.h"
-#include "core/servercontroller.h"
 
 #include "debug.h"
 #include "utils.h"
@@ -27,6 +26,13 @@ ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
 
 ErrorCode ShadowSocksVpnProtocol::start()
 {
+
+    if (!QFileInfo::exists(shadowSocksExecPath())) {
+        setLastError(ErrorCode::ShadowSocksExecutableMissing);
+        return lastError();
+    }
+
+
 #ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ss-local", false))) {
         Utils::killProcessByName(Utils::executable("ss-local", false));

@@ -74,13 +74,17 @@
 using namespace amnezia;
 using namespace PageEnumNS;
 
-UiLogic::UiLogic(QObject *parent) :
+UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
+    std::shared_ptr<ServerController> serverController,
+    QObject *parent) :
     QObject(parent),
-    m_dialogConnectErrorText{}
+    m_settings(settings),
+    m_configurator(configurator),
+    m_serverController(serverController)
 {
-    m_containersModel = new ContainersModel(this);
-    m_protocolsModel = new ProtocolsModel(this);
-    m_vpnConnection = new VpnConnection();
+    m_containersModel = new ContainersModel(settings, this);
+    m_protocolsModel = new ProtocolsModel(settings, this);
+    m_vpnConnection = new VpnConnection(settings, configurator, serverController);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -143,13 +147,11 @@ void UiLogic::initalizeUiLogic()
         }
     });
     if (!AndroidController::instance()->initialize()) {
-         qDebug() << QString("Init failed") ;
+         qCritical() << QString("Init failed") ;
          emit VpnProtocol::Error;
          return;
     }
 #endif
-
-    qDebug() << "UiLogic::initalizeUiLogic()";
 
     m_notificationHandler = NotificationHandler::create(qmlRoot());
 
@@ -158,36 +160,23 @@ void UiLogic::initalizeUiLogic()
     connect(m_notificationHandler, &NotificationHandler::connectRequested, vpnLogic(), &VpnLogic::onConnect);
     connect(m_notificationHandler, &NotificationHandler::disconnectRequested, vpnLogic(), &VpnLogic::onDisconnect);
 
-    if (m_settings.serversCount() > 0) {
-        if (m_settings.defaultServerIndex() < 0) m_settings.setDefaultServer(0);
+    if (m_settings->serversCount() > 0) {
+        if (m_settings->defaultServerIndex() < 0) m_settings->setDefaultServer(0);
         emit goToPage(Page::Vpn, true, false);
     }
     else {
         emit goToPage(Page::Start, true, false);
     }
 
-    selectedServerIndex = m_settings.defaultServerIndex();
+    selectedServerIndex = m_settings->defaultServerIndex();
 
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
 }
 
-QString UiLogic::getDialogConnectErrorText() const
-{
-    return m_dialogConnectErrorText;
-}
-
-void UiLogic::setDialogConnectErrorText(const QString &dialogConnectErrorText)
-{
-    if (m_dialogConnectErrorText != dialogConnectErrorText) {
-        m_dialogConnectErrorText = dialogConnectErrorText;
-        emit dialogConnectErrorTextChanged();
-    }
-}
-
 void UiLogic::showOnStartup()
 {
-    if (! m_settings.isStartMinimized()) {
+    if (! m_settings->isStartMinimized()) {
         emit show();
     }
     else {
@@ -235,30 +224,29 @@ void UiLogic::keyPressEvent(Qt::Key key)
         qApp->quit();
         break;
     case Qt::Key_H:
-        selectedServerIndex = m_settings.defaultServerIndex();
-        selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+        selectedServerIndex = m_settings->defaultServerIndex();
+        selectedDockerContainer = m_settings->defaultContainer(selectedServerIndex);
 
-        //updateSharingPage(selectedServerIndex, m_settings.serverCredentials(selectedServerIndex), selectedDockerContainer);
+        //updateSharingPage(selectedServerIndex, m_settings->serverCredentials(selectedServerIndex), selectedDockerContainer);
         emit goToPage(Page::ShareConnection);
         break;
 #endif
     case Qt::Key_C:
-        qDebug().noquote() << "Def server" << m_settings.defaultServerIndex() << m_settings.defaultContainerName(m_settings.defaultServerIndex());
-        //qDebug().noquote() << QJsonDocument(m_settings.containerConfig(m_settings.defaultServerIndex(), m_settings.defaultContainer(m_settings.defaultServerIndex()))).toJson();
-        qDebug().noquote() << QJsonDocument(m_settings.defaultServer()).toJson();
+        qDebug().noquote() << "Def server" << m_settings->defaultServerIndex() << m_settings->defaultContainerName(m_settings->defaultServerIndex());
+        qDebug().noquote() << QJsonDocument(m_settings->defaultServer()).toJson();
         break;
     case Qt::Key_A:
         emit goToPage(Page::Start);
         break;
     case Qt::Key_S:
-        selectedServerIndex = m_settings.defaultServerIndex();
+        selectedServerIndex = m_settings->defaultServerIndex();
         emit goToPage(Page::ServerSettings);
         break;
     case Qt::Key_P:
         onGotoCurrentProtocolsPage();
         break;
     case Qt::Key_T:
-        SshConfigurator::openSshTerminal(m_settings.serverCredentials(m_settings.defaultServerIndex()));
+        m_configurator->sshConfigurator->openSshTerminal(m_settings->serverCredentials(m_settings->defaultServerIndex()));
         break;
     case Qt::Key_Escape:
     case Qt::Key_Back:
@@ -280,7 +268,7 @@ void UiLogic::keyPressEvent(Qt::Key key)
 
 void UiLogic::onCloseWindow()
 {
-    if (m_settings.serversCount() == 0) qApp->quit();
+    if (m_settings->serversCount() == 0) qApp->quit();
     else {
         hide();
     }
@@ -299,8 +287,8 @@ QString UiLogic::containerDesc(int container)
 
 void UiLogic::onGotoCurrentProtocolsPage()
 {
-    selectedServerIndex = m_settings.defaultServerIndex();
-    selectedDockerContainer = m_settings.defaultContainer(selectedServerIndex);
+    selectedServerIndex = m_settings->defaultServerIndex();
+    selectedDockerContainer = m_settings->defaultContainer(selectedServerIndex);
     emit goToPage(Page::ServerContainers);
 }
 
@@ -385,7 +373,7 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
         server.insert(config_key::userName, installCredentials.userName);
         server.insert(config_key::password, installCredentials.password);
         server.insert(config_key::port, installCredentials.port);
-        server.insert(config_key::description, m_settings.nextAvailableServerName());
+        server.insert(config_key::description, m_settings->nextAvailableServerName());
 
         QJsonArray containerConfigs;
         for (const QJsonObject &cfg : containers) {
@@ -394,8 +382,8 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
         server.insert(config_key::containers, containerConfigs);
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(containers.firstKey()));
 
-        m_settings.addServer(server);
-        m_settings.setDefaultServer(m_settings.serversCount() - 1);
+        m_settings->addServer(server);
+        m_settings->setDefaultServer(m_settings->serversCount() - 1);
         onUpdateAllPages();
 
         emit setStartPage(Page::Vpn);
@@ -442,9 +430,9 @@ bool UiLogic::installContainers(ServerCredentials credentials,
         progress.setTextVisibleFunc(true);
         progress.setTextFunc(QString("Installing %1 %2 %3").arg(cnt+1).arg(tr("of")).arg(containers.size()));
 
-        ErrorCode e = ServerController::setupContainer(credentials, i.key(), i.value());
+        ErrorCode e = m_serverController->setupContainer(credentials, i.key(), i.value());
         qDebug() << "Setup server finished with code" << e;
-        ServerController::disconnectFromHost(credentials);
+        m_serverController->disconnectFromHost(credentials);
 
         if (e) {
             if (page.setEnabledFunc) {
@@ -587,7 +575,7 @@ PageProtocolLogicBase *UiLogic::protocolLogic(Proto p)
     PageProtocolLogicBase *logic = m_protocolLogicMap.value(p);
     if (logic) return logic;
     else {
-        qDebug() << "UiLogic::protocolLogic Warning: logic missing for" << p;
+        qCritical() << "UiLogic::protocolLogic Warning: logic missing for" << p;
         return new PageProtocolLogicBase(this);
     }
 }
@@ -632,13 +620,11 @@ void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QS
         QUrl::fromLocalFile(docDir), "*" + ext);
 #endif
 
-    qDebug() << "UiLogic::saveTextFile" << fileName;
     if (fileName.isEmpty()) return;
 
 #ifdef AMNEZIA_DESKTOP
     QFile save(fileName.toLocalFile());
 #else
-    qDebug() << "UiLogic::saveTextFile" << QQmlFile::urlToLocalFileOrQrc(fileName);
     QFile save(QQmlFile::urlToLocalFileOrQrc(fileName));
 #endif
 
@@ -681,7 +667,6 @@ void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QSt
     if (!fileName.endsWith(ext)) fileName.append(ext);
 
     QFile::remove(fileName);
-    qDebug() << "UiLogic::shareTempFile" << fileName;
 
     QFile save(fileName);
     save.open(QIODevice::WriteOnly);

@@ -1,5 +1,4 @@
 #include "openvpnovercloakprotocol.h"
-#include "core/servercontroller.h"
 
 #include "utils.h"
 #include "containers/containers_defs.h"
@@ -27,6 +26,10 @@ OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
 
 ErrorCode OpenVpnOverCloakProtocol::start()
 {
+    if (!QFileInfo::exists(cloakExecPath())) {
+        setLastError(ErrorCode::CloakExecutableMissing);
+        return lastError();
+    }
 #ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
         Utils::killProcessByName(Utils::executable("ck-client", false));
@@ -106,6 +109,8 @@ QString OpenVpnOverCloakProtocol::cloakExecPath()
 {
 #ifdef Q_OS_WIN
     return Utils::executable(QString("cloak/ck-client"), true);
+#elif defined Q_OS_LINUX
+        return Utils::usrExecutable("ck-client");
 #else
     return Utils::executable(QString("/ck-client"), true);
 #endif

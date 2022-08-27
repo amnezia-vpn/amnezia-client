@@ -4,13 +4,15 @@
 #include <QObject>
 #include <QProcessEnvironment>
 
+#include "configurator_base.h"
 #include "core/defs.h"
-#include "settings.h"
-#include "core/servercontroller.h"
 
-class OpenVpnConfigurator
+class OpenVpnConfigurator : ConfiguratorBase
 {
+    Q_OBJECT
 public:
+    OpenVpnConfigurator(std::shared_ptr<Settings> settings,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
 
     struct ConnectionData {
         QString clientId;
@@ -22,22 +24,21 @@ public:
         QString host; // host ip
     };
 
-    static QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
+    QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
-    static QString processConfigWithLocalSettings(QString jsonConfig);
-    static QString processConfigWithExportSettings(QString jsonConfig);
+    QString processConfigWithLocalSettings(QString jsonConfig);
+    QString processConfigWithExportSettings(QString jsonConfig);
 
-    static ErrorCode signCert(DockerContainer container,
+    ErrorCode signCert(DockerContainer container,
         const ServerCredentials &credentials, QString clientId);
 
 private:
-    static ConnectionData createCertRequest();
+    ConnectionData createCertRequest();
 
-    static ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
+    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode *errorCode = nullptr);
 
-    static Settings &m_settings();
 };
 
 #endif // OPENVPN_CONFIGURATOR_H

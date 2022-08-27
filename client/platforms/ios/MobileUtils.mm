@@ -1,6 +1,9 @@
 #include "MobileUtils.h"
 
 #include <UIKit/UIKit.h>
+#include <Security/Security.h>
+
+#include <QDebug>
 
 static UIViewController* getViewController() {
     NSArray *windows = [[UIApplication sharedApplication]windows];
@@ -31,3 +34,4 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
         popController.sourceView = qtController.view;
     }
 }
+

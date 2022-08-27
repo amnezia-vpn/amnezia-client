@@ -1,7 +1,0 @@
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Type=Application
-Name=AmneziaVPN service
-Comment=AmneziaVPN service
-Exec=AmneziaVPN-service
-Categories=VPN
