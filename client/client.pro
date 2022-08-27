@@ -16,6 +16,7 @@ include("3rd/QtSsh/src/botan/botan.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 include("3rd/qzxing/src/QZXing-components.pri")
 include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
+include("3rd/qtkeychain/qtkeychain.pri")
 
 INCLUDEPATH += $$PWD/3rd/QSimpleCrypto/include
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include

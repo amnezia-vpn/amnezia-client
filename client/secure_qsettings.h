@@ -6,6 +6,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 
+#include "keychain.h"
+
 
 constexpr const char* settingsKeyTag = "settingsKeyTag";
 constexpr const char* settingsIvTag = "settingsIvTag";
@@ -22,7 +24,7 @@ public:
     void sync();
 
     QByteArray backupAppConfig() const;
-    void restoreAppConfig(const QByteArray &base64Cfg);
+    bool restoreAppConfig(const QByteArray &json);
 
     QByteArray encryptText(const QByteArray &value) const;
     QByteArray decryptText(const QByteArray& ba) const;
@@ -31,6 +33,10 @@ public:
 
     QByteArray getEncKey() const;
     QByteArray getEncIv() const;
+
+    static QByteArray getSecTag(const QString &tag);
+    static void setSecTag(const QString &tag, const QByteArray &data);
+
 private:
     QSettings m_settings;
 
