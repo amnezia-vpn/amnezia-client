@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.*
 import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
-import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.json.JSONObject
 import java.io.File
@@ -20,26 +19,27 @@ class VPNServiceBinder(service: VPNService) : Binder() {
     private val tag = "VPNServiceBinder"
     private var mListener: IBinder? = null
     private var mResumeConfig: JSONObject? = null
+    private var mImportedConfig: String? = null
 
     /**
      * The codes this Binder does accept in [onTransact]
      */
-    object Actions {
-        const val ACTIVATE = 1
-        const val DEACTIVATE = 2
-        const val REGISTER_EVENT_LISTENER = 3
-        const val REQUEST_STATISTICS = 4
-        const val REQUEST_GET_LOG = 5
-        const val REQUEST_CLEANUP_LOG = 6
-        const val RESUME_ACTIVATE = 7
-        const val SET_NOTIFICATION_TEXT = 8
-        const val SET_NOTIFICATION_FALLBACK = 9
-        const val SHARE_CONFIG = 10
+    object ACTIONS {
+        const val activate = 1
+        const val deactivate = 2
+        const val registerEventListener = 3
+        const val requestStatistic = 4
+        const val requestGetLog = 5
+        const val requestCleanupLog = 6
+        const val resumeActivate = 7
+        const val setNotificationText = 8
+        const val setNotificationFallback = 9
+        const val shareConfig = 10
     }
 
     /**
      * Gets called when the VPNServiceBinder gets a request from a Client.
-     * The [code] determines what action is requested. - see [Actions]
+     * The [code] determines what action is requested. - see [ACTIONS]
      * [data] may contain a utf-8 encoded json string with optional args or is null.
      * [reply] is a pointer to a buffer in the clients memory, to reply results.
      * we use this to send result data.
@@ -50,7 +50,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         Log.i(tag, "GOT TRANSACTION " + code)
 
         when (code) {
-            Actions.ACTIVATE -> {
+            ACTIONS.activate -> {
                 try {
                     Log.i(tag, "Activation Requested, parsing Config")
                     // [data] is here a json containing the wireguard/openvpn conf
@@ -69,12 +69,12 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                     this.mService.turnOn(config)
                 } catch (e: Exception) {
                     Log.e(tag, "An Error occurred while enabling the VPN: ${e.localizedMessage}")
-                    dispatchEvent(Events.activationError, e.localizedMessage)
+                    dispatchEvent(EVENTS.activationError, e.localizedMessage)
                 }
                 return true
             }
 
-            Actions.RESUME_ACTIVATE -> {
+            ACTIONS.resumeActivate -> {
                 // [data] is empty
                 // Activate the current tunnel
                 try {
@@ -85,46 +85,50 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 return true
             }
 
-            Actions.DEACTIVATE -> {
+            ACTIONS.deactivate -> {
                 // [data] here is empty
                 this.mService.turnOff()
                 return true
             }
 
-            Actions.REGISTER_EVENT_LISTENER -> {
+            ACTIONS.registerEventListener -> {
                 // [data] contains the Binder that we need to dispatch the Events
                 val binder = data.readStrongBinder()
                 mListener = binder
                 val obj = JSONObject()
                 obj.put("connected", mService.isUp)
                 obj.put("time", mService.connectionTime)
-                dispatchEvent(Events.init, obj.toString())
+                dispatchEvent(EVENTS.init, obj.toString())
+                if( mImportedConfig != null ){
+                    dispatchEvent(EVENTS.configImport, mImportedConfig)
+                    mImportedConfig = null
+                }
                 return true
             }
 
-            Actions.REQUEST_STATISTICS -> {
-                dispatchEvent(Events.statisticUpdate, mService.status.toString())
+            ACTIONS.requestStatistic -> {
+                dispatchEvent(EVENTS.statisticUpdate, mService.status.toString())
                 return true
             }
 
-            Actions.REQUEST_GET_LOG -> {
+            ACTIONS.requestGetLog -> {
                 // Grabs all the Logs and dispatch new Log Event
-                dispatchEvent(Events.backendLogs, Log.getContent())
+                dispatchEvent(EVENTS.backendLogs, Log.getContent())
                 return true
             }
-            Actions.REQUEST_CLEANUP_LOG -> {
+            ACTIONS.requestCleanupLog -> {
                 Log.clearFile()
                 return true
             }
-            Actions.SET_NOTIFICATION_TEXT -> {
+            ACTIONS.setNotificationText -> {
                 NotificationUtil.update(data)
                 return true
             }
-            Actions.SET_NOTIFICATION_FALLBACK -> {
+            ACTIONS.setNotificationFallback -> {
                 NotificationUtil.saveFallBackMessage(data, mService)
                 return true
             }
-            Actions.SHARE_CONFIG -> {
+            ACTIONS.shareConfig -> {
                 val byteArray = data.createByteArray()
                 val json = byteArray?.let { String(it) }
                 val config = JSONObject(json)
@@ -191,9 +195,9 @@ class VPNServiceBinder(service: VPNService) : Binder() {
 
     /**
      * Dispatches an Event to all registered Binders
-     * [code] the Event that happened - see [Events]
+     * [code] the Event that happened - see [EVENTS]
      * To register an Event handler use [onTransact] with
-     * [Actions.REGISTER_EVENT_LISTENER]
+     * [ACTIONS.registerEventListener]
      */
     fun dispatchEvent(code: Int, payload: String?) {
         try {
@@ -215,13 +219,19 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         val obj = JSONObject()
         obj.put("config", config)
         val resultString = obj.toString()
-        dispatchEvent(Events.configImport, resultString)
+        Log.i(tag, "Transact import config request")
+        if(mListener?.isBinderAlive == true){
+            dispatchEvent(EVENTS.configImport, resultString)
+        } else {
+            mImportedConfig = resultString
+        }
+
     }
 
     /**
      *  The codes we Are Using in case of [dispatchEvent]
      */
-    object Events {
+    object EVENTS {
         const val init = 0
         const val connected = 1
         const val disconnected = 2

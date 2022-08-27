@@ -52,7 +52,7 @@ class VPNActivity : QtActivity() {
         super.onResume()
 
         if (configString != null) {
-            doServiceBinding()
+            bindVpnService()
         }
     }
 
@@ -86,7 +86,7 @@ class VPNActivity : QtActivity() {
                 Log.d(TAG, "Storage read permission granted")
 
                 if (configString != null) {
-                    doServiceBinding()
+                    bindVpnService()
                 }
             } else {
                 Toast.makeText(this, "Oops you just denied the permission", Toast.LENGTH_LONG).show()
@@ -94,7 +94,7 @@ class VPNActivity : QtActivity() {
         }
     }
 
-    private fun doServiceBinding() {
+    private fun bindVpnService() {
         try {
             val intent = Intent(this, VPNService::class.java)
             bindService(intent, connection, BIND_AUTO_CREATE)
@@ -105,12 +105,14 @@ class VPNActivity : QtActivity() {
 
     private fun getContentName(resolver: ContentResolver?, uri: Uri?): String? {
         val cursor = resolver!!.query(uri!!, null, null, null, null)
-        cursor!!.moveToFirst()
-        val nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-        return if (nameIndex >= 0) {
-            cursor.getString(nameIndex)
-        } else {
-            null
+        cursor.use {
+            cursor!!.moveToFirst()
+            val nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+            return if (nameIndex >= 0) {
+                return cursor.getString(nameIndex)
+            } else {
+                null
+            }
         }
     }
 
@@ -122,13 +124,13 @@ class VPNActivity : QtActivity() {
             if (scheme!!.compareTo(ContentResolver.SCHEME_CONTENT) == 0) {
                 val uri = intent.data
                 val name: String? = getContentName(resolver, uri)
-                Log.e(TAG, "Content intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
+                Log.d(TAG, "Content intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
                 val input = resolver.openInputStream(uri!!)
                 return input?.bufferedReader()?.use(BufferedReader::readText)
             } else if (scheme.compareTo(ContentResolver.SCHEME_FILE) == 0) {
                 val uri = intent.data
                 val name = uri!!.lastPathSegment
-                Log.e(TAG, "File intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
+                Log.d(TAG, "File intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
                 val input = resolver.openInputStream(uri)
                 return input?.bufferedReader()?.use(BufferedReader::readText)
             }
