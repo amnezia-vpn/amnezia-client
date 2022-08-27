@@ -20,32 +20,12 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
         qDebug() << "IpcServerProcess errorOccurred " << error;
     });
 
-//    connect(m_process.data(), &QProcess::readyReadStandardError, this, [this](){
-//        qDebug() << "IpcServerProcess StandardError " << m_process->readAllStandardError();
-
-//    });
-//    connect(m_process.data(), &QProcess::readyReadStandardOutput, this, [this](){
-//        qDebug() << "IpcServerProcess StandardOutput " << m_process->readAllStandardOutput();
-//    });
-
-//    connect(m_process.data(), &QProcess::readyRead, this, [this](){
-//        qDebug() << "IpcServerProcess StandardOutput " << m_process->readAll();
-//    });
-
 }
 
 IpcServerProcess::~IpcServerProcess()
 {
     qDebug() << "IpcServerProcess::~IpcServerProcess";
 }
-
-//void IpcServerProcess::start(const QString &program, const QStringList &arguments)
-//{
-//    m_process->start(program, arguments);
-//    qDebug() << "IpcServerProcess started, " << arguments;
-
-//    m_process->waitForStarted();
-//}
 
 void IpcServerProcess::start()
 {

@@ -13,7 +13,6 @@ public:
     explicit IpcServerProcess(QObject *parent = nullptr);
     virtual ~IpcServerProcess();
 
-    //void start(const QString &program, const QStringList &arguments) override;
     void start() override;
     void close() override;
 

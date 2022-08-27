@@ -12,23 +12,18 @@
 WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
 {
-    //m_configFile.setFileTemplate(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     m_configFile.setFileName(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     readWireguardConfiguration(configuration);
 }
 
 WireguardProtocol::~WireguardProtocol()
 {
-    //qDebug() << "WireguardProtocol::~WireguardProtocol() 1";
     WireguardProtocol::stop();
     QThread::msleep(200);
-    //qDebug() << "WireguardProtocol::~WireguardProtocol() 2";
 }
 
 void WireguardProtocol::stop()
 {
-    //qDebug() << "WireguardProtocol::stop() 1";
-
 #ifndef Q_OS_IOS
     if (!QFileInfo::exists(Utils::wireguardExecPath())) {
         qCritical() << "Wireguard executable missing!";
@@ -74,7 +69,6 @@ void WireguardProtocol::stop()
     setConnectionState(VpnProtocol::Disconnected);
 #endif
 
-    //qDebug() << "WireguardProtocol::stop() 2";
 }
 
 void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
@@ -97,11 +91,6 @@ void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configurat
 
 }
 
-//bool WireguardProtocol::openVpnProcessIsRunning() const
-//{
-//    return Utils::processIsRunning("openvpn");
-//}
-
 QString WireguardProtocol::configPath() const
 {
     return m_configFileName;
@@ -119,15 +108,12 @@ void WireguardProtocol::updateRouteGateway(QString line)
 
 ErrorCode WireguardProtocol::start()
 {
-    //qDebug() << "WireguardProtocol::start() 1";
-
 #ifndef Q_OS_IOS
     if (!m_isConfigLoaded) {
         setLastError(ErrorCode::ConfigMissing);
         return lastError();
     }
 
-    //qDebug() << "Start Wireguard connection";
     WireguardProtocol::stop();
 
     if (!QFileInfo::exists(Utils::wireguardExecPath())) {
@@ -145,7 +131,6 @@ ErrorCode WireguardProtocol::start()
     m_wireguardStartProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_wireguardStartProcess) {
-        //qWarning() << "IpcProcess replica is not created!";
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
@@ -198,8 +183,6 @@ ErrorCode WireguardProtocol::start()
 
     m_wireguardStartProcess->start();
     m_wireguardStartProcess->waitForFinished(10000);
-
-    //qDebug() << "WireguardProtocol::start() 2";
 
     return ErrorCode::NoError;
 #else
