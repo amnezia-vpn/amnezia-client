@@ -3,10 +3,16 @@
 
 #include <QDataStream>
 #include <QDebug>
+#include <QEventLoop>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QTimer>
 #include "utils.h"
 #include <QRandomGenerator>
 #include "QAead.h"
 #include "QBlockCipher.h"
+
+using namespace QKeychain;
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
     : QObject{parent},
@@ -70,7 +76,6 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     }
 
     m_cache.insert(key, retVal);
-
     return retVal;
 }
 
@@ -120,35 +125,26 @@ void SecureQSettings::sync()
 
 QByteArray SecureQSettings::backupAppConfig() const
 {
-    QMap<QString, QVariant> cfg;
+    QJsonObject cfg;
+
     for (const QString &key : m_settings.allKeys()) {
-        cfg.insert(key, value(key));
+        cfg.insert(key, QJsonValue::fromVariant(value(key)));
     }
 
-    QByteArray ba;
-    {
-        QDataStream ds(&ba, QIODevice::WriteOnly);
-        ds << cfg;
-    }
-
-    return ba.toBase64();
+    return QJsonDocument(cfg).toJson();
 }
 
-void SecureQSettings::restoreAppConfig(const QByteArray &base64Cfg)
+bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 {
-    QByteArray ba = QByteArray::fromBase64(base64Cfg);
-    QMap<QString, QVariant> cfg;
-
-    {
-        QDataStream ds(&ba, QIODevice::ReadOnly);
-        ds >> cfg;
-    }
+    QJsonObject cfg = QJsonDocument::fromJson(json).object();
+    if (cfg.isEmpty()) return false;
 
     for (const QString &key : cfg.keys()) {
-        setValue(key, cfg.value(key));
+        setValue(key, cfg.value(key).toVariant());
     }
 
     sync();
+    return true;
 }
 
 
@@ -166,17 +162,14 @@ QByteArray SecureQSettings::decryptText(const QByteArray& ba) const
 
 bool SecureQSettings::encryptionRequired() const
 {
-#if defined Q_OS_IOS // || defined Q_OS_ANDROID
+    // TODO: review on linux
     return true;
-#endif
-
-    return false;
 }
 
 QByteArray SecureQSettings::getEncKey() const
 {
     // load keys from system key storage
-    m_key = MobileUtils::readFromKeychain(settingsKeyTag);
+    m_key = getSecTag(settingsKeyTag);
 
     if (m_key.isEmpty()) {
         // Create new key
@@ -186,10 +179,10 @@ QByteArray SecureQSettings::getEncKey() const
             qCritical() << "SecureQSettings::getEncKey Unable to generate new enc key";
         }
 
-        MobileUtils::writeToKeychain(settingsKeyTag, key);
+        setSecTag(settingsKeyTag, key);
 
         // check
-        m_key = MobileUtils::readFromKeychain(settingsKeyTag);
+        m_key = getSecTag(settingsKeyTag);
         if (key != m_key) {
             qCritical() << "SecureQSettings::getEncKey Unable to store key in keychain" << key.size() << m_key.size();
             return {};
@@ -202,7 +195,7 @@ QByteArray SecureQSettings::getEncKey() const
 QByteArray SecureQSettings::getEncIv() const
 {
     // load keys from system key storage
-    m_iv = MobileUtils::readFromKeychain(settingsIvTag);
+    m_iv = getSecTag(settingsIvTag);
 
     if (m_iv.isEmpty()) {
         // Create new IV
@@ -211,10 +204,10 @@ QByteArray SecureQSettings::getEncIv() const
         if (iv.isEmpty()) {
             qCritical() << "SecureQSettings::getEncIv Unable to generate new enc IV";
         }
-        MobileUtils::writeToKeychain(settingsIvTag, iv);
+        setSecTag(settingsIvTag, iv);
 
         // check
-        m_iv = MobileUtils::readFromKeychain(settingsIvTag);
+        m_iv = getSecTag(settingsIvTag);
         if (iv != m_iv) {
             qCritical() << "SecureQSettings::getEncIv Unable to store IV in keychain" << iv.size() << m_iv.size();
             return {};
@@ -222,6 +215,40 @@ QByteArray SecureQSettings::getEncIv() const
     }
 
     return m_iv;
+}
+
+QByteArray SecureQSettings::getSecTag(const QString &tag)
+{
+    ReadPasswordJob job("get-" + tag);
+    job.setAutoDelete(false);
+    job.setKey(tag);
+    QEventLoop loop;
+    job.connect(&job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()));
+    job.start();
+    loop.exec();
+
+    if ( job.error() ) {
+        qCritical() << "SecureQSettings::getSecTag Error:" << job.errorString();
+    }
+
+    return job.binaryData();
+}
+
+void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
+{
+    WritePasswordJob job("set-" + tag);
+    job.setAutoDelete(false);
+    job.setKey(tag);
+    job.setBinaryData(data);
+    QEventLoop loop;
+    QTimer::singleShot(1000, &loop, SLOT(quit()));
+    job.connect(&job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()));
+    job.start();
+    loop.exec();
+
+    if (job.error()) {
+        qCritical() << "SecureQSettings::setSecTag Error:" << job.errorString();
+    }
 }
 
 
