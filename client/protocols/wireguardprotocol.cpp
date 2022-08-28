@@ -1,7 +1,6 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QProcess>
-#include <QRegularExpression>
 #include <QTcpSocket>
 #include <QThread>
 

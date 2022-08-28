@@ -79,26 +79,10 @@ void AmneziaApplication::init()
     }, Qt::QueuedConnection);
 
     m_engine->rootContext()->setContextProperty("Debug", &Debug::Instance());
-
-    m_engine->rootContext()->setContextProperty("UiLogic", m_uiLogic);
-
-    m_engine->rootContext()->setContextProperty("AppSettingsLogic", m_uiLogic->appSettingsLogic());
-    m_engine->rootContext()->setContextProperty("GeneralSettingsLogic", m_uiLogic->generalSettingsLogic());
-    m_engine->rootContext()->setContextProperty("NetworkSettingsLogic", m_uiLogic->networkSettingsLogic());
-    m_engine->rootContext()->setContextProperty("NewServerProtocolsLogic", m_uiLogic->newServerProtocolsLogic());
-    m_engine->rootContext()->setContextProperty("QrDecoderLogic", m_uiLogic->qrDecoderLogic());
-    m_engine->rootContext()->setContextProperty("ServerConfiguringProgressLogic", m_uiLogic->serverConfiguringProgressLogic());
-    m_engine->rootContext()->setContextProperty("ServerListLogic", m_uiLogic->serverListLogic());
-    m_engine->rootContext()->setContextProperty("ServerSettingsLogic", m_uiLogic->serverSettingsLogic());
-    m_engine->rootContext()->setContextProperty("ServerContainersLogic", m_uiLogic->serverprotocolsLogic());
-    m_engine->rootContext()->setContextProperty("ShareConnectionLogic", m_uiLogic->shareConnectionLogic());
-    m_engine->rootContext()->setContextProperty("SitesLogic", m_uiLogic->sitesLogic());
-    m_engine->rootContext()->setContextProperty("StartPageLogic", m_uiLogic->startPageLogic());
-    m_engine->rootContext()->setContextProperty("VpnLogic", m_uiLogic->vpnLogic());
-    m_engine->rootContext()->setContextProperty("WizardLogic", m_uiLogic->wizardLogic());
+    m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)
-    setStartPageLogic(m_uiLogic->startPageLogic());
+    setStartPageLogic(m_uiLogic->pageLogic<StartPageLogic>());
 #endif
 
     m_engine->load(url);
@@ -130,6 +114,7 @@ void AmneziaApplication::init()
         });
     }
 #endif
+
 }
 
 void AmneziaApplication::registerTypes()
@@ -207,3 +192,9 @@ void AmneziaApplication::parseCommands()
         exec();
     }
 }
+
+QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
+{
+    return m_engine;
+}
+

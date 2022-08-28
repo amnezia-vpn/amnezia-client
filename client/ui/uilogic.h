@@ -7,6 +7,10 @@
 #include <QKeyEvent>
 #include <QThread>
 
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+
 #include "property_helper.h"
 #include "pages.h"
 #include "protocols/vpnprotocol.h"
@@ -21,6 +25,8 @@ class Settings;
 class VpnConfigurator;
 class ServerController;
 
+class PageLogicBase;
+
 class AppSettingsLogic;
 class GeneralSettingsLogic;
 class NetworkSettingsLogic;
@@ -33,6 +39,7 @@ class ServerContainersLogic;
 class ShareConnectionLogic;
 class SitesLogic;
 class StartPageLogic;
+class ViewConfigLogic;
 class VpnLogic;
 class WizardLogic;
 
@@ -77,6 +84,7 @@ public:
     friend class ShareConnectionLogic;
     friend class SitesLogic;
     friend class StartPageLogic;
+    friend class ViewConfigLogic;
     friend class VpnLogic;
     friend class WizardLogic;
 
@@ -95,10 +103,6 @@ public:
 
     Q_INVOKABLE QString containerName(int container);
     Q_INVOKABLE QString containerDesc(int container);
-
-    Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoShareProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
 
     Q_INVOKABLE void onGotoCurrentProtocolsPage();
 
@@ -166,21 +170,6 @@ private:
 
 
 public:
-    AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
-    GeneralSettingsLogic *generalSettingsLogic()            { return m_generalSettingsLogic; }
-    NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
-    NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
-    QrDecoderLogic *qrDecoderLogic()                        { return m_qrDecoderLogic; }
-    ServerConfiguringProgressLogic *serverConfiguringProgressLogic()  { return m_serverConfiguringProgressLogic; }
-    ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
-    ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
-    ServerContainersLogic *serverprotocolsLogic()        { return m_serverprotocolsLogic; }
-    ShareConnectionLogic *shareConnectionLogic()            { return m_shareConnectionLogic; }
-    SitesLogic *sitesLogic()                                { return m_sitesLogic; }
-    StartPageLogic *startPageLogic()                        { return m_startPageLogic; }
-    VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
-    WizardLogic *wizardLogic()                              { return m_wizardLogic; }
-
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);
 
     QObject *qmlRoot() const;
@@ -188,23 +177,27 @@ public:
 
     NotificationHandler *notificationHandler() const;
 
+    void setQmlContextProperty(PageLogicBase *logic);
+    void registerPagesLogic();
+
+    template<typename T>
+    void registerPageLogic()
+    {
+        T* logic = new T(this);
+        m_logicMap[std::type_index(typeid(T))] = logic;
+        setQmlContextProperty(logic);
+    }
+
+    template<typename T>
+    T* pageLogic()
+    {
+        return static_cast<T *>(m_logicMap.value(std::type_index(typeid(T))));
+    }
+
 private:
     QObject *m_qmlRoot{nullptr};
 
-    AppSettingsLogic *m_appSettingsLogic;
-    GeneralSettingsLogic *m_generalSettingsLogic;
-    NetworkSettingsLogic *m_networkSettingsLogic;
-    NewServerProtocolsLogic *m_newServerProtocolsLogic;
-    QrDecoderLogic *m_qrDecoderLogic;
-    ServerConfiguringProgressLogic *m_serverConfiguringProgressLogic;
-    ServerListLogic *m_serverListLogic;
-    ServerSettingsLogic *m_serverSettingsLogic;
-    ServerContainersLogic *m_serverprotocolsLogic;
-    ShareConnectionLogic *m_shareConnectionLogic;
-    SitesLogic *m_sitesLogic;
-    StartPageLogic *m_startPageLogic;
-    VpnLogic *m_vpnLogic;
-    WizardLogic *m_wizardLogic;
+    QMap<std::type_index, PageLogicBase*> m_logicMap;
 
     QMap<Proto, PageProtocolLogicBase *> m_protocolLogicMap;
 

@@ -1,4 +1,6 @@
 #include "StartPageLogic.h"
+#include "ViewConfigLogic.h"
+
 #include "core/errorstrings.h"
 #include "configurators/ssh_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -17,13 +19,7 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_pushButtonConnectEnabled{true},
     m_pushButtonConnectText{tr("Connect")},
     m_pushButtonConnectKeyChecked{false},
-    m_lineEditStartExistingCodeText{},
-    m_textEditSshKeyText{},
-    m_lineEditIpText{},
-    m_lineEditPasswordText{},
-    m_lineEditLoginText{},
     m_labelWaitInfoVisible{true},
-    m_labelWaitInfoText{},
     m_pushButtonBackFromStartVisible{true},
     m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
@@ -150,11 +146,9 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     credentials.password = profile.value(config_key::password).toString();
 
     if (credentials.isValid() || profile.contains(config_key::containers)) {
-        m_settings->addServer(profile);
-        m_settings->setDefaultServer(m_settings->serversCount() - 1);
-
-        emit uiLogic()->goToPage(Page::Vpn);
-        emit uiLogic()->setStartPage(Page::Vpn);
+        // check config
+        uiLogic()->pageLogic<ViewConfigLogic>()->set_configJson(profile);
+        emit uiLogic()->goToPage(Page::ViewConfig);
     }
     else {
         qDebug() << "Failed to import profile";

@@ -4,7 +4,6 @@
 #include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
-#include <QHBoxLayout>
 #include <QHostInfo>
 #include <QItemSelectionModel>
 #include <QJsonDocument>
@@ -16,8 +15,10 @@
 #include <QSysInfo>
 #include <QThread>
 #include <QTimer>
-#include <QRegularExpression>
 #include <QQmlFile>
+#include <QMetaObject>
+
+#include "amnezia_application.h"
 
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
@@ -62,6 +63,7 @@
 #include "pages_logic/ShareConnectionLogic.h"
 #include "pages_logic/SitesLogic.h"
 #include "pages_logic/StartPageLogic.h"
+#include "pages_logic/ViewConfigLogic.h"
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
 
@@ -88,20 +90,6 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
-    m_appSettingsLogic = new AppSettingsLogic(this);
-    m_generalSettingsLogic = new GeneralSettingsLogic(this);
-    m_networkSettingsLogic = new NetworkSettingsLogic(this);
-    m_newServerProtocolsLogic = new NewServerProtocolsLogic(this);
-    m_qrDecoderLogic = new QrDecoderLogic(this);
-    m_serverConfiguringProgressLogic = new ServerConfiguringProgressLogic(this);
-    m_serverListLogic = new ServerListLogic(this);
-    m_serverSettingsLogic = new ServerSettingsLogic(this);
-    m_serverprotocolsLogic = new ServerContainersLogic(this);
-    m_shareConnectionLogic = new ShareConnectionLogic(this);
-    m_sitesLogic = new SitesLogic(this);
-    m_startPageLogic = new StartPageLogic(this);
-    m_vpnLogic = new VpnLogic(this);
-    m_wizardLogic = new WizardLogic(this);
 
     m_protocolLogicMap.insert(Proto::OpenVpn, new OpenVpnLogic(this));
     m_protocolLogicMap.insert(Proto::ShadowSocks, new ShadowSocksLogic(this));
@@ -143,7 +131,7 @@ void UiLogic::initalizeUiLogic()
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
-            vpnLogic()->onConnectionStateChanged(VpnProtocol::Connected);
+            pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
         }
     });
     if (!AndroidController::instance()->initialize()) {
@@ -157,8 +145,8 @@ void UiLogic::initalizeUiLogic()
 
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, m_notificationHandler, &NotificationHandler::setConnectionState);
     connect(m_notificationHandler, &NotificationHandler::raiseRequested, this, &UiLogic::raise);
-    connect(m_notificationHandler, &NotificationHandler::connectRequested, vpnLogic(), &VpnLogic::onConnect);
-    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, vpnLogic(), &VpnLogic::onDisconnect);
+    connect(m_notificationHandler, &NotificationHandler::connectRequested, pageLogic<VpnLogic>(), &VpnLogic::onConnect);
+    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, pageLogic<VpnLogic>(), &VpnLogic::onDisconnect);
 
     if (m_settings->serversCount() > 0) {
         if (m_settings->defaultServerIndex() < 0) m_settings->setDefaultServer(0);
@@ -190,21 +178,7 @@ void UiLogic::showOnStartup()
 
 void UiLogic::onUpdateAllPages()
 {
-    for (PageLogicBase *logic : {
-         (PageLogicBase *) m_appSettingsLogic,
-         (PageLogicBase *) m_generalSettingsLogic,
-         (PageLogicBase *) m_networkSettingsLogic,
-         (PageLogicBase *) m_serverConfiguringProgressLogic,
-         (PageLogicBase *) m_newServerProtocolsLogic,
-         (PageLogicBase *) m_serverListLogic,
-         (PageLogicBase *) m_serverSettingsLogic,
-         (PageLogicBase *) m_serverprotocolsLogic,
-         (PageLogicBase *) m_shareConnectionLogic,
-         (PageLogicBase *) m_sitesLogic,
-         (PageLogicBase *) m_startPageLogic,
-         (PageLogicBase *) m_vpnLogic,
-         (PageLogicBase *) m_wizardLogic
-    }) {
+    for (auto logic : m_logicMap) {
         logic->onUpdatePage();
     }
 }
@@ -332,34 +306,34 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 
     PageFunc page_new_server_configuring;
     page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
-        serverConfiguringProgressLogic()->set_pageEnabled(enabled);
+        pageLogic<ServerConfiguringProgressLogic>()->set_pageEnabled(enabled);
     };
     ButtonFunc no_button;
     LabelFunc label_new_server_configuring_wait_info;
     label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
-        serverConfiguringProgressLogic()->set_labelWaitInfoText(text);
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoText(text);
     };
     label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
-        serverConfiguringProgressLogic()->set_labelWaitInfoVisible(visible);
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoVisible(visible);
     };
     ProgressFunc progressBar_new_server_configuring;
     progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
-        serverConfiguringProgressLogic()->set_progressBarVisible(visible);
+        pageLogic<ServerConfiguringProgressLogic>()->set_progressBarVisible(visible);
     };
     progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
-        serverConfiguringProgressLogic()->set_progressBarValue(value);
+        pageLogic<ServerConfiguringProgressLogic>()->set_progressBarValue(value);
     };
     progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
-        return serverConfiguringProgressLogic()->progressBarValue();
+        return pageLogic<ServerConfiguringProgressLogic>()->progressBarValue();
     };
     progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
-        return serverConfiguringProgressLogic()->progressBarMaximium();
+        return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximium();
     };
     progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
-        serverConfiguringProgressLogic()->set_progressBarTextVisible(visible);
+        pageLogic<ServerConfiguringProgressLogic>()->set_progressBarTextVisible(visible);
     };
     progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
-        serverConfiguringProgressLogic()->set_progressBarText(text);
+        pageLogic<ServerConfiguringProgressLogic>()->set_progressBarText(text);
     };
     bool ok = installContainers(installCredentials, containers,
                                 page_new_server_configuring,
@@ -595,6 +569,11 @@ NotificationHandler *UiLogic::notificationHandler() const
     return m_notificationHandler;
 }
 
+void UiLogic::setQmlContextProperty(PageLogicBase *logic)
+{
+    amnApp->qmlEngine()->rootContext()->setContextProperty(logic->metaObject()->className(), logic);
+}
+
 PageEnumNS::Page UiLogic::currentPage()
 {
     return static_cast<PageEnumNS::Page>(currentPageValue());
@@ -676,4 +655,25 @@ void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QSt
     QStringList filesToSend;
     filesToSend.append(fileName);
     MobileUtils::shareText(filesToSend);
+}
+
+void UiLogic::registerPagesLogic()
+{
+    amnApp->qmlEngine()->rootContext()->setContextProperty("UiLogic", this);
+
+    registerPageLogic<AppSettingsLogic>();
+    registerPageLogic<GeneralSettingsLogic>();
+    registerPageLogic<NetworkSettingsLogic>();
+    registerPageLogic<NewServerProtocolsLogic>();
+    registerPageLogic<QrDecoderLogic>();
+    registerPageLogic<ServerConfiguringProgressLogic>();
+    registerPageLogic<ServerListLogic>();
+    registerPageLogic<ServerSettingsLogic>();
+    registerPageLogic<ServerContainersLogic>();
+    registerPageLogic<ShareConnectionLogic>();
+    registerPageLogic<SitesLogic>();
+    registerPageLogic<StartPageLogic>();
+    registerPageLogic<ViewConfigLogic>();
+    registerPageLogic<VpnLogic>();
+    registerPageLogic<WizardLogic>();
 }

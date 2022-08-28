@@ -13,6 +13,9 @@
 #include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
 
+#define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
+
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #define AMNEZIA_BASE_CLASS QApplication
 #else
@@ -38,6 +41,8 @@ public:
     void loadFonts();
     void loadTranslator();
     void parseCommands();
+
+    QQmlApplicationEngine *qmlEngine() const;
 
 private:
     QQmlApplicationEngine *m_engine;
