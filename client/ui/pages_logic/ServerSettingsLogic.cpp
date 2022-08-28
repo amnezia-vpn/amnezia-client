@@ -49,7 +49,7 @@ void ServerSettingsLogic::onPushButtonClearServer()
     set_pushButtonClearText(tr("Uninstalling Amnezia software..."));
 
     if (m_settings->defaultServerIndex() == uiLogic()->selectedServerIndex) {
-        uiLogic()->vpnLogic()->onDisconnect();
+        uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
 
     ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
@@ -76,7 +76,7 @@ void ServerSettingsLogic::onPushButtonClearServer()
 void ServerSettingsLogic::onPushButtonForgetServer()
 {
     if (m_settings->defaultServerIndex() == uiLogic()->selectedServerIndex && uiLogic()->m_vpnConnection->isConnected()) {
-        uiLogic()->vpnLogic()->onDisconnect();
+        uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
     m_settings->removeServer(uiLogic()->selectedServerIndex);
 
@@ -128,6 +128,6 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
 
 void ServerSettingsLogic::onPushButtonShareFullClicked()
 {
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
     emit uiLogic()->goToShareProtocolPage(Proto::Any);
 }

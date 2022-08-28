@@ -34,6 +34,6 @@ void GeneralSettingsLogic::onPushButtonGeneralSettingsShareConnectionClicked()
     qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel())->setSelectedServerIndex(uiLogic()->selectedServerIndex);
     qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel())->setSelectedDockerContainer(uiLogic()->selectedDockerContainer);
 
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     emit uiLogic()->goToPage(Page::ShareConnection);
 }

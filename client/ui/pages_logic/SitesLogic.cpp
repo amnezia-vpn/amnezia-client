@@ -40,7 +40,7 @@ void SitesLogic::onUpdatePage()
 
 void SitesLogic::onPushButtonAddCustomSitesClicked()
 {
-    if (uiLogic()->vpnLogic()->radioButtonVpnModeAllSitesChecked()) {
+    if (uiLogic()->pageLogic<VpnLogic>()->radioButtonVpnModeAllSitesChecked()) {
         return;
     }
     Settings::RouteMode mode = m_settings->routeMode();
