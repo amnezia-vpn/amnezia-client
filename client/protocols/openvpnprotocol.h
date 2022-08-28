@@ -46,6 +46,8 @@ private:
     QString m_configFileName;
     QTemporaryFile m_configFile;
 
+    uint selectMgmtPort();
+
 private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
