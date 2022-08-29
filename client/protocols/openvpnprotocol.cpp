@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QTcpSocket>
+#include <QTcpServer>
+#include <QRandomGenerator>
 
 #include "debug.h"
 #include "defines.h"
@@ -121,6 +123,21 @@ void OpenVpnProtocol::sendManagementCommand(const QString& command)
     }
 }
 
+uint OpenVpnProtocol::selectMgmtPort()
+{
+
+    for (int i = 0; i < 100; ++i) {
+        quint32 port = QRandomGenerator::global()->generate();
+        port = (double)(65000-15001) * port / UINT32_MAX + 15001;
+
+        QTcpServer s;
+        bool ok = s.listen(QHostAddress::LocalHost, port);
+        if (ok) return port;
+    }
+
+    return m_managementPort;
+}
+
 void OpenVpnProtocol::updateRouteGateway(QString line)
 {
     // TODO: fix for macos
@@ -150,7 +167,10 @@ ErrorCode OpenVpnProtocol::start()
 //    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
 //    Utils::createEmptyFile(vpnLogFileNamePath);
 
-    if (!m_managementServer.start(m_managementHost, m_managementPort)) {
+    uint mgmtPort = selectMgmtPort();
+    qDebug() << "OpenVpnProtocol::start mgmt port selected:" << mgmtPort;
+
+    if (!m_managementServer.start(m_managementHost, mgmtPort)) {
         setLastError(ErrorCode::OpenVpnManagementServerError);
         return lastError();
     }
@@ -173,7 +193,7 @@ ErrorCode OpenVpnProtocol::start()
     }
     m_openVpnProcess->setProgram(PermittedProcess::OpenVPN);
     QStringList arguments({"--config" , configPath(),
-                      "--management", m_managementHost, QString::number(m_managementPort),
+                      "--management", m_managementHost, QString::number(mgmtPort),
                       "--management-client"/*, "--log", vpnLogFileNamePath */
                      });
     m_openVpnProcess->setArguments(arguments);
