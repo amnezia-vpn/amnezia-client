@@ -6,7 +6,7 @@
 
 #include "debug.h"
 #include "defines.h"
-#include "utils.h"
+#include "utilities.h"
 #include "openvpnprotocol.h"
 
 
@@ -125,9 +125,9 @@ void OpenVpnProtocol::sendManagementCommand(const QString& command)
 void OpenVpnProtocol::updateRouteGateway(QString line)
 {
     // TODO: fix for macos
-    line = line.split("ROUTE_GATEWAY", QString::SkipEmptyParts).at(1);
+    line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
     if (!line.contains("/")) return;
-    m_routeGateway = line.split("/", QString::SkipEmptyParts).first();
+    m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
     m_routeGateway.replace(" ", "");
     qDebug() << "Set VPN route gateway" << m_routeGateway;
 }

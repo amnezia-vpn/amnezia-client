@@ -4,7 +4,7 @@
 #include "localserver.h"
 #include "log.h"
 #include "systemservice.h"
-#include "utils.h"
+#include "utilities.h"
 
 
 int runApplication(int argc, char** argv)

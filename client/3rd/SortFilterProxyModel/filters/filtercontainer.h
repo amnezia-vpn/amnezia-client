@@ -31,8 +31,8 @@ private:
     virtual void onFiltersCleared() = 0;
 
     static void append_filter(QQmlListProperty<Filter>* list, Filter* filter);
-    static int count_filter(QQmlListProperty<Filter>* list);
-    static Filter* at_filter(QQmlListProperty<Filter>* list, int index);
+    static qsizetype count_filter(QQmlListProperty<Filter>* list);
+    static Filter* at_filter(QQmlListProperty<Filter>* list, qsizetype index);
     static void clear_filters(QQmlListProperty<Filter>* list);
 };
 

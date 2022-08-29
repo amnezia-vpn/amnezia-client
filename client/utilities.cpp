@@ -5,10 +5,11 @@
 #include <QHostInfo>
 #include <QProcess>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
 #include "defines.h"
-#include "utils.h"
+#include "utilities.h"
 
 QString Utils::getRandomString(int len)
 {
@@ -86,7 +87,7 @@ bool Utils::processIsRunning(const QString& fileName)
     process.waitForStarted();
     process.waitForFinished();
     QString processData(process.readAll());
-    QStringList processList = processData.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
+    QStringList processList = processData.split(QRegularExpression("[\r\n]"),Qt::SkipEmptyParts);
     foreach (const QString& rawLine, processList) {
         const QString line = rawLine.simplified();
         if (line.isEmpty()) {
@@ -115,7 +116,7 @@ bool Utils::processIsRunning(const QString& fileName)
 
 QString Utils::getIPAddress(const QString& host)
 {
-    if (ipAddressRegExp().exactMatch(host)) {
+    if (ipAddressRegExp().match(host).hasMatch()) {
         return host;
     }
 
@@ -165,6 +166,7 @@ bool Utils::checkIpSubnetFormat(const QString &ip)
 void Utils::killProcessByName(const QString &name)
 {           
     qDebug().noquote() << "Kill process" << name;
+    qDebug() << "Hello";
 #ifdef Q_OS_WIN
     QProcess::execute(QString("taskkill /im %1 /f").arg(name));
 #elif defined Q_OS_IOS

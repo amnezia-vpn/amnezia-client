@@ -1,7 +1,7 @@
 #include "NetworkSettingsLogic.h"
 
 #include "defines.h"
-#include "utils.h"
+#include "utilities.h"
 
 NetworkSettingsLogic::NetworkSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
@@ -21,14 +21,14 @@ void NetworkSettingsLogic::onUpdatePage()
 
 void NetworkSettingsLogic::onLineEditDns1EditFinished(const QString &text)
 {
-    if (ipAddressRegex().exactMatch(text)) {
+    if (ipAddressRegex().match(text).hasMatch()) {
         m_settings.setPrimaryDns(text);
     }
 }
 
 void NetworkSettingsLogic::onLineEditDns2EditFinished(const QString &text)
 {
-    if (ipAddressRegex().exactMatch(text)) {
+    if (ipAddressRegex().match(text).hasMatch()) {
         m_settings.setSecondaryDns(text);
     }
 }

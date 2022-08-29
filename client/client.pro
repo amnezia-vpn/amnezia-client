@@ -74,7 +74,7 @@ HEADERS  += \
     ui/uilogic.h \
    ui/qautostart.h \
    ui/models/sites_model.h \
-    utils.h \
+    utilities.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
     logger.h \
@@ -130,7 +130,7 @@ SOURCES  += \
     ui/uilogic.cpp \
    ui/qautostart.cpp \
    ui/models/sites_model.cpp \
-    utils.cpp \
+    utilities.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     logger.cpp \
@@ -171,6 +171,7 @@ win32 {
         -liphlpapi \
         -lgdi32
 
+    QMAKE_LFLAGS_WINDOWS += /entry:mainCRTStartup
 
    !contains(QMAKE_TARGET.arch, x86_64) {
       message("Windows x86 build")
@@ -339,15 +340,15 @@ ios {
     QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
     QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
     QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
-    
+
     XCODEBUILD_FLAGS += -allowProvisioningUpdates
-    
+
     DEFINES += iphoneos
-    
+
     contains(QT_ARCH, arm64) {
       message("Building for iOS/ARM v8 64-bit architecture")
       ARCH_TAG = "ios_armv8_64"
-      
+
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
     } else {
@@ -356,15 +357,15 @@ ios {
     }
   }
 #    }
-  
+
 
 #    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
 #  iphonesimulator {
 #    message("Building for iPhone Simulator")
 #    ARCH_TAG = "ios_x86_64"
-#    
+#
 #    DEFINES += iphonesimulator
-#    
+#
 #    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
 #    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
 #  }

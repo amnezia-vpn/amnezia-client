@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- joinrole.cpp -->
+  <title>JoinRole QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">JoinRole QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$JoinRole-brief -->
+<p>a role made from concatenating other roles. <a href="#details">More...</a></p>
+<!-- @@@JoinRole -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-singlerole.html">SingleRole</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-joinrole-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-joinrole.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-joinrole.html#roleNames-prop">roleNames</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-joinrole.html#separator-prop">separator</a></b></b> : string</li>
+</ul>
+<!-- $$$JoinRole-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A JoinRole is a simple <a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a> that concatenates other roles.</p>
+<p>In the following example, the <code>fullName</code> role is computed by the concatenation of the <code>firstName</code> role and the <code>lastName</code> role separated by a space :</p>
+<pre class="cpp">SortFilterProxyModel {
+   sourceModel: contactModel
+   proxyRoles: JoinRole {
+       name: <span class="string">&quot;fullName&quot;</span>
+       roleNames: <span class="operator">[</span><span class="string">&quot;firstName&quot;</span><span class="operator">,</span> <span class="string">&quot;lastName&quot;</span><span class="operator">]</span>
+  }
+}</pre>
+<!-- @@@JoinRole -->
+<h2>Property Documentation</h2>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name of the proxy role.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$roleNames -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="roleNames-prop"></a><span class="name">roleNames</span> : <span class="type">list</span>&lt;<span class="type">string</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role names that are joined by this role.</p>
+</div></div><!-- @@@roleNames -->
+<br/>
+<!-- $$$separator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="separator-prop"></a><span class="name">separator</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the separator that is used to join the roles specified in <a href="qml-sortfilterproxymodel-joinrole.html#roleNames-prop">roleNames</a>.</p>
+<p>By default, it's a space.</p>
+</div></div><!-- @@@separator -->
+<br/>
+</body>
+</html>

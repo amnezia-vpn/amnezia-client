@@ -1,7 +1,7 @@
 #ifndef UILOGIC_H
 #define UILOGIC_H
 
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QQmlEngine>
 #include <functional>
 #include <QKeyEvent>

@@ -13,7 +13,7 @@
 #include "core/server_defs.h"
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
-#include "utils.h"
+#include "utilities.h"
 
 Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials,
     DockerContainer container, ErrorCode *errorCode)

@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 
 #include "containers/containers_defs.h"
-#include "utils.h"
+#include "utilities.h"
 
 Settings &VpnConfigurator::m_settings()
 {

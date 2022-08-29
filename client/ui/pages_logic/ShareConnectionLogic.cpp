@@ -6,7 +6,7 @@
 
 #include "QZXing.h"
 #include "QZXingImageProvider.h"
-#include "QZXingFilter.h"
+//#include "QZXingFilter.h"
 
 #include "ShareConnectionLogic.h"
 

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- switchrole.cpp -->
+  <title>SwitchRole QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SwitchRole QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SwitchRole-brief -->
+<p>A role using <a href="qml-sortfilterproxymodel-filter.html">Filter</a> to conditionnaly compute its data. <a href="#details">More...</a></p>
+<!-- @@@SwitchRole -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-singlerole.html">SingleRole</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-switchrole-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-switchrole.html#defaultRoleName-prop">defaultRoleName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-switchrole.html#defaultValue-prop">defaultValue</a></b></b> : var</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-switchrole.html#filters-prop">filters</a></b></b> : list&lt;Filter&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-switchrole.html#name-prop">name</a></b></b> : string</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-switchrole.html#value-attached-prop">value</a></b></b> : var</li>
+</ul>
+<!-- $$$SwitchRole-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A SwitchRole is a <a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a> that computes its data with the help of <a href="qml-sortfilterproxymodel-filter.html">Filter</a>. Each top level filters specified in the <a href="qml-sortfilterproxymodel-switchrole.html">SwitchRole</a> is evaluated on the rows of the model, if a <a href="qml-sortfilterproxymodel-filter.html">Filter</a> evaluates to true, the data of the <a href="qml-sortfilterproxymodel-switchrole.html">SwitchRole</a> for this row will be the one of the attached <a href="qml-sortfilterproxymodel-switchrole.html#value-attached-prop">SwitchRole.value</a> property. If no top level filters evaluate to true, the data will default to the one of the <a href="qml-sortfilterproxymodel-switchrole.html#defaultRoleName-prop">defaultRoleName</a> (or the <a href="qml-sortfilterproxymodel-switchrole.html#defaultValue-prop">defaultValue</a> if no <a href="qml-sortfilterproxymodel-switchrole.html#defaultRoleName-prop">defaultRoleName</a> is specified).</p>
+<p>In the following example, the <code>favoriteOrFirstNameSection</code> role is equal to <code>*</code> if the <code>favorite</code> role of a row is true, otherwise it's the same as the <code>firstName</code> role :</p>
+<pre class="cpp">SortFilterProxyModel {
+   sourceModel: contactModel
+   proxyRoles: SwitchRole {
+       name: <span class="string">&quot;favoriteOrFirstNameSection&quot;</span>
+       filters: ValueFilter {
+           roleName: <span class="string">&quot;favorite&quot;</span>
+           value: <span class="keyword">true</span>
+           SwitchRole<span class="operator">.</span>value: <span class="string">&quot;*&quot;</span>
+       }
+       defaultRoleName: <span class="string">&quot;firstName&quot;</span>
+    }
+}</pre>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+<!-- @@@SwitchRole -->
+<h2>Property Documentation</h2>
+<!-- $$$defaultRoleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defaultRoleName-prop"></a><span class="name">defaultRoleName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the default role name of the role. If no filter match a row, the data of this role will be the data of the role whose name is <code>defaultRoleName</code>.</p>
+</div></div><!-- @@@defaultRoleName -->
+<br/>
+<!-- $$$defaultValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defaultValue-prop"></a><span class="name">defaultValue</span> : <span class="type">var</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the default value of the role. If no filter match a row, and no <a href="qml-sortfilterproxymodel-switchrole.html#defaultRoleName-prop">defaultRoleName</a> is set, the data of this role will be <code>defaultValue</code>.</p>
+</div></div><!-- @@@defaultValue -->
+<br/>
+<!-- $$$filters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="filters-prop"></a><span class="qmldefault">[default] </span><span class="name">filters</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-sortfilterproxymodel-filter.html">Filter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of filters for this proxy role. The data of this role will be equal to the attached <a href="qml-sortfilterproxymodel-switchrole.html#value-attached-prop">SwitchRole.value</a> property of the first filter that matches the model row.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filter.html">Filter</a> and <a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+</div></div><!-- @@@filters -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name of the proxy role.</p>
+</div></div><!-- @@@name -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-attached-prop"></a><span class="name">SwitchRole.value</span> : <span class="type">var</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property attaches a value to a <a href="qml-sortfilterproxymodel-filter.html">Filter</a>.</p>
+</div></div><!-- @@@value -->
+<br/>
+</body>
+</html>

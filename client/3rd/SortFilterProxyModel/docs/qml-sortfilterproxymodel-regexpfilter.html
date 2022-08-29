@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- regexpfilter.cpp -->
+  <title>RegExpFilter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RegExpFilter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RegExpFilter-brief -->
+<p>Filters rows matching a regular expression. <a href="#details">More...</a></p>
+<!-- @@@RegExpFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-rolefilter.html">RoleFilter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-regexpfilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#caseSensitivity-prop">caseSensitivity</a></b></b> : Qt::CaseSensitivity</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#inverted-prop">inverted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#pattern-prop">pattern</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#roleName-prop">roleName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexpfilter.html#syntax-prop">syntax</a></b></b> : enum</li>
+</ul>
+<!-- $$$RegExpFilter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A RegExpFilter is a <a href="qml-sortfilterproxymodel-rolefilter.html">RoleFilter</a> that accepts rows matching a regular rexpression.</p>
+<p>In the following example, only rows with their <code>lastName</code> role beggining with the content of textfield the will be accepted:</p>
+<pre class="cpp">TextField {
+   id: nameTextField
+}
+
+SortFilterProxyModel {
+   sourceModel: contactModel
+   filters: RegExpFilter {
+       roleName: <span class="string">&quot;lastName&quot;</span>
+       pattern: <span class="string">&quot;^&quot;</span> <span class="operator">+</span> nameTextField<span class="operator">.</span>displayText
+   }
+}</pre>
+<!-- @@@RegExpFilter -->
+<h2>Property Documentation</h2>
+<!-- $$$caseSensitivity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="caseSensitivity-prop"></a><span class="name">caseSensitivity</span> : <span class="type">Qt::CaseSensitivity</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the caseSensitivity of the filter.</p>
+</div></div><!-- @@@caseSensitivity -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is enabled. A disabled filter will accept every rows unconditionally (even if it's inverted).</p>
+<p>By default, filters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is inverted. When a filter is inverted, a row normally accepted would be rejected, and vice-versa.</p>
+<p>By default, filters are not inverted.</p>
+</div></div><!-- @@@inverted -->
+<br/>
+<!-- $$$pattern -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pattern-prop"></a><span class="name">pattern</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The pattern used to filter the contents of the source model.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-regexpfilter.html#syntax-prop">syntax</a>.</p>
+</div></div><!-- @@@pattern -->
+<br/>
+<!-- $$$roleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="roleName-prop"></a><span class="name">roleName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name that the filter is using to query the source model's data when filtering items.</p>
+</div></div><!-- @@@roleName -->
+<br/>
+<!-- $$$syntax -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="syntax-prop"></a><span class="name">syntax</span> : <span class="type">enum</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The pattern used to filter the contents of the source model.</p>
+<p>Only the source model's value having their <a href="qml-sortfilterproxymodel-regexpfilter.html#roleName-prop">RoleFilter::roleName</a> data matching this <a href="qml-sortfilterproxymodel-regexpfilter.html#pattern-prop">pattern</a> with the specified syntax will be kept.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>RegExpFilter.RegExp</code></td><td class="topAlign">A rich Perl-like pattern matching syntax. This is the default.</td></tr>
+<tr><td class="topAlign"><code>RegExpFilter.Wildcard</code></td><td class="topAlign">This provides a simple pattern matching syntax similar to that used by shells (command interpreters) for &quot;file globbing&quot;.</td></tr>
+<tr><td class="topAlign"><code>RegExpFilter.FixedString</code></td><td class="topAlign">The pattern is a fixed string. This is equivalent to using the RegExp pattern on a string in which all metacharacters are escaped.</td></tr>
+<tr><td class="topAlign"><code>RegExpFilter.RegExp2</code></td><td class="topAlign">Like RegExp, but with greedy quantifiers.</td></tr>
+<tr><td class="topAlign"><code>RegExpFilter.WildcardUnix</code></td><td class="topAlign">This is similar to Wildcard but with the behavior of a Unix shell. The wildcard characters can be escaped with the character &quot;&quot;.</td></tr>
+<tr><td class="topAlign"><code>RegExpFilter.W3CXmlSchema11</code></td><td class="topAlign">The pattern is a regular expression as defined by the W3C XML Schema 1.1 specification.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-regexpfilter.html#pattern-prop">pattern</a>.</p>
+</div></div><!-- @@@syntax -->
+<br/>
+</body>
+</html>

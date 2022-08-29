@@ -1,0 +1,22 @@
+{
+  "name": "fr.grecko.sortfilterproxymodel",
+  "description": "A nicely exposed QSortFilterProxyModel for QML",
+  "author": {
+    "name": "Pierre-Yves Siret",
+    "email": "gr3cko@gmail.com"
+  },
+  "repository": {
+    "type": "GITHUB",
+    "url": "https://github.com/oKcerG/SortFilterProxyModel.git"
+  },
+  "version": {
+    "label": "0.1.0",
+    "revision": "",
+    "fingerprint": ""
+  },
+  "dependencies": [
+  ],
+  "license": "MIT",
+  "pri_filename": "SortFilterProxyModel.pri",
+  "webpage": ""
+}

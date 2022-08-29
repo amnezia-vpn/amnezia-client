@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- stringsorter.cpp -->
+  <title>StringSorter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">StringSorter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$StringSorter-brief -->
+<p>Sorts rows based on a source model string role. <a href="#details">More...</a></p>
+<!-- @@@StringSorter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-rolesorter.html">RoleSorter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-stringsorter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-stringsorter.html#caseSensitivity-prop">caseSensitivity</a></b></b> : Qt.CaseSensitivity</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-stringsorter.html#ignorePunctation-prop">ignorePunctation</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-stringsorter.html#locale-prop">locale</a></b></b> : Locale</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-stringsorter.html#numericMode-prop">numericMode</a></b></b> : bool</li>
+</ul>
+<!-- $$$StringSorter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-sortfilterproxymodel-stringsorter.html">StringSorter</a> is a specialized <a href="qml-sortfilterproxymodel-rolesorter.html">RoleSorter</a> that sorts rows based on a source model string role. <a href="qml-sortfilterproxymodel-stringsorter.html">StringSorter</a> compares strings according to a localized collation algorithm.</p>
+<p>In the following example, rows with be sorted by their <code>lastName</code> role :</p>
+<pre class="cpp">SortFilterProxyModel {
+   sourceModel: contactModel
+   sorters: StringSorter { roleName: <span class="string">&quot;lastName&quot;</span> }
+}</pre>
+<!-- @@@StringSorter -->
+<h2>Property Documentation</h2>
+<!-- $$$caseSensitivity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="caseSensitivity-prop"></a><span class="name">caseSensitivity</span> : <span class="type">Qt</span>.<span class="type">CaseSensitivity</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the case sensitivity of the sorter.</p>
+</div></div><!-- @@@caseSensitivity -->
+<br/>
+<!-- $$$ignorePunctation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ignorePunctation-prop"></a><span class="name">ignorePunctation</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the sorter ignores punctation. if <code>ignorePunctuation</code> is <code>true</code>, punctuation characters and symbols are ignored when determining sort order.</p>
+<p><b>Note: </b>This property is not currently supported on Apple platforms or if Qt is configured to not use ICU on Linux.</p></div></div><!-- @@@ignorePunctation -->
+<br/>
+<!-- $$$locale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="locale-prop"></a><span class="name">locale</span> : <span class="type">Locale</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the locale of the sorter.</p>
+</div></div><!-- @@@locale -->
+<br/>
+<!-- $$$numericMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="numericMode-prop"></a><span class="name">numericMode</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the numeric mode of the sorter is enabled. This will enable proper sorting of numeric digits, so that e.g&#x2e; 100 sorts after 99. By default this mode is off.</p>
+</div></div><!-- @@@numericMode -->
+<br/>
+</body>
+</html>

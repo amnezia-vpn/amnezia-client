@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- rangefilter.cpp -->
+  <title>RangeFilter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RangeFilter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RangeFilter-brief -->
+<p>Filters rows between boundary values. <a href="#details">More...</a></p>
+<!-- @@@RangeFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-rolefilter.html">RoleFilter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-rangefilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#inverted-prop">inverted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#maximumInclusive-prop">maximumInclusive</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#maximumValue-prop">maximumValue</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#minimumInclusive-prop">minimumInclusive</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-rangefilter.html#roleName-prop">roleName</a></b></b> : string</li>
+</ul>
+<!-- $$$RangeFilter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A RangeFilter is a <a href="qml-sortfilterproxymodel-rolefilter.html">RoleFilter</a> that accepts rows if their data is between the filter's minimum and maximum value.</p>
+<p>In the following example, only rows with their <code>price</code> role set to a value between the tow boundary of the slider will be accepted :</p>
+<pre class="cpp">RangeSlider {
+   id: priceRangeSlider
+}
+
+SortFilterProxyModel {
+   sourceModel: priceModel
+   filters: RangeFilter {
+       roleName: <span class="string">&quot;price&quot;</span>
+       minimumValue: priceRangeSlider<span class="operator">.</span>first<span class="operator">.</span>value
+       maximumValue: priceRangeSlider<span class="operator">.</span>second<span class="operator">.</span>value
+   }
+}</pre>
+<!-- @@@RangeFilter -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is enabled. A disabled filter will accept every rows unconditionally (even if it's inverted).</p>
+<p>By default, filters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is inverted. When a filter is inverted, a row normally accepted would be rejected, and vice-versa.</p>
+<p>By default, filters are not inverted.</p>
+</div></div><!-- @@@inverted -->
+<br/>
+<!-- $$$maximumInclusive -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumInclusive-prop"></a><span class="name">maximumInclusive</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the <a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a> is inclusive.</p>
+<p>By default, the <a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a> is inclusive.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a>.</p>
+</div></div><!-- @@@maximumInclusive -->
+<br/>
+<!-- $$$maximumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumValue-prop"></a><span class="name">maximumValue</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximumValue of the filter. Rows with a value higher than <code>maximumValue</code> will be rejected.</p>
+<p>By default, no value is set.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-rangefilter.html#maximumInclusive-prop">maximumInclusive</a>.</p>
+</div></div><!-- @@@maximumValue -->
+<br/>
+<!-- $$$minimumInclusive -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumInclusive-prop"></a><span class="name">minimumInclusive</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the <a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a> is inclusive.</p>
+<p>By default, the <a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a> is inclusive.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-rangefilter.html#minimumValue-prop">minimumValue</a>.</p>
+</div></div><!-- @@@minimumInclusive -->
+<br/>
+<!-- $$$minimumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumValue-prop"></a><span class="name">minimumValue</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimumValue of the filter. Rows with a value lower than <code>minimumValue</code> will be rejected.</p>
+<p>By default, no value is set.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-rangefilter.html#minimumInclusive-prop">minimumInclusive</a>.</p>
+</div></div><!-- @@@minimumValue -->
+<br/>
+<!-- $$$roleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="roleName-prop"></a><span class="name">roleName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name that the filter is using to query the source model's data when filtering items.</p>
+</div></div><!-- @@@roleName -->
+<br/>
+</body>
+</html>

@@ -31,8 +31,8 @@ private:
     virtual void onSortersCleared() = 0;
 
     static void append_sorter(QQmlListProperty<Sorter>* list, Sorter* sorter);
-    static int count_sorter(QQmlListProperty<Sorter>* list);
-    static Sorter* at_sorter(QQmlListProperty<Sorter>* list, int index);
+    static qsizetype count_sorter(QQmlListProperty<Sorter>* list);
+    static Sorter* at_sorter(QQmlListProperty<Sorter>* list, qsizetype index);
     static void clear_sorters(QQmlListProperty<Sorter>* list);
 };
 

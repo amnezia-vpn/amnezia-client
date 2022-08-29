@@ -36,7 +36,7 @@
 #include "debug.h"
 #include "defines.h"
 #include "uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 #include <functional>
 

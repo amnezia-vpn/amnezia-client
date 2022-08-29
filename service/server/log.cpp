@@ -5,7 +5,7 @@
 
 #include "log.h"
 #include "defines.h"
-#include "utils.h"
+#include "utilities.h"
 
 QFile Log::m_file;
 QTextStream Log::m_textStream;
@@ -17,7 +17,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
         return;
     }
 
-    Log::m_textStream << qFormatLogMessage(type, context, msg) << endl << flush;
+    Log::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
 
     std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
 }

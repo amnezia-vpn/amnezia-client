@@ -1,6 +1,6 @@
 #include "defines.h"
 #include "settings.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include <QDebug>
 #include "containers/containers_defs.h"
