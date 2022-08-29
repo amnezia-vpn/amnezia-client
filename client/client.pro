@@ -282,9 +282,10 @@ android {
 
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libjbcrypto.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopenvpn.so
-      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libopvpnutil.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnutil.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpn3.so
       ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libovpnexec.so
+      ANDROID_EXTRA_LIBS += $$PWD/android/lib/openvpn/$${abi}/libck-ovpn-plugin.so
    }
 }
 
