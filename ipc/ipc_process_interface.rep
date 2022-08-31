@@ -3,7 +3,7 @@
 
 class IpcProcessInterface
 {
-    SLOT( start(const QString &program, const QStringList &args) );
+    //SLOT( start(const QString &program, const QStringList &args) );
     SLOT( start() );
     SLOT( close() );
 
@@ -11,7 +11,7 @@ class IpcProcessInterface
     SLOT( setInputChannelMode(QProcess::InputChannelMode mode) );
     SLOT( setNativeArguments(const QString &arguments) );
     SLOT( setProcessChannelMode(QProcess::ProcessChannelMode mode) );
-    SLOT( setProgram(const QString &program) );
+    SLOT( setProgram(int programId) );
     SLOT( setWorkingDirectory(const QString &dir) );
 
     SLOT( QByteArray readAll() );

@@ -56,14 +56,17 @@
 
 AmneziaApplication::~AmneziaApplication()
 {
-    QObject::disconnect(m_engine, 0,0,0);
-    delete m_engine;
+    if (m_engine) {
+        QObject::disconnect(m_engine, 0,0,0);
+        delete m_engine;
+    }
+    if (m_uiLogic) {
+        QObject::disconnect(m_uiLogic, 0,0,0);
+        delete m_uiLogic;
+    }
 
-    QObject::disconnect(m_uiLogic, 0,0,0);
-    delete m_uiLogic;
-
-    delete m_protocolProps;
-    delete m_containerProps;
+    if (m_protocolProps) delete m_protocolProps;
+    if (m_containerProps) delete m_containerProps;
 }
 
 void AmneziaApplication::init()
@@ -79,26 +82,10 @@ void AmneziaApplication::init()
     }, Qt::QueuedConnection);
 
     m_engine->rootContext()->setContextProperty("Debug", &Debug::Instance());
-
-    m_engine->rootContext()->setContextProperty("UiLogic", m_uiLogic);
-
-    m_engine->rootContext()->setContextProperty("AppSettingsLogic", m_uiLogic->appSettingsLogic());
-    m_engine->rootContext()->setContextProperty("GeneralSettingsLogic", m_uiLogic->generalSettingsLogic());
-    m_engine->rootContext()->setContextProperty("NetworkSettingsLogic", m_uiLogic->networkSettingsLogic());
-    m_engine->rootContext()->setContextProperty("NewServerProtocolsLogic", m_uiLogic->newServerProtocolsLogic());
-    m_engine->rootContext()->setContextProperty("QrDecoderLogic", m_uiLogic->qrDecoderLogic());
-    m_engine->rootContext()->setContextProperty("ServerConfiguringProgressLogic", m_uiLogic->serverConfiguringProgressLogic());
-    m_engine->rootContext()->setContextProperty("ServerListLogic", m_uiLogic->serverListLogic());
-    m_engine->rootContext()->setContextProperty("ServerSettingsLogic", m_uiLogic->serverSettingsLogic());
-    m_engine->rootContext()->setContextProperty("ServerContainersLogic", m_uiLogic->serverprotocolsLogic());
-    m_engine->rootContext()->setContextProperty("ShareConnectionLogic", m_uiLogic->shareConnectionLogic());
-    m_engine->rootContext()->setContextProperty("SitesLogic", m_uiLogic->sitesLogic());
-    m_engine->rootContext()->setContextProperty("StartPageLogic", m_uiLogic->startPageLogic());
-    m_engine->rootContext()->setContextProperty("VpnLogic", m_uiLogic->vpnLogic());
-    m_engine->rootContext()->setContextProperty("WizardLogic", m_uiLogic->wizardLogic());
+    m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)
-    setStartPageLogic(m_uiLogic->startPageLogic());
+    setStartPageLogic(m_uiLogic->pageLogic<StartPageLogic>());
 #endif
 
     m_engine->load(url);
@@ -130,6 +117,7 @@ void AmneziaApplication::init()
         });
     }
 #endif
+
 }
 
 void AmneziaApplication::registerTypes()
@@ -185,7 +173,7 @@ void AmneziaApplication::loadTranslator()
     }
 }
 
-void AmneziaApplication::parseCommands()
+bool AmneziaApplication::parseCommands()
 {
     m_parser.setApplicationDescription(APPLICATION_NAME);
     m_parser.addHelpOption();
@@ -201,9 +189,17 @@ void AmneziaApplication::parseCommands()
 
     if (m_parser.isSet(c_cleanup)) {
         Debug::cleanUp();
-        QTimer::singleShot(100,[this]{
+        QTimer::singleShot(100, this, [this]{
             quit();
         });
         exec();
+        return false;
     }
+    return true;
 }
+
+QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
+{
+    return m_engine;
+}
+

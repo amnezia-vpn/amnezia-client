@@ -16,6 +16,7 @@ include("3rd/QtSsh/src/botan/botan.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
 include("3rd/qzxing/src/QZXing-components.pri")
 include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
+include("3rd/qtkeychain/qtkeychain.pri")
 
 INCLUDEPATH += $$PWD/3rd/QSimpleCrypto/include
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
@@ -63,6 +64,7 @@ HEADERS  += \
     ui/pages_logic/ShareConnectionLogic.h \
     ui/pages_logic/SitesLogic.h \
     ui/pages_logic/StartPageLogic.h \
+    ui/pages_logic/ViewConfigLogic.h \
     ui/pages_logic/VpnLogic.h \
     ui/pages_logic/WizardLogic.h \
     ui/pages_logic/protocols/CloakLogic.h \
@@ -123,6 +125,7 @@ SOURCES  += \
     ui/pages_logic/ShareConnectionLogic.cpp \
     ui/pages_logic/SitesLogic.cpp \
     ui/pages_logic/StartPageLogic.cpp \
+    ui/pages_logic/ViewConfigLogic.cpp \
     ui/pages_logic/VpnLogic.cpp \
     ui/pages_logic/WizardLogic.cpp \
     ui/pages_logic/protocols/CloakLogic.cpp \

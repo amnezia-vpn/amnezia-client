@@ -63,8 +63,11 @@ int main(int argc, char *argv[])
     app.loadTranslator();
     app.loadFonts();
 
-    app.parseCommands();
-    app.init();
+    bool doExec = app.parseCommands();
 
-    return app.exec();
+    if (doExec) {
+        app.init();
+        return app.exec();
+    }
+    return 0;
 }

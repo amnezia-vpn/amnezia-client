@@ -54,13 +54,13 @@ void ServerContainersLogic::onPushButtonDefaultClicked(DockerContainer c)
     if (!uiLogic()->m_vpnConnection) return;
     if (!uiLogic()->m_vpnConnection->isConnected()) return;
 
-    uiLogic()->vpnLogic()->onDisconnect();
-    uiLogic()->vpnLogic()->onConnect();
+    uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
+    uiLogic()->pageLogic<VpnLogic>()->onConnect();
 }
 
 void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
 {
-    uiLogic()->shareConnectionLogic()->updateSharingPage(uiLogic()->selectedServerIndex, c);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, c);
     emit uiLogic()->goToPage(Page::ShareConnection);
 }
 
@@ -86,7 +86,7 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
-    ErrorCode e = uiLogic()->serverConfiguringProgressLogic()->doInstallAction([this, c, &config](){
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, c, &config](){
         return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), c, config);
     });
 

@@ -213,6 +213,38 @@ QStringList Utils::summarizeRoutes(const QStringList &ips, const QString cidr)
     return QStringList();
 }
 
+QString Utils::openVpnExecPath()
+{
+#ifdef Q_OS_WIN
+    return Utils::executable("openvpn/openvpn", true);
+#elif defined Q_OS_LINUX
+    return Utils::usrExecutable("openvpn");
+#else
+    return Utils::executable("/openvpn", true);
+#endif
+}
+
+QString Utils::wireguardExecPath()
+{
+#ifdef Q_OS_WIN
+    return Utils::executable("wireguard/wireguard-service", true);
+#elif defined Q_OS_LINUX
+    return Utils::usrExecutable("wg");
+#else
+    return Utils::executable("/wireguard", true);
+#endif
+}
+
+QString Utils::certUtilPath()
+{
+#ifdef Q_OS_WIN
+    QString winPath = QString::fromUtf8(qgetenv("windir"));
+    return winPath + "system32\\certutil.exe";
+#else
+    return "";
+#endif
+}
+
 #ifdef Q_OS_WIN
 // Inspired from http://stackoverflow.com/a/15281070/1529139
 // and http://stackoverflow.com/q/40059902/1529139
