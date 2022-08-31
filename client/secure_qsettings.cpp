@@ -219,7 +219,7 @@ QByteArray SecureQSettings::getEncIv() const
 
 QByteArray SecureQSettings::getSecTag(const QString &tag)
 {
-    ReadPasswordJob job("get-" + tag);
+    ReadPasswordJob job(keyChainName);
     job.setAutoDelete(false);
     job.setKey(tag);
     QEventLoop loop;
@@ -236,7 +236,7 @@ QByteArray SecureQSettings::getSecTag(const QString &tag)
 
 void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
 {
-    WritePasswordJob job("set-" + tag);
+    WritePasswordJob job(keyChainName);
     job.setAutoDelete(false);
     job.setKey(tag);
     job.setBinaryData(data);
