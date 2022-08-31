@@ -56,14 +56,17 @@
 
 AmneziaApplication::~AmneziaApplication()
 {
-    QObject::disconnect(m_engine, 0,0,0);
-    delete m_engine;
+    if (m_engine) {
+        QObject::disconnect(m_engine, 0,0,0);
+        delete m_engine;
+    }
+    if (m_uiLogic) {
+        QObject::disconnect(m_uiLogic, 0,0,0);
+        delete m_uiLogic;
+    }
 
-    QObject::disconnect(m_uiLogic, 0,0,0);
-    delete m_uiLogic;
-
-    delete m_protocolProps;
-    delete m_containerProps;
+    if (m_protocolProps) delete m_protocolProps;
+    if (m_containerProps) delete m_containerProps;
 }
 
 void AmneziaApplication::init()
@@ -170,7 +173,7 @@ void AmneziaApplication::loadTranslator()
     }
 }
 
-void AmneziaApplication::parseCommands()
+bool AmneziaApplication::parseCommands()
 {
     m_parser.setApplicationDescription(APPLICATION_NAME);
     m_parser.addHelpOption();
@@ -186,11 +189,13 @@ void AmneziaApplication::parseCommands()
 
     if (m_parser.isSet(c_cleanup)) {
         Debug::cleanUp();
-        QTimer::singleShot(100,[this]{
+        QTimer::singleShot(100, this, [this]{
             quit();
         });
         exec();
+        return false;
     }
+    return true;
 }
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
