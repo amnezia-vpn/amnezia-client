@@ -134,7 +134,7 @@ void UiLogic::initalizeUiLogic()
             pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
         }
     });
-    if (!AndroidController::instance()->initialize(m_startPageLogic)) {
+    if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
          qCritical() << QString("Init failed") ;
          emit VpnProtocol::Error;
          return;
