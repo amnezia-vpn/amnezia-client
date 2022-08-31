@@ -231,7 +231,18 @@ win32|macx|linux:!android {
 }
 
 android {
-   QT += androidextras
+    message(Platform: android)
+    message("$$ANDROID_TARGET_ARCH")
+    versionAtLeast(QT_VERSION, 6.0.0) {
+        # We need to include qtprivate api's
+        # As QAndroidBinder is not yet implemented with a public api
+        QT+=core-private
+        ANDROID_ABIS=ANDROID_TARGET_ARCH
+    }
+    else {
+        QT += androidextras
+    }
+
    DEFINES += MVPN_ANDROID
 
    INCLUDEPATH += platforms/android

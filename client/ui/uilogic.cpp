@@ -18,7 +18,7 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QQmlFile>
-
+#include <QStandardPaths>
 #include "configurators/cloak_configurator.h"
 #include "configurators/vpn_configurator.h"
 #include "configurators/openvpn_configurator.h"

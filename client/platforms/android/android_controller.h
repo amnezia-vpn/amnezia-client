@@ -1,8 +1,9 @@
 #ifndef ANDROID_CONTROLLER_H
 #define ANDROID_CONTROLLER_H
 
-#include <QAndroidBinder>
-#include <QAndroidServiceConnection>
+//#include <QAndroidBinder>
+//#include <QAndroidServiceConnection>
+#include <QtCore/private/qandroidextras_p.h>
 
 #include "protocols/vpnprotocol.h"
 using namespace amnezia;
