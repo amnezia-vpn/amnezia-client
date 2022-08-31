@@ -26,7 +26,7 @@
 #include <protocols/ios_vpnprotocol.h>
 #endif
 
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(QObject* parent) : QObject(parent),

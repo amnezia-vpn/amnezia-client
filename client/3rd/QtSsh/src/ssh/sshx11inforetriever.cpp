@@ -107,7 +107,7 @@ SshX11InfoRetriever::SshX11InfoRetriever(const QString &displayName, QObject *pa
                     return;
                 }
                 if (dotIndex != -1) {
-                    displayInfo.screen = m_displayName.midRef(dotIndex + 1).toInt(&ok);
+                    displayInfo.screen = m_displayName.mid(dotIndex + 1).toInt(&ok);
                     if (!ok) {
                         emitFailure(tr("Invalid display name \"%1\"").arg(m_displayName));
                         return;

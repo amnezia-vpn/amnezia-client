@@ -5,7 +5,7 @@
 
 #include "SitesLogic.h"
 #include "VpnLogic.h"
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 #include <functional>
 
@@ -56,7 +56,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         newSite.replace("http://", "");
         newSite.replace("ftp://", "");
 
-        newSite = newSite.split("/", QString::SkipEmptyParts).first();
+        newSite = newSite.split("/", Qt::SkipEmptyParts).first();
     }
 
     const auto &cbProcess = [this, mode](const QString &newSite, const QString &ip) {

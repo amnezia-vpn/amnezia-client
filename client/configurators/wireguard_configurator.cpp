@@ -16,7 +16,7 @@
 #include "core/server_defs.h"
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
-#include "utils.h"
+#include "utilities.h"
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 {

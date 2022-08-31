@@ -1,5 +1,6 @@
 #include "rolesorter.h"
 #include "qqmlsortfilterproxymodel.h"
+#include "../utils/utils.h"
 
 namespace qqsfpm {
 
@@ -56,14 +57,8 @@ QPair<QVariant, QVariant> RoleSorter::sourceData(const QModelIndex &sourceLeft, 
 
 int RoleSorter::compare(const QModelIndex &sourceLeft, const QModelIndex& sourceRight, const QQmlSortFilterProxyModel& proxyModel) const
 {
-    QPair<QVariant, QVariant> pair = sourceData(sourceLeft, sourceRight, proxyModel);
-    QVariant leftValue = pair.first;
-    QVariant rightValue = pair.second;
-    if (leftValue < rightValue)
-        return -1;
-    if (leftValue > rightValue)
-        return 1;
-    return 0;
+    const QPair<QVariant, QVariant> pair = sourceData(sourceLeft, sourceRight, proxyModel);
+    return compareVariants(pair.first, pair.second);
 }
 
 }

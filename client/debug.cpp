@@ -9,7 +9,7 @@
 
 #include "debug.h"
 #include "defines.h"
-#include "utils.h"
+#include "utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
 #include <core/ipcclient.h>
@@ -30,7 +30,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
         return;
     }
 
-    Debug::m_textStream << qFormatLogMessage(type, context, msg) << endl << flush;
+    Debug::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
     Debug::appendAllLog(qFormatLogMessage(type, context, msg));
 
     std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;

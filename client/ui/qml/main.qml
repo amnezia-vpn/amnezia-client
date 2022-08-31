@@ -7,7 +7,7 @@ import PageEnum 1.0
 import PageType 1.0
 import Qt.labs.platform 1.1
 import Qt.labs.folderlistmodel 2.12
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs
 import "./"
 import "Controls"
 import "Pages"
@@ -263,10 +263,10 @@ Window  {
 //        y: (root.height - height) / 2
         title: qsTr("Exit")
         text: qsTr("Do you really want to quit?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
-            Qt.quit()
-        }
+//        standardButtons: StandardButton.Yes | StandardButton.No
+//        onYesClicked: {
+//            Qt.quit()
+//        }
         visible: false
     }
     MessageDialog {

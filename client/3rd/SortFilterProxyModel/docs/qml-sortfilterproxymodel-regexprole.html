@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- regexprole.cpp -->
+  <title>RegExpRole QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RegExpRole QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RegExpRole-brief -->
+<p>A <a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a> extracting data from a source role via a regular expression. <a href="#details">More...</a></p>
+<!-- @@@RegExpRole -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-regexprole-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexprole.html#caseSensitivity-prop">caseSensitivity</a></b></b> : Qt::CaseSensitivity</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexprole.html#pattern-prop">pattern</a></b></b> : QString</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-regexprole.html#roleName-prop">roleName</a></b></b> : QString</li>
+</ul>
+<!-- $$$RegExpRole-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A RegExpRole is a <a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a> that provides a role for each named capture group of its regular expression <a href="qml-sortfilterproxymodel-regexprole.html#pattern-prop">pattern</a>.</p>
+<p>In the following example, the <code>date</code> role of the source model will be extracted in 3 roles in the proxy moodel: <code>year</code>, <code>month</code> and <code>day</code>.</p>
+<pre class="cpp">SortFilterProxyModel {
+    sourceModel: eventModel
+    proxyRoles: RegExpRole {
+        roleName: <span class="string">&quot;date&quot;</span>
+        pattern: <span class="string">&quot;(?&lt;year&gt;\\d{4})-(?&lt;month&gt;\\d{2})-(?&lt;day&gt;\\d{2})&quot;</span>
+    }
+}</pre>
+<!-- @@@RegExpRole -->
+<h2>Property Documentation</h2>
+<!-- $$$caseSensitivity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="caseSensitivity-prop"></a><span class="name">caseSensitivity</span> : <span class="type">Qt::CaseSensitivity</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the caseSensitivity of the regular expression.</p>
+</div></div><!-- @@@caseSensitivity -->
+<br/>
+<!-- $$$pattern -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pattern-prop"></a><span class="name">pattern</span> : <span class="type">QString</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the pattern of the regular expression of this <a href="qml-sortfilterproxymodel-regexprole.html">RegExpRole</a>. The <a href="qml-sortfilterproxymodel-regexprole.html">RegExpRole</a> will expose a role for each of the named capture group of the pattern.</p>
+</div></div><!-- @@@pattern -->
+<br/>
+<!-- $$$roleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="roleName-prop"></a><span class="name">roleName</span> : <span class="type">QString</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name that the <a href="qml-sortfilterproxymodel-regexprole.html">RegExpRole</a> is using to query the source model's data to extract new roles from.</p>
+</div></div><!-- @@@roleName -->
+<br/>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- sorter.cpp -->
+  <title>Sorter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Sorter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Sorter-brief -->
+<p>Base type for the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a> sorters. <a href="#details">More...</a></p>
+<!-- @@@Sorter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-expressionsorter.html">ExpressionSorter</a>, <a href="qml-sortfilterproxymodel-filtersorter.html">FilterSorter</a>, and <a href="qml-sortfilterproxymodel-rolesorter.html">RoleSorter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-sorter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sorter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sorter.html#priority-prop">priority</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sorter.html#sortOrder-prop">sortOrder</a></b></b> : Qt::SortOrder</li>
+</ul>
+<!-- $$$Sorter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Sorter type cannot be used directly in a QML file. It exists to provide a set of common properties and methods, available across all the other sorters types that inherit from it. Attempting to use the Sorter type directly will result in an error.</p>
+<!-- @@@Sorter -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the sorter is enabled. A disabled sorter will not change the order of the rows.</p>
+<p>By default, sorters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$priority -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="priority-prop"></a><span class="name">priority</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the sort priority of this sorter. Sorters with a higher priority are applied first. In case of equal priority, Sorters are ordered by their insertion order.</p>
+<p>By default, the priority is 0.</p>
+</div></div><!-- @@@priority -->
+<br/>
+<!-- $$$sortOrder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sortOrder-prop"></a><span class="name">sortOrder</span> : <span class="type">Qt::SortOrder</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the sort order of this sorter.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.AscendingOrder</code></td><td class="topAlign">The items are sorted ascending e.g&#x2e; starts with 'AAA' ends with 'ZZZ' in Latin-1 locales</td></tr>
+<tr><td class="topAlign"><code>Qt.DescendingOrder</code></td><td class="topAlign">The items are sorted descending e.g&#x2e; starts with 'ZZZ' ends with 'AAA' in Latin-1 locales</td></tr>
+</table></div>
+<p>By default, sorting is in ascending order.</p>
+</div></div><!-- @@@sortOrder -->
+<br/>
+</body>
+</html>

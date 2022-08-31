@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- alloffilter.cpp -->
+  <title>AllOf QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">AllOf QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$AllOf-brief -->
+<p>Filter container accepting rows accepted by all its child filters. <a href="#details">More...</a></p>
+<!-- @@@AllOf -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-filter.html">Filter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-allof-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-allof.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-allof.html#inverted-prop">inverted</a></b></b> : bool</li>
+</ul>
+<!-- $$$AllOf-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The AllOf type is a <a href="qml-sortfilterproxymodel-filter.html">Filter</a> container that accepts rows if all of its contained (and enabled) filters accept them, or if it has no filter.</p>
+<p>Using it as a top level filter has the same effect as putting all its child filters as top level filters. It can however be usefull to use an AllOf filter when nested in an <a href="qml-sortfilterproxymodel-anyof.html">AnyOf</a> filter.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+<!-- @@@AllOf -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is enabled. A disabled filter will accept every rows unconditionally (even if it's inverted).</p>
+<p>By default, filters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is inverted. When a filter is inverted, a row normally accepted would be rejected, and vice-versa.</p>
+<p>By default, filters are not inverted.</p>
+</div></div><!-- @@@inverted -->
+<br/>
+</body>
+</html>

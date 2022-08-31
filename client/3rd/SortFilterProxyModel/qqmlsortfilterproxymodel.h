@@ -26,7 +26,6 @@ class QQmlSortFilterProxyModel : public QSortFilterProxyModel,
 
     Q_PROPERTY(QString filterRoleName READ filterRoleName WRITE setFilterRoleName NOTIFY filterRoleNameChanged)
     Q_PROPERTY(QString filterPattern READ filterPattern WRITE setFilterPattern NOTIFY filterPatternChanged)
-    Q_PROPERTY(PatternSyntax filterPatternSyntax READ filterPatternSyntax WRITE setFilterPatternSyntax NOTIFY filterPatternSyntaxChanged)
     Q_PROPERTY(QVariant filterValue READ filterValue WRITE setFilterValue NOTIFY filterValueChanged)
 
     Q_PROPERTY(QString sortRoleName READ sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged)
@@ -37,15 +36,6 @@ class QQmlSortFilterProxyModel : public QSortFilterProxyModel,
     Q_PROPERTY(QQmlListProperty<qqsfpm::ProxyRole> proxyRoles READ proxyRolesListProperty)
 
 public:
-    enum PatternSyntax {
-        RegExp = QRegExp::RegExp,
-        Wildcard = QRegExp::Wildcard,
-        FixedString = QRegExp::FixedString,
-        RegExp2 = QRegExp::RegExp2,
-        WildcardUnix = QRegExp::WildcardUnix,
-        W3CXmlSchema11 = QRegExp::W3CXmlSchema11 };
-    Q_ENUMS(PatternSyntax)
-
     QQmlSortFilterProxyModel(QObject* parent = 0);
 
     int count() const;
@@ -58,9 +48,6 @@ public:
 
     QString filterPattern() const;
     void setFilterPattern(const QString& filterPattern);
-
-    PatternSyntax filterPatternSyntax() const;
-    void setFilterPatternSyntax(PatternSyntax patternSyntax);
 
     const QVariant& filterValue() const;
     void setFilterValue(const QVariant& filterValue);
@@ -97,7 +84,6 @@ Q_SIGNALS:
     void delayedChanged();
 
     void filterRoleNameChanged();
-    void filterPatternSyntaxChanged();
     void filterPatternChanged();
     void filterValueChanged();
 
@@ -109,7 +95,7 @@ protected:
     bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
 
 protected Q_SLOTS:
-    void resetInternalData();
+    void resetInternalData() override;
 
 private Q_SLOTS:
     void queueInvalidateFilter();

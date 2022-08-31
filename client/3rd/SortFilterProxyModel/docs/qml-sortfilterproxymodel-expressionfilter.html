@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- expressionfilter.cpp -->
+  <title>ExpressionFilter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ExpressionFilter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ExpressionFilter-brief -->
+<p>Filters row with a custom filtering. <a href="#details">More...</a></p>
+<!-- @@@ExpressionFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-filter.html">Filter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-expressionfilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-expressionfilter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-expressionfilter.html#expression-prop">expression</a></b></b> : expression</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-expressionfilter.html#inverted-prop">inverted</a></b></b> : bool</li>
+</ul>
+<!-- $$$ExpressionFilter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An ExpressionFilter is a <a href="qml-sortfilterproxymodel-filter.html">Filter</a> allowing to implement custom filtering based on a javascript expression.</p>
+<!-- @@@ExpressionFilter -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is enabled. A disabled filter will accept every rows unconditionally (even if it's inverted).</p>
+<p>By default, filters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$expression -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="expression-prop"></a><span class="name">expression</span> : <span class="type">expression</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>An expression to implement custom filtering, it must evaluate to a boolean. It has the same syntax has a <a href="http://doc.qt.io/qt-5/qtqml-syntax-propertybinding.html">Property Binding</a> except it will be evaluated for each of the source model's rows. Rows that have their expression evaluating to <code>true</code> will be accepted by the model. Data for each row is exposed like for a delegate of a QML View.</p>
+<p>This expression is reevaluated for a row every time its model data changes. When an external property (not <code>index</code> or in <code>model</code>) the expression depends on changes, the expression is reevaluated for every row of the source model. To capture the properties the expression depends on, the expression is first executed with invalid data and each property access is detected by the QML engine. This means that if a property is not accessed because of a conditional, it won't be captured and the expression won't be reevaluted when this property changes.</p>
+<p>A workaround to this problem is to access all the properties the expressions depends unconditionally at the beggining of the expression.</p>
+</div></div><!-- @@@expression -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is inverted. When a filter is inverted, a row normally accepted would be rejected, and vice-versa.</p>
+<p>By default, filters are not inverted.</p>
+</div></div><!-- @@@inverted -->
+<br/>
+</body>
+</html>

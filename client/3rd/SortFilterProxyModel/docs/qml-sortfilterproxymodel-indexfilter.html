@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- indexfilter.cpp -->
+  <title>IndexFilter QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">IndexFilter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$IndexFilter-brief -->
+<p>Filters rows based on their source index. <a href="#details">More...</a></p>
+<!-- @@@IndexFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-filter.html">Filter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-indexfilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-indexfilter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-indexfilter.html#inverted-prop">inverted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-indexfilter.html#maximumIndex-prop">maximumIndex</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-indexfilter.html#minimumIndex-prop">minimumIndex</a></b></b> : int</li>
+</ul>
+<!-- $$$IndexFilter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An IndexFilter is a filter allowing contents to be filtered based on their source model index.</p>
+<p>In the following example, only the first row of the source model will be accepted:</p>
+<pre class="cpp">SortFilterProxyModel {
+   sourceModel: contactModel
+   filters: IndexFilter {
+       maximumIndex: <span class="number">0</span>
+   }
+}</pre>
+<!-- @@@IndexFilter -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is enabled. A disabled filter will accept every rows unconditionally (even if it's inverted).</p>
+<p>By default, filters are enabled.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the filter is inverted. When a filter is inverted, a row normally accepted would be rejected, and vice-versa.</p>
+<p>By default, filters are not inverted.</p>
+</div></div><!-- @@@inverted -->
+<br/>
+<!-- $$$maximumIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumIndex-prop"></a><span class="name">maximumIndex</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximumIndex of the filter. Rows with a source index higher than <code>maximumIndex</code> will be rejected.</p>
+<p>If <code>maximumIndex</code> is negative, it is counted from the end of the source model, meaning that:</p>
+<pre class="cpp">maximumIndex: <span class="operator">-</span><span class="number">1</span></pre>
+<p>is equivalent to :</p>
+<pre class="cpp">maximumIndex: sourceModel<span class="operator">.</span>count <span class="operator">-</span> <span class="number">1</span></pre>
+<p>By default, no value is set.</p>
+</div></div><!-- @@@maximumIndex -->
+<br/>
+<!-- $$$minimumIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumIndex-prop"></a><span class="name">minimumIndex</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimumIndex of the filter. Rows with a source index lower than <code>minimumIndex</code> will be rejected.</p>
+<p>If <code>minimumIndex</code> is negative, it is counted from the end of the source model, meaning that :</p>
+<pre class="cpp">minimumIndex: <span class="operator">-</span><span class="number">1</span></pre>
+<p>is equivalent to :</p>
+<pre class="cpp">minimumIndex: sourceModel<span class="operator">.</span>count <span class="operator">-</span> <span class="number">1</span></pre>
+<p>By default, no value is set.</p>
+</div></div><!-- @@@minimumIndex -->
+<br/>
+</body>
+</html>

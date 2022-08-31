@@ -19,7 +19,7 @@
 #include "containers/containers_defs.h"
 #include "server_defs.h"
 #include "scripts_registry.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include <configurators/vpn_configurator.h>
 
@@ -51,7 +51,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     qDebug() << "Run script";
 
     QString totalLine;
-    const QStringList &lines = script.split("\n", QString::SkipEmptyParts);
+    const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
     for (int i = 0; i < lines.count(); i++) {
         QString currentLine = lines.at(i);
         QString nextLine;

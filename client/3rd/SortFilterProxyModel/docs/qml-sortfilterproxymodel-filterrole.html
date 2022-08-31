@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- filterrole.cpp -->
+  <title>FilterRole QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FilterRole QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FilterRole-brief -->
+<p>A role resolving to <code>true</code> for rows matching all its filters. <a href="#details">More...</a></p>
+<!-- @@@FilterRole -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-sortfilterproxymodel-singlerole.html">SingleRole</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-filterrole-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-filterrole.html#filters-prop">filters</a></b></b> : list&lt;Filter&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-filterrole.html#name-prop">name</a></b></b> : string</li>
+</ul>
+<!-- $$$FilterRole-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A FilterRole is a <a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a> that returns <code>true</code> for rows matching all its filters.</p>
+<p>In the following example, the <code>isAdult</code> role will be equal to <code>true</code> if the <code>age</code> role is superior or equal to 18.</p>
+<pre class="cpp">SortFilterProxyModel {
+    sourceModel: personModel
+    proxyRoles: FilterRole {
+        name: <span class="string">&quot;isAdult&quot;</span>
+        RangeFilter { roleName: <span class="string">&quot;age&quot;</span>; minimumValue: <span class="number">18</span>; minimumInclusive: <span class="keyword">true</span> }
+    }
+}</pre>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+<!-- @@@FilterRole -->
+<h2>Property Documentation</h2>
+<!-- $$$filters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="filters-prop"></a><span class="qmldefault">[default] </span><span class="name">filters</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-sortfilterproxymodel-filter.html">Filter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of filters for this filter role. The data of this role will be equal to the <code>true</code> if all its filters match the model row, <code>false</code> otherwise.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filter.html">Filter</a> and <a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+</div></div><!-- @@@filters -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role name of the proxy role.</p>
+</div></div><!-- @@@name -->
+<br/>
+</body>
+</html>

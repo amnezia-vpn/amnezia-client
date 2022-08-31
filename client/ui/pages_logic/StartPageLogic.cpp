@@ -2,7 +2,7 @@
 #include "core/errorstrings.h"
 #include "configurators/ssh_configurator.h"
 #include "../uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -200,7 +200,7 @@ bool StartPageLogic::importConnectionFromCode(QString code)
         return importConnection(o);
     }
 
-    o = QJsonDocument::fromBinaryData(ba).object();
+    o = QJsonDocument::fromJson(ba).object();
     if (!o.isEmpty()) {
         return importConnection(o);
     }

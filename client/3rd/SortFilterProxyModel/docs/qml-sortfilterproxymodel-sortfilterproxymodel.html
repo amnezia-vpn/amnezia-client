@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlsortfilterproxymodel.cpp -->
+  <title>SortFilterProxyModel QML Type | SortFilterProxyModel</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SortFilterProxyModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SortFilterProxyModel-brief -->
+<p>Filters and sorts data coming from a source <a href="http://doc.qt.io/qt-5/qabstractitemmodel.html">QAbstractItemModel</a>. <a href="#details">More...</a></p>
+<!-- @@@SortFilterProxyModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import SortFilterProxyModel .</td></tr></table></div><ul>
+<li><a href="qml-sortfilterproxymodel-sortfilterproxymodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#delayed-prop">delayed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#filters-prop">filters</a></b></b> : list&lt;Filter&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#proxyRoles-prop">proxyRoles</a></b></b> : list&lt;ProxyRole&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#sortRoleName-prop">sortRoleName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#sorters-prop">sorters</a></b></b> : list&lt;Sorter&gt;</li>
+<li class="fn"><b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#sourceModel-prop">sourceModel</a></b></b> : QAbstractItemModel*</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">variant <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#get-method-1">get</a></b></b>(<i>row</i>,  string <i>roleName</i>)</li>
+<li class="fn">object <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#get-method">get</a></b></b>(<i>row</i>)</li>
+<li class="fn">int <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#mapFromSource-method-1">mapFromSource</a></b></b>(<i>sourceRow</i>)</li>
+<li class="fn">QModelIndex <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#mapFromSource-method">mapFromSource</a></b></b>(<i>sourceIndex</i>)</li>
+<li class="fn">int <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#mapToSource-method-1">mapToSource</a></b></b>(<i>proxyRow</i>)</li>
+<li class="fn">index <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#mapToSource-method">mapToSource</a></b></b>(<i>proxyIndex</i>)</li>
+<li class="fn">int <b><b><a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#roleForName-method">roleForName</a></b></b>(<i>roleName</i>)</li>
+</ul>
+<!-- $$$SortFilterProxyModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The SortFilterProxyModel type provides support for filtering and sorting data coming from a source model.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a> and <a href="qml-sortfilterproxymodel-sortercontainer.html">SorterContainer</a>.</p>
+<!-- @@@SortFilterProxyModel -->
+<h2>Property Documentation</h2>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="name">count</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The number of rows in the proxy model (not filtered out the source model)</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$delayed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delayed-prop"></a><span class="name">delayed</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Delay the execution of filters, sorters and <a href="index.html#proxyroles">proxyRoles</a> until the next event loop. This can be used as an optimization when multiple filters, sorters or <a href="index.html#proxyroles">proxyRoles</a> are changed in a single event loop. They will be executed once in a single batch at the next event loop instead of being executed in multiple sequential batches.</p>
+<p>By default, the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a> is not delayed, unless the <code>SFPM_DELAYED</code> environment variable is defined at compile time.</p>
+</div></div><!-- @@@delayed -->
+<br/>
+<!-- $$$filters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="filters-prop"></a><span class="name">filters</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-sortfilterproxymodel-filter.html">Filter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of filters for this proxy model. To be included in the model, a row of the source model has to be accepted by all the top level filters of this list.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-filter.html">Filter</a> and <a href="qml-sortfilterproxymodel-filtercontainer.html">FilterContainer</a>.</p>
+</div></div><!-- @@@filters -->
+<br/>
+<!-- $$$proxyRoles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="proxyRoles-prop"></a><span class="name">proxyRoles</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of proxy roles for this proxy model. Each proxy role adds a new custom role to the model.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-proxyrole.html">ProxyRole</a>.</p>
+</div></div><!-- @@@proxyRoles -->
+<br/>
+<!-- $$$sortRoleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sortRoleName-prop"></a><span class="name">sortRoleName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The role name of the source model's data used for the sorting.</p>
+<p><b>See also </b><a href="http://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop">sortRole</a> and <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html#roleForName-method">roleForName</a>.</p>
+</div></div><!-- @@@sortRoleName -->
+<br/>
+<!-- $$$sorters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sorters-prop"></a><span class="name">sorters</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-sortfilterproxymodel-sorter.html">Sorter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of sorters for this proxy model. The rows of the source model are sorted by the sorters of this list, in their order of insertion.</p>
+<p><b>See also </b><a href="qml-sortfilterproxymodel-sorter.html">Sorter</a> and <a href="qml-sortfilterproxymodel-sortercontainer.html">SorterContainer</a>.</p>
+</div></div><!-- @@@sorters -->
+<br/>
+<!-- $$$sourceModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceModel-prop"></a><span class="name">sourceModel</span> : <span class="type">QAbstractItemModel</span>*</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The source model of this proxy model</p>
+</div></div><!-- @@@sourceModel -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$get$$$getstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method-1"></a><span class="type">variant</span> <span class="name">get</span>(<i>row</i>,  <span class="type">string</span> <i>roleName</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Return the data for the given <i>roleName</i> of the item at <i>row</i> in the proxy model. This allows the role data to be read (not modified) from JavaScript. This equivalent to calling <code>data(index(row, 0), roleForName(roleName))</code>.</p>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$get[overload1]$$$get -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method"></a><span class="type">object</span> <span class="name">get</span>(<i>row</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Return the item at <i>row</i> in the proxy model as a map of all its roles. This allows the item data to be read (not modified) from JavaScript.</p>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$mapFromSource$$$mapFromSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mapFromSource-method-1"></a><span class="type">int</span> <span class="name">mapFromSource</span>(<i>sourceRow</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the row in the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a> given the <i>sourceRow</i> from the source model. Returns -1 if there is no corresponding row.</p>
+</div></div><!-- @@@mapFromSource -->
+<br/>
+<!-- $$$mapFromSource[overload1]$$$mapFromSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mapFromSource-method"></a><span class="type">QModelIndex</span> <span class="name">mapFromSource</span>(<i>sourceIndex</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the model index in the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a> given the <i>sourceIndex</i> from the source model.</p>
+</div></div><!-- @@@mapFromSource -->
+<br/>
+<!-- $$$mapToSource$$$mapToSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mapToSource-method-1"></a><span class="type">int</span> <span class="name">mapToSource</span>(<i>proxyRow</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the source model row corresponding to the given <i>proxyRow</i> from the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a>. Returns -1 if there is no corresponding row.</p>
+</div></div><!-- @@@mapToSource -->
+<br/>
+<!-- $$$mapToSource[overload1]$$$mapToSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mapToSource-method"></a><span class="type">index</span> <span class="name">mapToSource</span>(<i>proxyIndex</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the source model index corresponding to the given <i>proxyIndex</i> from the <a href="qml-sortfilterproxymodel-sortfilterproxymodel.html">SortFilterProxyModel</a>.</p>
+</div></div><!-- @@@mapToSource -->
+<br/>
+<!-- $$$roleForName[overload1]$$$roleForName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="roleForName-method"></a><span class="type">int</span> <span class="name">roleForName</span>(<i>roleName</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the role number for the given <i>roleName</i>. If no role is found for this <i>roleName</i>, <code>-1</code> is returned.</p>
+</div></div><!-- @@@roleForName -->
+<br/>
+</body>
+</html>
