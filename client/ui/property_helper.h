@@ -14,7 +14,7 @@
         } \
        Q_SIGNAL void NAME ## Changed(TYPE value);\
     private: \
-       TYPE m_ ## NAME;
+       TYPE m_ ## NAME{};
 
 #define READONLY_PROPERTY(TYPE, NAME) \
     Q_PROPERTY(TYPE NAME READ NAME CONSTANT ) \
@@ -22,6 +22,6 @@
        TYPE NAME() const { return m_ ## NAME ; } \
     private: \
        void NAME(TYPE value) {m_ ## NAME = value; } \
-       TYPE m_ ## NAME;
+       TYPE m_ ## NAME{};
 
 #endif // PROPERTY_HELPER_H

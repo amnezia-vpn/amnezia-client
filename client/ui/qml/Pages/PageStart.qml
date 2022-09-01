@@ -119,7 +119,6 @@ PageBase {
             anchors.topMargin: 40
 
             text: qsTr("Open file")
-            visible: StartPageLogic.pushButtonConnectVisible
             onClicked: {
                 StartPageLogic.onPushButtonImportOpenFile()
             }
@@ -133,7 +132,6 @@ PageBase {
             anchors.topMargin: 10
 
             text: qsTr("Scan QR code")
-            visible: StartPageLogic.pushButtonConnectVisible
             onClicked: {
                 if (Qt.platform.os == "ios") {
                     UiLogic.goToPage(PageEnum.QrDecoderIos)
@@ -144,7 +142,19 @@ PageBase {
             enabled: StartPageLogic.pushButtonConnectEnabled
         }
 
+        BlueButtonType {
+            id: btn_restore_cfg
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: qr_code_import.bottom
+            anchors.topMargin: 30
+            visible: UiLogic.pagesStackDepth == 1
+            enabled: StartPageLogic.pushButtonConnectEnabled
 
+            text: qsTr("Restore app config")
+            onClicked: {
+                AppSettingsLogic.onPushButtonRestoreAppConfigClicked()
+            }
+        }
     }
 
 
@@ -270,7 +280,6 @@ PageBase {
             anchors.topMargin: 10
 
             text: StartPageLogic.pushButtonConnectText
-            visible: StartPageLogic.pushButtonConnectVisible
             onClicked: {
                 StartPageLogic.onPushButtonConnect()
             }

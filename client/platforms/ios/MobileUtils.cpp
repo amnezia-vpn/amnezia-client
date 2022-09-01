@@ -1,5 +1,5 @@
 #include "MobileUtils.h"
 
-void MobileUtils::shareText(const QStringList& filesToSend) {
+void MobileUtils::shareText(const QStringList&) {}
 
-}
+

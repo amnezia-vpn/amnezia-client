@@ -7,6 +7,10 @@
 #include <QKeyEvent>
 #include <QThread>
 
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+
 #include "property_helper.h"
 #include "pages.h"
 #include "protocols/vpnprotocol.h"
@@ -16,7 +20,12 @@
 #include "models/protocols_model.h"
 
 #include "notificationhandler.h"
-#include "settings.h"
+
+class Settings;
+class VpnConfigurator;
+class ServerController;
+
+class PageLogicBase;
 
 class AppSettingsLogic;
 class GeneralSettingsLogic;
@@ -30,6 +39,7 @@ class ServerContainersLogic;
 class ShareConnectionLogic;
 class SitesLogic;
 class StartPageLogic;
+class ViewConfigLogic;
 class VpnLogic;
 class WizardLogic;
 
@@ -50,17 +60,18 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
+    AUTO_PROPERTY(QString, dialogConnectErrorText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
-    // TODO: review
-    Q_PROPERTY(QString dialogConnectErrorText READ getDialogConnectErrorText WRITE setDialogConnectErrorText NOTIFY dialogConnectErrorTextChanged)
-
 public:
-    explicit UiLogic(QObject *parent = nullptr);
+    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
+
+    friend class PageLogicBase;
 
     friend class AppSettingsLogic;
     friend class GeneralSettingsLogic;
@@ -73,6 +84,7 @@ public:
     friend class ShareConnectionLogic;
     friend class SitesLogic;
     friend class StartPageLogic;
+    friend class ViewConfigLogic;
     friend class VpnLogic;
     friend class WizardLogic;
 
@@ -92,10 +104,6 @@ public:
     Q_INVOKABLE QString containerName(int container);
     Q_INVOKABLE QString containerDesc(int container);
 
-    Q_INVOKABLE void onGotoPage(PageEnumNS::Page p, bool reset = true, bool slide = true) { emit goToPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToProtocolPage(p, reset, slide); }
-    Q_INVOKABLE void onGotoShareProtocolPage(Proto p, bool reset = true, bool slide = true) { emit goToShareProtocolPage(p, reset, slide); }
-
     Q_INVOKABLE void onGotoCurrentProtocolsPage();
 
     Q_INVOKABLE void keyPressEvent(Qt::Key key);
@@ -105,9 +113,6 @@ public:
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
-
-    QString getDialogConnectErrorText() const;
-    void setDialogConnectErrorText(const QString &dialogConnectErrorText);
 
 signals:
     void dialogConnectErrorTextChanged();
@@ -124,9 +129,6 @@ signals:
     void hide();
     void raise();
     void toggleLogPanel();
-
-private:
-    QString m_dialogConnectErrorText;
 
 private slots:
     // containers - INOUT arg
@@ -168,21 +170,6 @@ private:
 
 
 public:
-    AppSettingsLogic *appSettingsLogic()                    { return m_appSettingsLogic; }
-    GeneralSettingsLogic *generalSettingsLogic()            { return m_generalSettingsLogic; }
-    NetworkSettingsLogic *networkSettingsLogic()            { return m_networkSettingsLogic; }
-    NewServerProtocolsLogic *newServerProtocolsLogic()      { return m_newServerProtocolsLogic; }
-    QrDecoderLogic *qrDecoderLogic()                        { return m_qrDecoderLogic; }
-    ServerConfiguringProgressLogic *serverConfiguringProgressLogic()  { return m_serverConfiguringProgressLogic; }
-    ServerListLogic *serverListLogic()                      { return m_serverListLogic; }
-    ServerSettingsLogic *serverSettingsLogic()              { return m_serverSettingsLogic; }
-    ServerContainersLogic *serverprotocolsLogic()        { return m_serverprotocolsLogic; }
-    ShareConnectionLogic *shareConnectionLogic()            { return m_shareConnectionLogic; }
-    SitesLogic *sitesLogic()                                { return m_sitesLogic; }
-    StartPageLogic *startPageLogic()                        { return m_startPageLogic; }
-    VpnLogic *vpnLogic()                                    { return m_vpnLogic; }
-    WizardLogic *wizardLogic()                              { return m_wizardLogic; }
-
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);
 
     QObject *qmlRoot() const;
@@ -190,29 +177,36 @@ public:
 
     NotificationHandler *notificationHandler() const;
 
+    void setQmlContextProperty(PageLogicBase *logic);
+    void registerPagesLogic();
+
+    template<typename T>
+    void registerPageLogic()
+    {
+        T* logic = new T(this);
+        m_logicMap[std::type_index(typeid(T))] = logic;
+        setQmlContextProperty(logic);
+    }
+
+    template<typename T>
+    T* pageLogic()
+    {
+        return static_cast<T *>(m_logicMap.value(std::type_index(typeid(T))));
+    }
+
 private:
     QObject *m_qmlRoot{nullptr};
 
-    AppSettingsLogic *m_appSettingsLogic;
-    GeneralSettingsLogic *m_generalSettingsLogic;
-    NetworkSettingsLogic *m_networkSettingsLogic;
-    NewServerProtocolsLogic *m_newServerProtocolsLogic;
-    QrDecoderLogic *m_qrDecoderLogic;
-    ServerConfiguringProgressLogic *m_serverConfiguringProgressLogic;
-    ServerListLogic *m_serverListLogic;
-    ServerSettingsLogic *m_serverSettingsLogic;
-    ServerContainersLogic *m_serverprotocolsLogic;
-    ShareConnectionLogic *m_shareConnectionLogic;
-    SitesLogic *m_sitesLogic;
-    StartPageLogic *m_startPageLogic;
-    VpnLogic *m_vpnLogic;
-    WizardLogic *m_wizardLogic;
+    QMap<std::type_index, PageLogicBase*> m_logicMap;
 
     QMap<Proto, PageProtocolLogicBase *> m_protocolLogicMap;
 
     VpnConnection* m_vpnConnection;
     QThread m_vpnConnectionThread;
-    Settings m_settings;
+
+    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<VpnConfigurator> m_configurator;
+    std::shared_ptr<ServerController> m_serverController;
 
     NotificationHandler* m_notificationHandler;
 

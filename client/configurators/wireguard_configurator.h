@@ -4,13 +4,15 @@
 #include <QObject>
 #include <QProcessEnvironment>
 
+#include "configurator_base.h"
 #include "core/defs.h"
-#include "settings.h"
-#include "core/servercontroller.h"
 
-class WireguardConfigurator
+class WireguardConfigurator : ConfiguratorBase
 {
+    Q_OBJECT
 public:
+    WireguardConfigurator(std::shared_ptr<Settings> settings,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
 
     struct ConnectionData {
         QString clientPrivKey; // client private key
@@ -21,20 +23,18 @@ public:
         QString host; // host ip
     };
 
-    static QString genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
+    QString genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
-    static QString processConfigWithLocalSettings(QString config);
-    static QString processConfigWithExportSettings(QString config);
+    QString processConfigWithLocalSettings(QString config);
+    QString processConfigWithExportSettings(QString config);
 
 
 private:
-    static ConnectionData prepareWireguardConfig(const ServerCredentials &credentials,
+    ConnectionData prepareWireguardConfig(const ServerCredentials &credentials,
         DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
-    static ConnectionData genClientKeys();
-
-    static Settings &m_settings();
+    ConnectionData genClientKeys();
 };
 
 #endif // WIREGUARD_CONFIGURATOR_H

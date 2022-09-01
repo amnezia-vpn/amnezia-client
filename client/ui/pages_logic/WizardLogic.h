@@ -2,6 +2,7 @@
 #define WIZARD_LOGIC_H
 
 #include "PageLogicBase.h"
+#include "containers/containers_defs.h"
 
 class UiLogic;
 

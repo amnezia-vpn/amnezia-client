@@ -159,5 +159,6 @@
         <file>ui/qml/Controls/SvgButtonType.qml</file>
         <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
         <file>server_scripts/website_tor/Dockerfile</file>
+        <file>ui/qml/Pages/PageViewConfig.qml</file>
     </qresource>
 </RCC>
