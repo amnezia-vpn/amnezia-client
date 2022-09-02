@@ -162,7 +162,10 @@ QByteArray SecureQSettings::decryptText(const QByteArray& ba) const
 
 bool SecureQSettings::encryptionRequired() const
 {
-    // TODO: review on linux
+#ifdef Q_OS_LINUX
+    // QtKeyChain failing on Linux
+    return false;
+#endif
     return true;
 }
 
