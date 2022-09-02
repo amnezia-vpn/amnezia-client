@@ -5,6 +5,10 @@
 #include "macos/gobridge/wireguard.h"
 #include "wireguard-go-version.h"
 #include "3rd/wireguard-apple/Sources/WireGuardKitC/WireGuardKitC.h"
+#include "3rd/ShadowSocks/ShadowSocks/ShadowSocks.h"
+#include "platforms/ios/ssconnectivity.h"
+#include "platforms/ios/iosopenvpn2ssadapter.h"
+#include "3rd/libleaf/include/leaf.h" 
 
 #include <stdbool.h>
 #include <stdint.h>

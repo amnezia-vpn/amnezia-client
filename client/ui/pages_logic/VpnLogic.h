@@ -22,7 +22,8 @@ class VpnLogic : public PageLogicBase
     AUTO_PROPERTY(bool, pushButtonConnectEnabled)
     AUTO_PROPERTY(bool, pushButtonConnectVisible)
     AUTO_PROPERTY(bool, widgetVpnModeEnabled)
-    AUTO_PROPERTY(bool, isContainerWorkingOnPlatform)
+    AUTO_PROPERTY(bool, isContainerSupportedByCurrentPlatform)
+    AUTO_PROPERTY(bool, isContainerHaveAuthData)
 
     AUTO_PROPERTY(QString, labelErrorText)
     AUTO_PROPERTY(QString, labelVersionText)

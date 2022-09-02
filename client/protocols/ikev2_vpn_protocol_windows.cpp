@@ -199,7 +199,7 @@ ErrorCode Ikev2Protocol::start()
             setLastError(ErrorCode::AmneziaServiceConnectionFailed);
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
-        certInstallProcess->setProgram("certutil");
+        certInstallProcess->setProgram(PermittedProcess::CertUtil);
         QStringList arguments({"-f" , "-importpfx",
                                "-p", m_config[config_key::password].toString(),
                                certFile.fileName(), "NoExport"

@@ -55,9 +55,9 @@ void WizardLogic::onPushButtonVpnModeFinishClicked()
     auto containers = getInstallConfigsFromWizardPage();
     uiLogic()->installServer(containers);
     if (checkBoxVpnModeChecked()) {
-        m_settings.setRouteMode(Settings::VpnOnlyForwardSites);
+        m_settings->setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
-        m_settings.setRouteMode(Settings::VpnAllSites);
+        m_settings->setRouteMode(Settings::VpnAllSites);
     }
 }
 

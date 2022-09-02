@@ -38,8 +38,6 @@ void QrDecoderLogic::onDetectedQrCode(const QString &code)
 
 
     if (magic == amnezia::qrMagicCode) {
-        qDebug() << "QrDecoderLogic::onDetectedQrCode magic code detected" << magic << ba.size();
-
         quint8 chunksCount; s >> chunksCount;
         if (totalChunksCount() != chunksCount) {
             m_chunks.clear();
@@ -56,7 +54,7 @@ void QrDecoderLogic::onDetectedQrCode(const QString &code)
                 data.append(m_chunks.value(i));
             }
 
-            bool ok = uiLogic()->startPageLogic()->importConnectionFromQr(data);
+            bool ok = uiLogic()->pageLogic<StartPageLogic>()->importConnectionFromQr(data);
             if (ok) {
                 set_detectingEnabled(false);
                 emit stopDecode();
@@ -69,7 +67,7 @@ void QrDecoderLogic::onDetectedQrCode(const QString &code)
         }
     }
     else {
-        bool ok = uiLogic()->startPageLogic()->importConnectionFromQr(ba);
+        bool ok = uiLogic()->pageLogic<StartPageLogic>()->importConnectionFromQr(ba);
         if (ok) {
             set_detectingEnabled(false);
             emit stopDecode();

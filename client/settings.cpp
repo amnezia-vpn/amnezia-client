@@ -2,15 +2,15 @@
 #include "settings.h"
 #include "utils.h"
 
-#include <QDebug>
 #include "containers/containers_defs.h"
 
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
 
+
 Settings::Settings(QObject* parent) :
     QObject(parent),
-    m_settings (ORGANIZATION_NAME, APPLICATION_NAME, this)
+    m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
 {
     // Import old settings
     if (serversCount() == 0) {
@@ -178,7 +178,6 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     QJsonObject c = protocolConfig(serverIndex, container, proto);
     c.remove(config_key::last_config);
     setProtocolConfig(serverIndex, container, proto, c);
-    qDebug() << "Settings::clearLastConnectionConfig for" << serverIndex << container << proto;
 }
 
 bool Settings::haveAuthData(int serverIndex) const
@@ -292,59 +291,9 @@ void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
     setVpnSites(mode, sitesMap);
 }
 
-//void Settings::addVpnForwardSite(const QString &site, const QString &ip)
-//{
-//    auto sites = vpnForwardSites();
-//    QStringList l = sites.value(site).toStringList();
-//    if (!l.contains(ip)) {
-//        l.append(ip);
-//        setVpnForwardSites(sites);
-//    }
-//}
-
-//QStringList Settings::getVpnForwardIps() const
-//{
-//    QStringList ips;
-//    const QVariantMap &m = vpnForwardSites();
-//    for (const QVariant &v : m) {
-//        ips.append(v.toStringList());
-//    }
-//    ips.removeDuplicates();
-//    return ips;
-//}
-
-//void Settings::addVpnExceptSite(const QString &site, const QString &ip)
-//{
-//    auto sites = vpnExceptSites();
-//    QStringList l = sites.value(site).toStringList();
-//    if (!l.contains(ip)) {
-//        l.append(ip);
-//        setVpnExceptSites(sites);
-//    }
-//}
-
-//QStringList Settings::getVpnExceptIps() const
-//{
-//    QStringList ips;
-//    const QVariantMap &m = vpnExceptSites();
-//    for (const QVariant &v : m) {
-//        ips.append(v.toStringList());
-//    }
-//    ips.removeDuplicates();
-//    return ips;
-//}
-
 QString Settings::primaryDns() const { return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString(); }
 
 QString Settings::secondaryDns() const { return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString(); }
-
-//void Settings::setServerCredentials(const ServerCredentials &credentials)
-//{
-//    setServerName(credentials.hostName);
-//    setServerPort(credentials.port);
-//    setUserName(credentials.userName);
-//    setPassword(credentials.password);
-//}
 
 ServerCredentials Settings::defaultServerCredentials() const
 {

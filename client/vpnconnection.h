@@ -8,8 +8,14 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
-#include "core/ipcclient.h"
 #include "settings.h"
+
+#ifdef AMNEZIA_DESKTOP
+#include "core/ipcclient.h"
+#endif
+
+class VpnConfigurator;
+class ServerController;
 
 using namespace amnezia;
 
@@ -18,7 +24,9 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(QObject* parent = nullptr);
+    explicit VpnConnection(std::shared_ptr<Settings> settings,
+        std::shared_ptr<VpnConfigurator> configurator,
+        std::shared_ptr<ServerController> serverController, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -70,12 +78,17 @@ protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
-    Settings m_settings;
+    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<VpnConfigurator> m_configurator;
+    std::shared_ptr<ServerController> m_serverController;
+
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
-    IpcClient *m_IpcClient {nullptr};
 
+#ifdef AMNEZIA_DESKTOP
+    IpcClient *m_IpcClient {nullptr};
+#endif
 };
 
 #endif // VPNCONNECTION_H

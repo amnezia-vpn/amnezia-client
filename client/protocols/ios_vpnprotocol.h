@@ -16,7 +16,7 @@ public:
     explicit IOSVpnProtocol(amnezia::Proto proto, const QJsonObject& configuration, QObject* parent = nullptr);
     static IOSVpnProtocol* instance();
     
-    virtual ~IOSVpnProtocol() = default;
+    virtual ~IOSVpnProtocol() override = default;
 
     bool initialize();
 
@@ -47,11 +47,17 @@ private:
     bool m_checkingStatus = false;
     std::function<void(const QString&)> m_logCallback;
     
+    bool m_isChangingState = false;
+    
     void setupWireguardProtocol(const QtJson::JsonObject& result);
     void setupOpenVPNProtocol(const QtJson::JsonObject& result);
+    void setupShadowSocksProtocol(const QtJson::JsonObject& result);
     
     void launchWireguardTunnel(const QtJson::JsonObject &result);
     void launchOpenVPNTunnel(const QtJson::JsonObject &result);
+    void launchShadowSocksTunnel(const QtJson::JsonObject &result);
+    
+    QString serializeSSConfig(const QtJson::JsonObject &ssConfig);
 };
 
 

@@ -46,29 +46,6 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
 
     m_systemTrayIcon.setContextMenu(&m_menu);
     setTrayState(VpnProtocol::Disconnected);
-
-
-//  m_preferencesAction = m_menu.addAction("", vpn, &MozillaVPN::requestSettings);
-
-//  m_menu.addSeparator();
-
-//  m_quitAction = m_menu.addAction("", vpn->controller(), &Controller::quit);
-//  m_systemTrayIcon.setContextMenu(&m_menu);
-
-//  updateIcon(vpn->statusIcon()->iconString());
-
-//  connect(QmlEngineHolder::instance()->window(), &QWindow::visibleChanged, this,
-//          &SystemTrayNotificationHandler::updateContextMenu);
-
-//  connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this,
-//          &SystemTrayNotificationHandler::maybeActivated);
-
-//  connect(&m_systemTrayIcon, &QSystemTrayIcon::messageClicked, this,
-//          &SystemTrayNotificationHandler::messageClickHandle);
-
-//  retranslate();
-
-//  m_systemTrayIcon.show();
 }
 
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
@@ -98,7 +75,6 @@ void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationR
 
 void SystemTrayNotificationHandler::setTrayState(VpnProtocol::VpnConnectionState state)
 {
-    qDebug() << "SystemTrayNotificationHandler::setTrayState" << state;
     QString resourcesPath = ":/images/tray/%1";
 
     switch (state) {

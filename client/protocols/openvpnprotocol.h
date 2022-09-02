@@ -30,7 +30,6 @@ protected slots:
 
 private:
     QString configPath() const;
-    QString openVpnExecPath() const;
     bool openVpnProcessIsRunning() const;
     bool sendTermSignal();
     void readOpenVpnConfiguration(const QJsonObject &configuration);
@@ -46,6 +45,8 @@ private:
     ManagementServer m_managementServer;
     QString m_configFileName;
     QTemporaryFile m_configFile;
+
+    uint selectMgmtPort();
 
 private:
     void updateRouteGateway(QString line);

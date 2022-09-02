@@ -65,7 +65,6 @@ bool IpcClient::init(IpcClient *instance)
 
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
 {
-#ifndef Q_OS_IOS
     if (! Instance()->m_ipcClient || ! Instance()->m_ipcClient->isReplicaValid()) {
         qWarning() << "IpcClient::createPrivilegedProcess : IpcClient IpcClient replica is not valid";
         return nullptr;
@@ -107,9 +106,6 @@ QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
 
     auto proccessReplica = QSharedPointer<PrivilegedProcess>(pd->ipcProcess);
     return proccessReplica;
-#else
-    return QSharedPointer<PrivilegedProcess>();
-#endif
 }
 
 

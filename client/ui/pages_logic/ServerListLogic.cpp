@@ -13,7 +13,7 @@ ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
 
 void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 {
-    m_settings.setDefaultServer(index);
+    m_settings->setDefaultServer(index);
     uiLogic()->onUpdateAllPages();
 }
 
@@ -25,8 +25,8 @@ void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
 
 void ServerListLogic::onUpdatePage()
 {
-    const QJsonArray &servers = m_settings.serversArray();
-    int defaultServer = m_settings.defaultServerIndex();
+    const QJsonArray &servers = m_settings->serversArray();
+    int defaultServer = m_settings->defaultServerIndex();
     std::vector<ServerModelContent> serverListContent;
     for(int i = 0; i < servers.size(); i++) {
         ServerModelContent c;

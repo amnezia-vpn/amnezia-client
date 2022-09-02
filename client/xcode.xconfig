@@ -1,5 +1,5 @@
-DEVELOPMENT_TEAM = 7VAGZXD78P
+DEVELOPMENT_TEAM = X7UJ388FXK
 
-GROUP_ID_IOS = group.ru.kotit.AmneziaVPN.udev
-APP_ID_IOS = ru.kotit.AmneziaVPN
-NETEXT_ID_IOS = ru.kotit.AmneziaVPN.network-extension
+GROUP_ID_IOS = group.org.amnezia.AmneziaVPN
+APP_ID_IOS = org.amnezia.AmneziaVPN
+NETEXT_ID_IOS = org.amnezia.AmneziaVPN.network-extension

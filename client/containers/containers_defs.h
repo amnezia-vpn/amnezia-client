@@ -54,7 +54,7 @@ public:
     // it may be changed fot future containers :)
     Q_INVOKABLE static Proto defaultProtocol(DockerContainer c);
 
-    Q_INVOKABLE static bool isWorkingOnPlatform(DockerContainer c);
+    Q_INVOKABLE static bool isSupportedByCurrentPlatform(DockerContainer c);
 };
 
 

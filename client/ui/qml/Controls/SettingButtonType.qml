@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 BasicButtonType {
     id: root
     property alias textItem: textItem
+    height: 30
 
     background: Item {}
     contentItem: Item {
@@ -12,6 +13,7 @@ BasicButtonType {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             svg.source: root.icon.source
+            color: "#100A44"
             width: 25
             height: 25
         }
