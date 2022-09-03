@@ -35,8 +35,12 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 
 # Seacrh Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=5.15.2;
-QT_BIN_DIR=/opt/Qt/$QT_VERSION/gcc_64/bin
+  QT_VERSION=5.15.2
+  if [ -f /opt/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
+    QT_BIN_DIR=/opt/Qt/$QT_VERSION/gcc_64/bin
+  elif [ -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
+    QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
+  fi
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
@@ -60,15 +64,14 @@ make
 
 cp -r $DEPLOY_DATA_DIR/* $APP_DIR
 
-wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
+if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
+  wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
+  unzip -o $TOOLS_DIR/CQtDeployer.zip -d $CQTDEPLOYER_DIR/
+  chmod +x -R $CQTDEPLOYER_DIR
+fi
 
-unzip -o $TOOLS_DIR/CQtDeployer.zip -d $CQTDEPLOYER_DIR/
-
-chmod +x -R $CQTDEPLOYER_DIR
-#chmod +x $CQTDEPLOYER_DIR/binarycreator.sh
 
 $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
-
 $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
 
 rm -f $INSTALLER_DATA_DIR/data.7z
