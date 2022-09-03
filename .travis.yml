@@ -162,6 +162,7 @@ jobs:
         apt:
           packages:
           - p7zip
+          - p7zip-full
           - python3
           - python3-pip
           - libgl-dev
