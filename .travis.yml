@@ -168,6 +168,7 @@ jobs:
           - libgl-dev
           - mesa-common-dev
           - libpulse-dev
+          - libxcb-icccm4
 
       env:
         - QT_VERSION=5.15.2
@@ -215,10 +216,20 @@ jobs:
       env:
         - QT_VERSION=5.15.2
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
-        - USE_ANDROID_NDK_VERSION=21d
-        - ANDROID_NDK_HOME=$HOME/NDK
-        - PROJ_ROOT=$(pwd)
+        - ANDROID_API_VERSION=android-21
+        - ANDROID_HOME=$HOME/sdk
+        - ANDROID_SDK_ROOT=$ANDROID_HOME
+        - LOCAL_ANDROID_HOME=$ANDROID_HOME
+        - LOCAL_ANDROID_SDK_ROOT=$ANDROID_HOME
+        - NDK_VERSION=21d
+        - ANDROID_NDK_PLATFORM=android-21
+        - ANDROID_NDK_HOME=$HOME/android-ndk-r${NDK_VERSION}
+        - ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+        - ANDROID_NDK_HOST=linux-x86_64
+        - LOCAL_ANDROID_NDK_HOME=$ANDROID_NDK_HOME
+        - LOCAL_ANDROID_NDK_HOST_PLATFORM=$ANDROID_NDK_HOST
         - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - TERM=dumb
 
       addons:
         apt:
@@ -235,35 +246,24 @@ jobs:
           python3 -m pip show aqtinstall && \
           python3 -m aqt install-qt linux android $QT_VERSION -m all -O $HOME/Qt ; \
           fi
-        - echo "Download SDK" && pwd
-        - export ANDROID_HOME=`pwd`/sdk
-        - export LOCAL_ANDROID_HOME=`pwd`/sdk
-        - export ANDROID_SDK_ROOT=`pwd`/sdk  
-        - export LOCAL_ANDROID_SDK_ROOT=`pwd`/sdk  
-        - export ANDROID_API_VERSION=android-21
-        - mkdir -p sdk && cd sdk &&
-          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -qO sdk.zip > /dev/null || exit 1
-        - ls -ll && unzip -q sdk.zip || exit 1
-        - echo "Download all needed tools" && pwd && ls -ll && 
-          yes | ./tools/bin/sdkmanager --licenses > /dev/null 2>/dev/null
-        - ./tools/bin/sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-30" "build-tools;30.0.2" > /dev/null 2>/dev/null
-        - cd $PROJ_ROOT && echo "Download NDK" && pwd
-        - export TERM=dumb &&
-          curl -L https://dl.google.com/android/repository/android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip -O && 
-          unzip ./android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip > /dev/null &&
-          rm android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip && 
-          export ANDROID_NDK_HOME=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
-          export ANDROID_NDK_ROOT=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
-          export LOCAL_ANDROID_NDK_HOME="$ANDROID_NDK_HOME" &&
-          export LOCAL_ANDROID_NDK_HOST_PLATFORM="linux-x86_64" &&
-          export PATH=$PATH:${ANDROID_NDK_HOME} &&
-          export ANDROID_NDK_HOST=linux-x86_64 &&
-          export ANDROID_NDK_PLATFORM=android-21 &&
-          env
-        - echo "Check env vars" && echo $ANDROID_SDK_ROOT && echo $ANDROID_NDK_ROOT && echo $QT_BIN_DIR
+
+        - |
+          if [ ! -f $ANDROID_SDK_ROOT/tools/bin/sdkmanager ]; then \
+          echo "Download Android SDK" && \
+          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -qO $HOME/sdk.zip > /dev/null && \
+          unzip -q -d $ANDROID_SDK_ROOT $HOME/sdk.zip && \
+          echo "Download tools" && \
+          yes | ./tools/bin/sdkmanager --licenses && \
+          $ANDROID_SDK_ROOT/tools/bin/sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-30" "build-tools;30.0.2" || exit 1 ; \
+          fi
+        - |
+          if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then \
+          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux-x86_64.zip -qO $HOME/ndk.zip &&
+          unzip -q -d $HOME $HOME/ndk.zip ; \
+          fi
 
       script:
-        - deploy/build_android.sh
+        - bash deploy/build_android.sh
 
       after_script:
         - ccache --show-stats
@@ -286,6 +286,7 @@ jobs:
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
           - $ANDROID_NDK_HOME
+          - $ANDROID_SDK_ROOT
 
 # ------------------------------------------------------
     - name: iOS
