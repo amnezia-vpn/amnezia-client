@@ -168,7 +168,23 @@ jobs:
           - libgl-dev
           - mesa-common-dev
           - libpulse-dev
+          - libxcb-*
           - libxcb-icccm4
+          - libxcb-image0
+          - libxcb-shm0
+          - libxcb-util1
+          - libxcb-keysyms1
+          - libxcb-randr0
+          - libxcb-render-util0
+          - libxcb-render0
+          - libxcb-shape0
+          - libxcb-sync1
+          - libxcb-xfixes0
+          - libxcb-randr0-dev
+          - libxcb-xtest0-dev
+          - libxcb-xinerama0-dev
+          - libxcb-shape0-dev
+          - libxcb-xkb-dev
 
       env:
         - QT_VERSION=5.15.2
@@ -253,7 +269,7 @@ jobs:
           wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -qO $HOME/sdk.zip > /dev/null && \
           unzip -q -d $ANDROID_SDK_ROOT $HOME/sdk.zip && \
           echo "Download tools" && \
-          yes | ./tools/bin/sdkmanager --licenses && \
+          yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses && \
           $ANDROID_SDK_ROOT/tools/bin/sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-30" "build-tools;30.0.2" || exit 1 ; \
           fi
         - |
