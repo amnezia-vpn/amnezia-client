@@ -210,65 +210,54 @@ jobs:
 # ------------------------------------------------------
     - name: Android
       os: linux
-      language: android
-      dist: xenial
-
-      addons:
-        apt:
-          packages:
-          - p7zip
-          - python3
-          - python3-pip
-
-      android:
-        components:
-          # Uncomment the lines below if you want to
-          # use the latest revision of Android SDK Tools
-          # - tools
-          # - platform-tools
-
-          # The BuildTools version used by your project
-          - build-tools-30.0.2
-
-          # The SDK version used to compile your project
-          - android-30
-
-          # Additional components
-          - extra
-          - extra-google-google_play_services
-          - extra-google-m2repository
-          - extra-android-m2repository
-
+      language: cpp
+      dist: focal
       env:
         - QT_VERSION=5.15.2
         - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
         - USE_ANDROID_NDK_VERSION=21d
         - ANDROID_NDK_HOME=$HOME/NDK
+        - PROJ_ROOT=$(pwd)
+        - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
       install:
-        - |
-          if [ ! -f $QT_BIN_DIR/qmake ]; then \
-          export PATH=$HOME/.local/bin:$PATH && \
-          python3 -m pip install -U aqtinstall requests py7zr && \
-          python3 -m pip show aqtinstall && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_x86 -m all -O $HOME/Qt ; \
+        - echo "Installing Java 8"
+        - sudo apt-get install openjdk-8-jdk > /dev/null
+        - echo "QT bin install" && pwd
+        - if [ ! -f $QT_BIN_DIR/qmake ]; then
+          wget https://ondjoss.com/qt15_2_android_linux_x86_64.zip > /dev/null && 
+          mkdir -p $HOME/Qt/$QT_VERSION && \
+          unzip ./qt15_2_android_linux_x86_64.zip -d $HOME/Qt/$QT_VERSION > /dev/null ; 
           fi
-        - |
-          export TERM=dumb &&
-          curl -L https://dl.google.com/android/repository/android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip -O &&
+        - echo "Download SDK" && pwd
+        - export ANDROID_HOME=`pwd`/sdk
+        - export LOCAL_ANDROID_HOME=`pwd`/sdk
+        - export ANDROID_SDK_ROOT=`pwd`/sdk  
+        - export LOCAL_ANDROID_SDK_ROOT=`pwd`/sdk  
+        - export ANDROID_API_VERSION=android-21
+        - mkdir -p sdk && cd sdk &&
+          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -qO sdk.zip > /dev/null || exit 1
+        - ls -ll && unzip -q sdk.zip || exit 1
+        - echo "Download all needed tools" && pwd && ls -ll && 
+          yes | ./tools/bin/sdkmanager --licenses > /dev/null 2>/dev/null
+        - ./tools/bin/sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-30" "build-tools;30.0.2" > /dev/null 2>/dev/null
+        - cd $PROJ_ROOT && echo "Download NDK" && pwd
+        - export TERM=dumb &&
+          curl -L https://dl.google.com/android/repository/android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip -O && 
           unzip ./android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip > /dev/null &&
-          rm android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip &&
+          rm android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip && 
           export ANDROID_NDK_HOME=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
+          export ANDROID_NDK_ROOT=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
           export LOCAL_ANDROID_NDK_HOME="$ANDROID_NDK_HOME" &&
           export LOCAL_ANDROID_NDK_HOST_PLATFORM="linux-x86_64" &&
           export PATH=$PATH:${ANDROID_NDK_HOME} &&
+          export ANDROID_NDK_HOST=linux-x86_64 &&
+          export ANDROID_NDK_PLATFORM=android-21 &&
           env
+        - echo "Check env vars" && echo $ANDROID_SDK_ROOT && echo $ANDROID_NDK_ROOT && echo $QT_BIN_DIR
 
       script:
-        - bash deploy/build_android.sh
+        - travis_wait 60 bash deploy/build_android.sh
 
       after_script:
         - ccache --show-stats
