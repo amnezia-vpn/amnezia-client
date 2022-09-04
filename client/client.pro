@@ -8,8 +8,6 @@ CONFIG += qzxing_multimedia \
           enable_decoder_qr_code \
           enable_encoder_qr_code
 
-DEFINES += QT_DEPRECATED_WARNINGS
-
 include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
