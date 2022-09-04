@@ -3,6 +3,12 @@ QT += widgets core gui network xml remoteobjects quick svg
 TARGET = AmneziaVPN
 TEMPLATE = app
 
+# silent builds on CI env
+contains(DEFINES,CI){
+  message("Detected CI env")
+  CONFIG += silent ccache
+}
+
 CONFIG += qtquickcompiler
 CONFIG += qzxing_multimedia \
           enable_decoder_qr_code \
