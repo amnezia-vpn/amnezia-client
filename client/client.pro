@@ -4,7 +4,8 @@ TARGET = AmneziaVPN
 TEMPLATE = app
 
 # silent builds on CI env
-contains(DEFINES,$$(CI)){
+IS_CI=$$(CI)
+!isEmpty(IS_CI){
   message("Detected CI env")
   CONFIG += silent ccache
 }
