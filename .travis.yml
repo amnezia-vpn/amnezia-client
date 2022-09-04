@@ -220,14 +220,20 @@ jobs:
         - PROJ_ROOT=$(pwd)
         - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
+      addons:
+        apt:
+          packages:
+          - p7zip
+          - python3
+          - python3-pip
+          - openjdk-8-jdk
+
       install:
-        - echo "Installing Java 8"
-        - sudo apt-get install openjdk-8-jdk > /dev/null
-        - echo "QT bin install" && pwd
-        - if [ ! -f $QT_BIN_DIR/qmake ]; then
-          wget https://ondjoss.com/qt15_2_android_linux_x86_64.zip > /dev/null && 
-          mkdir -p $HOME/Qt/$QT_VERSION && \
-          unzip ./qt15_2_android_linux_x86_64.zip -d $HOME/Qt/$QT_VERSION > /dev/null ; 
+        - |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt linux android $QT_VERSION -m all -O $HOME/Qt ; \
           fi
         - echo "Download SDK" && pwd
         - export ANDROID_HOME=`pwd`/sdk
@@ -257,7 +263,7 @@ jobs:
         - echo "Check env vars" && echo $ANDROID_SDK_ROOT && echo $ANDROID_NDK_ROOT && echo $QT_BIN_DIR
 
       script:
-        - travis_wait 60 bash deploy/build_android.sh
+        - deploy/build_android.sh
 
       after_script:
         - ccache --show-stats

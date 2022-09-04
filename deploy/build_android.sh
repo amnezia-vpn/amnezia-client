@@ -30,16 +30,16 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=5.15.2;
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
-#QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
+echo "Using Android SDK in $ANDROID_SDK_ROOT"
+echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
 
 # Checking env
 $QT_BIN_DIR/qmake -v
-make -v
-gcc -v
+$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 
 # Build App
 echo "Building App..."
@@ -47,16 +47,14 @@ cd $BUILD_DIR
 
 $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
 echo "Executing make... may take long time"
-$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -j2 > /dev/null 2>/dev/null
+$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -j2
 echo "Make install..."
-$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android > /dev/null 2>/dev/null
+$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android
 echo "Build OK"
-# Build and run tests here
 
 echo "............Deploy.................."
 cd $OUT_APP_DIR
 
-#--verbose removed
 $QT_BIN_DIR/androiddeployqt \
     --output $OUT_APP_DIR/android \
     --gradle \
