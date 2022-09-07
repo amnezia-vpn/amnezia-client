@@ -19,7 +19,7 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
-include("3rd/qzxing/src/QZXing-components.pri")
+include("3rd/qrcodegen/qrcodegen.pri")
 include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
 include("3rd/qtkeychain/qtkeychain.pri")
 
