@@ -23,10 +23,10 @@ jobs:
         if [ ! -f $QT_BIN_DIR/qmake ]; then \
         brew install p7zip ccache && \
         python3 -m pip install --upgrade pip && \
-        pip install -U aqtinstall requests py7zr && \
-        pip show aqtinstall && \
-        aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
-        aqt install-tool mac desktop tools_ifw  -O $HOME/Qt ; \
+        python3 -m pip install -U aqtinstall requests py7zr && \
+        python3 -m pip show aqtinstall && \
+        python3 -m aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
+        python3 -m aqt install-tool mac desktop tools_ifw  -O $HOME/Qt ; \
         fi
 
       script:
@@ -314,9 +314,9 @@ jobs:
           if [ ! -f $QT_BIN_DIR/qmake ]; then \
           brew install p7zip ccache && \
           python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
-          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
           fi
         - brew install golang
         - go install golang.org/x/mobile/cmd/gomobile@latest
