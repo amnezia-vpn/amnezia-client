@@ -6,6 +6,7 @@
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSharedPointer>
 #include <QTimer>
 #include "utils.h"
 #include <QRandomGenerator>
@@ -222,35 +223,39 @@ QByteArray SecureQSettings::getEncIv() const
 
 QByteArray SecureQSettings::getSecTag(const QString &tag)
 {
-    ReadPasswordJob job(keyChainName);
-    job.setAutoDelete(false);
-    job.setKey(tag);
+    auto job = QSharedPointer<ReadPasswordJob>(new ReadPasswordJob(keyChainName), &QObject::deleteLater);
+    job->setAutoDelete(false);
+    job->setKey(tag);
     QEventLoop loop;
-    job.connect(&job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()));
-    job.start();
+    job->connect(job.data(), &ReadPasswordJob::finished, job.data(), [&loop](){
+        loop.quit();
+    });
+    job->start();
     loop.exec();
 
-    if ( job.error() ) {
-        qCritical() << "SecureQSettings::getSecTag Error:" << job.errorString();
+    if ( job->error() ) {
+        qCritical() << "SecureQSettings::getSecTag Error:" << job->errorString();
     }
 
-    return job.binaryData();
+    return job->binaryData();
 }
 
 void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
 {
-    WritePasswordJob job(keyChainName);
-    job.setAutoDelete(false);
-    job.setKey(tag);
-    job.setBinaryData(data);
+    auto job = QSharedPointer<WritePasswordJob>(new WritePasswordJob(keyChainName), &QObject::deleteLater);
+    job->setAutoDelete(false);
+    job->setKey(tag);
+    job->setBinaryData(data);
     QEventLoop loop;
     QTimer::singleShot(1000, &loop, SLOT(quit()));
-    job.connect(&job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()));
-    job.start();
+    job->connect(job.data(), &WritePasswordJob::finished, job.data(), [&loop](){
+        loop.quit();
+    });
+    job->start();
     loop.exec();
 
-    if (job.error()) {
-        qCritical() << "SecureQSettings::setSecTag Error:" << job.errorString();
+    if (job->error()) {
+        qCritical() << "SecureQSettings::setSecTag Error:" << job->errorString();
     }
 }
 
