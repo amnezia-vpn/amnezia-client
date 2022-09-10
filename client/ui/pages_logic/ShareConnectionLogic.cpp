@@ -1,12 +1,9 @@
 #include <QBuffer>
 #include <QImage>
 #include <QDataStream>
-//#include <QZXing>
 #include <QMessageBox>
 
-#include "QZXing.h"
-#include "QZXingImageProvider.h"
-#include "QZXingFilter.h"
+#include "qrcodegen.hpp"
 
 #include "ShareConnectionLogic.h"
 
@@ -29,6 +26,8 @@
 #ifdef __linux__
     #include <math.h>
 #endif
+
+using namespace qrcodegen;
 
 ShareConnectionLogic::ShareConnectionLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
@@ -168,8 +167,10 @@ void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
     ssString = "ss://" + ssString.toUtf8().toBase64();
     set_lineEditShareShadowSocksStringText(ssString);
 
-    QImage qr = QZXing::encodeData(ssString.toUtf8(), QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
-    set_shareShadowSocksQrCodeText(imageToBase64(qr));
+    QrCode qr = QrCode::encodeText(ssString.toUtf8(), QrCode::Ecc::LOW);
+    QString svg = QString::fromStdString(toSvgString(qr, 0));
+
+    set_shareShadowSocksQrCodeText(svgToBase64(svg));
 
     QString humanString = QString("Server: %3\n"
                                   "Port: %4\n"
@@ -227,9 +228,10 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
     set_textEditShareWireGuardCodeText(cfg);
 
-    QImage qr = QZXing::encodeData(cfg.toUtf8(), QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
+    QrCode qr = QrCode::encodeText(cfg.toUtf8(), QrCode::Ecc::LOW);
+    QString svg = QString::fromStdString(toSvgString(qr, 0));
 
-    set_shareWireGuardQrCodeText(imageToBase64(qr));
+    set_shareWireGuardQrCodeText(svgToBase64(svg));
 }
 
 void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
@@ -267,7 +269,7 @@ void ShareConnectionLogic::updateSharingPage(int serverIndex, DockerContainer co
 
 QList<QString> ShareConnectionLogic::genQrCodeImageSeries(const QByteArray &data)
 {
-    double k = 1500;
+    double k = 850;
 
     quint8 chunksCount = std::ceil(data.size() / k);
     QList<QString> chunks;
@@ -278,18 +280,15 @@ QList<QString> ShareConnectionLogic::genQrCodeImageSeries(const QByteArray &data
 
         QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
-        QImage qr = QZXing::encodeData(ba, QZXing::EncoderFormat_QR_CODE, QSize(512,512), QZXing::EncodeErrorCorrectionLevel_L);
-        chunks.append(imageToBase64(qr));
+        QrCode qr = QrCode::encodeText(ba, QrCode::Ecc::LOW);
+        QString svg = QString::fromStdString(toSvgString(qr, 0));
+        chunks.append(svgToBase64(svg));
     }
 
     return chunks;
 }
 
-QString ShareConnectionLogic::imageToBase64(const QImage &image)
+QString ShareConnectionLogic::svgToBase64(const QString &image)
 {
-    QByteArray ba;
-    QBuffer bu(&ba);
-    bu.open(QIODevice::WriteOnly);
-    image.save(&bu, "PNG");
-    return "data:image/png;base64," + QString::fromLatin1(ba.toBase64().data());
+    return "data:image/svg;base64," + QString::fromLatin1(image.toUtf8().toBase64().data());
 }

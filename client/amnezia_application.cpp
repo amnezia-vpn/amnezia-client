@@ -6,8 +6,6 @@
 #include <QTranslator>
 
 
-#include "QZXing.h"
-
 #include "core/servercontroller.h"
 #include "debug.h"
 #include "defines.h"
@@ -141,8 +139,6 @@ void AmneziaApplication::init()
 
 void AmneziaApplication::registerTypes()
 {
-    QZXing::registerQMLTypes();
-
     qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
