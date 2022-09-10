@@ -127,6 +127,7 @@ PageBase {
 
         BlueButtonType {
             id: qr_code_import
+            visible: GC.isMobile()
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: qr_code_import_open.bottom
             anchors.topMargin: 10

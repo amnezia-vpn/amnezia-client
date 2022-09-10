@@ -9,10 +9,6 @@
 #include "Windows.h"
 #endif
 
-#if defined(Q_OS_ANDROID)
-#include "native.h"
-#endif
-
 #if defined(Q_OS_IOS)
 #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
@@ -44,10 +40,6 @@ int main(int argc, char *argv[])
 // Allow to raise app window if secondary instance launched
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(0);
-#endif
-
-#if defined(Q_OS_ANDROID)
-    NativeHelpers::registerApplicationInstance(&app);
 #endif
 
 #if defined(Q_OS_IOS)

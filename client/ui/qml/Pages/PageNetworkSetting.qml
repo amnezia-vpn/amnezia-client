@@ -87,7 +87,7 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
         anchors.topMargin: 20
         width: parent.width - 60
         height: 21
-        text: qsTr("Secondray DNS server")
+        text: qsTr("Secondary DNS server")
     }
     TextFieldType {
         id: dns2

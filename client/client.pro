@@ -11,9 +11,6 @@ IS_CI=$$(CI)
 }
 
 CONFIG += qtquickcompiler
-CONFIG += qzxing_multimedia \
-          enable_decoder_qr_code \
-          enable_encoder_qr_code
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
@@ -247,13 +244,11 @@ android {
    INCLUDEPATH += platforms/android
 
    HEADERS += \
-      platforms/android/native.h \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
       protocols/android_vpnprotocol.h
 
    SOURCES += \
-      platforms/android/native.cpp \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
       protocols/android_vpnprotocol.cpp

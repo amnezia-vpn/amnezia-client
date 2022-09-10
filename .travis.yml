@@ -164,6 +164,7 @@ jobs:
 # ------------------------------------------------------
     - name: Linux
       os: linux
+      language: cpp
       dist: focal
 
       addons:
