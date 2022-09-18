@@ -217,6 +217,7 @@ jobs:
         - ccache
         - directories:
           - $HOME/Qt
+          - $HOME/.ccache
 
 # ------------------------------------------------------
     - name: Android

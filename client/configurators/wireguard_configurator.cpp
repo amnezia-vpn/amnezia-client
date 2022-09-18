@@ -80,7 +80,12 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
             stdOut += data + "\n";
         };
 
-        m_serverController->runContainerScript(credentials, container, script, cbReadStdOut);
+        e = m_serverController->runContainerScript(credentials, container, script, cbReadStdOut);
+        if (errorCode && e) {
+            *errorCode = e;
+            return connData;
+        }
+
         stdOut.replace("AllowedIPs = ", "");
         stdOut.replace("/32", "");
         QStringList ips = stdOut.split("\n", Qt::SkipEmptyParts);
