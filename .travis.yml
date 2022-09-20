@@ -23,10 +23,10 @@ jobs:
         if [ ! -f $QT_BIN_DIR/qmake ]; then \
         brew install p7zip ccache && \
         python3 -m pip install --upgrade pip && \
-        pip install -U aqtinstall requests py7zr && \
-        pip show aqtinstall && \
-        aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
-        aqt install-tool mac desktop tools_ifw  -O $HOME/Qt ; \
+        python3 -m pip install -U aqtinstall requests py7zr && \
+        python3 -m pip show aqtinstall && \
+        python3 -m aqt install-qt mac desktop $QT_VERSION clang_64 -m all -O $HOME/Qt && \
+        python3 -m aqt install-tool mac desktop tools_ifw  -O $HOME/Qt ; \
         fi
 
       script:
@@ -77,6 +77,7 @@ jobs:
           aqt install-qt windows desktop $QT_VERSION win64_msvc2019_64 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
+        - choco install ccache
 
       script:
         - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
@@ -86,7 +87,10 @@ jobs:
         - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\" -arch=amd64" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
-        
+
+      after_script:
+        - ccache --show-stats
+
       deploy:
         provider: releases
         token: $GH_TOKEN
@@ -128,6 +132,7 @@ jobs:
           aqt install-qt windows desktop $QT_VERSION win32_msvc2019 -m all -O /C/Qt && \
           aqt install-tool windows desktop tools_ifw  -O /C/Qt ; \
           fi
+        - choco install ccache
 
       script:
         - echo set BUILD_ARCH=$BUILD_ARCH > winbuild.bat
@@ -137,6 +142,9 @@ jobs:
         - echo call \""%MSVC_PATH_WIN%\\Common7\\Tools\\VsDevCmd.bat\"" >> winbuild.bat
         - echo call deploy\\build_windows.bat >> winbuild.bat
         - cmd //c winbuild.bat
+
+      after_script:
+        - ccache --show-stats
 
       deploy:
         provider: releases
@@ -156,17 +164,21 @@ jobs:
 # ------------------------------------------------------
     - name: Linux
       os: linux
+      language: cpp
       dist: focal
 
       addons:
         apt:
           packages:
           - p7zip
+          - p7zip-full
           - python3
           - python3-pip
           - libgl-dev
           - mesa-common-dev
           - libpulse-dev
+          - libxcb-*
+          - libxkbcommon-x11-0
 
       env:
         - QT_VERSION=5.15.2
@@ -205,12 +217,30 @@ jobs:
         - ccache
         - directories:
           - $HOME/Qt
+          - $HOME/.ccache
 
 # ------------------------------------------------------
     - name: Android
       os: linux
-      language: android
-      dist: xenial
+      language: cpp
+      dist: focal
+      env:
+        - QT_VERSION=5.15.2
+        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
+        - ANDROID_API_VERSION=android-21
+        - ANDROID_HOME=$HOME/sdk
+        - ANDROID_SDK_ROOT=$ANDROID_HOME
+        - LOCAL_ANDROID_HOME=$ANDROID_HOME
+        - LOCAL_ANDROID_SDK_ROOT=$ANDROID_HOME
+        - NDK_VERSION=21d
+        - ANDROID_NDK_PLATFORM=android-21
+        - ANDROID_NDK_HOME=$HOME/android-ndk-r${NDK_VERSION}
+        - ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+        - ANDROID_NDK_HOST=linux-x86_64
+        - LOCAL_ANDROID_NDK_HOME=$ANDROID_NDK_HOME
+        - LOCAL_ANDROID_NDK_HOST_PLATFORM=$ANDROID_NDK_HOST
+        - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - TERM=dumb
 
       addons:
         apt:
@@ -218,53 +248,30 @@ jobs:
           - p7zip
           - python3
           - python3-pip
-
-      android:
-        components:
-          # Uncomment the lines below if you want to
-          # use the latest revision of Android SDK Tools
-          # - tools
-          # - platform-tools
-
-          # The BuildTools version used by your project
-          - build-tools-30.0.2
-
-          # The SDK version used to compile your project
-          - android-30
-
-          # Additional components
-          - extra
-          - extra-google-google_play_services
-          - extra-google-m2repository
-          - extra-android-m2repository
-
-      env:
-        - QT_VERSION=5.15.2
-        - QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
-        - USE_ANDROID_NDK_VERSION=21d
-        - ANDROID_NDK_HOME=$HOME/NDK
+          - openjdk-8-jdk
 
       install:
         - |
           if [ ! -f $QT_BIN_DIR/qmake ]; then \
-          export PATH=$HOME/.local/bin:$PATH && \
           python3 -m pip install -U aqtinstall requests py7zr && \
           python3 -m pip show aqtinstall && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_armv7 -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_arm64_v8a -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_x86_64 -m all -O $HOME/Qt && \
-          python3 -m aqt install-qt linux android $QT_VERSION android_x86 -m all -O $HOME/Qt ; \
+          python3 -m aqt install-qt linux android $QT_VERSION -m all -O $HOME/Qt ; \
+          fi
+
+        - |
+          if [ ! -f $ANDROID_SDK_ROOT/tools/bin/sdkmanager ]; then \
+          echo "Download Android SDK" && \
+          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -qO $HOME/sdk.zip > /dev/null && \
+          unzip -q -d $ANDROID_SDK_ROOT $HOME/sdk.zip && \
+          echo "Download tools" && \
+          yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses > /dev/null 2>&1 && \
+          $ANDROID_SDK_ROOT/tools/bin/sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-30" "build-tools;30.0.2" > /dev/null 2>&1 || exit 1 ; \
           fi
         - |
-          export TERM=dumb &&
-          curl -L https://dl.google.com/android/repository/android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip -O &&
-          unzip ./android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip > /dev/null &&
-          rm android-ndk-r${USE_ANDROID_NDK_VERSION}-linux-x86_64.zip &&
-          export ANDROID_NDK_HOME=`pwd`/android-ndk-r${USE_ANDROID_NDK_VERSION} &&
-          export LOCAL_ANDROID_NDK_HOME="$ANDROID_NDK_HOME" &&
-          export LOCAL_ANDROID_NDK_HOST_PLATFORM="linux-x86_64" &&
-          export PATH=$PATH:${ANDROID_NDK_HOME} &&
-          env
+          if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then \
+          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux-x86_64.zip -qO $HOME/ndk.zip &&
+          unzip -q -d $HOME $HOME/ndk.zip ; \
+          fi
 
       script:
         - bash deploy/build_android.sh
@@ -290,6 +297,7 @@ jobs:
           - $HOME/.gradle/wrapper/
           - $HOME/.android/build-cache
           - $ANDROID_NDK_HOME
+          - $ANDROID_SDK_ROOT
 
 # ------------------------------------------------------
     - name: iOS
@@ -308,9 +316,9 @@ jobs:
           if [ ! -f $QT_BIN_DIR/qmake ]; then \
           brew install p7zip ccache && \
           python3 -m pip install --upgrade pip && \
-          pip install -U aqtinstall requests py7zr && \
-          pip show aqtinstall && \
-          aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt mac ios $QT_VERSION -m all -O $HOME/Qt ; \
           fi
         - brew install golang
         - go install golang.org/x/mobile/cmd/gomobile@latest

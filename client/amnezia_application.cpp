@@ -1,11 +1,10 @@
 #include "amnezia_application.h"
 
 #include <QFontDatabase>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QTranslator>
 
-
-#include "QZXing.h"
 
 #include "core/servercontroller.h"
 #include "debug.h"
@@ -49,6 +48,24 @@
 #endif
 {
     setQuitOnLastWindowClosed(false);
+
+    // Fix config file permissions
+#ifdef Q_OS_LINUX
+    {
+        QSettings s(ORGANIZATION_NAME, APPLICATION_NAME);
+        s.setValue("permFixed", true);
+    }
+
+    QString configLoc1 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/"
+            + ORGANIZATION_NAME + "/" + APPLICATION_NAME + ".conf";
+    QFile::setPermissions(configLoc1, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+
+    QString configLoc2 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/"
+            + ORGANIZATION_NAME + "/" + APPLICATION_NAME + "/" + APPLICATION_NAME + ".conf";
+    QFile::setPermissions(configLoc2, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+
+#endif
+
     m_settings = std::shared_ptr<Settings>(new Settings);
     m_serverController = std::shared_ptr<ServerController>(new ServerController(m_settings, this));
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, m_serverController, this));
@@ -122,8 +139,6 @@ void AmneziaApplication::init()
 
 void AmneziaApplication::registerTypes()
 {
-    QZXing::registerQMLTypes();
-
     qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
