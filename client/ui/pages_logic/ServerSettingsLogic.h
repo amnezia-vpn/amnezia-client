@@ -3,6 +3,10 @@
 
 #include "PageLogicBase.h"
 
+#if defined(Q_OS_ANDROID)
+#include <QAndroidActivityResultReceiver>
+#endif
+
 class UiLogic;
 
 class ServerSettingsLogic : public PageLogicBase
@@ -34,4 +38,25 @@ public:
     ~ServerSettingsLogic() = default;
 
 };
+
+#if defined(Q_OS_ANDROID)
+/* Auth result handler for Android */
+class authResultReceiver  final : public PageLogicBase, public QAndroidActivityResultReceiver
+{
+Q_OBJECT
+
+public:
+    authResultReceiver(UiLogic *uiLogic, int serverIndex , QObject *parent = nullptr) : PageLogicBase(uiLogic, parent) {
+        m_serverIndex = serverIndex;
+    }
+    ~authResultReceiver() {}
+
+public:
+    void handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &data) override;
+
+private:
+    int  m_serverIndex;
+};
+#endif
+
 #endif // SERVER_SETTINGS_LOGIC_H
