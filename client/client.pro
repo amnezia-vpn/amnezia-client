@@ -263,10 +263,60 @@ android {
       android/gradlew.bat \
       android/gradle.properties \
       android/res/values/libs.xml \
+      android/src/com/wireguard/android/util/SharedLibraryLoader.java \
+      android/src/com/wireguard/config/Attribute.java \
+      android/src/com/wireguard/config/BadConfigException.java \
+      android/src/com/wireguard/config/Config.java \
+      android/src/com/wireguard/config/InetAddresses.java \
+      android/src/com/wireguard/config/InetEndpoint.java \
+      android/src/com/wireguard/config/InetNetwork.java \
+      android/src/com/wireguard/config/Interface.java \
+      android/src/com/wireguard/config/ParseException.java \
+      android/src/com/wireguard/config/Peer.java \
+      android/src/com/wireguard/crypto/Curve25519.java \
+      android/src/com/wireguard/crypto/Ed25519.java \
+      android/src/com/wireguard/crypto/Key.java \
+      android/src/com/wireguard/crypto/KeyFormatException.java \
+      android/src/com/wireguard/crypto/KeyPair.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_Config.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ConnectionInfo.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_DynamicChallenge.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_EvalConfig.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_Event.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ExternalPKIBase.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ExternalPKICertRequest.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ExternalPKIRequestBase.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ExternalPKISignRequest.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_InterfaceStats.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_KeyValue.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_LLVector.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_LogInfo.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_MergeConfig.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_OpenVPNClient.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ProvideCreds.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_RemoteOverride.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ServerEntry.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_ServerEntryVector.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_SessionToken.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_Status.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_StringVec.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_TransportStats.java \
+      android/src/net/openvpn/ovpn3/ClientAPI_TunBuilderBase.java \
+      android/src/net/openvpn/ovpn3/SWIGTYPE_p_std__string.java \
+      android/src/net/openvpn/ovpn3/SWIGTYPE_p_std__vectorT_openvpn__ClientAPI__KeyValue_t.java \
+      android/src/net/openvpn/ovpn3/ovpncli.java \
+      android/src/net/openvpn/ovpn3/ovpncliJNI.java \
       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
       android/src/org/amnezia/vpn/VpnService.kt \
       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
-      android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
+      android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt \
+      android/src/org/amnezia/vpn/NotificationUtil.kt \
+      android/src/org/amnezia/vpn/Prefs.kt \
+      android/src/org/amnezia/vpn/VPNLogger.kt \
+      android/src/org/amnezia/vpn/qt/AmneziaApp.kt \
+      android/src/org/amnezia/vpn/qt/PackageManagerHelper.java \
+      android/src/org/amnezia/vpn/qt/VPNActivity.kt \
+      android/src/org/amnezia/vpn/qt/VPNApplication.java
 
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
