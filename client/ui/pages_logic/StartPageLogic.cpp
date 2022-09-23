@@ -11,6 +11,7 @@
 #include <QStandardPaths>
 
 #ifdef Q_OS_ANDROID
+#include <QtAndroid>
 #include "platforms/android/android_controller.h"
 #endif
 
@@ -23,7 +24,16 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     m_pushButtonBackFromStartVisible{true},
     m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
 {
-
+#ifdef Q_OS_ANDROID
+    // Set security screen for Android app
+    QtAndroid::runOnAndroidThread([]() {
+        QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (window.isValid()){
+            const int FLAG_SECURE = 8192;
+            window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
+        }
+    });
+#endif
 }
 
 void StartPageLogic::onUpdatePage()
