@@ -117,9 +117,9 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion 24
-        targetSdkVersion 30
-        versionCode 12 // Change to a higher number
-        versionName "2.1.2" // Change to a higher number
+        targetSdkVersion 31
+        versionCode 14 // Change to a higher number
+        versionName "2.1.2.3" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
             "room.schemaLocation": "${qt5AndroidDir}/schemas".toString()

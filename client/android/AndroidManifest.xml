@@ -185,7 +185,7 @@
             <!-- extract android style -->
             <meta-data android:name="android.app.splash_screen_drawable" android:resource="@drawable/splashscreen"/>
         </activity>
-        <service android:name=".VPNService" android:permission="android.permission.BIND_VPN_SERVICE" android:process=":QtOnlyProcess">
+        <service android:name=".VPNService" android:permission="android.permission.BIND_VPN_SERVICE" android:process=":QtOnlyProcess" android:exported="true">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
@@ -201,7 +201,7 @@
             <meta-data android:name="android.app.static_init_classes" android:value="-- %%INSERT_INIT_CLASSES%% --"/>
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
-        <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper" android:permission="android.permission.BIND_VPN_SERVICE">
+        <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper" android:permission="android.permission.BIND_VPN_SERVICE" android:exported="true">
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
