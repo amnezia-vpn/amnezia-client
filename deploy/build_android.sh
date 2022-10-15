@@ -3,7 +3,6 @@ echo "Build script started ..."
 
 set -o errexit -o nounset
 
-
 # Hold on to current directory
 PROJECT_DIR=$(pwd)
 DEPLOY_DIR=$PROJECT_DIR/deploy
@@ -30,38 +29,38 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 # Seacrh Qt
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=5.15.2;
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
+echo "Using Android SDK in $ANDROID_SDK_ROOT"
+echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
 
 # Checking env
 $QT_BIN_DIR/qmake -v
-make -v
-gcc -v
+$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 
 # Build App
 echo "Building App..."
 cd $BUILD_DIR
 
 $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
+echo "Executing make... may take long time"
 $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -j2
+echo "Make install..."
 $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android
+echo "Build OK"
 
+echo "............Deploy.................."
+cd $OUT_APP_DIR
 
-
-# Build and run tests here
-
-#echo "............Deploy.................."
-
-# TODO possible solution: https://github.com/mhoeher/opentodolist/blob/b8981852e500589851132a02c5a62af9b0ed592c/ci/android-cmake-build.sh
-#$QT_BIN_DIR/androiddeployqt \
-#    --output $OUT_APP_DIR \
-#    --gradle \
-#    --release \
-#    --deployment bundled
-
-#cp $OUT_APP_DIR/build/outputs/apk/release/android-build-release-unsigned.apk \
-#    OpenTodoList-${ANDROID_ABIS}-${OTL_VERSION}.apk
-
+$QT_BIN_DIR/androiddeployqt \
+    --output $OUT_APP_DIR/android \
+    --gradle \
+    --release \
+    --input android-AmneziaVPN-deployment-settings.json
+    
+echo "............Copy apk.................."
+cp $OUT_APP_DIR/android/build/outputs/apk/release/android-release-unsigned.apk \
+   $PROJECT_DIR/AmneziaVPN-release-unsigned.apk

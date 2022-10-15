@@ -4,16 +4,19 @@
 #include <QObject>
 #include <QProcessEnvironment>
 
+#include "configurator_base.h"
 #include "core/defs.h"
-#include "settings.h"
-#include "core/servercontroller.h"
 
-class SshConfigurator
+class SshConfigurator : ConfiguratorBase
 {
+    Q_OBJECT
 public:
-    static QProcessEnvironment prepareEnv();
-    static QString convertOpenSShKey(const QString &key);
-    static void openSshTerminal(const ServerCredentials &credentials);
+    SshConfigurator(std::shared_ptr<Settings> settings,
+        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+
+    QProcessEnvironment prepareEnv();
+    QString convertOpenSShKey(const QString &key);
+    void openSshTerminal(const ServerCredentials &credentials);
 
 };
 

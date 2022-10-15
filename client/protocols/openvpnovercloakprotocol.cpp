@@ -1,5 +1,4 @@
 #include "openvpnovercloakprotocol.h"
-#include "core/servercontroller.h"
 
 #include "utilities.h"
 #include "containers/containers_defs.h"

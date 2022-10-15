@@ -5,18 +5,27 @@
 #include <QTemporaryDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <QJsonDocument>
+
 
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 
-#include "sftpdefs.h"
 
-#include "core/server_defs.h"
 #include "containers/containers_defs.h"
+#include "core/server_defs.h"
 #include "core/scripts_registry.h"
 #include "utilities.h"
+#include "core/servercontroller.h"
+#include "settings.h"
+
+WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
+    ConfiguratorBase(settings, serverController, parent)
+{
+
+}
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 {
@@ -71,7 +80,12 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
             stdOut += data + "\n";
         };
 
-        ServerController::runContainerScript(credentials, container, script, cbReadStdOut);
+        e = m_serverController->runContainerScript(credentials, container, script, cbReadStdOut);
+        if (errorCode && e) {
+            *errorCode = e;
+            return connData;
+        }
+
         stdOut.replace("AllowedIPs = ", "");
         stdOut.replace("/32", "");
         QStringList ips = stdOut.split("\n", Qt::SkipEmptyParts);
@@ -104,14 +118,14 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     }
 
     // Get keys
-    connData.serverPubKey = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::wireguard::serverPublicKeyPath, &e);
+    connData.serverPubKey = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::wireguard::serverPublicKeyPath, &e);
     connData.serverPubKey.replace("\n", "");
     if (e) {
         if (errorCode) *errorCode = e;
         return connData;
     }
 
-    connData.pskKey = ServerController::getTextFileFromContainer(container, credentials, amnezia::protocols::wireguard::serverPskKeyPath, &e);
+    connData.pskKey = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::wireguard::serverPskKeyPath, &e);
     connData.pskKey.replace("\n", "");
 
     if (e) {
@@ -129,7 +143,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
             arg(connData.pskKey).
             arg(connData.clientIP);
 
-    e = ServerController::uploadTextFileToContainer(container, credentials, configPart,
+    e = m_serverController->uploadTextFileToContainer(container, credentials, configPart,
         protocols::wireguard::serverConfigPath, QSsh::SftpOverwriteMode::SftpAppendToExisting);
 
     if (e) {
@@ -137,24 +151,18 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    e = ServerController::runScript(credentials,
-        ServerController::replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
-            ServerController::genVarsForScript(credentials, container)));
+    e = m_serverController->runScript(credentials,
+        m_serverController->replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
+            m_serverController->genVarsForScript(credentials, container)));
 
     return connData;
-}
-
-Settings &WireguardConfigurator::m_settings()
-{
-    static Settings s;
-    return s;
 }
 
 QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &credentials,
     DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
-    QString config = ServerController::replaceVars(amnezia::scriptData(ProtocolScriptType::wireguard_template, container),
-            ServerController::genVarsForScript(credentials, container, containerConfig));
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::wireguard_template, container),
+            m_serverController->genVarsForScript(credentials, container, containerConfig));
 
     ConnectionData connData = prepareWireguardConfig(credentials, container, containerConfig, errorCode);
     if (errorCode && *errorCode) {
@@ -182,8 +190,8 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
 QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
 {
     // TODO replace DNS if it already set
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    config.replace("$PRIMARY_DNS", m_settings->primaryDns());
+    config.replace("$SECONDARY_DNS", m_settings->secondaryDns());
 
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
@@ -193,8 +201,8 @@ QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
 
 QString WireguardConfigurator::processConfigWithExportSettings(QString config)
 {
-    config.replace("$PRIMARY_DNS", m_settings().primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings().secondaryDns());
+    config.replace("$PRIMARY_DNS", m_settings->primaryDns());
+    config.replace("$SECONDARY_DNS", m_settings->secondaryDns());
 
     return config;
 }

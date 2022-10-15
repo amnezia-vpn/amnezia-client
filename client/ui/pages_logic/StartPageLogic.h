@@ -3,7 +3,7 @@
 
 #include "PageLogicBase.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 class UiLogic;
 
@@ -22,7 +22,6 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(bool, labelWaitInfoVisible)
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
-    AUTO_PROPERTY(bool, pushButtonConnectVisible)
 
     READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:

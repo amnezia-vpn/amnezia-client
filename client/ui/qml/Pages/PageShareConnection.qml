@@ -59,7 +59,7 @@ PageBase {
                 text: qsTr("Share for Amnezia")
                 height: 40
                 width: tb_c.width - 10
-                onClicked: UiLogic.onGotoShareProtocolPage(ProtocolEnum.Any)
+                onClicked: UiLogic.goToShareProtocolPage(ProtocolEnum.Any)
             }
 
             ListView {
@@ -82,7 +82,7 @@ PageBase {
                         text: qsTr("Share for ") + name_role
                         height: 40
                         width: tb_c.width - 10
-                        onClicked: UiLogic.onGotoShareProtocolPage(proxyProtocolsModel.mapToSource(index))
+                        onClicked: UiLogic.goToShareProtocolPage(proxyProtocolsModel.mapToSource(index))
                     }
                 }
             }

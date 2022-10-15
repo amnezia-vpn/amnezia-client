@@ -15,7 +15,7 @@ public:
         IpRole
     };
 
-    explicit SitesModel(Settings::RouteMode mode, QObject *parent = nullptr);
+    explicit SitesModel(std::shared_ptr<Settings> settings, Settings::RouteMode mode, QObject *parent = nullptr);
     void resetCache();
 
     // Basic functionality:
@@ -32,7 +32,7 @@ private:
 
 private:
     Settings::RouteMode m_mode;
-    Settings m_settings;
+    std::shared_ptr<Settings> m_settings;
 
     mutable QVector<QPair<QString, QString>> m_ipsCache;
     mutable bool m_cacheReady = false;

@@ -2,6 +2,7 @@
 #define SITES_LOGIC_H
 
 #include "PageLogicBase.h"
+#include "settings.h"
 
 class UiLogic;
 class SitesModel;

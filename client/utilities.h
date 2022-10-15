@@ -46,6 +46,11 @@ public:
 
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
 
+    static QString openVpnExecPath();
+    static QString wireguardExecPath();
+    static QString certUtilPath();
+
+
 #ifdef Q_OS_WIN
     static bool signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent);
 #endif

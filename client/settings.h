@@ -11,6 +11,7 @@
 
 #include "core/defs.h"
 #include "containers/containers_defs.h"
+#include "secure_qsettings.h"
 
 using namespace amnezia;
 
@@ -25,7 +26,6 @@ public:
 
     ServerCredentials defaultServerCredentials() const;
     ServerCredentials serverCredentials(int index) const;
-    //void setServerCredentials(const ServerCredentials &credentials);
 
     QJsonArray serversArray() const { return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array(); }
     void setServersArray(const QJsonArray &servers) { m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson()); }
@@ -110,13 +110,11 @@ public:
 //    static constexpr char openNicNs5[] = "94.103.153.176";
 //    static constexpr char openNicNs13[] = "144.76.103.143";
 
-
-public:
-
-
+    QByteArray backupAppConfig() const { return m_settings.backupAppConfig(); }
+    bool restoreAppConfig(const QByteArray &cfg) { return m_settings.restoreAppConfig(cfg); }
 
 private:
-    QSettings m_settings;
+    SecureQSettings m_settings;
 
 };
 

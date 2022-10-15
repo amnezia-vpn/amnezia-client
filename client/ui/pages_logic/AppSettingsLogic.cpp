@@ -7,6 +7,7 @@
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QStandardPaths>
 
 using namespace amnezia;
@@ -25,9 +26,9 @@ AppSettingsLogic::AppSettingsLogic(UiLogic *logic, QObject *parent):
 void AppSettingsLogic::onUpdatePage()
 {
     set_checkBoxAutostartChecked(Autostart::isAutostart());
-    set_checkBoxAutoConnectChecked(m_settings.isAutoConnect());
-    set_checkBoxStartMinimizedChecked(m_settings.isStartMinimized());
-    set_checkBoxSaveLogsChecked(m_settings.isSaveLogs());
+    set_checkBoxAutoConnectChecked(m_settings->isAutoConnect());
+    set_checkBoxStartMinimizedChecked(m_settings->isStartMinimized());
+    set_checkBoxSaveLogsChecked(m_settings->isSaveLogs());
 
     QString ver = QString("%1: %2 (%3)")
             .arg(tr("Software version"))
@@ -46,17 +47,17 @@ void AppSettingsLogic::onCheckBoxAutostartToggled(bool checked)
 
 void AppSettingsLogic::onCheckBoxAutoconnectToggled(bool checked)
 {
-    m_settings.setAutoConnect(checked);
+    m_settings->setAutoConnect(checked);
 }
 
 void AppSettingsLogic::onCheckBoxStartMinimizedToggled(bool checked)
 {
-    m_settings.setStartMinimized(checked);
+    m_settings->setStartMinimized(checked);
 }
 
 void AppSettingsLogic::onCheckBoxSaveLogsCheckedToggled(bool checked)
 {
-    m_settings.setSaveLogs(checked);
+    m_settings->setSaveLogs(checked);
 }
 
 void AppSettingsLogic::onPushButtonOpenLogsClicked()
@@ -74,3 +75,32 @@ void AppSettingsLogic::onPushButtonClearLogsClicked()
     Debug::clearLogs();
     Debug::clearServiceLogs();
 }
+
+void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
+{
+    uiLogic()->saveTextFile("Backup application config", "AmneziaVPN.backup", ".backup", m_settings->backupAppConfig());
+}
+
+void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open backup"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
+
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+
+    bool ok = m_settings->restoreAppConfig(data);
+    if (ok) {
+        emit uiLogic()->goToPage(Page::Vpn);
+        emit uiLogic()->setStartPage(Page::Vpn);
+    }
+    else {
+        QMessageBox::warning(nullptr, APPLICATION_NAME,
+            tr("Can't import config, file is corrupted."));
+    }
+
+}
+

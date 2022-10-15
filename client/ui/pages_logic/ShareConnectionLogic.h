@@ -2,6 +2,7 @@
 #define SHARE_CONNECTION_LOGIC_H
 
 #include "PageLogicBase.h"
+#include "containers/containers_defs.h"
 
 class UiLogic;
 
@@ -48,8 +49,7 @@ public:
     void updateSharingPage(int serverIndex, DockerContainer container);
     QList<QString> genQrCodeImageSeries(const QByteArray &data);
 
-    QString imageToBase64(const QImage &image);
-
+    QString svgToBase64(const QString &image);
 
 };
 #endif // SHARE_CONNECTION_LOGIC_H

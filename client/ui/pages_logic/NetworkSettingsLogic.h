@@ -3,6 +3,8 @@
 
 #include "PageLogicBase.h"
 
+#include <QRegularExpression>
+
 class UiLogic;
 
 class NetworkSettingsLogic : public PageLogicBase

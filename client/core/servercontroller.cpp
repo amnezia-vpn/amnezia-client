@@ -18,18 +18,18 @@
 
 #include "containers/containers_defs.h"
 #include "server_defs.h"
+#include "settings.h"
 #include "scripts_registry.h"
 #include "utilities.h"
 
 #include <configurators/vpn_configurator.h>
 
-
 using namespace QSsh;
 
-Settings &ServerController::m_settings()
+ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) :
+    m_settings(settings)
 {
-    static Settings s;
-    return s;
+
 }
 
 ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
@@ -605,7 +605,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
                 cbReadStdOut, cbReadStdErr);
 
 
-    VpnConfigurator::updateContainerConfigAfterInstallation(container, config, stdOut);
+    m_configurator->updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;
 }
@@ -698,8 +698,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     vars.append({{"$IPSEC_VPN_C2C_TRAFFIC", "no"}});
 
-    vars.append({{"$PRIMARY_SERVER_DNS", m_settings().primaryDns()}});
-    vars.append({{"$SECONDARY_SERVER_DNS", m_settings().secondaryDns()}});
+    vars.append({{"$PRIMARY_SERVER_DNS", m_settings->primaryDns()}});
+    vars.append({{"$SECONDARY_SERVER_DNS", m_settings->secondaryDns()}});
 
 
     // Sftp vars

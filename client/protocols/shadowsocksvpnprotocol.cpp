@@ -1,5 +1,4 @@
 #include "shadowsocksvpnprotocol.h"
-#include "core/servercontroller.h"
 
 #include "debug.h"
 #include "utilities.h"
