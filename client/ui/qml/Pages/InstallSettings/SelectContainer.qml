@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import SortFilterProxyModel 0.2
 import ProtocolEnum 1.0
 import "./"

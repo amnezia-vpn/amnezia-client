@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import PageEnum 1.0
 import QRCodeReader 1.0
 
@@ -25,7 +25,7 @@ PageBase {
     }
 
     Connections {
-        target: Qt.platform.os == "ios" ? QrDecoderLogic : nil
+        target: Qt.platform.os == "ios" ? QrDecoderLogic : null
         function onStartDecode() {
             console.debug("Starting QR decoder")
             loader.sourceComponent = component

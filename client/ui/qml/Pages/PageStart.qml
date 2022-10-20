@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -134,7 +134,7 @@ PageBase {
 
             text: qsTr("Scan QR code")
             onClicked: {
-                if (Qt.platform.os == "ios") {
+                if (Qt.platform.os === "ios") {
                     UiLogic.goToPage(PageEnum.QrDecoderIos)
                 } else {
                     UiLogic.goToPage(PageEnum.QrDecoder)
@@ -148,7 +148,7 @@ PageBase {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: qr_code_import.bottom
             anchors.topMargin: 30
-            visible: UiLogic.pagesStackDepth == 1
+            visible: UiLogic.pagesStackDepth === 1
             enabled: StartPageLogic.pushButtonConnectEnabled
 
             text: qsTr("Restore app config")
@@ -212,8 +212,8 @@ PageBase {
                 StartPageLogic.lineEditIpText = text
             }
 
-            validator: RegExpValidator {
-                regExp: StartPageLogic.ipAddressPortRegex
+            validator: RegularExpressionValidator {
+                regularExpression: StartPageLogic.ipAddressPortRegex
             }
         }
 

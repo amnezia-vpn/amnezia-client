@@ -1,6 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.12
+import QtQuick
+import QtQuick.Controls
+//import QtGraphicalEffects 1.12
+import QtQuick.Shapes 1.4
 
 Item {
     id: root
@@ -17,16 +18,15 @@ Item {
         color: "transparent"
         clip: true
         radius: 2
-        LinearGradient {
-            anchors.fill: parent
-            start: Qt.point(0, 0)
-            end: Qt.point(0, height)
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#E1E1E1" }
-                GradientStop { position: 0.4; color: "#DDDDDD" }
-                GradientStop { position: 0.5; color: "#D8D8D8" }
+        gradient: LinearGradient {
+            x1: 0 ; y1: 0
+            x2: 0 ; y2: height
+            stops: [
+                GradientStop { position: 0.0; color: "#E1E1E1" },
+                GradientStop { position: 0.4; color: "#DDDDDD" },
+                GradientStop { position: 0.5; color: "#D8D8D8" },
                 GradientStop { position: 1.0; color: "#D3D3D3" }
-            }
+            ]
         }
         Image {
             anchors.verticalCenter: parent.verticalCenter

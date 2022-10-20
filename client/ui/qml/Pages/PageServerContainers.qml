@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.1
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.platform
+import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 import ContainerProps 1.0
 import ProtocolProps 1.0
@@ -304,7 +304,7 @@ PageBase {
 
                                 MessageDialog {
                                     id: dialogRemove
-                                    standardButtons: StandardButton.Yes | StandardButton.Cancel
+                                    buttons: StandardButton.Yes | StandardButton.Cancel
                                     title: "AmneziaVPN"
                                     text: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
                                     onAccepted: {

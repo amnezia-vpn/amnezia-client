@@ -1,12 +1,12 @@
-import QtQuick 2.14
-import QtQuick.Window 2.14
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
-import QtQuick.Controls.Material 2.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Material
 import PageEnum 1.0
 import PageType 1.0
-import Qt.labs.platform 1.1
-import Qt.labs.folderlistmodel 2.12
+import Qt.labs.platform
+import Qt.labs.folderlistmodel
 import QtQuick.Dialogs
 import "./"
 import "Controls"
@@ -199,7 +199,7 @@ Window  {
                         sharePages[obj.protocol] = obj
                     }
 
-                    //console.debug("Created compenent " + component.url + " for " + type);
+//                    console.debug("Created compenent " + component.url + " for " + type);
                 }
             } else if (component.status === Component.Error) {
                 console.debug("Error loading component:", component.errorString());
@@ -209,7 +209,7 @@ Window  {
         if (c.status === Component.Ready)
             finishCreation(c);
         else {
-            console.debug("Warning: Pages components are not ready");
+            console.debug("Warning: " + file + " page components are not ready " + c.errorString());
         }
     }
 
