@@ -22,6 +22,8 @@ include("3rd/qtkeychain/qtkeychain.pri")
 
 INCLUDEPATH += $$PWD/3rd/QSimpleCrypto/include
 INCLUDEPATH += $$PWD/3rd/OpenSSL/include
+INCLUDEPATH += $$PWD/3rd/qtkeychain/include
+INCLUDEPATH += $$PWD/3rd/libssh/include
 DEPENDPATH += $$PWD/3rd/OpenSSL/include
 
 HEADERS  += \
@@ -208,6 +210,8 @@ linux:!android {
     DEFINES += MVPN_LINUX
     LIBS += /usr/lib/x86_64-linux-gnu/libcrypto.a
     LIBS += /usr/lib/x86_64-linux-gnu/libssl.a
+    LIBS += $$PWD/3rd/libssh/build/src/libssh.a
+    LIBS += -lz
 
     INCLUDEPATH += $$PWD/platforms/linux
 }
