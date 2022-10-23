@@ -12,9 +12,20 @@
 #include <QApplication>
 #include <QTemporaryFile>
 #include <QFileInfo>
+#include <filesystem>
+#include <iostream>
 
-#include "sftpchannel.h"
+#include <fstream>
+#include <sys/stat.h>
+
+#include <fcntl.h>
+#include <libssh/libssh.h>
+#include <libssh/sftp.h>
+
 #include "sshconnectionmanager.h"
+
+#include <chrono>
+#include <thread>
 
 #include "containers/containers_defs.h"
 #include "server_defs.h"
@@ -24,6 +35,9 @@
 
 #include <configurators/vpn_configurator.h>
 
+#define SFTP_TRANSFER_CHUNK_SIZE 16384
+#define SSH_BUFFER_SIZE 256
+
 using namespace QSsh;
 
 ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) :
@@ -32,23 +46,87 @@ ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *
 
 }
 
-ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
-    const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
-    const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
-{
-    SshConnection *client = connectToHost(sshParams(credentials));
-    if (client->state() == SshConnection::State::Connecting) {
-        qDebug() << "ServerController::runScript aborted, connectToHost in progress";
+ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, ssh_session &session) {
+
+    if (session == NULL) {
+        return ErrorCode::InternalError;
+    }
+
+    int port = credentials.port;
+    int log_verbosity = SSH_LOG_NOLOG;
+    std::string host_ip = credentials.hostName.toStdString();
+    std::string host_username = credentials.userName.toStdString() + "@" + host_ip;
+
+    ssh_options_set(session, SSH_OPTIONS_HOST, host_ip.c_str());
+    ssh_options_set(session, SSH_OPTIONS_PORT, &port);
+    ssh_options_set(session, SSH_OPTIONS_USER, host_username.c_str());
+    ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &log_verbosity);
+
+    int connection_result = ssh_connect(session);
+
+    if (connection_result != SSH_OK) {
         return ErrorCode::SshTimeoutError;
     }
-    else if (client->state() != SshConnection::State::Connected) {
-        qDebug() << "ServerController::runScript connectToHost error: " << fromSshConnectionErrorCode(client->errorState());
-        return fromSshConnectionErrorCode(client->errorState());
+
+    std::string auth_username = credentials.userName.toStdString();
+
+    int auth_result = SSH_ERROR;
+    if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
+        ssh_key priv_key;
+        ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, nullptr, nullptr, &priv_key);
+        auth_result = ssh_userauth_publickey(session, auth_username.c_str(), priv_key);
+    }
+    else {
+       auth_result =  ssh_userauth_password(session, auth_username.c_str(), credentials.password.toStdString().c_str());
+    }
+
+    if (auth_result != SSH_OK) {
+        ssh_disconnect(session);
+        return ErrorCode::SshAuthenticationError;
+    }
+
+    return ErrorCode::NoError;
+}
+
+
+ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
+    const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut,
+    const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr) {
+
+    ssh_session ssh = ssh_new();
+
+    ErrorCode e = connectToHost(credentials, ssh);
+    if (e) {
+        ssh_free(ssh);
+        return e;
+    }
+    ssh_channel channel = ssh_channel_new(ssh);
+
+    if (channel == NULL) {
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+        return ErrorCode::SshAuthenticationError;
+    }
+
+    ssh_channel_open_session(channel);
+
+    if (ssh_channel_is_open(channel)) {
+        qDebug() << "SSH chanel opened";
+    } else {
+        ssh_channel_free(channel);
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+        return ErrorCode::SshAuthenticationError;
     }
 
     script.replace("\r", "");
 
-    qDebug() << "Run script";
+    qDebug() << "Run script " << script;
+
+    int exec_result = ssh_channel_request_pty(channel);
+
+    ssh_channel_change_pty_size(channel, 80, 1024);
+    ssh_channel_request_shell(channel);
 
     QString totalLine;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
@@ -73,66 +151,57 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
             totalLine.clear();
         }
 
+        qDebug()<<"total line " << totalLine;
+
         // Run collected line
-        if (totalLine.startsWith("#")) {
+        if (lineToExec.startsWith("#")) {
             continue;
         }
 
+        lineToExec += "\n";
+
         qDebug().noquote() << "EXEC" << lineToExec;
         Debug::appendSshLog("Run command:" + lineToExec);
+        int nwritten, nbytes = 0, tryes = 0;
+        char buffer[2048];
+        if (ssh_channel_write(channel, lineToExec.toUtf8(), (uint32_t)lineToExec.size()) == lineToExec.size() &&
+                        ssh_channel_write(channel, "\n", 1) == 1){
+                while (nbytes !=0 || tryes < 100){
+                 if (ssh_channel_is_open(channel) && !ssh_channel_is_eof(channel)) {
+                  //nbytes = ssh_channel_read_nonblocking(channel, buffer, sizeof(buffer), 0);
 
-        QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(lineToExec.toUtf8());
+                  nbytes = ssh_channel_read_timeout(channel, buffer, sizeof(buffer), 0, 50);
 
-        if (!proc) {
-            qCritical() << "Failed to create SshRemoteProcess, breaking.";
-            return ErrorCode::SshRemoteProcessCreationError;
-        }
+                  if (nbytes > 0) {
+                    tryes = 0;
+                    std::string strbuf;
+                    strbuf.assign(buffer, nbytes);
+                    QByteArray qbuff(buffer, nbytes);
+                    QString outp(qbuff);
 
-        QEventLoop wait;
-        int exitStatus = -1;
+                    if (cbReadStdOut){
+                        cbReadStdOut(outp, nullptr);
+                    }
+                    qDebug().noquote() << QString(strbuf.c_str());
 
-        //        QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [](){
-        //            qDebug() << "Command started";
-        //        });
+                  } else {
+                      tryes++;
+                  }
+                  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                }
 
-        QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
-            exitStatus = status;
-            //qDebug() << "Remote process exited with status" << status;
-            wait.quit();
-        });
-
-        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardOutput, &wait, [proc, cbReadStdOut](){
-            QString s = proc->readAllStandardOutput();
-
-            if (s != "." && !s.isEmpty()) {
-                Debug::appendSshLog("Output: " + s);
-                qDebug().noquote() << "stdout" << s;
             }
-            if (cbReadStdOut) cbReadStdOut(s, proc);
-        });
-
-        QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, &wait, [proc, cbReadStdErr](){
-            QString s = proc->readAllStandardError();
-            if (s != "." && !s.isEmpty()) {
-                Debug::appendSshLog("Output: " + s);
-                qDebug().noquote() << "stderr" << s;
-            }
-            if (cbReadStdErr) cbReadStdErr(s, proc);
-        });
-
-        proc->start();
-        if (i < lines.count() && exitStatus < 0) {
-            wait.exec();
-        }
-
-        if (SshRemoteProcess::ExitStatus(exitStatus) != QSsh::SshRemoteProcess::ExitStatus::NormalExit) {
-            return fromSshProcessExitStatus(exitStatus);
         }
     }
 
-    qDebug() << "ServerController::runScript finished\n";
+    ssh_channel_send_eof(channel);
+    ssh_channel_free(channel);
+    ssh_disconnect(ssh);
+    ssh_free(ssh);
+
     return ErrorCode::NoError;
 }
+
 
 ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials,
     DockerContainer container, QString script,
@@ -151,7 +220,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
     runScript(credentials,
-        replaceVars(remover, genVarsForScript(credentials, container)));
+        replaceVars(remover, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     return e;
 }
@@ -162,6 +231,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
+
+    qDebug() << "data" << file;
+
     e = uploadFileToHost(credentials, file.toUtf8(), tmpFileName);
     if (e) return e;
 
@@ -220,52 +292,37 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
     const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode)
 {
+
     if (errorCode) *errorCode = ErrorCode::NoError;
 
     QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").
             arg(ContainerProps::containerToString(container)).arg(path);
 
-    qDebug().noquote() << "Copy file from container\n" << script;
 
-    SshConnection *client = connectToHost(sshParams(credentials));
-    if (client->state() != SshConnection::State::Connected) {
-        if (errorCode) *errorCode = fromSshConnectionErrorCode(client->errorState());
-        return {};
-    }
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data;
+    };
 
-    QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(script.toUtf8());
-    if (!proc) {
-        qCritical() << "Failed to create SshRemoteProcess, breaking.";
-        if (errorCode) *errorCode = ErrorCode::SshRemoteProcessCreationError;
-        return {};
-    }
+    *errorCode = runScript(credentials, script, cbReadStdOut);
 
-    QEventLoop wait;
-    int exitStatus = 0;
+    qDebug().noquote() << "Copy file from container stdout : \n" << stdOut;
 
-    QObject::connect(proc.data(), &SshRemoteProcess::closed, &wait, [&](int status){
-        exitStatus = status;
-        wait.quit();
-    });
 
-    QObject::connect(proc.data(), &SshRemoteProcess::started, &wait, [&](){
-        qDebug() << "ServerController::getTextFileFromContainer proc started";
-        exitStatus = -1;
-    });
+    qDebug().noquote() << "Copy file from container END : \n" ;
 
-    proc->start();
-    wait.exec();
 
-//    if (exitStatus < 0) {
-//        wait.exec();
-//    }
+    int pos=stdOut.lastIndexOf("'\"");
 
-    if (SshRemoteProcess::ExitStatus(exitStatus) != QSsh::SshRemoteProcess::ExitStatus::NormalExit) {
-        if (errorCode) *errorCode = fromSshProcessExitStatus(exitStatus);
-    }
+    QString cuted_right(stdOut.right(stdOut.size()-pos-4));
 
-    if (errorCode) *errorCode = ErrorCode::NoError;
-    return QByteArray::fromHex(proc->readAllStandardOutput());
+    pos=cuted_right.lastIndexOf("\n");
+
+    QString cuted(cuted_right.left(pos-1));
+
+    qDebug().noquote() << "Copy file cuted : \n" << cuted <<"cut END";
+
+    return QByteArray::fromHex(cuted.toUtf8());
 }
 
 ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
@@ -286,35 +343,40 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     QSsh::SftpOverwriteMode overwriteMode)
 {
-    SshConnection *client = connectToHost(sshParams(credentials));
-    if (client->state() != SshConnection::State::Connected) {
-        return fromSshConnectionErrorCode(client->errorState());
+
+    ssh_session ssh = ssh_new();
+
+    ErrorCode e = connectToHost(credentials, ssh);
+    if (e) {
+        ssh_free(ssh);
+        return e;
     }
 
-    bool err = false;
+    ssh_channel channel = ssh_channel_new(ssh);
 
-    QEventLoop wait;
-    QTimer timer;
-    timer.setSingleShot(true);
-    timer.start(3000);
+    if (channel == NULL) {
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+        return ErrorCode::SshSftpError;
+    }
 
-    QSharedPointer<SftpChannel> sftp = client->createSftpChannel();
-    sftp->initialize();
+    sftp_session sftp_sess = sftp_new(ssh);
 
-    QObject::connect(sftp.data(), &SftpChannel::initialized, &wait, [&](){
-        timer.stop();
-        wait.quit();
-    });
-    QObject::connect(&timer, &QTimer::timeout, &wait, [&](){
-        err= true;
-        wait.quit();
-    });
+    if (sftp_sess == NULL) {
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+        return ErrorCode::SshSftpError;
+    }
 
-    wait.exec();
+    int init_result = sftp_init(sftp_sess);
 
-    if (!sftp) {
-        qCritical() << "Failed to create SftpChannel, breaking.";
-        return ErrorCode::SshRemoteProcessCreationError;
+    if (init_result != SSH_OK) {
+
+        sftp_free(sftp_sess);
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+
+        return ErrorCode::SshSftpError;
     }
 
     QTemporaryFile localFile;
@@ -322,28 +384,99 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-    auto job = sftp->uploadFile(localFile.fileName(), remotePath, QSsh::SftpOverwriteMode::SftpOverwriteExisting);
-    QObject::connect(sftp.data(), &SftpChannel::finished, &wait, [&](QSsh::SftpJobId j, const SftpError errorType = SftpError::NoError, const QString &error = QString()){
-        if (job == j) {
-            qDebug() << "Sftp finished with status" << error;
-            wait.quit();
-        }
-    });
+    qDebug() << "remotePath" << remotePath;
 
-    QObject::connect(sftp.data(), &SftpChannel::channelError, &wait, [&](const QString &reason){
-        qDebug() << "Sftp finished with error" << reason;
-        err= true;
-        wait.quit();
-    });
+    e = copyFileToRemoteHost(ssh, sftp_sess, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
 
-    wait.exec();
-
-    if (err) {
-        return ErrorCode::SshSftpError;
+    if (e) {
+        sftp_free(sftp_sess);
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
+        return e;
     }
     else {
+
+        sftp_free(sftp_sess);
+        ssh_disconnect(ssh);
+        ssh_free(ssh);
         return ErrorCode::NoError;
     }
+}
+
+
+ErrorCode ServerController::copyFileToRemoteHost(ssh_session& ssh, sftp_session& sftp, std::string local_path, std::string remote_path, std::string file_desc) {
+    int access_type = O_WRONLY | O_CREAT | O_TRUNC;
+    sftp_file file;
+    char buffer[SFTP_TRANSFER_CHUNK_SIZE];
+    int length {sizeof (buffer)};
+
+    file = sftp_open(sftp, remote_path.c_str(), access_type, S_IRWXU);
+
+    if (file == NULL) {
+        return ErrorCode::SshSftpError;
+    }
+
+    int local_file_size   = std::filesystem::file_size(local_path);
+    int num_full_chunks   = local_file_size / (SFTP_TRANSFER_CHUNK_SIZE);
+
+    std::ifstream fin(local_path, std::ios::binary | std::ios::in);
+
+    if (fin.is_open()) {
+
+        for (int current_chunk_id = 0; current_chunk_id < num_full_chunks; current_chunk_id++) {
+            // Getting chunk from local file
+            fin.read(buffer, length);
+
+            int nwritten = sftp_write(file, buffer, length);
+
+            std::string chunk(buffer, length);
+
+            qDebug() << "write -> " << QString(chunk.c_str());
+
+            if (nwritten != length) {
+                fin.close();
+                sftp_close(file);
+                return ErrorCode::SshSftpError;
+            }
+        }
+
+        int last_chapter_size = local_file_size % (SFTP_TRANSFER_CHUNK_SIZE);
+
+        if (last_chapter_size != 0) {
+            char* last_chapter_buffer = new char[last_chapter_size];
+            fin.read(last_chapter_buffer, last_chapter_size);
+
+            QByteArray arr_tmp(last_chapter_buffer, last_chapter_size);
+
+            QString std_test = QString::fromUtf8(arr_tmp);
+
+            qDebug() << "test file " << std_test;
+
+            int nwritten = sftp_write(file, last_chapter_buffer, last_chapter_size);
+
+            if (nwritten != last_chapter_size) {
+
+                fin.close();
+                sftp_close(file);
+                delete[] last_chapter_buffer;
+                return ErrorCode::SshSftpError;
+            }
+            delete[] last_chapter_buffer;
+        }
+
+    } else {
+        sftp_close(file);
+        return ErrorCode::SshSftpError;
+    }
+
+    fin.close();
+
+    int close_result = sftp_close(file);
+    if (close_result != SSH_OK) {
+        return ErrorCode::SshSftpError;
+    }
+
+    return ErrorCode::NoError;
 }
 
 ErrorCode ServerController::fromSshConnectionErrorCode(SshError error)
@@ -424,6 +557,7 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     removeContainer(credentials, container);
     qDebug().noquote() << "ServerController::setupContainer removeContainer finished";
 
+    qDebug().noquote() << "buildContainerWorker start";
     e = buildContainerWorker(credentials, container, config);
     if (e) return e;
     qDebug().noquote() << "ServerController::setupContainer buildContainerWorker finished";
@@ -520,9 +654,9 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
         stdOut += data + "\n";
 
-        if (data.contains("Automatically restart Docker daemon?")) {
-            proc->write("yes\n");
-        }
+       // if (data.contains("Automatically restart Docker daemon?")) {
+       //     proc->write("yes\n");
+       // }
     };
     auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
         stdOut += data + "\n";
@@ -553,17 +687,20 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
 
     if (e) return e;
 
-//    QString stdOut;
-//    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-//        stdOut += data + "\n";
-//    };
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
 //    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
 //        stdOut += data + "\n";
 //    };
 
-    return runScript(credentials,
+    e = runScript(credentials,
         replaceVars(amnezia::scriptData(SharedScriptType::build_container),
-                    genVarsForScript(credentials, container, config)));
+                    genVarsForScript(credentials, container, config)), cbReadStdOut);
+    if (e) return e;
+
+    return e;
 }
 
 ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
@@ -572,14 +709,18 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
         stdOut += data + "\n";
     };
-    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-        stdOut += data + "\n";
-    };
+   // auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+   //     stdOut += data + "\n";
+   // };
 
     ErrorCode e = runScript(credentials,
         replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
-            genVarsForScript(credentials, container, config)),
-                cbReadStdOut, cbReadStdErr);
+            genVarsForScript(credentials, container, config)), cbReadStdOut);
+
+    qDebug() << "cbReadStdOut: " << stdOut;
+
+
+    if (stdOut.contains("docker: Error response from daemon")) return ErrorCode::ServerDockerFailedError;
 
     if (stdOut.contains("address already in use")) return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("is already in use by container")) return ErrorCode::ServerPortAlreadyAllocatedError;

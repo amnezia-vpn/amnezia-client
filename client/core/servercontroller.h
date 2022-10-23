@@ -5,6 +5,10 @@
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
+
+#include <libssh/libssh.h>
+#include <libssh/sftp.h>
+
 #include "debug.h"
 #include "defs.h"
 
@@ -74,6 +78,9 @@ public:
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
 private:
+
+    ErrorCode copyFileToRemoteHost(ssh_session& ssh, sftp_session& sftp, std::string local_path, std::string remote_path, std::string file_desc);
+    ErrorCode connectToHost(const ServerCredentials &credentials, ssh_session& session);
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
