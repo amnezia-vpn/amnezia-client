@@ -7,7 +7,7 @@ import PageType 1.0
 import Qt.labs.platform
 import Qt.labs.folderlistmodel
 import QtQuick.Dialogs
-import QtQuick.Controls.Universal 2.12
+import QtQuick.Controls.Basic
 import "./"
 import "Controls"
 import "Pages"

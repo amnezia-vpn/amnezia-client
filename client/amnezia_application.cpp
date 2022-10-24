@@ -169,7 +169,7 @@ void AmneziaApplication::registerTypes()
 
 void AmneziaApplication::loadFonts()
 {
-	QQuickStyle::setStyle("Universal");
+	QQuickStyle::setStyle("Bassic");
 
     QFontDatabase::addApplicationFont(":/fonts/Lato-Black.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-BlackItalic.ttf");
