@@ -9,6 +9,7 @@
 #include "core/servercontroller.h"
 #include "debug.h"
 #include "defines.h"
+#include <QQuickStyle>
 
 #include "platforms/ios/QRCodeReaderBase.h"
 
@@ -168,6 +169,8 @@ void AmneziaApplication::registerTypes()
 
 void AmneziaApplication::loadFonts()
 {
+	QQuickStyle::setStyle("Universal");
+
     QFontDatabase::addApplicationFont(":/fonts/Lato-Black.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-BlackItalic.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-Bold.ttf");

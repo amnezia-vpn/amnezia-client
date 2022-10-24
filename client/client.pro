@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick svg
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
 equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN

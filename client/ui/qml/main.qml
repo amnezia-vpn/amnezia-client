@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Controls.Material
 import PageEnum 1.0
 import PageType 1.0
 import Qt.labs.platform
 import Qt.labs.folderlistmodel
 import QtQuick.Dialogs
+import QtQuick.Controls.Universal 2.12
 import "./"
 import "Controls"
 import "Pages"
