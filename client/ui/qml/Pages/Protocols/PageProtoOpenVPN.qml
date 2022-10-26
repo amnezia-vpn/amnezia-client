@@ -281,7 +281,10 @@ PageProtocolBase {
                         font.styleName: "normal"
                         font.pixelSize: 16
                         color: "#181922"
-
+                        text: logic.textAreaAdditionalClientConfig
+                        onEditingFinished: {
+                            logic.textAreaAdditionalClientConfig = text
+                        }
                     }
                 }
 
@@ -294,7 +297,7 @@ PageProtocolBase {
 
                 implicitWidth: parent.width
                 height: 21
-                text: qsTr("Additional client config commands →")
+                text: qsTr("Additional server config commands →")
                 background: Item {
                     anchors.fill: parent
                 }
@@ -305,7 +308,7 @@ PageProtocolBase {
                     font.styleName: "normal"
                     font.pixelSize: 16
                     color: "#15CDCB";
-                    text: pb_client_config.text
+                    text: pb_server_config.text
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -331,7 +334,10 @@ PageProtocolBase {
                         font.styleName: "normal"
                         font.pixelSize: 16
                         color: "#181922"
-
+                        text: logic.textAreaAdditionalServerConfig
+                        onEditingFinished: {
+                            logic.textAreaAdditionalServerConfig = text
+                        }
                     }
                 }
 
