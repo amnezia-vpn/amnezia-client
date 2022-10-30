@@ -135,9 +135,8 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn");
-
+    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open profile"),
+                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), tr("*.vpn"));
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
@@ -145,6 +144,14 @@ void StartPageLogic::onPushButtonImportOpenFile()
     QByteArray data = file.readAll();
 
     importConnectionFromCode(QString(data));
+}
+
+bool StartPageLogic::isIOS()
+{
+#ifdef Q_OS_IOS
+    return true;
+#endif
+    return false;
 }
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)

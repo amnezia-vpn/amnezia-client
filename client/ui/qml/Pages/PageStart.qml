@@ -122,7 +122,7 @@ PageBase {
             onClicked: {
                 StartPageLogic.onPushButtonImportOpenFile()
             }
-            enabled: StartPageLogic.pushButtonConnectEnabled
+            enabled: StartPageLogic.isIOS() ? false : StartPageLogic.pushButtonConnectEnabled
         }
 
         BlueButtonType {
@@ -149,7 +149,7 @@ PageBase {
             anchors.top: qr_code_import.bottom
             anchors.topMargin: 30
             visible: UiLogic.pagesStackDepth == 1
-            enabled: StartPageLogic.pushButtonConnectEnabled
+            enabled: StartPageLogic.isIOS() ? false : StartPageLogic.pushButtonConnectEnabled
 
             text: qsTr("Restore app config")
             onClicked: {

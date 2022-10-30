@@ -249,7 +249,7 @@ else
   print Y "No Tun2Socks will be built"
 fi
 
-print Y "Creating the xcode project via qmake..."
+print Y "Creating the Xcode project via qmake..."
 $QMAKE \
   VERSION=$SHORTVERSION \
   BUILD_ID=$FULLVERSION \
@@ -270,6 +270,6 @@ print G "done."
     sed -i '' '/<string>Original<\/string>/d' AmneziaVPN.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
   fi
 
-# print Y "Opening in XCode..."
-# open AmneziaVPN.xcodeproj
 print G "All done!"
+print Y "Opening project in Xcode..."
+open AmneziaVPN.xcodeproj

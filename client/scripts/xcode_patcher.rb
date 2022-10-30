@@ -104,7 +104,7 @@ class XCodeprojPatcher
       config.build_settings['ENABLE_BITCODE'] ||= 'NO' if platform == 'ios'
       config.build_settings['SDKROOT'] = 'iphoneos' if platform == 'ios'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO' if platform == 'ios'
-      config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin:/usr/local/bin:/opt/homebrew/bin'
+      config.build_settings['PATH'] = '${PATH}:/opt/local/bin:/usr/local/go/bin:/usr/local/bin:/opt/homebrew/bin'
 
       groupId = "";
       if (platform == 'macos')
@@ -325,7 +325,7 @@ class XCodeprojPatcher
           "-framework",
           "OpenGLES",
         ]
-        config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin'
+        config.build_settings['PATH'] = '${PATH}:/opt/local/bin:/usr/local/go/bin'
       end
 
       groupId = "";

@@ -18,6 +18,6 @@ SDKROOT[arch=armv7] = iphoneos
 SDKROOT[arch=armv7s] = iphoneos
 
 VALID_ARCHS[sdk=iphoneos*] = arm64
-PROJECT_TEMP_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/ShadowSocks.build
-CONFIGURATION_BUILD_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/Release-iphoneos
-BUILT_PRODUCTS_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client-bkp/client/3rd/ShadowSocks/build/Release-iphoneos  
+PROJECT_TEMP_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client/client/3rd/ShadowSocks/build/ShadowSocks.build
+CONFIGURATION_BUILD_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client/client/3rd/ShadowSocks/build/Release-iphoneos
+BUILT_PRODUCTS_DIR = /Users/sanchez/work/vied/ios/vpn/desktop-client/client/3rd/ShadowSocks/build/Release-iphoneos  

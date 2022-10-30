@@ -3,3 +3,12 @@ DEVELOPMENT_TEAM = X7UJ388FXK
 GROUP_ID_IOS = group.org.amnezia.AmneziaVPN
 APP_ID_IOS = org.amnezia.AmneziaVPN
 NETEXT_ID_IOS = org.amnezia.AmneziaVPN.network-extension
+
+// Intermediate build files go here
+//PROJECT_TEMP_DIR = $(SRCROOT)/build/$(PROJECT_NAME).build
+
+// Build-related files for the active build configuration go here
+//CONFIGURATION_BUILD_DIR = $(SRCROOT)/build/$CONFIGURATION
+
+// The final product executables and other build products go here
+//BUILT_PRODUCTS_DIR = $(SRCROOT)/build/$CONFIGURATION
