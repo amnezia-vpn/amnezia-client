@@ -15,6 +15,23 @@ PageBase {
         visible: pageLoader.depth > 1
     }
 
+    ImageButtonType {
+        anchors {
+            right: parent.right
+            top: parent.top
+        }
+
+        width: 41
+        height: 41
+        imgMarginHover: 8
+        imgMargin: 9
+        icon.source: "qrc:/images/settings_grey.png"
+        visible: !GeneralSettingsLogic.existsAnyServer
+        onClicked: {
+            UiLogic.goToPage(PageEnum.GeneralSettings)
+        }
+    }
+
     Caption {
         id: caption
         text: start_switch_page.checked ?

@@ -85,6 +85,7 @@ PageBase {
                 Layout.preferredHeight: 30
                 icon.source: "qrc:/images/svg/vpn_key_black_24dp.svg"
                 text: qsTr("Server Settings")
+                enabled: GeneralSettingsLogic.existsAnyServer
                 onClicked: {
                     GeneralSettingsLogic.onPushButtonGeneralSettingsServerSettingsClicked()
                 }
@@ -101,7 +102,8 @@ PageBase {
                 Layout.preferredHeight: 30
                 icon.source: "qrc:/images/svg/share_black_24dp.svg"
                 text: qsTr("Share connection")
-                enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable
+                enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable &&
+                         GeneralSettingsLogic.existsAnyServer
                 onClicked: {
                     GeneralSettingsLogic.onPushButtonGeneralSettingsShareConnectionClicked()
                 }
