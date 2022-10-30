@@ -8,11 +8,12 @@ BasicButtonType {
 
     background: Item {}
     contentItem: Item {
-        anchors.fill: parent
+//        anchors.fill: parent
         SvgImageType {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             svg.source: root.icon.source
+            enabled: root.enabled
             color: "#100A44"
             width: 25
             height: 25

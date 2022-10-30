@@ -18,6 +18,6 @@ Item {
     ColorOverlay {
         anchors.fill: image
         source: image
-        color: root.color
+        color: root.enabled ? root.color : "grey"
     }
 }
