@@ -15,6 +15,25 @@
 #include "platforms/android/android_controller.h"
 #endif
 
+namespace {
+QString checkConfigFormat(const QString &config)
+{
+    const QString openVpnConfigPatternCli = "client";
+    const QString openVpnConfigPatternProto1 = "proto tcp";
+    const QString openVpnConfigPatternProto2 = "proto udp";
+    const QString openVpnConfigPatternDriver1 = "dev tun";
+    const QString openVpnConfigPatternDriver2 = "dev tap";
+
+    if (config.contains(openVpnConfigPatternCli) &&
+            (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2)) &&
+            (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+        return "OpenVpn";
+    }
+    return "Amnezia";
+}
+
+}
+
 StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_pushButtonConnectEnabled{true},
@@ -136,7 +155,7 @@ void StartPageLogic::onPushButtonImport()
 void StartPageLogic::onPushButtonImportOpenFile()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn");
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn");
 
     if (fileName.isEmpty()) return;
 
@@ -144,7 +163,12 @@ void StartPageLogic::onPushButtonImportOpenFile()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    importConnectionFromCode(QString(data));
+    auto configFormat = checkConfigFormat(QString(data));
+    if (configFormat == "OpenVpn") {
+        importConnectionFromOpenVpnConfig(QString(data));
+    } else {
+        importConnectionFromCode(QString(data));
+    }
 }
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)
@@ -213,4 +237,45 @@ bool StartPageLogic::importConnectionFromQr(const QByteArray &data)
     }
 
     return false;
+}
+
+bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
+{
+    QJsonObject openVpnConfig;
+    openVpnConfig[config_key::config] = config;
+
+    QJsonObject lastConfig;
+    lastConfig[config_key::last_config] = QString(QJsonDocument(openVpnConfig).toJson());
+
+    QJsonObject containers;
+    containers.insert(config_key::container, QJsonValue("amnezia-openvpn"));
+    containers.insert("openvpn", QJsonValue(lastConfig));
+
+    QJsonArray arr;
+    arr.push_back(containers);
+
+    QJsonObject o;
+    o[config_key::containers] = arr;
+    o[config_key::defaultContainer] = "amnezia-openvpn";
+    o[config_key::description] = "OpenVpn server";
+
+
+    const static QRegularExpression dnsRegExp("dhcp-option DNS \\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
+    QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(config);
+    if (dnsMatch.hasNext()) {
+        o[config_key::dns1] = dnsMatch.next().captured(0).split(" ").at(2);
+    }
+    if (dnsMatch.hasNext()) {
+        o[config_key::dns2] = dnsMatch.next().captured(0).split(" ").at(2);
+    }
+
+    const static QRegularExpression hostNameRegExp("remote \\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
+    QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(config);
+    if (hostNameMatch.hasMatch()) {
+        o[config_key::hostName] = hostNameMatch.captured(0).split(" ").at(1);
+    }
+
+    o["isThirdPartyConfig"] = true;
+
+    return importConnection(o);
 }

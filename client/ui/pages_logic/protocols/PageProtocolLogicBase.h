@@ -17,7 +17,7 @@ public:
     explicit PageProtocolLogicBase(UiLogic *uiLogic, QObject *parent = nullptr);
     ~PageProtocolLogicBase() = default;
 
-    virtual void updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData) {}
+    virtual void updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) {}
     virtual QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) { return QJsonObject(); }
 
 };

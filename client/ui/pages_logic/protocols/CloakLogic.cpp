@@ -23,7 +23,7 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData)
+void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig)
 {
     set_pageEnabled(haveAuthData);
     set_pushButtonSaveVisible(haveAuthData);

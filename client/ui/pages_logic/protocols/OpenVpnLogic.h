@@ -35,6 +35,9 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(int, progressBarResetValue)
     AUTO_PROPERTY(int, progressBarResetMaximium)
 
+    AUTO_PROPERTY(QString, openVpnLastConfigText)
+    AUTO_PROPERTY(bool, isThirdPartyConfig)
+
 public:
     Q_INVOKABLE void onPushButtonProtoOpenVpnSaveClicked();
 
@@ -42,7 +45,7 @@ public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~OpenVpnLogic() = default;
 
-    void updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData) override;
+    void updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
     QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:

@@ -113,6 +113,8 @@ public:
     QByteArray backupAppConfig() const { return m_settings.backupAppConfig(); }
     bool restoreAppConfig(const QByteArray &cfg) { return m_settings.restoreAppConfig(cfg); }
 
+    bool isThirdPartyConfig(int serverIndex) const;
+
 private:
     SecureQSettings m_settings;
 

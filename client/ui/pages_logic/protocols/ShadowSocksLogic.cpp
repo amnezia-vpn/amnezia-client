@@ -21,7 +21,7 @@ ShadowSocksLogic::ShadowSocksLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
+void ShadowSocksLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig)
 {
     set_pageEnabled(haveAuthData);
     set_pushButtonSaveVisible(haveAuthData);

@@ -36,7 +36,7 @@ OtherProtocolsLogic::~OtherProtocolsLogic()
 #endif
 }
 
-void OtherProtocolsLogic::updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData)
+void OtherProtocolsLogic::updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig)
 {
     set_labelTftpUserNameText(config.value(config_key::userName).toString());
     set_labelTftpPasswordText(config.value(config_key::password).toString(protocols::sftp::defaultUserName));

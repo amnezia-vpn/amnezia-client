@@ -27,7 +27,7 @@ public:
     explicit OtherProtocolsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~OtherProtocolsLogic();
 
-    void updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData) override;
+    void updateProtocolPage(const QJsonObject &config, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
     //QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:
