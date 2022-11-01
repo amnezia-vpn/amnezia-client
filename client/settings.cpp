@@ -317,5 +317,5 @@ bool Settings::isThirdPartyConfig(int serverIndex) const
 {
     if (serverIndex < 0) return false;
     const QJsonObject &s = server(serverIndex);
-    return s.value("isThirdPartyConfig").toBool();
+    return s.value(config_key::is_third_party_config).toBool();
 }

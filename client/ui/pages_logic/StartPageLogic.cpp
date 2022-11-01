@@ -249,7 +249,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
 
     QJsonObject containers;
     containers.insert(config_key::container, QJsonValue("amnezia-openvpn"));
-    containers.insert("openvpn", QJsonValue(lastConfig));
+    containers.insert(config_key::openvpn, QJsonValue(lastConfig));
 
     QJsonArray arr;
     arr.push_back(containers);
@@ -275,7 +275,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
         o[config_key::hostName] = hostNameMatch.captured(0).split(" ").at(1);
     }
 
-    o["isThirdPartyConfig"] = true;
+    o[config_key::is_third_party_config] = true;
 
     return importConnection(o);
 }
