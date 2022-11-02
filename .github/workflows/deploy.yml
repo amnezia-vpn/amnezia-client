@@ -14,8 +14,8 @@ jobs:
     env:
       QT_VERSION: 5.15.2
       QIF_VERSION: 4.4
-      QT_BIN_DIR: $HOME/Qt/$QT_VERSION/gcc_64/bin
-      QIF_BIN_DIR: $QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+      QT_BIN_DIR: ~/Qt/${{env.QT_VERSION}}/gcc_64/bin
+      QIF_BIN_DIR: ${{env.QT_BIN_DIR}}/../../../Tools/QtInstallerFramework/${{env.QIF_VERSION}}/bin
 
     steps:
     - uses: actions/checkout@v3
