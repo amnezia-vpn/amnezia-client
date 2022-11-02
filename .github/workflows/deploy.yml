@@ -1,0 +1,38 @@
+name: Deploy workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on: [push, pull_request]
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  Build-Bundle-Action:
+    name: Build-Bundle-Action
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 10
+      
+    - name: Install packages
+      run: sudo apt-get install sshpass p7zip p7zip-full python3 python3-pip libgl-dev mesa-common-dev libpulse-dev libxcb-* libxkbcommon-x11-0
+
+    - name: Install deps and build project
+      env:
+        QT_VERSION: 5.15.2
+        QIF_VERSION: 4.4
+        QT_BIN_DIR: $HOME/Qt/$QT_VERSION/gcc_64/bin
+        QIF_BIN_DIR: $QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+
+      run: |
+          if [ ! -f $QT_BIN_DIR/qmake ]; then \
+          python3 -m pip install --user $(whoami) --upgrade pip && \
+          export PATH=$HOME/.local/bin:$PATH && \
+          python3 -m pip install -U aqtinstall requests py7zr && \
+          python3 -m pip show aqtinstall && \
+          python3 -m aqt install-qt linux desktop $QT_VERSION gcc_64 -m all -O $HOME/Qt && \
+          python3 -m aqt install-tool linux desktop tools_ifw  -O $HOME/Qt ; \
+          fi && \
+          bash deploy.sh
+
