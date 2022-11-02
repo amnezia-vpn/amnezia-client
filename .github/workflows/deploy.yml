@@ -41,8 +41,8 @@ jobs:
     - name: Cache Qt
       uses: actions/cache@v3
       id: cache-qt
-      key: qt-5.15.2-linux
       with:
+        key: qt-5.15.2-linux
         path: "$HOME/Qt"
 
     - name: Build project
