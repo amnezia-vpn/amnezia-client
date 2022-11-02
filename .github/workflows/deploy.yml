@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - name: Setup env
-    - run: |
+      run: |
         QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin && export QT_BIN_DIR && \
         QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin && export QIF_BIN_DIR
 
