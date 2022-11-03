@@ -24,11 +24,16 @@ QString checkConfigFormat(const QString &config)
     const QString openVpnConfigPatternDriver1 = "dev tun";
     const QString openVpnConfigPatternDriver2 = "dev tap";
 
+    const QString wireguardConfigPatternSectionInterface = "[Interface]";
+    const QString wireguardConfigPatternSectionPeer = "[Peer]";
+
     if (config.contains(openVpnConfigPatternCli) &&
             (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2)) &&
             (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
         return "OpenVpn";
-    }
+    } else if (config.contains(wireguardConfigPatternSectionInterface) &&
+               config.contains(wireguardConfigPatternSectionPeer))
+        return "Wireguard";
     return "Amnezia";
 }
 
@@ -155,7 +160,7 @@ void StartPageLogic::onPushButtonImport()
 void StartPageLogic::onPushButtonImportOpenFile()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn");
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
 
     if (fileName.isEmpty()) return;
 
@@ -166,6 +171,8 @@ void StartPageLogic::onPushButtonImportOpenFile()
     auto configFormat = checkConfigFormat(QString(data));
     if (configFormat == "OpenVpn") {
         importConnectionFromOpenVpnConfig(QString(data));
+    } else if (configFormat == "Wireguard") {
+        importConnectionFromWireguardConfig(QString(data));
     } else {
         importConnectionFromCode(QString(data));
     }
@@ -276,6 +283,42 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     }
 
     o[config_key::is_third_party_config] = true;
+
+    return importConnection(o);
+}
+
+bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
+{
+    QJsonObject lastConfig;
+    lastConfig[config_key::config] = config;
+
+    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b):([0-9]*)");
+    QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(config);
+    QString hostName;
+    QString port;
+    if (hostNameAndPortMatch.hasMatch()) {
+        hostName = hostNameAndPortMatch.captured(1);
+        port = hostNameAndPortMatch.captured(2);
+    }
+
+
+    QJsonObject wireguardConfig;
+    wireguardConfig[config_key::last_config] = lastConfig;
+    wireguardConfig[config_key::port] = port;
+    wireguardConfig[config_key::transport_proto] = "udp";
+
+    QJsonObject containers;
+    containers.insert(config_key::container, QJsonValue("amnezia-wireguard"));
+    containers.insert(config_key::wireguard, QJsonValue(wireguardConfig));
+
+    QJsonArray arr;
+    arr.push_back(containers);
+
+    QJsonObject o;
+    o[config_key::containers] = arr;
+    o[config_key::defaultContainer] = "amnezia-wireguard";
+    o[config_key::description] = "Wireguard server";
+    o[config_key::hostName] = hostName;
 
     return importConnection(o);
 }

@@ -43,6 +43,7 @@ PageProtocolBase {
             ColumnLayout {
                 visible: !logic.isThirdPartyConfig
                 enabled: logic.pageEnabled
+
                 LabelType {
                     id: lb_subnet
                     height: 21

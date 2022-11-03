@@ -33,6 +33,7 @@ public:
     bool importConnectionFromCode(QString code);
     bool importConnectionFromQr(const QByteArray &data);
     bool importConnectionFromOpenVpnConfig(const QString &config);
+    bool importConnectionFromWireguardConfig(const QString &config);
 
 public:
     explicit StartPageLogic(UiLogic *uiLogic, QObject *parent = nullptr);
