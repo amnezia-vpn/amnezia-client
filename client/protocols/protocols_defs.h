@@ -59,7 +59,7 @@ constexpr char additional_server_config[] = "additional_server_config";
 // proto config keys
 constexpr char last_config[] = "last_config";
 
-constexpr char is_third_party_config[] = "is_third_party_config";
+constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
 
 constexpr char openvpn[] = "openvpn";
 constexpr char wireguard[] = "wireguard";

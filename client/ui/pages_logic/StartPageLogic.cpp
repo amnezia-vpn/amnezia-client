@@ -267,22 +267,22 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     o[config_key::description] = "OpenVpn server";
 
 
-    const static QRegularExpression dnsRegExp("dhcp-option DNS \\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
+    const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(config);
     if (dnsMatch.hasNext()) {
-        o[config_key::dns1] = dnsMatch.next().captured(0).split(" ").at(2);
+        o[config_key::dns1] = dnsMatch.next().captured(1);
     }
     if (dnsMatch.hasNext()) {
-        o[config_key::dns2] = dnsMatch.next().captured(0).split(" ").at(2);
+        o[config_key::dns2] = dnsMatch.next().captured(1);
     }
 
-    const static QRegularExpression hostNameRegExp("remote \\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
+    const static QRegularExpression hostNameRegExp("remote (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(config);
     if (hostNameMatch.hasMatch()) {
-        o[config_key::hostName] = hostNameMatch.captured(0).split(" ").at(1);
+        o[config_key::hostName] = hostNameMatch.captured(1);
     }
 
-    o[config_key::is_third_party_config] = true;
+    o[config_key::isThirdPartyConfig] = true;
 
     return importConnection(o);
 }
@@ -301,9 +301,8 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
         port = hostNameAndPortMatch.captured(2);
     }
 
-
     QJsonObject wireguardConfig;
-    wireguardConfig[config_key::last_config] = lastConfig;
+    wireguardConfig[config_key::last_config] = QString(QJsonDocument(lastConfig).toJson());;
     wireguardConfig[config_key::port] = port;
     wireguardConfig[config_key::transport_proto] = "udp";
 
@@ -318,7 +317,16 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-wireguard";
     o[config_key::description] = "Wireguard server";
+
+    const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
+    QRegularExpressionMatch dnsMatch = dnsRegExp.match(config);
+    if (dnsMatch.hasMatch()) {
+        o[config_key::dns1] = dnsMatch.captured(1);
+        o[config_key::dns2] = dnsMatch.captured(2);
+    }
+
     o[config_key::hostName] = hostName;
+    o[config_key::isThirdPartyConfig] = true;
 
     return importConnection(o);
 }

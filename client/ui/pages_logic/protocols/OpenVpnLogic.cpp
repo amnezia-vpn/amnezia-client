@@ -91,11 +91,12 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     auto lastConfig = openvpnConfig.value(config_key::last_config).toString();
     auto lastConfigJson = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    QString openVpnLastConfigText;
     for (const QString &l: lines) {
-            m_openVpnLastConfigText.append(l + "\n");
+            openVpnLastConfigText.append(l + "\n");
     }
 
-    emit openVpnLastConfigTextChanged(m_openVpnLastConfigText);
+    set_openVpnLastConfigText(m_openVpnLastConfigText);
     set_isThirdPartyConfig(isThirdPartyConfig);
 }
 
