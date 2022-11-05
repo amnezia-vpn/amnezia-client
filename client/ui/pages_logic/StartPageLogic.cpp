@@ -16,7 +16,13 @@
 #endif
 
 namespace {
-QString checkConfigFormat(const QString &config)
+enum class ConfigTypes {
+    Amnezia,
+    OpenVpn,
+    WireGuard
+};
+
+ConfigTypes checkConfigFormat(const QString &config)
 {
     const QString openVpnConfigPatternCli = "client";
     const QString openVpnConfigPatternProto1 = "proto tcp";
@@ -30,11 +36,11 @@ QString checkConfigFormat(const QString &config)
     if (config.contains(openVpnConfigPatternCli) &&
             (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2)) &&
             (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
-        return "OpenVpn";
+        return ConfigTypes::OpenVpn;
     } else if (config.contains(wireguardConfigPatternSectionInterface) &&
                config.contains(wireguardConfigPatternSectionPeer))
-        return "Wireguard";
-    return "Amnezia";
+        return ConfigTypes::WireGuard;
+    return ConfigTypes::Amnezia;
 }
 
 }
@@ -169,9 +175,9 @@ void StartPageLogic::onPushButtonImportOpenFile()
     QByteArray data = file.readAll();
 
     auto configFormat = checkConfigFormat(QString(data));
-    if (configFormat == "OpenVpn") {
+    if (configFormat == ConfigTypes::OpenVpn) {
         importConnectionFromOpenVpnConfig(QString(data));
-    } else if (configFormat == "Wireguard") {
+    } else if (configFormat == ConfigTypes::WireGuard) {
         importConnectionFromWireguardConfig(QString(data));
     } else {
         importConnectionFromCode(QString(data));
@@ -261,10 +267,17 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     QJsonArray arr;
     arr.push_back(containers);
 
+    QString hostName;
+    const static QRegularExpression hostNameRegExp("remote (.*) [0-9]*");
+    QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(config);
+    if (hostNameMatch.hasMatch()) {
+        hostName = hostNameMatch.captured(1);
+    }
+
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-openvpn";
-    o[config_key::description] = "OpenVpn server";
+    o[config_key::description] = QString("OpenVpn server %1").arg(hostName);
 
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
@@ -276,11 +289,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
         o[config_key::dns2] = dnsMatch.next().captured(1);
     }
 
-    const static QRegularExpression hostNameRegExp("remote (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
-    QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(config);
-    if (hostNameMatch.hasMatch()) {
-        o[config_key::hostName] = hostNameMatch.captured(1);
-    }
+    o[config_key::hostName] = hostName;
 
     o[config_key::isThirdPartyConfig] = true;
 
@@ -292,7 +301,7 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     QJsonObject lastConfig;
     lastConfig[config_key::config] = config;
 
-    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b):([0-9]*)");
+    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*):([0-9]*)");
     QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(config);
     QString hostName;
     QString port;
@@ -316,7 +325,7 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-wireguard";
-    o[config_key::description] = "Wireguard server";
+    o[config_key::description] = QString("Wireguard server %1").arg(hostName);
 
     const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(config);
@@ -326,6 +335,7 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     }
 
     o[config_key::hostName] = hostName;
+
     o[config_key::isThirdPartyConfig] = true;
 
     return importConnection(o);
