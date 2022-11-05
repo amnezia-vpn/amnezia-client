@@ -16,10 +16,27 @@ jobs:
       QIF_VERSION: 4.4
 
     steps:
-    - name: Setup env
-      run: |
-        QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin && export QT_BIN_DIR && \
-        QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin && export QIF_BIN_DIR
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      host: linux
+      with:
+        version: '5.15.2'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        dir: '${{ github.workspace }}/Qt/'
+        install-deps: 'true'
+        modules: 'qtcharts'
+        archives: 'qtbase qtsvg'
+        cache: 'true'
+        cache-key-prefix: 'install-qt-action-linux'
+        setup-python: 'true'
+        tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+        set-env: 'true'
+        tools-only: 'false'
+        aqtversion: '==2.1.*'
+        py7zrversion: '==0.19.*'
+        extra: '--external 7z'
 
     - uses: actions/checkout@v3
       with:
@@ -50,4 +67,85 @@ jobs:
 
     - name: Build project
       run: bash deploy/build_linux.sh
+
+
+
+  Build-Windows-x64:
+    name: Build-Windows-x64
+    runs-on: ubuntu-latest
+
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.4
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      host: windows
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        dir: '${{ github.workspace }}/Qt/'
+        install-deps: 'true'
+        modules: 'qtcharts'
+        archives: 'qtbase qtsvg'
+        cache: 'false'
+        cache-key-prefix: 'install-qt-action-windows64'
+        setup-python: 'true'
+        tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+        set-env: 'true'
+        tools-only: 'false'
+        aqtversion: '==2.1.*'
+        py7zrversion: '==0.19.*'
+        extra: '--external 7z'
+
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 10
+
+    - name: Build project
+      run: cmd //c winbuild.bat
+
+
+
+  Build-MacOS:
+    name: Build-MacOS
+    runs-on: ubuntu-latest
+
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.4
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      host: windows
+      with:
+        version: '5.15.2'
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        dir: '${{ github.workspace }}/Qt/'
+        install-deps: 'true'
+        modules: 'qtcharts'
+        archives: 'qtbase qtsvg'
+        cache: 'true'
+        cache-key-prefix: 'install-qt-action-mac'
+        setup-python: 'true'
+        tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+        set-env: 'true'
+        tools-only: 'false'
+        aqtversion: '==2.1.*'
+        py7zrversion: '==0.19.*'
+        extra: '--external 7z'
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 10
+
+    - name: Build project
+      run: bash deploy/build_macos.sh
 
