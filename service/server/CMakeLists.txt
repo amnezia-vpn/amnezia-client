@@ -56,8 +56,28 @@ if(WIN32)
 
     add_compile_definitions(_WINSOCKAPI_)
 endif()
-#TODO migrate macx
-#TODO migrate linux
+
+if(APPLE)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/helper_route_mac.h
+        ${CMAKE_CURRENT_LIST_DIR}/router_mac.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/helper_route_mac.c
+        ${CMAKE_CURRENT_LIST_DIR}/router_mac.cpp
+    )
+endif()
+
+if(LINUX)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/router_linux.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/router_linux.cpp
+    )
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../src/qtservice.cmake)
 
