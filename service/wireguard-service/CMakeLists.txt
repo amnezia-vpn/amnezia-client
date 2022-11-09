@@ -11,10 +11,12 @@ qt_standard_project_setup()
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/wireguardtunnelservice.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/wireguardtunnelservice.cpp
+)
 
 set(HEADERS
-   ${CMAKE_CURRENT_LIST_DIR}/wireguardtunnelservice.h)
+   ${CMAKE_CURRENT_LIST_DIR}/wireguardtunnelservice.h
+)
 
 set(LIBS
     user32
@@ -25,7 +27,8 @@ set(LIBS
     iphlpapi
     gdi32
     Advapi32
-    Kernel32)
+    Kernel32
+)
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core ${LIBS})
