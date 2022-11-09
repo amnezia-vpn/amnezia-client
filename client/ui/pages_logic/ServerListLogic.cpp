@@ -15,12 +15,18 @@ void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 {
     m_settings->setDefaultServer(index);
     uiLogic()->onUpdateAllPages();
+	emit currServerIdxChanged();
 }
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
 {
     uiLogic()->selectedServerIndex = index;
     uiLogic()->goToPage(Page::ServerSettings);
+}
+
+int ServerListLogic::currServerIdx() const
+{
+	return m_settings->defaultServerIndex();
 }
 
 void ServerListLogic::onUpdatePage()
