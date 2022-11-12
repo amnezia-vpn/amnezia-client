@@ -87,4 +87,4 @@ set(HEADERS ${HEADERS} ${PUBLIC_HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/opensshkeyfilereader_p.h
 )
 
-qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/qssh.qrc)
+# qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/qssh.qrc)

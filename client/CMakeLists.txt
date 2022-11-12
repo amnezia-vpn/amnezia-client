@@ -35,6 +35,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 
+# TODO it seems like i'm doing it wrong
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
@@ -210,18 +211,41 @@ if(WIN32)
         )
     else()
         message("Windows x86 build")
+        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86)
         set(LIBS ${LIBS}
-            -L${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86/
             libssl
             libcrypto
         )
     endif()
 endif()
+    
+if(APPLE)
+    add_compile_definitions(MVPN_MACOS)
 
-#todo add mac
-#todo add linux
+    # ICON   = $$PWD/images/app.icns //todo
 
-if(WIN32) #todo add mac and linux
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
+
+    # LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+
+    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
+    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
+
+endif()
+
+if(LINUX AND NOT ANDROID)
+    add_compile_definitions(MVPN_LINUX)
+
+    set(LIBS ${LIBS}
+        /usr/lib/x86_64-linux-gnu/libcrypto.a
+        /usr/lib/x86_64-linux-gnu/libssl.a
+    )
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
+endif()
+
+if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
+    message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
     set(HEADERS ${HEADERS}
@@ -245,8 +269,120 @@ if(WIN32) #todo add mac and linux
     )
 endif()
 
-#todo add android
-#todo add ios
+if(ANDROID)
+    message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
+    # We need to include qtprivate api's
+    # As QAndroidBinder is not yet implemented with a public api
+    set(LIBS ${LIBS} Qt6::CorePrivate)
+    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
+
+    add_compile_definitions(MVPN_ANDROID)
+
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/android)
+
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
+    )
+
+    # DISTFILES += 
+    #     android/AndroidManifest.xml 
+    #     android/build.gradle 
+    #     android/gradle/wrapper/gradle-wrapper.jar 
+    #     android/gradle/wrapper/gradle-wrapper.properties 
+    #     android/gradlew 
+    #     android/gradlew.bat 
+    #     android/gradle.properties 
+    #     android/res/values/libs.xml 
+    #     android/src/org/amnezia/vpn/OpenVPNThreadv3.kt 
+    #     android/src/org/amnezia/vpn/VpnService.kt 
+    #     android/src/org/amnezia/vpn/VpnServiceBinder.kt 
+    #     android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
+
+    set(QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/android)
+
+    foreach(abi IN ANDROID_ABIS)
+        if(ANDROID_TARGET_ARCH EQUAL ${abi})
+            set(LIBS ${LIBS} 
+                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
+                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
+            )
+        endif()
+
+        set(QT_ANDROID_EXTRA_LIBS ${QT_ANDROID_EXTRA_LIBS}
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg-go.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg-quick.so
+    
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libjbcrypto.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libopenvpn.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libopvpnutil.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libovpn3.so
+            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libovpnexec.so
+        )
+    endforeach()
+endif()
+
+if(IOS)
+    message("Client iOS build")
+
+    # CONFIG += static
+    # CONFIG += file_copies
+
+    # # For the authentication
+    # LIBS += -framework AuthenticationServices
+
+    # # For notifications
+    # LIBS += -framework UIKit
+    # LIBS += -framework Foundation
+    # LIBS += -framework StoreKit
+    # LIBS += -framework UserNotifications
+
+    add_compile_definitions(MVPN_IOS)
+
+    set(HEADERS ${HEADERS}
+        ${QT_ANDROID_EXTRA_LIBS}/protocols/ios_vpnprotocol.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosnotificationhandler.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/json.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/bigint.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/bigintipv6addr.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddress.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddressrange.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate.h 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate-C-Interface.h
+    )
+
+    # i think in cmake it is not necessary?
+    # SOURCES -= 
+    #   platforms/ios/QRCodeReaderBase.cpp 
+    #   platforms/ios/MobileUtils.cpp
+
+    set(SOURCES ${SOURCES}
+        ${QT_ANDROID_EXTRA_LIBS}/protocols/ios_vpnprotocol.mm 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosnotificationhandler.mm 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/json.cpp 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosglue.mm 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddress.cpp 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddressrange.cpp 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QRCodeReaderBase.mm 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate.mm 
+        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/MobileUtils.mm
+    )
+
+    # Q_ENABLE_BITCODE.value = NO
+    # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+    # QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+endif()
+
+#if(IPHONEOS)
+#endif()
 #todo add iphones
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})

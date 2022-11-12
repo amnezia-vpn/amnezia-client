@@ -21,7 +21,45 @@ if(WIN32)
     endif()
 endif()
 
-#todo add mac
-#todo add linux
-#todo add android
-#todo add ios
+if(APPLE)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/macos)
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.cpp)
+else()
+
+if(LINUX)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/linux)
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.cpp)
+    set(LIBS ${LIBS} dl)
+else()
+
+if(ANDROID)
+    # We need to include qtprivate api's
+    # As QAndroidBinder is not yet implemented with a public api
+    set(LIBS ${LIBS} Qt6::CorePrivate)
+    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
+
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH})
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.cpp)
+else()
+
+if(IOS)
+    # CONFIG(iphoneos, iphoneos|iphonesimulator) {
+    #     contains(QT_ARCH, arm64) {
+    #         INCLUDEPATH += $$PWD/ios/iphone
+    #         HEADERS += $$PWD/ios/iphone/botan_all.h
+    #         SOURCES += $$PWD/ios/iphone/botan_all.cpp
+    #     } else {
+    #         message("Building for iOS/ARM v7 (32-bit) architecture")
+    #         ARCH_TAG = "ios_armv7"
+    #     }
+    # }
+
+    # CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+    # INCLUDEPATH += $$PWD/ios/iphone
+    # HEADERS += $$PWD/ios/iphone/botan_all.h
+    # SOURCES += $$PWD/ios/iphone/botan_all.cpp
+    # }
+endif()
