@@ -71,7 +71,7 @@ PageBase {
                 anchors.right: parent.right
                 autoOrientation: true
                 fillMode: VideoOutput.PreserveAspectFit
-                filters: [ zxingFilter ]
+//                filters: [ zxingFilter ]
 
 
                 Rectangle {
@@ -120,40 +120,40 @@ PageBase {
                 }
             }
 
-            QZXingFilter
-            {
-                id: zxingFilter
-                orientation: videoOutput.orientation
-                captureRect: {
-                    // setup bindings
-                    videoOutput.contentRect;
-                    videoOutput.sourceRect;
-                    return videoOutput.mapRectToSource(videoOutput.mapNormalizedRectToItem(Qt.rect(
-                        0.15, 0.15, 0.7, 0.7 //0, 0, 1.0, 1.0
-                    )));
-                }
+//            QZXingFilter // Which module will be used to read QrCodes ?
+//            {
+//                id: zxingFilter
+//                orientation: videoOutput.orientation
+//                captureRect: {
+//                    // setup bindings
+//                    videoOutput.contentRect;
+//                    videoOutput.sourceRect;
+//                    return videoOutput.mapRectToSource(videoOutput.mapNormalizedRectToItem(Qt.rect(
+//                        0.15, 0.15, 0.7, 0.7 //0, 0, 1.0, 1.0
+//                    )));
+//                }
 
-                decoder {
-                    enabledDecoders: QZXing.DecoderFormat_QR_CODE
+//                decoder {
+//                    enabledDecoders: QZXing.DecoderFormat_QR_CODE
 
-                    onTagFound: {
-                        QrDecoderLogic.onDetectedQrCode(tag)
-                    }
+//                    onTagFound: {
+//                        QrDecoderLogic.onDetectedQrCode(tag)
+//                    }
 
-                    tryHarder: true
-                }
+//                    tryHarder: true
+//                }
 
-                property int framesDecoded: 0
-                property real timePerFrameDecode: 0
+//                property int framesDecoded: 0
+//                property real timePerFrameDecode: 0
 
-                onDecodingFinished:
-                {
-                    timePerFrameDecode = (decodeTime + framesDecoded * timePerFrameDecode) / (framesDecoded + 1);
-                    framesDecoded++;
-                    if(succeeded)
-                        console.log("frame finished: " + succeeded, decodeTime, timePerFrameDecode, framesDecoded);
-                }
-            }
+//                onDecodingFinished:
+//                {
+//                    timePerFrameDecode = (decodeTime + framesDecoded * timePerFrameDecode) / (framesDecoded + 1);
+//                    framesDecoded++;
+//                    if(succeeded)
+//                        console.log("frame finished: " + succeeded, decodeTime, timePerFrameDecode, framesDecoded);
+//                }
+//            }
 
 
         }
