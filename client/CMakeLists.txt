@@ -190,7 +190,7 @@ endif()
 if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
-
+    
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/core/ipcclient.h
         ${CMAKE_CURRENT_LIST_DIR}/core/privileged_process.h
@@ -234,43 +234,6 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
-
-    # DISTFILES += 
-    #     android/AndroidManifest.xml 
-    #     android/build.gradle 
-    #     android/gradle/wrapper/gradle-wrapper.jar 
-    #     android/gradle/wrapper/gradle-wrapper.properties 
-    #     android/gradlew 
-    #     android/gradlew.bat 
-    #     android/gradle.properties 
-    #     android/res/values/libs.xml 
-    #     android/src/org/amnezia/vpn/OpenVPNThreadv3.kt 
-    #     android/src/org/amnezia/vpn/VpnService.kt 
-    #     android/src/org/amnezia/vpn/VpnServiceBinder.kt 
-    #     android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
-
-    set(QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/android)
-
-    foreach(abi IN ANDROID_ABIS)
-        if(ANDROID_TARGET_ARCH EQUAL ${abi})
-            set(LIBS ${LIBS} 
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
-            )
-        endif()
-
-        set(QT_ANDROID_EXTRA_LIBS ${QT_ANDROID_EXTRA_LIBS}
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg-go.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/wireguard/${abi}/libwg-quick.so
-    
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libjbcrypto.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libopenvpn.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libopvpnutil.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libovpn3.so
-            ${QT_ANDROID_EXTRA_LIBS}/android/lib/openvpn/${abi}/libovpnexec.so
-        )
-    endforeach()
 endif()
 
 if(IOS)
@@ -291,15 +254,15 @@ if(IOS)
     add_compile_definitions(MVPN_IOS)
 
     set(HEADERS ${HEADERS}
-        ${QT_ANDROID_EXTRA_LIBS}/protocols/ios_vpnprotocol.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosnotificationhandler.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/json.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/bigint.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/bigintipv6addr.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddress.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddressrange.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate.h 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate-C-Interface.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
 
     # i think in cmake it is not necessary?
@@ -308,15 +271,15 @@ if(IOS)
     #   platforms/ios/MobileUtils.cpp
 
     set(SOURCES ${SOURCES}
-        ${QT_ANDROID_EXTRA_LIBS}/protocols/ios_vpnprotocol.mm 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosnotificationhandler.mm 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/json.cpp 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/iosglue.mm 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddress.cpp 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/ipaddressrange.cpp 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QRCodeReaderBase.mm 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/QtAppDelegate.mm 
-        ${QT_ANDROID_EXTRA_LIBS}/platforms/ios/MobileUtils.mm
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.cpp 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
 
     # Q_ENABLE_BITCODE.value = NO
@@ -325,10 +288,97 @@ if(IOS)
 endif()
 
 #if(IPHONEOS)
+    # message("Building for iPhone OS")
+    # QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
+    # QMAKE_BUNDLE = AmneziaVPN
+    # QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+    # QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
+    # QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
+    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+    # QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
+    # QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
+
+    # XCODEBUILD_FLAGS += -allowProvisioningUpdates
+
+    # DEFINES += iphoneos
+
+    # contains(QT_ARCH, arm64) {
+    # message("Building for iOS/ARM v8 64-bit architecture")
+    # ARCH_TAG = "ios_armv8_64"
+
+    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
+    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
+    # } else {
+    # message("Building for iOS/ARM v7 (32-bit) architecture")
+    # ARCH_TAG = "ios_armv7"
+    # }
 #endif()
-#todo add iphones
+
+# NETWORKEXTENSION=1
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+
+if(ANDROID)
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_LIST_DIR}/android/AndroidManifest.xml 
+            ${CMAKE_CURRENT_LIST_DIR}/android/build.gradle 
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.jar 
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.properties 
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew 
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew.bat 
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle.properties 
+            ${CMAKE_CURRENT_LIST_DIR}/android/res/values/libs.xml 
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/OpenVPNThreadv3.kt 
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnService.kt 
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnServiceBinder.kt 
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
+            ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+    set_property(TARGET ${PROJECT} 
+        QT_ANDROID_PACKAGE_SOURCE_DIR 
+        ${CMAKE_CURRENT_LIST_DIR}/android
+    )
+
+    foreach(abi IN ANDROID_ABIS)
+        if(ANDROID_TARGET_ARCH EQUAL ${abi})
+            set(LIBS ${LIBS} 
+                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
+                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
+            )
+        endif()
+
+        set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
+    
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libjbcrypto.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopenvpn.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopvpnutil.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
+        )
+    endforeach()
+endif()
+
+if(WIN32)
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(DIR_NAME "x64")
+    else()
+        set(DIR_NAME "x32")
+    endif()
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        ${CMAKE_SOURCE_DIR}/deploy/data/windows/${DIR_NAME}
+        $<TARGET_FILE_DIR:${PROJECT}>
+        COMMAND_EXPAND_LISTS
+    )
+endif()
+
 target_link_libraries(${PROJECT} PRIVATE 
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects

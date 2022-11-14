@@ -21,7 +21,7 @@ if(WIN32)
     endif()
 endif()
 
-if(APPLE)
+if(APPLE AND NOT IOS)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/macos)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.cpp)

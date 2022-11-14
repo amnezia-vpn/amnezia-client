@@ -1,5 +1,10 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
+find_package(Qt6 REQUIRED COMPONENTS 
+    Widgets Gui Network Core5Compat
+)
+set(LIBS ${LIBS} Qt6::Widgets Qt6::Gui Qt6::Network Qt6::Core5Compat)
+
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/sshsendfacility.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sshremoteprocess.cpp

@@ -1,5 +1,10 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
-message(${CMAKE_CURRENT_LIST_DIR})
+
+find_package(Qt6 REQUIRED COMPONENTS 
+    Core Network
+)
+set(LIBS ${LIBS} Qt6::Core Qt6::Network)
+
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/singleapplication.h 
