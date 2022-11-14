@@ -13,12 +13,16 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 qt_standard_project_setup()
 
-# # silent builds on CI env
-# IS_CI=$$(CI)
-# !isEmpty(IS_CI){
-#   message("Detected CI env")
+# silent builds on CI env
+set(IS_CI ${CI})
+if(IS_CI)
+  message("Detected CI env")
 #   CONFIG += silent ccache
-# }
+  find_program(CCACHE "ccache")
+  if(CCACHE)
+      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
+  endif()
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/ssh/qssh.cmake)
 
@@ -49,125 +53,64 @@ include_directories(
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/cloak_configurator.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/configurator_base.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/ikev2_configurator.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/shadowsocks_configurator.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/ssh_configurator.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/vpn_configurator.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/wireguard_configurator.h
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.h
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/openvpn_configurator.h
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/debug.h
-    ${CMAKE_CURRENT_LIST_DIR}/defines.h
-    ${CMAKE_CURRENT_LIST_DIR}/managementserver.h
     ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
-    ${CMAKE_CURRENT_LIST_DIR}/secure_qsettings.h
-    ${CMAKE_CURRENT_LIST_DIR}/settings.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/containers_model.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols_model.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/AppSettingsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/GeneralSettingsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/NetworkSettingsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/NewServerProtocolsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/PageLogicBase.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/QrDecoderLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerConfiguringProgressLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerContainersLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerListLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerSettingsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ShareConnectionLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/SitesLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/StartPageLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ViewConfigLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/VpnLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/WizardLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/CloakLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/OpenVpnLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/OtherProtocolsLogic.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/PageProtocolLogicBase.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/ShadowSocksLogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/property_helper.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/servers_model.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/sites_model.h
-    ${CMAKE_CURRENT_LIST_DIR}/utilities.h
-    ${CMAKE_CURRENT_LIST_DIR}/vpnconnection.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
-    ${CMAKE_CURRENT_LIST_DIR}/logger.h
-    ${CMAKE_CURRENT_LIST_DIR}/loghandler.h
-    ${CMAKE_CURRENT_LIST_DIR}/loglevel.h
-    ${CMAKE_CURRENT_LIST_DIR}/constants.h
     ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/cloak_configurator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/configurator_base.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/ikev2_configurator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/shadowsocks_configurator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/ssh_configurator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/vpn_configurator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/wireguard_configurator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/configurators/openvpn_configurator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/debug.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/managementserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/secure_qsettings.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/settings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/containers_model.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols_model.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/AppSettingsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/GeneralSettingsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/NetworkSettingsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/NewServerProtocolsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/PageLogicBase.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/QrDecoderLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerConfiguringProgressLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerContainersLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerListLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ServerSettingsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ShareConnectionLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/SitesLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/StartPageLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/ViewConfigLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/VpnLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/WizardLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/CloakLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/OpenVpnLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/OtherProtocolsLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/PageProtocolLogicBase.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/protocols/ShadowSocksLogic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/servers_model.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/sites_model.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/vpnconnection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/logger.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loghandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
+)
+
+file(GLOB COMMON_FILES_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.h)
+file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
+
+file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/*.h)
+file(GLOB_RECURSE PAGE_LOGIC_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/*.cpp)
+
+file(GLOB CONFIGURATORS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.h)
+file(GLOB CONFIGURATORS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.cpp)
+
+file(GLOB UI_MODELS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.h)
+file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.cpp)
+
+set(HEADERS ${HEADERS}
+    ${COMMON_FILES_H}
+    ${PAGE_LOGIC_H}
+    ${CONFIGURATORS_H}
+    ${UI_MODELS_H}
+)
+set(SOURCES ${SOURCES}
+    ${COMMON_FILES_CPP}
+    ${PAGE_LOGIC_CPP}
+    ${CONFIGURATORS_CPP}
+    ${UI_MODELS_CPP}
 )
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
@@ -393,7 +336,7 @@ target_link_libraries(${PROJECT} PRIVATE
     Qt6::Core5Compat ${LIBS}
 )
 
-if(WIN32) #todo add mac and linux
+if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()

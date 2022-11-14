@@ -25,14 +25,14 @@ if(APPLE)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/macos)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.cpp)
-else()
+endif()
 
 if(LINUX)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/linux)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.cpp)
     set(LIBS ${LIBS} dl)
-else()
+endif()
 
 if(ANDROID)
     # We need to include qtprivate api's
@@ -43,7 +43,7 @@ if(ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH})
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.cpp)
-else()
+endif()
 
 if(IOS)
     # CONFIG(iphoneos, iphoneos|iphonesimulator) {
