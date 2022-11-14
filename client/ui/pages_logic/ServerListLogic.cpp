@@ -15,7 +15,7 @@ void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 {
     m_settings->setDefaultServer(index);
     uiLogic()->onUpdateAllPages();
-	emit currServerIdxChanged();
+    emit currServerIdxChanged();
 }
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
@@ -26,7 +26,7 @@ void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
 
 int ServerListLogic::currServerIdx() const
 {
-	return m_settings->defaultServerIndex();
+    return m_settings->defaultServerIndex();
 }
 
 void ServerListLogic::onUpdatePage()
