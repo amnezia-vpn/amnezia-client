@@ -4,4 +4,7 @@ set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
 add_subdirectory(client)
-add_subdirectory(service)
+
+if(NOT IOS AND NOT ANDROID)
+    add_subdirectory(service)
+endif()

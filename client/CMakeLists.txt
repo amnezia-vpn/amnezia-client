@@ -30,14 +30,17 @@ include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/botan/botan.cmake)
 if(NOT IOS AND NOT ANDROID)
    include(${CMAKE_CURRENT_LIST_DIR}/3rd/SingleApplication/singleapplication.cmake)
 endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/SortFilterProxyModel)
-set(LIBS ${LIBS} qt6keychain)
+set(LIBS ${LIBS} SortFilterProxyModel)
 
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
 set(BUILD_WITH_QT6 ON)
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
+set(LIBS ${LIBS} qt6keychain)
 
 # TODO it seems like i'm doing it wrong
 include_directories(
@@ -114,8 +117,6 @@ set(SOURCES ${SOURCES}
 )
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-
-#todo add translations
 
 if(WIN32)
     add_compile_definitions(MVPN_WINDOWS)
@@ -317,6 +318,9 @@ endif()
 # NETWORKEXTENSION=1
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+
+qt_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 if(ANDROID)
     add_custom_command(

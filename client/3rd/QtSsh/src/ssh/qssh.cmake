@@ -59,7 +59,8 @@ set(PUBLIC_HEADERS ${PUBLIC_HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/sshconnection.h
 )
 
-set(HEADERS ${HEADERS} ${PUBLIC_HEADERS}
+set(HEADERS ${HEADERS} 
+    ${PUBLIC_HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/sshsendfacility_p.h
     ${CMAKE_CURRENT_LIST_DIR}/sshremoteprocess_p.h
     ${CMAKE_CURRENT_LIST_DIR}/sshpacketparser_p.h
