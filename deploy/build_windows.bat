@@ -28,14 +28,14 @@ set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
 
 echo "Environment:"
-echo "APP_FILENAME:			%APP_FILENAME%"
-echo "PROJECT_DIR:			%PROJECT_DIR%"
+echo "APP_FILENAME:         %APP_FILENAME%"
+echo "PROJECT_DIR:          %PROJECT_DIR%"
 echo "SCRIPT_DIR:           %SCRIPT_DIR%"
-echo "RELEASE_DIR:			%RELEASE_DIR%"
-echo "OUT_APP_DIR:			%OUT_APP_DIR%"
+echo "RELEASE_DIR:          %RELEASE_DIR%"
+echo "OUT_APP_DIR:          %OUT_APP_DIR%"
 echo "DEPLOY_DATA_DIR:      %DEPLOY_DATA_DIR%"
-echo "INSTALLER_DATA_DIR: 	%INSTALLER_DATA_DIR%"
-echo "QMAKE_STASH_FILE: 	%QMAKE_STASH_FILE%"
+echo "INSTALLER_DATA_DIR:   %INSTALLER_DATA_DIR%"
+echo "QMAKE_STASH_FILE:     %QMAKE_STASH_FILE%"
 echo "TARGET_FILENAME:      %TARGET_FILENAME%"
 
 rem Signing staff
