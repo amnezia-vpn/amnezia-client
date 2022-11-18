@@ -42,7 +42,6 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
-# TODO it seems like i'm doing it wrong
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
@@ -166,7 +165,7 @@ endif()
 if(APPLE)
     add_compile_definitions(MVPN_MACOS)
 
-    # ICON   = $$PWD/images/app.icns //todo
+    # ICON   = $$PWD/images/app.icns
 
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
@@ -368,6 +367,7 @@ if(ANDROID)
     endforeach()
 endif()
 
+# deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DIR_NAME "x64")

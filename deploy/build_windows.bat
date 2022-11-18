@@ -25,19 +25,18 @@ set RELEASE_DIR=%WORK_DIR:"=%
 set OUT_APP_DIR=%RELEASE_DIR:"=%\client\release
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
-@REM set QMAKE_STASH_FILE=%PROJECT_DIR:"=%\.qmake_stash
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
 
 echo "Environment:"
 echo "APP_FILENAME:			%APP_FILENAME%"
 echo "PROJECT_DIR:			%PROJECT_DIR%"
-echo "SCRIPT_DIR:                   %SCRIPT_DIR%"
+echo "SCRIPT_DIR:           %SCRIPT_DIR%"
 echo "RELEASE_DIR:			%RELEASE_DIR%"
 echo "OUT_APP_DIR:			%OUT_APP_DIR%"
-echo "DEPLOY_DATA_DIR:              %DEPLOY_DATA_DIR%"
-echo "INSTALLER_DATA_DIR: 		%INSTALLER_DATA_DIR%"
-echo "QMAKE_STASH_FILE: 		%QMAKE_STASH_FILE%"
-echo "TARGET_FILENAME:              %TARGET_FILENAME%"
+echo "DEPLOY_DATA_DIR:      %DEPLOY_DATA_DIR%"
+echo "INSTALLER_DATA_DIR: 	%INSTALLER_DATA_DIR%"
+echo "QMAKE_STASH_FILE: 	%QMAKE_STASH_FILE%"
+echo "TARGET_FILENAME:      %TARGET_FILENAME%"
 
 rem Signing staff
 powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine
@@ -47,12 +46,11 @@ powershell Import-PfxCertificate -FilePath %SCRIPT_DIR:"=%\PrivacyTechWindowsCer
 
 echo "Cleanup..."
 Rmdir /Q /S %RELEASE_DIR%
-@REM Del %QMAKE_STASH_FILE%
 Del %TARGET_FILENAME%
 
 call "%QT_BIN_DIR:"=%\qt-cmake" --version
 "%QT_BIN_DIR:"=%\windeployqt" -v
-cmake --version @REM use cmake from qt tools dir
+cmake --version
 
 cd %PROJECT_DIR%
 call "%QT_BIN_DIR:"=%\qt-cmake" . -B %WORK_DIR%
@@ -101,4 +99,4 @@ cd %PROJECT_DIR%
 signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%"
 
 echo "Finished, see %TARGET_FILENAME%"
-REM exit 0
+exit 0
