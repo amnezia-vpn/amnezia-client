@@ -58,7 +58,7 @@ PageBase {
                     if (GC.isMobile()) {
                         ServerListLogic.onServerListPushbuttonSettingsClicked(index)
                     }
-                mouse.accepted = false
+                    mouse.accepted = false
                 }
                 onEntered: {
                     mouseExitAni.stop()
