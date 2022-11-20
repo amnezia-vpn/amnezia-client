@@ -14,4 +14,6 @@ if(NOT IOS AND NOT ANDROID)
     add_subdirectory(server)
 endif()
 
-add_subdirectory(wireguard-service)
+if(WIN32)
+    add_subdirectory(wireguard-service)
+endif()

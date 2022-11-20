@@ -47,16 +47,15 @@ echo "Using Qt in $QT_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qmake -v
-make -v
+$QT_BIN_DIR/qt-cmake --version
 gcc -v
 
 # Build App
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qmake $PROJECT_DIR/AmneziaVPN.pro 'CONFIG+=release CONFIG+=x86_64'
-make
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
+cmake --build . --config release
 
 # Build and run tests here
 

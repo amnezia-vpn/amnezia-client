@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
-    RemoteObjects Quick Svg Quickcontrols2 
+    RemoteObjects Quick Svg QuickControls2 
     Core5Compat
 )
 qt_standard_project_setup()
@@ -180,9 +180,11 @@ endif()
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
 
+    set(OPENSSL_USE_STATIC_LIBS TRUE)
+    find_package(OpenSSL REQUIRED)
     set(LIBS ${LIBS}
-        /usr/lib/x86_64-linux-gnu/libcrypto.a
-        /usr/lib/x86_64-linux-gnu/libssl.a
+        OpenSSL::Crypto
+        OpenSSL::SSL
     )
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
@@ -367,22 +369,6 @@ if(ANDROID)
     endforeach()
 endif()
 
-# deploy artifacts required to run the application to the debug build folder
-if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DIR_NAME "x64")
-    else()
-        set(DIR_NAME "x32")
-    endif()
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/deploy/data/windows/${DIR_NAME}
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMAND_EXPAND_LISTS
-    )
-endif()
-
 target_link_libraries(${PROJECT} PRIVATE 
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
@@ -394,3 +380,24 @@ if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
+
+# deploy artifacts required to run the application to the debug build folder
+if(WIN32)
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(DEPLOY_ARTIFACT_PATH "windows/x64")
+    else()
+        set(DEPLOY_ARTIFACT_PATH "windows/x32")
+    endif()
+elseif(LINUX)
+    set(DEPLOY_ARTIFACT_PATH "linux/client")
+elseif(APPLE)
+    set(DEPLOY_ARTIFACT_PATH "macos")
+endif()
+
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)

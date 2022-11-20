@@ -81,8 +81,6 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../src/qtservice.cmake)
 
-message(${CMAKE_CURRENT_BINARY_DIR})
-
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
@@ -97,3 +95,16 @@ qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface
 if(NOT IOS)
     qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 endif()
+
+# deploy artifacts required to run the application to the debug build folder
+if(LINUX)
+    set(DEPLOY_ARTIFACT_PATH "linux/service")
+endif()
+
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)
