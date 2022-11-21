@@ -173,6 +173,23 @@ class XCodeprojPatcher
       }
     end
 
+    if(platform == 'ios')
+
+      frameworks_group = @project.groups.find { |group| group.display_name == 'Frameworks' }
+      frameworks_build_phase = @target_main.build_phases.find { |build_phase| build_phase.to_s == 'FrameworksBuildPhase' }
+
+      embed_frameworks_build_phase = project.new(Xcodeproj::Project::Object::PBXCopyFilesBuildPhase)
+      embed_frameworks_build_phase.name = 'Embed Frameworks'
+      embed_frameworks_build_phase.symbol_dst_subfolder_spec = :frameworks
+      @target_main.build_phases << embed_frameworks_build_phase
+
+      framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
+      build_file = embed_frameworks_build_phase.add_file_reference(framework_ref)
+
+      frameworks_build_phase.add_file_reference(framework_ref)   
+      build_file.settings = { 'ATTRIBUTES' => ['CodeSignOnCopy', 'RemoveHeadersOnCopy'] }
+    end
+
     if (platform == 'ios' && adjust_sdk_token != "")
       frameworks_group = @project.groups.find { |group| group.display_name == 'Frameworks' }
       frameworks_build_phase = @target_main.build_phases.find { |build_phase| build_phase.to_s == 'FrameworksBuildPhase' }
@@ -183,6 +200,8 @@ class XCodeprojPatcher
 
       framework_ref = frameworks_group.new_file('iAd.framework')
       frameworks_build_phase.add_file_reference(framework_ref)
+
+
 
       # Adjust SDK
       group = @project.main_group.new_group('AdjustSDK')
@@ -418,8 +437,9 @@ class XCodeprojPatcher
 #   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
     
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
+    #nmoved to main target build phases -> embedded frameworks
+#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
+#   frameworks_build_phase.add_file_reference(framework_ref)
     
 #   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
 #   frameworks_build_phase.add_file_reference(framework_ref)
@@ -491,6 +511,7 @@ class XCodeprojPatcher
 
     framework_ref = frameworks_group.new_file('balrog/balrog.a')
     frameworks_build_phase.add_file_reference(framework_ref)
+
 
     # This fails: @target_main.add_dependency target_balrog
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)
