@@ -129,11 +129,11 @@ jobs:
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         call deploy\\build_windows.bat
 
-    - name: 'Upload artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: AmneziaVPN_x${{ env.BUILD_ARCH }}
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+    # - name: 'Upload artifact'
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: AmneziaVPN_x${{ env.BUILD_ARCH }}
+    #     path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
 
   # Build-MacOS:
   #   name: Build-MacOS
