@@ -9,7 +9,7 @@ class XCodeprojPatcher
   attr :target_main
   attr :target_extension
 
-  def run(file, shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
+  def run(file, shortVersion, fullVersion, platform, networkExtension, configHash)
     open_project file
     setup_project
     open_target_main
@@ -19,7 +19,7 @@ class XCodeprojPatcher
     group = @project.main_group.new_group('Configuration')
     @configFile = group.new_file('xcode.xconfig')
 
-    setup_target_main shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token
+    setup_target_main shortVersion, fullVersion, platform, networkExtension, configHash
 
 #    if platform == 'macos'
 #      setup_target_loginitem shortVersion, fullVersion, configHash
@@ -59,7 +59,7 @@ class XCodeprojPatcher
   end
   
 
-  def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
+  def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash)
     @target_main.build_configurations.each do |config|
       config.base_configuration_reference = @configFile
 
@@ -91,9 +91,6 @@ class XCodeprojPatcher
       config.build_settings['INFOPLIST_FILE'] ||= platform + '/app/Info.plist'
       if platform == 'ios'
         config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'ios/app/main.entitlements'
-        if adjust_sdk_token != ""
-          config.build_settings['ADJUST_SDK_TOKEN'] = adjust_sdk_token
-        end
       elsif networkExtension
         config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/app/app.entitlements'
       else
@@ -528,7 +525,7 @@ class XCodeprojPatcher
 
       # other configs
       config.build_settings['INFOPLIST_FILE'] ||= 'macos/loginitem/Info.plist'
-      config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/loginitem/MozillaVPNLoginItem.entitlements'
+      config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/loginitem/MozillaVPNLoginItem.entitlements'  #TODO need to check this
       config.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Development'
       config.build_settings['SKIP_INSTALL'] = 'YES'
 
@@ -637,7 +634,7 @@ class XCodeprojPatcher
     copy_nativeMessagingManifest.dst_path = 'Contents/Resources/utils'
 
     group = @project.main_group.new_group('WireGuardHelper')
-    file = group.new_file 'extension/app/manifests/macos/mozillavpn.json'
+    file = group.new_file 'extension/app/manifests/macos/mozillavpn.json' #TODO Need to check this
 
     nativeMessagingManifest_file = copy_nativeMessagingManifest.add_file_reference file
     nativeMessagingManifest_file.settings = { "ATTRIBUTES" => ['RemoveHeadersOnCopy'] }
@@ -673,8 +670,7 @@ configFile.each { |line|
 platform = "macos"
 platform = "ios" if ARGV[3] == "ios"
 networkExtension = true if ARGV[4] == "1"
-adjust_sdk_token = ARGV[5]
 
 r = XCodeprojPatcher.new
-r.run ARGV[0], ARGV[1], ARGV[2], platform, networkExtension, config, adjust_sdk_token
+r.run ARGV[0], ARGV[1], ARGV[2], platform, networkExtension, config
 exit 0
