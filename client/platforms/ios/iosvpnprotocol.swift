@@ -388,7 +388,7 @@ public class IOSVpnProtocolImpl : NSObject {
         proto.providerBundleIdentifier = vpnBundleID
 
         tunnel!.protocolConfiguration = proto
-        tunnel!.localizedDescription = vpnName
+        tunnel!.localizedDescription = "Amnezia Wireguard"
         tunnel!.isEnabled = true
 
         tunnel!.saveToPreferences { [unowned self] saveError in
@@ -527,8 +527,9 @@ public class IOSVpnProtocolImpl : NSObject {
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
         Logger.global?.log(message: "Check status")
 //        assert(tunnel != nil)
-        
+        print("check status")
         let protoType = (tunnel!.localizedDescription ?? "").toTunnelType
+        print(protoType);
         
         switch protoType {
         case .wireguard:
@@ -729,9 +730,9 @@ enum TunnelType: String {
 extension String {
     var toTunnelType: TunnelType {
         switch self {
-        case "wireguard": return .wireguard
-        case "openvpn": return .openvpn
-        case "shadowsocks": return .shadowsocks
+        case "Amnezia Wireguard": return .wireguard
+        case "Amnezia OpenVPN": return .openvpn
+        case "Amnezia ShadowSocks": return .shadowsocks
         default:
             return .empty
         }
