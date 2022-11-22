@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - dev
+    - feature/ios-cloak
     - /\d+\.\d+/
   
 jobs:

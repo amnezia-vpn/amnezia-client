@@ -21,12 +21,6 @@ class XCodeprojPatcher
 
     setup_target_main shortVersion, fullVersion, platform, networkExtension, configHash
 
-#    if platform == 'macos'
-#      setup_target_loginitem shortVersion, fullVersion, configHash
-#      setup_target_nativemessaging shortVersion, fullVersion, configHash
-#    end
-
-
     if networkExtension
       setup_target_extension shortVersion, fullVersion, platform, configHash
       setup_target_gobridge platform
@@ -72,10 +66,8 @@ class XCodeprojPatcher
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
         "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
-#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
       # Versions and names
@@ -212,12 +204,9 @@ class XCodeprojPatcher
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/libleaf/lib",
         "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
         "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
-#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
-#     config.build_settings['LIBRARY_SEARCH_PATHS'] = [config.build_settings['LIBRARY_SEARCH_PATHS'], "$(PROJECT_DIR)/3rd/libleaf/lib"]
 
       # Versions and names
       config.build_settings['MARKETING_VERSION'] ||= shortVersion
@@ -303,17 +292,7 @@ class XCodeprojPatcher
       'platforms/ios/iostunnel.swift',
       'platforms/ios/ioslogger.swift',
       'platforms/ios/iosinterface.swift',
-#     'platforms/ios/ssprovider.swift',
       'platforms/ios/iosglue.mm',
-#     'platforms/ios/ssconnectivity.h',
-#     'platforms/ios/ssconnectivity.m',
-#     'platforms/ios/iosopenvpn2ssadapter.h',
-#     'platforms/ios/iosopenvpn2ssadapter.m',
-#     'platforms/ios/sspacket.h',
-#     'platforms/ios/sspacket.m',
-#     'platforms/ios/ssadapterpacketflow.h',
-#     'platforms/ios/tun2ssprovider.swift',
-#     'platforms/ios/tun2sockswriter.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -326,41 +305,10 @@ class XCodeprojPatcher
 
     framework_ref = frameworks_group.new_file('libwg-go.a')
     frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
-#   frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-    #nmoved to main target build phases -> embedded frameworks
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#
-#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/CocoaLumberjack/build/Release-iphoneos/CocoaLumberjack.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-    
-    
-
     # This fails: @target_main.add_dependency @target_extension
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)
     container_proxy.container_portal = @project.root_object.uuid
