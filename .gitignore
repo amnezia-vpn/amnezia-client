@@ -125,3 +125,4 @@ captures/
 
 # Android Profiling
 *.hprof
+client/3rd/ShadowSocks/ss_ios.xcconfig
