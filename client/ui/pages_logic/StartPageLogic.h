@@ -29,8 +29,6 @@ public:
     Q_INVOKABLE void onPushButtonImport();
     Q_INVOKABLE void onPushButtonImportOpenFile();
 
-    Q_INVOKABLE bool isIOS();
-
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);
     bool importConnectionFromQr(const QByteArray &data);

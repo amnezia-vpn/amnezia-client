@@ -146,14 +146,6 @@ void StartPageLogic::onPushButtonImportOpenFile()
     importConnectionFromCode(QString(data));
 }
 
-bool StartPageLogic::isIOS()
-{
-#ifdef Q_OS_IOS
-    return true;
-#endif
-    return false;
-}
-
 bool StartPageLogic::importConnection(const QJsonObject &profile)
 {
     ServerCredentials credentials;
