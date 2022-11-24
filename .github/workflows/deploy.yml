@@ -4,75 +4,58 @@ name: Deploy workflow
 # or API.
 on: [push] #, pull_request]
 
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Build-Linux-Ubuntu:
-  #   name: Build-Linux-Ubuntu
-  #   runs-on: ubuntu-latest
+  Build-Linux-Ubuntu:
+    name: Build-Linux-Ubuntu
+    runs-on: ubuntu-latest
 
-  #   env:
-  #     QT_VERSION: 5.15.2
-  #     QIF_VERSION: 4.4
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.5
 
-  #   steps:
-  #   - name: Install Qt
-  #     uses: jurplel/install-qt-action@v3
-  #     with:
-  #       version: '5.15.2'
-  #       host: 'linux'
-  #       target: 'desktop'
-  #       arch: 'gcc_64'
-  #       dir: '${{ github.workspace }}/Qt/'
-  #       install-deps: 'true'
-  #       modules: 'qtcharts'
-  #       archives: 'qtbase qtsvg'
-  #       cache: 'true'
-  #       cache-key-prefix: 'install-qt-action-linux'
-  #       setup-python: 'true'
-  #       tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
-  #       set-env: 'true'
-  #       tools-only: 'false'
-  #       aqtversion: '==2.1.*'
-  #       py7zrversion: '==0.19.*'
-  #       extra: '--external 7z'
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'true'
+        extra: '--external 7z'
 
-  #   - uses: actions/checkout@v3
-  #     with:
-  #       fetch-depth: 10
-      
-  #   - uses: awalsh128/cache-apt-pkgs-action@latest
-  #     with:
-  #       packages: p7zip p7zip-full python3 python3-pip libgl-dev mesa-common-dev libpulse-dev libxcb-* libxkbcommon-x11-0
-  #       version: 1.0
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
-  #   - name: Install Qt
-  #     run: |
-  #         if [ ! -f $QT_BIN_DIR/qmake ]; then \
-  #         python3 -m pip install --user $(whoami) --upgrade pip && \
-  #         export PATH=$HOME/.local/bin:$PATH && \
-  #         python3 -m pip install -U aqtinstall requests py7zr && \
-  #         python3 -m pip show aqtinstall && \
-  #         python3 -m aqt install-qt linux desktop $QT_VERSION gcc_64 -m all -O $HOME/Qt && \
-  #         python3 -m aqt install-tool linux desktop tools_ifw  -O $HOME/Qt ; \
-  #         fi
+    # - name: Cache Qt
+    #   uses: actions/cache@v3
+    #   id: cache-qt
+    #   with:
+    #     key: qt-5.15.2-linux
+    #     path: "$HOME/Qt"
 
-  #   - name: Cache Qt
-  #     uses: actions/cache@v3
-  #     id: cache-qt
-  #     with:
-  #       key: qt-5.15.2-linux
-  #       path: "$HOME/Qt"
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
 
-  #   - name: Build project
-  #     run: bash deploy/build_linux.sh
+    - name: Build project
+      run: |
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
+        export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
+        bash deploy/build_linux.sh
 
 # ------------------------------------------------------
 
   Build-Windows:
     name: Build-Windows
     runs-on: windows-latest
-    continue-on-error: true
+    # continue-on-error: true
 
     strategy:
       matrix:
@@ -102,6 +85,9 @@ jobs:
       with:
         submodules: 'true'
         fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -177,6 +163,9 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build project
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
@@ -186,40 +175,45 @@ jobs:
 
 # ------------------------------------------------------
 
-  # Build-MacOS:
-  #   name: Build-MacOS
-  #   runs-on: ubuntu-latest
+  Build-MacOS:
+    name: Build-MacOS
+    runs-on: macos-latest
 
-  #   env:
-  #     QT_VERSION: 5.15.2
-  #     QIF_VERSION: 4.4
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.5
 
-  #   steps:
-  #   - name: Install Qt
-  #     uses: jurplel/install-qt-action@v3
-  #     with:
-  #       version: '5.15.2'
-  #       host: 'mac'
-  #       target: 'desktop'
-  #       arch: 'clang_64'
-  #       dir: '${{ github.workspace }}/Qt/'
-  #       install-deps: 'true'
-  #       modules: 'qtcharts'
-  #       archives: 'qtbase qtsvg'
-  #       cache: 'true'
-  #       cache-key-prefix: 'install-qt-action-mac'
-  #       setup-python: 'true'
-  #       tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
-  #       set-env: 'true'
-  #       tools-only: 'false'
-  #       aqtversion: '==2.1.*'
-  #       py7zrversion: '==0.19.*'
-  #       extra: '--external 7z'
+    steps:
+    - name: Setup xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '13.4'
 
-  #   - uses: actions/checkout@v3
-  #     with:
-  #       fetch-depth: 10
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'true'
+        extra: '--external 7z'
 
-  #   - name: Build project
-  #     run: bash deploy/build_macos.sh
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: Build project
+      run: |
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/clang_64/bin"
+        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+        bash deploy/build_macos.sh
 
