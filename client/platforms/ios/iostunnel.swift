@@ -125,7 +125,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .wireguard:
             handleWireguardAppMessage(messageData, completionHandler: completionHandler)
         case .openvpn:
-            handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+            handleOpenVPNAppMessage(messageData, completionHandler: completionHandler)
         case .shadowsocks:
             break
 //            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
@@ -295,6 +295,21 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         } else {
             completionHandler(nil)
         }
+    }
+    
+    private func handleOpenVPNAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        if messageData.count == 1 && messageData[0] == 0 {
+            let bytesin = ovpnAdapter.transportStatistics.bytesIn
+            let strBytesin = "rx_bytes=" + String(bytesin);
+            
+            let bytesout = ovpnAdapter.transportStatistics.bytesOut
+            let strBytesout = "tx_bytes=" + String(bytesout);
+            
+            let strData = strBytesin + "\n" + strBytesout;
+            let data = Data(strData.utf8)
+            completionHandler(data)
+    }
     }
     
 /*
