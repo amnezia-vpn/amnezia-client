@@ -1,13 +1,10 @@
-name: Deploy workflow
+name: 'Deploy workflow'
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
-on: [push] #, pull_request]
+on: [push]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   Build-Linux-Ubuntu:
-    name: Build-Linux-Ubuntu
+    name: 'Build-Linux-Ubuntu'
     runs-on: ubuntu-latest
 
     env:
@@ -15,7 +12,7 @@ jobs:
       QIF_VERSION: 4.5
 
     steps:
-    - name: Install Qt
+    - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -34,17 +31,10 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    # - name: Cache Qt
-    #   uses: actions/cache@v3
-    #   id: cache-qt
-    #   with:
-    #     key: qt-5.15.2-linux
-    #     path: "$HOME/Qt"
-
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: Build project
+    - name: 'Build project'
       run: |
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
@@ -55,7 +45,7 @@ jobs:
   Build-Windows:
     name: Build-Windows
     runs-on: windows-latest
-    # continue-on-error: true
+    continue-on-error: true
 
     strategy:
       matrix:
@@ -115,16 +105,10 @@ jobs:
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         call deploy\\build_windows.bat
 
-    # - name: 'Upload artifact'
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: AmneziaVPN_x${{ env.BUILD_ARCH }}
-    #     path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
-
 # ------------------------------------------------------
 
   Build-IOS:
-    name: Build-IOS
+    name: 'Build-IOS'
     runs-on: macos-latest
 
     env:
@@ -132,12 +116,12 @@ jobs:
       QIF_VERSION: 4.4
 
     steps:
-    - name: Setup xcode
+    - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '13.4'
 
-    - name: Install Qt
+    - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -148,10 +132,10 @@ jobs:
         set-env: 'true'
         extra: '--external 7z'
 
-    - name: Install go
+    - name: 'Install go'
       uses: actions/setup-go@v3
 
-    - name: Setup gomobile
+    - name: 'Setup gomobile'
       run: |
           export PATH=$PATH:~/go/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
@@ -166,7 +150,7 @@ jobs:
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: Build project
+    - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
         export QT_IOS_BIN=$QT_BIN_DIR
@@ -176,7 +160,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    name: Build-MacOS
+    name: 'Build-MacOS'
     runs-on: macos-latest
 
     env:
@@ -184,12 +168,12 @@ jobs:
       QIF_VERSION: 4.5
 
     steps:
-    - name: Setup xcode
+    - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '13.4'
 
-    - name: Install Qt
+    - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -211,9 +195,62 @@ jobs:
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: Build project
+    - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/clang_64/bin"
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
 
+# ------------------------------------------------------
+
+  Build-Android:
+    name: 'Build-Android'
+    runs-on: ubuntu-latest
+
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.5
+
+    steps:
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android'
+        modules: 'qtcharts qtdatavis3d qtpurchasing qtnetworkauth qtscript'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name: 'Build project'
+      run: |
+        export NDK_VERSION=21d
+        export ANDROID_NDK_PLATFORM=android-21
+        export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
+        export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+
+        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
+          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux-x86_64.zip -qO ${{ runner.temp }}/ndk.zip &&
+          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
+        fi
+
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android/bin
+        bash deploy/build_android.sh
