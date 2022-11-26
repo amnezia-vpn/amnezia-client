@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "Build script started ..."
 
+ls $QT_BIN_DIR
+
 set -o errexit -o nounset
 
 while getopts n: flag

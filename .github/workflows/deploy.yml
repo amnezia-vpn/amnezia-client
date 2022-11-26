@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      QT_VERSION: 5.15.2
+      QT_VERSION: 6.4.1
       QIF_VERSION: 4.5
 
     steps:
@@ -60,7 +60,7 @@ jobs:
             arch: 64
 
     env:
-      QT_VERSION: 5.15.2
+      QT_VERSION: 6.4.1
       QIF_VERSION: 4.5
       BUILD_ARCH: ${{ matrix.arch }}
 
@@ -108,7 +108,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 5.15.2
+      QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
 
     steps:
@@ -162,7 +162,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 5.15.2
+      QT_VERSION: 6.4.1
       QIF_VERSION: 4.5
 
     steps:
@@ -196,7 +196,7 @@ jobs:
 
     - name: 'Build project'
       run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/clang_64/bin"
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
 
@@ -207,7 +207,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      QT_VERSION: 5.15.2
+      QT_VERSION: 6.4.1
       QIF_VERSION: 4.5
 
     steps:
