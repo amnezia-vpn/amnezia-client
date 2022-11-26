@@ -1,6 +1,10 @@
 #!/bin/bash
 echo "Build script started ..."
 
+ls "/Users/runner/work/_temp/Qt/6.4.0/"
+# sed 's/macos/ios/' /Users/runner/work/_temp/Qt/6.4.0/ios/bin/qmake > /Users/runner/work/_temp/Qt/6.4.0/ios/bin/qmake
+cat /Users/runner/work/_temp/Qt/6.4.0/ios/bin/qmake
+
 set -o errexit -o nounset
 
 # Hold on to current directory

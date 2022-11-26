@@ -19,6 +19,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
+        modules: 'qtremoteobjects qt5compat'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -49,14 +50,8 @@ jobs:
 
     strategy:
       matrix:
-        arch: [32, 64]
+        arch: [64]
         include:
-          - qt-arch: 'win32_msvc2019'
-            arch: 32
-          - qt-msvc-path: 'msvc2019'
-            arch: 32
-          - msvc-arch: 'x86'
-            arch: 32
           - qt-arch: 'win64_msvc2019_64'
             arch: 64
           - qt-msvc-path: 'msvc2019_64'
@@ -86,6 +81,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: '${{ matrix.qt-arch }}'
+        modules: 'qtremoteobjects qt5compat'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -127,10 +123,12 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
+        modules: 'qtremoteobjects qt5compat'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
         extra: '--external 7z'
+        aqtversion: '==3.0.*'
 
     - name: 'Install go'
       uses: actions/setup-go@v3
@@ -180,6 +178,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -219,7 +218,7 @@ jobs:
         host: 'linux'
         target: 'android'
         arch: 'android'
-        modules: 'qtcharts qtdatavis3d qtpurchasing qtnetworkauth qtscript'
+        modules: 'qtremoteobjects qt5compat'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
