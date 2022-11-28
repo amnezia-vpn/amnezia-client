@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QQmlFile>
 #include <QMetaObject>
+#include <QStandardPaths>
 
 #include "amnezia_application.h"
 

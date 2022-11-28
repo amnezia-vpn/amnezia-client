@@ -270,6 +270,6 @@ print G "done."
     sed -i '' '/<string>Original<\/string>/d' AmneziaVPN.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
   fi
 
-# print Y "Opening in XCode..."
-# open AmneziaVPN.xcodeproj
+print Y "Opening in XCode..."
+open AmneziaVPN.xcodeproj
 print G "All done!"
