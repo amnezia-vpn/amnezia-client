@@ -1,9 +1,9 @@
 #ifndef IOS_VPNPROTOCOL_H
 #define IOS_VPNPROTOCOL_H
 
+#include "platforms/ios/json.h"
 #include "vpnprotocol.h"
 #include "protocols/protocols_defs.h"
-#include "json.h"
 
 using namespace amnezia;
 

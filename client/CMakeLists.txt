@@ -42,6 +42,9 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
+qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+
+
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
@@ -161,21 +164,52 @@ if(WIN32)
         )
     endif()
 endif()
-    
-if(APPLE)
-    add_compile_definitions(MVPN_MACOS)
 
+if(APPLE)
+    if(IOS)
+        message("ios in mac")
+      #do nothing, IOS is added in below
+     else() #mac
+
+         message("MAC build")
+         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
+         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
+
+    #     set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+         add_compile_definitions(MVPN_MACOS)
     # ICON   = $$PWD/images/app.icns
 
-    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
-    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-    # LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+    message(STATUS "test ${PROJECT_SOURCE_DIR}")
 
-    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
-    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
+    find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
+      PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
+
+  find_library(LIB_SSL NAMES "libssl.a"
+    PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
+
+
+    find_library(FW_COCOA Cocoa)
+    find_library(FW_APPLICATIONSERVICES ApplicationServices)
+    find_library(FW_CORESERVICES CoreServices)
+    find_library(FW_FOUNDATION Foundation)
+    find_library(FW_APPKIT AppKit)
+    find_library(FW_SECURITY Security)
+
+    target_link_libraries(${PROJECT} PRIVATE ${FW_COCOA})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_APPLICATIONSERVICES})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_CORESERVICES})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_FOUNDATION})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_APPKIT})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_SECURITY})
+
+    target_link_libraries(${PROJECT} PRIVATE ${LIB_LIBCRYPTO})
+    target_link_libraries(${PROJECT} PRIVATE ${LIB_SSL})
+
+    endif()
 
 endif()
+
 
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
@@ -240,18 +274,25 @@ endif()
 
 if(IOS)
     message("Client iOS build")
+    target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
+
 
     # CONFIG += static
     # CONFIG += file_copies
 
-    # # For the authentication
-    # LIBS += -framework AuthenticationServices
 
-    # # For notifications
-    # LIBS += -framework UIKit
-    # LIBS += -framework Foundation
-    # LIBS += -framework StoreKit
-    # LIBS += -framework UserNotifications
+    find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
+    find_library(FW_UIKIT UIKit)
+    find_library(FW_FOUNDATION Foundation)
+    find_library(FW_STOREKIT StoreKit)
+    find_library(FW_USERNOTIFICATIONS UserNotifications)
+
+    target_link_libraries(${PROJECT} PRIVATE ${FW_AUTHENTICATIONSERVICES})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_UIKIT})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_FOUNDATION})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_STOREKIT})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_USERNOTIFICATIONS})
+
 
     add_compile_definitions(MVPN_IOS)
 
@@ -267,7 +308,7 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
 
-    # i think in cmake it is not necessary?
+    # i think in cmake it is not necessary? yes in iOS we are using native
     # SOURCES -= 
     #   platforms/ios/QRCodeReaderBase.cpp 
     #   platforms/ios/MobileUtils.cpp
@@ -284,10 +325,39 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
 
+
+
+
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+
+
     # Q_ENABLE_BITCODE.value = NO
     # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     # QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 endif()
+
+if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
+    message("Building for iPhone OS")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+
+
+
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia"
+                                     OUTPUT_NAME "Mozilla VPN"
+                                     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
+                                     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
+                                     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/client/ios/app/Info.plist
+                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
+
+
+                                        )
+
+
+
+
+
+endif()
+
 
 #if(IPHONEOS)
     # message("Building for iPhone OS")
@@ -296,11 +366,11 @@ endif()
     # QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
     # QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
     # QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc          not added yet
     # QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
     # QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
 
-    # XCODEBUILD_FLAGS += -allowProvisioningUpdates
+    # XCODEBUILD_FLAGS += -allowProvisioningUpdates                              not added yet
 
     # DEFINES += iphoneos
 
@@ -318,7 +388,6 @@ endif()
 
 # NETWORKEXTENSION=1
 
-qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 
 qt_add_translations(${PROJECT} TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
