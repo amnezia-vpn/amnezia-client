@@ -163,6 +163,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
            set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")

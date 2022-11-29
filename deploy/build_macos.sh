@@ -49,16 +49,18 @@ echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qmake -v
-make -v
+$QT_BIN_DIR/qt-cmake --version
+cmake --version
 clang -v
 
 # Build App
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qmake $PROJECT_DIR/AmneziaVPN.pro 'CONFIG+=release CONFIG+=x86_64'
-make -j `sysctl -n hw.ncpu`
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR
+cmake --build . --config release
+# $QT_BIN_DIR/qmake $PROJECT_DIR/AmneziaVPN.pro 'CONFIG+=release CONFIG+=x86_64'
+# make -j `sysctl -n hw.ncpu`
 
 # Build and run tests here
 
