@@ -42,8 +42,6 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
-qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
-
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
@@ -196,15 +194,9 @@ if(APPLE)
     find_library(FW_APPKIT AppKit)
     find_library(FW_SECURITY Security)
 
-    target_link_libraries(${PROJECT} PRIVATE ${FW_COCOA})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_APPLICATIONSERVICES})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_CORESERVICES})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_FOUNDATION})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_APPKIT})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_SECURITY})
+    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES
+                        LIB_LIBCRYPTO LIB_SSL)
 
-    target_link_libraries(${PROJECT} PRIVATE ${LIB_LIBCRYPTO})
-    target_link_libraries(${PROJECT} PRIVATE ${LIB_SSL})
 
     endif()
 
@@ -287,12 +279,7 @@ if(IOS)
     find_library(FW_STOREKIT StoreKit)
     find_library(FW_USERNOTIFICATIONS UserNotifications)
 
-    target_link_libraries(${PROJECT} PRIVATE ${FW_AUTHENTICATIONSERVICES})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_UIKIT})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_FOUNDATION})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_STOREKIT})
-    target_link_libraries(${PROJECT} PRIVATE ${FW_USERNOTIFICATIONS})
-
+    set(LIBS ${LIBS} FW_AUTHENTICATIONSERVICES FW_UIKIT FW_FOUNDATION FW_STOREKIT FW_USERNOTIFICATIONS)
 
     add_compile_definitions(MVPN_IOS)
 
@@ -347,13 +334,7 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
                                      XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
                                      XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
                                      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/client/ios/app/Info.plist
-                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
-
-
-                                        )
-
-
-
+                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution")
 
 
 endif()
@@ -388,6 +369,7 @@ endif()
 
 # NETWORKEXTENSION=1
 
+qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 
 qt_add_translations(${PROJECT} TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
