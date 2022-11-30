@@ -22,6 +22,8 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(bool, checkBoxBlockDnsChecked)
     AUTO_PROPERTY(QString, lineEditPortText)
     AUTO_PROPERTY(bool, checkBoxTlsAuthChecked)
+    AUTO_PROPERTY(QString, textAreaAdditionalClientConfig)
+    AUTO_PROPERTY(QString, textAreaAdditionalServerConfig)
 
     AUTO_PROPERTY(bool, pushButtonSaveVisible)
     AUTO_PROPERTY(bool, progressBarResetVisible)

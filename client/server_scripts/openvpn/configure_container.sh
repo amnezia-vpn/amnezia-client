@@ -23,4 +23,5 @@ verb 1
 tls-server
 tls-version-min 1.2
 $OPENVPN_TLS_AUTH
+$OPENVPN_ADDITIONAL_SERVER_CONFIG
 EOF
