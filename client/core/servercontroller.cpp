@@ -662,6 +662,11 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
         vars.append({{"$OPENVPN_TA_KEY", "" }});
     }
 
+    vars.append({{"$OPENVPN_ADDITIONAL_CLIENT_CONFIG", openvpnConfig.value(config_key::additional_client_config).
+                  toString(protocols::openvpn::defaultAdditionalClientConfig) }});
+    vars.append({{"$OPENVPN_ADDITIONAL_SERVER_CONFIG", openvpnConfig.value(config_key::additional_server_config).
+                  toString(protocols::openvpn::defaultAdditionalServerConfig) }});
+
     // ShadowSocks vars
     vars.append({{"$SHADOWSOCKS_SERVER_PORT", ssConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) }});
     vars.append({{"$SHADOWSOCKS_LOCAL_PORT", ssConfig.value(config_key::local_port).toString(protocols::shadowsocks::defaultLocalProxyPort) }});

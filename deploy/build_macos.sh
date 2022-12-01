@@ -3,7 +3,7 @@ echo "Build script started ..."
 
 set -o errexit -o nounset
 
-while getopts n: flag
+while getopts n flag
 do
     case "${flag}" in
         n) NOTARIZE_APP=1;;

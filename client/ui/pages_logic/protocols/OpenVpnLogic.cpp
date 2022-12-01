@@ -21,6 +21,8 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     m_checkBoxBlockDnsChecked{false},
     m_lineEditPortText{},
     m_checkBoxTlsAuthChecked{false},
+    m_textAreaAdditionalClientConfig{""},
+    m_textAreaAdditionalServerConfig{""},
     m_pushButtonSaveVisible{false},
     m_progressBarResetVisible{false},
 
@@ -66,6 +68,14 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
 
     bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
     set_checkBoxTlsAuthChecked(isTlsAuth);
+
+    QString additionalClientConfig = openvpnConfig.value(config_key::additional_client_config).
+            toString(protocols::openvpn::defaultAdditionalClientConfig);
+    set_textAreaAdditionalClientConfig(additionalClientConfig);
+
+    QString additionalServerConfig = openvpnConfig.value(config_key::additional_server_config).
+            toString(protocols::openvpn::defaultAdditionalServerConfig);
+    set_textAreaAdditionalServerConfig(additionalServerConfig);
 
     if (container == DockerContainer::ShadowSocks) {
         set_radioButtonUdpEnabled(false);
@@ -142,5 +152,7 @@ QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
     oldConfig.insert(config_key::block_outside_dns, checkBoxBlockDnsChecked());
     oldConfig.insert(config_key::port, lineEditPortText());
     oldConfig.insert(config_key::tls_auth, checkBoxTlsAuthChecked());
+    oldConfig.insert(config_key::additional_client_config, textAreaAdditionalClientConfig());
+    oldConfig.insert(config_key::additional_server_config, textAreaAdditionalServerConfig());
     return oldConfig;
 }

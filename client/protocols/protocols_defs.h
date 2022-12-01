@@ -53,6 +53,9 @@ constexpr char subnet_address[] = "subnet_address";
 constexpr char subnet_mask[] = "subnet_mask";
 constexpr char subnet_cidr[] = "subnet_cidr";
 
+constexpr char additional_client_config[] = "additional_client_config";
+constexpr char additional_server_config[] = "additional_server_config";
+
 // proto config keys
 constexpr char last_config[] = "last_config";
 }
@@ -82,6 +85,8 @@ constexpr bool defaultTlsAuth = true;
 constexpr char ncpDisableString[] = "ncp-disable";
 constexpr char tlsAuthString[] = "tls-auth /opt/amnezia/openvpn/ta.key 0";
 
+constexpr char defaultAdditionalClientConfig[] = "";
+constexpr char defaultAdditionalServerConfig[] = "";
 }
 
 namespace shadowsocks {
