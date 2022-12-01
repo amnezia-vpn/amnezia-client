@@ -42,7 +42,6 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
-
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
@@ -164,6 +163,20 @@ if(WIN32)
 endif()
 
 if(APPLE)
+
+    if(NOT BUILD_OSX_APP_IDENTIFIER)
+           set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")
+       endif()
+       if(NOT BUILD_IOS_APP_IDENTIFIER)
+           set(BUILD_IOS_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "iOS Application identifier")
+       endif()
+       if(NOT BUILD_IOS_GROUP_IDENTIFIER)
+           set(BUILD_IOS_GROUP_IDENTIFIER group.org.amnezia.AmneziaVPN.Guardian CACHE STRING "iOS Group identifier")
+       endif()
+       if(NOT BUILD_VPN_DEVELOPMENT_TEAM)
+           set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "Amnezia VPN Development Team")
+       endif()
+
     if(IOS)
         message("ios in mac")
       #do nothing, IOS is added in below
@@ -215,7 +228,7 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
     
@@ -264,9 +277,12 @@ if(ANDROID)
     )
 endif()
 
+qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+qt_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
+
 if(IOS)
     message("Client iOS build")
-    target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 
     # CONFIG += static
@@ -316,7 +332,9 @@ if(IOS)
 
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-
+    add_subdirectory(ios/networkextension)
+    add_dependencies(${PROJECT} networkextension)
+    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
 
     # Q_ENABLE_BITCODE.value = NO
     # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
@@ -329,12 +347,20 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 
 
 
-    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia"
-                                     OUTPUT_NAME "Mozilla VPN"
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
+                                     OUTPUT_NAME "AmneziaVPN"
                                      XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
                                      XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
-                                     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/client/ios/app/Info.plist
-                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution")
+                                     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/ios/app/Info.plist
+                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+
+    find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
+                                   PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
+
+    find_library(LIB_SSL NAMES "libssl.a"
+                                 PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
+
+   # set(LIBS ${LIBS} LIB_LIBCRYPTO LIB_SSL)
 
 
 endif()
@@ -369,10 +395,7 @@ endif()
 
 # NETWORKEXTENSION=1
 
-qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 
-qt_add_translations(${PROJECT} TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 if(ANDROID)
     add_custom_command(
@@ -427,7 +450,7 @@ target_link_libraries(${PROJECT} PRIVATE
     Qt6::Core5Compat ${LIBS}
 )
 
-if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
