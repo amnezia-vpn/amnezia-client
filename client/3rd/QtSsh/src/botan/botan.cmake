@@ -62,4 +62,12 @@ if(IOS)
     # HEADERS += $$PWD/ios/iphone/botan_all.h
     # SOURCES += $$PWD/ios/iphone/botan_all.cpp
     # }
+
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/ios/iphone)
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.cpp)
+
+
+
+
 endif()

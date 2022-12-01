@@ -161,21 +161,60 @@ if(WIN32)
         )
     endif()
 endif()
-    
-if(APPLE)
-    add_compile_definitions(MVPN_MACOS)
 
+if(APPLE)
+
+    if(NOT BUILD_OSX_APP_IDENTIFIER)
+           set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")
+       endif()
+       if(NOT BUILD_IOS_APP_IDENTIFIER)
+           set(BUILD_IOS_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "iOS Application identifier")
+       endif()
+       if(NOT BUILD_IOS_GROUP_IDENTIFIER)
+           set(BUILD_IOS_GROUP_IDENTIFIER group.org.amnezia.AmneziaVPN.Guardian CACHE STRING "iOS Group identifier")
+       endif()
+       if(NOT BUILD_VPN_DEVELOPMENT_TEAM)
+           set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "Amnezia VPN Development Team")
+       endif()
+
+    if(IOS)
+        message("ios in mac")
+      #do nothing, IOS is added in below
+     else() #mac
+
+         message("MAC build")
+         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
+         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
+
+    #     set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+         add_compile_definitions(MVPN_MACOS)
     # ICON   = $$PWD/images/app.icns
 
-    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
-    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-    # LIBS += -framework Cocoa -framework ApplicationServices -framework CoreServices -framework Foundation -framework AppKit -framework Security
+    message(STATUS "test ${PROJECT_SOURCE_DIR}")
 
-    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libcrypto.a
-    # LIBS += $$PWD/3rd/OpenSSL/lib/macos/x86_64/libssl.a
+    find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
+      PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
+
+  find_library(LIB_SSL NAMES "libssl.a"
+    PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
+
+
+    find_library(FW_COCOA Cocoa)
+    find_library(FW_APPLICATIONSERVICES ApplicationServices)
+    find_library(FW_CORESERVICES CoreServices)
+    find_library(FW_FOUNDATION Foundation)
+    find_library(FW_APPKIT AppKit)
+    find_library(FW_SECURITY Security)
+
+    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES
+                        LIB_LIBCRYPTO LIB_SSL)
+
+
+    endif()
 
 endif()
+
 
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
@@ -189,7 +228,7 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
     
@@ -238,20 +277,25 @@ if(ANDROID)
     )
 endif()
 
+qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+qt_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
+
 if(IOS)
     message("Client iOS build")
+
 
     # CONFIG += static
     # CONFIG += file_copies
 
-    # # For the authentication
-    # LIBS += -framework AuthenticationServices
 
-    # # For notifications
-    # LIBS += -framework UIKit
-    # LIBS += -framework Foundation
-    # LIBS += -framework StoreKit
-    # LIBS += -framework UserNotifications
+    find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
+    find_library(FW_UIKIT UIKit)
+    find_library(FW_FOUNDATION Foundation)
+    find_library(FW_STOREKIT StoreKit)
+    find_library(FW_USERNOTIFICATIONS UserNotifications)
+
+    set(LIBS ${LIBS} FW_AUTHENTICATIONSERVICES FW_UIKIT FW_FOUNDATION FW_STOREKIT FW_USERNOTIFICATIONS)
 
     add_compile_definitions(MVPN_IOS)
 
@@ -267,7 +311,7 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
 
-    # i think in cmake it is not necessary?
+    # i think in cmake it is not necessary? yes in iOS we are using native
     # SOURCES -= 
     #   platforms/ios/QRCodeReaderBase.cpp 
     #   platforms/ios/MobileUtils.cpp
@@ -284,10 +328,43 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
 
+
+
+
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+    add_subdirectory(ios/networkextension)
+    add_dependencies(${PROJECT} networkextension)
+    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
+
     # Q_ENABLE_BITCODE.value = NO
     # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     # QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 endif()
+
+if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
+    message("Building for iPhone OS")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+
+
+
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
+                                     OUTPUT_NAME "AmneziaVPN"
+                                     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
+                                     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
+                                     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/ios/app/Info.plist
+                                     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+
+    find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
+                                   PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
+
+    find_library(LIB_SSL NAMES "libssl.a"
+                                 PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
+
+   # set(LIBS ${LIBS} LIB_LIBCRYPTO LIB_SSL)
+
+
+endif()
+
 
 #if(IPHONEOS)
     # message("Building for iPhone OS")
@@ -296,11 +373,11 @@ endif()
     # QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
     # QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
     # QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
+    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc          not added yet
     # QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
     # QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
 
-    # XCODEBUILD_FLAGS += -allowProvisioningUpdates
+    # XCODEBUILD_FLAGS += -allowProvisioningUpdates                              not added yet
 
     # DEFINES += iphoneos
 
@@ -318,10 +395,7 @@ endif()
 
 # NETWORKEXTENSION=1
 
-qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 
-qt_add_translations(${PROJECT} TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 if(ANDROID)
     add_custom_command(
@@ -376,7 +450,7 @@ target_link_libraries(${PROJECT} PRIVATE
     Qt6::Core5Compat ${LIBS}
 )
 
-if(WIN32 OR APPLE OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
