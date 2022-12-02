@@ -10,10 +10,12 @@
 
 #include <QByteArray>
 
-#include "ipaddressrange.h"
+#include "platforms/ios/ipaddressrange.h"
 #include "ios_vpnprotocol.h"
 #include "core/errorstrings.h"
 #include "AmneziaVPN-Swift.h"
+#include "UIKit/UIKit.h"
+
 
 namespace
 {
