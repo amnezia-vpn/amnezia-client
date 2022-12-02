@@ -163,7 +163,6 @@ if(WIN32)
 endif()
 
 if(APPLE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
            set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")
@@ -182,6 +181,7 @@ if(APPLE)
         message("ios in mac")
       #do nothing, IOS is added in below
      else() #mac
+         set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 
          message("MAC build")
          set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
@@ -465,7 +465,7 @@ if(WIN32)
     endif()
 elseif(LINUX)
     set(DEPLOY_ARTIFACT_PATH "linux/client")
-elseif(APPLE)
+elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
