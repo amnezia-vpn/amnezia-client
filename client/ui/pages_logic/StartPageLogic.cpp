@@ -166,14 +166,6 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
         return false;
     }
 
-    if (!profile.contains(config_key::containers)) {
-        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
-        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-        uiLogic()->onUpdateAllPages();
-
-        emit uiLogic()->goToPage(Page::ServerContainers);
-    }
-
     return true;
 }
 
