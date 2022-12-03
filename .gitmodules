@@ -25,3 +25,6 @@
 [submodule "client/3rd/qtkeychain"]
 	path = client/3rd/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain.git
+[submodule "client/3rd/libssh"]
+	path = client/3rd/libssh
+	url = https://git.libssh.org/projects/libssh.git/

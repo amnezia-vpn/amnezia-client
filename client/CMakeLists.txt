@@ -42,6 +42,9 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh/include)
+set(LIBS ${LIBS} ssh)
+
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
