@@ -157,8 +157,8 @@ TRANSLATIONS = \
 win32 {
     DEFINES += MVPN_WINDOWS
 
-    OTHER_FILES += platform_win/vpnclient.rc
-    RC_FILE = platform_win/vpnclient.rc
+    OTHER_FILES += platforms/windows/amneziavpn.rc
+    RC_FILE = platforms/windows/amneziavpn.rc
 
     HEADERS += \
        protocols/ikev2_vpn_protocol_windows.h \
