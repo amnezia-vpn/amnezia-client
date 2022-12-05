@@ -9,9 +9,9 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
     cmake_policy(SET CMP0099 OLD)
 endif()
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+#set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTORCC ON)
+#set(CMAKE_AUTOUIC ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -72,7 +72,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
@@ -81,8 +80,14 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
 )
+
+if(NOT IOS)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
+    )
+endif()
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
@@ -91,15 +96,20 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
 )
+
+if(NOT IOS)
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
+    )
+endif()
 
 file(GLOB COMMON_FILES_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.h)
 file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
