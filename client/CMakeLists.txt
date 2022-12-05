@@ -308,11 +308,6 @@ endif()
 if(IOS)
     message("Client iOS build")
 
-
-    # CONFIG += static
-    # CONFIG += file_copies
-
-
     find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
     find_library(FW_UIKIT UIKit)
     find_library(FW_FOUNDATION Foundation)
@@ -337,11 +332,6 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
 
-    # i think in cmake it is not necessary? yes in iOS we are using native
-    # SOURCES -= 
-    #   platforms/ios/QRCodeReaderBase.cpp 
-    #   platforms/ios/MobileUtils.cpp
-
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm 
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm 
@@ -356,35 +346,12 @@ if(IOS)
 
 
 
-
-
-
-
-    # Q_ENABLE_BITCODE.value = NO
-    # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-    # QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 endif()
 
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
     message("Building for iPhone OS")
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 
-
-
-
-   # find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
-    #                               PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
-
-    #find_library(LIB_SSL NAMES "libssl.a"
-     #                            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
-
-
-
-    #set(LIBS ${LIBS} LIB_LIBCRYPTO LIB_SSL)
-
-      #    target_link_libraries(${PROJECT} PRIVATE ${LIB_LIBCRYPTO})
-
-       #   target_link_libraries(${PROJECT} PRIVATE ${LIB_SSL})
 
 
 endif()
@@ -497,6 +464,15 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
            platforms/ios/iosvpnprotocol.swift
            platforms/ios/ioslogger.swift
        )
+
+   target_sources(${PROJECT} PRIVATE
+       ${CMAKE_SOURCE_DIR}/ios/app/launch.png
+       ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard)
+   set_source_files_properties(
+       ${CMAKE_SOURCE_DIR}/ios/app/launch.png
+       ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+       PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
    add_subdirectory(ios/networkextension)
    add_dependencies(${PROJECT} networkextension)
    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)

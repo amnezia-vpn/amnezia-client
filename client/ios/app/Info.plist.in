@@ -49,5 +49,7 @@
 	<string>group.org.amnezia.amneziavpn</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Amnezia VPN needs access to the camera for reading QR-codes.</string>
 </dict>
 </plist>
