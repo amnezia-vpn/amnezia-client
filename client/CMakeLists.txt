@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.23.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT})
-
+project(${PROJECT} VERSION 2.0.10)
+set(BUILD_ID 3)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
@@ -23,6 +23,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core5Compat
 )
 qt_standard_project_setup()
+
 
 # silent builds on CI env
 set(IS_CI ${CI})
@@ -355,35 +356,6 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 
 
 endif()
-
-
-#if(IPHONEOS)
-    # message("Building for iPhone OS")
-    # QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
-    # QMAKE_BUNDLE = AmneziaVPN
-    # QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
-    # QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
-    # QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc          not added yet
-    # QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
-    # QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
-
-    # XCODEBUILD_FLAGS += -allowProvisioningUpdates                              not added yet
-
-    # DEFINES += iphoneos
-
-    # contains(QT_ARCH, arm64) {
-    # message("Building for iOS/ARM v8 64-bit architecture")
-    # ARCH_TAG = "ios_armv8_64"
-
-    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
-    # } else {
-    # message("Building for iOS/ARM v7 (32-bit) architecture")
-    # ARCH_TAG = "ios_armv7"
-    # }
-#endif()
-
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 qt_add_translations(${PROJECT} TS_FILES
