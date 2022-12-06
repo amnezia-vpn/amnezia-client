@@ -410,7 +410,7 @@ ErrorCode ServerController::copyFileToRemoteHost(ssh_session& ssh, sftp_session&
     char buffer[SFTP_TRANSFER_CHUNK_SIZE];
     int length {sizeof (buffer)};
 
-    file = sftp_open(sftp, remote_path.c_str(), access_type, S_IRWXU);
+    file = sftp_open(sftp, remote_path.c_str(), access_type, 0);//S_IRWXU);
 
     if (file == NULL) {
         return ErrorCode::SshSftpError;

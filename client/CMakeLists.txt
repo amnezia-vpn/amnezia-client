@@ -37,13 +37,19 @@ set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/zlib)
+set(ZLIB_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
+set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rd/zlib)
+set(WITH_SERVER OFF)
+set(WITH_GSSAPI OFF)
+set(WITH_EXAMPLES OFF)
+set(OPENSSL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh)
+
 set(BUILD_WITH_QT6 ON)
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
-
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh/include)
-set(LIBS ${LIBS} ssh)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include

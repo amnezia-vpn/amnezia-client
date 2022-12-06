@@ -28,3 +28,6 @@
 [submodule "client/3rd/libssh"]
 	path = client/3rd/libssh
 	url = https://git.libssh.org/projects/libssh.git/
+[submodule "client/3rd/zlib"]
+	path = client/3rd/zlib
+	url = https://github.com/madler/zlib.git
