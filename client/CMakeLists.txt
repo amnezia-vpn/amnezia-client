@@ -398,49 +398,10 @@ if(IOS)
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
 
 
-    #find_library(FW_OPENVPN OpenVPNAdapter "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
-
-  #add_library(OpenVPNAdapter SHARED "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
-
-  #set_target_properties(${PROJECT} PROPERTIES FRAMEWORK TRUE)
-
-  #target_link_libraries(${PROJECT} PUBLIC OpenVPNAdapter)
-
-
-#  set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-#      "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
-#      OpenVPNAdapter)
-
-
-#  set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH  "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
-
   set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
   set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
   set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 
-#          set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
-#          set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-
-
-      #    target_link_libraries(${PROJECT} PRIVATE FW_OPENVPN)
-
- #   set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS FW_OPENVPN)
-
-
- #=====================================================
-# add_library(MyLib SHARED "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
- #set_target_properties(${PROJECT} PROPERTIES FRAMEWORK TRUE)
-
-# target_link_libraries(${PROJECT} PUBLIC MyLib)
-
- #set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-  #   "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
-   #  )
- #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
- #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
- #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-
- #======================================================
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
                                      XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
