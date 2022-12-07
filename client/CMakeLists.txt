@@ -24,6 +24,27 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 qt_standard_project_setup()
 
+if(IOS)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
+
+#    add_custom_command(
+#        # On Visual Studio Generators, run before any other rules are executed within the target. On other generators, run just before PRE_LINK commands
+#        OUTPUT ${TEST_FILE}
+#        PRE_BUILD
+
+#        COMMAND echo -e ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh
+#        COMMENT "This command will be executed before building bar"
+#        VERBATIM # to support \t for example
+#    )
+##    ADD_CUSTOM_COMMAND(
+##        OUTPUT ${TEST_FILE}
+##        COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh
+##        COMMENT "Building OpenVPN"
+##    )
+
+message(STATUS "${openvpnlogs}")
+
+endif()
 
 # silent builds on CI env
 set(IS_CI ${CI})
@@ -206,6 +227,10 @@ if(APPLE)
     if(IOS)
         message("ios in mac")
       #do nothing, IOS is added in below
+
+
+
+
      else() #mac
          set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 
@@ -234,7 +259,7 @@ if(APPLE)
     find_library(FW_APPKIT AppKit)
     find_library(FW_SECURITY Security)
 
-    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES
+    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES FW_OPENVPN
                         LIB_LIBCRYPTO LIB_SSL)
 
 
@@ -368,9 +393,54 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
     include(src/cmake/osxtools.cmake)
+#    set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
 
+
+    #find_library(FW_OPENVPN OpenVPNAdapter "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
+
+  #add_library(OpenVPNAdapter SHARED "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
+
+  #set_target_properties(${PROJECT} PROPERTIES FRAMEWORK TRUE)
+
+  #target_link_libraries(${PROJECT} PUBLIC OpenVPNAdapter)
+
+
+#  set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+#      "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+#      OpenVPNAdapter)
+
+
+#  set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH  "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
+
+  set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
+  set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
+  set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
+
+#          set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
+#          set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+
+
+      #    target_link_libraries(${PROJECT} PRIVATE FW_OPENVPN)
+
+ #   set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS FW_OPENVPN)
+
+
+ #=====================================================
+# add_library(MyLib SHARED "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
+ #set_target_properties(${PROJECT} PROPERTIES FRAMEWORK TRUE)
+
+# target_link_libraries(${PROJECT} PUBLIC MyLib)
+
+ #set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+  #   "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+   #  )
+ #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos")
+ #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
+ #set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+
+ #======================================================
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
                                      XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
@@ -448,6 +518,14 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
    add_subdirectory(ios/networkextension)
    add_dependencies(${PROJECT} networkextension)
    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
+
+   set_property(TARGET "networkextension" PROPERTY XCODE_EMBED_FRAMEWORKS
+       "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+       )
+   set_target_properties(networkextension PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+     set_target_properties(networkextension PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
+
+
 
 endif()
 
