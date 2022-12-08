@@ -37,17 +37,40 @@ set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/zlib)
-set(ZLIB_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
-set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rd/zlib)
-set(WITH_SERVER OFF)
-set(WITH_GSSAPI OFF)
-set(WITH_EXAMPLES OFF)
-set(OPENSSL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include)
+set(ZLIB_LIBRARY $<IF:$<CONFIG:Debug>,zlibd,zlib>)
+set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib")
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
+
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
+set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
+set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+set(OPENSSL_LIBRARIES "ssl" "crypto")
+
+if(WIN32)
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64/libcrypto.lib")
+    else()
+        set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86/libcrypto.lib")
+    endif()
+elseif(APPLE AND NOT IOS)
+    set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/macos/x86_64/libssl.lib")
+    set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/macos/x86_64/libcrypto.lib")
+endif()
+
+file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+     DESTINATION ${OPENSSL_LIBRARIES_DIR})
+ file(COPY "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include"
+      DESTINATION ${OPENSSL_ROOT_DIR})
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh)
+add_compile_definitions(_WINSOCKAPI_)
+set(LIBS ${LIBS} ssh)
 
 set(BUILD_WITH_QT6 ON)
-set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
@@ -56,9 +79,11 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
     ${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain
+    ${CMAKE_CURRENT_LIST_DIR}/3rd/libssh/include
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
+    ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
 )
 
 set(HEADERS ${HEADERS}
