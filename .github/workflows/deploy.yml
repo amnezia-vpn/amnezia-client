@@ -218,7 +218,7 @@ jobs:
         export PATH=$PATH:~/go/bin
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DCMAKE_TOOLCHAIN_FILE=$QT_TOOL_CHAIN/qt.toolchain.cmake -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
--DCMAKE_OSX_SYSROOT:STRING=iphoneos
+        -DCMAKE_OSX_SYSROOT:STRING=iphoneos
 
 # ------------------------------------------------------
 
