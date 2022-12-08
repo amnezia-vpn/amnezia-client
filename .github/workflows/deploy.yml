@@ -214,7 +214,7 @@ jobs:
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
         export QT_TOOL_CHAIN="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/lib/cmake/Qt6"
-        export QT_IOS"${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios"
+        export QT_IOS="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
         mkdir build-ios
