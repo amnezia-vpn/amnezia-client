@@ -158,7 +158,6 @@ Build-IOS-cmake:
     name: 'Build-IOS-cmake'
     runs-on: macos-latest
     
-    if: github.ref == 'refs/heads/qmake-to-cmake-migration'
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
