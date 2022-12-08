@@ -377,7 +377,7 @@ if(IOS)
 #    set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
 
   set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
   set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
@@ -456,6 +456,11 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
        ${CMAKE_SOURCE_DIR}/ios/app/launch.png
        ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
        PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+   target_sources(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR}/ios/Media.xcassets)
+   set_source_files_properties(Media.xcassets PROPERTIES
+       MACOSX_PACKAGE_LOCATION Resources
+   )
 
    add_subdirectory(ios/networkextension)
    add_dependencies(${PROJECT} networkextension)
