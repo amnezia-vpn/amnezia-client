@@ -155,6 +155,74 @@ jobs:
 
 # ------------------------------------------------------
 
+  Build-IOS-cmake:
+    name: 'Build-IOS-cmake'
+    runs-on: macos-latest
+    
+    env:
+      QT_VERSION: 6.4.1
+      QIF_VERSION: 4.4
+
+    steps:
+    - name: 'Setup xcode'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '13.4'
+
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
+
+    - name: 'Install ios Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'ios'
+        modules: 'qtremoteobjects qt5compat'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Install go'
+      uses: actions/setup-go@v3
+
+    - name: 'Setup gomobile'
+      run: |
+          export PATH=$PATH:~/go/bin
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
+
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Build project'
+      run: |
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
+        export QT_TOOL_CHAIN="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/lib/cmake/Qt6"
+        export QT_IOS="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios"
+        export QT_IOS_BIN=$QT_BIN_DIR
+        export PATH=$PATH:~/go/bin
+        mkdir build-ios
+        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DCMAKE_TOOLCHAIN_FILE=$QT_TOOL_CHAIN/qt.toolchain.cmake -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
+        -DCMAKE_OSX_SYSROOT:STRING=iphoneos -QT_HOST_PATH=$QT_IOS
+
+# ------------------------------------------------------
+
   Build-MacOS:
     name: 'Build-MacOS'
     runs-on: macos-latest
