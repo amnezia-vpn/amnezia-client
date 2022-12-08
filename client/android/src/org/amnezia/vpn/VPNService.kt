@@ -15,6 +15,8 @@ import android.os.*
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import android.text.TextUtils
+import androidx.core.content.FileProvider
 import com.wireguard.android.util.SharedLibraryLoader
 import com.wireguard.config.*
 import com.wireguard.crypto.Key
@@ -151,6 +153,31 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private var flags = 0
     private var startId = 0
 
+    private lateinit var mMessenger: Messenger
+
+    internal class ExternalConfigImportHandler(
+        context: Context,
+        private val serviceBinder: VPNServiceBinder,
+        private val applicationContext: Context = context.applicationContext
+    ) : Handler() {
+
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                IMPORT_COMMAND_CODE -> {
+                    val data = msg.data.getString(IMPORT_CONFIG_KEY)
+
+                    if (data != null) {
+                        serviceBinder.importConfig(data)
+                    }
+                }
+
+                else -> {
+                    super.handleMessage(msg)
+                }
+            }
+        }
+    }
+
     fun init() {
         if (mAlreadyInitialised) {
             return
@@ -188,6 +215,14 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      */
     override fun onBind(intent: Intent): IBinder {
         Log.v(tag, "Aman: onBind....................")
+
+        if (intent.action != null && intent.action == IMPORT_ACTION_CODE) {
+            Log.v(tag, "Service bind for import of config")
+            mMessenger = Messenger(ExternalConfigImportHandler(this, mBinder))
+            return mMessenger.binder
+        }
+
+        Log.v(tag, "Regular service bind")
         when (mProtocol) {
             "shadowsocks" -> {
                 when (intent.action) {
@@ -840,4 +875,44 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         override fun close() = Os.close(fd)
     }
 
+    fun saveAsFile(configContent: String?, suggestedFileName: String): String {
+        val rootDirPath = cacheDir.absolutePath
+        val rootDir = File(rootDirPath)
+
+        if (!rootDir.exists()) {
+            rootDir.mkdirs()
+        }
+
+        val fileName = if (!TextUtils.isEmpty(suggestedFileName)) suggestedFileName else "amnezia.cfg"
+
+        val file = File(rootDir, fileName)
+
+        try {
+            file.bufferedWriter().use { out -> out.write(configContent) }
+            return file.toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return ""
+    }
+
+    fun shareFile(attachmentFile: String?) {
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/*"
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            val file = File(attachmentFile)
+            val uri = FileProvider.getUriForFile(this, "${BuildConfig.APPLICATION_ID}.fileprovider", file)
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            val createChooser = Intent.createChooser(intent, "Config sharing")
+            createChooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(createChooser)
+        } catch (e: Exception) {
+            Log.i(tag, e.message.toString())
+        }
+    }
 }

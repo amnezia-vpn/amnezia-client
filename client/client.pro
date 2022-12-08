@@ -263,9 +263,19 @@ android {
       android/gradlew.bat \
       android/gradle.properties \
       android/res/values/libs.xml \
+      android/res/xml/fileprovider.xml \
+      android/src/org/amnezia/vpn/AuthHelper.java \
+      android/src/org/amnezia/vpn/IPCContract.kt \
+      android/src/org/amnezia/vpn/NotificationUtil.kt \
       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
+      android/src/org/amnezia/vpn/Prefs.kt \
+      android/src/org/amnezia/vpn/VpnLogger.kt \
       android/src/org/amnezia/vpn/VpnService.kt \
       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+      android/src/org/amnezia/vpn/qt/AmneziaApp.kt \
+      android/src/org/amnezia/vpn/qt/PackageManagerHelper.java \
+      android/src/org/amnezia/vpn/qt/VPNActivity.kt \
+      android/src/org/amnezia/vpn/qt/VPNApplication.java \
       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
