@@ -2,9 +2,8 @@ import Foundation
 import NetworkExtension
 import os
 import Darwin
-//import OpenVPNAdapter
+import OpenVPNAdapter
 //import Tun2socks
-
 enum TunnelProtoType: String {
     case wireguard, openvpn, shadowsocks, none
 }
@@ -48,11 +47,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }()
     
-//    private lazy var ovpnAdapter: OpenVPNAdapter = {
-//        let adapter = OpenVPNAdapter()
-//        adapter.delegate = self
-//        return adapter
-//    }()
+    private lazy var ovpnAdapter: OpenVPNAdapter = {
+        let adapter = OpenVPNAdapter()
+        adapter.delegate = self
+        return adapter
+    }()
     
     private var shadowSocksConfig: Data? = nil
     private var openVPNConfig: Data? = nil
@@ -70,7 +69,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 //    private var session: NWUDPSession? = nil
 //    private var observer: AnyObject?
    
-//    let vpnReachability = OpenVPNReachability()
+    let vpnReachability = OpenVPNReachability()
 
     var startHandler: ((Error?) -> Void)?
     var stopHandler: (() -> Void)?
@@ -97,8 +96,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                            errorNotifier: errorNotifier,
                            completionHandler: completionHandler)
         case .openvpn:
-            break
-            //startOpenVPN(completionHandler: completionHandler)
+            startOpenVPN(completionHandler: completionHandler)
         case .shadowsocks:
             break
 //            startShadowSocks(completionHandler: completionHandler)
@@ -112,8 +110,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .wireguard:
             stopWireguard(with: reason, completionHandler: completionHandler)
         case .openvpn:
-           break
-            // stopOpenVPN(with: reason, completionHandler: completionHandler)
+            stopOpenVPN(with: reason, completionHandler: completionHandler)
         case .shadowsocks:
             break
 //            stopShadowSocks(with: reason, completionHandler: completionHandler)
@@ -127,7 +124,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .wireguard:
             handleWireguardAppMessage(messageData, completionHandler: completionHandler)
         case .openvpn:
-            handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+            handleOpenVPNAppMessage(messageData, completionHandler: completionHandler)
         case .shadowsocks:
             break
 //            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
@@ -189,17 +186,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
     
-//    private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
-//        guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
-//           let providerConfiguration = protocolConfiguration.providerConfiguration,
-//              let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
-//            // TODO: handle errors properly
-//               wg_log(.error, message: "Can't start startOpenVPN()")
-//            return
-//        }
-//
-//        setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
-//    }
+    private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
+        guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
+           let providerConfiguration = protocolConfiguration.providerConfiguration,
+              let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
+            // TODO: handle errors properly
+               wg_log(.error, message: "Can't start startOpenVPN()")
+            return
+        }
+        
+        setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
+    }
 /*
     private func startShadowSocks(completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
@@ -238,13 +235,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
     
-//    private func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-//        stopHandler = completionHandler
-//        if vpnReachability.isTracking {
-//            vpnReachability.stopTracking()
-//        }
-//        ovpnAdapter.disconnect()
-//    }
+    private func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+        stopHandler = completionHandler
+        if vpnReachability.isTracking {
+            vpnReachability.stopTracking()
+        }
+        ovpnAdapter.disconnect()
+    }
 /*
     private func stopShadowSocks(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         stopOpenVPN(with: reason) { [weak self] in
@@ -297,6 +294,21 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         } else {
             completionHandler(nil)
         }
+    }
+    
+    private func handleOpenVPNAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        if messageData.count == 1 && messageData[0] == 0 {
+            let bytesin = ovpnAdapter.transportStatistics.bytesIn
+            let strBytesin = "rx_bytes=" + String(bytesin);
+            
+            let bytesout = ovpnAdapter.transportStatistics.bytesOut
+            let strBytesout = "tx_bytes=" + String(bytesout);
+            
+            let strData = strBytesin + "\n" + strBytesout;
+            let data = Data(strData.utf8)
+            completionHandler(data)
+    }
     }
     
 /*
@@ -402,9 +414,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             }
         }
     }
-
     // MARK: -- Leaf provider methods
-
     private func prepareConfig(onInterface iface: String, fromSSConfig ssConfig: Data, andOvpnConfig ovpnConfig: Data) -> UnsafePointer<CChar>? {
         guard let ssConfig = try? JSONSerialization.jsonObject(with: ssConfig, options: []) as? [String: Any] else {
         self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
@@ -412,7 +422,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                                  userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
             return nil
         }
-
         guard let remoteHost = ssConfig[Constants.ssRemoteHost] as? String,
               let remotePort = ssConfig[Constants.ssRemotePort] as? Int,
               let method = ssConfig[Constants.ssCipherKey] as? String,
@@ -422,19 +431,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                                            userInfo: [NSLocalizedDescriptionKey: "Cannot asign profile params for ss in tunnel"]))
                   return nil
               }
-
         var insettings:  [String: Any] = .init()
         insettings["name"] = iface
         insettings["address"] = "127.0.0.2"
         insettings["netmask"] = "255.255.255.0"
         insettings["gateway"] = "127.0.0.1"
         insettings["mtu"] = 1600
-
         var inbounds: [String: Any] = .init()
         inbounds["protocol"] = "tun"
         inbounds["settings"] = insettings
         inbounds["tag"] = "tun_in"
-
         var outbounds: [String: Any] = .init()
         var outsettings: [String: Any] = .init()
         outsettings["address"] = remoteHost
@@ -444,18 +450,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         outbounds["protocol"] = "shadowsocks"
         outbounds["settings"] = outsettings
         outbounds["tag"] = "shadowsocks_out"
-
         var params: [String: Any] = .init()
         params["inbounds"] = [inbounds]
         params["outbounds"] =  [outbounds]
-
         wg_log(.error, message: "Config dictionary: \(params)")
-
         guard let jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted),
               let jsonString = String(data: jsonData, encoding: .utf8) else { return nil }
-
         wg_log(.error, message: "JSON String: \(jsonString)")
-
         var path = ""
         if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
                                                                in: .userDomainMask).first {
@@ -525,7 +526,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             
         }
     }
-
     private func stopLeafRedirector(completion: @escaping () -> Void) {
         leafProvider?.stopTunnel { error in
             // TODO: handle errors
@@ -558,7 +558,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 wg_log(.error, message: "Error starting ShadowSocks: \(String(describing: errorCode))")
                 return
             }
-
 //            self.setupAndHandleOpenVPNOverSSConnection(withConfig: ovpnConfig)
             self.startAndHandleTunnelOverSS(completionHandler: completion)
         }
@@ -688,47 +687,47 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
 */
-//    private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
-//        wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
-//        let str = String(decoding: ovpnConfiguration, as: UTF8.self)
-//        wg_log(.info, message: "OPENVPN config: \(str)")
-//
-//        let configuration = OpenVPNConfiguration()
-//        configuration.fileContent = ovpnConfiguration
-//        if viaSS {
-////            configuration.settings = [
-////                "remote": "137.74.6.148 1194",
-////                "proto": "tcp",
-////                "link-mtu": "1480",
-////                "tun-mtu": "1460",
-////            ]
-//        }
-//        let evaluation: OpenVPNConfigurationEvaluation
-//        do {
-//            evaluation = try ovpnAdapter.apply(configuration: configuration)
-//        } catch {
-//            completionHandler(error)
-//            return
-//        }
-//
-//        if !evaluation.autologin {
-//            wg_log(.info, message: "Implement login with user credentials")
-//        }
-//
-//        vpnReachability.startTracking { [weak self] status in
-//            guard status == .reachableViaWiFi else { return }
-//            self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
-//        }
-//
-//        startHandler = completionHandler
-//        ovpnAdapter.connect(using: packetFlow)
-//
+    private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
+        wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
+        let str = String(decoding: ovpnConfiguration, as: UTF8.self)
+        wg_log(.info, message: "OPENVPN config: \(str)")
+        
+        let configuration = OpenVPNConfiguration()
+        configuration.fileContent = ovpnConfiguration
+        if viaSS {
+//            configuration.settings = [
+//                "remote": "137.74.6.148 1194",
+//                "proto": "tcp",
+//                "link-mtu": "1480",
+//                "tun-mtu": "1460",
+//            ]
+        }
+        let evaluation: OpenVPNConfigurationEvaluation
+        do {
+            evaluation = try ovpnAdapter.apply(configuration: configuration)
+        } catch {
+            completionHandler(error)
+            return
+        }
+        
+        if !evaluation.autologin {
+            wg_log(.info, message: "Implement login with user credentials")
+        }
+        
+        vpnReachability.startTracking { [weak self] status in
+            guard status == .reachableViaWiFi else { return }
+            self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
+        }
+        
+        startHandler = completionHandler
+        ovpnAdapter.connect(using: packetFlow)
+    
 //        let ifaces = Interface.allInterfaces()
 //            .filter { $0.family == .ipv4 }
 //            .map { iface in iface.name }
-//
+        
 //        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
-//    }
+    }
     
     // MARK: -- Network observing methods
     
@@ -798,87 +797,87 @@ extension WireGuardLogLevel {
     }
 }
 
-//extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}
+extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}
 
 /* extension NEPacketTunnelFlow: ShadowSocksAdapterPacketFlow {} */
 
-//extension PacketTunnelProvider: OpenVPNAdapterDelegate {
-//
-//    // OpenVPNAdapter calls this delegate method to configure a VPN tunnel.
-//    // `completionHandler` callback requires an object conforming to `OpenVPNAdapterPacketFlow`
-//    // protocol if the tunnel is configured without errors. Otherwise send nil.
-//    // `OpenVPNAdapterPacketFlow` method signatures are similar to `NEPacketTunnelFlow` so
-//    // you can just extend that class to adopt `OpenVPNAdapterPacketFlow` protocol and
-//    // send `self.packetFlow` to `completionHandler` callback.
-//    func openVPNAdapter(
-//        _ openVPNAdapter: OpenVPNAdapter,
-//        configureTunnelWithNetworkSettings networkSettings: NEPacketTunnelNetworkSettings?,
-//        completionHandler: @escaping (Error?) -> Void
-//    ) {
-//        // In order to direct all DNS queries first to the VPN DNS servers before the primary DNS servers
-//        // send empty string to NEDNSSettings.matchDomains
-//        networkSettings?.dnsSettings?.matchDomains = [""]
-//
-//        // Set the network settings for the current tunneling session.
-//        setTunnelNetworkSettings(networkSettings, completionHandler: completionHandler)
-//    }
-//
-//    // Process events returned by the OpenVPN library
-//    func openVPNAdapter(
-//        _ openVPNAdapter: OpenVPNAdapter,
-//        handleEvent event:
-//        OpenVPNAdapterEvent, message: String?
-//    ) {
-//        switch event {
-//        case .connected:
-//            if reasserting {
-//                reasserting = false
-//            }
-//
-//            guard let startHandler = startHandler else { return }
-//
-//            startHandler(nil)
-//            self.startHandler = nil
-//        case .disconnected:
-//            guard let stopHandler = stopHandler else { return }
-//
-//            if vpnReachability.isTracking {
-//                vpnReachability.stopTracking()
-//            }
-//
-//            stopHandler()
-//            self.stopHandler = nil
-//        case .reconnecting:
-//            reasserting = true
-//        default:
-//            break
-//        }
-//    }
-//
-//    // Handle errors thrown by the OpenVPN library
-//    func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleError error: Error) {
-//        // Handle only fatal errors
-//        guard let fatal = (error as NSError).userInfo[OpenVPNAdapterErrorFatalKey] as? Bool,
-//              fatal == true else { return }
-//
-//        if vpnReachability.isTracking {
-//            vpnReachability.stopTracking()
-//        }
-//
-//        if let startHandler = startHandler {
-//            startHandler(error)
-//            self.startHandler = nil
-//        } else {
-//            cancelTunnelWithError(error)
-//        }
-//    }
-//
-//    // Use this method to process any log message returned by OpenVPN library.
-//    func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleLogMessage logMessage: String) {
-//        // Handle log messages
-//        wg_log(.info, message: logMessage)
-//    }
-//}
+extension PacketTunnelProvider: OpenVPNAdapterDelegate {
+    
+    // OpenVPNAdapter calls this delegate method to configure a VPN tunnel.
+    // `completionHandler` callback requires an object conforming to `OpenVPNAdapterPacketFlow`
+    // protocol if the tunnel is configured without errors. Otherwise send nil.
+    // `OpenVPNAdapterPacketFlow` method signatures are similar to `NEPacketTunnelFlow` so
+    // you can just extend that class to adopt `OpenVPNAdapterPacketFlow` protocol and
+    // send `self.packetFlow` to `completionHandler` callback.
+    func openVPNAdapter(
+        _ openVPNAdapter: OpenVPNAdapter,
+        configureTunnelWithNetworkSettings networkSettings: NEPacketTunnelNetworkSettings?,
+        completionHandler: @escaping (Error?) -> Void
+    ) {
+        // In order to direct all DNS queries first to the VPN DNS servers before the primary DNS servers
+        // send empty string to NEDNSSettings.matchDomains
+        networkSettings?.dnsSettings?.matchDomains = [""]
+        
+        // Set the network settings for the current tunneling session.
+        setTunnelNetworkSettings(networkSettings, completionHandler: completionHandler)
+    }
+    
+    // Process events returned by the OpenVPN library
+    func openVPNAdapter(
+        _ openVPNAdapter: OpenVPNAdapter,
+        handleEvent event:
+        OpenVPNAdapterEvent, message: String?
+    ) {
+        switch event {
+        case .connected:
+            if reasserting {
+                reasserting = false
+            }
+            
+            guard let startHandler = startHandler else { return }
+            
+            startHandler(nil)
+            self.startHandler = nil
+        case .disconnected:
+            guard let stopHandler = stopHandler else { return }
+            
+            if vpnReachability.isTracking {
+                vpnReachability.stopTracking()
+            }
+            
+            stopHandler()
+            self.stopHandler = nil
+        case .reconnecting:
+            reasserting = true
+        default:
+            break
+        }
+    }
+    
+    // Handle errors thrown by the OpenVPN library
+    func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleError error: Error) {
+        // Handle only fatal errors
+        guard let fatal = (error as NSError).userInfo[OpenVPNAdapterErrorFatalKey] as? Bool,
+              fatal == true else { return }
+        
+        if vpnReachability.isTracking {
+            vpnReachability.stopTracking()
+        }
+        
+        if let startHandler = startHandler {
+            startHandler(error)
+            self.startHandler = nil
+        } else {
+            cancelTunnelWithError(error)
+        }
+    }
+    
+    // Use this method to process any log message returned by OpenVPN library.
+    func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleLogMessage logMessage: String) {
+        // Handle log messages
+        wg_log(.info, message: logMessage)
+    }
+}
 /*
 extension PacketTunnelProvider: Tun2socksTunWriterProtocol {
     func write(_ p0: Data?, n: UnsafeMutablePointer<Int>?) throws {

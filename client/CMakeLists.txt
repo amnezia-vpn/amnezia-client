@@ -1,10 +1,21 @@
 cmake_minimum_required(VERSION 3.23.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT})
-
+project(${PROJECT} VERSION 2.0.10)
+set(BUILD_ID 2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+    cmake_policy(SET CMP0099 OLD)
+endif()
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
+set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
@@ -12,6 +23,11 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core5Compat
 )
 qt_standard_project_setup()
+
+if(IOS)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
+
+endif()
 
 # silent builds on CI env
 set(IS_CI ${CI})
@@ -95,7 +111,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
@@ -104,8 +119,14 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
 )
+
+if(NOT IOS)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
+    )
+endif()
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
@@ -114,15 +135,20 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
 )
+
+if(NOT IOS)
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
+    )
+endif()
 
 file(GLOB COMMON_FILES_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.h)
 file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
@@ -211,9 +237,17 @@ if(APPLE)
            set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "Amnezia VPN Development Team")
        endif()
 
+       set(CMAKE_XCODE_GENERATE_SCHEME FALSE)
+         set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${BUILD_VPN_DEVELOPMENT_TEAM})
+         set(CMAKE_XCODE_ATTRIBUTE_GROUP_ID_IOS ${BUILD_IOS_GROUP_IDENTIFIER})
+
     if(IOS)
         message("ios in mac")
       #do nothing, IOS is added in below
+
+
+
+
      else() #mac
          set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 
@@ -242,7 +276,7 @@ if(APPLE)
     find_library(FW_APPKIT AppKit)
     find_library(FW_SECURITY Security)
 
-    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES
+    set(LIBS ${LIBS} FW_COCOA FW_APPLICATIONSERVICES FW_FOUNDATION FW_APPKIT FW_SECURITY FW_CORESERVICES FW_OPENVPN
                         LIB_LIBCRYPTO LIB_SSL)
 
 
@@ -317,11 +351,6 @@ endif()
 if(IOS)
     message("Client iOS build")
 
-
-    # CONFIG += static
-    # CONFIG += file_copies
-
-
     find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
     find_library(FW_UIKIT UIKit)
     find_library(FW_FOUNDATION Foundation)
@@ -331,8 +360,6 @@ if(IOS)
     set(LIBS ${LIBS} ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT} ${FW_FOUNDATION} ${FW_STOREKIT} ${FW_USERNOTIFICATIONS})
 
     add_compile_definitions(MVPN_IOS)
-
-    message("shahzain ${CMAKE_CURRENT_LIST_DIR}")
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h 
@@ -345,11 +372,6 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h 
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
-
-    # i think in cmake it is not necessary? yes in iOS we are using native
-    # SOURCES -= 
-    #   platforms/ios/QRCodeReaderBase.cpp 
-    #   platforms/ios/MobileUtils.cpp
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm 
@@ -365,13 +387,6 @@ if(IOS)
 
 
 
-
-
-
-
-    # Q_ENABLE_BITCODE.value = NO
-    # Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-    # QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 endif()
 
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
@@ -380,52 +395,7 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 
 
 
-
-   # find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
-    #                               PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
-
-    #find_library(LIB_SSL NAMES "libssl.a"
-     #                            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/ NO_DEFAULT_PATH)
-
-
-
-    #set(LIBS ${LIBS} LIB_LIBCRYPTO LIB_SSL)
-
-      #    target_link_libraries(${PROJECT} PRIVATE ${LIB_LIBCRYPTO})
-
-       #   target_link_libraries(${PROJECT} PRIVATE ${LIB_SSL})
-
-
 endif()
-
-
-#if(IPHONEOS)
-    # message("Building for iPhone OS")
-    # QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
-    # QMAKE_BUNDLE = AmneziaVPN
-    # QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
-    # QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
-    # QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
-    # QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc          not added yet
-    # QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
-    # QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
-
-    # XCODEBUILD_FLAGS += -allowProvisioningUpdates                              not added yet
-
-    # DEFINES += iphoneos
-
-    # contains(QT_ARCH, arm64) {
-    # message("Building for iOS/ARM v8 64-bit architecture")
-    # ARCH_TAG = "ios_armv8_64"
-
-    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-    # LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
-    # } else {
-    # message("Building for iOS/ARM v7 (32-bit) architecture")
-    # ARCH_TAG = "ios_armv7"
-    # }
-#endif()
-
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 qt_add_translations(${PROJECT} TS_FILES
@@ -438,8 +408,14 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
     include(src/cmake/osxtools.cmake)
+#    set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+
+  set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
+  set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
+  set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
@@ -506,9 +482,31 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
            platforms/ios/iosvpnprotocol.swift
            platforms/ios/ioslogger.swift
        )
+
+   target_sources(${PROJECT} PRIVATE
+       ${CMAKE_SOURCE_DIR}/ios/app/launch.png
+       ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard)
+   set_source_files_properties(
+       ${CMAKE_SOURCE_DIR}/ios/app/launch.png
+       ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+       PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+   target_sources(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR}/ios/Media.xcassets)
+   set_source_files_properties(Media.xcassets PROPERTIES
+       MACOSX_PACKAGE_LOCATION Resources
+   )
+
    add_subdirectory(ios/networkextension)
    add_dependencies(${PROJECT} networkextension)
    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
+
+   set_property(TARGET "networkextension" PROPERTY XCODE_EMBED_FRAMEWORKS
+       "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+       )
+   set_target_properties(networkextension PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+     set_target_properties(networkextension PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
+
+
 
 endif()
 
