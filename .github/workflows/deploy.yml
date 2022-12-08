@@ -154,7 +154,8 @@ jobs:
         bash deploy/build_ios.sh
 
 # ------------------------------------------------------
-Build-IOS-cmake:
+
+  Build-IOS-cmake:
     name: 'Build-IOS-cmake'
     runs-on: macos-latest
     
@@ -219,7 +220,7 @@ Build-IOS-cmake:
 
 # ------------------------------------------------------
 
-Build-MacOS:
+  Build-MacOS:
     name: 'Build-MacOS'
     runs-on: macos-latest
 
