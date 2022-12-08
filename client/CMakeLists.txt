@@ -27,23 +27,6 @@ qt_standard_project_setup()
 if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
 
-#    add_custom_command(
-#        # On Visual Studio Generators, run before any other rules are executed within the target. On other generators, run just before PRE_LINK commands
-#        OUTPUT ${TEST_FILE}
-#        PRE_BUILD
-
-#        COMMAND echo -e ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh
-#        COMMENT "This command will be executed before building bar"
-#        VERBATIM # to support \t for example
-#    )
-##    ADD_CUSTOM_COMMAND(
-##        OUTPUT ${TEST_FILE}
-##        COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh
-##        COMMENT "Building OpenVPN"
-##    )
-
-message(STATUS "${openvpnlogs}")
-
 endif()
 
 # silent builds on CI env
@@ -343,8 +326,6 @@ if(IOS)
     set(LIBS ${LIBS} ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT} ${FW_FOUNDATION} ${FW_STOREKIT} ${FW_USERNOTIFICATIONS})
 
     add_compile_definitions(MVPN_IOS)
-
-    message("shahzain ${CMAKE_CURRENT_LIST_DIR}")
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h 
