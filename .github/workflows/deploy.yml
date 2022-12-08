@@ -215,7 +215,7 @@ Build-IOS-cmake:
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
         mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode 
+        ${{ env.QT_IOS_BIN }}/qt-cmake . -B build-ios -GXcode 
 
 # ------------------------------------------------------
 
