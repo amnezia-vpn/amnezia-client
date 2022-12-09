@@ -22,27 +22,23 @@ find_package(Qt6 REQUIRED COMPONENTS
     RemoteObjects Quick Svg QuickControls2 
     Core5Compat
 )
-qt_standard_project_setup()
 
 if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
-
 endif()
 
-# silent builds on CI env
 set(IS_CI ${CI})
 if(IS_CI)
-  message("Detected CI env")
-#   CONFIG += silent ccache
-  find_program(CCACHE "ccache")
-  if(CCACHE)
-      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
-  endif()
+    message("Detected CI env")
+    find_program(CCACHE "ccache")
+    if(CCACHE)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
+    endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/ssh/qssh.cmake)
-
 include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/botan/botan.cmake)
+
 if(NOT IOS AND NOT ANDROID)
    include(${CMAKE_CURRENT_LIST_DIR}/3rd/SingleApplication/singleapplication.cmake)
 endif()
@@ -55,7 +51,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/zlib)
-set(ZLIB_LIBRARY $<IF:$<CONFIG:Debug>,zlibd,zlib>)
+if(WIN32)
+    set(ZLIB_LIBRARY $<IF:$<CONFIG:Debug>,zlibd,zlib>)
+else()
+    set(ZLIB_LIBRARY libz)
+endif()
 set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib")
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 
@@ -64,23 +64,24 @@ set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
 set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 set(OPENSSL_LIBRARIES "ssl" "crypto")
 
+set(OPENSSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL")
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64/libssl.lib")
-        set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64/libcrypto.lib")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/x86_64/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/x86_64/libcrypto.lib")
     else()
-        set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86/libssl.lib")
-        set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86/libcrypto.lib")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/x86/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/x86/libcrypto.lib")
     endif()
 elseif(APPLE AND NOT IOS)
-    set(OPENSSL_LIB_SSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/macos/x86_64/libssl.lib")
-    set(OPENSSL_LIB_CRYPTO_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/macos/x86_64/libcrypto.lib")
+    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/macos/x86_64/libssl.lib")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/macos/x86_64/libcrypto.lib")
 endif()
 
 file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-     DESTINATION ${OPENSSL_LIBRARIES_DIR})
- file(COPY "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include"
-      DESTINATION ${OPENSSL_ROOT_DIR})
+    DESTINATION ${OPENSSL_LIBRARIES_DIR})
+file(COPY "${OPENSSL_PATH}/include"
+    DESTINATION ${OPENSSL_ROOT_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh)
 add_compile_definitions(_WINSOCKAPI_)
@@ -346,8 +347,6 @@ if(ANDROID)
     )
 endif()
 
-
-
 if(IOS)
     message("Client iOS build")
 
@@ -384,9 +383,6 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm 
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
-
-
-
 endif()
 
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
