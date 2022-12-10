@@ -28,7 +28,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 qt_standard_project_setup()
 
 if(IOS)
-    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh args
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/client)
 
 endif()
 
