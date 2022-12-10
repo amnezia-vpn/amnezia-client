@@ -112,7 +112,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat QtShaderTools'
         dir: ${{ runner.temp }}
         set-env: 'true'
 
