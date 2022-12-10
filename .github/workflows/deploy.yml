@@ -149,11 +149,11 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_IOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios"
+        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
         mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DPREFIX_PATH=$QT_IOS_ROOT_DIR
+        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
 # ------------------------------------------------------
 
