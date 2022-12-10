@@ -23,7 +23,7 @@ list(APPEND CMAKE_PREFIX_PATH ${PREFIX_PATH})
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
-    Core5Compat
+    Core5Compat Qt6ShaderTools
 )
 qt_standard_project_setup()
 
