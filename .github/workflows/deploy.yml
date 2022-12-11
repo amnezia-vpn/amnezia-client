@@ -112,7 +112,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         set-env: 'true'
 
@@ -122,7 +122,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -152,6 +152,7 @@ jobs:
         export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
+        cd client
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
