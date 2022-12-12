@@ -93,7 +93,7 @@ if(NOT LINUX)
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 
-    set(OpenSSL_DIR ${OPENSSL_ROOT_DIR})
+    list(APPEND CMAKE_PREFIX_PATH ${OPENSSL_ROOT_DIR})
     find_package(OpenSSL REQUIRED)
 endif()
 
