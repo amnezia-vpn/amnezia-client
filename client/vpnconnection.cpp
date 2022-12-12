@@ -105,13 +105,11 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 #endif
 
 #ifdef Q_OS_IOS
-
-    qDebug() << state;
-    if(state == VpnProtocol::Connected){
+    if (state == VpnProtocol::Connected){
         m_isIOSConnected = true;
         checkIOSStatus();
-    }else{
-
+    }
+    else {
         m_isIOSConnected = false;
         m_receivedBytes = 0;
         m_sentBytes = 0;
@@ -120,17 +118,17 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
     emit connectionStateChanged(state);
 }
 
+#ifdef Q_OS_IOS
 void VpnConnection::checkIOSStatus()
 {
     QTimer::singleShot(1000, [this]() {
-
         if(m_isIOSConnected){
             iosVpnProtocol->checkStatus();
             checkIOSStatus();
         }
-
     } );
 }
+#endif
 
 const QString &VpnConnection::remoteAddress() const
 {
