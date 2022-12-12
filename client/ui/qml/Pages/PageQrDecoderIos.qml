@@ -25,7 +25,7 @@ PageBase {
     }
 
     Connections {
-        target: Qt.platform.os == "ios" ? QrDecoderLogic : nil
+        target: Qt.platform.os == "ios" ? QrDecoderLogic : null
         function onStartDecode() {
             console.debug("Starting QR decoder")
             loader.sourceComponent = component
