@@ -165,9 +165,8 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
+    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open config file"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
-
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
@@ -201,14 +200,6 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(profile).toJson();
         return false;
-    }
-
-    if (!profile.contains(config_key::containers)) {
-        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
-        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-        uiLogic()->onUpdateAllPages();
-
-        emit uiLogic()->goToPage(Page::ServerContainers);
     }
 
     return true;

@@ -10,13 +10,11 @@ fi
 RELEASE=1
 OS=
 NETWORKEXTENSION=
-ADJUST_SDK_TOKEN=
-ADJUST="CONFIG-=adjust"
 WORKINGDIR=`pwd`
 
 helpFunction() {
   print G "Usage:"
-  print N "\t$0 <macos|ios|> [-d|--debug] [-n|--networkextension] [-a|--adjusttoken <adjust_token>]"
+  print N "\t$0 <macos|ios|> [-d|--debug] [-n|--networkextension]"
   print N ""
   print N "By default, the project is compiled in release mode. Use -d or --debug for a debug build."
   print N "Use -n or --networkextension to force the network-extension component for MacOS too."
@@ -26,7 +24,6 @@ helpFunction() {
   print G "Config variables:"
   print N "\tQT_MACOS_BIN=</path/of/the/qt/bin/folder/for/macos>"
   print N "\tQT_IOS_BIN=</path/of/the/qt/bin/folder/for/ios>"
-  print N "\tMVPN_IOS_ADJUST_TOKEN=<token>"
   print N ""
   exit 0
 }
@@ -38,11 +35,6 @@ while [[ $# -gt 0 ]]; do
   key="$1"
 
   case $key in
-  -a | --adjusttoken)
-    ADJUST_SDK_TOKEN="$2"
-    shift
-    shift
-    ;;
   -d | --debug)
     RELEASE=
     shift
@@ -97,11 +89,6 @@ if [[ "$OS" != "macos" ]] && [[ "$OS" != "ios" ]] && [[ "$OS" != "macostest" ]];
   helpFunction
 fi
 
-if ! [[ "$ADJUST_SDK_TOKEN" ]] && [[ "$MVPN_IOS_ADJUST_TOKEN" ]]; then
-  print Y "Using the MVPN_IOS_ADJUST_TOKEN value for the adjust token"
-  ADJUST_SDK_TOKEN=$MVPN_IOS_ADJUST_TOKEN
-fi
-
 if [[ "$OS" == "ios" ]]; then
   # Network-extension is the default for IOS
   NETWORKEXTENSION=1
@@ -150,7 +137,6 @@ MACOS_FLAGS="
   QTPLUGIN+=qsvg
   CONFIG-=static
   CONFIG+=balrog
-  MVPN_MACOS=1
 "
 
 MACOSTEST_FLAGS="
@@ -160,7 +146,6 @@ MACOSTEST_FLAGS="
 "
 
 IOS_FLAGS="
-  MVPN_IOS=1
   Q_OS_IOS=1
 "
 
@@ -183,11 +168,6 @@ elif [ "$OS" = "macostest" ]; then
   PLATFORM=$MACOSTEST_FLAGS
 elif [ "$OS" = "ios" ]; then
   PLATFORM=$IOS_FLAGS
-  if [[ "$ADJUST_SDK_TOKEN"  ]]; then
-    printn Y "ADJUST_SDK_TOKEN: "
-    print G "$ADJUST_SDK_TOKEN"
-    ADJUST="CONFIG+=adjust"
-  fi
 else
   killProcess "Why are we here?"
 fi
@@ -249,7 +229,7 @@ else
   print Y "No Tun2Socks will be built"
 fi
 
-print Y "Creating the xcode project via qmake..."
+print Y "Creating the Xcode project via qmake..."
 $QMAKE \
   VERSION=$SHORTVERSION \
   BUILD_ID=$FULLVERSION \
@@ -258,11 +238,10 @@ $QMAKE \
   $VPNMODE \
   $WEMODE \
   $PLATFORM \
-  $ADJUST \
   ./client.pro || killProcess "Compilation failed"
 
 print Y "Patching the xcode project..."
-ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" "$ADJUST_SDK_TOKEN" || killProcess "Failed to merge xcode with wireguard"
+ruby scripts/xcode_patcher.rb "AmneziaVPN.xcodeproj" "$SHORTVERSION" "$FULLVERSION" "$OSRUBY" "$NETWORKEXTENSION" || killProcess "Failed to merge xcode with wireguard"
 print G "done."
 
   if command -v "sed" &>/dev/null; then
@@ -270,6 +249,6 @@ print G "done."
     sed -i '' '/<string>Original<\/string>/d' AmneziaVPN.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
   fi
 
-# print Y "Opening in XCode..."
-# open AmneziaVPN.xcodeproj
 print G "All done!"
+print Y "Opening project in Xcode..."
+open AmneziaVPN.xcodeproj

@@ -266,8 +266,6 @@ void UiLogic::onGotoCurrentProtocolsPage()
     emit goToPage(Page::ServerContainers);
 }
 
-
-
 //void UiLogic::showEvent(QShowEvent *event)
 //{
 //#if defined Q_OS_MACX

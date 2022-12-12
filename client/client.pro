@@ -303,6 +303,7 @@ ios {
     LIBS += -framework Foundation
     LIBS += -framework StoreKit
     LIBS += -framework UserNotifications
+    LIBS += -framework AVFoundation
 
     DEFINES += MVPN_IOS
 

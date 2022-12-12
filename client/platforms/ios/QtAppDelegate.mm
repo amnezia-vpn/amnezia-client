@@ -2,7 +2,9 @@
 
 #include <QFile>
 
-@implementation QtAppDelegate
+@implementation QtAppDelegate {
+    UIView *_screen;
+}
 
 +(QtAppDelegate *)sharedQtAppDelegate {
     static dispatch_once_t pred;
@@ -26,6 +28,13 @@
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    _screen = [UIScreen.mainScreen snapshotViewAfterScreenUpdates: false];
+    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle: UIBlurEffectStyleDark];
+    UIVisualEffectView *blurBackround = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
+    [_screen addSubview: blurBackround];
+    blurBackround.frame = _screen.frame;
+    UIWindow *_window = UIApplication.sharedApplication.keyWindow;
+    [_window addSubview: _screen];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
@@ -44,6 +53,7 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [_screen removeFromSuperview];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
