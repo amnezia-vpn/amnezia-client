@@ -9,7 +9,10 @@
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
 #include "settings.h"
+
+#ifdef Q_OS_IOS
 #include "protocols/ios_vpnprotocol.h"
+#endif
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/ipcclient.h"
@@ -74,7 +77,10 @@ signals:
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
+
+#ifdef Q_OS_IOS
     void checkIOSStatus();
+#endif
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;

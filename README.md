@@ -1,7 +1,7 @@
 # Amnezia VPN
 ## _The best client for self-hosted VPN_
 
-[![Build Status](https://travis-ci.com/amnezia-vpn/desktop-client.svg?branch=master)](https://travis-ci.com/amnezia-vpn/desktop-client)
+[![Build Status](https://github.com/amnezia-vpn/desktop-client/actions/workflows/deploy.yml/badge.svg?branch=dev)]
 
 Amnezia is a VPN client with the key feature of deploying your own VPN server on you virtual server.
 
