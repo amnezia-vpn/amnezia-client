@@ -9,7 +9,7 @@ class XCodeprojPatcher
   attr :target_main
   attr :target_extension
 
-  def run(file, shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
+  def run(file, shortVersion, fullVersion, platform, networkExtension, configHash)
     open_project file
     setup_project
     open_target_main
@@ -19,13 +19,7 @@ class XCodeprojPatcher
     group = @project.main_group.new_group('Configuration')
     @configFile = group.new_file('xcode.xconfig')
 
-    setup_target_main shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token
-
-#    if platform == 'macos'
-#      setup_target_loginitem shortVersion, fullVersion, configHash
-#      setup_target_nativemessaging shortVersion, fullVersion, configHash
-#    end
-
+    setup_target_main shortVersion, fullVersion, platform, networkExtension, configHash
 
     if networkExtension
       setup_target_extension shortVersion, fullVersion, platform, configHash
@@ -59,7 +53,7 @@ class XCodeprojPatcher
   end
   
 
-  def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash, adjust_sdk_token)
+  def setup_target_main(shortVersion, fullVersion, platform, networkExtension, configHash)
     @target_main.build_configurations.each do |config|
       config.base_configuration_reference = @configFile
 
@@ -72,10 +66,8 @@ class XCodeprojPatcher
         "$(PROJECT_DIR)/3rd",
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
         "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
-#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
 
       # Versions and names
@@ -91,9 +83,6 @@ class XCodeprojPatcher
       config.build_settings['INFOPLIST_FILE'] ||= platform + '/app/Info.plist'
       if platform == 'ios'
         config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'ios/app/main.entitlements'
-        if adjust_sdk_token != ""
-          config.build_settings['ADJUST_SDK_TOKEN'] = adjust_sdk_token
-        end
       elsif networkExtension
         config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/app/app.entitlements'
       else
@@ -104,7 +93,7 @@ class XCodeprojPatcher
       config.build_settings['ENABLE_BITCODE'] ||= 'NO' if platform == 'ios'
       config.build_settings['SDKROOT'] = 'iphoneos' if platform == 'ios'
       config.build_settings['SWIFT_PRECOMPILE_BRIDGING_HEADER'] = 'NO' if platform == 'ios'
-      config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin:/usr/local/bin:/opt/homebrew/bin'
+      config.build_settings['PATH'] = '${PATH}:/opt/local/bin:/usr/local/go/bin:/usr/local/bin:/opt/homebrew/bin'
 
       groupId = "";
       if (platform == 'macos')
@@ -173,96 +162,23 @@ class XCodeprojPatcher
       }
     end
 
-    if (platform == 'ios' && adjust_sdk_token != "")
+    if(platform == 'ios')
+
       frameworks_group = @project.groups.find { |group| group.display_name == 'Frameworks' }
       frameworks_build_phase = @target_main.build_phases.find { |build_phase| build_phase.to_s == 'FrameworksBuildPhase' }
 
-      framework_ref = frameworks_group.new_file('AdServices.framework')
-      build_file = frameworks_build_phase.add_file_reference(framework_ref)
-      build_file.settings = { 'ATTRIBUTES' => ['Weak'] }
+      embed_frameworks_build_phase = project.new(Xcodeproj::Project::Object::PBXCopyFilesBuildPhase)
+      embed_frameworks_build_phase.name = 'Embed Frameworks'
+      embed_frameworks_build_phase.symbol_dst_subfolder_spec = :frameworks
+      @target_main.build_phases << embed_frameworks_build_phase
 
-      framework_ref = frameworks_group.new_file('iAd.framework')
-      frameworks_build_phase.add_file_reference(framework_ref)
+      framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
+      build_file = embed_frameworks_build_phase.add_file_reference(framework_ref)
 
-      # Adjust SDK
-      group = @project.main_group.new_group('AdjustSDK')
-
-      [
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityHandler.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityKind.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityPackage.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityState.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdjustFactory.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdRevenue.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAttribution.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAttributionHandler.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJBackoffStrategy.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSData+ADJAdditions.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSNumber+ADJAdditions.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSString+ADJAdditions.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJConfig.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJEvent.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJEventFailure.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJEventSuccess.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJLinkResolution.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJLogger.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageBuilder.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageHandler.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageParams.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJRequestHandler.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJResponseData.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJSdkClickHandler.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionFailure.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionParameters.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionSuccess.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJSubscription.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJThirdPartySharing.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJTimerCycle.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJTimerOnce.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJUrlStrategy.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJUserDefaults.h',
-        '3rd/adjust-ios-sdk/Adjust/Adjust.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJUtil.h',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityHandler.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityKind.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityPackage.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJActivityState.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdjustFactory.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdRevenue.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAttribution.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAttributionHandler.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJBackoffStrategy.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSData+ADJAdditions.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSNumber+ADJAdditions.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJAdditions/NSString+ADJAdditions.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJConfig.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJEvent.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJEventFailure.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJEventSuccess.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJLinkResolution.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJLogger.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageBuilder.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageHandler.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJPackageParams.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJRequestHandler.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJResponseData.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJSdkClickHandler.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionFailure.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionParameters.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJSessionSuccess.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJSubscription.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJThirdPartySharing.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJTimerCycle.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJTimerOnce.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJUrlStrategy.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJUserDefaults.m',
-        '3rd/adjust-ios-sdk/Adjust/Adjust.m',
-        '3rd/adjust-ios-sdk/Adjust/ADJUtil.m',
-      ].each { |filename|
-        file = group.new_file(filename)
-        file_reference = @target_main.add_file_references([file], '-fobjc-arc')
-      }
+      frameworks_build_phase.add_file_reference(framework_ref)   
+      build_file.settings = { 'ATTRIBUTES' => ['CodeSignOnCopy', 'RemoveHeadersOnCopy'] }
     end
+
   end
 
   def setup_target_extension(shortVersion, fullVersion, platform, configHash)
@@ -288,12 +204,9 @@ class XCodeprojPatcher
         "$(PROJECT_DIR)/3rd/OpenVPNAdapter/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/libleaf/lib",
         "$(PROJECT_DIR)/3rd/ShadowSocks/build/Release-iphoneos",
-#       "$(PROJECT_DIR)/3rd/PacketProcessor/build/Release-iphoneos",
         "$(PROJECT_DIR)/3rd/outline-go-tun2socks/build/ios",
         "${PROJECT_DIR}/3rd/CocoaAsyncSocket/build/Release-iphoneos",
-#       "${PROJECT_DIR}/3rd/CocoaLumberjack/build/Release-iphoneos",
       ]
-#     config.build_settings['LIBRARY_SEARCH_PATHS'] = [config.build_settings['LIBRARY_SEARCH_PATHS'], "$(PROJECT_DIR)/3rd/libleaf/lib"]
 
       # Versions and names
       config.build_settings['MARKETING_VERSION'] ||= shortVersion
@@ -325,7 +238,7 @@ class XCodeprojPatcher
           "-framework",
           "OpenGLES",
         ]
-        config.build_settings['PATH'] = '${PATH}:/usr/local/go/bin'
+        config.build_settings['PATH'] = '${PATH}:/opt/local/bin:/usr/local/go/bin'
       end
 
       groupId = "";
@@ -379,17 +292,7 @@ class XCodeprojPatcher
       'platforms/ios/iostunnel.swift',
       'platforms/ios/ioslogger.swift',
       'platforms/ios/iosinterface.swift',
-#     'platforms/ios/ssprovider.swift',
       'platforms/ios/iosglue.mm',
-#     'platforms/ios/ssconnectivity.h',
-#     'platforms/ios/ssconnectivity.m',
-#     'platforms/ios/iosopenvpn2ssadapter.h',
-#     'platforms/ios/iosopenvpn2ssadapter.m',
-#     'platforms/ios/sspacket.h',
-#     'platforms/ios/sspacket.m',
-#     'platforms/ios/ssadapterpacketflow.h',
-#     'platforms/ios/tun2ssprovider.swift',
-#     'platforms/ios/tun2sockswriter.swift',
     ].each { |filename|
       file = group.new_file(filename)
       @target_extension.add_file_references([file])
@@ -402,40 +305,10 @@ class XCodeprojPatcher
 
     framework_ref = frameworks_group.new_file('libwg-go.a')
     frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/libleaf/lib/libleaf.a')
-#   frameworks_build_phase.add_file_reference(framework_ref)
 
     framework_ref = frameworks_group.new_file('NetworkExtension.framework')
     frameworks_build_phase.add_file_reference(framework_ref)
     
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/LZ4.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/mbedTLS.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNClient.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-    framework_ref = frameworks_group.new_file('3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework')
-    frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/ShadowSocks/build/Release-iphoneos/ShadowSocks.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#   
-#   framework_ref = frameworks_group.new_file('3rd/CocoaAsyncSocket/build/Release-iphoneos/CocoaAsyncSocket.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-#
-#   framework_ref = frameworks_group.new_file('3rd/outline-go-tun2socks/build/ios/Tun2socks.xcframework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-#   framework_ref = frameworks_group.new_file('3rd/CocoaLumberjack/build/Release-iphoneos/CocoaLumberjack.framework')
-#   frameworks_build_phase.add_file_reference(framework_ref)
-    
-    
-    
-
     # This fails: @target_main.add_dependency @target_extension
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)
     container_proxy.container_portal = @project.root_object.uuid
@@ -491,6 +364,7 @@ class XCodeprojPatcher
 
     framework_ref = frameworks_group.new_file('balrog/balrog.a')
     frameworks_build_phase.add_file_reference(framework_ref)
+
 
     # This fails: @target_main.add_dependency target_balrog
     container_proxy = @project.new(Xcodeproj::Project::PBXContainerItemProxy)
@@ -599,7 +473,7 @@ class XCodeprojPatcher
 
       # other configs
       config.build_settings['INFOPLIST_FILE'] ||= 'macos/loginitem/Info.plist'
-      config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/loginitem/MozillaVPNLoginItem.entitlements'
+      config.build_settings['CODE_SIGN_ENTITLEMENTS'] ||= 'macos/loginitem/MozillaVPNLoginItem.entitlements'  #TODO need to check this
       config.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Development'
       config.build_settings['SKIP_INSTALL'] = 'YES'
 
@@ -708,7 +582,7 @@ class XCodeprojPatcher
     copy_nativeMessagingManifest.dst_path = 'Contents/Resources/utils'
 
     group = @project.main_group.new_group('WireGuardHelper')
-    file = group.new_file 'extension/app/manifests/macos/mozillavpn.json'
+    file = group.new_file 'extension/app/manifests/macos/mozillavpn.json' #TODO Need to check this
 
     nativeMessagingManifest_file = copy_nativeMessagingManifest.add_file_reference file
     nativeMessagingManifest_file.settings = { "ATTRIBUTES" => ['RemoveHeadersOnCopy'] }
@@ -744,8 +618,7 @@ configFile.each { |line|
 platform = "macos"
 platform = "ios" if ARGV[3] == "ios"
 networkExtension = true if ARGV[4] == "1"
-adjust_sdk_token = ARGV[5]
 
 r = XCodeprojPatcher.new
-r.run ARGV[0], ARGV[1], ARGV[2], platform, networkExtension, config, adjust_sdk_token
+r.run ARGV[0], ARGV[1], ARGV[2], platform, networkExtension, config
 exit 0

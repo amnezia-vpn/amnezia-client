@@ -135,9 +135,8 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open profile"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn");
-
+    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open profile"),
+                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), tr("*.vpn"));
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
