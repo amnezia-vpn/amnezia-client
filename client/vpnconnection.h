@@ -10,6 +10,10 @@
 #include "core/defs.h"
 #include "settings.h"
 
+#ifdef Q_OS_IOS
+#include "protocols/ios_vpnprotocol.h"
+#endif
+
 #ifdef AMNEZIA_DESKTOP
 #include "core/ipcclient.h"
 #endif
@@ -74,6 +78,10 @@ protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
 
+#ifdef Q_OS_IOS
+    void checkIOSStatus();
+#endif
+
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
@@ -85,9 +93,15 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
+    quint64 m_receivedBytes;
+    quint64 m_sentBytes;
+    bool m_isIOSConnected;  //remove later move to isConnected,
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient *m_IpcClient {nullptr};
+#endif
+#ifdef Q_OS_IOS
+    IOSVpnProtocol * iosVpnProtocol{nullptr};
 #endif
 };
 

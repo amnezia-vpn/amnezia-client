@@ -19,19 +19,21 @@
 
 #include "android_controller.h"
 #include "core/errorstrings.h"
+#include "ui/pages_logic/StartPageLogic.h"
 
 // Binder Codes for VPNServiceBinder
 // See also - VPNServiceBinder.kt
 // Actions that are Requestable
 const int ACTION_ACTIVATE = 1;
 const int ACTION_DEACTIVATE = 2;
-const int ACTION_REGISTERLISTENER = 3;
+const int ACTION_REGISTER_LISTENER = 3;
 const int ACTION_REQUEST_STATISTIC = 4;
 const int ACTION_REQUEST_GET_LOG = 5;
 const int ACTION_REQUEST_CLEANUP_LOG = 6;
 const int ACTION_RESUME_ACTIVATE = 7;
 const int ACTION_SET_NOTIFICATION_TEXT = 8;
 const int ACTION_SET_NOTIFICATION_FALLBACK = 9;
+const int ACTION_SHARE_CONFIG = 10;
 
 // Event Types that will be Dispatched after registration
 const int EVENT_INIT = 0;
@@ -40,6 +42,7 @@ const int EVENT_DISCONNECTED = 2;
 const int EVENT_STATISTIC_UPDATE = 3;
 const int EVENT_BACKEND_LOGS = 4;
 const int EVENT_ACTIVATION_ERROR = 5;
+const int EVENT_CONFIG_IMPORT = 6;
 
 namespace {
 AndroidController* s_instance = nullptr;
@@ -60,9 +63,11 @@ AndroidController* AndroidController::instance() {
     return s_instance;
 }
 
-bool AndroidController::initialize()
+bool AndroidController::initialize(StartPageLogic *startPageLogic)
 {
     qDebug() << "Initializing";
+
+    m_startPageLogic = startPageLogic;
 
     // Hook in the native implementation for startActivityForResult into the JNI
     JNINativeMethod methods[]{{"startActivityForResult",
@@ -151,6 +156,16 @@ void AndroidController::setNotificationText(const QString& title,
   m_serviceBinder.transact(ACTION_SET_NOTIFICATION_TEXT, data, nullptr);
 }
 
+void AndroidController::shareConfig(const QString& configContent, const QString& suggestedName) {
+    QJsonObject rootObject;
+    rootObject["data"] = configContent;
+    rootObject["suggestedName"] = suggestedName;
+    QJsonDocument doc(rootObject);
+    QAndroidParcel parcel;
+    parcel.writeData(doc.toJson());
+    m_serviceBinder.transact(ACTION_SHARE_CONFIG, parcel, nullptr);
+}
+
 /*
  * Sets fallback Notification text that should be shown in case the VPN
  * switches into the Connected state without the app open
@@ -190,6 +205,10 @@ void AndroidController::cleanupBackendLogs() {
   m_serviceBinder.transact(ACTION_REQUEST_CLEANUP_LOG, nullParcel, nullptr);
 }
 
+void AndroidController::importConfig(const QString& data){
+    m_startPageLogic->importConnectionFromCode(data);
+}
+
 void AndroidController::onServiceConnected(
     const QString& name, const QAndroidBinder& serviceBinder) {
   qDebug() << "Server " + name + " connected";
@@ -201,7 +220,7 @@ void AndroidController::onServiceConnected(
   // Send the Service our Binder to recive incoming Events
   QAndroidParcel binderParcel;
   binderParcel.writeBinder(m_binder);
-  m_serviceBinder.transact(ACTION_REGISTERLISTENER, binderParcel, nullptr);
+  m_serviceBinder.transact(ACTION_REGISTER_LISTENER, binderParcel, nullptr);
 }
 
 void AndroidController::onServiceDisconnected(const QString& name) {
@@ -282,7 +301,14 @@ bool AndroidController::VPNBinder::onTransact(int code,
     case EVENT_ACTIVATION_ERROR:
       qDebug() << "Transact: error";
       emit m_controller->connectionStateChanged(VpnProtocol::Error);
-
+      break;
+    case EVENT_CONFIG_IMPORT:
+      qDebug() << "Transact: config import";
+      doc = QJsonDocument::fromJson(data.readData());
+      buffer = doc.object()["config"].toString();
+      qDebug() << "Transact: config string" << buffer;
+      m_controller->importConfig(buffer);
+      break;
     default:
       qWarning() << "Transact: Invalid!";
       break;

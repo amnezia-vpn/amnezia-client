@@ -388,7 +388,7 @@ public class IOSVpnProtocolImpl : NSObject {
         proto.providerBundleIdentifier = vpnBundleID
 
         tunnel!.protocolConfiguration = proto
-        tunnel!.localizedDescription = vpnName
+        tunnel!.localizedDescription = "Amnezia Wireguard"
         tunnel!.isEnabled = true
 
         tunnel!.saveToPreferences { [unowned self] saveError in
@@ -527,8 +527,9 @@ public class IOSVpnProtocolImpl : NSObject {
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
         Logger.global?.log(message: "Check status")
 //        assert(tunnel != nil)
-        
+        print("check status")
         let protoType = (tunnel!.localizedDescription ?? "").toTunnelType
+        print(protoType);
         
         switch protoType {
         case .wireguard:
@@ -559,7 +560,7 @@ public class IOSVpnProtocolImpl : NSObject {
         
         print("server IP: \(serverIpv4Gateway)")
         
-        let deviceIpv4Address = getTunIPAddress()
+        let deviceIpv4Address = getWiFiAddress()
         print("device IP: \(serverIpv4Gateway)")
         if deviceIpv4Address == nil {
             callback("", "", "")
@@ -610,8 +611,9 @@ public class IOSVpnProtocolImpl : NSObject {
         print("server IP: \(serverIpv4Gateway)")
         
         
-        let deviceIpv4Address = getTunIPAddress()
-        print("device IP: \(serverIpv4Gateway)")
+        
+        let deviceIpv4Address = getWiFiAddress()
+        print("device IP: \(deviceIpv4Address)")
         if deviceIpv4Address == nil {
             callback("", "", "")
             return
@@ -690,37 +692,44 @@ public class IOSVpnProtocolImpl : NSObject {
         }
     }
     
-    private func getTunIPAddress() -> String? {
-        var address: String? = nil
-        var interfaces: UnsafeMutablePointer<ifaddrs>? = nil
-        var temp_addr: UnsafeMutablePointer<ifaddrs>? = nil
-        var success: Int = 0
-       
-        // retrieve the current interfaces - returns 0 on success
-        success = Int(getifaddrs(&interfaces))
-        if success == 0 {
-            // Loop through linked list of interfaces
-            temp_addr = interfaces
-            while temp_addr != nil {
-                if temp_addr?.pointee.ifa_addr == nil {
-                     continue
+    func getWiFiAddress() -> String? {
+        var address : String?
+
+        // Get list of all interfaces on the local machine:
+        var ifaddr : UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0 else { return nil }
+        guard let firstAddr = ifaddr else { return nil }
+
+        // For each interface ...
+        for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+            let interface = ifptr.pointee
+
+            // Check for IPv4 or IPv6 interface:
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            //if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {  // **ipv6 committed
+            if addrFamily == UInt8(AF_INET){
+
+                // Check interface name:
+                let name = String(cString: interface.ifa_name)
+                if  name == "en0" {
+
+                    // Convert interface address to a human readable string:
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len),
+                                &hostname, socklen_t(hostname.count),
+                                nil, socklen_t(0), NI_NUMERICHOST)
+                    address = String(cString: hostname)
                 }
-                if temp_addr?.pointee.ifa_addr.pointee.sa_family == UInt8(AF_INET) {
-                    // Check if interface is en0 which is the wifi connection on the iPhone
-                    if let name = temp_addr?.pointee.ifa_name, ((String(utf8String: name)?.contains("tun")) != nil) {
-                        // Get NSString from C String
-                        if let value = temp_addr?.pointee.ifa_addr as? sockaddr_in {
-                            address = String(utf8String: inet_ntoa(value.sin_addr))
-                        }
-                    }
-                }
-                temp_addr = temp_addr?.pointee.ifa_next
             }
         }
-        freeifaddrs(interfaces)
+        freeifaddrs(ifaddr)
+
         return address
     }
+    
+    
 }
+
 
 enum TunnelType: String {
     case wireguard, openvpn, shadowsocks, empty
@@ -729,9 +738,9 @@ enum TunnelType: String {
 extension String {
     var toTunnelType: TunnelType {
         switch self {
-        case "wireguard": return .wireguard
-        case "openvpn": return .openvpn
-        case "shadowsocks": return .shadowsocks
+        case "Amnezia Wireguard": return .wireguard
+        case "Amnezia OpenVPN": return .openvpn
+        case "Amnezia ShadowSocks": return .shadowsocks
         default:
             return .empty
         }
