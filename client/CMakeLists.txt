@@ -90,6 +90,10 @@ if(NOT LINUX)
 
     file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
         DESTINATION ${OPENSSL_LIBRARIES_DIR})
+    if(IOS)
+        file(RENAME ${OPENSSL_LIBRARIES_DIR}/libssl.a ${OPENSSL_LIBRARIES_DIR}/ssl.a)
+        file(RENAME ${OPENSSL_LIBRARIES_DIR}/libcrypto.a ${OPENSSL_LIBRARIES_DIR}/crypto.a)
+    endif()
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 
