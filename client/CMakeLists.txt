@@ -68,7 +68,7 @@ link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 link_libraries(${ZLIB_LIBRARY})
 
 if(NOT LINUX)
-    set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL/")
+    set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
     set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
     set(OPENSSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL")
@@ -97,6 +97,7 @@ if(NOT LINUX)
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 
+    list(APPEND CMAKE_PREFIX_PATH ${OPENSSL_ROOT_DIR})
     find_package(OpenSSL REQUIRED)
 endif()
 
