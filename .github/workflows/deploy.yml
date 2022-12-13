@@ -155,7 +155,7 @@ jobs:
         cd client
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-
+        
 # ------------------------------------------------------
 
   Build-MacOS:

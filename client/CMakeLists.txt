@@ -88,12 +88,19 @@ if(NOT LINUX)
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/ios/iphone/libcrypto.a")
     endif()
 
-    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-        DESTINATION ${OPENSSL_LIBRARIES_DIR})
-    file(COPY "${OPENSSL_PATH}/include"
-        DESTINATION ${OPENSSL_ROOT_DIR})
+    if(NOT IOS)
+        file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+            DESTINATION ${OPENSSL_LIBRARIES_DIR})
+        file(COPY "${OPENSSL_PATH}/include"
+            DESTINATION ${OPENSSL_ROOT_DIR})
+    else()
+        file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+            DESTINATION ${OPENSSL_LIBRARIES_DIR}/ios)
+        file(COPY "${OPENSSL_PATH}/include"
+            DESTINATION ${OPENSSL_ROOT_DIR}/ios)
+    endif()
 
-    set(ENV{PKG_CONFIG_PATH} "${OPENSSL_ROOT_DIR}")
+    set(ENV{OPENSSL_ROOT_DIR} "${OPENSSL_ROOT_DIR}")
     find_package(OpenSSL REQUIRED)
 endif()
 
