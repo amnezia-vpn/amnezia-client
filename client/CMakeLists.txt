@@ -69,7 +69,9 @@ link_libraries(${ZLIB_LIBRARY})
 
 if(NOT LINUX)
     set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
     set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+    set(OPENSSL_LIBRARIES "ssl" "crypto")
 
     set(OPENSSL_PATH "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL")
     if(WIN32)
@@ -96,9 +98,6 @@ if(NOT LINUX)
     endif()
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
-
-    list(APPEND CMAKE_PREFIX_PATH ${OPENSSL_ROOT_DIR})
-    find_package(OpenSSL REQUIRED)
 endif()
 
 SET(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
