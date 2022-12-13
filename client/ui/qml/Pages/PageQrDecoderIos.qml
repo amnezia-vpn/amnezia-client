@@ -40,9 +40,27 @@ PageBase {
         id: loader
 
         anchors.top: caption.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: progressColumn.top
         anchors.left: parent.left
         anchors.right: parent.right
+    }
+
+    Column{
+    height: 40
+    id: progressColumn
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+        ProgressBar {
+            id: progress
+            anchors.left: parent.left
+            anchors.right: parent.right
+            value: QrDecoderLogic.totalChunksCount === 0? 0 : (QrDecoderLogic.receivedChunksCount/QrDecoderLogic.totalChunksCount)
+        }
+        Text {
+            id: chunksCount
+            text: "Progress: " + QrDecoderLogic.receivedChunksCount +"/"+QrDecoderLogic.totalChunksCount
+        }
     }
 
     Component {

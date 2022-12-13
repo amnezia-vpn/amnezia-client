@@ -27,7 +27,6 @@ PageProtocolBase {
         anchors.top: caption.bottom
         anchors.left: root.left
         anchors.right: root.right
-        anchors.bottom: pb_save.top
         anchors.margins: 20
         anchors.topMargin: 10
 
