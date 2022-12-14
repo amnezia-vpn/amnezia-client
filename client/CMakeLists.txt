@@ -378,7 +378,7 @@ if(IOS)
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
         XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_SOURCE_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
+        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
         XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
         XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
         XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "AmneziaVPN-Swift.h"
@@ -387,7 +387,7 @@ if(IOS)
     set_target_properties(${PROJECT} PROPERTIES
         OUTPUT_NAME "AmneziaVPN"
         MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/ios/app/Info.plist.in
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/ios/app/Info.plist.in
         MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
         MACOSX_BUNDLE_BUNDLE_VERSION "${BUILD_ID}"
         MACOSX_BUNDLE_COPYRIGHT "MPL-2.0"
@@ -396,14 +396,14 @@ if(IOS)
         MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}-${BUILD_ID}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
-        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_SOURCE_DIR}/ios/app/main.entitlements"
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_LIST_DIR}/ios/app/main.entitlements"
         XCODE_ATTRIBUTE_MARKETING_VERSION "${CMAKE_PROJECT_VERSION}"
         XCODE_GENERATE_SCHEME TRUE
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
 
     )
 
-    target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
+    target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
     target_compile_options(${PROJECT} PRIVATE
         -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\"
@@ -412,20 +412,20 @@ if(IOS)
 
 
    target_sources(${PROJECT} PRIVATE
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/NETunnelProviderProtocol+Extension.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/TunnelConfiguration.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/Endpoint.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/String+ArrayConversion.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PeerConfiguration.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/DNSServer.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardApp/LocalizationHelper.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/FileManager+Extension.swift
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitC/x25519.c
-        ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/NETunnelProviderProtocol+Extension.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/TunnelConfiguration.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/Endpoint.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/String+ArrayConversion.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PeerConfiguration.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/DNSServer.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardApp/LocalizationHelper.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/FileManager+Extension.swift
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKitC/x25519.c
+        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
     )
 
     target_sources(${PROJECT} PRIVATE
@@ -434,21 +434,21 @@ if(IOS)
     )
 
     target_sources(${PROJECT} PRIVATE
-        ${CMAKE_SOURCE_DIR}/ios/app/launch.png
-        ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+        ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
+        ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     )
     set_source_files_properties(
-        ${CMAKE_SOURCE_DIR}/ios/app/launch.png
-        ${CMAKE_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+        ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
+        ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
         PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
     )
 
 target_sources(${PROJECT} PRIVATE
-    ${CMAKE_SOURCE_DIR}/ios/Media.xcassets
+    ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
 
 )
 set_source_files_properties(
-    ${CMAKE_SOURCE_DIR}/ios/Media.xcassets
+    ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
     PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 )
 

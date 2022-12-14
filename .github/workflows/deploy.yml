@@ -152,7 +152,6 @@ jobs:
         export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
-        cd client
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
