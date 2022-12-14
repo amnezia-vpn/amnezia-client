@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.23.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT} VERSION 2.0.10)
-set(BUILD_ID 2)
+project(${PROJECT} VERSION 2.1.2)
+set(BUILD_ID 1)
 SET(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -311,6 +311,8 @@ endif()
 if(IOS)
     message("Client iOS build")
 
+
+
     find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
     set(LIBS ${LIBS} Qt6::ShaderTools)
 
@@ -356,6 +358,7 @@ endif()
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
     message("Building for iPhone OS")
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
@@ -375,7 +378,7 @@ if(IOS)
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
-    set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
+    set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks")
     set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 
 
@@ -416,6 +419,8 @@ if(IOS)
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_SOURCE_DIR}/ios/app/main.entitlements"
         XCODE_ATTRIBUTE_MARKETING_VERSION "${CMAKE_PROJECT_VERSION}"
         XCODE_GENERATE_SCHEME TRUE
+        MACOSX_BUNDLE_ICON_FILE "AppIcon"
+
     )
 
     target_include_directories(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR})
@@ -458,20 +463,24 @@ if(IOS)
         PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
     )
 
-    target_sources(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR}/ios/Media.xcassets)
-    set_source_files_properties(Media.xcassets PROPERTIES
-        MACOSX_PACKAGE_LOCATION Resources
-    )
+target_sources(${PROJECT} PRIVATE
+    ${CMAKE_SOURCE_DIR}/ios/Media.xcassets
+
+)
+set_source_files_properties(
+    ${CMAKE_SOURCE_DIR}/ios/Media.xcassets
+    PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+)
 
     add_subdirectory(ios/networkextension)
     add_dependencies(${PROJECT} networkextension)
     set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
 
-    set_property(TARGET "networkextension" PROPERTY XCODE_EMBED_FRAMEWORKS
+    set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
         "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
     )
-    set_target_properties(networkextension PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-    set_target_properties(networkextension PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
+    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+    set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
 endif()
 
 if(ANDROID)

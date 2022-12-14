@@ -93,7 +93,7 @@ PageShareProtocolBase {
                 Layout.preferredHeight: 40
                 width: parent.width - 60
 
-                text: qsTr("Save to file")
+                text: Qt.platform.os === "android" ? qsTr("Share") : qsTr("Save to file")
                 enabled: tfShareCode.textArea.length > 0
                 visible: tfShareCode.textArea.length > 0
 

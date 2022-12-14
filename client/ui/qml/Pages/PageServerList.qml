@@ -42,6 +42,9 @@ PageBase {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         model: ServerListLogic.serverListModel
+        highlightRangeMode: ListView.ApplyRange
+        highlightMoveVelocity: -1
+        currentIndex: ServerListLogic.currServerIdx
         spacing: 5
         clip: true
         delegate: Item {
@@ -55,10 +58,6 @@ PageBase {
                     if (GC.isMobile()) {
                         ServerListLogic.onServerListPushbuttonSettingsClicked(index)
                     }
-                    else {
-                        listWidget_servers.currentIndex = index
-                    }
-
                     mouse.accepted = false
                 }
                 onEntered: {

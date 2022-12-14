@@ -1,7 +1,7 @@
 #include <windows.h>
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
-IDI_ICON1               ICON                    "../images/app.ico"
+IDI_ICON1               ICON                    "../../images/app.ico"
 
 #define VER_FILEVERSION             2,0,0,0
 #define VER_FILEVERSION_STR         "2.0.0.0\0"
