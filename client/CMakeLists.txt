@@ -45,32 +45,12 @@ if(IS_CI)
   endif()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/ssh/qssh.cmake)
-
-include(${CMAKE_CURRENT_LIST_DIR}/3rd/QtSsh/src/botan/botan.cmake)
-if(NOT IOS AND NOT ANDROID)
-   include(${CMAKE_CURRENT_LIST_DIR}/3rd/SingleApplication/singleapplication.cmake)
-endif()
-
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/SortFilterProxyModel)
-set(LIBS ${LIBS} SortFilterProxyModel)
-
-include(${CMAKE_CURRENT_LIST_DIR}/3rd/qrcodegen/qrcodegen.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
-
-set(BUILD_WITH_QT6 ON)
-set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain)
-set(LIBS ${LIBS} qt6keychain)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 
 include_directories(
-    ${CMAKE_CURRENT_LIST_DIR}/3rd/QSimpleCrypto/include
-    ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/include
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
-    ${CMAKE_CURRENT_LIST_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
 )
 
 set(HEADERS ${HEADERS}
