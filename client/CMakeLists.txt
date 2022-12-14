@@ -162,7 +162,7 @@ if(WIN32)
     )
 
     set(RESOURCES ${RESOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platform_win/vpnclient.rc
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc
     )
 
     set(LIBS ${LIBS}
@@ -495,9 +495,19 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/gradlew.bat 
             ${CMAKE_CURRENT_LIST_DIR}/android/gradle.properties 
             ${CMAKE_CURRENT_LIST_DIR}/android/res/values/libs.xml 
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/OpenVPNThreadv3.kt 
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnService.kt 
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnServiceBinder.kt 
+            ${CMAKE_CURRENT_LIST_DIR}/android/res/xml/fileprovider.xml
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/AuthHelper.java
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/IPCContract.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/NotificationUtil.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/OpenVPNThreadv3.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/Prefs.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnLogger.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnService.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnServiceBinder.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/AmneziaApp.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNApplication.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
             ${CMAKE_CURRENT_BINARY_DIR}
     )
