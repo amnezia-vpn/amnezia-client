@@ -30,6 +30,8 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat
 )
 
+qt_standard_project_setup()
+
 if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh)
 endif()
