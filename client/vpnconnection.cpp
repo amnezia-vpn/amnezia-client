@@ -362,6 +362,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
     connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+    connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol, &AndroidVpnProtocol::connectionDataUpdated);
 
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS

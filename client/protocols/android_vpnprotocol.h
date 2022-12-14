@@ -25,6 +25,9 @@ public:
 signals:
 
 
+public slots:
+    void connectionDataUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
+
 protected slots:
 
 protected:

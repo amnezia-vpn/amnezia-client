@@ -52,7 +52,7 @@ constexpr auto PERMISSIONHELPER_CLASS =
 AndroidController::AndroidController():
       m_binder(this)
 {
-
+    connect(this, &AndroidController::scheduleStatusCheckSignal, this, &AndroidController::scheduleStatusCheckSlot);
 }
 
 AndroidController* AndroidController::instance() {
@@ -237,6 +237,14 @@ void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
     m_vpnConfig = newVpnConfig;
 }
 
+void AndroidController::scheduleStatusCheckSlot()
+{
+    QTimer::singleShot(1000, [this]() {
+        if (isConnected) {
+            checkStatus();
+        }
+    });
+}
 
 /**
  * @brief AndroidController::VPNBinder::onTransact
@@ -271,22 +279,30 @@ bool AndroidController::VPNBinder::onTransact(int code,
     case EVENT_CONNECTED:
       qDebug() << "Transact: connected";
       emit m_controller->connectionStateChanged(VpnProtocol::Connected);
+      m_controller->isConnected = true;
+      emit m_controller->scheduleStatusCheckSignal();
       break;
     case EVENT_DISCONNECTED:
       qDebug() << "Transact: disconnected";
       emit m_controller->connectionStateChanged(VpnProtocol::Disconnected);
+      m_controller->isConnected = false;
       break;
     case EVENT_STATISTIC_UPDATE:
+    {
       qDebug() << "Transact:: update";
 
-      // Data is here a JSON String
       doc = QJsonDocument::fromJson(data.readData());
-      // TODO update counters
-//      emit m_controller->statusUpdated(doc.object()["endpoint"].toString(),
-//                                       doc.object()["deviceIpv4"].toString(),
-//                                       doc.object()["totalTX"].toInt(),
-//                                       doc.object()["totalRX"].toInt());
+
+      QString rx = doc.object()["rx_bytes"].toString();
+      QString tx = doc.object()["tx_bytes"].toString();
+      QString endpoint = doc.object()["endpoint"].toString();
+      QString deviceIPv4 = doc.object()["deviceIpv4"].toString();
+
+      emit m_controller->statusUpdated(rx, tx, endpoint, deviceIPv4);
+      emit m_controller->scheduleStatusCheckSignal();
+
       break;
+    }
     case EVENT_BACKEND_LOGS:
       qDebug() << "Transact: backend logs";
 

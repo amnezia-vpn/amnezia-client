@@ -53,7 +53,11 @@ signals:
     void initialized(bool status, bool connected,
                      const QDateTime& connectionDate);
 
+    void statusUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
+    void scheduleStatusCheckSignal();
+
 protected slots:
+    void scheduleStatusCheckSlot();
 
 protected:
 
@@ -83,6 +87,10 @@ private:
     };
 
     VPNBinder m_binder;
+
+    bool isConnected = false;
+
+    void scheduleStatusCheck();
 
     static void startActivityForResult(JNIEnv* env, jobject /*thiz*/, jobject intent);
 };

@@ -319,16 +319,51 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
             mConnectionTime = 0
         }
+
     val status: JSONObject
         get() {
             val deviceIpv4: String = ""
+
+            val status = when (mProtocol) {
+                "openvpn" -> {
+                    if (mOpenVPNThreadv3 == null) {
+                        Status(null, null, null, null)
+                    } else {
+                        val rx = mOpenVPNThreadv3?.getTotalRxBytes() ?: ""
+                        val tx = mOpenVPNThreadv3?.getTotalTxBytes() ?: ""
+
+                        Status(
+                            rx.toString(),
+                            tx.toString(),
+                            if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
+                            if (mConfig!!.has("device")) { mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
+                        )
+                    }
+                }
+                else -> {
+                    Status(
+                        getConfigValue("rx_bytes"),
+                        getConfigValue("tx_bytes"),
+                        mConfig?.getJSONObject("server")?.getString("ipv4Gateway"),
+                        mConfig?.getJSONObject("device")?.getString("ipv4Address")
+                    )
+                }
+            }
+
             return JSONObject().apply {
-                putOpt("rx_bytes", getConfigValue("rx_bytes"))
-                putOpt("tx_bytes", getConfigValue("tx_bytes"))
-                putOpt("endpoint", mConfig?.getJSONObject("server")?.getString("ipv4Gateway"))
-                putOpt("deviceIpv4", mConfig?.getJSONObject("device")?.getString("ipv4Address"))
+                putOpt("rx_bytes", status.rxBytes)
+                putOpt("tx_bytes", status.txBytes)
+                putOpt("endpoint", status.endpoint)
+                putOpt("deviceIpv4", status.device)
             }
         }
+
+    data class Status(
+        var rxBytes: String?,
+        var txBytes: String?,
+        var endpoint: String?,
+        var device: String?
+    )
 
     /*
     * Checks if the VPN Permission is given.
