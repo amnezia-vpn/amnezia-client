@@ -26,6 +26,7 @@ class ServerController : public QObject
     Q_OBJECT
 public:
     ServerController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    ~ServerController();
 
     typedef QList<QPair<QString, QString>> Vars;
 

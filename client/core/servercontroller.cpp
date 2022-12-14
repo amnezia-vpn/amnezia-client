@@ -43,7 +43,12 @@ using namespace QSsh;
 ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) :
     m_settings(settings)
 {
+    ssh_init();
+}
 
+ServerController::~ServerController()
+{
+    ssh_finalize();
 }
 
 ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, ssh_session &session) {
