@@ -80,7 +80,7 @@ function(osx_bundle_assetcatalog TARGET)
     add_custom_command(TARGET ${TARGET} POST_BUILD
         COMMENT "Bundling asset catalog"
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/xcassets $<TARGET_BUNDLE_CONTENT_DIR:${TARGET}>/${XCASSETS_RESOURCE_DIR}
-        COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/macos/merge_plist.py ${XCASSETS_GEN_PLIST} -o $<TARGET_BUNDLE_CONTENT_DIR:${TARGET}>/Info.plist
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/macos/merge_plist.py ${XCASSETS_GEN_PLIST} -o $<TARGET_BUNDLE_CONTENT_DIR:${TARGET}>/Info.plist
     )
 
     target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/xcassets/Assets.car)
@@ -125,7 +125,7 @@ function(osx_codesign_target TARGET)
         get_target_property(CODESIGN_ENTITLEMENTS ${TARGET} XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS)
         if(CODESIGN_ENTITLEMENTS)
             add_custom_command(TARGET ${TARGET} POST_BUILD
-                COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/utils/make_template.py ${CODESIGN_ENTITLEMENTS}
+                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/utils/make_template.py ${CODESIGN_ENTITLEMENTS}
                     -k PRODUCT_BUNDLE_IDENTIFIER=$<TARGET_PROPERTY:${TARGET},XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER>
                     -k DEVELOPMENT_TEAM=$<TARGET_PROPERTY:${TARGET},XCODE_ATTRIBUTE_DEVELOPMENT_TEAM>
                     -o ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_codesign.entitlements
