@@ -90,7 +90,7 @@ endif()
 ## TODO: The upstream makefile also makes an attempt to patch the golang runtime
 ## to provide the boot-time clock instead of an uptime clock. We should probably
 ## make an attempt to do the same, somehow?
-include(${CMAKE_SOURCE_DIR}/src/cmake/golang.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/golang.cmake)
 if(OSXARCH STREQUAL "x86_64")
     set(GOARCH amd64)
 else()
