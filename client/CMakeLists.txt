@@ -540,6 +540,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
+if(NOT IOS)
 add_custom_command(
     TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
@@ -547,3 +548,4 @@ add_custom_command(
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )
+endif()
