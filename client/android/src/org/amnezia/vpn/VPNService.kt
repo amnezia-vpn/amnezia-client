@@ -41,6 +41,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
+import java.lang.Exception
 import android.net.VpnService as BaseVpnService
 
 
@@ -306,9 +307,16 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             return mConnectionTime
         }
 
-    var isUp: Boolean
+    var isUp: Boolean = false
         get() {
-            return currentTunnelHandle >= 0
+            return when (mProtocol) {
+                "openvpn" -> {
+                    field
+                }
+                else -> {
+                    currentTunnelHandle >= 0
+                }
+            }
         }
         set(value) {
             if (value) {
@@ -344,8 +352,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                     Status(
                         getConfigValue("rx_bytes"),
                         getConfigValue("tx_bytes"),
-                        mConfig?.getJSONObject("server")?.getString("ipv4Gateway"),
-                        mConfig?.getJSONObject("device")?.getString("ipv4Address")
+                        if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
+                        if (mConfig!!.has("server")) {mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
                     )
                 }
             }
@@ -712,6 +720,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     private fun startOpenVpn() {
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
+        isUp = true
+
         Thread({
             mOpenVPNThreadv3?.run()
         }).start()

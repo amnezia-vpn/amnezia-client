@@ -266,16 +266,27 @@ bool AndroidController::VPNBinder::onTransact(int code,
   QString buffer;
   switch (code) {
     case EVENT_INIT:
+    {
       qDebug() << "Transact: init";
       doc = QJsonDocument::fromJson(data.readData());
-      emit m_controller->initialized(
-          true, doc.object()["connected"].toBool(),
-          QDateTime::fromMSecsSinceEpoch(
-              doc.object()["time"].toVariant().toLongLong()));
+
+      bool isConnected = doc.object()["connected"].toBool();
+      QDateTime time = QDateTime::fromMSecsSinceEpoch(
+                  doc.object()["time"].toVariant().toLongLong());
+
+      emit m_controller->initialized(true, isConnected, time);
+
       // Pass a localised version of the Fallback string for the Notification
       m_controller->setFallbackConnectedNotification();
 
+      m_controller->isConnected = isConnected;
+
+      if (isConnected) {
+          emit m_controller->scheduleStatusCheckSignal();
+      }
+
       break;
+    }
     case EVENT_CONNECTED:
       qDebug() << "Transact: connected";
       emit m_controller->connectionStateChanged(VpnProtocol::Connected);
@@ -299,7 +310,10 @@ bool AndroidController::VPNBinder::onTransact(int code,
       QString deviceIPv4 = doc.object()["deviceIpv4"].toString();
 
       emit m_controller->statusUpdated(rx, tx, endpoint, deviceIPv4);
-      emit m_controller->scheduleStatusCheckSignal();
+
+      if (m_controller->isConnected) {
+        emit m_controller->scheduleStatusCheckSignal();
+      }
 
       break;
     }
