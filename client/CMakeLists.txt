@@ -66,8 +66,32 @@ endif()
 set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib")
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 link_libraries(${ZLIB_LIBRARY})
+if(APPLE)
 
-if(NOT LINUX)
+    set(BREW_OPENSSL_PREFIX /opt/homebrew/opt/openssl@1.1)
+    message("${BREW_OPENSSL_PREFIX}")
+            message(STATUS "Found OpenSSL keg installed by Homebrew at ${BREW_OPENSSL_PREFIX}")
+            set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_PREFIX}/")
+            set(OPENSSL_INCLUDE_DIR "${BREW_OPENSSL_PREFIX}/include")
+            set(OPENSSL_LIBRARIES "${BREW_OPENSSL_PREFIX}/lib")
+            set(OPENSSL_CRYPTO_LIBRARY "${BREW_OPENSSL_PREFIX}/lib/libcrypto.dylib")
+
+    find_package(OpenSSL REQUIRED)
+    if (OPENSSL_FOUND)
+      # Add the include directories for compiling
+      set(OPENSSL_INCLUDE_DIR "${OPENSSL_INCLUDE_DIR})")
+    add_subdirectory(${BREW_OPENSSL_PREFIX}/include/openssl)
+
+
+      # Add the static lib for linking
+      set(OPENSSL_LIBRARIES "OpenSSL::SSL" "OpenSSL::Crypto")
+
+      message(STATUS "Found OpenSSL ${OPENSSL_VERSION}")
+    else()
+      message(STATUS "OpenSSL Not Found")
+    endif()
+endif()
+if(LINUX) #change it to not linux once we are done with apple
     set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
     set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
@@ -95,11 +119,16 @@ if(NOT LINUX)
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 
+    message ("${CMAKE_HOST_SYSTEM_NAME}")
+
+
     find_package(OpenSSL REQUIRED)
+
 endif()
 
 set(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh)
+
 add_compile_definitions(_WINSOCKAPI_)
 set(LIBS ${LIBS} ssh)
 
