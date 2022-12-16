@@ -23,6 +23,7 @@ qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*
+compile_commands.json
 
 # fastlane
 client/fastlane/report.xml

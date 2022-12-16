@@ -11,8 +11,6 @@ Drawer {
     signal containerSelected(int c_index)
     property int selectedIndex: -1
 
-    z: -3
-
     y: 0
     x: 0
     edge: Qt.RightEdge
@@ -117,6 +115,7 @@ Drawer {
 
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             tb.currentIndex = index
                             tb_other.currentIndex = -1
@@ -181,6 +180,7 @@ Drawer {
 
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             tb_other.currentIndex = index
                             tb.currentIndex = -1

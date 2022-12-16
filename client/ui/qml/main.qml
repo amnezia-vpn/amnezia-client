@@ -285,7 +285,6 @@ Window  {
     Drawer {
         id: drawer_log
 
-        z: -3
         y: 0
         x: 0
         edge: Qt.BottomEdge
