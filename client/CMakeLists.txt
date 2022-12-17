@@ -95,8 +95,11 @@ if(NOT LINUX AND NOT IOS)
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 elseif(IOS)
-    set(BREW_OPENSSL_PREFIX /opt/homebrew/opt/openssl@1.1)
+    set(BREW_OPENSSL_PREFIX "/opt/homebrew/opt/openssl@1.1")
     set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_PREFIX}")
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
+    set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+    set(OPENSSL_LIBRARIES "ssl" "crypto")
 endif()
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
