@@ -34,6 +34,7 @@ PageBase {
         anchors.top: caption.bottom
         anchors.bottom: root.bottom
         contentHeight: col.height
+        boundsBehavior: Flickable.StopAtBounds
 
         Column {
             id: col
