@@ -66,32 +66,8 @@ endif()
 set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib")
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 link_libraries(${ZLIB_LIBRARY})
-if(APPLE)
 
-    set(BREW_OPENSSL_PREFIX /opt/homebrew/opt/openssl@1.1)
-    message("${BREW_OPENSSL_PREFIX}")
-            message(STATUS "Found OpenSSL keg installed by Homebrew at ${BREW_OPENSSL_PREFIX}")
-            set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_PREFIX}/")
-            set(OPENSSL_INCLUDE_DIR "${BREW_OPENSSL_PREFIX}/include")
-            set(OPENSSL_LIBRARIES "${BREW_OPENSSL_PREFIX}/lib")
-            set(OPENSSL_CRYPTO_LIBRARY "${BREW_OPENSSL_PREFIX}/lib/libcrypto.dylib")
-
-    find_package(OpenSSL REQUIRED)
-    if (OPENSSL_FOUND)
-      # Add the include directories for compiling
-      set(OPENSSL_INCLUDE_DIR "${OPENSSL_INCLUDE_DIR})")
-    add_subdirectory(${BREW_OPENSSL_PREFIX}/include/openssl)
-
-
-      # Add the static lib for linking
-      set(OPENSSL_LIBRARIES "OpenSSL::SSL" "OpenSSL::Crypto")
-
-      message(STATUS "Found OpenSSL ${OPENSSL_VERSION}")
-    else()
-      message(STATUS "OpenSSL Not Found")
-    endif()
-endif()
-if(LINUX) #change it to not linux once we are done with apple
+if(NOT LINUX AND NOT IOS)
     set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
     set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
@@ -118,17 +94,20 @@ if(LINUX) #change it to not linux once we are done with apple
         DESTINATION ${OPENSSL_LIBRARIES_DIR})
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
-
-    message ("${CMAKE_HOST_SYSTEM_NAME}")
-
-
-    find_package(OpenSSL REQUIRED)
-
+elseif(IOS)
+    set(BREW_OPENSSL_PREFIX /opt/homebrew/opt/openssl@1.1)
+    set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_PREFIX}")
 endif()
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+set(LIBS ${LIBS}
+    OpenSSL::Crypto
+    OpenSSL::SSL
+)
 
 set(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rd/libssh)
-
 add_compile_definitions(_WINSOCKAPI_)
 set(LIBS ${LIBS} ssh)
 
@@ -250,22 +229,6 @@ if(WIN32)
     )
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        message("Windows x86_64 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    else()
-        message("Windows x86 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    endif()
 endif()
 
 if(APPLE)
@@ -296,12 +259,6 @@ if(APPLE)
         # set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
-        find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
-        find_library(LIB_SSL NAMES "libssl.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
 
         find_library(FW_COCOA Cocoa)
         find_library(FW_APPLICATIONSERVICES ApplicationServices)
@@ -314,7 +271,7 @@ if(APPLE)
             ${FW_COCOA} ${FW_APPLICATIONSERVICES}
             ${FW_FOUNDATION} ${FW_APPKIT}
             ${FW_SECURITY} ${FW_CORESERVICES}
-            ${LIB_LIBCRYPTO} ${LIB_SSL}
+            ${LIB_LIBCRYPTO}
         )
     endif()
 endif()
@@ -323,12 +280,6 @@ endif()
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
 
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
-    find_package(OpenSSL REQUIRED)
-    set(LIBS ${LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
-    )
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
