@@ -45,7 +45,7 @@ public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~OpenVpnLogic() = default;
 
-    void updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
+    void updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData) override;
     QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:

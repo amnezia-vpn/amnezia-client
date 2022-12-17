@@ -312,10 +312,3 @@ ServerCredentials Settings::serverCredentials(int index) const
 
     return credentials;
 }
-
-bool Settings::isThirdPartyConfig(int serverIndex) const
-{
-    if (serverIndex < 0) return false;
-    const QJsonObject &s = server(serverIndex);
-    return s.value(config_key::isThirdPartyConfig).toBool();
-}

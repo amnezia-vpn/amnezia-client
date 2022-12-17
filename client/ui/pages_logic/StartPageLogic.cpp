@@ -250,6 +250,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
 
     QJsonObject lastConfig;
     lastConfig[config_key::last_config] = QString(QJsonDocument(openVpnConfig).toJson());
+    lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
     containers.insert(config_key::container, QJsonValue("amnezia-openvpn"));
@@ -268,7 +269,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-openvpn";
-    o[config_key::description] = QString("OpenVpn server %1").arg(hostName);
+    o[config_key::description] = QString("OpenVpn server");
 
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
@@ -281,8 +282,6 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     }
 
     o[config_key::hostName] = hostName;
-
-    o[config_key::isThirdPartyConfig] = true;
 
     return importConnection(o);
 }
@@ -302,7 +301,8 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     }
 
     QJsonObject wireguardConfig;
-    wireguardConfig[config_key::last_config] = QString(QJsonDocument(lastConfig).toJson());;
+    wireguardConfig[config_key::last_config] = QString(QJsonDocument(lastConfig).toJson());
+    wireguardConfig[config_key::isThirdPartyConfig] = true;
     wireguardConfig[config_key::port] = port;
     wireguardConfig[config_key::transport_proto] = "udp";
 
@@ -316,7 +316,7 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-wireguard";
-    o[config_key::description] = QString("Wireguard server %1").arg(hostName);
+    o[config_key::description] = QString("Wireguard server");
 
     const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(config);
@@ -326,8 +326,6 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     }
 
     o[config_key::hostName] = hostName;
-
-    o[config_key::isThirdPartyConfig] = true;
 
     return importConnection(o);
 }

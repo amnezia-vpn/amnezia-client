@@ -35,7 +35,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig)
+void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerContainer container, bool haveAuthData)
 {
     qDebug() << "OpenVpnLogic::updateProtocolPage";
     set_pageEnabled(haveAuthData);
@@ -96,8 +96,8 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
             openVpnLastConfigText.append(l + "\n");
     }
 
-    set_openVpnLastConfigText(m_openVpnLastConfigText);
-    set_isThirdPartyConfig(isThirdPartyConfig);
+    set_openVpnLastConfigText(openVpnLastConfigText);
+    set_isThirdPartyConfig(openvpnConfig.value(config_key::isThirdPartyConfig).isBool());
 }
 
 void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()

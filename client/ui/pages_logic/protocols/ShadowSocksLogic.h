@@ -26,7 +26,7 @@ public:
     explicit ShadowSocksLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ShadowSocksLogic() = default;
 
-    void updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
+    void updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData) override;
     QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:

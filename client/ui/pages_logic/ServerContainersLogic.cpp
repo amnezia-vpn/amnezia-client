@@ -38,8 +38,7 @@ void ServerContainersLogic::onPushButtonProtoSettingsClicked(DockerContainer c, 
     uiLogic()->selectedDockerContainer = c;
     uiLogic()->protocolLogic(p)->updateProtocolPage(m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, p),
                       uiLogic()->selectedDockerContainer,
-                      m_settings->haveAuthData(uiLogic()->selectedServerIndex),
-                      m_settings->isThirdPartyConfig(uiLogic()->selectedServerIndex));
+                      m_settings->haveAuthData(uiLogic()->selectedServerIndex));
 
     emit uiLogic()->goToProtocolPage(p);
 }

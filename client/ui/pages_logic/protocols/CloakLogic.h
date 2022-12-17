@@ -28,7 +28,7 @@ public:
     explicit CloakLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~CloakLogic() = default;
 
-    void updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
+    void updateProtocolPage(const QJsonObject &ckConfig, DockerContainer container, bool haveAuthData) override;
     QJsonObject getProtocolConfigFromPage(QJsonObject oldConfig) override;
 
 private:

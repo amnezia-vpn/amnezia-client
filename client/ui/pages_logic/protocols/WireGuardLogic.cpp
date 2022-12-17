@@ -12,7 +12,7 @@ WireGuardLogic::WireGuardLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void WireGuardLogic::updateProtocolPage(const QJsonObject &wireGuardConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig)
+void WireGuardLogic::updateProtocolPage(const QJsonObject &wireGuardConfig, DockerContainer container, bool haveAuthData)
 {
     qDebug() << "WireGuardLogic::updateProtocolPage";
 
@@ -26,5 +26,5 @@ void WireGuardLogic::updateProtocolPage(const QJsonObject &wireGuardConfig, Dock
     }
 
     set_wireGuardLastConfigText(wireGuardLastConfigText);
-    set_isThirdPartyConfig(isThirdPartyConfig);
+    set_isThirdPartyConfig(wireGuardConfig.value(config_key::isThirdPartyConfig).toBool());
 }

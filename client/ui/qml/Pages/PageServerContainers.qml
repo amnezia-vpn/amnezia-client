@@ -32,6 +32,7 @@ PageBase {
 
     BackButton {
         id: back
+        onClicked: tb_c.currentIndex = -1
     }
     Caption {
         id: caption

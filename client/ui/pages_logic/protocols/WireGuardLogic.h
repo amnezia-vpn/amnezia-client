@@ -16,7 +16,7 @@ public:
     explicit WireGuardLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~WireGuardLogic() = default;
 
-    void updateProtocolPage(const QJsonObject &wireGuardConfig, DockerContainer container, bool haveAuthData, bool isThirdPartyConfig) override;
+    void updateProtocolPage(const QJsonObject &wireGuardConfig, DockerContainer container, bool haveAuthData) override;
 
 private:
     UiLogic *m_uiLogic;
