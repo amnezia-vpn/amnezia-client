@@ -1,5 +1,7 @@
 enable_language(Swift)
 
+set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+
 add_executable(networkextension)
 set_target_properties(networkextension PROPERTIES
     OUTPUT_NAME "AmneziaVPNNetworkExtension"
@@ -35,7 +37,7 @@ target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources)
 
 target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
@@ -57,15 +59,15 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CMAKE_SOURCE_DIR}/platforms/ios/iostunnel.swift
-    ${CMAKE_SOURCE_DIR}/platforms/ios/iosglue.mm
-    ${CMAKE_SOURCE_DIR}/platforms/ios/ioslogger.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/iostunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
+    ${CLIENT_ROOT_DIR}/platforms/ios/ioslogger.swift
 )
 
 ## Build wireguard-go-version.h
 execute_process(
     COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
+    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
     OUTPUT_VARIABLE WG_VERSION_FULL
 )
 string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
@@ -74,7 +76,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
 target_sources(networkextension PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
 
-target_include_directories(networkextension PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 ## HACK: Build only the first architecture, this will break universal builds
@@ -90,13 +92,13 @@ endif()
 ## TODO: The upstream makefile also makes an attempt to patch the golang runtime
 ## to provide the boot-time clock instead of an uptime clock. We should probably
 ## make an attempt to do the same, somehow?
-include(${CMAKE_SOURCE_DIR}/src/cmake/golang.cmake)
+include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
 if(OSXARCH STREQUAL "x86_64")
     set(GOARCH amd64)
 else()
     set(GOARCH ${FIRST_OSX_ARCHITECTURE})
 endif()
-add_go_library(libwg-go ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/api-apple.go
+add_go_library(libwg-go ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/api-apple.go
     GOOS ios
     GOARCH ${GOARCH}
     CGO_CFLAGS -arch ${OSXARCH}

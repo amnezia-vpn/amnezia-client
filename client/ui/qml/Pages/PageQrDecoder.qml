@@ -26,7 +26,7 @@ PageBase {
     }
 
     Connections {
-        target: Qt.platform.os != "ios" ? QrDecoderLogic : nil
+        target: Qt.platform.os != "ios" ? QrDecoderLogic : null
         function onStartDecode() {
             console.debug("Starting QR decoder")
             loader.sourceComponent = component
@@ -71,7 +71,7 @@ PageBase {
                 anchors.right: parent.right
                 autoOrientation: true
                 fillMode: VideoOutput.PreserveAspectFit
-                filters: [ zxingFilter ]
+//                filters: [ zxingFilter ]
 
 
                 Rectangle {

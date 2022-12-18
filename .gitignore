@@ -23,6 +23,7 @@ qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*
+compile_commands.json
 
 # fastlane
 client/fastlane/report.xml
@@ -125,3 +126,4 @@ captures/
 
 # Android Profiling
 *.hprof
+client/3rd/ShadowSocks/ss_ios.xcconfig

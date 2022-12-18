@@ -61,7 +61,17 @@ void ViewConfigLogic::importConfig()
     m_settings->addServer(configJson());
     m_settings->setDefaultServer(m_settings->serversCount() - 1);
 
-    emit uiLogic()->goToPage(Page::Vpn);
-    emit uiLogic()->setStartPage(Page::Vpn);
+
+    if (!configJson().contains(config_key::containers) || configJson().value(config_key::containers).toArray().isEmpty()) {
+        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
+        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+        uiLogic()->onUpdateAllPages();
+        emit uiLogic()->goToPage(Page::Vpn);
+        emit uiLogic()->setStartPage(Page::Vpn);
+        emit uiLogic()->goToPage(Page::ServerContainers);
+    } else {
+        emit uiLogic()->goToPage(Page::Vpn);
+        emit uiLogic()->setStartPage(Page::Vpn);
+    }
 }
 

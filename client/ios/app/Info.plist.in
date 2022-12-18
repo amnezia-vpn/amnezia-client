@@ -51,6 +51,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Amnezia VPN needs access to the camera for reading QR-codes.</string>
+	<key>CFBundleIcons</key>
+        <dict/>
+        <key>CFBundleIcons~ipad</key>
+        <dict/>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
