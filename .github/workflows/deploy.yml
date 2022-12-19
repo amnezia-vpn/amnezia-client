@@ -156,8 +156,8 @@ jobs:
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
-    - name: Build iOS Action
-      uses: sparkfabrik/ios-build-action@v1.0.8
+    - name: iOS Build/Release With Multiple Targets Action
+      uses: kumarsunil0007/build-ios-action@latest
       with:
         project-path: build-ios/AmneziaVPN.xcodeproj
         p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
