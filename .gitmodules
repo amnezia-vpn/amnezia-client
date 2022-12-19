@@ -25,3 +25,6 @@
 [submodule "client/3rd/qtkeychain"]
 	path = client/3rd/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain.git
+[submodule "deploy/amnezia-ios-certificates"]
+	path = deploy/amnezia-ios-certificates
+	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
