@@ -1,5 +1,6 @@
 name: 'Deploy workflow'
 
+
 on: [push]
 
 jobs:
@@ -154,6 +155,24 @@ jobs:
         export PATH=$PATH:~/go/bin
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+
+    - name: Build iOS Action
+      uses: sparkfabrik/ios-build-action@v1.0.0
+      with:
+        project-path: build-ios/AmneziaVPN.xcodeproj
+        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
+        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
+        code-signing-identity:  'iOS Distribution'
+        team-id: 'X7UJ388FXK'
+        configuration: Release
+
+
+
+
+
+
+
+
 
 # ------------------------------------------------------
 
