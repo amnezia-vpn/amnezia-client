@@ -157,7 +157,7 @@ jobs:
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
     - name: Build iOS Action
-      uses: sparkfabrik/ios-build-action@v1.0.0
+      uses: sparkfabrik/ios-build-action@v1.0.8
       with:
         project-path: build-ios/AmneziaVPN.xcodeproj
         p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
