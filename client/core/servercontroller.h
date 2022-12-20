@@ -15,6 +15,7 @@
 #include "containers/containers_defs.h"
 
 #include "sftpdefs.h"
+#include "sshclient.h"
 
 class Settings;
 class VpnConfigurator;
@@ -76,7 +77,6 @@ public:
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
-    QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
 private:
 
@@ -92,6 +92,8 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
+
+    SshClient m_sshClient;
 };
 
 #endif // SERVERCONTROLLER_H

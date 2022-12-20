@@ -21,13 +21,13 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
-    Core5Compat
+    Core5Compat Concurrent
 )
 set(LIBS ${LIBS} 
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
-    Qt6::Core5Compat
+    Qt6::Core5Compat Qt6::Concurrent
 )
 
 qt_standard_project_setup()
@@ -71,6 +71,8 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshsession.h
 )
 
 if(NOT IOS)
@@ -93,6 +95,8 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshsession.cpp
 )
 
 if(NOT IOS)

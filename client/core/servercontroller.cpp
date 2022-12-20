@@ -43,12 +43,10 @@ using namespace QSsh;
 ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) :
     m_settings(settings)
 {
-    ssh_init();
 }
 
 ServerController::~ServerController()
 {
-    ssh_finalize();
 }
 
 ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, ssh_session &session) {
@@ -58,14 +56,14 @@ ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, 
     }
 
     int port = credentials.port;
-    int log_verbosity = SSH_LOG_NOLOG;
-    std::string host_ip = credentials.hostName.toStdString();
-    std::string host_username = credentials.userName.toStdString() + "@" + host_ip;
+    int logVerbosity = SSH_LOG_NOLOG;
+    std::string hostIp = credentials.hostName.toStdString();
+    std::string hostUsername = credentials.userName.toStdString() + "@" + hostIp;
 
-    ssh_options_set(session, SSH_OPTIONS_HOST, host_ip.c_str());
+    ssh_options_set(session, SSH_OPTIONS_HOST, hostIp.c_str());
     ssh_options_set(session, SSH_OPTIONS_PORT, &port);
-    ssh_options_set(session, SSH_OPTIONS_USER, host_username.c_str());
-    ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &log_verbosity);
+    ssh_options_set(session, SSH_OPTIONS_USER, hostUsername.c_str());
+    ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &logVerbosity);
 
     int connection_result = ssh_connect(session);
 
@@ -82,7 +80,7 @@ ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, 
         auth_result = ssh_userauth_publickey(session, auth_username.c_str(), priv_key);
     }
     else {
-       auth_result =  ssh_userauth_password(session, auth_username.c_str(), credentials.password.toStdString().c_str());
+        auth_result =  ssh_userauth_password(session, auth_username.c_str(), credentials.password.toStdString().c_str());
     }
 
     if (auth_result != SSH_OK) {
@@ -98,67 +96,38 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr) {
 
-    ssh_session ssh = ssh_new();
-
-    ErrorCode e = connectToHost(credentials, ssh);
-    if (e) {
-        ssh_free(ssh);
-        return e;
+    std::shared_ptr<SshSession> session = m_sshClient.getSession();
+    if (!session) {
+        return ErrorCode::SshInternalError;
     }
-    ssh_channel channel = ssh_channel_new(ssh);
-
-    if (channel == NULL) {
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return ErrorCode::SshAuthenticationError;
-    }
-
-    ssh_channel_open_session(channel);
-
-    if (ssh_channel_is_open(channel)) {
-        qDebug() << "SSH chanel opened";
-    } else {
-        ssh_channel_free(channel);
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return ErrorCode::SshAuthenticationError;
+    auto error = session->initChannel(credentials);
+    if (error != ErrorCode::NoError) {
+        return error;
     }
 
     script.replace("\r", "");
 
     qDebug() << "Run script " << script;
 
-    int exec_result = ssh_channel_request_pty(channel);
-
-    ssh_channel_change_pty_size(channel, 80, 1024);
-    ssh_channel_request_shell(channel);
-
     QString totalLine;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
     for (int i = 0; i < lines.count(); i++) {
         QString currentLine = lines.at(i);
-        QString nextLine;
-        if (i + 1 < lines.count()) nextLine = lines.at(i+1);
 
         if (totalLine.isEmpty()) {
             totalLine = currentLine;
-        }
-        else {
+        } else {
             totalLine = totalLine + "\n" + currentLine;
         }
 
         QString lineToExec;
         if (currentLine.endsWith("\\")) {
             continue;
-        }
-        else {
+        } else {
             lineToExec = totalLine;
             totalLine.clear();
         }
 
-        qDebug()<<"total line " << totalLine;
-
-        // Run collected line
         if (lineToExec.startsWith("#")) {
             continue;
         }
@@ -167,43 +136,14 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
         qDebug().noquote() << "EXEC" << lineToExec;
         Debug::appendSshLog("Run command:" + lineToExec);
-        int nwritten, nbytes = 0, tryes = 0;
-        char buffer[2048];
-        if (ssh_channel_write(channel, lineToExec.toUtf8(), (uint32_t)lineToExec.size()) == lineToExec.size() &&
-                        ssh_channel_write(channel, "\n", 1) == 1){
-                while (nbytes !=0 || tryes < 100){
-                 if (ssh_channel_is_open(channel) && !ssh_channel_is_eof(channel)) {
-                  //nbytes = ssh_channel_read_nonblocking(channel, buffer, sizeof(buffer), 0);
 
-                  nbytes = ssh_channel_read_timeout(channel, buffer, sizeof(buffer), 0, 50);
-
-                  if (nbytes > 0) {
-                    tryes = 0;
-                    std::string strbuf;
-                    strbuf.assign(buffer, nbytes);
-                    QByteArray qbuff(buffer, nbytes);
-                    QString outp(qbuff);
-
-                    if (cbReadStdOut){
-                        cbReadStdOut(outp, nullptr);
-                    }
-                    qDebug().noquote() << QString(strbuf.c_str());
-
-                  } else {
-                      tryes++;
-                  }
-                  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                }
-
-            }
+        error = session->writeToChannel(lineToExec);
+        if (error != ErrorCode::NoError) {
+            return error;
         }
     }
 
-    ssh_channel_send_eof(channel);
-    ssh_channel_free(channel);
-    ssh_disconnect(ssh);
-    ssh_free(ssh);
-
+    qDebug() << "ServerController::runScript finished\n";
     return ErrorCode::NoError;
 }
 
@@ -214,7 +154,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<void (const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
+    Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + QStringLiteral(":\n") + script);
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
@@ -886,60 +826,6 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     if (errorCode) *errorCode = e;
 
     return stdOut;
-}
-
-SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
-{
-    SshConnection *client = acquireConnection(sshParams);
-    if (!client) return nullptr;
-
-    QEventLoop waitssh;
-    QObject::connect(client, &SshConnection::connected, &waitssh, [&]() {
-        qDebug() << "Server connected by ssh";
-        waitssh.quit();
-    });
-
-    QObject::connect(client, &SshConnection::disconnected, &waitssh, [&]() {
-        qDebug() << "Server disconnected by ssh";
-        waitssh.quit();
-    });
-
-    QObject::connect(client, &SshConnection::error, &waitssh, [&](QSsh::SshError error) {
-        qCritical() << "Ssh error:" << error << client->errorString();
-        waitssh.quit();
-    });
-
-
-    //    QObject::connect(client, &SshConnection::dataAvailable, [&](const QString &message) {
-    //        qCritical() << "Ssh message:" << message;
-    //    });
-
-    //qDebug() << "Connection state" << client->state();
-
-    if (client->state() == SshConnection::State::Unconnected) {
-        client->connectToHost();
-        waitssh.exec();
-    }
-
-
-    //    QObject::connect(&client, &SshClient::sshDataReceived, [&](){
-    //        qDebug().noquote() << "Data received";
-    //    });
-
-
-    //    if(client.sshState() != SshClient::SshState::Ready) {
-    //        qCritical() << "Can't connect to server";
-    //        return false;
-    //    }
-    //    else {
-    //        qDebug() << "SSh connection established";
-    //    }
-
-
-    //    QObject::connect(proc, &SshProcess::finished, &wait, &QEventLoop::quit);
-    //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
-
-    return client;
 }
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)
