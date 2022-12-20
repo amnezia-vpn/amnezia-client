@@ -72,8 +72,8 @@ jobs:
       uses: kumarsunil0007/build-ios-action@latest
       with:
         project-path: build-ios/AmneziaVPN.xcodeproj
-        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
-        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
-        code-signing-identity:  'iOS Distribution'
-        team-id: 'X7UJ388FXK'
+        p12-base64: ${{ secrets.P12_BASE64 }}
+        mobileprovision-base64: ${{ secrets.MOBILEPROVISION_BASE64 }}
+        code-signing-identity: ${{ secrets.CODE_SIGNING_IDENTITY }}
+        team-id: ${{ secrets.TEAM_ID }}
         configuration: Release
