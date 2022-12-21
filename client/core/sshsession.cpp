@@ -86,6 +86,7 @@ ErrorCode SshSession::initChannel(const ServerCredentials &credentials)
 
     if (result == SSH_OK && ssh_channel_is_open(m_channel)) {
         qDebug() << "SSH chanel opened";
+        m_isChannelOpened = true;
     } else {
         qDebug() << ssh_get_error(m_session);
         return ErrorCode::SshAuthenticationError;
@@ -103,22 +104,80 @@ ErrorCode SshSession::initChannel(const ServerCredentials &credentials)
         return ErrorCode::SshInternalError;
     }
 
-    result = ssh_channel_request_shell(m_channel);
-    if (result != SSH_OK) {
-        qDebug() << ssh_get_error(m_session);
-        return ErrorCode::SshInternalError;
-    }
+//    result = ssh_channel_request_shell(m_channel);
+//    if (result != SSH_OK) {
+//        qDebug() << ssh_get_error(m_session);
+//        return ErrorCode::SshInternalError;
+//    }
 
     return ErrorCode::NoError;
 }
 
-ErrorCode SshSession::writeToChannel(const QString &data)
+ErrorCode SshSession::writeToChannel(const QString &data,
+                                     const std::function<void(const QString &)> &cbReadStdOut,
+                                     const std::function<void(const QString &)> &cbReadStdErr)
 {
     QFutureWatcher<ErrorCode> watcher;
     connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &SshSession::writeToChannelFinished);
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, &data]() {
-        return write(data);
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &data, &cbReadStdOut, &cbReadStdErr]() {
+        const int channelReadTimeoutMs = 10;
+        const size_t bufferSize = 2048;
+
+        int bytesRead = 0;
+        int attempts = 0;
+        char buffer[bufferSize];
+
+        std::string output1;
+        if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
+            bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), 0, channelReadTimeoutMs);
+            while (bytesRead > 0)
+            {
+                output1.append(buffer, bytesRead);
+                bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), 0, channelReadTimeoutMs);
+            }
+        }
+        qDebug().noquote() << "stdOut: " << QString(output1.c_str());
+
+        int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
+        if (bytesWritten == data.size()) {
+            std::string stdOut;
+            std::string stdErr;
+
+            auto readOutput = [&](bool isStdErr) {
+                std::string output;
+                if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
+                    bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, channelReadTimeoutMs);
+                    while (bytesRead > 0)
+                    {
+                        output.append(buffer, bytesRead);
+                        bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, channelReadTimeoutMs);
+                    }
+                }
+                return output;
+            };
+
+            stdOut = readOutput(false);
+            stdErr = readOutput(true);
+
+            if (cbReadStdOut){
+                cbReadStdOut(stdOut.c_str());
+            }
+            if (cbReadStdErr){
+                cbReadStdErr(stdErr.c_str());
+            }
+            if (!stdOut.empty()) {
+                qDebug().noquote() << "stdOut: " << QString(stdOut.c_str());
+            }
+            if (!stdErr.empty()) {
+                qDebug().noquote() << "stdErr: " << QString(stdOut.c_str());
+            }
+        } else {
+            qDebug() << ssh_get_error(m_session);
+            return ErrorCode::SshInternalError;
+        }
+        m_isNeedSendChannelEof = true;
+        return ErrorCode::NoError;
     });
     watcher.setFuture(future);
 
@@ -128,40 +187,4 @@ ErrorCode SshSession::writeToChannel(const QString &data)
     wait.exec();
 
     return watcher.result();
-}
-
-ErrorCode SshSession::write(const QString &data)
-{
-    const int channelReadTimeoutMs = 10;
-    const size_t bufferSize = 2048;
-
-    int bytesToRead = 0;
-    int attempts = 0;
-    char buffer[bufferSize];
-
-    int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
-    if (bytesWritten == data.size()) {
-        while (bytesToRead != 0 || attempts < 100){
-            if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
-                bytesToRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), 0, channelReadTimeoutMs);
-                if (bytesToRead > 0) {
-                    attempts = 0;
-                    std::string strbuf(buffer, bytesToRead);
-//                    QByteArray qbuff(buffer, bytesToRead);
-//                    QString outp(buffer);
-
-//                    if (cbReadStdOut){
-//                        cbReadStdOut(outp, nullptr);
-//                    }
-                    qDebug().noquote() << QString(strbuf.c_str());
-                } else {
-                    attempts++;
-                }
-            }
-        }
-    } else {
-        qDebug() << ssh_get_error(m_session);
-        return ErrorCode::SshInternalError;
-    }
-    return ErrorCode::NoError;
 }

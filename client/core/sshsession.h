@@ -18,10 +18,11 @@ public:
     ~SshSession();
 
     ErrorCode initChannel(const ServerCredentials &credentials);
-    ErrorCode writeToChannel(const QString &data);
+    ErrorCode writeToChannel(const QString &data,
+                             const std::function<void(const QString &)> &cbReadStdOut,
+                             const std::function<void(const QString &)> &cbReadStdErr);
 private:
     ErrorCode connectToHost(const ServerCredentials &credentials);
-    ErrorCode write(const QString &data);
 
     ssh_session m_session;
     ssh_channel m_channel;

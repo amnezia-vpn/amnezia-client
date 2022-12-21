@@ -67,12 +67,12 @@ public:
     QString replaceVars(const QString &script, const Vars &vars);
 
     ErrorCode runScript(const ServerCredentials &credentials, QString script,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+        const std::function<void(const QString &)> &cbReadStdOut = nullptr,
+        const std::function<void(const QString &)> &cbReadStdErr = nullptr);
 
     ErrorCode runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+        const std::function<void(const QString &)> &cbReadStdOut = nullptr,
+        const std::function<void(const QString &)> &cbReadStdErr = nullptr);
 
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
