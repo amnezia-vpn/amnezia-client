@@ -18,12 +18,6 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#include <fcntl.h>
-#include <libssh/libssh.h>
-#include <libssh/sftp.h>
-
-#include "sshconnectionmanager.h"
-
 #include <chrono>
 #include <thread>
 
@@ -35,11 +29,6 @@
 
 #include <configurators/vpn_configurator.h>
 
-#define SFTP_TRANSFER_CHUNK_SIZE 16384
-#define SSH_BUFFER_SIZE 256
-
-using namespace QSsh;
-
 ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) :
     m_settings(settings)
 {
@@ -47,48 +36,6 @@ ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *
 
 ServerController::~ServerController()
 {
-}
-
-ErrorCode ServerController::connectToHost(const ServerCredentials &credentials, ssh_session &session) {
-
-    if (session == NULL) {
-        return ErrorCode::InternalError;
-    }
-
-    int port = credentials.port;
-    int logVerbosity = SSH_LOG_NOLOG;
-    std::string hostIp = credentials.hostName.toStdString();
-    std::string hostUsername = credentials.userName.toStdString() + "@" + hostIp;
-
-    ssh_options_set(session, SSH_OPTIONS_HOST, hostIp.c_str());
-    ssh_options_set(session, SSH_OPTIONS_PORT, &port);
-    ssh_options_set(session, SSH_OPTIONS_USER, hostUsername.c_str());
-    ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &logVerbosity);
-
-    int connection_result = ssh_connect(session);
-
-    if (connection_result != SSH_OK) {
-        return ErrorCode::SshTimeoutError;
-    }
-
-    std::string auth_username = credentials.userName.toStdString();
-
-    int auth_result = SSH_ERROR;
-    if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
-        ssh_key priv_key;
-        ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, nullptr, nullptr, &priv_key);
-        auth_result = ssh_userauth_publickey(session, auth_username.c_str(), priv_key);
-    }
-    else {
-        auth_result =  ssh_userauth_password(session, auth_username.c_str(), credentials.password.toStdString().c_str());
-    }
-
-    if (auth_result != SSH_OK) {
-        ssh_disconnect(session);
-        return ErrorCode::SshAuthenticationError;
-    }
-
-    return ErrorCode::NoError;
 }
 
 
@@ -107,7 +54,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
     script.replace("\r", "");
 
-    qDebug() << "Run script " << script;
+    qDebug() << "Run script";
 
     QString totalLine;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
@@ -131,8 +78,6 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         if (lineToExec.startsWith("#")) {
             continue;
         }
-
-        lineToExec += "\n";
 
         qDebug().noquote() << "EXEC" << lineToExec;
         Debug::appendSshLog("Run command:" + lineToExec);
@@ -288,40 +233,13 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     QSsh::SftpOverwriteMode overwriteMode)
 {
-
-    ssh_session ssh = ssh_new();
-
-    ErrorCode e = connectToHost(credentials, ssh);
-    if (e) {
-        ssh_free(ssh);
-        return e;
+    std::shared_ptr<SshSession> session = m_sshClient.getSession();
+    if (!session) {
+        return ErrorCode::SshInternalError;
     }
-
-    ssh_channel channel = ssh_channel_new(ssh);
-
-    if (channel == NULL) {
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return ErrorCode::SshSftpError;
-    }
-
-    sftp_session sftp_sess = sftp_new(ssh);
-
-    if (sftp_sess == NULL) {
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return ErrorCode::SshSftpError;
-    }
-
-    int init_result = sftp_init(sftp_sess);
-
-    if (init_result != SSH_OK) {
-
-        sftp_free(sftp_sess);
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-
-        return ErrorCode::SshSftpError;
+    auto error = session->initSftp(credentials);
+    if (error != ErrorCode::NoError) {
+        return error;
     }
 
     QTemporaryFile localFile;
@@ -331,146 +249,60 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
 
     qDebug() << "remotePath" << remotePath;
 
-    e = copyFileToRemoteHost(ssh, sftp_sess, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
-
-    if (e) {
-        sftp_free(sftp_sess);
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return e;
+    error = session->sftpFileCopy(localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
+    if (error != ErrorCode::NoError) {
+        return error;
     }
-    else {
-
-        sftp_free(sftp_sess);
-        ssh_disconnect(ssh);
-        ssh_free(ssh);
-        return ErrorCode::NoError;
-    }
-}
-
-
-ErrorCode ServerController::copyFileToRemoteHost(ssh_session& ssh, sftp_session& sftp, std::string local_path, std::string remote_path, std::string file_desc) {
-    int access_type = O_WRONLY | O_CREAT | O_TRUNC;
-    sftp_file file;
-    char buffer[SFTP_TRANSFER_CHUNK_SIZE];
-    int length {sizeof (buffer)};
-
-    file = sftp_open(sftp, remote_path.c_str(), access_type, 0);//S_IRWXU);
-
-    if (file == NULL) {
-        return ErrorCode::SshSftpError;
-    }
-
-    int local_file_size   = std::filesystem::file_size(local_path);
-    int num_full_chunks   = local_file_size / (SFTP_TRANSFER_CHUNK_SIZE);
-
-    std::ifstream fin(local_path, std::ios::binary | std::ios::in);
-
-    if (fin.is_open()) {
-
-        for (int current_chunk_id = 0; current_chunk_id < num_full_chunks; current_chunk_id++) {
-            // Getting chunk from local file
-            fin.read(buffer, length);
-
-            int nwritten = sftp_write(file, buffer, length);
-
-            std::string chunk(buffer, length);
-
-            qDebug() << "write -> " << QString(chunk.c_str());
-
-            if (nwritten != length) {
-                fin.close();
-                sftp_close(file);
-                return ErrorCode::SshSftpError;
-            }
-        }
-
-        int last_chapter_size = local_file_size % (SFTP_TRANSFER_CHUNK_SIZE);
-
-        if (last_chapter_size != 0) {
-            char* last_chapter_buffer = new char[last_chapter_size];
-            fin.read(last_chapter_buffer, last_chapter_size);
-
-            QByteArray arr_tmp(last_chapter_buffer, last_chapter_size);
-
-            QString std_test = QString::fromUtf8(arr_tmp);
-
-            qDebug() << "test file " << std_test;
-
-            int nwritten = sftp_write(file, last_chapter_buffer, last_chapter_size);
-
-            if (nwritten != last_chapter_size) {
-
-                fin.close();
-                sftp_close(file);
-                delete[] last_chapter_buffer;
-                return ErrorCode::SshSftpError;
-            }
-            delete[] last_chapter_buffer;
-        }
-
-    } else {
-        sftp_close(file);
-        return ErrorCode::SshSftpError;
-    }
-
-    fin.close();
-
-    int close_result = sftp_close(file);
-    if (close_result != SSH_OK) {
-        return ErrorCode::SshSftpError;
-    }
-
     return ErrorCode::NoError;
 }
 
-ErrorCode ServerController::fromSshConnectionErrorCode(SshError error)
-{
-    switch (error) {
-    case(SshNoError): return ErrorCode::NoError;
-    case(QSsh::SshSocketError): return ErrorCode::SshSocketError;
-    case(QSsh::SshTimeoutError): return ErrorCode::SshTimeoutError;
-    case(QSsh::SshProtocolError): return ErrorCode::SshProtocolError;
-    case(QSsh::SshHostKeyError): return ErrorCode::SshHostKeyError;
-    case(QSsh::SshKeyFileError): return ErrorCode::SshKeyFileError;
-    case(QSsh::SshAuthenticationError): return ErrorCode::SshAuthenticationError;
-    case(QSsh::SshClosedByServerError): return ErrorCode::SshClosedByServerError;
-    case(QSsh::SshInternalError): return ErrorCode::SshInternalError;
-    default: return ErrorCode::SshInternalError;
-    }
-}
+//ErrorCode ServerController::fromSshConnectionErrorCode(SshError error)
+//{
+//    switch (error) {
+//    case(SshNoError): return ErrorCode::NoError;
+//    case(QSsh::SshSocketError): return ErrorCode::SshSocketError;
+//    case(QSsh::SshTimeoutError): return ErrorCode::SshTimeoutError;
+//    case(QSsh::SshProtocolError): return ErrorCode::SshProtocolError;
+//    case(QSsh::SshHostKeyError): return ErrorCode::SshHostKeyError;
+//    case(QSsh::SshKeyFileError): return ErrorCode::SshKeyFileError;
+//    case(QSsh::SshAuthenticationError): return ErrorCode::SshAuthenticationError;
+//    case(QSsh::SshClosedByServerError): return ErrorCode::SshClosedByServerError;
+//    case(QSsh::SshInternalError): return ErrorCode::SshInternalError;
+//    default: return ErrorCode::SshInternalError;
+//    }
+//}
 
-ErrorCode ServerController::fromSshProcessExitStatus(int exitStatus)
-{
-    qDebug() << exitStatus;
-    switch (SshRemoteProcess::ExitStatus(exitStatus)) {
-    case(SshRemoteProcess::ExitStatus::NormalExit): return ErrorCode::NoError;
-    case(SshRemoteProcess::ExitStatus::FailedToStart): return ErrorCode::FailedToStartRemoteProcessError;
-    case(SshRemoteProcess::ExitStatus::CrashExit): return ErrorCode::RemoteProcessCrashError;
-    default: return ErrorCode::SshInternalError;
-    }
-}
+//ErrorCode ServerController::fromSshProcessExitStatus(int exitStatus)
+//{
+//    qDebug() << exitStatus;
+//    switch (SshRemoteProcess::ExitStatus(exitStatus)) {
+//    case(SshRemoteProcess::ExitStatus::NormalExit): return ErrorCode::NoError;
+//    case(SshRemoteProcess::ExitStatus::FailedToStart): return ErrorCode::FailedToStartRemoteProcessError;
+//    case(SshRemoteProcess::ExitStatus::CrashExit): return ErrorCode::RemoteProcessCrashError;
+//    default: return ErrorCode::SshInternalError;
+//    }
+//}
 
-SshConnectionParameters ServerController::sshParams(const ServerCredentials &credentials)
-{
-    QSsh::SshConnectionParameters sshParams;
-    if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
-        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePublicKey;
-        sshParams.privateKeyFile = credentials.password;
-    }
-    else {
-        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
-        sshParams.setPassword(credentials.password);
-    }
-    sshParams.setHost(credentials.hostName);
-    sshParams.setUserName(credentials.userName);
-    sshParams.timeout = 10;
-    sshParams.setPort(credentials.port);
-    sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
-    sshParams.options = SshIgnoreDefaultProxy;
+//SshConnectionParameters ServerController::sshParams(const ServerCredentials &credentials)
+//{
+//    QSsh::SshConnectionParameters sshParams;
+//    if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
+//        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePublicKey;
+//        sshParams.privateKeyFile = credentials.password;
+//    }
+//    else {
+//        sshParams.authenticationType = QSsh::SshConnectionParameters::AuthenticationTypePassword;
+//        sshParams.setPassword(credentials.password);
+//    }
+//    sshParams.setHost(credentials.hostName);
+//    sshParams.setUserName(credentials.userName);
+//    sshParams.timeout = 10;
+//    sshParams.setPort(credentials.port);
+//    sshParams.hostKeyCheckingMode = QSsh::SshHostKeyCheckingMode::SshHostKeyCheckingNone;
+//    sshParams.options = SshIgnoreDefaultProxy;
 
-    return sshParams;
-}
+//    return sshParams;
+//}
 
 ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)
 {
@@ -830,8 +662,8 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)
 {
-    SshConnection *client = acquireConnection(sshParams(credentials));
-    if (client) client->disconnectFromHost();
+//    SshConnection *client = acquireConnection(sshParams(credentials));
+//    if (client) client->disconnectFromHost();
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)

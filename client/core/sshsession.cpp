@@ -3,6 +3,9 @@
 #include <QEventLoop>
 #include <QtConcurrent>
 
+#include <fstream>
+#include <fcntl.h>
+
 SshSession::SshSession(QObject *parent) : QObject(parent)
 {
 
@@ -15,6 +18,9 @@ SshSession::~SshSession()
     }
     if (m_isChannelOpened) {
         ssh_channel_free(m_channel);
+    }
+    if (m_isSftpInitialized) {
+        sftp_free(m_sftpSession);
     }
     if (m_isSessionConnected) {
         ssh_disconnect(m_session);
@@ -104,11 +110,11 @@ ErrorCode SshSession::initChannel(const ServerCredentials &credentials)
         return ErrorCode::SshInternalError;
     }
 
-//    result = ssh_channel_request_shell(m_channel);
-//    if (result != SSH_OK) {
-//        qDebug() << ssh_get_error(m_session);
-//        return ErrorCode::SshInternalError;
-//    }
+    result = ssh_channel_request_shell(m_channel);
+    if (result != SSH_OK) {
+        qDebug() << ssh_get_error(m_session);
+        return ErrorCode::SshInternalError;
+    }
 
     return ErrorCode::NoError;
 }
@@ -117,61 +123,48 @@ ErrorCode SshSession::writeToChannel(const QString &data,
                                      const std::function<void(const QString &)> &cbReadStdOut,
                                      const std::function<void(const QString &)> &cbReadStdErr)
 {
+    if (m_channel == NULL) {
+        qDebug() << "ssh channel not initialized";
+        return ErrorCode::SshAuthenticationError;
+    }
+
     QFutureWatcher<ErrorCode> watcher;
     connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &SshSession::writeToChannelFinished);
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &data, &cbReadStdOut, &cbReadStdErr]() {
-        const int channelReadTimeoutMs = 10;
         const size_t bufferSize = 2048;
 
         int bytesRead = 0;
-        int attempts = 0;
         char buffer[bufferSize];
 
-        std::string output1;
-        if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
-            bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), 0, channelReadTimeoutMs);
-            while (bytesRead > 0)
-            {
-                output1.append(buffer, bytesRead);
-                bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), 0, channelReadTimeoutMs);
-            }
-        }
-        qDebug().noquote() << "stdOut: " << QString(output1.c_str());
-
         int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
+        ssh_channel_write(m_channel, "\n", 1);
         if (bytesWritten == data.size()) {
-            std::string stdOut;
-            std::string stdErr;
-
             auto readOutput = [&](bool isStdErr) {
                 std::string output;
                 if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
-                    bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, channelReadTimeoutMs);
+                    bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 50);
                     while (bytesRead > 0)
                     {
-                        output.append(buffer, bytesRead);
-                        bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, channelReadTimeoutMs);
+                        output = std::string(buffer, bytesRead);
+                        if (!output.empty()) {
+                            qDebug().noquote() << (isStdErr ? "stdErr" : "stdOut") << QString(output.c_str());
+
+                            if (cbReadStdOut && !isStdErr){
+                                cbReadStdOut(output.c_str());
+                            }
+                            if (cbReadStdErr && isStdErr){
+                                cbReadStdErr(output.c_str());
+                            }
+                        }
+                        bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 500);
                     }
                 }
                 return output;
             };
 
-            stdOut = readOutput(false);
-            stdErr = readOutput(true);
-
-            if (cbReadStdOut){
-                cbReadStdOut(stdOut.c_str());
-            }
-            if (cbReadStdErr){
-                cbReadStdErr(stdErr.c_str());
-            }
-            if (!stdOut.empty()) {
-                qDebug().noquote() << "stdOut: " << QString(stdOut.c_str());
-            }
-            if (!stdErr.empty()) {
-                qDebug().noquote() << "stdErr: " << QString(stdOut.c_str());
-            }
+            readOutput(false);
+            readOutput(true);
         } else {
             qDebug() << ssh_get_error(m_session);
             return ErrorCode::SshInternalError;
@@ -184,6 +177,121 @@ ErrorCode SshSession::writeToChannel(const QString &data,
     QEventLoop wait;
 
     QObject::connect(this, &SshSession::writeToChannelFinished, &wait, &QEventLoop::quit);
+    wait.exec();
+
+    return watcher.result();
+}
+
+ErrorCode SshSession::initSftp(const ServerCredentials &credentials)
+{
+    m_session = ssh_new();
+
+    ErrorCode error = connectToHost(credentials);
+    if (error) {
+        return error;
+    }
+
+    m_sftpSession = sftp_new(m_session);
+
+    if (m_sftpSession == NULL) {
+        qDebug() << ssh_get_error(m_session);
+        return ErrorCode::SshSftpError;
+    }
+
+    int result = sftp_init(m_sftpSession);
+
+    if (result != SSH_OK) {
+        qDebug() << ssh_get_error(m_session);
+        return ErrorCode::SshSftpError;
+    }
+
+    return ErrorCode::NoError;
+}
+
+ErrorCode SshSession::sftpFileCopy(const std::string& localPath, const std::string& remotePath, const std::string& fileDesc)
+{
+    if (m_sftpSession == NULL) {
+        qDebug() << "ssh sftp session not initialized";
+        return ErrorCode::SshSftpError;
+    }
+
+    QFutureWatcher<ErrorCode> watcher;
+    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &SshSession::sftpFileCopyFinished);
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &localPath, &remotePath, &fileDesc]() {
+        int accessType = O_WRONLY | O_CREAT | O_TRUNC;
+        sftp_file file;
+        const size_t bufferSize = 16384;
+        char buffer[bufferSize];
+
+        file = sftp_open(m_sftpSession, remotePath.c_str(), accessType, 0);//S_IRWXU);
+
+        if (file == NULL) {
+            qDebug() << ssh_get_error(m_session);
+            return ErrorCode::SshSftpError;
+        }
+
+        int localFileSize   = std::filesystem::file_size(localPath);
+        int chunksCount   = localFileSize / (bufferSize);
+
+        std::ifstream fin(localPath, std::ios::binary | std::ios::in);
+
+        if (fin.is_open()) {
+            for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
+                fin.read(buffer, bufferSize);
+
+                int bytesWritten = sftp_write(file, buffer, bufferSize);
+
+                std::string chunk(buffer, bufferSize);
+                qDebug() << "write -> " << QString(chunk.c_str());
+
+                if (bytesWritten != bufferSize) {
+                    fin.close();
+                    sftp_close(file);
+                    qDebug() << ssh_get_error(m_session);
+                    return ErrorCode::SshSftpError;
+                }
+            }
+
+            int lastChunkSize = localFileSize % (bufferSize);
+
+            if (lastChunkSize != 0) {
+                fin.read(buffer, lastChunkSize);
+
+                std::string chunk(buffer, lastChunkSize);
+                qDebug() << "write -> " << QString(chunk.c_str());
+
+                int bytesWritten = sftp_write(file, buffer, lastChunkSize);
+
+                if (bytesWritten != lastChunkSize) {
+                    fin.close();
+                    sftp_close(file);
+                    qDebug() << ssh_get_error(m_session);
+                    return ErrorCode::SshSftpError;
+                }
+            }
+
+        } else {
+            sftp_close(file);
+            qDebug() << ssh_get_error(m_session);
+            return ErrorCode::SshSftpError;
+        }
+
+        fin.close();
+
+        int result = sftp_close(file);
+        if (result != SSH_OK) {
+            qDebug() << ssh_get_error(m_session);
+            return ErrorCode::SshSftpError;
+        }
+
+        return ErrorCode::NoError;
+    });
+    watcher.setFuture(future);
+
+    QEventLoop wait;
+
+    QObject::connect(this, &SshSession::sftpFileCopyFinished, &wait, &QEventLoop::quit);
     wait.exec();
 
     return watcher.result();

@@ -3,11 +3,6 @@
 
 #include <QJsonObject>
 #include <QObject>
-#include "sshconnection.h"
-#include "sshremoteprocess.h"
-
-#include <libssh/libssh.h>
-#include <libssh/sftp.h>
 
 #include "debug.h"
 #include "defs.h"
@@ -31,12 +26,12 @@ public:
 
     typedef QList<QPair<QString, QString>> Vars;
 
-    ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
+//    ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
 
     // QSsh exitCode and exitStatus are different things
-    ErrorCode fromSshProcessExitStatus(int exitStatus);
+//    ErrorCode fromSshProcessExitStatus(int exitStatus);
 
-    QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
+//    QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
     void disconnectFromHost(const ServerCredentials &credentials);
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
@@ -79,10 +74,6 @@ public:
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
 private:
-
-    ErrorCode copyFileToRemoteHost(ssh_session& ssh, sftp_session& sftp, std::string local_path, std::string remote_path, std::string file_desc);
-    ErrorCode connectToHost(const ServerCredentials &credentials, ssh_session& session);
-
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
