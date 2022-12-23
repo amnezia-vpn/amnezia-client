@@ -153,31 +153,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private var flags = 0
     private var startId = 0
 
-    private lateinit var mMessenger: Messenger
-
-    internal class ExternalConfigImportHandler(
-        context: Context,
-        private val serviceBinder: VPNServiceBinder,
-        private val applicationContext: Context = context.applicationContext
-    ) : Handler() {
-
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                IMPORT_COMMAND_CODE -> {
-                    val data = msg.data.getString(IMPORT_CONFIG_KEY)
-
-                    if (data != null) {
-                        serviceBinder.importConfig(data)
-                    }
-                }
-
-                else -> {
-                    super.handleMessage(msg)
-                }
-            }
-        }
-    }
-
     fun init() {
         if (mAlreadyInitialised) {
             return
@@ -216,13 +191,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     override fun onBind(intent: Intent): IBinder {
         Log.v(tag, "Aman: onBind....................")
 
-        if (intent.action != null && intent.action == IMPORT_ACTION_CODE) {
-            Log.v(tag, "Service bind for import of config")
-            mMessenger = Messenger(ExternalConfigImportHandler(this, mBinder))
-            return mMessenger.binder
-        }
-
-        Log.v(tag, "Regular service bind")
         when (mProtocol) {
             "shadowsocks" -> {
                 when (intent.action) {
