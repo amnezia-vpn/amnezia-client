@@ -16,20 +16,25 @@ QString errorString(ErrorCode code){
     case(ServerContainerMissingError): return QObject::tr("Server error: Docker container missing");
     case(ServerDockerFailedError): return QObject::tr("Server error: Docker failed");
 
-    // Ssh connection errors
-    case(SshSocketError): return QObject::tr("Ssh connection error");
-    case(SshTimeoutError): return QObject::tr("Ssh connection timeout");
-    case(SshProtocolError): return QObject::tr("Ssh protocol error");
-    case(SshHostKeyError): return QObject::tr("Ssh server ket check failed");
-    case(SshKeyFileError): return QObject::tr("Ssh key file error");
-    case(SshAuthenticationError): return QObject::tr("Ssh authentication error");
-    case(SshClosedByServerError): return QObject::tr("Ssh session closed");
+    // Libssh errors
+    case(SshRequsetDeniedError): return QObject::tr("Ssh request was denied");
+    case(SshInterruptedError): return QObject::tr("Ssh request was interrupted");
     case(SshInternalError): return QObject::tr("Ssh internal error");
 
-    // Ssh remote process errors
-    case(SshRemoteProcessCreationError): return QObject::tr("Failed to create remote process on server");
-    case(FailedToStartRemoteProcessError): return QObject::tr("Failed to start remote process on server");
-    case(RemoteProcessCrashError): return QObject::tr("Remote process on server crashed");
+    // Libssh sftp errors
+    case(SshSftpEofError): return QObject::tr("Sftp error: End-of-file encountered");
+    case(SshSftpNoSuchFileError): return QObject::tr("Sftp error: File does not exist");
+    case(SshSftpPermissionDeniedError): return QObject::tr("Sftp error: Permission denied");
+    case(SshSftpFailureError): return QObject::tr("Sftp error: Generic failure");
+    case(SshSftpBadMessageError): return QObject::tr("Sftp error: Garbage received from server");
+    case(SshSftpNoConnectionError): return QObject::tr("Sftp error: No connection has been set up");
+    case(SshSftpConnectionLostError): return QObject::tr("Sftp error: There was a connection, but we lost it");
+    case(SshSftpOpUnsupportedError): return QObject::tr("Sftp error: Operation not supported by libssh yet");
+    case(SshSftpInvalidHandleError): return QObject::tr("Sftp error: Invalid file handle");
+    case(SshSftpNoSuchPathError): return QObject::tr("Sftp error: No such file or directory path exists");
+    case(SshSftpFileAlreadyExistsError): return QObject::tr("Sftp error: An attempt to create an already existing file or directory has been made");
+    case(SshSftpWriteProtectError): return QObject::tr("Sftp error: Write-protected filesystem");
+    case(SshSftpNoMediaError): return QObject::tr("Sftp error: No media was in remote drive");
 
     // Local errors
     case (FailedToSaveConfigData): return QObject::tr("Failed to save config to disk");

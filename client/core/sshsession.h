@@ -30,11 +30,14 @@ namespace libssh {
         ErrorCode initChannel(const ServerCredentials &credentials);
         ErrorCode initSftp(const ServerCredentials &credentials);
         ErrorCode writeToChannel(const QString &data,
-                                 const std::function<void(const QString &)> &cbReadStdOut,
-                                 const std::function<void(const QString &)> &cbReadStdErr);
+                                 const std::function<void(const QString &, Session &)> &cbReadStdOut,
+                                 const std::function<void(const QString &, Session &)> &cbReadStdErr);
+        ErrorCode writeToChannel(const QString &data);
         ErrorCode sftpFileCopy(const SftpOverwriteMode overwriteMode, const std::string& localPath, const std::string& remotePath, const std::string& fileDesc);
     private:
         ErrorCode connectToHost(const ServerCredentials &credentials);
+        ErrorCode fromLibsshErrorCode(int errorCode);
+        ErrorCode fromLibsshSftpErrorCode(int errorCode);
 
         ssh_session m_session;
         ssh_channel m_channel;

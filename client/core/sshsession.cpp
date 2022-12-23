@@ -52,7 +52,7 @@ namespace libssh {
 
         if (connectionResult != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshTimeoutError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         m_isSessionConnected = true;
@@ -71,10 +71,10 @@ namespace libssh {
 
         if (authResult != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshAuthenticationError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
-        return ErrorCode::NoError;
+        return fromLibsshErrorCode(ssh_get_error_code(m_session));
     }
 
     ErrorCode Session::initChannel(const ServerCredentials &credentials)
@@ -89,7 +89,7 @@ namespace libssh {
 
         if (m_channel == NULL) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshAuthenticationError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         int result = ssh_channel_open_session(m_channel);
@@ -99,37 +99,37 @@ namespace libssh {
             m_isChannelOpened = true;
         } else {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshAuthenticationError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         result = ssh_channel_request_pty(m_channel);
         if (result != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshInternalError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         result = ssh_channel_change_pty_size(m_channel, 80, 1024);
         if (result != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshInternalError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         result = ssh_channel_request_shell(m_channel);
         if (result != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshInternalError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
-        return ErrorCode::NoError;
+        return fromLibsshErrorCode(ssh_get_error_code(m_session));
     }
 
     ErrorCode Session::writeToChannel(const QString &data,
-                                        const std::function<void(const QString &)> &cbReadStdOut,
-                                        const std::function<void(const QString &)> &cbReadStdErr)
+                                        const std::function<void(const QString &, Session &)> &cbReadStdOut,
+                                        const std::function<void(const QString &, Session &)> &cbReadStdErr)
     {
         if (m_channel == NULL) {
             qDebug() << "ssh channel not initialized";
-            return ErrorCode::SshAuthenticationError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         QFutureWatcher<ErrorCode> watcher;
@@ -142,12 +142,11 @@ namespace libssh {
             char buffer[bufferSize];
 
             int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
-            ssh_channel_write(m_channel, "\n", 1);
-            if (bytesWritten == data.size()) {
+            if (bytesWritten == data.size() && ssh_channel_write(m_channel, "\n", 1)) {
                 auto readOutput = [&](bool isStdErr) {
                     std::string output;
                     if (ssh_channel_is_open(m_channel) && !ssh_channel_is_eof(m_channel)) {
-                        bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 50);
+                        bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 200);
                         while (bytesRead > 0)
                         {
                             output = std::string(buffer, bytesRead);
@@ -155,13 +154,13 @@ namespace libssh {
                                 qDebug().noquote() << (isStdErr ? "stdErr" : "stdOut") << QString(output.c_str());
 
                                 if (cbReadStdOut && !isStdErr){
-                                    cbReadStdOut(output.c_str());
+                                    cbReadStdOut(output.c_str(), *this);
                                 }
                                 if (cbReadStdErr && isStdErr){
-                                    cbReadStdErr(output.c_str());
+                                    cbReadStdErr(output.c_str(), *this);
                                 }
                             }
-                            bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 5000);
+                            bytesRead = ssh_channel_read_timeout(m_channel, buffer, sizeof(buffer), isStdErr, 2000);
                         }
                     }
                     return output;
@@ -171,19 +170,33 @@ namespace libssh {
                 readOutput(true);
             } else {
                 qDebug() << ssh_get_error(m_session);
-                return ErrorCode::SshInternalError;
+                return fromLibsshErrorCode(ssh_get_error_code(m_session));
             }
             m_isNeedSendChannelEof = true;
-            return ErrorCode::NoError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         });
         watcher.setFuture(future);
 
         QEventLoop wait;
-
         QObject::connect(this, &Session::writeToChannelFinished, &wait, &QEventLoop::quit);
         wait.exec();
 
         return watcher.result();
+    }
+
+    ErrorCode Session::writeToChannel(const QString &data)
+    {
+        if (m_channel == NULL) {
+            qDebug() << "ssh channel not initialized";
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
+        }
+
+        int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
+        if (bytesWritten == data.size() && ssh_channel_write(m_channel, "\n", 1)) {
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
+        }
+        qDebug() << ssh_get_error(m_session);
+        return fromLibsshErrorCode(ssh_get_error_code(m_session));
     }
 
     ErrorCode Session::initSftp(const ServerCredentials &credentials)
@@ -199,14 +212,14 @@ namespace libssh {
 
         if (m_sftpSession == NULL) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshSftpError;
+            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
         int result = sftp_init(m_sftpSession);
 
         if (result != SSH_OK) {
             qDebug() << ssh_get_error(m_session);
-            return ErrorCode::SshSftpError;
+            return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
         }
 
         return ErrorCode::NoError;
@@ -216,7 +229,7 @@ namespace libssh {
     {
         if (m_sftpSession == NULL) {
             qDebug() << "ssh sftp session not initialized";
-            return ErrorCode::SshSftpError;
+            return ErrorCode::SshInternalError;
         }
 
         QFutureWatcher<ErrorCode> watcher;
@@ -232,7 +245,7 @@ namespace libssh {
 
             if (file == NULL) {
                 qDebug() << ssh_get_error(m_session);
-                return ErrorCode::SshSftpError;
+                return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
             }
 
             int localFileSize = std::filesystem::file_size(localPath);
@@ -253,7 +266,7 @@ namespace libssh {
                         fin.close();
                         sftp_close(file);
                         qDebug() << ssh_get_error(m_session);
-                        return ErrorCode::SshSftpError;
+                        return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
                     }
                 }
 
@@ -271,13 +284,13 @@ namespace libssh {
                         fin.close();
                         sftp_close(file);
                         qDebug() << ssh_get_error(m_session);
-                        return ErrorCode::SshSftpError;
+                        return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
                     }
                 }
             } else {
                 sftp_close(file);
                 qDebug() << ssh_get_error(m_session);
-                return ErrorCode::SshSftpError;
+                return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
             }
 
             fin.close();
@@ -285,7 +298,7 @@ namespace libssh {
             int result = sftp_close(file);
             if (result != SSH_OK) {
                 qDebug() << ssh_get_error(m_session);
-                return ErrorCode::SshSftpError;
+                return fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
             }
 
             return ErrorCode::NoError;
@@ -293,10 +306,40 @@ namespace libssh {
         watcher.setFuture(future);
 
         QEventLoop wait;
-
         QObject::connect(this, &Session::sftpFileCopyFinished, &wait, &QEventLoop::quit);
         wait.exec();
 
         return watcher.result();
+    }
+
+    ErrorCode Session::fromLibsshErrorCode(int errorCode)
+    {
+        switch (errorCode) {
+        case(SSH_NO_ERROR): return ErrorCode::NoError;
+        case(SSH_REQUEST_DENIED): return ErrorCode::SshRequsetDeniedError;
+        case(SSH_EINTR): return ErrorCode::SshInterruptedError;
+        case(SSH_FATAL): return ErrorCode::SshInternalError;
+        default: return ErrorCode::SshInternalError;
+        }
+    }
+    ErrorCode Session::fromLibsshSftpErrorCode(int errorCode)
+    {
+        switch (errorCode) {
+        case(SSH_FX_OK): return ErrorCode::NoError;
+        case(SSH_FX_EOF): return ErrorCode::SshSftpEofError;
+        case(SSH_FX_NO_SUCH_FILE): return ErrorCode::SshSftpNoSuchFileError;
+        case(SSH_FX_PERMISSION_DENIED): return ErrorCode::SshSftpPermissionDeniedError;
+        case(SSH_FX_FAILURE): return ErrorCode::SshSftpFailureError;
+        case(SSH_FX_BAD_MESSAGE): return ErrorCode::SshSftpBadMessageError;
+        case(SSH_FX_NO_CONNECTION): return ErrorCode::SshSftpNoConnectionError;
+        case(SSH_FX_CONNECTION_LOST): return ErrorCode::SshSftpConnectionLostError;
+        case(SSH_FX_OP_UNSUPPORTED): return ErrorCode::SshSftpOpUnsupportedError;
+        case(SSH_FX_INVALID_HANDLE): return ErrorCode::SshSftpInvalidHandleError;
+        case(SSH_FX_NO_SUCH_PATH): return ErrorCode::SshSftpNoSuchPathError;
+        case(SSH_FX_FILE_ALREADY_EXISTS): return ErrorCode::SshSftpFileAlreadyExistsError;
+        case(SSH_FX_WRITE_PROTECT): return ErrorCode::SshSftpWriteProtectError;
+        case(SSH_FX_NO_MEDIA): return ErrorCode::SshSftpNoMediaError;
+        default: return ErrorCode::SshSftpFailureError;
+        }
     }
 }
