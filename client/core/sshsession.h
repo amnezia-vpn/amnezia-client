@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <fcntl.h>
+
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
@@ -10,33 +12,42 @@
 
 using namespace amnezia;
 
-class SshSession : public QObject
-{
-    Q_OBJECT
-public:
-    SshSession(QObject *parent = nullptr);
-    ~SshSession();
+namespace libssh {
+    enum SftpOverwriteMode {
+        /*! Overwrite any existing files */
+        SftpOverwriteExisting = O_TRUNC,
+        /*! Append new content if the file already exists */
+        SftpAppendToExisting = O_APPEND
+    };
 
-    ErrorCode initChannel(const ServerCredentials &credentials);
-    ErrorCode initSftp(const ServerCredentials &credentials);
-    ErrorCode writeToChannel(const QString &data,
-                             const std::function<void(const QString &)> &cbReadStdOut,
-                             const std::function<void(const QString &)> &cbReadStdErr);
-    ErrorCode sftpFileCopy(const std::string& localPath, const std::string& remotePath, const std::string& fileDesc);
-private:
-    ErrorCode connectToHost(const ServerCredentials &credentials);
+    class Session : public QObject
+    {
+        Q_OBJECT
+    public:
+        Session(QObject *parent = nullptr);
+        ~Session();
 
-    ssh_session m_session;
-    ssh_channel m_channel;
-    sftp_session m_sftpSession;
+        ErrorCode initChannel(const ServerCredentials &credentials);
+        ErrorCode initSftp(const ServerCredentials &credentials);
+        ErrorCode writeToChannel(const QString &data,
+                                 const std::function<void(const QString &)> &cbReadStdOut,
+                                 const std::function<void(const QString &)> &cbReadStdErr);
+        ErrorCode sftpFileCopy(const SftpOverwriteMode overwriteMode, const std::string& localPath, const std::string& remotePath, const std::string& fileDesc);
+    private:
+        ErrorCode connectToHost(const ServerCredentials &credentials);
 
-    bool m_isChannelOpened = false;
-    bool m_isSessionConnected = false;
-    bool m_isNeedSendChannelEof = false;
-    bool m_isSftpInitialized = false;
-signals:
-    void writeToChannelFinished();
-    void sftpFileCopyFinished();
-};
+        ssh_session m_session;
+        ssh_channel m_channel;
+        sftp_session m_sftpSession;
+
+        bool m_isChannelOpened = false;
+        bool m_isSessionConnected = false;
+        bool m_isNeedSendChannelEof = false;
+        bool m_isSftpInitialized = false;
+    signals:
+        void writeToChannelFinished();
+        void sftpFileCopyFinished();
+    };
+}
 
 #endif // SSHSESSION_H

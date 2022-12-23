@@ -144,7 +144,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
             arg(connData.clientIP);
 
     e = m_serverController->uploadTextFileToContainer(container, credentials, configPart,
-        protocols::wireguard::serverConfigPath, QSsh::SftpOverwriteMode::SftpAppendToExisting);
+        protocols::wireguard::serverConfigPath, libssh::SftpOverwriteMode::SftpAppendToExisting);
 
     if (e) {
         if (errorCode) *errorCode = e;

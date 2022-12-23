@@ -4,12 +4,9 @@
 #include <QJsonObject>
 #include <QObject>
 
-#include "debug.h"
 #include "defs.h"
-
 #include "containers/containers_defs.h"
 
-#include "sftpdefs.h"
 #include "sshclient.h"
 
 class Settings;
@@ -48,11 +45,11 @@ public:
     ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-        const QString &remotePath, QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+        const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 
     ErrorCode uploadTextFileToContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &file, const QString &path,
-        QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+        libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 
     QByteArray getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
@@ -84,7 +81,7 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
-    SshClient m_sshClient;
+    libssh::Client m_sshClient;
 };
 
 #endif // SERVERCONTROLLER_H

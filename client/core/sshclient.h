@@ -7,14 +7,16 @@
 
 using namespace amnezia;
 
-class SshClient : public QObject
-{
-    Q_OBJECT
-public:
-    SshClient(QObject *parent = nullptr);
-    ~SshClient();
+namespace libssh {
+    class Client : public QObject
+    {
+        Q_OBJECT
+    public:
+        Client(QObject *parent = nullptr);
+        ~Client();
 
-    std::shared_ptr<SshSession> getSession();
-};
+        std::shared_ptr<Session> getSession();
+    };
+}
 
 #endif // SSHCLIENT_H

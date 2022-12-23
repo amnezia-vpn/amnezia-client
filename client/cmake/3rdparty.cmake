@@ -1,7 +1,7 @@
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
-include(${CLIENT_ROOT_DIR}/3rd/QtSsh/src/ssh/qssh.cmake)
-include(${CLIENT_ROOT_DIR}/3rd/QtSsh/src/botan/botan.cmake)
+#include(${CLIENT_ROOT_DIR}/3rd/QtSsh/src/ssh/qssh.cmake)
+#include(${CLIENT_ROOT_DIR}/3rd/QtSsh/src/botan/botan.cmake)
 
 if(NOT IOS AND NOT ANDROID)
    include(${CLIENT_ROOT_DIR}/3rd/SingleApplication/singleapplication.cmake)

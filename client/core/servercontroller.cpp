@@ -22,6 +22,7 @@
 #include <thread>
 
 #include "containers/containers_defs.h"
+#include "debug.h"
 #include "server_defs.h"
 #include "settings.h"
 #include "scripts_registry.h"
@@ -43,7 +44,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     const std::function<void(const QString &)> &cbReadStdOut,
     const std::function<void(const QString &)> &cbReadStdErr) {
 
-    std::shared_ptr<SshSession> session = m_sshClient.getSession();
+    std::shared_ptr<libssh::Session> session = m_sshClient.getSession();
     if (!session) {
         return ErrorCode::SshInternalError;
     }
@@ -117,7 +118,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
 
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     const ServerCredentials &credentials, const QString &file, const QString &path,
-    QSsh::SftpOverwriteMode overwriteMode)
+    libssh::SftpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -141,14 +142,14 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     if (e) return e;
 
 
-    if (overwriteMode == QSsh::SftpOverwriteMode::SftpOverwriteExisting) {
+    if (overwriteMode == libssh::SftpOverwriteMode::SftpOverwriteExisting) {
         e = runScript(credentials,
             replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
                 genVarsForScript(credentials, container)), cbReadStd, cbReadStd);
 
         if (e) return e;
     }
-    else if (overwriteMode == QSsh::SftpOverwriteMode::SftpAppendToExisting) {
+    else if (overwriteMode == libssh::SftpOverwriteMode::SftpAppendToExisting) {
         e = runScript(credentials,
             replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
                 genVarsForScript(credentials, container)), cbReadStd, cbReadStd);
@@ -231,9 +232,9 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
-    QSsh::SftpOverwriteMode overwriteMode)
+    libssh::SftpOverwriteMode overwriteMode)
 {
-    std::shared_ptr<SshSession> session = m_sshClient.getSession();
+    std::shared_ptr<libssh::Session> session = m_sshClient.getSession();
     if (!session) {
         return ErrorCode::SshInternalError;
     }
@@ -249,7 +250,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
 
     qDebug() << "remotePath" << remotePath;
 
-    error = session->sftpFileCopy(localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
+    error = session->sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
     if (error != ErrorCode::NoError) {
         return error;
     }
