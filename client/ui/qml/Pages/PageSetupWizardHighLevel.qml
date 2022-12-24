@@ -19,7 +19,7 @@ PageBase {
         text: qsTr("Setup Wizard")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: caption.bottom

@@ -28,7 +28,7 @@ PageBase {
     }
 
 
-    Flickable {
+    FlickableType {
         clip: true
         width: parent.width
         anchors.top: caption.bottom

@@ -17,7 +17,7 @@ PageBase {
         z: -1
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: back.bottom

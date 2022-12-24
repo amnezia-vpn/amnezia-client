@@ -19,7 +19,7 @@ PageProtocolBase {
         text: qsTr("OpenVPN Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: caption.bottom

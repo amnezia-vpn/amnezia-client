@@ -19,7 +19,7 @@ PageBase {
         text: qsTr("Application Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: caption.bottom
@@ -161,10 +161,6 @@ PageBase {
                     AppSettingsLogic.onPushButtonRestoreAppConfigClicked()
                 }
             }
-        }
-
-        ScrollBar.vertical: ScrollBar {
-            policy: fl.height > content.height? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
         }
     }
 

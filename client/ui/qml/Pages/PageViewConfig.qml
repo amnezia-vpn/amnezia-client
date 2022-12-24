@@ -20,7 +20,7 @@ PageBase {
         text: qsTr("Check config")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: caption.bottom

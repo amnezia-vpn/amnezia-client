@@ -178,7 +178,7 @@ PageBase {
 
 
 
-    Flickable {
+    FlickableType {
         visible: container_selector.selectedIndex <= 0
         clip: true
         width: parent.width

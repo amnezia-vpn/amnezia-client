@@ -18,7 +18,7 @@ PageShareProtocolBase {
         text: qsTr("Share Cloak Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
         width: root.width
         anchors.top: caption.bottom
