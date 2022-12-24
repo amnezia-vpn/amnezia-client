@@ -187,7 +187,7 @@ if(APPLE)
         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-        # set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
 
@@ -266,8 +266,6 @@ endif()
 if(IOS)
     message("Client iOS build")
 
-
-
     find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
     set(LIBS ${LIBS} Qt6::ShaderTools)
 
@@ -313,7 +311,6 @@ endif()
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
     message("Building for iPhone OS")
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
