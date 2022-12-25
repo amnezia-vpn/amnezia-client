@@ -43,6 +43,7 @@ namespace libssh {
         ssh_channel m_channel;
         sftp_session m_sftpSession;
 
+        bool m_isChannelCreated = false;
         bool m_isChannelOpened = false;
         bool m_isSessionConnected = false;
         bool m_isNeedSendChannelEof = false;

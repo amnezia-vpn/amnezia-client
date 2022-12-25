@@ -21,6 +21,9 @@ namespace libssh {
             ssh_channel_send_eof(m_channel);
         }
         if (m_isChannelOpened) {
+            ssh_channel_close(m_channel);
+        }
+        if (m_isChannelCreated) {
             ssh_channel_free(m_channel);
         }
         if (m_isSftpInitialized) {
@@ -92,6 +95,7 @@ namespace libssh {
             return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
 
+        m_isChannelCreated = true;
         int result = ssh_channel_open_session(m_channel);
 
         if (result == SSH_OK && ssh_channel_is_open(m_channel)) {
