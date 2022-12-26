@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-//import QtGraphicalEffects 1.12
 import QtQuick.Shapes 1.4
 
 Item {
