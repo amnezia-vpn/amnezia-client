@@ -122,9 +122,6 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
-
-    qDebug() << "data" << file;
-
     e = uploadFileToHost(credentials, file.toUtf8(), tmpFileName);
     if (e) return e;
 
@@ -202,18 +199,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
     qDebug().noquote() << "Copy file from container END : \n" ;
 
-
-    int pos=stdOut.lastIndexOf("'\"");
-
-    QString cuted_right(stdOut.right(stdOut.size()-pos-4));
-
-    pos=cuted_right.lastIndexOf("\n");
-
-    QString cuted(cuted_right.left(pos-1));
-
-    qDebug().noquote() << "Copy file cuted : \n" << cuted <<"cut END";
-
-    return QByteArray::fromHex(cuted.toUtf8());
+    return QByteArray::fromHex(stdOut.toUtf8());
 }
 
 ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
