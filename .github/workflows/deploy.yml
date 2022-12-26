@@ -19,7 +19,7 @@ jobs:
         xcode-version: '13.4'
 
     - name: 'Apple Certificate'
-        run: 
+      run: |
           wget https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
           sudo security add-trusted-cert -d -r unspecified -k /Library/Keychains/System.keychain AppleWWDRCAG3.cer
 
