@@ -21,7 +21,7 @@ jobs:
     - name: 'Apple Certificate'
       run: |
           wget https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
-          sudo security add-trusted-cert -d unspecified -k /Library/Keychains/System.keychain AppleWWDRCAG3.cer
+          sudo security add-trusted-cert -r unspecified -k /Library/Keychains/ios-build.keychain AppleWWDRCAG3.cer
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
