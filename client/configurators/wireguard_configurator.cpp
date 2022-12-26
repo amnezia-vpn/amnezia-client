@@ -76,8 +76,9 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     {
         QString script = QString("cat %1 | grep AllowedIPs").arg(amnezia::protocols::wireguard::serverConfigPath);
         QString stdOut;
-        auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+        auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
             stdOut += data + "\n";
+            return ErrorCode::NoError;
         };
 
         e = m_serverController->runContainerScript(credentials, container, script, cbReadStdOut);

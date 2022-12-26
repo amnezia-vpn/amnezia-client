@@ -41,14 +41,10 @@ ServerController::~ServerController()
 
 
 ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
-    const std::function<void(const QString &, libssh::Session &)> &cbReadStdOut,
-    const std::function<void(const QString &, libssh::Session &)> &cbReadStdErr) {
+    const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut,
+    const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr) {
 
-    std::shared_ptr<libssh::Session> session = m_sshClient.getSession();
-    if (!session) {
-        return ErrorCode::SshInternalError;
-    }
-    auto error = session->initChannel(credentials);
+    auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -83,7 +79,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         qDebug().noquote() << "EXEC" << lineToExec;
         Debug::appendSshLog("Run command:" + lineToExec);
 
-        error = session->writeToChannel(lineToExec, cbReadStdOut, cbReadStdErr);
+        error = m_sshClient.executeCommand(lineToExec, cbReadStdOut, cbReadStdErr);
         if (error != ErrorCode::NoError) {
             return error;
         }
@@ -96,8 +92,8 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
 ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials,
     DockerContainer container, QString script,
-    const std::function<void (const QString &, libssh::Session &)> &cbReadStdOut,
-    const std::function<void (const QString &, libssh::Session &)> &cbReadStdErr)
+    const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut,
+    const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
     Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + QStringLiteral(":\n") + script);
@@ -126,8 +122,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     if (e) return e;
 
     QString stdOut;
-    auto cbReadStd = [&](const QString &data, libssh::Session &) {
+    auto cbReadStd = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
     // mkdir
@@ -188,8 +185,9 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
 
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data;
+        return ErrorCode::NoError;
     };
 
     *errorCode = runScript(credentials, script, cbReadStdOut);
@@ -220,11 +218,7 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     libssh::SftpOverwriteMode overwriteMode)
 {
-    std::shared_ptr<libssh::Session> session = m_sshClient.getSession();
-    if (!session) {
-        return ErrorCode::SshInternalError;
-    }
-    auto error = session->initSftp(credentials);
+    auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -236,7 +230,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
 
     qDebug() << "remotePath" << remotePath;
 
-    error = session->sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -367,15 +361,17 @@ bool ServerController::isReinstallContainerRequred(DockerContainer container, co
 ErrorCode ServerController::installDockerWorker(const ServerCredentials &credentials, DockerContainer container)
 {
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &session) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &client) {
         stdOut += data + "\n";
 
         if (data.contains("Automatically restart Docker daemon?")) {
-            session.writeToChannel("yes");
+            return client.writeResponse("yes");
         }
+        return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
     ErrorCode e = runScript(credentials,
@@ -404,8 +400,9 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     if (e) return e;
 
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 //    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
 //        stdOut += data + "\n";
@@ -422,8 +419,9 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
 ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
    // auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
    //     stdOut += data + "\n";
@@ -448,11 +446,13 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
 ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
 
@@ -584,11 +584,13 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
 {
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, libssh::Session &) {
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
     ErrorCode e = runScript(credentials,
@@ -601,8 +603,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)
 {
-//    SshConnection *client = acquireConnection(sshParams(credentials));
-//    if (client) client->disconnectFromHost();
+    m_sshClient.disconnectFromHost();
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)

@@ -72,7 +72,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/sshsession.h
 )
 
 if(NOT IOS)
@@ -96,7 +95,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/sshsession.cpp
 )
 
 if(NOT IOS)

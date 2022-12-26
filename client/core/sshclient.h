@@ -3,11 +3,22 @@
 
 #include <QObject>
 
-#include "sshsession.h"
+#include <fcntl.h>
+
+#include <libssh/libssh.h>
+#include <libssh/sftp.h>
+
+#include "defs.h"
 
 using namespace amnezia;
 
 namespace libssh {
+    enum SftpOverwriteMode {
+        /*! Overwrite any existing files */
+        SftpOverwriteExisting = O_TRUNC,
+        /*! Append new content if the file already exists */
+        SftpAppendToExisting = O_APPEND
+    };
     class Client : public QObject
     {
         Q_OBJECT
@@ -15,7 +26,28 @@ namespace libssh {
         Client(QObject *parent = nullptr);
         ~Client();
 
-        std::shared_ptr<Session> getSession();
+        ErrorCode connectToHost(const ServerCredentials &credentials);
+        void disconnectFromHost();
+        ErrorCode executeCommand(const QString &data,
+                                 const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
+                                 const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr);
+        ErrorCode writeResponse(const QString &data);
+        ErrorCode sftpFileCopy(const SftpOverwriteMode overwriteMode,
+                               const std::string& localPath,
+                               const std::string& remotePath,
+                               const std::string& fileDesc);
+    private:
+        ErrorCode closeChannel();
+        ErrorCode closeSftpSession();
+        ErrorCode fromLibsshErrorCode(int errorCode);
+        ErrorCode fromLibsshSftpErrorCode(int errorCode);
+
+        ssh_session m_session;
+        ssh_channel m_channel;
+        sftp_session m_sftpSession;
+    signals:
+        void writeToChannelFinished();
+        void sftpFileCopyFinished();
     };
 }
 
