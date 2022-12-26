@@ -69,11 +69,21 @@ jobs:
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
     - name: iOS Build/Release With Multiple Targets Action
-      uses: kumarsunil0007/build-ios-action@latest
+      uses: sparkfabrik/ios-build-action@v2.0.0
       with:
-        project-path: build-ios/AmneziaVPN.xcodeproj
-        p12-base64: ${{ secrets.P12_BASE64 }}
-        mobileprovision-base64: ${{ secrets.MOBILEPROVISION_BASE64 }}
-        code-signing-identity: ${{ secrets.CODE_SIGNING_IDENTITY }}
-        team-id: ${{ secrets.TEAM_ID }}
+        upload-to-testflight: true
+        increment-build-number: true
         configuration: Release
+        export-method: app-store
+        project-path: /build-ios/AmneziaVPN.xcodeproj
+        scheme: AmneziaVPN
+        output-path: build-${{ github.sha }}.ipa
+        apple-key-id: ${{ secrets.APPLE_KEY_ID }}
+        apple-key-issuer-id: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+        apple-key-content: ${{ secrets.APPLE_KEY_CONTENT }}
+        team-id: ${{ secrets.TEAM_ID }}
+        team-name: ${{ secrets.TEAM_NAME }}
+        match-password: ${{ secrets.MATCH_PASSWORD }}
+        match-git-url: ${{ secrets.MATCH_GIT_URL }}
+        match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        match-build-type: 'appstore'
