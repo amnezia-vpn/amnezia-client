@@ -68,8 +68,8 @@ jobs:
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
-    - name: iOS Build/Release With Multiple Targets Action
-      uses: sparkfabrik/ios-build-action@v2.0.0
+    - name: Build iOS Action Multiple Targets
+      uses: Shahzainali/ios-build-action@0.2
       with:
         upload-to-testflight: true
         increment-build-number: true
@@ -87,4 +87,3 @@ jobs:
         match-git-url: ${{ secrets.MATCH_GIT_URL }}
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
-        ios-app-id: org.amnezia.AmneziaVPN
