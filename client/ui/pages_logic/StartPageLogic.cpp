@@ -184,10 +184,6 @@ bool StartPageLogic::importConnectionFromCode(QString code)
         return importConnection(o);
     }
 
-    o = QJsonDocument::fromJson(ba).object();
-    if (!o.isEmpty()) {
-        return importConnection(o);
-    }
     return false;
 }
 

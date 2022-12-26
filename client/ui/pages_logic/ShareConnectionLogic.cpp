@@ -3,9 +3,7 @@
 #include <QDataStream>
 #include <QMessageBox>
 
-
-//#include "qrcodegen.hpp"
-#include "3rd/qrcodegen/qrcodegen.hpp"
+#include "qrcodegen.hpp"
 
 #include "ShareConnectionLogic.h"
 

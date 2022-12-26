@@ -1,8 +1,6 @@
 #ifndef ANDROID_CONTROLLER_H
 #define ANDROID_CONTROLLER_H
 
-//#include <QAndroidBinder>
-//#include <QAndroidServiceConnection>
 #include <QtCore/private/qandroidextras_p.h>
 
 #include "ui/uilogic.h"
