@@ -174,10 +174,6 @@ PageBase {
         }
     }
 
-
-
-
-
     FlickableType {
         visible: container_selector.selectedIndex <= 0
         clip: true

@@ -28,7 +28,7 @@ PageShareProtocolBase {
         anchors.left: root.left
         anchors.leftMargin: 30
         anchors.right: root.right
-        anchors.rightMargin: 30
+        anchors.rightMargin: 15
 
         contentHeight: content.height
         clip: true
@@ -39,6 +39,7 @@ PageShareProtocolBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             LabelType {
                 id: lb_desc

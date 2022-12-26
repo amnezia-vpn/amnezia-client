@@ -4,7 +4,7 @@ import Qt.labs.platform 1.0
 
 import "../Config"
 
-Flickable
+FlickableType
 {
     property alias textArea: root
     id: flickable
