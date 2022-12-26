@@ -97,9 +97,19 @@ if(NOT IOS)
 endif()
 
 # deploy artifacts required to run the application to the debug build folder
-if(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/service")
+if(WIN32)
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(DEPLOY_ARTIFACT_PATH "windows/x64")
+    else()
+        set(DEPLOY_ARTIFACT_PATH "windows/x32")
+    endif()
+elseif(LINUX)
+    set(DEPLOY_ARTIFACT_PATH "linux/serivce")
+elseif(APPLE AND NOT IOS)
+    set(DEPLOY_ARTIFACT_PATH "macos")
+endif()
 
+if(NOT IOS AND NOT ANDROID)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>

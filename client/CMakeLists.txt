@@ -509,12 +509,12 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
-if(NOT IOS)
-add_custom_command(
-    TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
-    $<TARGET_FILE_DIR:${PROJECT}>
-    COMMAND_EXPAND_LISTS
-)
+if(NOT IOS AND NOT ANDROID)
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+        $<TARGET_FILE_DIR:${PROJECT}>
+        COMMAND_EXPAND_LISTS
+    )
 endif()
