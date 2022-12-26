@@ -76,7 +76,7 @@ jobs:
         increment-build-number: true
         configuration: Release
         export-method: app-store
-        project-path: /build-ios/AmneziaVPN.xcodeproj
+        project-path: /Users/runner/work/desktop-client/desktop-client/build-ios/AmneziaVPN.xcodeproj
         scheme: AmneziaVPN
         output-path: build-${{ github.sha }}.ipa
         apple-key-id: ${{ secrets.APPLE_KEY_ID }}
