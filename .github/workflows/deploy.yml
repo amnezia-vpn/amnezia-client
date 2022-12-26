@@ -20,7 +20,8 @@ jobs:
 
     - name: 'Install fastlane'
       run: |
-          brew install fastlane
+          sudo gem install fastlane
+          fastlane init
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
