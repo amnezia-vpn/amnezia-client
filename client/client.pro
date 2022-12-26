@@ -46,8 +46,6 @@ HEADERS  += \
     debug.h \
     defines.h \
     managementserver.h \
-    platforms/android/androidutils.h \
-    platforms/android/androidvpnactivity.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
     protocols/protocols_defs.h \
@@ -110,8 +108,6 @@ SOURCES  += \
     debug.cpp \
     main.cpp \
     managementserver.cpp \
-    platforms/android/androidutils.cpp \
-    platforms/android/androidvpnactivity.cpp \
     platforms/ios/MobileUtils.cpp \
     platforms/linux/leakdetector.cpp \
     protocols/protocols_defs.cpp \
@@ -264,13 +260,16 @@ android {
    HEADERS += \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
-      protocols/android_vpnprotocol.h
+      protocols/android_vpnprotocol.h \
+      platforms/android/androidutils.h \
+      platforms/android/androidvpnactivity.h
 
    SOURCES += \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
-      protocols/android_vpnprotocol.cpp
-
+      protocols/android_vpnprotocol.cpp \
+      platforms/android/androidutils.cpp \
+      platforms/android/androidvpnactivity.cpp
 
    DISTFILES += \
       android/AndroidManifest.xml \
