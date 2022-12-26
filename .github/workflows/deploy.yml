@@ -18,6 +18,16 @@ jobs:
       with:
         xcode-version: '13.4'
 
+    - name: 'Apple Certificate'
+        apple_intermediate_certificate_path = "/tmp/AppleWWDRCAG3.cer"
+        `curl https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer --output #{apple_intermediate_certificate_path}`
+
+      other_action.import_certificate(
+        certificate_path: apple_intermediate_certificate_path,
+        keychain_name: ios-build.keychain,
+        keychain_password: 12345678
+      ) 
+
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
       with:
@@ -68,6 +78,8 @@ jobs:
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
         ls
+
+   
 
     - name: Build iOS Action Multiple Targets
       uses: Shahzainali/ios-build-action@0.5
