@@ -18,10 +18,9 @@ jobs:
       with:
         xcode-version: '13.4'
 
-    - name: 'Apple Certificate'
+    - name: 'Install fastlane'
       run: |
-          wget https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
-          security add-trusted-cert -d -r unspecified -k ~/Library/Keychains/login.keychain-db AppleWWDRCAG3.cer
+          brew install fastlane
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
