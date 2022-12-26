@@ -31,3 +31,6 @@
 [submodule "client/3rd/zlib"]
 	path = client/3rd/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "deploy/amnezia-ios-certificates"]
+	path = deploy/amnezia-ios-certificates
+	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
