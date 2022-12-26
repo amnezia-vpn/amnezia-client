@@ -8,7 +8,7 @@ TEMPLATE = app
 IS_CI=$$(CI)
 !isEmpty(IS_CI){
   message("Detected CI env")
-  CONFIG += silent ccache
+  CONFIG += silent #ccache
 }
 
 CONFIG += qtquickcompiler
@@ -248,6 +248,9 @@ android {
         # As QAndroidBinder is not yet implemented with a public api
         QT+=core-private
         ANDROID_ABIS=ANDROID_TARGET_ARCH
+
+        # for not changing qtkeychain sources for qt6
+        QT -= androidextras
     }
     else {
         QT += androidextras

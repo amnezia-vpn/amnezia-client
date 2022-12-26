@@ -1,7 +1,5 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+#include "wireguard-go-version.h"
+#include "3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard.h"
 #include "3rd/wireguard-apple/Sources/WireGuardKitC/WireGuardKitC.h"
 
 #include <stdbool.h>
@@ -21,8 +19,3 @@ bool key_from_hex(uint8_t key[WG_KEY_LEN], const char* hex);
 bool key_eq(const uint8_t key1[WG_KEY_LEN], const uint8_t key2[WG_KEY_LEN]);
 
 void write_msg_to_log(const char* tag, const char* msg);
-
-#import "TargetConditionals.h"
-#if TARGET_OS_OSX
-#  include <libproc.h>
-#endif
