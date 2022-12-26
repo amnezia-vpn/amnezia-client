@@ -70,7 +70,7 @@ jobs:
         ls
 
     - name: Build iOS Action Multiple Targets
-      uses: Shahzainali/ios-build-action@0.3
+      uses: Shahzainali/ios-build-action@0.4
       with:
         upload-to-testflight: true
         increment-build-number: true
