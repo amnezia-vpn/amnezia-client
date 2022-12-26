@@ -69,7 +69,7 @@ jobs:
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
     - name: Build iOS Action Multiple Targets
-      uses: Shahzainali/ios-build-action@0.2
+      uses: Shahzainali/ios-build-action@0.3
       with:
         upload-to-testflight: true
         increment-build-number: true
