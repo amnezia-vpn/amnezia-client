@@ -67,6 +67,7 @@ jobs:
         export PATH=$PATH:~/go/bin
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+        ls
 
     - name: Build iOS Action Multiple Targets
       uses: Shahzainali/ios-build-action@0.3
