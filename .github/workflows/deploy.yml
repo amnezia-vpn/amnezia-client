@@ -11,7 +11,7 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
-      app_identifier: 'org.amnezia.AmneziaVPN'
+      IOS_APP_ID: 'org.amnezia.AmneziaVPN'
 
     steps:
     - name: 'Setup xcode'
@@ -73,7 +73,7 @@ jobs:
     - name: Build iOS Action
       uses: sparkfabrik/ios-build-action@v2.0.0
       with:
-        upload-to-testflight: false
+        upload-to-testflight: true
         increment-build-number: true
         configuration: Release
         export-method: app-store
