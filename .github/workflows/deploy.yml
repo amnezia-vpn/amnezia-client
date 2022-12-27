@@ -11,7 +11,7 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
-      APP_ID: 'org.amnezia.AmneziaVPN'
+      APP_ID: 'org.amnezia.AmneziaVPN','org.amnezia.AmneziaVPN.network-extension'
       IOS_APP_ID: 'org.amnezia.AmneziaVPN'
 
 
