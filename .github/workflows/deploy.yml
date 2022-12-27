@@ -242,7 +242,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
