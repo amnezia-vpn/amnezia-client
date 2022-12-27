@@ -277,12 +277,16 @@ if(ANDROID)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.h
     )
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
 endif()
@@ -465,6 +469,8 @@ set_source_files_properties(
 endif()
 
 if(ANDROID)
+    set(QT_ANDROID_BUILD_ALL_ABIS ON)
+
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
@@ -489,18 +495,19 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNApplication.java
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNClientBinder.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
             ${CMAKE_CURRENT_BINARY_DIR}
     )
 
-    set_property(TARGET ${PROJECT} 
+    set_property(TARGET ${PROJECT} PROPERTY
         QT_ANDROID_PACKAGE_SOURCE_DIR 
         ${CMAKE_CURRENT_LIST_DIR}/android
     )
 
-    foreach(abi IN ANDROID_ABIS)
+    foreach(abi IN LISTS ${QT_ANDROID_ABIS})
         if(ANDROID_TARGET_ARCH EQUAL ${abi})
-            set(LIBS ${LIBS} 
+            set(LIBS ${LIBS}
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
             )
@@ -510,7 +517,7 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
-    
+
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libjbcrypto.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopenvpn.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopvpnutil.so
@@ -518,6 +525,7 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
         )
     endforeach()
+
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
