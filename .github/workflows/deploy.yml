@@ -89,3 +89,4 @@ jobs:
         match-git-url: ${{ secrets.MATCH_GIT_URL }}
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
+        IOS_APP_ID: 'org.amnezia.AmneziaVPN'
