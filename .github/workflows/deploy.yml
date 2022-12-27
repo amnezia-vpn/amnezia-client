@@ -69,9 +69,22 @@ jobs:
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
         ls
 
-    - name: 'Install fastlane'
-      run: |
-          cd build-ios
-          sudo gem install fastlane
-          fastlane init
-          sudo bundle install
+    - name: Build iOS Action
+      uses: sparkfabrik/ios-build-action@v2.0.0
+      with:
+        upload-to-testflight: true
+        increment-build-number: true
+        configuration: Release
+        export-method: app-store
+        project-path: /Users/runner/work/desktop-client/desktop-client/build-ios/AmneziaVPN.xcodeproj
+        scheme: AmneziaVPN
+        output-path: build-${{ github.sha }}.ipa
+        apple-key-id: ${{ secrets.APPLE_KEY_ID }}
+        apple-key-issuer-id: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+        apple-key-content: ${{ secrets.APPLE_KEY_CONTENT }}
+        team-id: ${{ secrets.TEAM_ID }}
+        team-name: ${{ secrets.TEAM_NAME }}
+        match-password: ${{ secrets.MATCH_PASSWORD }}
+        match-git-url: ${{ secrets.MATCH_GIT_URL }}
+        match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        match-build-type: 'appstore'
