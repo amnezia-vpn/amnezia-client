@@ -39,14 +39,12 @@ if(ANDROID)
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
 
-    message("botan target arch ${CMAKE_ANDROID_ARCH_ABI}")
     set(abi ${CMAKE_ANDROID_ARCH_ABI})
 
     include_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
     link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.cpp)
-
 endif()
 
 if(IOS)
@@ -70,8 +68,4 @@ if(IOS)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/ios/iphone)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.cpp)
-
-
-
-
 endif()

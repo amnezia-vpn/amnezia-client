@@ -503,8 +503,8 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/android
     )
 
-    foreach(abi IN LISTS ${QT_ANDROID_ABIS})
-        if(ANDROID_TARGET_ARCH EQUAL ${abi})
+    foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
+        if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
             set(LIBS ${LIBS}
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
