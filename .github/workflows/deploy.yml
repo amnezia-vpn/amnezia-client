@@ -72,7 +72,7 @@ jobs:
     - name: Build iOS Action
       uses: sparkfabrik/ios-build-action@v2.0.0
       with:
-        upload-to-testflight: true
+        upload-to-testflight: false
         increment-build-number: true
         configuration: Release
         export-method: app-store
