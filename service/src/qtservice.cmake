@@ -1,7 +1,5 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-#include(${CMAKE_CURRENT_LIST_DIR}/../common.cmake)
-
 if(NOT WIN32)
     set(LIBS ${LIBS} Qt6::Network)
 elseif(WIN32)
