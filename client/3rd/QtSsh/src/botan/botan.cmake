@@ -38,11 +38,15 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
-    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
 
-    link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH})
-    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.h)
-    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.cpp)
+    message("botan target arch ${CMAKE_ANDROID_ARCH_ABI}")
+    set(abi ${CMAKE_ANDROID_ARCH_ABI})
+
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.cpp)
+
 endif()
 
 if(IOS)

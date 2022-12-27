@@ -268,7 +268,7 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
-    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
+    # set(ANDROID_ABIS ANDROID_TARGET_ARCH)
 
     add_compile_definitions(MVPN_ANDROID)
 
@@ -283,7 +283,7 @@ if(ANDROID)
     )
 
     set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
@@ -469,8 +469,6 @@ set_source_files_properties(
 endif()
 
 if(ANDROID)
-    set(QT_ANDROID_BUILD_ALL_ABIS ON)
-
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

@@ -2,7 +2,6 @@
 #include "vpnconnection.h"
 
 #include "../uilogic.h"
-#include "ServerListLogic.h"
 #include "ShareConnectionLogic.h"
 #include "VpnLogic.h"
 
@@ -11,7 +10,7 @@
 #include <QTimer>
 
 #if defined(Q_OS_ANDROID)
-#include "androidutils.h"
+#include "../../platforms/android/androidutils.h"
 #endif
 
 ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):

@@ -12,7 +12,7 @@
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
-#include "androidutils.h"
+#include "../../platforms/android/androidutils.h"
 #endif
 
 StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):

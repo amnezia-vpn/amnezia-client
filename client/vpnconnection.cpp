@@ -19,7 +19,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include "android_controller.h"
+#include "../../platforms/android/android_controller.h"
 #include "protocols/android_vpnprotocol.h"
 #endif
 
