@@ -255,7 +255,7 @@ jobs:
         host: 'linux'
         target: 'android'
         arch: ${{ matrix.arch }}
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
