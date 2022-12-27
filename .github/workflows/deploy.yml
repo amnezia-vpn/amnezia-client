@@ -11,6 +11,7 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
+      app_identifier: 'org.amnezia.AmneziaVPN'
 
     steps:
     - name: 'Setup xcode'
