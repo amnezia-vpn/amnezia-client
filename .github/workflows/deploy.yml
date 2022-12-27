@@ -12,6 +12,8 @@ jobs:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
       APP_ID: 'org.amnezia.AmneziaVPN'
+      IOS_APP_ID: 'org.amnezia.AmneziaVPN'
+
 
     steps:
     - name: 'Setup xcode'
@@ -90,3 +92,5 @@ jobs:
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
         APP_ID: 'org.amnezia.AmneziaVPN'
+        IOS_APP_ID: 'org.amnezia.AmneziaVPN'
+
