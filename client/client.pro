@@ -84,9 +84,6 @@ HEADERS  += \
     utilities.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
-    logger.h \
-    loghandler.h \
-    loglevel.h \
     constants.h \
     platforms/ios/QRCodeReaderBase.h
 
@@ -144,8 +141,6 @@ SOURCES  += \
     utilities.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
-    logger.cpp \
-    loghandler.cpp \
     platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \
