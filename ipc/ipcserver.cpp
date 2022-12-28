@@ -5,7 +5,7 @@
 #include <QLocalSocket>
 
 #include "router.h"
-#include "log.h"
+#include "logger.h"
 
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
@@ -111,16 +111,16 @@ QStringList IpcServer::getTapList()
 void IpcServer::cleanUp()
 {
     qDebug() << "IpcServer::cleanUp";
-    Log::deinit();
-    Log::cleanUp();
+    Logger::deinit();
+    Logger::cleanUp();
 }
 
 void IpcServer::setLogsEnabled(bool enabled)
 {
     if (enabled) {
-        Log::init();
+        Logger::init();
     }
     else {
-        Log::deinit();
+        Logger::deinit();
     }
 }

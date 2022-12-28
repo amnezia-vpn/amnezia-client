@@ -2,7 +2,7 @@
 
 #include "defines.h"
 #include "localserver.h"
-#include "log.h"
+#include "logger.h"
 #include "systemservice.h"
 #include "utilities.h"
 
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
     Utils::initializePath(Utils::systemLogPath());
 
-    Log::init();
+    Logger::init();
 
     if (argc == 2) {
         qInfo() << "Started as console application";

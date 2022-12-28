@@ -83,7 +83,7 @@ bool Logger::init()
 
 void Logger::deInit()
 {
-    qInstallMessageHandler(0);
+    qInstallMessageHandler(nullptr);
     qSetMessagePattern("%{message}");
     m_textStream.setDevice(nullptr);
     m_file.close();
