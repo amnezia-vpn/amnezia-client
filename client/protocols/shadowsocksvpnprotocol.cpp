@@ -1,6 +1,6 @@
 #include "shadowsocksvpnprotocol.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "utilities.h"
 #include "containers/containers_defs.h"
 

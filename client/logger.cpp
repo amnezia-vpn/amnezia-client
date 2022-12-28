@@ -1,3 +1,5 @@
+#include "logger.h"
+
 #include <QDateTime>
 #include <QDebug>
 #include <QDesktopServices>
@@ -7,7 +9,6 @@
 
 #include <iostream>
 
-#include "debug.h"
 #include "defines.h"
 #include "utilities.h"
 
@@ -15,9 +16,9 @@
 #include <core/ipcclient.h>
 #endif
 
-QFile Debug::m_file;
-QTextStream Debug::m_textStream;
-QString Debug::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
+QFile Logger::m_file;
+QTextStream Logger::m_textStream;
+QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 
 void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
@@ -30,32 +31,32 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
         return;
     }
 
-    Debug::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
-    Debug::appendAllLog(qFormatLogMessage(type, context, msg));
+    Logger::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
+    Logger::appendAllLog(qFormatLogMessage(type, context, msg));
 
     std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
 }
 
-Debug &Debug::Instance()
+Logger &Logger::Instance()
 {
-    static Debug s;
+    static Logger s;
     return s;
 }
 
-void Debug::appendSshLog(const QString &log)
+void Logger::appendSshLog(const QString &log)
 {
     QString dt = QDateTime::currentDateTime().toString();
     Instance().m_sshLog.append(dt + ": " + log + "\n");
     emit Instance().sshLogChanged(Instance().sshLog());
 }
 
-void Debug::appendAllLog(const QString &log)
+void Logger::appendAllLog(const QString &log)
 {
     Instance().m_allLog.append(log + "\n");
     emit Instance().allLogChanged(Instance().allLog());
 }
 
-bool Debug::init()
+bool Logger::init()
 {
     qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
 
@@ -80,7 +81,7 @@ bool Debug::init()
     return true;
 }
 
-void Debug::deInit()
+void Logger::deInit()
 {
     qInstallMessageHandler(0);
     qSetMessagePattern("%{message}");
@@ -88,17 +89,17 @@ void Debug::deInit()
     m_file.close();
 }
 
-QString Debug::userLogsDir()
+QString Logger::userLogsDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
 }
 
-QString Debug::userLogsFilePath()
+QString Logger::userLogsFilePath()
 {
     return userLogsDir() + QDir::separator() + m_logFileName;
 }
 
-QString Debug::getLogFile()
+QString Logger::getLogFile()
 {
     m_file.flush();
     QFile file(userLogsFilePath());
@@ -107,7 +108,7 @@ QString Debug::getLogFile()
     return file.readAll();
 }
 
-bool Debug::openLogsFolder()
+bool Logger::openLogsFolder()
 {
     QString path = userLogsDir();
 #ifdef Q_OS_WIN
@@ -120,7 +121,7 @@ bool Debug::openLogsFolder()
     return true;
 }
 
-bool Debug::openServiceLogsFolder()
+bool Logger::openServiceLogsFolder()
 {
     QString path = Utils::systemLogPath();
     path = "file:///" + path;
@@ -128,12 +129,12 @@ bool Debug::openServiceLogsFolder()
     return true;
 }
 
-QString Debug::appLogFileNamePath()
+QString Logger::appLogFileNamePath()
 {
     return m_file.fileName();
 }
 
-void Debug::clearLogs()
+void Logger::clearLogs()
 {
     bool isLogActive = m_file.isOpen();
     m_file.close();
@@ -149,7 +150,7 @@ void Debug::clearLogs()
     }
 }
 
-void Debug::clearServiceLogs()
+void Logger::clearServiceLogs()
 {
 #ifdef AMNEZIA_DESKTOP
     IpcClient *m_IpcClient = new IpcClient;
@@ -171,7 +172,7 @@ void Debug::clearServiceLogs()
 #endif
 }
 
-void Debug::cleanUp()
+void Logger::cleanUp()
 {
     clearLogs();
     QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));

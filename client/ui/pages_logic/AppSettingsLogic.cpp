@@ -1,6 +1,6 @@
 #include "AppSettingsLogic.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "ui/qautostart.h"
 #include "ui/uilogic.h"
@@ -62,18 +62,18 @@ void AppSettingsLogic::onCheckBoxSaveLogsCheckedToggled(bool checked)
 
 void AppSettingsLogic::onPushButtonOpenLogsClicked()
 {
-    Debug::openLogsFolder();
+    Logger::openLogsFolder();
 }
 
 void AppSettingsLogic::onPushButtonExportLogsClicked()
 {
-    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Debug::getLogFile());
+    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Logger::getLogFile());
 }
 
 void AppSettingsLogic::onPushButtonClearLogsClicked()
 {
-    Debug::clearLogs();
-    Debug::clearServiceLogs();
+    Logger::clearLogs();
+    Logger::clearServiceLogs();
 }
 
 void AppSettingsLogic::onPushButtonBackupAppConfigClicked()

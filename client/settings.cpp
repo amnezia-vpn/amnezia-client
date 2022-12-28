@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 #include "containers/containers_defs.h"
-#include "debug.h"
+#include "logger.h"
 
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
@@ -211,9 +211,9 @@ void Settings::setSaveLogs(bool enabled)
 {
     m_settings.setValue("Conf/saveLogs", enabled);
     if (!isSaveLogs()) {
-        Debug::deInit();
+        Logger::deInit();
     } else {
-        if (!Debug::init()) {
+        if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }

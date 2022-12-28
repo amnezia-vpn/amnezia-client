@@ -6,7 +6,7 @@
 
 #include <chrono>
 
-#include "debug.h"
+#include "logger.h"
 #include "ikev2_vpn_protocol_windows.h"
 #include "utilities.h"
 

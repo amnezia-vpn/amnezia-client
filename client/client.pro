@@ -43,8 +43,8 @@ HEADERS  += \
     core/scripts_registry.h \
     core/server_defs.h \
     core/servercontroller.h \
-    debug.h \
     defines.h \
+    logger.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
@@ -102,7 +102,7 @@ SOURCES  += \
     core/scripts_registry.cpp \
     core/server_defs.cpp \
     core/servercontroller.cpp \
-    debug.cpp \
+    logger.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \

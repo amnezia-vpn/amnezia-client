@@ -1,5 +1,5 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <QDebug>
 #include <QDir>
@@ -9,14 +9,14 @@
 
 #include "ui/property_helper.h"
 
-class Debug : public QObject
+class Logger : public QObject
 {
     Q_OBJECT
     AUTO_PROPERTY(QString, sshLog)
     AUTO_PROPERTY(QString, allLog)
 
 public:
-    static Debug& Instance();
+    static Logger& Instance();
 
     static void appendSshLog(const QString &log);
     static void appendAllLog(const QString &log);
@@ -35,9 +35,9 @@ public:
     static QString getLogFile();
 
 private:
-    Debug() {}
-    Debug(Debug const &) = delete;
-    Debug& operator= (Debug const&) = delete;
+    Logger() {}
+    Logger(Logger const &) = delete;
+    Logger& operator= (Logger const&) = delete;
 
     static QString userLogsDir();
 
@@ -48,4 +48,4 @@ private:
     friend void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 };
 
-#endif // DEBUG_H
+#endif // LOGGER_H

@@ -7,7 +7,7 @@
 
 
 #include "core/servercontroller.h"
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include <QQuickStyle>
 
@@ -99,7 +99,7 @@ void AmneziaApplication::init()
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    m_engine->rootContext()->setContextProperty("Debug", &Debug::Instance());
+    m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
     m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)
@@ -113,7 +113,7 @@ void AmneziaApplication::init()
     }
 
     if (m_settings->isSaveLogs()) {
-        if (!Debug::init()) {
+        if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
@@ -206,7 +206,7 @@ bool AmneziaApplication::parseCommands()
     m_parser.process(*this);
 
     if (m_parser.isSet(c_cleanup)) {
-        Debug::cleanUp();
+        Logger::cleanUp();
         QTimer::singleShot(100, this, [this]{
             quit();
         });

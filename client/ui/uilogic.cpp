@@ -35,7 +35,7 @@
 
 #include "ui/qautostart.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "uilogic.h"
 #include "utilities.h"
@@ -190,9 +190,9 @@ void UiLogic::keyPressEvent(Qt::Key key)
     case Qt::Key_AsciiTilde:
     case Qt::Key_QuoteLeft: emit toggleLogPanel();
         break;
-    case Qt::Key_L: Debug::openLogsFolder();
+    case Qt::Key_L: Logger::openLogsFolder();
         break;
-    case Qt::Key_K: Debug::openServiceLogsFolder();
+    case Qt::Key_K: Logger::openServiceLogsFolder();
         break;
 #ifdef QT_DEBUG
     case Qt::Key_Q:
