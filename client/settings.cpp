@@ -3,6 +3,7 @@
 #include "utilities.h"
 
 #include "containers/containers_defs.h"
+#include "debug.h"
 
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
@@ -204,6 +205,19 @@ QString Settings::nextAvailableServerName() const
     } while (nameExist);
 
     return tr("Server") + " " + QString::number(i);
+}
+
+void Settings::setSaveLogs(bool enabled)
+{
+    m_settings.setValue("Conf/saveLogs", enabled);
+    if (!isSaveLogs()) {
+        Debug::deInit();
+    } else {
+        if (!Debug::init()) {
+            qWarning() << "Initialization of debug subsystem failed";
+        }
+    }
+    emit updateVpnPage();
 }
 
 QString Settings::routeModeString(RouteMode mode) const

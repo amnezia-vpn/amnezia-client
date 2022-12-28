@@ -80,6 +80,14 @@ bool Debug::init()
     return true;
 }
 
+void Debug::deInit()
+{
+    qInstallMessageHandler(0);
+    qSetMessagePattern("%{message}");
+    m_textStream.setDevice(nullptr);
+    m_file.close();
+}
+
 QString Debug::userLogsDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
