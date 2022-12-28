@@ -6,10 +6,20 @@ project(${PROJECT})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat)
 qt_standard_project_setup()
 
-set(HEADERS
+add_executable(${PROJECT})
+
+find_package(Qt6 REQUIRED COMPONENTS Core
+    Network RemoteObjects Core5Compat
+)
+
+target_link_libraries(${PROJECT} PRIVATE
+    Qt6::Core Qt6::Network
+    Qt6::RemoteObjects Qt6::Core5Compat
+)
+
+target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
@@ -18,9 +28,7 @@ set(HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/logger.h
         ${CMAKE_CURRENT_LIST_DIR}/router.h
         ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
-)
 
-set(SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
@@ -32,17 +40,15 @@ set(SOURCES
 )
 
 if(WIN32)
-    set(HEADERS ${HEADERS}
+    target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.h
         ${CMAKE_CURRENT_LIST_DIR}/router_win.h
-    )
 
-    set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.cpp
         ${CMAKE_CURRENT_LIST_DIR}/router_win.cpp
     )
 
-    set(LIBS
+    target_link_libraries(${PROJECT} PRIVATE
         user32
         rasapi32
         shlwapi
@@ -54,42 +60,35 @@ if(WIN32)
         Kernel32
     )
 
-    add_compile_definitions(_WINSOCKAPI_)
+    target_compile_definitions(${PROJECT} PRIVATE _WINSOCKAPI_)
 endif()
 
 if(APPLE)
-    set(HEADERS ${HEADERS}
+    target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/helper_route_mac.h
         ${CMAKE_CURRENT_LIST_DIR}/router_mac.h
-    )
 
-    set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/helper_route_mac.c
         ${CMAKE_CURRENT_LIST_DIR}/router_mac.cpp
     )
 endif()
 
 if(LINUX)
-    set(HEADERS ${HEADERS}
+    target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/router_linux.h
-    )
 
-    set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/router_linux.cpp
     )
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../src/qtservice.cmake)
 
-include_directories(
-    ${CMAKE_CURRENT_LIST_DIR}
+target_include_directories(${PROJECT} PRIVATE
+	${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
     ${CMAKE_CURRENT_BINARY_DIR}
 )
-
-add_executable(${PROJECT} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 if(NOT IOS)
