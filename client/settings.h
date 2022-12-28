@@ -68,7 +68,7 @@ public:
     void setStartMinimized(bool enabled) { m_settings.setValue("Conf/startMinimized", enabled); }
 
     bool isSaveLogs() const { return m_settings.value("Conf/saveLogs", false).toBool(); }
-    void setSaveLogs(bool enabled) { m_settings.setValue("Conf/saveLogs", enabled); }
+    void setSaveLogs(bool enabled);
 
     enum RouteMode {
         VpnAllSites,
@@ -112,6 +112,9 @@ public:
 
     QByteArray backupAppConfig() const { return m_settings.backupAppConfig(); }
     bool restoreAppConfig(const QByteArray &cfg) { return m_settings.restoreAppConfig(cfg); }
+
+signals:
+    void updateVpnPage();
 
 private:
     SecureQSettings m_settings;
