@@ -44,12 +44,15 @@ $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
-echo "Executing make... may take long time"
-$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -j2
-echo "Make install..."
-$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android
-echo "Build OK"
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
+cmake --build . --config release
+
+# $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
+# echo "Executing make... may take long time"
+# $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -j2
+# echo "Make install..."
+# $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android
+# echo "Build OK"
 
 echo "............Deploy.................."
 cd $OUT_APP_DIR
