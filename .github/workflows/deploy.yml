@@ -11,7 +11,7 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
-      APP_ID: 'org.amnezia.AmneziaVPN','org.amnezia.AmneziaVPN.network-extension'
+      APP_ID: 'org.amnezia.AmneziaVPN'
       IOS_APP_ID: 'org.amnezia.AmneziaVPN'
       APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
       APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPLE_KEY_ISSUER_ID }}
@@ -19,7 +19,7 @@ jobs:
       APP_STORE_CONNECT_API_KEY_IS_KEY_CONTENT_BASE64: false
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }} 
-      
+
     steps:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
