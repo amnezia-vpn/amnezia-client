@@ -44,8 +44,10 @@ $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake -DQT_HOST_PATH=$QT_HOST_PATH --build . --config release
+echo "HOST Qt: $QT_HOST_PATH"
+
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -DQT_HOST_PATH=$QT_HOST_PATH
+cmake --build . --config release
 
 # $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
 # echo "Executing make... may take long time"
