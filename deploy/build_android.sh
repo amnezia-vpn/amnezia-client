@@ -40,6 +40,8 @@ echo "Using Android NDK in $ANDROID_NDK_ROOT"
 $QT_BIN_DIR/qmake -v
 $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 
+QT_HOST_PATH = $HOME/Qt/$QT_VERSION/gcc_64/bin
+
 # Build App
 echo "Building App..."
 cd $BUILD_DIR
