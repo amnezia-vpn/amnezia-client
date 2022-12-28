@@ -13,6 +13,12 @@ jobs:
       QIF_VERSION: 4.4
       APP_ID: 'org.amnezia.AmneziaVPN','org.amnezia.AmneziaVPN.network-extension'
       IOS_APP_ID: 'org.amnezia.AmneziaVPN'
+      APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APPLE_KEY_CONTENT }}
+      APP_STORE_CONNECT_API_KEY_IS_KEY_CONTENT_BASE64: false
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }} 
 
 
     steps:
@@ -91,6 +97,4 @@ jobs:
         match-git-url: ${{ secrets.MATCH_GIT_URL }}
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
-        APP_ID: 'org.amnezia.AmneziaVPN'
-        IOS_APP_ID: 'org.amnezia.AmneziaVPN'
 
