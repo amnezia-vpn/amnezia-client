@@ -15,6 +15,7 @@ include(${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
 set(BUILD_WITH_QT6 ON)
 set(BUILD_SHARED_LIBS OFF)
+set(BUILD_TRANSLATIONS OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 

@@ -21,7 +21,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
-    Core5Compat Concurrent
+    Core5Compat Concurrent LinguistTools
 )
 set(LIBS ${LIBS} 
     Qt6::Widgets Qt6::Core Qt6::Gui
