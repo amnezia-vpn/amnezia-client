@@ -359,7 +359,7 @@ if(IOS)
     enable_language(Swift)
 
     #disbale in cicd
-    include(cmake/osxtools.cmake)
+    #include(cmake/osxtools.cmake)
     # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
