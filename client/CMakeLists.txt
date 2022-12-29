@@ -348,8 +348,8 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
-#qt_add_translations(${PROJECT} TS_FILES
-#    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
+qt_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 # NETWORKEXTENSION=1
 
@@ -359,7 +359,7 @@ if(IOS)
     enable_language(Swift)
 
     #disbale in cicd
-    #include(cmake/osxtools.cmake)
+    include(cmake/osxtools.cmake)
     # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
     set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")

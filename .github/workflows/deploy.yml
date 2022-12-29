@@ -74,7 +74,6 @@ jobs:
         export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
-        cd client
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -T buildsystem=1 -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
         ls
@@ -86,7 +85,7 @@ jobs:
         increment-build-number: true
         configuration: Release
         export-method: app-store
-        project-path: /Users/runner/work/desktop-client/desktop-client/client/build-ios/AmneziaVPN.xcodeproj
+        project-path: /Users/runner/work/desktop-client/desktop-client/build-ios/AmneziaVPN.xcodeproj
         scheme: AmneziaVPN
         output-path: build-${{ github.sha }}.ipa
         apple-key-id: ${{ secrets.APPLE_KEY_ID }}
