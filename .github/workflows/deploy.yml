@@ -27,14 +27,14 @@ jobs:
         set-env: 'true'
         extra: '--external 7z'
 
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
         submodules: 'true'
         fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -61,15 +61,6 @@ jobs:
       BUILD_ARCH: 64
 
     steps:
-    - name: 'Get sources'
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
@@ -87,7 +78,16 @@ jobs:
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
       with:
-          arch: 'x64'
+        arch: 'x64'
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
     - name: 'Build project'
       shell: cmd
