@@ -98,3 +98,7 @@ jobs:
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
 
+    - name: Custom build
+      run: |
+          cmake --build . --config release
+
