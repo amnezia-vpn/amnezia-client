@@ -25,7 +25,8 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.4'
+        xcode-version: latest-stable
+
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -79,7 +80,7 @@ jobs:
         ls
 
     - name: Build iOS Action
-      uses: Shahzainali/ios-build-action@1.2
+      uses: Shahzainali/ios-build-action@1.1
       with:
         upload-to-testflight: true
         increment-build-number: true
