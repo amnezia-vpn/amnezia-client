@@ -25,8 +25,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-
+        xcode-version: '13.4'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -76,7 +75,7 @@ jobs:
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
         mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -T buildsystem=1 -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
         ls
 
     - name: Build iOS Action
