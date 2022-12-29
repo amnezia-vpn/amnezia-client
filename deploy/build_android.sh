@@ -46,8 +46,8 @@ cd $BUILD_DIR
 
 echo "HOST Qt: $QT_HOST_PATH"
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -DQT_HOST_PATH=$QT_HOST_PATH
-cmake --build . --config release -DCMAKE_BUILD_TYPE=Release
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -DQT_HOST_PATH=$QT_HOST_PATH -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
 
 # $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
 # echo "Executing make... may take long time"
