@@ -79,7 +79,7 @@ jobs:
         ls
 
     - name: Build iOS Action
-      uses: Shahzainali/ios-build-action@1.5
+      uses: Shahzainali/ios-build-action@1.6
       with:
         upload-to-testflight: true
         increment-build-number: true
