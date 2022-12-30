@@ -79,7 +79,7 @@ jobs:
         ls
 
     - name: Build iOS Action
-      uses: Shahzainali/ios-build-action@1.3
+      uses: Shahzainali/ios-build-action@1.4
       with:
         upload-to-testflight: true
         increment-build-number: true
@@ -97,8 +97,4 @@ jobs:
         match-git-url: ${{ secrets.MATCH_GIT_URL }}
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
-
-    - name: Custom build
-      run: |
-          cmake --build . --config release
 
