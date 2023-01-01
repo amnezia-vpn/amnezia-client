@@ -84,6 +84,9 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
+
+signals:
+    void serverIsBusy(const bool isBusy);
 };
 
 #endif // SERVERCONTROLLER_H

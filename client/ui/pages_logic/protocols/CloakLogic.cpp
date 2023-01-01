@@ -1,7 +1,10 @@
 #include "CloakLogic.h"
-#include "core/servercontroller.h"
+
 #include <functional>
-#include "../../uilogic.h"
+
+#include "core/servercontroller.h"
+#include "ui/uilogic.h"
+#include "ui/pages_logic/ServerConfiguringProgressLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -59,40 +62,59 @@ void CloakLogic::onPushButtonSaveClicked()
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Proto::Cloak), protocolConfig);
 
-    UiLogic::PageFunc page_func;
-    page_func.setEnabledFunc = [this] (bool enabled) -> void {
+    ServerConfiguringProgressLogic::PageFunc pageFunc;
+    pageFunc.setEnabledFunc = [this] (bool enabled) -> void {
         set_pageEnabled(enabled);
     };
-    UiLogic::ButtonFunc pushButton_save_func;
-    pushButton_save_func.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::ButtonFunc saveButtonFunc;
+    saveButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_pushButtonSaveVisible(visible);
     };
-    UiLogic::LabelFunc label_info_func;
-    label_info_func.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::LabelFunc waitInfoFunc;
+    waitInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_labelInfoVisible(visible);
     };
-    label_info_func.setTextFunc = [this] (const QString& text) ->void {
+    waitInfoFunc.setTextFunc = [this] (const QString& text) -> void {
         set_labelInfoText(text);
     };
-    UiLogic::ProgressFunc progressBar_reset;
-    progressBar_reset.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::ProgressFunc progressBarFunc;
+    progressBarFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_progressBarResetVisible(visible);
     };
-    progressBar_reset.setValueFunc = [this] (int value) ->void {
+    progressBarFunc.setValueFunc = [this] (int value) -> void {
         set_progressBarResetValue(value);
     };
-    progressBar_reset.getValueFunc = [this] (void) -> int {
+    progressBarFunc.getValueFunc = [this] (void) -> int {
         return progressBarResetValue();
     };
-    progressBar_reset.getMaximiumFunc = [this] (void) -> int {
+    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
         return progressBarResetMaximium();
     };
+    progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
+        set_progressBarTextVisible(visible);
+    };
+    progressBarFunc.setTextFunc = [this] (const QString& text) -> void {
+        set_progressBarText(text);
+    };
 
-    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+    ServerConfiguringProgressLogic::LabelFunc busyInfoFuncy;
+    busyInfoFuncy.setTextFunc = [this] (const QString& text) -> void {
+        set_labelServerBusyText(text);
+    };
+    busyInfoFuncy.setVisibleFunc = [this] (bool visible) -> void {
+        set_labelServerBusyVisible(visible);
+    };
+
+    progressBarFunc.setTextVisibleFunc(true);
+    progressBarFunc.setTextFunc(QString("Configuring..."));
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
+                                                   uiLogic()->selectedDockerContainer,
+                                                   containerConfig,
+                                                   newContainerConfig);
     },
-    page_func, progressBar_reset,
-    pushButton_save_func, label_info_func);
+    pageFunc, progressBarFunc,
+    saveButtonFunc, waitInfoFunc, busyInfoFuncy);
 
     if (!e) {
         m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);

@@ -20,13 +20,8 @@ class ServerConfiguringProgressLogic : public PageLogicBase
     AUTO_PROPERTY(int, progressBarMaximium)
     AUTO_PROPERTY(bool, progressBarTextVisible)
     AUTO_PROPERTY(QString, progressBarText)
-
-public:
-    explicit ServerConfiguringProgressLogic(UiLogic *uiLogic, QObject *parent = nullptr);
-    ~ServerConfiguringProgressLogic() = default;
-
-    void onUpdatePage() override;
-    ErrorCode doInstallAction(const std::function<ErrorCode()> &action);
+    AUTO_PROPERTY(bool, labelServerBusyVisible)
+    AUTO_PROPERTY(QString, labelServerBusyText)
 
 private:
     struct ProgressFunc {
@@ -47,6 +42,24 @@ private:
         std::function<void(bool)> setVisibleFunc;
         std::function<void(const QString&)> setTextFunc;
     };
+
+public:
+    explicit ServerConfiguringProgressLogic(UiLogic *uiLogic, QObject *parent = nullptr);
+    ~ServerConfiguringProgressLogic() = default;
+
+    friend class OpenVpnLogic;
+    friend class ShadowSocksLogic;
+    friend class CloakLogic;
+    friend class UiLogic;
+
+    void onUpdatePage() override;
+    ErrorCode doInstallAction(const std::function<ErrorCode()> &action);
+    ErrorCode doInstallAction(const std::function<ErrorCode()> &action,
+                              const PageFunc &page,
+                              const ProgressFunc &progress,
+                              const ButtonFunc &button,
+                              const LabelFunc &waitInfo,
+                              const LabelFunc &serverBusyInfo);
 
 };
 #endif // SERVER_CONFIGURING_PROGRESS_LOGIC_H

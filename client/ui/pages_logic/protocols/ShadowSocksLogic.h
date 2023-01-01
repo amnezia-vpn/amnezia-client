@@ -12,13 +12,17 @@ class ShadowSocksLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(QString, comboBoxCipherText)
     AUTO_PROPERTY(QString, lineEditPortText)
     AUTO_PROPERTY(bool, pushButtonSaveVisible)
-    AUTO_PROPERTY(bool, progressBaResetVisible)
+    AUTO_PROPERTY(bool, progressBarResetVisible)
     AUTO_PROPERTY(bool, lineEditPortEnabled)
     AUTO_PROPERTY(bool, labelInfoVisible)
     AUTO_PROPERTY(QString, labelInfoText)
-    AUTO_PROPERTY(int, progressBaResetValue)
-    AUTO_PROPERTY(int, progressBaResetMaximium)
+    AUTO_PROPERTY(int, progressBarResetValue)
+    AUTO_PROPERTY(int, progressBarResetMaximium)
+    AUTO_PROPERTY(bool, progressBarTextVisible)
+    AUTO_PROPERTY(QString, progressBarText)
 
+    AUTO_PROPERTY(bool, labelServerBusyVisible)
+    AUTO_PROPERTY(QString, labelServerBusyText)
 public:
     Q_INVOKABLE void onPushButtonSaveClicked();
 

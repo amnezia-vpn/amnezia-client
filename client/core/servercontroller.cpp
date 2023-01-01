@@ -12,6 +12,8 @@
 #include <QApplication>
 #include <QTemporaryFile>
 #include <QFileInfo>
+#include <QThread>
+#include <QtConcurrent>
 
 #include "sftpchannel.h"
 #include "sshconnectionmanager.h"
@@ -528,14 +530,36 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         stdOut += data + "\n";
     };
 
-    ErrorCode e = runScript(credentials,
-        replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
-            genVarsForScript(credentials)),
-                cbReadStdOut, cbReadStdErr);
+    QFutureWatcher<void> watcher;
+
+    QFuture<void> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
+        do {
+            stdOut.clear();
+            runScript(credentials,
+                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
+                                  genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+                emit serverIsBusy(true);
+                QThread::msleep(1000);
+            }
+        } while (!stdOut.isEmpty());
+    });
+
+    watcher.setFuture(future);
+
+    QEventLoop wait;
+    QObject::connect(&watcher, &QFutureWatcher<void>::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+
+    emit serverIsBusy(false);
+
+    ErrorCode error = runScript(credentials,
+                                replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
+                                            genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
-    return e;
+    return error;
 }
 
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)

@@ -13,6 +13,7 @@ PageProtocolBase {
 
     BackButton {
         id: back
+        enabled: logic.pageEnabled
     }
     Caption {
         id: caption
@@ -345,9 +346,19 @@ PageProtocolBase {
             }
 
             LabelType {
-                id: label_proto_openvpn_info
+                id: label_server_busy
+                horizontalAlignment: Text.AlignHCenter
+                Layout.maximumWidth: parent.width
+                Layout.fillWidth: true
+                visible: logic.labelServerBusyVisible
+                text: logic.labelServerBusyText
+            }
 
-                height: 41
+            LabelType {
+                id: label_proto_openvpn_info
+                horizontalAlignment: Text.AlignHCenter
+                Layout.maximumWidth: parent.width
+                Layout.fillWidth: true
                 visible: logic.labelProtoOpenVpnInfoVisible
                 text: logic.labelProtoOpenVpnInfoText
             }
@@ -395,11 +406,20 @@ PageProtocolBase {
                         }
                     }
                 }
-
+                LabelType {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: logic.progressBarText
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.family: "Lato"
+                    font.styleName: "normal"
+                    font.pixelSize: 16
+                    color: "#D4D4D4"
+                    visible: logic.progressBarTextVisible
+                }
             }
-
         }
-
     }
-
 }

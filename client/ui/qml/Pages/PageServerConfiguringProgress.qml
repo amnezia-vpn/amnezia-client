@@ -28,6 +28,22 @@ PageBase {
     }
 
     LabelType {
+        id: labelServerBusy
+        x: 0
+        anchors.top: label.bottom
+        anchors.topMargin: 30
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+
+        width: parent.width - 40
+        height: 41
+
+        text: ServerConfiguringProgressLogic.labelServerBusyText
+        visible: ServerConfiguringProgressLogic.labelServerBusyVisible
+    }
+
+    LabelType {
         anchors.bottom: pr.top
         anchors.bottomMargin: 20
 

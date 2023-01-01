@@ -5,6 +5,8 @@
 #include <QEventLoop>
 #include <QMessageBox>
 
+#include "core/servercontroller.h"
+
 ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_progressBarValue{0},
@@ -13,7 +15,9 @@ ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, Q
     m_progressBarVisible{true},
     m_progressBarMaximium{100},
     m_progressBarTextVisible{true},
-    m_progressBarText{tr("Configuring...")}
+    m_progressBarText{tr("Configuring...")},
+    m_labelServerBusyVisible{false},
+    m_labelServerBusyText{""}
 {
 
 }
@@ -30,14 +34,14 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     page.setEnabledFunc = [this] (bool enabled) -> void {
         set_pageEnabled(enabled);
     };
-    ButtonFunc button;
-    LabelFunc info;
+    ButtonFunc noButton;
+    LabelFunc noWaitInfo;
     ProgressFunc progress;
-    progress.setVisibleFunc = [this] (bool visible) ->void {
+    progress.setVisibleFunc = [this] (bool visible) -> void {
         set_progressBarVisible(visible);
     };
 
-    progress.setValueFunc = [this] (int value) ->void {
+    progress.setValueFunc = [this] (int value) -> void {
         set_progressBarValue(value);
     };
     progress.getValueFunc = [this] (void) -> int {
@@ -47,8 +51,24 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
         return progressBarMaximium();
     };
 
+    LabelFunc busyInfo;
+    busyInfo.setTextFunc = [this] (const QString& text) -> void {
+        set_labelServerBusyText(text);
+    };
+    busyInfo.setVisibleFunc = [this] (bool visible) -> void {
+        set_labelServerBusyVisible(visible);
+    };
 
+    return doInstallAction(action, page, progress, noButton, noWaitInfo, busyInfo);
+}
 
+ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<ErrorCode()> &action,
+                                                          const PageFunc &page,
+                                                          const ProgressFunc &progress,
+                                                          const ButtonFunc &button,
+                                                          const LabelFunc &waitInfo,
+                                                          const LabelFunc &serverBusyInfo)
+{
     progress.setVisibleFunc(true);
     if (page.setEnabledFunc) {
         page.setEnabledFunc(false);
@@ -56,11 +76,11 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     if (button.setVisibleFunc) {
         button.setVisibleFunc(false);
     }
-    if (info.setVisibleFunc) {
-        info.setVisibleFunc(true);
+    if (waitInfo.setVisibleFunc) {
+        waitInfo.setVisibleFunc(true);
     }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
+    if (waitInfo.setTextFunc) {
+        waitInfo.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
     }
 
     QTimer timer;
@@ -71,8 +91,26 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.setValueFunc(0);
     timer.start(1000);
 
+    QMetaObject::Connection connection;
+    if (serverBusyInfo.setTextFunc) {
+        connection = connect(m_serverController.get(),
+                             &ServerController::serverIsBusy,
+                             this,
+                             [&serverBusyInfo, &timer](const bool isBusy) {
+            isBusy ? timer.stop() : timer.start(1000);
+            serverBusyInfo.setVisibleFunc(isBusy);
+            serverBusyInfo.setTextFunc(isBusy ? "Amnesia has detected that your server is currently "
+                                                "busy installing other software. Amnesia installation "
+                                                "will pause until the server finishes installing other software"
+                                              : "");
+        });
+    }
+
     ErrorCode e = action();
     qDebug() << "doInstallAction finished with code" << e;
+    if (serverBusyInfo.setTextFunc) {
+        disconnect(connection);
+    }
 
     if (e) {
         if (page.setEnabledFunc) {
@@ -81,8 +119,8 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
         if (button.setVisibleFunc) {
             button.setVisibleFunc(true);
         }
-        if (info.setVisibleFunc) {
-            info.setVisibleFunc(false);
+        if (waitInfo.setVisibleFunc) {
+            waitInfo.setVisibleFunc(false);
         }
         QMessageBox::warning(nullptr, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
@@ -95,9 +133,9 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     // just ui progressbar tweak
     timer.stop();
 
-    int remaining_val = progress.getMaximiumFunc() - progress.getValueFunc();
+    int remainingVal = progress.getMaximiumFunc() - progress.getValueFunc();
 
-    if (remaining_val > 0) {
+    if (remainingVal > 0) {
         QTimer timer1;
         QEventLoop loop1;
 
@@ -120,8 +158,8 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     if (page.setEnabledFunc) {
         page.setEnabledFunc(true);
     }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Operation finished"));
+    if (waitInfo.setTextFunc) {
+        waitInfo.setTextFunc(tr("Operation finished"));
     }
     return ErrorCode::NoError;
 }
