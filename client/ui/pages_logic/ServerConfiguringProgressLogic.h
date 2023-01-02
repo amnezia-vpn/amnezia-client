@@ -22,6 +22,10 @@ class ServerConfiguringProgressLogic : public PageLogicBase
     AUTO_PROPERTY(QString, progressBarText)
     AUTO_PROPERTY(bool, labelServerBusyVisible)
     AUTO_PROPERTY(QString, labelServerBusyText)
+    AUTO_PROPERTY(bool, pushButtonCancelVisible)
+
+public:
+    Q_INVOKABLE void onPushButtonCancelClicked();
 
 private:
     struct ProgressFunc {
@@ -57,9 +61,13 @@ public:
     ErrorCode doInstallAction(const std::function<ErrorCode()> &action,
                               const PageFunc &page,
                               const ProgressFunc &progress,
-                              const ButtonFunc &button,
+                              const ButtonFunc &saveButton,
                               const LabelFunc &waitInfo,
-                              const LabelFunc &serverBusyInfo);
+                              const LabelFunc &serverBusyInfo,
+                              const ButtonFunc &cancelButton);
+
+signals:
+    void cancelDoInstallAction(const bool cancel);
 
 };
 #endif // SERVER_CONFIGURING_PROGRESS_LOGIC_H

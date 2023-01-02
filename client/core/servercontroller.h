@@ -73,6 +73,7 @@ public:
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
+    void setCancelInstallation(const bool cancel);
 private:
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
@@ -85,6 +86,7 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
+    bool m_cancelInstallation = false;
 signals:
     void serverIsBusy(const bool isBusy);
 };

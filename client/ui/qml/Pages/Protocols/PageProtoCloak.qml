@@ -129,7 +129,6 @@ PageProtocolBase {
         text: logic.labelInfoText
     }
 
-
     ProgressBar {
         id: progressBar_proto_cloak_reset
         anchors.horizontalCenter: parent.horizontalCenter
@@ -184,4 +183,13 @@ PageProtocolBase {
         }
     }
 
+    BlueButtonType {
+        anchors.fill: pb_save
+        text: qsTr("Cancel")
+        visible: logic.pushButtonCancelVisible
+        enabled: logic.pushButtonCancelVisible
+        onClicked: {
+            logic.onPushButtonCancelClicked()
+        }
+    }
 }

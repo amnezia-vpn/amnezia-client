@@ -23,8 +23,12 @@ class ShadowSocksLogic : public PageProtocolLogicBase
 
     AUTO_PROPERTY(bool, labelServerBusyVisible)
     AUTO_PROPERTY(QString, labelServerBusyText)
+
+    AUTO_PROPERTY(bool, pushButtonCancelVisible)
+
 public:
     Q_INVOKABLE void onPushButtonSaveClicked();
+    Q_INVOKABLE void onPushButtonCancelClicked();
 
 public:
     explicit ShadowSocksLogic(UiLogic *uiLogic, QObject *parent = nullptr);

@@ -59,22 +59,28 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
         set_labelServerBusyVisible(visible);
     };
 
-    return doInstallAction(action, page, progress, noButton, noWaitInfo, busyInfo);
+    ButtonFunc cancelButton;
+    cancelButton.setVisibleFunc = [this] (bool visible) -> void {
+        set_pushButtonCancelVisible(visible);
+    };
+
+    return doInstallAction(action, page, progress, noButton, noWaitInfo, busyInfo, cancelButton);
 }
 
 ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<ErrorCode()> &action,
                                                           const PageFunc &page,
                                                           const ProgressFunc &progress,
-                                                          const ButtonFunc &button,
+                                                          const ButtonFunc &saveButton,
                                                           const LabelFunc &waitInfo,
-                                                          const LabelFunc &serverBusyInfo)
+                                                          const LabelFunc &serverBusyInfo,
+                                                          const ButtonFunc &cancelButton)
 {
     progress.setVisibleFunc(true);
     if (page.setEnabledFunc) {
         page.setEnabledFunc(false);
     }
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(false);
+    if (saveButton.setVisibleFunc) {
+        saveButton.setVisibleFunc(false);
     }
     if (waitInfo.setVisibleFunc) {
         waitInfo.setVisibleFunc(true);
@@ -91,33 +97,47 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.setValueFunc(0);
     timer.start(1000);
 
-    QMetaObject::Connection connection;
-    if (serverBusyInfo.setTextFunc) {
-        connection = connect(m_serverController.get(),
+    QMetaObject::Connection cancelDoInstallActionConnection;
+    if (cancelButton.setVisibleFunc) {
+        cancelDoInstallActionConnection = connect(this, &ServerConfiguringProgressLogic::cancelDoInstallAction,
+                m_serverController.get(), &ServerController::setCancelInstallation);
+    }
+
+
+    QMetaObject::Connection serverBusyConnection;
+    if (serverBusyInfo.setVisibleFunc && serverBusyInfo.setTextFunc) {
+        serverBusyConnection = connect(m_serverController.get(),
                              &ServerController::serverIsBusy,
                              this,
-                             [&serverBusyInfo, &timer](const bool isBusy) {
+                             [&serverBusyInfo, &timer, &cancelButton](const bool isBusy) {
             isBusy ? timer.stop() : timer.start(1000);
             serverBusyInfo.setVisibleFunc(isBusy);
             serverBusyInfo.setTextFunc(isBusy ? "Amnesia has detected that your server is currently "
                                                 "busy installing other software. Amnesia installation "
                                                 "will pause until the server finishes installing other software"
                                               : "");
+            if (cancelButton.setVisibleFunc) {
+                cancelButton.setVisibleFunc(isBusy ? true : false);
+            }
         });
     }
 
     ErrorCode e = action();
     qDebug() << "doInstallAction finished with code" << e;
-    if (serverBusyInfo.setTextFunc) {
-        disconnect(connection);
+    if (cancelButton.setVisibleFunc) {
+        disconnect(cancelDoInstallActionConnection);
+    }
+
+    if (serverBusyInfo.setVisibleFunc && serverBusyInfo.setTextFunc) {
+        disconnect(serverBusyConnection);
     }
 
     if (e) {
         if (page.setEnabledFunc) {
             page.setEnabledFunc(true);
         }
-        if (button.setVisibleFunc) {
-            button.setVisibleFunc(true);
+        if (saveButton.setVisibleFunc) {
+            saveButton.setVisibleFunc(true);
         }
         if (waitInfo.setVisibleFunc) {
             waitInfo.setVisibleFunc(false);
@@ -152,8 +172,8 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
 
 
     progress.setVisibleFunc(false);
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(true);
+    if (saveButton.setVisibleFunc) {
+        saveButton.setVisibleFunc(true);
     }
     if (page.setEnabledFunc) {
         page.setEnabledFunc(true);
@@ -162,4 +182,9 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
         waitInfo.setTextFunc(tr("Operation finished"));
     }
     return ErrorCode::NoError;
+}
+
+void ServerConfiguringProgressLogic::onPushButtonCancelClicked()
+{
+    cancelDoInstallAction(true);
 }

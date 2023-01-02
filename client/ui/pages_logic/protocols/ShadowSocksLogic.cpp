@@ -97,6 +97,11 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
         set_labelServerBusyVisible(visible);
     };
 
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        set_pushButtonCancelVisible(visible);
+    };
+
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
@@ -106,11 +111,17 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
                                                    newContainerConfig);
     },
     pageFunc, progressBarFunc,
-    saveButtonFunc, waitInfoFunc, busyInfoFuncy);
+    saveButtonFunc, waitInfoFunc,
+    busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
         m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
         m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     }
     qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
+}
+
+void ShadowSocksLogic::onPushButtonCancelClicked()
+{
+    emit uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->cancelDoInstallAction(true);
 }

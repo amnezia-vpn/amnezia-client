@@ -162,4 +162,14 @@ PageProtocolBase {
             logic.onPushButtonSaveClicked()
         }
     }
+
+    BlueButtonType {
+        anchors.fill: pb_save
+        text: qsTr("Cancel")
+        visible: logic.pushButtonCancelVisible
+        enabled: logic.pushButtonCancelVisible
+        onClicked: {
+            logic.onPushButtonCancelClicked()
+        }
+    }
 }

@@ -10,7 +10,6 @@ PageBase {
     page: PageEnum.ServerConfiguringProgress
     logic: ServerConfiguringProgressLogic
 
-    enabled: ServerConfiguringProgressLogic.pageEnabled
     Caption {
         id: caption
         text: qsTr("Configuring...")
@@ -56,14 +55,27 @@ PageBase {
         visible: ServerConfiguringProgressLogic.labelWaitInfoVisible
     }
 
-    ProgressBar {
-        id: pr
+
+    BlueButtonType {
+        id: pb_cancel
+        z: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: logo.bottom
         anchors.bottomMargin: 40
-        width: parent.width - 40
+        width: root.width - 60
         height: 40
+        text: qsTr("Cancel")
+        visible: ServerConfiguringProgressLogic.pushButtonCancelVisible
+        enabled: ServerConfiguringProgressLogic.pushButtonCancelVisible
+        onClicked: {
+            ServerConfiguringProgressLogic.onPushButtonCancelClicked()
+        }
+    }
 
+    ProgressBar {
+        id: pr
+        enabled: ServerConfiguringProgressLogic.pageEnabled
+        anchors.fill: pb_cancel
         from: 0
         to: ServerConfiguringProgressLogic.progressBarMaximium
         value: ServerConfiguringProgressLogic.progressBarValue

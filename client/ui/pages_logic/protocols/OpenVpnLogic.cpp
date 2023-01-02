@@ -92,7 +92,7 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     set_lineEditPortEnabled(container == DockerContainer::OpenVpn);
 }
 
-void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
+void OpenVpnLogic::onPushButtonSaveClicked()
 {
     QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::OpenVpn);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
@@ -144,6 +144,11 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
         set_labelServerBusyVisible(visible);
     };
 
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        set_pushButtonCancelVisible(visible);
+    };
+
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
@@ -153,7 +158,8 @@ void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
                                                    newContainerConfig);
     },
     pageFunc, progressBarFunc,
-    saveButtonFunc, waitInfoFunc, busyInfoFuncy);
+    saveButtonFunc, waitInfoFunc,
+    busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
         m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
@@ -177,4 +183,9 @@ QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
     oldConfig.insert(config_key::additional_client_config, textAreaAdditionalClientConfig());
     oldConfig.insert(config_key::additional_server_config, textAreaAdditionalServerConfig());
     return oldConfig;
+}
+
+void OpenVpnLogic::onPushButtonCancelClicked()
+{
+    emit uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->cancelDoInstallAction(true);
 }

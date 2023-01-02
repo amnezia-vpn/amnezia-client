@@ -37,7 +37,6 @@ PageProtocolBase {
 
         ColumnLayout {
             id: content
-            enabled: logic.pageEnabled
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
@@ -45,12 +44,13 @@ PageProtocolBase {
 
             LabelType {
                 id: lb_subnet
+                enabled: logic.pageEnabled
                 height: 21
                 text: qsTr("VPN Addresses Subnet")
             }
             TextFieldType {
                 id: tf_subnet
-
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 height: 31
                 text: logic.lineEditSubnetText
@@ -59,15 +59,16 @@ PageProtocolBase {
                 }
             }
 
-            //
             LabelType {
                 id: lb_proto
+                enabled: logic.pageEnabled
                 Layout.topMargin: 20
                 height: 21
                 text: qsTr("Network protocol")
             }
             Rectangle {
                 id: rect_proto
+                enabled: logic.pageEnabled
                 implicitWidth: root.width - 60
                 height: 71
                 border.width: 1
@@ -99,8 +100,8 @@ PageProtocolBase {
                 }
             }
 
-            //
             RowLayout {
+                enabled: logic.pageEnabled
                 Layout.topMargin: 10
                 Layout.fillWidth: true
                 LabelType {
@@ -122,12 +123,9 @@ PageProtocolBase {
                 }
             }
 
-
-
-            //
             CheckBoxType {
                 id: check_auto_enc
-
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Auto-negotiate encryption")
@@ -140,15 +138,16 @@ PageProtocolBase {
                 }
             }
 
-            //
             LabelType {
                 id: lb_cipher
+                enabled: logic.pageEnabled
                 height: 21
                 text: qsTr("Cipher")
             }
 
             ComboBoxType {
                 id: cb_cipher
+                enabled: logic.pageEnabled && !check_auto_enc.checked
                 implicitWidth: parent.width
 
                 height: 31
@@ -175,18 +174,18 @@ PageProtocolBase {
                 onCurrentTextChanged: {
                     logic.comboBoxVpnCipherText = currentText
                 }
-                enabled: !check_auto_enc.checked
             }
 
-            //
             LabelType {
                 id: lb_hash
+                enabled: logic.pageEnabled
                 height: 21
                 Layout.topMargin: 20
                 text: qsTr("Hash")
             }
             ComboBoxType {
                 id: cb_hash
+                enabled: logic.pageEnabled && !check_auto_enc.checked
                 height: 31
                 implicitWidth: parent.width
                 model: [
@@ -212,11 +211,11 @@ PageProtocolBase {
                 onCurrentTextChanged: {
                     logic.comboBoxVpnHashText = currentText
                 }
-                enabled: !check_auto_enc.checked
             }
 
             CheckBoxType {
                 id: check_tls
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 Layout.topMargin: 20
                 height: 21
@@ -230,6 +229,7 @@ PageProtocolBase {
 
             CheckBoxType {
                 id: check_block_dns
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Block DNS requests outside of VPN")
@@ -242,7 +242,7 @@ PageProtocolBase {
 
             BasicButtonType {
                 id: pb_client_config
-
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Additional client config commands →")
@@ -267,6 +267,7 @@ PageProtocolBase {
 
             Rectangle {
                 id: rect_client_conf
+                enabled: logic.pageEnabled
                 implicitWidth: root.width - 60
                 height: 101
                 border.width: 1
@@ -288,14 +289,12 @@ PageProtocolBase {
                         }
                     }
                 }
-
-
             }
 
 
             BasicButtonType {
                 id: pb_server_config
-
+                enabled: logic.pageEnabled
                 implicitWidth: parent.width
                 height: 21
                 text: qsTr("Additional server config commands →")
@@ -320,6 +319,7 @@ PageProtocolBase {
 
             Rectangle {
                 id: rect_server_conf
+                enabled: logic.pageEnabled
                 implicitWidth: root.width - 60
                 height: 101
                 border.width: 1
@@ -347,6 +347,7 @@ PageProtocolBase {
 
             LabelType {
                 id: label_server_busy
+                enabled: logic.pageEnabled
                 horizontalAlignment: Text.AlignHCenter
                 Layout.maximumWidth: parent.width
                 Layout.fillWidth: true
@@ -356,6 +357,7 @@ PageProtocolBase {
 
             LabelType {
                 id: label_proto_openvpn_info
+                enabled: logic.pageEnabled
                 horizontalAlignment: Text.AlignHCenter
                 Layout.maximumWidth: parent.width
                 Layout.fillWidth: true
@@ -371,18 +373,31 @@ PageProtocolBase {
 
                 BlueButtonType {
                     id: pb_save
+                    enabled: logic.pageEnabled
                     z: 1
                     height: 40
                     text: qsTr("Save and restart VPN")
                     width: parent.width
                     visible: logic.pushButtonSaveVisible
                     onClicked: {
-                        logic.onPushButtonProtoOpenVpnSaveClicked()
+                        logic.onPushButtonSaveClicked()
+                    }
+                }
+
+                BlueButtonType {
+                    z: 1
+                    anchors.fill: pb_save
+                    text: qsTr("Cancel")
+                    visible: logic.pushButtonCancelVisible
+                    enabled: logic.pushButtonCancelVisible
+                    onClicked: {
+                        logic.onPushButtonCancelClicked()
                     }
                 }
 
                 ProgressBar {
                     id: progress_save
+                    enabled: logic.pageEnabled
                     anchors.fill: pb_save
                     from: 0
                     to: logic.progressBarResetMaximium

@@ -530,10 +530,13 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         stdOut += data + "\n";
     };
 
-    QFutureWatcher<void> watcher;
+    QFutureWatcher<ErrorCode> watcher;
 
-    QFuture<void> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
         do {
+            if (m_cancelInstallation) {
+                return ErrorCode::ServerCancelInstallation;
+            }
             stdOut.clear();
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
@@ -543,15 +546,21 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                 QThread::msleep(1000);
             }
         } while (!stdOut.isEmpty());
+        return ErrorCode::NoError;
     });
 
     watcher.setFuture(future);
 
     QEventLoop wait;
-    QObject::connect(&watcher, &QFutureWatcher<void>::finished, &wait, &QEventLoop::quit);
+    QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
     wait.exec();
 
+    m_cancelInstallation = false;
     emit serverIsBusy(false);
+
+    if (future.result() != ErrorCode::NoError) {
+        return future.result();
+    }
 
     ErrorCode error = runScript(credentials,
                                 replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
@@ -818,6 +827,11 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
+}
+
+void ServerController::setCancelInstallation(const bool cancel)
+{
+    m_cancelInstallation = cancel;
 }
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)

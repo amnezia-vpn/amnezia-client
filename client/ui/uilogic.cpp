@@ -346,6 +346,11 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
         pageLogic<ServerConfiguringProgressLogic>()->set_labelServerBusyVisible(visible);
     };
 
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_pushButtonCancelVisible(visible);
+    };
+
     int count = 0;
     ErrorCode error;
     for (QMap<DockerContainer, QJsonObject>::iterator i = containers.begin(); i != containers.end(); i++, count++) {
@@ -353,7 +358,7 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 
         error = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([&] () {
             return m_serverController->setupContainer(installCredentials, i.key(), i.value());
-        }, pageFunc, progressBarFunc, noButton, waitInfoFunc, busyInfoFunc);
+        }, pageFunc, progressBarFunc, noButton, waitInfoFunc, busyInfoFunc, cancelButtonFunc);
 
         m_serverController->disconnectFromHost(installCredentials);
     }
