@@ -76,16 +76,14 @@ jobs:
         export PATH=$PATH:~/go/bin
         cd client
         mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -T buildsystem=1 -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-        cmake --build . --config Release
-  
+        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_IOS_BUILD
         path: /Users/runner/work/desktop-client/desktop-client/client/build-ios/
         retention-days: 1
-
 
     - name: Build iOS Action
       uses: Shahzainali/ios-build-action@2.1
