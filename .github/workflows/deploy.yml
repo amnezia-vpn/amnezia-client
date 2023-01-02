@@ -65,6 +65,10 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
+    - name: 'Rust'
+      run: |
+        rustup target add x86_64-apple-ios aarch64-apple-ios
+
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
