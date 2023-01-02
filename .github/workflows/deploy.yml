@@ -65,9 +65,6 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
@@ -104,4 +101,24 @@ jobs:
         match-git-url: ${{ secrets.MATCH_GIT_URL }}
         match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         match-build-type: 'appstore'
+
+     - name: Build iOS Action again
+      uses: Shahzainali/ios-build-action@2.1
+      with:
+        upload-to-testflight: true
+        increment-build-number: true
+        configuration: Release
+        export-method: app-store
+        project-path: /Users/runner/work/desktop-client/desktop-client/client/build-ios/AmneziaVPN.xcodeproj
+        scheme: AmneziaVPN
+        output-path: build-${{ github.sha }}.ipa
+        apple-key-id: ${{ secrets.APPLE_KEY_ID }}
+        apple-key-issuer-id: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+        apple-key-content: ${{ secrets.APPLE_KEY_CONTENT }}
+        team-id: ${{ secrets.TEAM_ID }}
+        team-name: ${{ secrets.TEAM_NAME }}
+        match-password: ${{ secrets.MATCH_PASSWORD }}
+        match-git-url: ${{ secrets.MATCH_GIT_URL }}
+        match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        match-build-type: 'appstore'   
 
