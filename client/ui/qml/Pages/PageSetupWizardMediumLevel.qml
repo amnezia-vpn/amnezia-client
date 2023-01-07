@@ -21,18 +21,9 @@ PageBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 15
-
+        anchors.bottom: next_button.top
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -52,16 +43,18 @@ PageBase {
                 Layout.topMargin: 15
                 text: qsTr('OpenVPN over ShadowSocks profile will be installed')
             }
-            BlueButtonType {
-                id: next_button
-                Layout.fillWidth: true
-                Layout.topMargin: 15
-                Layout.preferredHeight: 41
-                text: qsTr("Next")
-                onClicked: {
-                    UiLogic.goToPage(PageEnum.WizardVpnMode, false)
-                }
-            }
+        }
+    }
+
+    BlueButtonType {
+        id: next_button
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: GC.defaultMargin
+        x: GC.defaultMargin
+        width: parent.width - 2 * GC.defaultMargin
+        text: qsTr("Next")
+        onClicked: {
+            UiLogic.goToPage(PageEnum.WizardVpnMode, false)
         }
     }
 }

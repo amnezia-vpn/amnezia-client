@@ -19,18 +19,10 @@ PageBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: back.bottom
         anchors.topMargin: 0
-        anchors.bottom: root.bottom
         anchors.bottomMargin: 10
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -39,6 +31,7 @@ PageBase {
             anchors.topMargin: 10
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: GC.defaultMargin
 
             spacing: 15
 

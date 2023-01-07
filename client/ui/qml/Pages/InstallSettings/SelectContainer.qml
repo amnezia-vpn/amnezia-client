@@ -51,7 +51,6 @@ Drawer {
     }
 
     FlickableType {
-        clip: true
         anchors.fill: parent
         contentHeight: col.height
 

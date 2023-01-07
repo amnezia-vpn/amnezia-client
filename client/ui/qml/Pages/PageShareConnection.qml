@@ -30,9 +30,7 @@ PageBase {
 
     FlickableType {
         clip: true
-        width: parent.width
         anchors.top: caption.bottom
-        anchors.bottom: root.bottom
         contentHeight: col.height
         boundsBehavior: Flickable.StopAtBounds
 
@@ -56,7 +54,6 @@ PageBase {
 
 
             ShareConnectionContent {
-                x: 10
                 text: qsTr("Share for Amnezia")
                 height: 40
                 width: tb_c.width - 10
@@ -65,7 +62,6 @@ PageBase {
 
             ListView {
                 id: tb_c
-                x: 10
                 width: parent.width - 10
                 height: tb_c.contentItem.height
                 currentIndex: -1

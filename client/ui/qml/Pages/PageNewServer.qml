@@ -8,7 +8,6 @@ import "../Config"
 PageBase {
     id: root
     page: PageEnum.NewServer
-    //logic: {}
 
     BackButton {
         id: back_from_new_server
@@ -22,15 +21,15 @@ PageBase {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: qsTr("If you want easily configure your server just run Wizard")
-        width: parent.width - 80
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: caption.bottom
         anchors.topMargin: 30
     }
     BlueButtonType {
         id: pushButtonWizard
         text: qsTr("Run Setup Wizard")
-        anchors.top: labelWizard.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: labelWizard.bottom
         anchors.topMargin: 10
         onClicked: {
             UiLogic.goToPage(PageEnum.Wizard);
@@ -41,14 +40,13 @@ PageBase {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: qsTr("Press configure manually to choose VPN protocols you want to install")
-
-        width: parent.width - 80
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: pushButtonWizard.bottom
         anchors.topMargin: 40
     }
 
     BlueButtonType {
-        text: qsTr("Configure VPN protocols manually")
+        text: qsTr("Configure")
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: labelManual.bottom
         anchors.topMargin: 10

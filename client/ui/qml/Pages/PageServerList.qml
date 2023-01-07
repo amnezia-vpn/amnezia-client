@@ -35,10 +35,10 @@ PageBase {
 
     ListView {
         id: listWidget_servers
-        x: 20
+        x: GC.defaultMargin
         anchors.top: caption.bottom
         anchors.topMargin: 15
-        width: parent.width - 30
+        width: parent.width - GC.defaultMargin - 1
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         model: ServerListLogic.serverListModel

@@ -161,5 +161,6 @@
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>ui/qml/Pages/PageViewConfig.qml</file>
         <file>ui/qml/Controls/FlickableType.qml</file>
+        <file>ui/qml/Controls/UrlButtonType.qml</file>
     </qresource>
 </RCC>

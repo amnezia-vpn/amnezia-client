@@ -21,18 +21,9 @@ PageBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
         anchors.bottom: logo.top
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 15
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content

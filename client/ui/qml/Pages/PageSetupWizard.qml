@@ -21,18 +21,9 @@ PageBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 15
-
+        anchors.bottom: next_button.top
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -94,21 +85,23 @@ OpenVPN over ShadowSocks profile will be installed.\n")
                 text: qsTr("I want to improve my privacy on the internet.
 OpenVPN profile will be installed.\n")
             }
+        }
+    }
 
-
-            BlueButtonType {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 41
-                text: qsTr("Next")
-                onClicked: {
-                    if (radioButton_setup_wizard_high.checked) {
-                        UiLogic.goToPage(PageEnum.WizardHigh, false);
-                    } else if (radioButton_setup_wizard_medium.checked) {
-                        UiLogic.goToPage(PageEnum.WizardMedium, false);
-                    } else if (radioButton_setup_wizard_low.checked) {
-                        UiLogic.goToPage(PageEnum.WizardLow, false);
-                    }
-                }
+    BlueButtonType {
+        id: next_button
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: GC.defaultMargin
+        x: GC.defaultMargin
+        width: parent.width - 2 * GC.defaultMargin
+        text: qsTr("Next")
+        onClicked: {
+            if (radioButton_setup_wizard_high.checked) {
+                UiLogic.goToPage(PageEnum.WizardHigh, false);
+            } else if (radioButton_setup_wizard_medium.checked) {
+                UiLogic.goToPage(PageEnum.WizardMedium, false);
+            } else if (radioButton_setup_wizard_low.checked) {
+                UiLogic.goToPage(PageEnum.WizardLow, false);
             }
         }
     }

@@ -21,18 +21,8 @@ PageProtocolBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 15
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -67,7 +57,7 @@ PageProtocolBase {
             }
             Rectangle {
                 id: rect_proto
-                implicitWidth: root.width - 60
+                implicitWidth: parent.width
                 height: 71
                 border.width: 1
                 border.color: "lightgray"
@@ -75,7 +65,7 @@ PageProtocolBase {
                 RadioButtonType {
                     x: 10
                     y: 40
-                    width: 171
+                    width: parent.width
                     height: 19
                     text: qsTr("TCP")
                     enabled: logic.radioButtonTcpEnabled
@@ -87,7 +77,7 @@ PageProtocolBase {
                 RadioButtonType {
                     x: 10
                     y: 10
-                    width: 171
+                    width: parent.width
                     height: 19
                     text: qsTr("UDP")
                     checked: logic.radioButtonUdpChecked
@@ -101,16 +91,17 @@ PageProtocolBase {
             //
             RowLayout {
                 Layout.topMargin: 10
-                Layout.fillWidth: true
+                implicitWidth: parent.width
                 LabelType {
                     id: lb_port
                     height: 31
                     text: qsTr("Port")
-                    Layout.preferredWidth: root.width / 2 - 10
+                    Layout.preferredWidth: content.width / 2 - 5
                 }
                 TextFieldType {
                     id: tf_port
-                    Layout.fillWidth: true
+                    Layout.preferredWidth: content.width / 2 - 5
+                    Layout.alignment: Qt.AlignRight
 
                     height: 31
                     text: logic.lineEditPortText
@@ -120,8 +111,6 @@ PageProtocolBase {
                     enabled: logic.lineEditPortEnabled
                 }
             }
-
-
 
             //
             CheckBoxType {

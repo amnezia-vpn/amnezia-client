@@ -21,18 +21,9 @@ PageBase {
 
     FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 15
-
+        anchors.bottom: next_button.top
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -57,16 +48,18 @@ We recommend not to use messaging applications for sending the connection profil
                 text: qsTr('OpenVPN profile will be installed')
                 verticalAlignment: Text.AlignBottom
             }
-            BlueButtonType {
-                id: next_button
-                Layout.fillWidth: true
-                Layout.topMargin: 15
-                Layout.preferredHeight: 41
-                text: qsTr("Start configuring")
-                onClicked: {
-                    WizardLogic.onPushButtonLowFinishClicked()
-                }
-            }
+        }
+    }
+
+    BlueButtonType {
+        id: next_button
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: GC.defaultMargin
+        x: GC.defaultMargin
+        width: parent.width - 2 * GC.defaultMargin
+        text: qsTr("Start configuring")
+        onClicked: {
+            WizardLogic.onPushButtonLowFinishClicked()
         }
     }
 }
