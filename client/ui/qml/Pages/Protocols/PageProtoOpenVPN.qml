@@ -19,26 +19,17 @@ PageProtocolBase {
         text: qsTr("OpenVPN Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: GC.defaultMargin - 1
 
             ColumnLayout {
                 visible: !logic.isThirdPartyConfig
@@ -69,7 +60,7 @@ PageProtocolBase {
                 }
                 Rectangle {
                     id: rect_proto
-                    implicitWidth: root.width - 60
+                    implicitWidth: parent.width
                     height: 71
                     border.width: 1
                     border.color: "lightgray"
@@ -83,7 +74,7 @@ PageProtocolBase {
                         enabled: logic.radioButtonTcpEnabled
                         checked: logic.radioButtonTcpChecked
                         onCheckedChanged: {
-                            UiLogic.radioButtonTcpChecked = checked
+                            logic.radioButtonTcpChecked = checked
                         }
                     }
                     RadioButtonType {

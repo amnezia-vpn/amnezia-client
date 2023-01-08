@@ -1,11 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
+import "../Config"
 
 BasicButtonType {
     id: root
-    width: parent.width - 80
-    height: 40
+    width: parent.width - 2 * GC.defaultMargin
+    implicitHeight: 40
 
     background: Rectangle {
         anchors.fill: parent
