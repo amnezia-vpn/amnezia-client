@@ -22,7 +22,6 @@ PageBase {
     FlickableType {
         id: fl
         anchors.top: caption.bottom
-        anchors.bottom: logo.top
         contentHeight: content.height
 
         ColumnLayout {
@@ -149,10 +148,5 @@ PageBase {
                 }
             }
         }
-    }
-
-    Logo {
-        id: logo
-        anchors.bottom: parent.bottom
     }
 }

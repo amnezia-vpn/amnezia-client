@@ -8,7 +8,6 @@ import Qt.labs.platform
 import Qt.labs.folderlistmodel
 import QtQuick.Dialogs
 import QtQuick.Controls.Basic
-import "./"
 import "Controls"
 import "Pages"
 import "Pages/Protocols"
@@ -23,10 +22,10 @@ Window  {
     id: root
     visible: true
     width: GC.screenWidth
-    height: GC.isDesktop() ? GC.screenHeight + titleBar.height : GC.screenHeight
-    minimumWidth: 360
+    height: GC.screenHeight
+    minimumWidth: GC.isDesktop() ? 360 : 0
     minimumHeight: GC.isDesktop() ? 640 : 0
-    onClosing: {
+    onClosing: function() {
         console.debug("QML onClosing signal")
         UiLogic.onCloseWindow()
     }
@@ -85,29 +84,6 @@ Window  {
         }
     }
 
-    TitleBar {
-        id: titleBar
-        anchors.top: root.top
-        visible: GC.isDesktop()
-        DragHandler {
-            grabPermissions: TapHandler.CanTakeOverFromAnything
-            onActiveChanged: {
-                if (active) {
-                    root.startSystemMove();
-                }
-            }
-            target: null
-        }
-        onCloseButtonClicked: {
-            if (UiLogic.currentPageValue === PageEnum.Start ||
-                    UiLogic.currentPageValue === PageEnum.NewServer) {
-                Qt.quit()
-            } else {
-                root.hide()
-            }
-        }
-    }
-
     Rectangle {
         y: GC.isDesktop() ? titleBar.height : 0
         anchors.fill: parent
@@ -120,16 +96,15 @@ Window  {
         anchors.fill: parent
         focus: true
 
-        onCurrentItemChanged: {
-            //console.debug("QML onCurrentItemChanged " + pageLoader.currentItem)
+        onCurrentItemChanged: function() {
             UiLogic.currentPageValue = currentItem.page
         }
 
-        onDepthChanged: {
+        onDepthChanged: function() {
             UiLogic.pagesStackDepth = depth
         }
 
-        Keys.onPressed: {
+        Keys.onPressed: function(event) {
             UiLogic.keyPressEvent(event.key)
             event.accepted = true
         }
