@@ -13,6 +13,8 @@ void ViewConfigLogic::onUpdatePage()
 {
     set_configText(QJsonDocument(configJson()).toJson());
 
+    auto s = configJson()[config_key::isThirdPartyConfig].toBool();
+
     m_openVpnLastConfigs = m_openVpnMalStrings =
             "<style> \
             div { line-height: 0.5; } \
@@ -24,28 +26,42 @@ void ViewConfigLogic::onUpdatePage()
     const QJsonArray &containers = configJson()[config_key::containers].toArray();
     int i = 0;
     for (const QJsonValue &v: containers) {
-        QString cfg_json = v.toObject()[ProtocolProps::protoToString(Proto::OpenVpn)]
-                .toObject()[config_key::last_config].toString();
-
-        QString openvpn_cfg = QJsonDocument::fromJson(cfg_json.toUtf8()).object()[config_key::config]
-                .toString();
-
-        openvpn_cfg.replace("\r", "");
-
-        QStringList lines = openvpn_cfg.split("\n");
-        for (const QString &l: lines) {
-            i++;
-            QRegularExpressionMatch match = m_re.match(l);
-            if (dangerousTags.contains(match.captured(0))) {
-                QString t = QString("<p><font color=\"red\">%1</font>").arg(l);
-                m_openVpnLastConfigs.append(t + "\n");
-                m_openVpnMalStrings.append(t);
-                if (m_warningStringNumber == 3) m_warningStringNumber = i - 3;
-                m_warningActive = true;
-                qDebug() << "ViewConfigLogic : malicious scripts warning:" << l;
+        auto containerName = v.toObject()[config_key::container].toString();
+        QJsonObject containerConfig = v.toObject()[containerName.replace("amnezia-", "")].toObject();
+        if (containerConfig[config_key::isThirdPartyConfig].toBool()) {
+            auto lastConfig = containerConfig.value(config_key::last_config).toString();
+            auto lastConfigJson = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
+            QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+            QString lastConfigText;
+            for (const QString &l: lines) {
+                    lastConfigText.append(l + "\n");
             }
-            else {
-                m_openVpnLastConfigs.append("<p>" + l + "&nbsp;\n");
+            set_configText(lastConfigText);
+        }
+
+
+        if (v.toObject()[config_key::container].toString() == "amnezia-openvpn") {
+            QString lastConfig = v.toObject()[ProtocolProps::protoToString(Proto::OpenVpn)]
+                    .toObject()[config_key::last_config].toString();
+
+            QString lastConfigJson = QJsonDocument::fromJson(lastConfig.toUtf8()).object()[config_key::config]
+                    .toString();
+
+            QStringList lines = lastConfigJson.replace("\r", "").split("\n");
+            for (const QString &l: lines) {
+                i++;
+                QRegularExpressionMatch match = m_re.match(l);
+                if (dangerousTags.contains(match.captured(0))) {
+                    QString t = QString("<p><font color=\"red\">%1</font>").arg(l);
+                    m_openVpnLastConfigs.append(t + "\n");
+                    m_openVpnMalStrings.append(t);
+                    if (m_warningStringNumber == 3) m_warningStringNumber = i - 3;
+                    m_warningActive = true;
+                    qDebug() << "ViewConfigLogic : malicious scripts warning:" << l;
+                }
+                else {
+                    m_openVpnLastConfigs.append("<p>" + l + "&nbsp;\n");
+                }
             }
         }
     }
