@@ -8,6 +8,8 @@ Item {
     readonly property int screenWidth: 380
     readonly property int screenHeight: 640
 
+    readonly property int defaultMargin: 20
+
     function isMobile() {
         if (Qt.platform.os == "android" ||
                 Qt.platform.os == "ios") {

@@ -37,11 +37,17 @@ void ServerSettingsLogic::onUpdatePage()
     set_pushButtonShareFullVisible(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
     const QJsonObject &server = m_settings->server(uiLogic()->selectedServerIndex);
     const QString &port = server.value(config_key::port).toString();
-    set_labelServerText(QString("%1@%2%3%4")
-                                     .arg(server.value(config_key::userName).toString())
-                                     .arg(server.value(config_key::hostName).toString())
-                                     .arg(port.isEmpty() ? "" : ":")
-                                     .arg(port));
+
+    const QString &userName = server.value(config_key::userName).toString();
+    const QString &hostName = server.value(config_key::hostName).toString();
+    QString name = QString("%1%2%3%4%5")
+        .arg(userName)
+        .arg(userName.isEmpty() ? "" : "@")
+        .arg(hostName)
+        .arg(port.isEmpty() ? "" : ":")
+        .arg(port);
+
+    set_labelServerText(name);
     set_lineEditDescriptionText(server.value(config_key::description).toString());
 
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);

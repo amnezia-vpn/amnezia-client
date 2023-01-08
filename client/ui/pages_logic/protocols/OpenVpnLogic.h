@@ -35,6 +35,9 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(int, progressBarResetValue)
     AUTO_PROPERTY(int, progressBarResetMaximium)
 
+    AUTO_PROPERTY(QString, openVpnLastConfigText)
+    AUTO_PROPERTY(bool, isThirdPartyConfig)
+
 public:
     Q_INVOKABLE void onPushButtonProtoOpenVpnSaveClicked();
 
