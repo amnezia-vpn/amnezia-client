@@ -76,6 +76,7 @@ PageBase {
             }
             BlueButtonType {
                 Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: qsTr("Share Server (FULL ACCESS)")
                 visible: ServerSettingsLogic.pushButtonShareFullVisible
                 onClicked: {
@@ -94,6 +95,7 @@ PageBase {
             }
             BlueButtonType {
                 Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: ServerSettingsLogic.pushButtonClearClientCacheText
                 visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
@@ -102,6 +104,7 @@ PageBase {
             }
             BlueButtonType {
                 Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: qsTr("Forget this server")
                 onClicked: {
                     ServerSettingsLogic.onPushButtonForgetServer()

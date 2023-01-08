@@ -71,7 +71,6 @@ PageBase {
             BlueButtonType {
                 visible: !GC.isMobile()
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: qsTr("Check for updates")
                 onClicked: {
                     Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
@@ -90,7 +89,6 @@ PageBase {
             }
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: qsTr("Open logs folder")
                 onClicked: {
                     AppSettingsLogic.onPushButtonOpenLogsClicked()
@@ -100,7 +98,6 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                Layout.preferredHeight: 41
                 text: qsTr("Export logs")
                 onClicked: {
                     AppSettingsLogic.onPushButtonExportLogsClicked()
@@ -110,7 +107,6 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                Layout.preferredHeight: 41
 
                 property string start_text: qsTr("Clear logs")
                 property string end_text: qsTr("Cleared")

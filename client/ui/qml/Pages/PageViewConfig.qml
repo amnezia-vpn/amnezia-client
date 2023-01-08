@@ -115,7 +115,7 @@ AmneziaVPN detected this profile may contain malicious scripts. Please, carefull
 
                 BasicButtonType {
                     Layout.preferredWidth: (content.width - parent.spacing) /2
-                    Layout.preferredHeight: 41
+                    Layout.preferredHeight: 40
                     font.pixelSize: btn_import.font.pixelSize
                     text: qsTr("Cancel")
                     onClicked: {
@@ -126,7 +126,6 @@ AmneziaVPN detected this profile may contain malicious scripts. Please, carefull
                 BlueButtonType {
                     id: btn_import
                     Layout.preferredWidth: (content.width - parent.spacing) /2
-                    Layout.preferredHeight: 41
                     text: qsTr("Import config")
                     onClicked: {
                         logic.importConfig()
