@@ -35,10 +35,10 @@ PageBase {
 
     ListView {
         id: listWidget_servers
-        x: 20
+        x: GC.defaultMargin
         anchors.top: caption.bottom
         anchors.topMargin: 15
-        width: parent.width
+        width: parent.width - GC.defaultMargin - 1
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         model: ServerListLogic.serverListModel
@@ -49,7 +49,7 @@ PageBase {
         clip: true
         delegate: Item {
             height: 60
-            width: root.width - 40
+            width: listWidget_servers.width - 15
             MouseArea {
                 id: ms
                 anchors.fill: parent
@@ -173,6 +173,10 @@ PageBase {
                     }
                 }
             }
+        }
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
         }
     }
 }

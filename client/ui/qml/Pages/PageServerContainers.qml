@@ -174,11 +174,7 @@ PageBase {
         }
     }
 
-
-
-
-
-    Flickable {
+    FlickableType {
         visible: container_selector.selectedIndex <= 0
         clip: true
         width: parent.width
@@ -224,7 +220,6 @@ PageBase {
 
             ListView {
                 id: tb_c
-                x: 10
                 width: parent.width - 10
                 height: tb_c.contentItem.height
                 currentIndex: -1
@@ -431,7 +426,7 @@ PageBase {
 
         width: parent.width - 40
         height: 40
-        text: qsTr("Install new protocols container")
+        text: qsTr("Install new service")
         font.pixelSize: 16
         onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
 
