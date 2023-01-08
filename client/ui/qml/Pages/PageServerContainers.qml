@@ -32,6 +32,7 @@ PageBase {
 
     BackButton {
         id: back
+        onClicked: tb_c.currentIndex = -1
     }
     Caption {
         id: caption
@@ -288,7 +289,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_remove
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true
                                 icon.source: "qrc:/images/delete.png"
@@ -315,7 +316,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_share
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 icon.source: "qrc:/images/share.png"
                                 implicitWidth: 30

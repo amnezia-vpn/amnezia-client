@@ -19,6 +19,8 @@ public:
     Q_INVOKABLE void onPushButtonRemoveClicked(DockerContainer c);
     Q_INVOKABLE void onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp);
 
+    AUTO_PROPERTY(bool, isManagedServer)
+
 public:
     explicit ServerContainersLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ServerContainersLogic() = default;
