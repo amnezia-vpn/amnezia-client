@@ -269,7 +269,7 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-openvpn";
-    o[config_key::description] = QString("OpenVpn server");
+    o[config_key::description] = m_settings->nextAvailableServerName();
 
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
@@ -316,7 +316,7 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     QJsonObject o;
     o[config_key::containers] = arr;
     o[config_key::defaultContainer] = "amnezia-wireguard";
-    o[config_key::description] = QString("Wireguard server");
+    o[config_key::description] = m_settings->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(config);

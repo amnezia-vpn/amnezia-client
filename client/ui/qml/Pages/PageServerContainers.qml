@@ -289,7 +289,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_remove
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true
                                 icon.source: "qrc:/images/delete.png"
@@ -316,7 +316,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_share
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 icon.source: "qrc:/images/share.png"
                                 implicitWidth: 30

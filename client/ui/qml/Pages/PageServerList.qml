@@ -93,14 +93,14 @@ PageBase {
                 id: label_address
                 x: 20
                 y: 40
-                width: 141
+                width: listWidget_servers.width - 100
                 height: 16
                 text: address
             }
             Text {
                 x: 10
                 y: 10
-                width: 181
+                width: listWidget_servers.width - 100
                 height: 21
                 font.family: "Lato"
                 font.styleName: "normal"
