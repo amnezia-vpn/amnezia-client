@@ -47,7 +47,7 @@ jobs:
       with:
         name: AmneziaVPN_Linux
         path: AmneziaVPN.bundle
-        retention-days: 1
+        retention-days: 3
 
 # ------------------------------------------------------
 
@@ -102,7 +102,7 @@ jobs:
       with:
         name: AmneziaVPN_Windows
         path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
-        retention-days: 1
+        retention-days: 3
 
 # ------------------------------------------------------
 
@@ -230,7 +230,7 @@ jobs:
       with:
         name: AmneziaVPN_MacOS
         path: AmneziaVPN.dmg
-        retention-days: 1
+        retention-days: 3
 
 # ------------------------------------------------------
 
