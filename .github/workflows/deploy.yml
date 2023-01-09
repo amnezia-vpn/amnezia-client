@@ -46,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_Linux
-        path: AmneziaVPN.bundle
+        path: deploy/AmneziaVPN_Linux_Installer
         retention-days: 3
 
 # ------------------------------------------------------
