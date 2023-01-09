@@ -18,6 +18,7 @@
 
 #include "models/containers_model.h"
 #include "models/protocols_model.h"
+#include "models/clientManagementModel.h"
 
 #include "notificationhandler.h"
 
@@ -42,6 +43,8 @@ class StartPageLogic;
 class ViewConfigLogic;
 class VpnLogic;
 class WizardLogic;
+class ClientManagementLogic;
+class ClientInfoLogic;
 
 class PageProtocolLogicBase;
 class OpenVpnLogic;
@@ -64,6 +67,7 @@ class UiLogic : public QObject
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
+    READONLY_PROPERTY(QObject *, clientManagementModel)
 
 public:
     explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
@@ -87,6 +91,8 @@ public:
     friend class ViewConfigLogic;
     friend class VpnLogic;
     friend class WizardLogic;
+    friend class ClientManagementLogic;
+    friend class ClientInfoLogic;
 
     friend class PageProtocolLogicBase;
     friend class OpenVpnLogic;
@@ -120,6 +126,7 @@ signals:
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Proto protocol, bool reset = true, bool slide = true);
     void goToShareProtocolPage(Proto protocol, bool reset = true, bool slide = true);
+    void goToClientInfoPage(Proto protocol, bool reset = true, bool slide = true);
 
     void closePage();
     void setStartPage(PageEnumNS::Page page, bool slide = true);

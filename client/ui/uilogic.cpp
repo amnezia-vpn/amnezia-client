@@ -67,6 +67,8 @@
 #include "pages_logic/ViewConfigLogic.h"
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
+#include "pages_logic/ClientManagementLogic.h"
+#include "pages_logic/ClientInfoLogic.h"
 
 #include "pages_logic/protocols/CloakLogic.h"
 #include "pages_logic/protocols/OpenVpnLogic.h"
@@ -87,6 +89,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
+    m_clientManagementModel = new ClientManagementModel(settings, this);
     m_vpnConnection = new VpnConnection(settings, configurator, serverController);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
@@ -676,4 +679,6 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<ViewConfigLogic>();
     registerPageLogic<VpnLogic>();
     registerPageLogic<WizardLogic>();
+    registerPageLogic<ClientManagementLogic>();
+    registerPageLogic<ClientInfoLogic>();
 }

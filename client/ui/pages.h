@@ -12,7 +12,8 @@ public:
     enum Type {
         Basic,
         Proto,
-        ShareProto
+        ShareProto,
+        ClientInfo
     };
     Q_ENUM(Type)
 };
@@ -24,7 +25,7 @@ enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
-           ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig};
+           ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig, ClientManagement, ClientInfo};
 Q_ENUM_NS(Page)
 
 static void declareQmlPageEnum() {

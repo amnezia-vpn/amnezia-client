@@ -796,6 +796,59 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     return client;
 }
 
+ErrorCode ServerController::getClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+
+    ErrorCode error = ErrorCode::NoError;
+    if (mainProtocol == Proto::OpenVpn) {
+        error = runScript(credentials,
+                          replaceVars(QString("sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'"),
+                                      genVarsForScript(credentials, container)), cbReadStdOut);
+        // TODO error processing
+        if (!stdOut.isEmpty()) {
+            QStringList clietnsNames = stdOut.split("\n", Qt::SkipEmptyParts);
+            clietnsNames.removeAll("AmneziaReq.crt");
+
+            QByteArray clientsTableString = getTextFileFromContainer(container, credentials, "opt/amnezia/openvpn/clientsTable");
+            QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
+            for (auto &clietnId : clietnsNames) {
+                clietnId.replace(".crt", "");
+                if (!clientsTable.contains(clietnId)) {
+                    stdOut.clear();
+                    error = runScript(credentials,
+                                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'").arg(clietnId),
+                                                  genVarsForScript(credentials, container)), cbReadStdOut);
+                    // TODO error processing
+                    QJsonObject client;
+                    client["name"] = "";
+                    client["certificate"] = stdOut;
+                    clientsTable[clietnId] = client;
+                }
+            }
+            QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
+            if (clientsTableString != newClientsTableString) {
+                error = uploadTextFileToContainer(container, credentials, newClientsTableString, "opt/amnezia/openvpn/clientsTable");
+            }
+            // TODO error processing
+            clietns = clientsTable;
+        }
+    } else if (mainProtocol == Proto::WireGuard) {
+
+    }
+
+    return error;
+}
+
+ErrorCode ServerController::setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns)
+{
+    auto error = uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), "opt/amnezia/openvpn/clientsTable");
+    return error;
+}
+
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)
 {
     SshConnection *client = acquireConnection(sshParams(credentials));

@@ -73,6 +73,9 @@ public:
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
+    ErrorCode getClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns);
+    ErrorCode setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns);
+
 private:
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
