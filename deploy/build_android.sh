@@ -46,8 +46,12 @@ cd $BUILD_DIR
 
 echo "HOST Qt: $QT_HOST_PATH"
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -DQT_HOST_PATH=$QT_HOST_PATH -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR \
+   -DQT_NO_GLOBAL_APK_TARGET_PART_OF_ALL="ON" \
+   -DQT_HOST_PATH=$QT_HOST_PATH \
+   -DCMAKE_BUILD_TYPE="Release"
+
+cmake --build . --config release
 
 # $QT_BIN_DIR/qmake  -r -spec android-clang CONFIG+=qtquickcompiler ANDROID_ABIS="armeabi-v7a arm64-v8a x86 x86_64" $PROJECT_DIR/AmneziaVPN.pro
 # echo "Executing make... may take long time"
@@ -56,15 +60,15 @@ cmake --build . --config Release
 # $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make install INSTALL_ROOT=android
 # echo "Build OK"
 
-# echo "............Deploy.................."
-# cd $OUT_APP_DIR
+echo "............Deploy.................."
+cd $OUT_APP_DIR
 
-# $QT_BIN_DIR/androiddeployqt \
-#     --output $OUT_APP_DIR/android \
-#     --gradle \
-#     --release \
-#     --input android-AmneziaVPN-deployment-settings.json
+$QT_HOST_PATH/bin/androiddeployqt \
+    --output $OUT_APP_DIR/android-build \
+    --gradle \
+    --release \
+    --input android-AmneziaVPN-deployment-settings.json
     
 echo "............Copy apk.................."
-cp $OUT_APP_DIR/android/build/outputs/apk/release/android-release-unsigned.apk \
+cp $OUT_APP_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
    $PROJECT_DIR/AmneziaVPN-release-unsigned.apk
