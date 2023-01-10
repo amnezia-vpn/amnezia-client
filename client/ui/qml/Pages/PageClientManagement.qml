@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes 1.4
+import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -45,6 +46,12 @@ PageBase {
                 text: ServerSettingsLogic.labelCurrentVpnProtocolText
             }
 
+            SortFilterProxyModel {
+                id: proxyClientManagementModel
+                sourceModel: UiLogic.clientManagementModel
+                sorters: RoleSorter { roleName: "clientName" }
+            }
+
             ListView {
                 id: lv_clients
                 width: parent.width
@@ -56,7 +63,7 @@ PageBase {
                 topMargin: 10
                 spacing: 10
                 clip: true
-                model: UiLogic.clientManagementModel
+                model: proxyClientManagementModel
                 highlightRangeMode: ListView.ApplyRange
                 highlightMoveVelocity: -1
                 delegate: Item {
@@ -69,7 +76,7 @@ PageBase {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            ClientManagementLogic.onClientItemClicked(index)
+                            ClientManagementLogic.onClientItemClicked(proxyClientManagementModel.mapToSource(index))
                         }
                     }
 
@@ -96,23 +103,11 @@ PageBase {
                         }
                     }
 
-                    Text {
-                        x: 10
-                        y: 10
-                        font.family: "Lato"
-                        font.styleName: "normal"
-                        color: "#181922"
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode: Text.Wrap
-                        text: clientName
-                    }
-
                     LabelType {
                         x: 20
-                        y: 40
-//                        width: 141
-                        height: 16
-                        text: certId
+                        y: 20
+                        font.pixelSize: 20
+                        text: clientName
                     }
                 }
             }

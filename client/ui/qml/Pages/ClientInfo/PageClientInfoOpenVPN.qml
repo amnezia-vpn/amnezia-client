@@ -9,7 +9,6 @@ import "../../Config"
 PageClientInfoBase {
     id: root
     protocol: ProtocolEnum.OpenVpn
-
     BackButton {
         id: back
     }
@@ -71,7 +70,7 @@ PageClientInfoBase {
             LabelType {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: ClientInfoLogic.labelCertId
+                text: ClientInfoLogic.labelOpenVpnCertId
             }
 
             LabelType {
@@ -87,7 +86,7 @@ PageClientInfoBase {
                 textArea.readOnly: true
                 textArea.wrapMode: TextEdit.WrapAnywhere
                 textArea.verticalAlignment: Text.AlignTop
-                textArea.text: ClientInfoLogic.textAreaCertificate
+                textArea.text: ClientInfoLogic.textAreaOpenVpnCertData
             }
 
             BlueButtonType {
@@ -95,7 +94,7 @@ PageClientInfoBase {
                 Layout.preferredHeight: 41
                 text: qsTr("Revoke Certificate")
                 onClicked: {
-                    ClientInfoLogic.onRevokeCertificateClicked()
+                    ClientInfoLogic.onRevokeOpenVpnCertificateClicked()
                 }
             }
         }

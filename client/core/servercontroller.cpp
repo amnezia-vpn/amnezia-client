@@ -810,23 +810,26 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
                                       genVarsForScript(credentials, container)), cbReadStdOut);
         // TODO error processing
         if (!stdOut.isEmpty()) {
-            QStringList clietnsNames = stdOut.split("\n", Qt::SkipEmptyParts);
-            clietnsNames.removeAll("AmneziaReq.crt");
+            QStringList certsIds = stdOut.split("\n", Qt::SkipEmptyParts);
+            certsIds.removeAll("AmneziaReq.crt");
 
             QByteArray clientsTableString = getTextFileFromContainer(container, credentials, "opt/amnezia/openvpn/clientsTable");
             QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
-            for (auto &clietnId : clietnsNames) {
-                clietnId.replace(".crt", "");
-                if (!clientsTable.contains(clietnId)) {
+            int count = 0;
+            for (auto &openvpnCertId : certsIds) {
+                openvpnCertId.replace(".crt", "");
+                if (!clientsTable.contains(openvpnCertId)) {
                     stdOut.clear();
                     error = runScript(credentials,
-                                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'").arg(clietnId),
+                                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'").arg(openvpnCertId),
                                                   genVarsForScript(credentials, container)), cbReadStdOut);
                     // TODO error processing
                     QJsonObject client;
-                    client["name"] = "";
-                    client["certificate"] = stdOut;
-                    clientsTable[clietnId] = client;
+                    client["openvpnCertId"] = openvpnCertId;
+                    client["clientName"] = QString("Client %1").arg(count);
+                    client["openvpnCertData"] = stdOut;
+                    clientsTable[openvpnCertId] = client;
+                    count++;
                 }
             }
             QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
@@ -837,7 +840,33 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
             clietns = clientsTable;
         }
     } else if (mainProtocol == Proto::WireGuard) {
+        QString wireguardConfigString = getTextFileFromContainer(container, credentials, "opt/amnezia/wireguard/wg0.conf");
 
+        auto configSections = wireguardConfigString.split("[", Qt::SkipEmptyParts);
+        QJsonObject clientsTable;
+        int count = 0;
+        for (const auto &section : configSections) {
+            auto configLines = section.split("\n", Qt::SkipEmptyParts);
+            if (!configLines.contains("Peer]")) {
+                continue;
+            }
+            QJsonObject client;
+            for (const auto &line : configLines) {
+                auto configPair = line.split(" = ", Qt::SkipEmptyParts);
+                if (configPair.front() == "# Name") {
+                    client["clientName"] = configPair.size() == 2 ? configPair.back() : "";
+                } else if (configPair.front() == "PublicKey") {
+                    client["wireguardPublicKey"] = configPair.back();
+                }
+            }
+            if (client["clientName"].isNull()) {
+                client["clientName"] = QString("Client %1").arg(count);
+                count++;
+            }
+            clientsTable[client["wireguardPublicKey"].toString()] = client;
+        }
+        // TODO error processing
+        clietns = clientsTable;
     }
 
     return error;
@@ -845,7 +874,12 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
 
 ErrorCode ServerController::setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns)
 {
-    auto error = uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), "opt/amnezia/openvpn/clientsTable");
+    ErrorCode error = ErrorCode::NoError;
+    if (mainProtocol == Proto::OpenVpn) {
+        error = uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), "opt/amnezia/openvpn/clientsTable");
+    } else if (mainProtocol == Proto::WireGuard) {
+
+    }
     return error;
 }
 

@@ -14,11 +14,20 @@ void ClientManagementModel::clearData()
     endResetModel();
 }
 
-void ClientManagementModel::setContent(const QVector<ClientInfo> &data)
+void ClientManagementModel::setContent(const QVector<QVariant> &data)
 {
     beginResetModel();
     m_content = data;
     endResetModel();
+}
+
+QJsonObject ClientManagementModel::getContent()
+{
+    QJsonObject clientsTable;
+    for (const auto &item : m_content) {
+        clientsTable[item.toJsonObject()["openvpnCertId"].toString()] = item.toJsonObject();
+    }
+    return clientsTable;
 }
 
 int ClientManagementModel::rowCount(const QModelIndex &parent) const
@@ -35,14 +44,15 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == NameRole) {
-        return m_content[index.row()].name;
+        return m_content[index.row()].toJsonObject()["clientName"].toString();
+    } else if (role == OpenVpnCertIdRole) {
+        return m_content[index.row()].toJsonObject()["openvpnCertId"].toString();
+    } else if (role == OpenVpnCertDataRole) {
+        return m_content[index.row()].toJsonObject()["openvpnCertData"].toString();
+    } else if (role == WireGuardPublicKey) {
+        return m_content[index.row()].toJsonObject()["wireguardPublicKey"].toString();
     }
-    if (role == CertIdRole) {
-        return m_content[index.row()].certId;
-    }
-    if (role == CertDataRole) {
-        return m_content[index.row()].certData;
-    }
+
     return QVariant();
 }
 
@@ -53,15 +63,19 @@ void ClientManagementModel::setData(const QModelIndex &index, QVariant data, int
         return;
     }
 
+    auto client = m_content[index.row()].toJsonObject();
     if (role == NameRole) {
-         m_content[index.row()].name = data.toString();
+        client["clientName"] = data.toString();
+    } else if (role == OpenVpnCertIdRole) {
+        client["openvpnCertId"] = data.toString();
+    } else if (role == OpenVpnCertDataRole) {
+        client["openvpnCertData"] = data.toString();
+    } else if (role == WireGuardPublicKey) {
+        client["wireguardPublicKey"] = data.toString();
+    } else {
+        return;
     }
-    if (role == CertIdRole) {
-        m_content[index.row()].certId = data.toString();
-    }
-    if (role == CertDataRole) {
-        m_content[index.row()].certData = data.toString();
-    }
+    m_content[index.row()] = client;
     emit dataChanged(index, index);
 }
 
@@ -69,7 +83,8 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "clientName";
-    roles[CertIdRole] = "certId";
-    roles[CertDataRole] = "certData";
+    roles[OpenVpnCertIdRole] = "openvpnCertId";
+    roles[OpenVpnCertDataRole] = "openvpnCertData";
+    roles[WireGuardPublicKey] = "wireguardPublicKey";
     return roles;
 }

@@ -13,6 +13,7 @@ ClientManagementLogic::ClientManagementLogic(UiLogic *logic, QObject *parent):
 
 void ClientManagementLogic::onUpdatePage()
 {
+    qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel())->clearData();
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
@@ -26,13 +27,9 @@ void ClientManagementLogic::onUpdatePage()
         ErrorCode e = m_serverController->getClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
                                                           selectedContainer, m_currentMainProtocol, clients);
     }
-    QVector<ClientManagementModel::ClientInfo> clientsArray;
+    QVector<QVariant> clientsArray;
     for (auto &clientId : clients.keys()) {
-        ClientManagementModel::ClientInfo clientInfo;
-        clientInfo.certId = clientId;
-        clientInfo.name = clients[clientId].toObject()["name"].toString();
-        clientInfo.certData = clients[clientId].toObject()["certificate"].toString();
-        clientsArray.push_back(clientInfo);
+        clientsArray.push_back(clients[clientId].toObject());
     }
     qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel())->setContent(clientsArray);
 }

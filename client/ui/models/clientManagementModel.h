@@ -12,21 +12,16 @@ class ClientManagementModel : public QAbstractListModel
 public:
     enum ClientRoles {
         NameRole = Qt::UserRole + 1,
-        CertIdRole,
-        CertDataRole
-    };
-
-    struct ClientInfo
-    {
-        QString name;
-        QString certId;
-        QString certData;
+        OpenVpnCertIdRole,
+        OpenVpnCertDataRole,
+        WireGuardPublicKey,
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     void clearData();
-    void setContent(const QVector<ClientInfo> &data);
+    void setContent(const QVector<QVariant> &data);
+    QJsonObject getContent();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void setData(const QModelIndex &index, QVariant data, int role = Qt::DisplayRole);
@@ -36,7 +31,7 @@ protected:
 
 private:
     std::shared_ptr<Settings> m_settings; //TODO remove this?
-    QVector<ClientInfo> m_content;
+    QVector<QVariant> m_content;
 };
 
 #endif // CLIENTMANAGEMENTMODEL_H

@@ -16,16 +16,26 @@ void ClientInfoLogic::setCurrentClientId(int index)
 }
 
 void ClientInfoLogic::onUpdatePage()
-{
+{   
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 
-    auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
-    auto modelIndex = model->index(m_currentClientIndex);
-    set_lineEditNameAliasText(model->data(modelIndex, ClientManagementModel::ClientRoles::NameRole).toString());
-    set_labelCertId(model->data(modelIndex, ClientManagementModel::ClientRoles::CertIdRole).toString());
-    set_textAreaCertificate(model->data(modelIndex, ClientManagementModel::ClientRoles::CertDataRole).toString());
+    auto protocols = ContainerProps::protocolsForContainer(selectedContainer);
+    if (!protocols.empty()) {
+        auto currentMainProtocol = protocols.front();
+
+        auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
+        auto modelIndex = model->index(m_currentClientIndex);
+
+        set_lineEditNameAliasText(model->data(modelIndex, ClientManagementModel::ClientRoles::NameRole).toString());
+        if (currentMainProtocol == Proto::OpenVpn) {
+            set_labelOpenVpnCertId(model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertIdRole).toString());
+            set_textAreaOpenVpnCertData(model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertDataRole).toString());
+        } else if (currentMainProtocol == Proto::WireGuard) {
+            set_textAreaWireGuardKeyData(model->data(modelIndex, ClientManagementModel::ClientRoles::WireGuardPublicKey).toString());
+        }
+    }
 }
 
 void ClientInfoLogic::onLineEditNameAliasEditingFinished()
@@ -34,10 +44,24 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
     auto modelIndex = model->index(m_currentClientIndex);
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
 
-    m_serverController->setClientsList();
+    auto clientsTable = model->getContent();
+    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    auto protocols = ContainerProps::protocolsForContainer(selectedContainer);
+    if (!protocols.empty()) {
+        auto currentMainProtocol = protocols.front();
+        m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
+                                           selectedContainer,
+                                           currentMainProtocol,
+                                           clientsTable);
+    }
 }
 
-void ClientInfoLogic::onRevokeCertificateClicked()
+void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
+{
+
+}
+
+void ClientInfoLogic::onRevokeWireGuardKeyClicked()
 {
 
 }
