@@ -21,7 +21,7 @@ public:
 
     void clearData();
     void setContent(const QVector<QVariant> &data);
-    QJsonObject getContent();
+    QJsonObject getContent(Proto protocol);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void setData(const QModelIndex &index, QVariant data, int role = Qt::DisplayRole);

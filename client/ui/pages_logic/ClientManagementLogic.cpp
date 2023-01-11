@@ -1,5 +1,9 @@
 #include "ClientManagementLogic.h"
 
+#include <QMessageBox>
+
+#include "defines.h"
+#include "core/errorstrings.h"
 #include "core/servercontroller.h"
 #include "ui/pages_logic/ClientInfoLogic.h"
 #include "ui/models/clientManagementModel.h"
@@ -24,8 +28,13 @@ void ClientManagementLogic::onUpdatePage()
     if (!protocols.empty()) {
         m_currentMainProtocol = protocols.front();
 
-        ErrorCode e = m_serverController->getClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
+        ErrorCode error = m_serverController->getClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
                                                           selectedContainer, m_currentMainProtocol, clients);
+        if (error != ErrorCode::NoError) {
+            QMessageBox::warning(nullptr, APPLICATION_NAME,
+                                 tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));
+            return;
+        }
     }
     QVector<QVariant> clientsArray;
     for (auto &clientId : clients.keys()) {

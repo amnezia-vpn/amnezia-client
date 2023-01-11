@@ -21,11 +21,15 @@ void ClientManagementModel::setContent(const QVector<QVariant> &data)
     endResetModel();
 }
 
-QJsonObject ClientManagementModel::getContent()
+QJsonObject ClientManagementModel::getContent(Proto protocol)
 {
     QJsonObject clientsTable;
     for (const auto &item : m_content) {
-        clientsTable[item.toJsonObject()["openvpnCertId"].toString()] = item.toJsonObject();
+        if (protocol == Proto::OpenVpn) {
+            clientsTable[item.toJsonObject()["openvpnCertId"].toString()] = item.toJsonObject();
+        } else if (protocol == Proto::WireGuard) {
+            clientsTable[item.toJsonObject()["wireguardPublicKey"].toString()] = item.toJsonObject();
+        }
     }
     return clientsTable;
 }

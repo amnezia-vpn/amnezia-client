@@ -1,5 +1,9 @@
 #include "ClientInfoLogic.h"
 
+#include <QMessageBox>
+
+#include "defines.h"
+#include "core/errorstrings.h"
 #include "core/servercontroller.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/uilogic.h"
@@ -16,7 +20,7 @@ void ClientInfoLogic::setCurrentClientId(int index)
 }
 
 void ClientInfoLogic::onUpdatePage()
-{   
+{
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
@@ -39,20 +43,26 @@ void ClientInfoLogic::onUpdatePage()
 }
 
 void ClientInfoLogic::onLineEditNameAliasEditingFinished()
-{    
+{
     auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
     auto modelIndex = model->index(m_currentClientIndex);
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
 
-    auto clientsTable = model->getContent();
+
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     auto protocols = ContainerProps::protocolsForContainer(selectedContainer);
     if (!protocols.empty()) {
         auto currentMainProtocol = protocols.front();
-        m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
+        auto clientsTable = model->getContent(currentMainProtocol);
+        ErrorCode error = m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
                                            selectedContainer,
                                            currentMainProtocol,
                                            clientsTable);
+        if (error != ErrorCode::NoError) {
+            QMessageBox::warning(nullptr, APPLICATION_NAME,
+                                 tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));
+            return;
+        }
     }
 }
 
