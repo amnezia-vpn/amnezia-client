@@ -12,6 +12,7 @@ PageBase {
     id: root
     page: PageEnum.ClientManagement
     logic: ClientManagementLogic
+    enabled: !ClientManagementLogic.busyIndicatorIsRunning
 
     BackButton {
         id: back
@@ -43,7 +44,13 @@ PageBase {
                 anchors.left: parent.left
                 font.pixelSize: 20
                 horizontalAlignment: Text.AlignHCenter
-                text: ServerSettingsLogic.labelCurrentVpnProtocolText
+                text: ClientManagementLogic.labelCurrentVpnProtocolText
+            }
+
+            BusyIndicator {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: ClientManagementLogic.busyIndicatorIsRunning
+                running: ClientManagementLogic.busyIndicatorIsRunning
             }
 
             SortFilterProxyModel {

@@ -12,6 +12,7 @@ class ClientManagementLogic : public PageLogicBase
     Q_OBJECT
 
     AUTO_PROPERTY(QString, labelCurrentVpnProtocolText)
+    AUTO_PROPERTY(bool, busyIndicatorIsRunning);
 
 public:
     ClientManagementLogic(UiLogic *uiLogic, QObject *parent = nullptr);

@@ -60,8 +60,7 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
                                            clientsTable);
         if (error != ErrorCode::NoError) {
             QMessageBox::warning(nullptr, APPLICATION_NAME,
-                                 tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));
-            return;
+                                 tr("An error occurred while saving the list of clients.") + "\n" + errorString(error));
         }
     }
 }

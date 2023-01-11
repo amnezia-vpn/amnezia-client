@@ -17,6 +17,8 @@ ClientManagementLogic::ClientManagementLogic(UiLogic *logic, QObject *parent):
 
 void ClientManagementLogic::onUpdatePage()
 {
+    set_busyIndicatorIsRunning(true);
+
     qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel())->clearData();
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
@@ -41,6 +43,8 @@ void ClientManagementLogic::onUpdatePage()
         clientsArray.push_back(clients[clientId].toObject());
     }
     qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel())->setContent(clientsArray);
+
+    set_busyIndicatorIsRunning(false);
 }
 
 void ClientManagementLogic::onClientItemClicked(int index)
