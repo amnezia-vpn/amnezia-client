@@ -1,8 +1,7 @@
-name: 'Deploy workflow'
+name: 'Release deploy workflow'
 
 
-on: 
-  workflow_dispatch
+on: [workflow_dispatch]
   # push:
   # tags:
   #   - **
@@ -114,7 +113,7 @@ jobs:
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
         bash deploy/build_android.sh
 
-    - name: Upload
+    - name: 'Upload'
         uses: actions/upload-artifact@v3
         with:
           name: Release APK
