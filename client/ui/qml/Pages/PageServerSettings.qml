@@ -23,20 +23,11 @@ PageBase {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
         anchors.bottom: logo.top
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -44,16 +35,13 @@ PageBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
-            TextFieldType {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 251
-                Layout.preferredHeight: 31
-                text: ServerSettingsLogic.lineEditDescriptionText
-                onEditingFinished: {
-                    ServerSettingsLogic.lineEditDescriptionText = text
-                    ServerSettingsLogic.onLineEditDescriptionEditingFinished()
-                }
+            LabelType {
+                Layout.fillWidth: true
+                font.pixelSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                text: ServerSettingsLogic.labelCurrentVpnProtocolText
             }
 
             TextFieldType {
@@ -67,25 +55,29 @@ PageBase {
 
             LabelType {
                 Layout.fillWidth: true
-                font.pixelSize: 20
-                horizontalAlignment: Text.AlignHCenter
-                text: ServerSettingsLogic.labelCurrentVpnProtocolText
+                text: ServerSettingsLogic.labelWaitInfoText
+                visible: ServerSettingsLogic.labelWaitInfoVisible
             }
-
-            BlueButtonType {
-                Layout.topMargin: 15
+            TextFieldType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
-                text: qsTr("Protocols and Services")
-                onClicked: {
-                    UiLogic.goToPage(PageEnum.ServerContainers)
+                text: ServerSettingsLogic.lineEditDescriptionText
+                onEditingFinished: {
+                    ServerSettingsLogic.lineEditDescriptionText = text
+                    ServerSettingsLogic.onLineEditDescriptionEditingFinished()
                 }
             }
 
             BlueButtonType {
-                Layout.topMargin: 10
+                text: qsTr("Protocols and Services")
+                Layout.topMargin: 20
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.ServerContainers)
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: qsTr("Share Server (FULL ACCESS)")
                 visible: ServerSettingsLogic.pushButtonShareFullVisible
                 onClicked: {
@@ -94,57 +86,46 @@ PageBase {
             }
 
             BlueButtonType {
-                Layout.topMargin: 10
+                Layout.topMargin: 60
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: qsTr("Clients Management")
                 onClicked: {
                     UiLogic.goToPage(PageEnum.ClientManagement)
                 }
             }
-
             BlueButtonType {
-                Layout.topMargin: 30
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
-                text: ServerSettingsLogic.pushButtonClearClientCacheText
-                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
-                onClicked: {
-                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
-                }
-            }
-
-            BlueButtonType {
                 Layout.topMargin: 10
-                Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: ServerSettingsLogic.pushButtonClearText
                 visible: ServerSettingsLogic.pushButtonClearVisible
                 onClicked: {
                     ServerSettingsLogic.onPushButtonClearServer()
                 }
             }
-
             BlueButtonType {
-                Layout.topMargin: 10
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
+                Layout.topMargin: 10
+                text: ServerSettingsLogic.pushButtonClearClientCacheText
+                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: qsTr("Forget this server")
                 onClicked: {
                     ServerSettingsLogic.onPushButtonForgetServer()
                 }
             }
 
-            LabelType {
-                Layout.fillWidth: true
-                text: ServerSettingsLogic.labelWaitInfoText
-                visible: ServerSettingsLogic.labelWaitInfoVisible
-            }
         }
     }
 
+
     Logo {
-        id: logo
+        id : logo
         anchors.bottom: parent.bottom
     }
 }
