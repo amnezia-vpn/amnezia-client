@@ -37,8 +37,8 @@ echo "Using Android SDK in $ANDROID_SDK_ROOT"
 echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
 # Checking env
-$QT_BIN_DIR/qmake -v
-$ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
+# $QT_BIN_DIR/qmake -v
+# $ANDROID_NDK_HOME/prebuilt/linux-x86_64/bin/make -v
 
 # Build App
 echo "Building App..."
