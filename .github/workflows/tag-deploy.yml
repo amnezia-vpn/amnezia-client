@@ -114,7 +114,7 @@ jobs:
         bash deploy/build_android.sh
 
     - name: 'Upload'
-        uses: actions/upload-artifact@v3
-        with:
-          name: Release APK
-          path: deploy/build/client/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+      uses: actions/upload-artifact@v3
+      with:
+        name: Release APK
+        path: deploy/build/client/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
