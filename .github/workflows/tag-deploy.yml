@@ -1,0 +1,121 @@
+name: 'Deploy workflow'
+
+
+on: 
+  workflow_dispatch
+  # push:
+  # tags:
+  #   - **
+
+jobs:
+
+  Build-Android-Release:
+    name: 'Build-Android-Release'
+    runs-on: ubuntu-latest
+
+    env:
+      QT_VERSION: 6.4.1
+      QIF_VERSION: 4.5
+
+    steps:
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Install android Qt x86_64'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86_64'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Install android Qt x86'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Install android Qt arm_v7'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_armv7'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Install android Qt arm_v8'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z'
+
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    - name: 'Build project'
+      run: |
+        export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
+        export NDK_VERSION=23c
+        export ANDROID_NDK_PLATFORM=android-23
+        export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
+        export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+
+        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
+          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
+          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
+        fi
+
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
+        bash deploy/build_android.sh
+
+    - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Release APK
+          path: deploy/build/client/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
