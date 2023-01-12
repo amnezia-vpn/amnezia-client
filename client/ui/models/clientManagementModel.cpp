@@ -79,8 +79,10 @@ void ClientManagementModel::setData(const QModelIndex &index, QVariant data, int
     } else {
         return;
     }
-    m_content[index.row()] = client;
-    emit dataChanged(index, index);
+    if (m_content[index.row()] != client) {
+        m_content[index.row()] = client;
+        emit dataChanged(index, index);
+    }
 }
 
 QHash<int, QByteArray> ClientManagementModel::roleNames() const

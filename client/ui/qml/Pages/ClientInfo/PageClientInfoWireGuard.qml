@@ -9,6 +9,8 @@ import "../../Config"
 PageClientInfoBase {
     id: root
     protocol: ProtocolEnum.WireGuard
+    enabled: !ClientInfoLogic.busyIndicatorIsRunning
+
     BackButton {
         id: back
     }
@@ -16,6 +18,14 @@ PageClientInfoBase {
     Caption {
         id: caption
         text: qsTr("Client Info")
+    }
+
+    BusyIndicator {
+        z: 99
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        visible: ClientInfoLogic.busyIndicatorIsRunning
+        running: ClientInfoLogic.busyIndicatorIsRunning
     }
 
     Flickable {

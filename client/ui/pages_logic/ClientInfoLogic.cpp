@@ -21,6 +21,8 @@ void ClientInfoLogic::setCurrentClientId(int index)
 
 void ClientInfoLogic::onUpdatePage()
 {
+    set_busyIndicatorIsRunning(false);
+
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
@@ -44,6 +46,8 @@ void ClientInfoLogic::onUpdatePage()
 
 void ClientInfoLogic::onLineEditNameAliasEditingFinished()
 {
+    set_busyIndicatorIsRunning(true);
+
     auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
     auto modelIndex = model->index(m_currentClientIndex);
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
@@ -55,14 +59,16 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
         auto currentMainProtocol = protocols.front();
         auto clientsTable = model->getContent(currentMainProtocol);
         ErrorCode error = m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                           selectedContainer,
-                                           currentMainProtocol,
-                                           clientsTable);
+                                                             selectedContainer,
+                                                             currentMainProtocol,
+                                                             clientsTable);
         if (error != ErrorCode::NoError) {
             QMessageBox::warning(nullptr, APPLICATION_NAME,
                                  tr("An error occurred while saving the list of clients.") + "\n" + errorString(error));
         }
     }
+
+    set_busyIndicatorIsRunning(false);
 }
 
 void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()

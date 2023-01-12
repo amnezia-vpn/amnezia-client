@@ -23,6 +23,14 @@ PageBase {
         text: qsTr("Clients Management")
     }
 
+    BusyIndicator {
+        z: 99
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        visible: ClientManagementLogic.busyIndicatorIsRunning
+        running: ClientManagementLogic.busyIndicatorIsRunning
+    }
+
     Flickable {
         id: fl
         width: root.width
@@ -45,12 +53,6 @@ PageBase {
                 font.pixelSize: 20
                 horizontalAlignment: Text.AlignHCenter
                 text: ClientManagementLogic.labelCurrentVpnProtocolText
-            }
-
-            BusyIndicator {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: ClientManagementLogic.busyIndicatorIsRunning
-                running: ClientManagementLogic.busyIndicatorIsRunning
             }
 
             SortFilterProxyModel {
