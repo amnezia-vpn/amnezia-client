@@ -1,7 +1,6 @@
 name: 'Release deploy workflow'
 
-
-on: [workflow_dispatch]
+on: workflow_dispatch
   # push:
   # tags:
   #   - **
