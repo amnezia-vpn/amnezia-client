@@ -2,7 +2,6 @@ name: 'Release deploy workflow'
 
 on: 
   workflow_dispatch:
-  push:
   # push:
   # tags:
   #   - **
@@ -111,7 +110,7 @@ jobs:
           unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
         fi
 
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin
         bash deploy/build_android.sh
 
     - name: 'Upload'
