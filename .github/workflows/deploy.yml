@@ -42,6 +42,13 @@ jobs:
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
 
+    - name: 'Upload artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN_Linux
+        path: deploy/AmneziaVPN_Linux_Installer
+        retention-days: 3
+
 # ------------------------------------------------------
 
   Build-Windows:
@@ -89,6 +96,13 @@ jobs:
         set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         call deploy\\build_windows.bat
+
+    - name: 'Upload artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN_Windows
+        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+        retention-days: 3
 
 # ------------------------------------------------------
 
@@ -166,14 +180,6 @@ jobs:
         team-id: 'X7UJ388FXK'
         configuration: Release
 
-
-
-
-
-
-
-
-
 # ------------------------------------------------------
 
   Build-MacOS:
@@ -218,6 +224,13 @@ jobs:
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
+
+    - name: 'Upload artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN_MacOS
+        path: AmneziaVPN.dmg
+        retention-days: 3
 
 # ------------------------------------------------------
 

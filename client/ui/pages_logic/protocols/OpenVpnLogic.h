@@ -42,6 +42,9 @@ class OpenVpnLogic : public PageProtocolLogicBase
 
     AUTO_PROPERTY(bool, pushButtonCancelVisible)
 
+    AUTO_PROPERTY(QString, openVpnLastConfigText)
+    AUTO_PROPERTY(bool, isThirdPartyConfig)
+
 public:
     Q_INVOKABLE void onPushButtonSaveClicked();
     Q_INVOKABLE void onPushButtonCancelClicked();

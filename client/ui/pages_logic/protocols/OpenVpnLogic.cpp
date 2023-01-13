@@ -90,6 +90,17 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
                                     toString(protocols::openvpn::defaultPort));
 
     set_lineEditPortEnabled(container == DockerContainer::OpenVpn);
+
+    auto lastConfig = openvpnConfig.value(config_key::last_config).toString();
+    auto lastConfigJson = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
+    QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    QString openVpnLastConfigText;
+    for (const QString &l: lines) {
+            openVpnLastConfigText.append(l + "\n");
+    }
+
+    set_openVpnLastConfigText(openVpnLastConfigText);
+    set_isThirdPartyConfig(openvpnConfig.value(config_key::isThirdPartyConfig).isBool());
 }
 
 void OpenVpnLogic::onPushButtonSaveClicked()
