@@ -9,10 +9,10 @@ import "../../Config"
 PageClientInfoBase {
     id: root
     protocol: ProtocolEnum.WireGuard
-    enabled: !ClientInfoLogic.busyIndicatorIsRunning
 
     BackButton {
         id: back
+        enabled: !ClientInfoLogic.busyIndicatorIsRunning
     }
 
     Caption {
@@ -50,6 +50,7 @@ PageClientInfoBase {
             anchors.right: parent.right
 
             LabelType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 Layout.fillWidth: true
                 font.pixelSize: 20
                 horizontalAlignment: Text.AlignHCenter
@@ -57,27 +58,33 @@ PageClientInfoBase {
             }
 
             LabelType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 height: 21
                 text: qsTr("Client name")
             }
 
             TextFieldType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 Layout.fillWidth: true
                 Layout.preferredHeight: 31
                 text: ClientInfoLogic.lineEditNameAliasText
                 onEditingFinished: {
-                    ClientInfoLogic.lineEditNameAliasText = text
-                    ClientInfoLogic.onLineEditNameAliasEditingFinished()
+                    if (text !== ClientInfoLogic.lineEditNameAliasText) {
+                        ClientInfoLogic.lineEditNameAliasText = text
+                        ClientInfoLogic.onLineEditNameAliasEditingFinished()
+                    }
                 }
             }
 
             LabelType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 Layout.topMargin: 20
                 height: 21
                 text: qsTr("Public Key")
             }
 
             TextAreaType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 Layout.preferredHeight: 200
                 Layout.fillWidth: true
 
@@ -88,6 +95,7 @@ PageClientInfoBase {
             }
 
             BlueButtonType {
+                enabled: !ClientInfoLogic.busyIndicatorIsRunning
                 Layout.fillWidth: true
                 Layout.preferredHeight: 41
                 text: qsTr("Revoke Key")

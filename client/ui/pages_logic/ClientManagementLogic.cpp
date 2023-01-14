@@ -35,6 +35,7 @@ void ClientManagementLogic::onUpdatePage()
         if (error != ErrorCode::NoError) {
             QMessageBox::warning(nullptr, APPLICATION_NAME,
                                  tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));
+            set_busyIndicatorIsRunning(false);
             return;
         }
     }
