@@ -25,6 +25,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void setData(const QModelIndex &index, QVariant data, int role = Qt::DisplayRole);
+    bool removeRows(int row);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

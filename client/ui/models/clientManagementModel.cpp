@@ -85,6 +85,14 @@ void ClientManagementModel::setData(const QModelIndex &index, QVariant data, int
     }
 }
 
+bool ClientManagementModel::removeRows(int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    m_content.removeAt(row);
+    endRemoveRows();
+    return true;
+}
+
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

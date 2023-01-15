@@ -115,6 +115,7 @@ PageClientInfoBase {
                 text: qsTr("Revoke Certificate")
                 onClicked: {
                     ClientInfoLogic.onRevokeOpenVpnCertificateClicked()
+                    UiLogic.closePage()
                 }
             }
         }

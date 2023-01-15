@@ -804,10 +804,10 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
         stdOut += data + "\n";
     };
 
-    auto mainProtocolString = ProtocolProps::protoToString(mainProtocol);
+    const QString mainProtocolString = ProtocolProps::protoToString(mainProtocol);
 
-    const QString clientsTableFile = QString("opt/amnezia/%1/clientsTable").arg(mainProtocolString);
-    QByteArray clientsTableString = getTextFileFromContainer(container, credentials, clientsTableFile, &error);
+    const QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable").arg(mainProtocolString);
+    const QByteArray clientsTableString = getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -847,7 +847,7 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
         }
     } else if (mainProtocol == Proto::WireGuard) {
         const QString wireGuardConfigFile = "opt/amnezia/wireguard/wg0.conf";
-        QString wireguardConfigString = getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+        const QString wireguardConfigString = getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
         if (error != ErrorCode::NoError) {
             return error;
         }
@@ -872,7 +872,7 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
         }
     }
 
-    QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
+    const QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
     if (clientsTableString != newClientsTableString) {
         error = uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
     }
@@ -886,9 +886,9 @@ ErrorCode ServerController::getClientsList(const ServerCredentials &credentials,
     return error;
 }
 
-ErrorCode ServerController::setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns)
+ErrorCode ServerController::setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, const QJsonObject &clietns)
 {
-    auto mainProtocolString = ProtocolProps::protoToString(mainProtocol);
+    const QString mainProtocolString = ProtocolProps::protoToString(mainProtocol);
     const QString clientsTableFile = QString("opt/amnezia/%1/clientsTable").arg(mainProtocolString);
     ErrorCode error = uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), clientsTableFile);
     return error;

@@ -8,6 +8,17 @@
 #include "ui/models/clientManagementModel.h"
 #include "ui/uilogic.h"
 
+namespace {
+    bool isErrorOccured(ErrorCode error) {
+        if (error != ErrorCode::NoError) {
+            QMessageBox::warning(nullptr, APPLICATION_NAME,
+                                 QObject::tr("An error occurred while saving the list of clients.") + "\n" + errorString(error));
+            return true;
+        }
+        return false;
+    }
+}
+
 ClientInfoLogic::ClientInfoLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent)
 {
@@ -23,16 +34,16 @@ void ClientInfoLogic::onUpdatePage()
 {
     set_busyIndicatorIsRunning(false);
 
-    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-    QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
-    set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const QString containerNameString = ContainerProps::containerHumanNames().value(container);
+    set_labelCurrentVpnProtocolText(tr("Service: ") + containerNameString);
 
-    auto protocols = ContainerProps::protocolsForContainer(selectedContainer);
+    const QVector<amnezia::Proto> protocols = ContainerProps::protocolsForContainer(container);
     if (!protocols.empty()) {
-        auto currentMainProtocol = protocols.front();
+        const Proto currentMainProtocol = protocols.front();
 
         auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
-        auto modelIndex = model->index(m_currentClientIndex);
+        const QModelIndex modelIndex = model->index(m_currentClientIndex);
 
         set_lineEditNameAliasText(model->data(modelIndex, ClientManagementModel::ClientRoles::NameRole).toString());
         if (currentMainProtocol == Proto::OpenVpn) {
@@ -49,23 +60,19 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
     set_busyIndicatorIsRunning(true);
 
     auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
-    auto modelIndex = model->index(m_currentClientIndex);
+    const QModelIndex modelIndex = model->index(m_currentClientIndex);
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
 
-
-    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-    auto protocols = ContainerProps::protocolsForContainer(selectedContainer);
+    const DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const QVector<amnezia::Proto> protocols = ContainerProps::protocolsForContainer(selectedContainer);
     if (!protocols.empty()) {
-        auto currentMainProtocol = protocols.front();
-        auto clientsTable = model->getContent(currentMainProtocol);
+        const Proto currentMainProtocol = protocols.front();
+        const QJsonObject clientsTable = model->getContent(currentMainProtocol);
         ErrorCode error = m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
                                                              selectedContainer,
                                                              currentMainProtocol,
                                                              clientsTable);
-        if (error != ErrorCode::NoError) {
-            QMessageBox::warning(nullptr, APPLICATION_NAME,
-                                 tr("An error occurred while saving the list of clients.") + "\n" + errorString(error));
-        }
+        isErrorOccured(error);
     }
 
     set_busyIndicatorIsRunning(false);
@@ -73,7 +80,50 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
 
 void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
 {
+    set_busyIndicatorIsRunning(true);
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
 
+    auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
+    const QModelIndex modelIndex = model->index(m_currentClientIndex);
+    const QString certId = model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertIdRole).toString();
+
+    const QString getOpenVpnCertData = QString("sudo docker exec -i $CONTAINER_NAME bash -c '"
+                                               "cd /opt/amnezia/openvpn ;\\"
+                                               "easyrsa revoke %1 ;\\"
+                                               "easyrsa gen-crl ;\\"
+                                               "cp pki/crl.pem .'").arg(certId);
+    const QString script = m_serverController->replaceVars(getOpenVpnCertData,
+                                                           m_serverController->genVarsForScript(credentials, container));
+    auto error = m_serverController->runScript(credentials, script);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+
+    model->removeRows(m_currentClientIndex);
+    const QJsonObject clientsTable = model->getContent(Proto::OpenVpn);
+    error = m_serverController->setClientsList(credentials, container, Proto::OpenVpn, clientsTable);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+
+    error = m_serverController->uploadTextFileToContainer(container, credentials, "crl-verify crl.pem\n",
+                                                          protocols::openvpn::serverConfigPath,
+                                                          QSsh::SftpOverwriteMode::SftpAppendToExisting);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+
+    const QJsonObject &containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, container);
+    error = m_serverController->startupContainerWorker(credentials, container, containerConfig);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+    set_busyIndicatorIsRunning(false);
 }
 
 void ClientInfoLogic::onRevokeWireGuardKeyClicked()
