@@ -217,7 +217,7 @@ void Settings::setSaveLogs(bool enabled)
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
-    emit updateVpnPage();
+    emit saveLogsChanged();
 }
 
 QString Settings::routeModeString(RouteMode mode) const

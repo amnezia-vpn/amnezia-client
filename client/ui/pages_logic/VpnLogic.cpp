@@ -33,7 +33,7 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     connect(this, &VpnLogic::connectToVpn, uiLogic()->m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &VpnLogic::disconnectFromVpn, uiLogic()->m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
-    connect(m_settings.get(), &Settings::updateVpnPage, this, &VpnLogic::onUpdatePage);
+    connect(m_settings.get(), &Settings::saveLogsChanged, this, &VpnLogic::onUpdatePage);
 
     if (m_settings->isAutoConnect() && m_settings->defaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this](){

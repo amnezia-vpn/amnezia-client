@@ -114,7 +114,7 @@ public:
     bool restoreAppConfig(const QByteArray &cfg) { return m_settings.restoreAppConfig(cfg); }
 
 signals:
-    void updateVpnPage();
+    void saveLogsChanged();
 
 private:
     SecureQSettings m_settings;
