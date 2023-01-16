@@ -43,8 +43,8 @@ HEADERS  += \
     core/scripts_registry.h \
     core/server_defs.h \
     core/servercontroller.h \
-    debug.h \
     defines.h \
+    logger.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
@@ -85,9 +85,6 @@ HEADERS  += \
     utilities.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
-    logger.h \
-    loghandler.h \
-    loglevel.h \
     constants.h \
     platforms/ios/QRCodeReaderBase.h
 
@@ -106,7 +103,7 @@ SOURCES  += \
     core/scripts_registry.cpp \
     core/server_defs.cpp \
     core/servercontroller.cpp \
-    debug.cpp \
+    logger.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \
@@ -146,8 +143,6 @@ SOURCES  += \
     utilities.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
-    logger.cpp \
-    loghandler.cpp \
     platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \

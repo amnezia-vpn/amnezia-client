@@ -1,15 +1,16 @@
+#include "logger.h"
+
 #include <QDir>
 #include <QStandardPaths>
 
 #include <iostream>
 
-#include "log.h"
 #include "defines.h"
 #include "utilities.h"
 
-QFile Log::m_file;
-QTextStream Log::m_textStream;
-QString Log::m_logFileName = QString("%1.log").arg(SERVICE_NAME);
+QFile Logger::m_file;
+QTextStream Logger::m_textStream;
+QString Logger::m_logFileName = QString("%1.log").arg(SERVICE_NAME);
 
 void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
@@ -17,12 +18,12 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
         return;
     }
 
-    Log::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
+    Logger::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
 
     std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
 }
 
-bool Log::init()
+bool Logger::init()
 {
     if (m_file.isOpen()) return true;
 
@@ -46,19 +47,19 @@ bool Log::init()
     return true;
 }
 
-void Log::deinit()
+void Logger::deinit()
 {
     m_file.close();
     m_textStream.setDevice(nullptr);
     qInstallMessageHandler(nullptr);
 }
 
-QString Log::serviceLogFileNamePath()
+QString Logger::serviceLogFileNamePath()
 {
     return m_file.fileName();
 }
 
-void Log::clearLogs()
+void Logger::clearLogs()
 {
     bool isLogActive = m_file.isOpen();
     m_file.close();
@@ -78,7 +79,7 @@ void Log::clearLogs()
     }
 }
 
-void Log::cleanUp()
+void Logger::cleanUp()
 {
     clearLogs();
     deinit();

@@ -4,7 +4,7 @@
 #include <QTcpSocket>
 #include <QThread>
 
-#include "debug.h"
+#include "logger.h"
 #include "wireguardprotocol.h"
 #include "utilities.h"
 

@@ -5,7 +5,7 @@
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
-#include "debug.h"
+#include "logger.h"
 #include "defs.h"
 
 #include "containers/containers_defs.h"
