@@ -31,6 +31,7 @@ PageBase {
     }
 
     UrlButtonType {
+        id: button_donate
         y: 10
         anchors.horizontalCenter: parent.horizontalCenter
         height: 21
@@ -53,6 +54,21 @@ PageBase {
         onClicked: {
             UiLogic.goToPage(PageEnum.GeneralSettings)
         }
+    }
+
+    LabelType {
+        id: lb_log_enabled
+        anchors.top: button_donate.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width
+        height: 21
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+
+        text: "Logging enabled!"
+        color: "#D4D4D4"
+
+        visible: VpnLogic.labelLogEnabledVisible
     }
 
     AnimatedImage {

@@ -5,7 +5,7 @@
 #include <QTcpServer>
 #include <QRandomGenerator>
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "utilities.h"
 #include "openvpnprotocol.h"

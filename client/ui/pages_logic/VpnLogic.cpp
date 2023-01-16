@@ -33,6 +33,8 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     connect(this, &VpnLogic::connectToVpn, uiLogic()->m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &VpnLogic::disconnectFromVpn, uiLogic()->m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
+    connect(m_settings.get(), &Settings::saveLogsChanged, this, &VpnLogic::onUpdatePage);
+
     if (m_settings->isAutoConnect() && m_settings->defaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this](){
             set_pushButtonConnectEnabled(false);
@@ -88,6 +90,8 @@ void VpnLogic::onUpdatePage()
     }
     QString ver = QString("v. %2").arg(QString(APP_MAJOR_VERSION));
     set_labelVersionText(ver);
+
+    set_labelLogEnabledVisible(m_settings->isSaveLogs());
 }
 
 
