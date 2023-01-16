@@ -190,12 +190,12 @@ PageBase {
                 left: parent.left;
                 right: parent.right;
             }
-            topPadding: 20
             spacing: 10
 
             Caption {
                 id: cap1
                 text: qsTr("Installed Protocols and Services")
+                leftPadding: -20
                 font.pixelSize: 20
 
             }
