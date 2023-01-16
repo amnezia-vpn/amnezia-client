@@ -42,20 +42,10 @@ PageShareProtocolBase {
         visible: false
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -63,6 +53,7 @@ PageShareProtocolBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
 //            LabelType {
 //                id: lb_desc
