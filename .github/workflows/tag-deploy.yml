@@ -97,6 +97,28 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
+    - name: 'Getting keystore'
+      uses: actions/checkout@v3  
+      with:
+        repository: amnezia-vpn/amnezia-android-certificates
+        token: ${{ secrets.CERTS_ACCESS_TOKEN }}
+
+    - name: 'Install Android Build Tools'
+      run: |
+        RUNNER_TMP_DIR=${{ runner.temp }}
+
+        ANDROID_BUILD_TOOLS_VERSION=30.0.3
+
+        BUILD_TOOLS_UNZIP_PATH=$RUNNER_TMP_DIR/build-tools
+        BUILD_TOOLS_ARCHIVE=$RUNNER_TMP_DIR/build-tools.zip
+
+        if [ ! -f $BUILD_TOOLS_UNZIP_PATH ]; then 
+            wget http://dl.google.com/android/repository/build-tools_r${ANDROID_BUILD_TOOLS_VERSION}-linux.zip -qO $BUILD_TOOLS_ARCHIVE;
+            unzip -q -d $BUILD_TOOLS_UNZIP_PATH $BUILD_TOOLS_ARCHIVE;
+        fi
+
+        export BUILD_TOOLS_PATH=$RUNNER_TMP_DIR/build-tools/android-11
+
     - name: 'Build project'
       run: |
         export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
@@ -113,8 +135,13 @@ jobs:
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin
         bash deploy/build_android.sh
 
+    - name: 'Signing APK'
+      run: |
+        ${BUILD_TOOLS_PATH}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
+        ${BUILD_TOOLS_PATH}/apksigner sign --out AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_KEYSTOTE_KEY_PASS }}  AmneziaVPN-release-aligned.apk
+
     - name: 'Upload'
       uses: actions/upload-artifact@v3
       with:
         name: Release APK
-        path: deploy/build/client/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+        path: ${{ runner.temp }}/AmneziaVPN-release-signed.apk
