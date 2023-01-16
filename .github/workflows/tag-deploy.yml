@@ -101,7 +101,7 @@ jobs:
       uses: actions/checkout@v3  
       with:
         repository: amnezia-vpn/amnezia-android-certificates
-        token: ${{ secrets.CERTS_ACCESS_TOKEN }}
+        ssh-key: ${{ secrets.ANDROID_CERTS_SSH_PRIVATE_KEY }}
 
     - name: 'Install Android Build Tools'
       run: |
@@ -138,7 +138,7 @@ jobs:
     - name: 'Signing APK'
       run: |
         ${BUILD_TOOLS_PATH}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
-        ${BUILD_TOOLS_PATH}/apksigner sign --out AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_KEYSTOTE_KEY_PASS }}  AmneziaVPN-release-aligned.apk
+        ${BUILD_TOOLS_PATH}/apksigner sign --out AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}  AmneziaVPN-release-aligned.apk
 
     - name: 'Upload'
       uses: actions/upload-artifact@v3
