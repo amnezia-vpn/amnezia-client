@@ -64,17 +64,19 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
 
     const DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
     const QVector<amnezia::Proto> protocols = ContainerProps::protocolsForContainer(selectedContainer);
     if (!protocols.empty()) {
         const Proto currentMainProtocol = protocols.front();
         const QJsonObject clientsTable = model->getContent(currentMainProtocol);
-        ErrorCode error = m_serverController->setClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
+        ErrorCode error = m_serverController->setClientsList(credentials,
                                                              selectedContainer,
                                                              currentMainProtocol,
                                                              clientsTable);
         isErrorOccured(error);
     }
 
+    m_serverController->disconnectFromHost(credentials);
     set_busyIndicatorIsRunning(false);
 }
 
@@ -123,10 +125,58 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
         set_busyIndicatorIsRunning(false);
         return;
     }
+    m_serverController->disconnectFromHost(credentials);
     set_busyIndicatorIsRunning(false);
 }
 
 void ClientInfoLogic::onRevokeWireGuardKeyClicked()
 {
+    set_busyIndicatorIsRunning(true);
+    ErrorCode error;
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+    const QString wireGuardConfigFile = "opt/amnezia/wireguard/wg0.conf";
+    const QString wireguardConfigString = m_serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
 
+    auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
+    const QModelIndex modelIndex = model->index(m_currentClientIndex);
+    const QString key = model->data(modelIndex, ClientManagementModel::ClientRoles::WireGuardPublicKey).toString();
+
+    auto configSections = wireguardConfigString.split("[", Qt::SkipEmptyParts);
+    for (auto &section : configSections) {
+        if (section.contains(key)) {
+            configSections.removeOne(section);
+        }
+    }
+    QString newWireGuardConfig = configSections.join("[");
+    newWireGuardConfig.insert(0, "[");
+    error = m_serverController->uploadTextFileToContainer(container, credentials, newWireGuardConfig,
+                                                          protocols::wireguard::serverConfigPath,
+                                                          QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+
+    model->removeRows(m_currentClientIndex);
+    const QJsonObject clientsTable = model->getContent(Proto::WireGuard);
+    error = m_serverController->setClientsList(credentials, container, Proto::WireGuard, clientsTable);
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+
+    error = m_serverController->runScript(credentials,
+                                          m_serverController->replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
+                                                                          m_serverController->genVarsForScript(credentials, container)));
+    if (isErrorOccured(error)) {
+        set_busyIndicatorIsRunning(false);
+        return;
+    }
+    m_serverController->disconnectFromHost(credentials);
+    set_busyIndicatorIsRunning(false);
 }

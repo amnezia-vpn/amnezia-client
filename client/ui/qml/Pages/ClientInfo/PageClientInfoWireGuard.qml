@@ -92,6 +92,7 @@ PageClientInfoBase {
                 text: qsTr("Revoke Key")
                 onClicked: {
                     ClientInfoLogic.onRevokeWireGuardKeyClicked()
+                    UiLogic.closePage()
                 }
             }
         }
