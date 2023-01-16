@@ -292,8 +292,6 @@ endif()
 if(IOS)
     message("Client iOS build")
 
-
-
     find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
     set(LIBS ${LIBS} Qt6::ShaderTools)
 
@@ -346,7 +344,11 @@ qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 qt_add_translations(${PROJECT} TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
-# NETWORKEXTENSION=1
+if(APPLE AND NOT IOS)
+    set_target_properties(AmneziaVPN PROPERTIES
+        MACOSX_BUNDLE TRUE
+    )
+endif()
 
 if(IOS)
     enable_language(OBJC)
