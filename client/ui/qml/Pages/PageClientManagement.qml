@@ -31,16 +31,10 @@ PageBase {
         running: ClientManagementLogic.busyIndicatorIsRunning
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-
         contentHeight: content.height
-        clip: true
 
         Column {
             id: content
@@ -49,8 +43,9 @@ PageBase {
             anchors.right: parent.right
 
             LabelType {
-                anchors.left: parent.left
                 font.pixelSize: 20
+                leftPadding: -20
+                anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
                 text: ClientManagementLogic.labelCurrentVpnProtocolText
             }
