@@ -3,6 +3,8 @@
 
 #include "PageLogicBase.h"
 
+#include "core/defs.h"
+#include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
 
 class UiLogic;
@@ -23,6 +25,8 @@ public slots:
     void onClientItemClicked(int index);
 
 private:
+    ErrorCode getClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, QJsonObject &clietns);
+
     amnezia::Proto m_currentMainProtocol;
 };
 

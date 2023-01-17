@@ -69,10 +69,10 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
     if (!protocols.empty()) {
         const Proto currentMainProtocol = protocols.front();
         const QJsonObject clientsTable = model->getContent(currentMainProtocol);
-        ErrorCode error = m_serverController->setClientsList(credentials,
-                                                             selectedContainer,
-                                                             currentMainProtocol,
-                                                             clientsTable);
+        ErrorCode error = setClientsList(credentials,
+                                         selectedContainer,
+                                         currentMainProtocol,
+                                         clientsTable);
         isErrorOccured(error);
     }
 
@@ -105,7 +105,7 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
 
     model->removeRows(m_currentClientIndex);
     const QJsonObject clientsTable = model->getContent(Proto::OpenVpn);
-    error = m_serverController->setClientsList(credentials, container, Proto::OpenVpn, clientsTable);
+    error = setClientsList(credentials, container, Proto::OpenVpn, clientsTable);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
@@ -164,7 +164,7 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
 
     model->removeRows(m_currentClientIndex);
     const QJsonObject clientsTable = model->getContent(Proto::WireGuard);
-    error = m_serverController->setClientsList(credentials, container, Proto::WireGuard, clientsTable);
+    error = setClientsList(credentials, container, Proto::WireGuard, clientsTable);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
@@ -179,4 +179,12 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
     }
     m_serverController->disconnectFromHost(credentials);
     set_busyIndicatorIsRunning(false);
+}
+
+ErrorCode ClientInfoLogic::setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, const QJsonObject &clietns)
+{
+    const QString mainProtocolString = ProtocolProps::protoToString(mainProtocol);
+    const QString clientsTableFile = QString("opt/amnezia/%1/clientsTable").arg(mainProtocolString);
+    ErrorCode error = m_serverController->uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), clientsTableFile);
+    return error;
 }

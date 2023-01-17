@@ -3,6 +3,10 @@
 
 #include "PageLogicBase.h"
 
+#include "core/defs.h"
+#include "containers/containers_defs.h"
+#include "protocols/protocols_defs.h"
+
 class UiLogic;
 
 class ClientInfoLogic : public PageLogicBase
@@ -29,6 +33,8 @@ public slots:
     void onRevokeWireGuardKeyClicked();
 
 private:
+    ErrorCode setClientsList(const ServerCredentials &credentials, DockerContainer container, Proto mainProtocol, const QJsonObject &clietns);
+
     int m_currentClientIndex;
 };
 
