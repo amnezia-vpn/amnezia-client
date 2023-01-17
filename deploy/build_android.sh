@@ -20,6 +20,12 @@ APP_DOMAIN=org.amneziavpn.package
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
+# Seacrh Qt
+if [ -z "${QT_VERSION+x}" ]; then
+QT_VERSION=6.4.1;
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/$ANDROID_CURRENT_ARCH/bin
+fi
+
 echo "Using Qt in $QT_BIN_DIR"
 echo "Using Android SDK in $ANDROID_SDK_ROOT"
 echo "Using Android NDK in $ANDROID_NDK_ROOT"
@@ -44,7 +50,8 @@ $QT_HOST_PATH/bin/androiddeployqt \
     --output $OUT_APP_DIR/android-build \
     --gradle \
     --release \
-    --input android-AmneziaVPN-deployment-settings.json
+    --input android-AmneziaVPN-deployment-settings.json \
+    --android-platform android-33
    
 echo "............Copy apk.................."
 cp $OUT_APP_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \

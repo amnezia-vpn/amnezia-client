@@ -2,7 +2,7 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
    ext{
-       kotlin_version = "1.4.30-M1"
+       kotlin_version = "1.6.20"
        //  for libwg
        appcompatVersion = '1.1.0'
        annotationsVersion = '1.0.1'
@@ -20,7 +20,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -121,7 +121,7 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = 24
-        targetSdkVersion = 30
+        targetSdkVersion = 31
         versionCode 10 // Change to a higher number
         versionName "2.0.10" // Change to a higher number
 

@@ -296,6 +296,7 @@ jobs:
         export ANDROID_NDK_PLATFORM=android-23
         export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
         export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+        export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
 
         if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
           wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
