@@ -97,30 +97,21 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
+    - name: 'Preparations before keystore fetching'
+      run: | 
+        mkdir keystore
+        cd keystore
+
     - name: 'Getting keystore'
       uses: actions/checkout@v3  
       with:
         repository: amnezia-vpn/amnezia-android-certificates
         ssh-key: ${{ secrets.ANDROID_CERTS_SSH_PRIVATE_KEY }}
 
-    - name: 'Install Android Build Tools'
-      run: |
-        RUNNER_TMP_DIR=${{ runner.temp }}
-
-        ANDROID_BUILD_TOOLS_VERSION=30.0.3
-
-        BUILD_TOOLS_UNZIP_PATH=$RUNNER_TMP_DIR/build-tools
-        BUILD_TOOLS_ARCHIVE=$RUNNER_TMP_DIR/build-tools.zip
-
-        if [ ! -f $BUILD_TOOLS_UNZIP_PATH ]; then 
-            wget http://dl.google.com/android/repository/build-tools_r${ANDROID_BUILD_TOOLS_VERSION}-linux.zip -qO $BUILD_TOOLS_ARCHIVE;
-            unzip -q -d $BUILD_TOOLS_UNZIP_PATH $BUILD_TOOLS_ARCHIVE;
-        fi
-
-        export BUILD_TOOLS_PATH=$RUNNER_TMP_DIR/build-tools/android-11
-
     - name: 'Build project'
       run: |
+        cd ..
+        
         export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
         export NDK_VERSION=23c
         export ANDROID_NDK_PLATFORM=android-23
@@ -137,8 +128,10 @@ jobs:
 
     - name: 'Signing APK'
       run: |
-        ${BUILD_TOOLS_PATH}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
-        ${BUILD_TOOLS_PATH}/apksigner sign --out AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}  AmneziaVPN-release-aligned.apk
+        ANDROID_BUILD_TOOLS_VERSION=30.0.3
+
+        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
+        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}  AmneziaVPN-release-aligned.apk
 
     - name: 'Upload'
       uses: actions/upload-artifact@v3
