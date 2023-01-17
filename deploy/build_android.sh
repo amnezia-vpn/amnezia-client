@@ -51,7 +51,7 @@ $QT_HOST_PATH/bin/androiddeployqt \
     --gradle \
     --release \
     --input android-AmneziaVPN-deployment-settings.json \
-    --android-platform android-33
+    --android-platform android-30
    
 echo "............Copy apk.................."
 cp $OUT_APP_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
