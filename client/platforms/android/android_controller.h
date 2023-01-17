@@ -71,23 +71,6 @@ private:
     bool m_serviceConnected = false;
     std::function<void(const QString&)> m_logCallback;
 
-//    QAndroidBinder m_serviceBinder;
-//    class VPNBinder : public QAndroidBinder {
-//     public:
-//      VPNBinder(AndroidController* controller) : m_controller(controller) {}
-
-//      bool onTransact(int code, const QAndroidParcel& data,
-//                      const QAndroidParcel& reply,
-//                      QAndroidBinder::CallType flags) override;
-
-//      QString readUTF8Parcel(QAndroidParcel data);
-
-//     private:
-//      AndroidController* m_controller = nullptr;
-//    };
-
-//    VPNBinder m_binder;
-
     static void startActivityForResult(JNIEnv* env, jobject /*thiz*/, jobject intent);
 };
 

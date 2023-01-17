@@ -20,12 +20,6 @@ APP_DOMAIN=org.amneziavpn.package
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
-# Seacrh Qt
-if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=5.15.2;
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/android/bin
-fi
-
 echo "Using Qt in $QT_BIN_DIR"
 echo "Using Android SDK in $ANDROID_SDK_ROOT"
 echo "Using Android NDK in $ANDROID_NDK_ROOT"

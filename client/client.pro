@@ -251,9 +251,6 @@ android {
         QT += core-private
         ANDROID_ABIS = $$ANDROID_TARGET_ARCH
     }
-#    else {
-#        QT += androidextras
-#    }
 
    DEFINES += MVPN_ANDROID
 
