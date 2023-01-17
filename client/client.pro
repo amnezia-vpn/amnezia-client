@@ -164,11 +164,9 @@ win32 {
 
     HEADERS += \
        protocols/ikev2_vpn_protocol_windows.h \
-       ui/framelesswindow.h
 
     SOURCES += \
        protocols/ikev2_vpn_protocol_windows.cpp \
-       ui/framelesswindow.cpp
 
     VERSION = 2.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"

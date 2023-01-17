@@ -134,12 +134,10 @@ if(WIN32)
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.h
-        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.h
     )
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.cpp
     )
 
     set(RESOURCES ${RESOURCES}
