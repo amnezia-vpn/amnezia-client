@@ -89,7 +89,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
-    m_clientManagementModel = new ClientManagementModel(settings, this);
+    m_clientManagementModel = new ClientManagementModel(this);
     m_vpnConnection = new VpnConnection(settings, configurator, serverController);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();

@@ -1,8 +1,8 @@
 #include "clientManagementModel.h"
 
-ClientManagementModel::ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent) :
-    m_settings(settings),
-    QAbstractListModel(parent)
+#include <QJsonObject>
+
+ClientManagementModel::ClientManagementModel(QObject *parent) : QAbstractListModel(parent)
 {
 
 }
@@ -21,13 +21,13 @@ void ClientManagementModel::setContent(const QVector<QVariant> &data)
     endResetModel();
 }
 
-QJsonObject ClientManagementModel::getContent(Proto protocol)
+QJsonObject ClientManagementModel::getContent(amnezia::Proto protocol)
 {
     QJsonObject clientsTable;
     for (const auto &item : m_content) {
-        if (protocol == Proto::OpenVpn) {
+        if (protocol == amnezia::Proto::OpenVpn) {
             clientsTable[item.toJsonObject()["openvpnCertId"].toString()] = item.toJsonObject();
-        } else if (protocol == Proto::WireGuard) {
+        } else if (protocol == amnezia::Proto::WireGuard) {
             clientsTable[item.toJsonObject()["wireguardPublicKey"].toString()] = item.toJsonObject();
         }
     }

@@ -87,19 +87,11 @@ ErrorCode ClientManagementLogic::getClientsList(const ServerCredentials &credent
             for (auto &openvpnCertId : certsIds) {
                 openvpnCertId.replace(".crt", "");
                 if (!clientsTable.contains(openvpnCertId)) {
-                    stdOut.clear();
-                    const QString getOpenVpnCertData = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'")
-                                                               .arg(openvpnCertId);
-                    script = m_serverController->replaceVars(getOpenVpnCertData, m_serverController->genVarsForScript(credentials, container));
-                    error = m_serverController->runScript(credentials, script, cbReadStdOut);
-                    if (error != ErrorCode::NoError) {
-                        return error;
-                    }
 
                     QJsonObject client;
                     client["openvpnCertId"] = openvpnCertId;
                     client["clientName"] = QString("Client %1").arg(count);
-                    client["openvpnCertData"] = stdOut;
+                    client["openvpnCertData"] = "";
                     clientsTable[openvpnCertId] = client;
                     count++;
                 }

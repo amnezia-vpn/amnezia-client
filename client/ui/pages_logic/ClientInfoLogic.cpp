@@ -32,8 +32,10 @@ void ClientInfoLogic::setCurrentClientId(int index)
 
 void ClientInfoLogic::onUpdatePage()
 {
-    set_busyIndicatorIsRunning(false);
+    set_pageContentVisible(false);
+    set_busyIndicatorIsRunning(true);
 
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
     const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
     const QString containerNameString = ContainerProps::containerHumanNames().value(container);
     set_labelCurrentVpnProtocolText(tr("Service: ") + containerNameString);
@@ -47,12 +49,35 @@ void ClientInfoLogic::onUpdatePage()
 
         set_lineEditNameAliasText(model->data(modelIndex, ClientManagementModel::ClientRoles::NameRole).toString());
         if (currentMainProtocol == Proto::OpenVpn) {
-            set_labelOpenVpnCertId(model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertIdRole).toString());
-            set_textAreaOpenVpnCertData(model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertDataRole).toString());
+            const QString certId = model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertIdRole).toString();
+            QString certData = model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertDataRole).toString();
+
+            if (certData.isEmpty()) {
+                QString stdOut;
+                auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+                    stdOut += data + "\n";
+                };
+
+                const QString getOpenVpnCertData = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'")
+                                                           .arg(certId);
+                const QString script = m_serverController->replaceVars(getOpenVpnCertData, m_serverController->genVarsForScript(credentials, container));
+                ErrorCode error = m_serverController->runScript(credentials, script, cbReadStdOut);
+                certData = stdOut;
+                m_serverController->disconnectFromHost(credentials);
+                if (isErrorOccured(error)) {
+                    set_busyIndicatorIsRunning(false);
+                    uiLogic()->closePage();
+                    return;
+                }
+            }
+            set_labelOpenVpnCertId(certId);
+            set_textAreaOpenVpnCertData(certData);
         } else if (currentMainProtocol == Proto::WireGuard) {
             set_textAreaWireGuardKeyData(model->data(modelIndex, ClientManagementModel::ClientRoles::WireGuardPublicKey).toString());
         }
     }
+    set_pageContentVisible(true);
+    set_busyIndicatorIsRunning(false);
 }
 
 void ClientInfoLogic::onLineEditNameAliasEditingFinished()

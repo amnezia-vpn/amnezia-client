@@ -19,6 +19,7 @@ class ClientInfoLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelCurrentVpnProtocolText)
     AUTO_PROPERTY(QString, textAreaWireGuardKeyData)
     AUTO_PROPERTY(bool, busyIndicatorIsRunning);
+    AUTO_PROPERTY(bool, pageContentVisible);
 
 public:
     ClientInfoLogic(UiLogic *uiLogic, QObject *parent = nullptr);

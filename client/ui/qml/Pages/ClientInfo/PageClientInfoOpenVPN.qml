@@ -32,6 +32,7 @@ PageClientInfoBase {
         id: fl
         anchors.top: caption.bottom
         contentHeight: content.height
+        visible: ClientInfoLogic.pageContentVisible
 
         ColumnLayout {
             id: content

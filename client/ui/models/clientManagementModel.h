@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 
-#include "settings.h"
+#include "protocols/protocols_defs.h"
 
 class ClientManagementModel : public QAbstractListModel
 {
@@ -17,11 +17,11 @@ public:
         WireGuardPublicKey,
     };
 
-    ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    ClientManagementModel(QObject *parent = nullptr);
 
     void clearData();
     void setContent(const QVector<QVariant> &data);
-    QJsonObject getContent(Proto protocol);
+    QJsonObject getContent(amnezia::Proto protocol);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void setData(const QModelIndex &index, QVariant data, int role = Qt::DisplayRole);
@@ -31,7 +31,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    std::shared_ptr<Settings> m_settings; //TODO remove this?
     QVector<QVariant> m_content;
 };
 
