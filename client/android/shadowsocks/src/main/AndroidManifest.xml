@@ -68,7 +68,8 @@
             android:name="org.amnezia.vpn.shadowsocks.core.BootReceiver"
             android:directBootAware="true"
             android:enabled="false"
-            android:process=":QtOnlyProcess">
+            android:process=":QtOnlyProcess"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
@@ -79,53 +80,63 @@
         <provider
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="androidx.work.impl.WorkManagerInitializer"
-            tools:node="remove" />
+            tools:node="remove"
+            android:exported="true"/>
 
         <service
             android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true"/>
         <service
             android:name="androidx.work.impl.background.systemjob.SystemJobService"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
 
         <receiver
             android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
-            tools:replace="android:directBootAware" />
+            tools:replace="android:directBootAware"
+            android:exported="true" />
     </application>
 </manifest>
