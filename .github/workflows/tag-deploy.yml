@@ -82,6 +82,11 @@ jobs:
         set-env: 'true'
         extra: '--external 7z'
 
+    - name: 'Preparations before getting sources'
+      run: | 
+        echo Working dir:
+        pwd
+
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
@@ -91,6 +96,8 @@ jobs:
 
     - name: 'Preparations before keystore fetching'
       run: | 
+        echo Working dir:
+        pwd
         mkdir keystore
 
     - name: 'Getting keystore'
