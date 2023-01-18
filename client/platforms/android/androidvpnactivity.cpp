@@ -48,7 +48,6 @@ void AndroidVPNActivity::maybeInit() {
 bool AndroidVPNActivity::handleBackButton(JNIEnv* env, jobject thiz) {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
-    //  return Navigator::instance()->eventHandled();
 }
 
 void AndroidVPNActivity::connectService() {

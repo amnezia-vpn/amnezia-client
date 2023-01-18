@@ -268,7 +268,6 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
-    # set(ANDROID_ABIS ANDROID_TARGET_ARCH)
 
     add_compile_definitions(MVPN_ANDROID)
 

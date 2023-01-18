@@ -11,6 +11,7 @@
 #include "ui/pages_logic/StartPageLogic.h"
 
 #include "protocols/vpnprotocol.h"
+
 using namespace amnezia;
 
 
@@ -38,10 +39,6 @@ public:
     void cleanupBackendLogs();
     void importConfig(const QString& data);
 
-    // from QAndroidServiceConnection
-//    void onServiceConnected(const QString& name, const QAndroidBinder& serviceBinder) override;
-//    void onServiceDisconnected(const QString& name) override;
-
     const QJsonObject &vpnConfig() const;
     void setVpnConfig(const QJsonObject &newVpnConfig);
 
@@ -63,7 +60,7 @@ protected:
 
 private:
     bool m_init = false;
-    //Protocol m_protocol;
+
     QJsonObject m_vpnConfig;
 
     StartPageLogic *m_startPageLogic;
