@@ -123,14 +123,17 @@ jobs:
         fi
 
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin
-        bash main/deploy/build_android.sh
+        cd main
+        bash deploy/build_android.sh
 
     - name: 'Signing APK'
       run: |
+        cd ..
+
         ANDROID_BUILD_TOOLS_VERSION=30.0.3
 
         ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign -f -v 4 main/AmneziaVPN-release-unsigned.apk main/AmneziaVPN-release-aligned.apk
-        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out main/AmneziaVPN-release-signed.apk --ks debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}  main/AmneziaVPN-release-aligned.apk
+        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out main/AmneziaVPN-release-signed.apk --ks keystore/debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}  main/AmneziaVPN-release-aligned.apk
 
     - name: 'Upload'
       uses: actions/upload-artifact@v3
