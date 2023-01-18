@@ -128,7 +128,6 @@ jobs:
 
     - name: 'Signing APK'
       run: |
-        cd ..
         pwd
 
         ANDROID_BUILD_TOOLS_VERSION=30.0.3
