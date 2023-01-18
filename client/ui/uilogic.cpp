@@ -267,32 +267,6 @@ void UiLogic::onGotoCurrentProtocolsPage()
     emit goToPage(Page::ServerContainers);
 }
 
-//void UiLogic::showEvent(QShowEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(true);
-//    }
-//    if (needToHideCustomTitlebar) {
-//        ui->widget_tittlebar->hide();
-//        resize(width(), 640);
-//        ui->stackedWidget_main->move(0,0);
-//    }
-//#endif
-//}
-
-//void UiLogic::hideEvent(QHideEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(false);
-//    }
-//#endif
-//}
-
-
-
-
 void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 {
     if (containers.isEmpty()) return;
