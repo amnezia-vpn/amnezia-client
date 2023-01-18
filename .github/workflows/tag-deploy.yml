@@ -99,19 +99,19 @@ jobs:
 
     - name: 'Preparations before keystore fetching'
       run: | 
-        mkdir keystore
-        cd keystore
+        mkdir ${{ runner.temp }}/keystore
 
     - name: 'Getting keystore'
       uses: actions/checkout@v3  
       with:
         repository: amnezia-vpn/amnezia-android-certificates
         ssh-key: ${{ secrets.ANDROID_CERTS_SSH_PRIVATE_KEY }}
+        path: ${{ runner.temp }}/keystore
 
     - name: 'Build project'
       run: |
         cd ..
-        
+
         export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
         export NDK_VERSION=23c
         export ANDROID_NDK_PLATFORM=android-23
