@@ -30,8 +30,10 @@ void ClientManagementLogic::onUpdatePage()
     if (!protocols.empty()) {
         m_currentMainProtocol = protocols.front();
 
-        ErrorCode error = getClientsList(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                         selectedContainer, m_currentMainProtocol, clients);
+        const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+
+        ErrorCode error = getClientsList(credentials, selectedContainer, m_currentMainProtocol, clients);
+        m_serverController->disconnectFromHost(credentials);
         if (error != ErrorCode::NoError) {
             QMessageBox::warning(nullptr, APPLICATION_NAME,
                                  tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));

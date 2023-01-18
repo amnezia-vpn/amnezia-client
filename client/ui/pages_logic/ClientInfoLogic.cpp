@@ -52,7 +52,7 @@ void ClientInfoLogic::onUpdatePage()
             const QString certId = model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertIdRole).toString();
             QString certData = model->data(modelIndex, ClientManagementModel::ClientRoles::OpenVpnCertDataRole).toString();
 
-            if (certData.isEmpty()) {
+            if (certData.isEmpty() && !certId.isEmpty()) {
                 QString stdOut;
                 auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
                     stdOut += data + "\n";
@@ -66,7 +66,7 @@ void ClientInfoLogic::onUpdatePage()
                 m_serverController->disconnectFromHost(credentials);
                 if (isErrorOccured(error)) {
                     set_busyIndicatorIsRunning(false);
-                    uiLogic()->closePage();
+                    emit uiLogic()->closePage();
                     return;
                 }
             }
