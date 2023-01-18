@@ -5,7 +5,7 @@
 #include <QObject>
 #include "sshconnection.h"
 #include "sshremoteprocess.h"
-#include "debug.h"
+#include "logger.h"
 #include "defs.h"
 
 #include "containers/containers_defs.h"
@@ -73,7 +73,9 @@ public:
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
-    ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    void setCancelInstallation(const bool cancel);
+
+	ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 private:
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
@@ -84,6 +86,10 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
+
+    bool m_cancelInstallation = false;
+signals:
+    void serverIsBusy(const bool isBusy);
 };
 
 #endif // SERVERCONTROLLER_H

@@ -96,19 +96,19 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                text: ServerSettingsLogic.pushButtonClearText
-                visible: ServerSettingsLogic.pushButtonClearVisible
+                text: ServerSettingsLogic.pushButtonClearClientCacheText
+                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearServer()
+                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
                 }
             }
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                text: ServerSettingsLogic.pushButtonClearClientCacheText
-                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                text: ServerSettingsLogic.pushButtonClearText
+                visible: ServerSettingsLogic.pushButtonClearVisible
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
+                    ServerSettingsLogic.onPushButtonClearServer()
                 }
             }
             BlueButtonType {

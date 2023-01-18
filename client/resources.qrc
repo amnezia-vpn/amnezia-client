@@ -62,7 +62,6 @@
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/run_container.sh</file>
         <file>ui/qml/main.qml</file>
-        <file>ui/qml/TitleBar.qml</file>
         <file>ui/qml/Pages/PageBase.qml</file>
         <file>ui/qml/Pages/PageAppSetting.qml</file>
         <file>ui/qml/Pages/PageGeneralSettings.qml</file>
@@ -134,6 +133,7 @@
         <file>ui/qml/Controls/SvgButtonType.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
         <file>ui/qml/Config/qmldir</file>
+        <file>server_scripts/check_server_is_busy.sh</file>
         <file>server_scripts/dns/configure_container.sh</file>
         <file>server_scripts/dns/Dockerfile</file>
         <file>server_scripts/dns/run_container.sh</file>

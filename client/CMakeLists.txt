@@ -21,13 +21,13 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
-    Core5Compat
+    Core5Compat Concurrent
 )
 set(LIBS ${LIBS} 
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
-    Qt6::Core5Compat
+    Qt6::Core5Compat Qt6::Concurrent
 )
 
 qt_standard_project_setup()
@@ -134,12 +134,10 @@ if(WIN32)
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.h
-        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.h
     )
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.cpp
     )
 
     set(RESOURCES ${RESOURCES}

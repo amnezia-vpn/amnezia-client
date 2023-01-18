@@ -1,12 +1,12 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <QDebug>
 #include <QFile>
 #include <QString>
 #include <QTextStream>
 
-class Log
+class Logger
 {
 public:
     static bool init();
@@ -25,4 +25,4 @@ private:
     static QTextStream m_textStream;
 };
 
-#endif // LOG_H
+#endif // LOGGER_H

@@ -88,14 +88,14 @@ Window  {
     }
 
     Rectangle {
-        y: GC.isDesktop() ? titleBar.height : 0
+        y: 0
         anchors.fill: parent
         color: "white"
     }
 
     StackView {
         id: pageLoader
-        y: GC.isDesktop() ? titleBar.height : 0
+        y: 0
         anchors.fill: parent
         focus: true
 
