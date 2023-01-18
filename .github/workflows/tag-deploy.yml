@@ -111,8 +111,6 @@ jobs:
 
     - name: 'Build project'
       run: |
-        cd ..
-
         export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
         export NDK_VERSION=23c
         export ANDROID_NDK_PLATFORM=android-23
