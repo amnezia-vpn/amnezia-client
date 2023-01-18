@@ -35,18 +35,21 @@ PageBase {
 
     ListView {
         id: listWidget_servers
-        x: 20
+        x: GC.defaultMargin
         anchors.top: caption.bottom
         anchors.topMargin: 15
-        width: parent.width
+        width: parent.width - GC.defaultMargin - 1
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         model: ServerListLogic.serverListModel
+        highlightRangeMode: ListView.ApplyRange
+        highlightMoveVelocity: -1
+        currentIndex: ServerListLogic.currServerIdx
         spacing: 5
         clip: true
         delegate: Item {
             height: 60
-            width: root.width - 40
+            width: listWidget_servers.width - 15
             MouseArea {
                 id: ms
                 anchors.fill: parent
@@ -55,10 +58,6 @@ PageBase {
                     if (GC.isMobile()) {
                         ServerListLogic.onServerListPushbuttonSettingsClicked(index)
                     }
-                    else {
-                        listWidget_servers.currentIndex = index
-                    }
-
                     mouse.accepted = false
                 }
                 onEntered: {
@@ -94,14 +93,14 @@ PageBase {
                 id: label_address
                 x: 20
                 y: 40
-                width: 141
+                width: listWidget_servers.width - 100
                 height: 16
                 text: address
             }
             Text {
                 x: 10
                 y: 10
-                width: 181
+                width: listWidget_servers.width - 100
                 height: 21
                 font.family: "Lato"
                 font.styleName: "normal"
@@ -174,6 +173,10 @@ PageBase {
                     }
                 }
             }
+        }
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
         }
     }
 }

@@ -3,18 +3,20 @@ QT += widgets core gui network xml remoteobjects quick svg
 TARGET = AmneziaVPN
 TEMPLATE = app
 
-CONFIG += qtquickcompiler
-CONFIG += qzxing_multimedia \
-          enable_decoder_qr_code \
-          enable_encoder_qr_code
+# silent builds on CI env
+IS_CI=$$(CI)
+!isEmpty(IS_CI){
+  message("Detected CI env")
+  CONFIG += silent ccache
+}
 
-DEFINES += QT_DEPRECATED_WARNINGS
+CONFIG += qtquickcompiler
 
 include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
-include("3rd/qzxing/src/QZXing-components.pri")
+include("3rd/qrcodegen/qrcodegen.pri")
 include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
 include("3rd/qtkeychain/qtkeychain.pri")
 
@@ -72,6 +74,7 @@ HEADERS  += \
     ui/pages_logic/protocols/OtherProtocolsLogic.h \
     ui/pages_logic/protocols/PageProtocolLogicBase.h \
     ui/pages_logic/protocols/ShadowSocksLogic.h \
+    ui/pages_logic/protocols/WireGuardLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
@@ -134,6 +137,7 @@ SOURCES  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
     ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
+    ui/pages_logic/protocols/WireGuardLogic.cpp \
     ui/uilogic.cpp \
     ui/qautostart.cpp \
     ui/models/sites_model.cpp \
@@ -153,8 +157,8 @@ TRANSLATIONS = \
 win32 {
     DEFINES += MVPN_WINDOWS
 
-    OTHER_FILES += platform_win/vpnclient.rc
-    RC_FILE = platform_win/vpnclient.rc
+    OTHER_FILES += platforms/windows/amneziavpn.rc
+    RC_FILE = platforms/windows/amneziavpn.rc
 
     HEADERS += \
        protocols/ikev2_vpn_protocol_windows.h \
@@ -242,13 +246,11 @@ android {
    INCLUDEPATH += platforms/android
 
    HEADERS += \
-      platforms/android/native.h \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
       protocols/android_vpnprotocol.h
 
    SOURCES += \
-      platforms/android/native.cpp \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
       protocols/android_vpnprotocol.cpp
@@ -263,9 +265,19 @@ android {
       android/gradlew.bat \
       android/gradle.properties \
       android/res/values/libs.xml \
+      android/res/xml/fileprovider.xml \
+      android/src/org/amnezia/vpn/AuthHelper.java \
+      android/src/org/amnezia/vpn/IPCContract.kt \
+      android/src/org/amnezia/vpn/NotificationUtil.kt \
       android/src/org/amnezia/vpn/OpenVPNThreadv3.kt \
+      android/src/org/amnezia/vpn/Prefs.kt \
+      android/src/org/amnezia/vpn/VpnLogger.kt \
       android/src/org/amnezia/vpn/VpnService.kt \
       android/src/org/amnezia/vpn/VpnServiceBinder.kt \
+      android/src/org/amnezia/vpn/qt/AmneziaApp.kt \
+      android/src/org/amnezia/vpn/qt/PackageManagerHelper.java \
+      android/src/org/amnezia/vpn/qt/VPNActivity.kt \
+      android/src/org/amnezia/vpn/qt/VPNApplication.java \
       android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
 
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -301,6 +313,7 @@ ios {
     LIBS += -framework Foundation
     LIBS += -framework StoreKit
     LIBS += -framework UserNotifications
+    LIBS += -framework AVFoundation
 
     DEFINES += MVPN_IOS
 

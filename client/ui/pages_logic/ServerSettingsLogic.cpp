@@ -10,6 +10,12 @@
 #include <core/servercontroller.h>
 #include <QTimer>
 
+#if defined(Q_OS_ANDROID)
+#include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
+#include <QtAndroid>
+#endif
+
 ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_labelWaitInfoVisible{true},
@@ -31,11 +37,17 @@ void ServerSettingsLogic::onUpdatePage()
     set_pushButtonShareFullVisible(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
     const QJsonObject &server = m_settings->server(uiLogic()->selectedServerIndex);
     const QString &port = server.value(config_key::port).toString();
-    set_labelServerText(QString("%1@%2%3%4")
-                                     .arg(server.value(config_key::userName).toString())
-                                     .arg(server.value(config_key::hostName).toString())
-                                     .arg(port.isEmpty() ? "" : ":")
-                                     .arg(port));
+
+    const QString &userName = server.value(config_key::userName).toString();
+    const QString &hostName = server.value(config_key::hostName).toString();
+    QString name = QString("%1%2%3%4%5")
+        .arg(userName)
+        .arg(userName.isEmpty() ? "" : "@")
+        .arg(hostName)
+        .arg(port.isEmpty() ? "" : ":")
+        .arg(port);
+
+    set_labelServerText(name);
     set_lineEditDescriptionText(server.value(config_key::description).toString());
 
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
@@ -126,8 +138,41 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
     uiLogic()->onUpdateAllPages();
 }
 
+#if defined(Q_OS_ANDROID)
+/* Auth result handler for Android */
+void authResultReceiver::handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &data)
+{
+    qDebug() << "receiverRequestCode" << receiverRequestCode << "resultCode" << resultCode;
+
+    if (resultCode == -1) { //ResultOK
+        uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(m_serverIndex, DockerContainer::None);
+        emit uiLogic()->goToShareProtocolPage(Proto::Any);
+    }
+}
+#endif
+
 void ServerSettingsLogic::onPushButtonShareFullClicked()
 {
+#if defined(Q_OS_ANDROID)
+/* We use builtin keyguard for ssh key export protection on Android */
+    auto appContext = QtAndroid::androidActivity().callObjectMethod(
+        "getApplicationContext", "()Landroid/content/Context;");
+    if (appContext.isValid()) {
+        QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->selectedServerIndex);
+        auto intent = QAndroidJniObject::callStaticObjectMethod(
+               "org/amnezia/vpn/AuthHelper", "getAuthIntent",
+               "(Landroid/content/Context;)Landroid/content/Intent;", appContext.object());
+        if (intent.isValid()) {
+            if (intent.object<jobject>() != nullptr) {
+                    QtAndroid::startActivity(intent.object<jobject>(), 1, receiver);
+                }
+            } else {
+            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
+            emit uiLogic()->goToShareProtocolPage(Proto::Any);
+        }
+    }
+#else
     uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
     emit uiLogic()->goToShareProtocolPage(Proto::Any);
+#endif
 }

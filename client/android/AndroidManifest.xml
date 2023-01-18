@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
-<manifest package="org.amnezia.vpn" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
+<manifest
+    package="org.amnezia.vpn"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionName="-- %%INSERT_VERSION_NAME%% --"
+    android:versionCode="-- %%INSERT_VERSION_CODE%% --"
+    android:installLocation="auto">
 
    <uses-permission android:name="android.permission.INTERNET"/>
    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -18,12 +23,72 @@
 
     <supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
 
-    <application android:name=".qt.AmneziaApp" android:hardwareAccelerated="true" android:label="-- %%INSERT_APP_NAME%% --" android:extractNativeLibs="true" android:icon="@drawable/icon">
-        <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:name=".qt.VPNActivity" android:label="-- %%INSERT_APP_NAME%% --" android:screenOrientation="unspecified" android:launchMode="singleTop" android:theme="@style/splashScreenTheme">
+    <application
+        android:name=".qt.AmneziaApp"
+        android:hardwareAccelerated="true"
+        android:label="-- %%INSERT_APP_NAME%% --"
+        android:extractNativeLibs="true"
+        android:icon="@drawable/icon">
+        
+        <activity
+            android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
+            android:name=".qt.VPNActivity"
+            android:label="-- %%INSERT_APP_NAME%% --"
+            android:screenOrientation="unspecified"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:theme="@style/splashScreenTheme">
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+    
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:mimeType= "*/*"/>
+                <data android:host="*"/>
+                <data android:pathPattern=".*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.vpn"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.vpn"/>
+            </intent-filter>
+    
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:mimeType= "*/*"/>
+                <data android:host="*"/>
+                <data android:pathPattern=".*\\.cfg"/>
+                <data android:pathPattern=".*\\..*\\.cfg"/>
+                <data android:pathPattern=".*\\..*\\..*\\.cfg"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cfg"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cfg"/>
+            </intent-filter>
+    
+            <intent-filter android:label="AmneziaVPN">
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:mimeType= "*/*"/>
+                <data android:host="*"/>
+                <data android:pathPattern=".*\\.conf"/>
+                <data android:pathPattern=".*\\..*\\.conf"/>
+                <data android:pathPattern=".*\\..*\\..*\\.conf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.conf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.conf"/>
+            </intent-filter>
+            
             <!-- Application arguments -->
             <!-- meta-data android:name="android.app.arguments" android:value="arg1 arg2 arg3"/ -->
             <!-- Application arguments -->
@@ -79,10 +144,17 @@
             <!-- extract android style -->
             <meta-data android:name="android.app.splash_screen_drawable" android:resource="@drawable/splashscreen"/>
         </activity>
-        <service android:name=".VPNService" android:permission="android.permission.BIND_VPN_SERVICE" android:process=":QtOnlyProcess">
+        
+        <service
+            android:name=".VPNService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:process=":QtOnlyProcess"
+            android:exported="true">
+            
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
+            
             <meta-data android:name="android.app.qt_sources_resource_id" android:resource="@array/qt_sources"/>
             <meta-data android:name="android.app.repository" android:value="default"/>
             <meta-data android:name="android.app.qt_libs_resource_id" android:resource="@array/qt_libs"/>
@@ -95,10 +167,24 @@
             <meta-data android:name="android.app.static_init_classes" android:value="-- %%INSERT_INIT_CLASSES%% --"/>
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
-        <service android:name="org.amnezia.vpn.qt.VPNPermissionHelper" android:permission="android.permission.BIND_VPN_SERVICE">
+        
+        <service
+            android:name=".qt.VPNPermissionHelper"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="true">
+            
             <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
+    
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="org.amnezia.vpn.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/fileprovider"/>
+        </provider>
     </application>
 
 </manifest>

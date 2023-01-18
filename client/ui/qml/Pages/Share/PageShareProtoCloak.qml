@@ -18,20 +18,10 @@ PageShareProtocolBase {
         text: qsTr("Share Cloak Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -39,7 +29,7 @@ PageShareProtocolBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
+            anchors.rightMargin: 15
 
             LabelType {
                 id: lb_desc
@@ -94,7 +84,7 @@ PageShareProtocolBase {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
 
-                text: qsTr("Save to file")
+                text: Qt.platform.os === "android" ? qsTr("Share") : qsTr("Save to file")
                 enabled: tfShareCode.textArea.length > 0
                 visible: tfShareCode.textArea.length > 0
 

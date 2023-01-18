@@ -22,6 +22,8 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(bool, checkBoxBlockDnsChecked)
     AUTO_PROPERTY(QString, lineEditPortText)
     AUTO_PROPERTY(bool, checkBoxTlsAuthChecked)
+    AUTO_PROPERTY(QString, textAreaAdditionalClientConfig)
+    AUTO_PROPERTY(QString, textAreaAdditionalServerConfig)
 
     AUTO_PROPERTY(bool, pushButtonSaveVisible)
     AUTO_PROPERTY(bool, progressBarResetVisible)
@@ -32,6 +34,9 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(QString, labelProtoOpenVpnInfoText)
     AUTO_PROPERTY(int, progressBarResetValue)
     AUTO_PROPERTY(int, progressBarResetMaximium)
+
+    AUTO_PROPERTY(QString, openVpnLastConfigText)
+    AUTO_PROPERTY(bool, isThirdPartyConfig)
 
 public:
     Q_INVOKABLE void onPushButtonProtoOpenVpnSaveClicked();

@@ -19,20 +19,11 @@ PageBase {
         text: qsTr("Setup Wizard")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
+        anchors.bottom: vpn_mode_finish.top
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -40,6 +31,7 @@ PageBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             LabelType {
                 Layout.fillWidth: true
@@ -56,17 +48,18 @@ You can enable VPN mode "For selected sites" and add blocked sites you need to v
                     WizardLogic.checkBoxVpnModeChecked = checked
                 }
             }
+        }
+    }
 
-            BlueButtonType {
-                id: vpn_mode_finish
-                Layout.fillWidth: true
-                Layout.topMargin: 15
-                Layout.preferredHeight: 41
-                text: qsTr("Start configuring")
-                onClicked: {
-                    WizardLogic.onPushButtonVpnModeFinishClicked()
-                }
-            }
+    BlueButtonType {
+        id: vpn_mode_finish
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: GC.defaultMargin
+        x: GC.defaultMargin
+        width: parent.width - 2 * GC.defaultMargin
+        text: qsTr("Start configuring")
+        onClicked: {
+            WizardLogic.onPushButtonVpnModeFinishClicked()
         }
     }
 }

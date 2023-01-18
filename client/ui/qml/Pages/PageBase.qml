@@ -17,8 +17,4 @@ Item {
 
     onActivated: pageActive = true
     onDeactivated: pageActive = false
-
-//    width: GC.screenWidth
-//    height: GC.screenHeight
-
 }

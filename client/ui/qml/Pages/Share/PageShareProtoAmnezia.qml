@@ -18,20 +18,10 @@ PageShareProtocolBase {
         text: qsTr("Share for Amnezia")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height + 20
-        clip: true
 
         Behavior on contentY{
             NumberAnimation {
@@ -46,6 +36,7 @@ PageShareProtocolBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             Text {
                 id: lb_desc
@@ -112,7 +103,7 @@ New encryption keys pair will be generated.")
                 Layout.bottomMargin: 10
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
-                text: qsTr("Save to file")
+                text: Qt.platform.os === "android" ? qsTr("Share") : qsTr("Save to file")
                 enabled: tfShareCode.textArea.length > 0
                 visible: tfShareCode.textArea.length > 0
 

@@ -66,6 +66,12 @@ client/3rd/ShadowSocks/build/
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+# Linux files
+*.7z
+deploy/AppDir
+deploy/Tools
+deploy/AmneziaVPN*Installer*
+
 # MACOS files
 .DS_Store
 client/.DS_Store
@@ -119,3 +125,4 @@ captures/
 
 # Android Profiling
 *.hprof
+client/3rd/ShadowSocks/ss_ios.xcconfig

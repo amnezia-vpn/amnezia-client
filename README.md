@@ -1,7 +1,7 @@
 # Amnezia VPN
 ## _The best client for self-hosted VPN_
 
-[![Build Status](https://travis-ci.com/amnezia-vpn/desktop-client.svg?branch=master)](https://travis-ci.com/amnezia-vpn/desktop-client)
+[![Build Status](https://github.com/amnezia-vpn/desktop-client/actions/workflows/deploy.yml/badge.svg?branch=dev)]
 
 Amnezia is a VPN client with the key feature of deploying your own VPN server on you virtual server.
 
@@ -86,6 +86,11 @@ Error 1
 ```
 Add a user defined variable to both AmneziaVPN and WireGuardNetworkExtension targets' build settings with
 key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
+
+if above error still persists on you M1 Mac, then most proably you need to install arch based cmake 
+```
+arch -arm64 brew install cmake
+```
 
 Build might fail with "source files not found" error the first time you try it, because modern XCode build system compiles
 dependencies in parallel, and some dependencies end up being built after the ones that

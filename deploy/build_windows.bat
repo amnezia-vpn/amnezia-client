@@ -92,7 +92,7 @@ dir %OUT_APP_DIR%
 
 cd %OUT_APP_DIR%
 echo "Compressing data..."
-"%QIF_BIN_DIR:"=%\archivegen" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z ./
+"%QIF_BIN_DIR:"=%\archivegen" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z .
 
 cd "%RELEASE_DIR:"=%\installer"
 echo "Creating installer..."

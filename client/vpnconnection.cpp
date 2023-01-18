@@ -1,3 +1,4 @@
+#include "qtimer.h"
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -34,7 +35,10 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     std::shared_ptr<ServerController> serverController, QObject* parent) : QObject(parent),
     m_settings(settings),
     m_configurator(configurator),
-    m_serverController(serverController)
+    m_serverController(serverController),
+    m_receivedBytes(0),
+    m_sentBytes(0),
+    m_isIOSConnected(false)
 {
 }
 
@@ -48,11 +52,16 @@ VpnConnection::~VpnConnection()
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 {
-    emit bytesChanged(receivedBytes, sentBytes);
+    emit bytesChanged(receivedBytes - m_receivedBytes, sentBytes - m_sentBytes);
+
+    m_receivedBytes = receivedBytes;
+    m_sentBytes = sentBytes;
+
 }
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
 {
+
 #ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
@@ -94,8 +103,32 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
         }
     }
 #endif
+
+#ifdef Q_OS_IOS
+    if (state == VpnProtocol::Connected){
+        m_isIOSConnected = true;
+        checkIOSStatus();
+    }
+    else {
+        m_isIOSConnected = false;
+        m_receivedBytes = 0;
+        m_sentBytes = 0;
+    }
+#endif
     emit connectionStateChanged(state);
 }
+
+#ifdef Q_OS_IOS
+void VpnConnection::checkIOSStatus()
+{
+    QTimer::singleShot(1000, [this]() {
+        if(m_isIOSConnected){
+            iosVpnProtocol->checkStatus();
+            checkIOSStatus();
+        }
+    } );
+}
+#endif
 
 const QString &VpnConnection::remoteAddress() const
 {
@@ -333,7 +366,10 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-    IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+    //if (iosVpnProtocol==NULL) {
+        iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+    //}
+  //  IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
     if (!iosVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
          emit VpnProtocol::Error;
@@ -384,12 +420,19 @@ void VpnConnection::disconnectFromVpn()
 
 VpnProtocol::VpnConnectionState VpnConnection::connectionState()
 {
+
+
     if (!m_vpnProtocol) return VpnProtocol::Disconnected;
     return m_vpnProtocol->connectionState();
+
 }
 
 bool VpnConnection::isConnected() const
 {
+#ifdef Q_OS_IOS
+
+#endif
+
     if (!m_vpnProtocol.data()) {
         return false;
     }

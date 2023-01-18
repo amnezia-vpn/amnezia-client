@@ -71,7 +71,7 @@
 #include "pages_logic/protocols/OpenVpnLogic.h"
 #include "pages_logic/protocols/ShadowSocksLogic.h"
 #include "pages_logic/protocols/OtherProtocolsLogic.h"
-
+#include "pages_logic/protocols/WireGuardLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -94,7 +94,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_protocolLogicMap.insert(Proto::OpenVpn, new OpenVpnLogic(this));
     m_protocolLogicMap.insert(Proto::ShadowSocks, new ShadowSocksLogic(this));
     m_protocolLogicMap.insert(Proto::Cloak, new CloakLogic(this));
-    //m_protocolLogicMap->insert(Proto::WireGuard, new WireguardLogic(this));
+    m_protocolLogicMap.insert(Proto::WireGuard, new WireGuardLogic(this));
 
     m_protocolLogicMap.insert(Proto::Dns, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Proto::Sftp, new OtherProtocolsLogic(this));
@@ -134,7 +134,7 @@ void UiLogic::initalizeUiLogic()
             pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
         }
     });
-    if (!AndroidController::instance()->initialize()) {
+    if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
          qCritical() << QString("Init failed") ;
          emit VpnProtocol::Error;
          return;
@@ -265,8 +265,6 @@ void UiLogic::onGotoCurrentProtocolsPage()
     selectedDockerContainer = m_settings->defaultContainer(selectedServerIndex);
     emit goToPage(Page::ServerContainers);
 }
-
-
 
 //void UiLogic::showEvent(QShowEvent *event)
 //{
@@ -595,8 +593,9 @@ void UiLogic::saveTextFile(const QString& desc, const QString& suggestedName, QS
     if (fileName.isEmpty()) return;
     if (!fileName.toString().endsWith(ext)) fileName = QUrl(fileName.toString() + ext);
 #elif defined Q_OS_ANDROID
-    fileName = QFileDialog::getSaveFileUrl(nullptr, suggestedName,
-        QUrl::fromLocalFile(docDir), "*" + ext);
+    qDebug() << "UiLogic::shareConfig" << data;
+    AndroidController::instance()->shareConfig(data, suggestedName);
+    return;
 #endif
 
     if (fileName.isEmpty()) return;
