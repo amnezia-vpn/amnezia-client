@@ -53,7 +53,11 @@ signals:
     void initialized(bool status, bool connected,
                      const QDateTime& connectionDate);
 
+    void statusUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
+    void scheduleStatusCheckSignal();
+
 protected slots:
+    void scheduleStatusCheckSlot();
 
 protected:
 
@@ -69,6 +73,10 @@ private:
     std::function<void(const QString&)> m_logCallback;
 
     static void startActivityForResult(JNIEnv* env, jobject /*thiz*/, jobject intent);
+
+    bool isConnected = false;
+
+    void scheduleStatusCheck();
 };
 
 #endif // ANDROID_CONTROLLER_H

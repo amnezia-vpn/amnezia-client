@@ -41,6 +41,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
+import java.lang.Exception
 import android.net.VpnService as BaseVpnService
 
 
@@ -274,9 +275,16 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             return mConnectionTime
         }
 
-    var isUp: Boolean
+    var isUp: Boolean = false
         get() {
-            return currentTunnelHandle >= 0
+            return when (mProtocol) {
+                "openvpn" -> {
+                    field
+                }
+                else -> {
+                    currentTunnelHandle >= 0
+                }
+            }
         }
         set(value) {
             if (value) {
@@ -287,16 +295,51 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
             mConnectionTime = 0
         }
+
     val status: JSONObject
         get() {
             val deviceIpv4: String = ""
+
+            val status = when (mProtocol) {
+                "openvpn" -> {
+                    if (mOpenVPNThreadv3 == null) {
+                        Status(null, null, null, null)
+                    } else {
+                        val rx = mOpenVPNThreadv3?.getTotalRxBytes() ?: ""
+                        val tx = mOpenVPNThreadv3?.getTotalTxBytes() ?: ""
+
+                        Status(
+                            rx.toString(),
+                            tx.toString(),
+                            if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
+                            if (mConfig!!.has("device")) { mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
+                        )
+                    }
+                }
+                else -> {
+                    Status(
+                        getConfigValue("rx_bytes"),
+                        getConfigValue("tx_bytes"),
+                        if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
+                        if (mConfig!!.has("server")) {mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
+                    )
+                }
+            }
+
             return JSONObject().apply {
-                putOpt("rx_bytes", getConfigValue("rx_bytes"))
-                putOpt("tx_bytes", getConfigValue("tx_bytes"))
-                putOpt("endpoint", mConfig?.getJSONObject("server")?.getString("ipv4Gateway"))
-                putOpt("deviceIpv4", mConfig?.getJSONObject("device")?.getString("ipv4Address"))
+                putOpt("rx_bytes", status.rxBytes)
+                putOpt("tx_bytes", status.txBytes)
+                putOpt("endpoint", status.endpoint)
+                putOpt("deviceIpv4", status.device)
             }
         }
+
+    data class Status(
+        var rxBytes: String?,
+        var txBytes: String?,
+        var endpoint: String?,
+        var device: String?
+    )
 
     /*
     * Checks if the VPN Permission is given.
@@ -645,6 +688,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     private fun startOpenVpn() {
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
+
         Thread({
             mOpenVPNThreadv3?.run()
         }).start()

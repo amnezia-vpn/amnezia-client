@@ -25,8 +25,10 @@ constexpr auto PERMISSIONHELPER_CLASS =
     "org/amnezia/vpn/qt/VPNPermissionHelper";
 }  // namespace
 
-AndroidController::AndroidController()
+AndroidController::AndroidController() : QObject()
 {
+    connect(this, &AndroidController::scheduleStatusCheckSignal, this, &AndroidController::scheduleStatusCheckSlot);
+
     s_instance = this;
 
     auto activity = AndroidVPNActivity::instance();
@@ -50,8 +52,11 @@ AndroidController::AndroidController()
 
             auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
             qlonglong time = doc.object()["time"].toVariant().toLongLong();
+
+            isConnected = doc.object()["connected"].toBool();
+
             emit initialized(
-                true, doc.object()["connected"].toBool(),
+                true, isConnected,
                 time > 0 ? QDateTime::fromMSecsSinceEpoch(time) : QDateTime());
 
             setFallbackConnectedNotification();
@@ -61,27 +66,35 @@ AndroidController::AndroidController()
         [this](const QString& parcelBody) {
             Q_UNUSED(parcelBody);
             qDebug() << "Transact: connected";
+
+            isConnected = true;
+
+            emit scheduleStatusCheckSignal();
+
             emit connectionStateChanged(VpnProtocol::Connected);
         }, Qt::QueuedConnection);
 
     connect(activity, &AndroidVPNActivity::eventDisconnected, this,
         [this]() {
             qDebug() << "Transact: disconnected";
+
+            isConnected = false;
+
             emit connectionStateChanged(VpnProtocol::Disconnected);
         }, Qt::QueuedConnection);
 
     connect(activity, &AndroidVPNActivity::eventStatisticUpdate, this,
-        [](const QString& parcelBody) {
-            qDebug() << "Transact:: update";
+        [this](const QString& parcelBody) {
+            qDebug() << "Transact: update";
 
             auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
 
-        // TODO: merge with "Android bandwidth" branch
+            QString rx = doc.object()["rx_bytes"].toString();
+            QString tx = doc.object()["tx_bytes"].toString();
+            QString endpoint = doc.object()["endpoint"].toString();
+            QString deviceIPv4 = doc.object()["deviceIpv4"].toString();
 
-        //            emit statusUpdated(doc.object()["endpoint"].toString(),
-        //                               doc.object()["deviceIpv4"].toString(),
-        //                               doc.object()["tx_bytes"].toInt(),
-        //                               doc.object()["rx_bytes"].toInt());
+            emit statusUpdated(rx, tx, endpoint, deviceIPv4);
         }, Qt::QueuedConnection);
 
     connect(activity, &AndroidVPNActivity::eventBackendLogs, this,
@@ -247,6 +260,16 @@ const QJsonObject &AndroidController::vpnConfig() const
 void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
 {
     m_vpnConfig = newVpnConfig;
+}
+
+void AndroidController::scheduleStatusCheckSlot()
+{
+    QTimer::singleShot(1000, [this]() {
+        if (isConnected) {
+            checkStatus();
+            emit scheduleStatusCheckSignal();
+        }
+    });
 }
 
 const int ACTIVITY_RESULT_OK = 0xffffffff;

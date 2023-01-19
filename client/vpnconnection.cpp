@@ -36,8 +36,6 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     m_settings(settings),
     m_configurator(configurator),
     m_serverController(serverController),
-    m_receivedBytes(0),
-    m_sentBytes(0),
     m_isIOSConnected(false)
 {
 }
@@ -52,11 +50,7 @@ VpnConnection::~VpnConnection()
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 {
-    emit bytesChanged(receivedBytes - m_receivedBytes, sentBytes - m_sentBytes);
-
-    m_receivedBytes = receivedBytes;
-    m_sentBytes = sentBytes;
-
+    emit bytesChanged(receivedBytes, sentBytes);
 }
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
@@ -362,6 +356,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
     connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+    connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol, &AndroidVpnProtocol::connectionDataUpdated);
 
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
