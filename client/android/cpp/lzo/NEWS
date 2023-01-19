@@ -1,0 +1,294 @@
+============================================================================
+User visible changes for LZO -- a real-time data compression library
+============================================================================
+
+Changes in 2.10 (01 Mar 2017)
+  * Improve CMake build support.
+  * Add support for pkg-config.
+  * Do not redefine "snprintf" so that the examples build with MSVC 2015.
+  * Assorted cleanups.
+
+Changes in 2.09 (04 Feb 2015)
+  * Work around gcc bug #64516 that could affect architectures like
+    armv4, armv5 and sparc.
+
+Changes in 2.08 (29 Jun 2014)
+  * Updated the Autoconf scripts to fix some reported build problems.
+  * Added CMake build support.
+  * Fixed lzo_init() on big-endian architectures like Sparc.
+
+Changes in 2.07 (25 Jun 2014)
+  * Fixed a potential integer overflow condition in the "safe" decompressor
+    variants which could result in a possible buffer overrun when
+    processing maliciously crafted compressed input data.
+
+    Note that this issue only affects 32-bit systems and also can only happen
+    if you use uncommonly huge buffer sizes where you have to decompress more
+    than 16 MiB (> 2^24 bytes) untrusted compressed bytes within a
+    *single* function call, so the practical implications are limited.
+
+    POTENTIAL SECURITY ISSUE. CVE-2014-4607.
+
+  * Removed support for ancient configurations like 16-bit "huge" pointers -
+    LZO now requires a flat 32-bit or 64-bit memory model.
+  * Assorted cleanups.
+
+Changes in 2.06 (12 Aug 2011)
+  * Some minor optimizations for big-endian architectures.
+  * Fixed overly strict malloc() misalignment check in examples.
+
+Changes in 2.05 (23 Apr 2011)
+  * Converted the configure system to non-recursive Automake.
+  * Applied some overdue speed optimizations for modern x86/x64 architectures
+    and current compilers like gcc 4.6 and MSVC 2010.
+
+Changes in 2.04 (31 Oct 2010)
+  * Fixed a gcc-4.5 aliasing issue in lzo_init().
+  * Updated the configure system.
+  * Assorted cleanups.
+
+Changes in 2.03 (30 Apr 2008)
+  * Updated the ELF assembler sources to mark the stack as non-executable.
+  * Fixed a HP-UX 11 build issue with Itanium in ILP32 mode.
+  * Updated the configure system.
+
+Changes in 2.02 (17 Oct 2005)
+  * Updated the build and Autoconf scripts to fix some reported
+    compilation problems.
+
+Changes in 2.01 (27 Jun 2005)
+  * Changed the configure system to install the LZO library under the
+    name "liblzo2" so that parallel installation with LZO v1 is possible.
+  * Improved auto-configuration in miniLZO for some embedded targets like
+    Blackfin and H8/300 processors.
+
+Changes in 2.00 (30 May 2005)
+
+  [Library interface changes]
+  * The 'lzo_uint' typedef has been changed to match 'size_t', which means
+    it now is 64 bits on most 64-bit architectures. 32-bit machines
+    are not affected by this change.
+  * The formula for maximum expansion of incompressible data has changed.
+    See doc/LZO.FAQ. This is needed for some upcoming speed improvements,
+    and also for compatibility with our commercial LZO Professional product.
+  * The progress indicator callback interface has been revamped.
+  * All public header files now get installed into a "lzo" subdirectory, so
+    your applications should use #include <lzo/lzoXXX.h>.
+  * A number of (internal) macros have been renamed. See LZO_CFG_COMPAT
+    in <lzo/lzoconf.h> if your code depends on these.
+
+  [Speed]
+  * Small overall speedup by exploiting features like branch prediction
+    hints and explicit inline control present in modern C/C++ compilers.
+  * Significant speedup for 64-bit architectures like AMD64.
+
+  [Portability]
+  * LZO now fully supports the LLP64 programming model.
+  * LZO now fully supports the ILP64 and SILP64 programming models which
+    are used on some supercomputing architectures.
+  * Full Win64 support for AMD64 (aka x64) and IA64 (Itanium).
+  * Full 16-bit support for ancient DOS 286 protected mode, OS/2 1.x
+    and Windows 3.x.
+  * The LZO library now compiles and works on completely freestanding or
+    embedded systems as long as you have <limits.h> and <stddef.h> header
+    files. See the B/generic/build_freestanding.sh build script.
+
+  [Misc]
+  * The i386 assembler versions of the decompressors are now automatically
+    built and installed. See also asm/i386/00README.TXT.
+  * Added include file <lzo/lzo_asm.h> that provides prototypes for all
+    assembler functions.
+  * Under MacOS X, the configure script now will use the '-no-cpp-precomp'
+    compiler option in order to work around bugs in some versions of
+    Apple's native "smart" preprocessor.
+  * Worked around a preprocessor bug that is present in all compilers which
+    are based on the lcc compiler kit.
+  * Added simple B/generic/build.sh build script family.
+  * Added lots of new build scripts for various DOS/Windows compilers.
+
+  [Upgrade instructions from LZO v1 to LZO v2]
+  * On 64-bit architectures, revisit all uses of lzo_uint.
+  * Adapt for the maximum expansion change of incompressible data.
+  * If you use the progress callback then adapt for the new interface.
+  * Use #include <lzo/lzoXXX.h> or adjust your include path.
+  * Check your code for use of deprecated macros. Add a
+    #define LZO_CFG_COMPAT if necessary.
+  * Other than that LZO v2 should be fully source-compatible with LZO v1.
+    Of course, the compressed data is fully compatible as well.
+  * Re-compile and re-link your application.
+  * Enjoy the improvements!
+
+----------------------------------------------------------------------------
+
+Changes in 1.08 (12 Jul 2002)
+  * Much better support for cross compiling.
+  * Straighten out ANSI-conforming compiler checks.
+  * Avoid harmless compiler warnings reported by -Wcast-align.
+  * Fixed some sign extension problems on rather exotic machines where
+    sizeof(size_t) < sizeof(ptrdiff_t) and sizeof(lzo_uint) == sizeof(size_t)
+  * Updated the configure system to use the latest Autoconf, Automake
+    and Libtool versions.
+
+Changes in 1.07 (18 Oct 2000)
+  * Default to '--disable-shared' (I'm getting tired of Libtool's
+    shared library build problems, this time AIX was the culprit).
+  * Avoid some harmless compiler warnings.
+
+Changes in 1.06 (29 Nov 1999)
+  * Updated the configure system to use Autoconf 2.13, Automake 1.4 and
+    Libtool 1.3.3. This should hopefully fix the shared-library build
+    problems that were reported on some machines.
+  * Enhanced example programs a little bit.
+
+Changes in 1.05 (14 Apr 1998)
+  * Just a one-line change in the configure script to workaround
+    a HPUX and IRIX build problem.
+
+Changes in 1.04 (15 Mar 1998)
+  * Worked around a bug in the cpp preprocessor under HPUX 10.20.
+  * Adapted for Automake 1.2f and Libtool 1.1.
+
+Changes in 1.03 (18 Jan 1998)
+  * minor compression ratio improvement
+  * extended example program to show how to do overlapping compression
+  * assembler changes, added support for the nasm assembler
+  * better support for cross compiling
+  * some cleanups
+
+Changes in 1.02 (07 Dec 1997)
+  * improved LZO1X-999 and LZO1Y-999 compression ratio a little bit again
+  * introduced compression levels for LZO1X-999 and LZO1Y-999
+  * added support for preset dictionaries
+  * implemented LZO1X-1(12): needs 16 KiB for compression
+  * new algorithm LZO1Z: this is another variant of LZO1X
+  * added example program: how to use preset dictionaries
+  * added example program: how to do in-place decompression
+  * added a little file-packer example program
+  * LZO now works cleanly under checkergcc
+  * strict 16-bit memory model is working (but not officially supported)
+  * shared libraries are supported on many platforms
+  * adapted for Automake 1.2d and Libtool 1.0h
+
+Changes in 1.01 (10 Aug 1997)
+  * improved LZO1X-999 and LZO1Y-999 compression ratio a little bit
+  * i386+gcc: significant speedup of the C version of the LZO1, LZO1A,
+    LZO1B and LZO1C decompressors
+  * added example programs that show how to generate pre-compressed data
+  * added Makefiles for DOS, Windows and OS/2 targets
+
+Changes in 1.00 (13 Jul 1997)
+  * added miniLZO - can be easily included in your project
+  * improved documentation, added LZO.FAQ
+  * added build scripts for many systems where Autoconf is not available:
+    Windows 3.1 (LIB+DLL), Windows 95/NT (LIB+DLL), DOS (16+32 bit), OS/2
+  * adapted for Automake 1.2 and Libtool 1.0
+
+Changes in 0.90 (27 Jun 1997): never released
+  * LZO now uses GNU Automake 1.0 - lots of configuration changes
+  * added LZO1X-1(11): this version needs only 8 KiB for compression
+  * implemented LZO1Y-1
+  * added i386 assembler decompressors for MASM/TASM/WASM
+  * the name of some assembler functions changed
+  * the numeric value of some error codes changed
+  * portability fixes
+
+Changes in 0.29 (04 May 1997)
+  * Linux ELF shared library support
+  * workaround for gcc 2.7.2 optimizer bug under AIX
+  * added lzo_crc32() checksum
+
+Changes in 0.28 (22 Feb 1997)
+  * new algorithm LZO1Y: LZO1Y-999 and LZO1Y decompressor
+  * added lzo1x_optimize() and lzo1y_optimize()
+  * minor speedup in assembler decompressors (i386+gcc)
+  * ltest.c rewritten
+
+Changes in 0.27 (19 Jan 1997)
+  * fixed a bug in LZO1B-999 and LZO1C-999 that could produce
+    invalid compressed data in very rare cases
+
+Changes in 0.26 (18 Jan 1997): never released
+  * implemented LZO1B-999
+  * renamed LZO1D to LZO2A (also updated all docs)
+  * some cleanups
+
+Changes in 0.25 (28 Dec 1996): never released
+  * some portability fixes (LZO now works on my old Atari ST :-)
+  * adapted for Autoconf 2.12
+
+Changes in 0.24 (30 Nov 1996): never released
+  * improved performance of LZO1X assembler decompressor on a Pentium (i386+gcc)
+
+Changes in 0.23 (23 Nov 1996)
+  * added LZO1C, LZO1F and LZO1X decompressors in assembler (i386+gcc)
+  * added corresponding LZO_PUBLIC to all LZO_EXTERN functions
+  * added support for Microsoft C 7.0 (16-bit DOS)
+  * introduced lzo_uint32. This could prove useful for a strict 16-bit
+    version that doesn't use 'huge' pointers.
+  * all algorithms use incremental hashing now
+  * some cleanups and portability fixes
+
+Changes in 0.22 (19 Sep 1996)
+  * LZO1X: minor decompressor speedup, added some checks in safe decompressor
+  * Autoconf: added detection of gcc strength-reduction bug
+  * Makefile changes
+
+Changes in 0.21 (08 Sep 1996)
+  * LZO now uses GNU Autoconf 2.10 - lots of configuration changes
+  * a few cosmetical changes
+
+Changes in 0.20 (11 Aug 1996)
+  * new algorithm LZO1X: LZO1X-1, LZO1X-999 and LZO1X decompressor
+  * significantly speeded up LZO1B, LZO1C and LZO1F decompressors
+    on CPUs which allow unaligned memory access (e.g. Intel i386)
+  * greatly speeded up LZO2A-999 compressor at the cost of some memory
+  * some cleanups, portability fixes and minor speedups
+
+Changes in 0.16 (22 Jul 1996)
+  * speeded up LZO1F decompressor a little bit
+  * improved LZO1F-999 compression ratio
+
+Changes in 0.15 (10 Jul 1996)
+  * new algorithm LZO1F: LZO1F-1, LZO1F-999 and LZO1F decompressor
+  * improved LZO2A-999 compression ratio
+  * removed LZO1E as it is dominated by LZO1F
+
+Changes in 0.14 (06 Jul 1996): never released
+  * experimental algorithms: LZO1E and LZO1F
+  * added LZO_EXTERN to all prototypes. Useful when building a DLL.
+  * improved LZO1C-999 and LZO2A-999 compression ratio a little bit
+  * fixed progress indicator callback (it was called only once)
+
+Changes in 0.13 (20 Jun 1996)
+  * some speed improvements in LZO1C-999 and LZO2A-999
+
+Changes in 0.12 (18 Jun 1996): never released
+  * added LZO1C-999, a slow but nearly optimal compressor
+    intended for generating pre-compressed data
+  * added tests for lookbehind-overrun in all safe decompressors
+  * source tree completely rearranged, some filenames changed
+  * extensions changed: a .ch file is a C source code that is included
+    for reasons of code sharing
+  * new algorithm LZO2A: LZO2A-999 and LZO2A decompressor. There is
+    no fast compressor yet.
+  * some cleanups
+
+Changes in 0.11 (29 May 1996)
+  * source tree rearranged
+  * LZO now compiles fine as a C++ library (interface still has C linkage)
+  * improved overall compression ratio a little bit
+  * LZO1B-99/LZO1C-99 now search for longer matches
+  * incremental hash is working, it's a little bit faster
+  * Makefile changed
+  * added lzo_uint and lzo_sizeof in some places
+  * split LZO1B compressor into even more include-files
+
+Changes in 0.10 (20 May 1996): first public release of the LZO library
+  * includes LZO1, LZO1A, LZO1B and LZO1C algorithms
+    (compression levels 1-9 and 99)
+
+14 Mar 1996:
+  * public release of the LZO1A algorithm
+
+04 Mar 1996:
+  * public release of the LZO1 algorithm

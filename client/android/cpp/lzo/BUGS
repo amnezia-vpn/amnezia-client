@@ -1,0 +1,21 @@
+============================================================================
+LZO -- a real-time data compression library
+============================================================================
+
+LZO is free of any known bugs.
+
+Nevertheless LZO has been reported to break the optimizer of some
+compilers including gcc 2.7.2 (AIX, IRIX) and Watcom C 9.5.
+
+So if 'lzotest' reports data decompression errors you should recompile
+everything without optimizations and see if that fixes the problem.
+I'd like to hear about optimizer problems and possible workarounds.
+
+
+Known compiler problems:
+------------------------
+  some versions of gcc    use '-O2 -fno-strength-reduce'
+  some versions of gcc    use '-O2 -fno-schedule-insns -fno-schedule-insns2'
+  Watcom C 9.5            compile with '-oneax' instead of '-oneatx'
+
+

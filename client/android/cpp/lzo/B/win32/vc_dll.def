@@ -1,0 +1,7 @@
+EXPORTS
+ lzo1c_decompress_asm
+ lzo1f_decompress_asm_fast
+ lzo1x_decompress_asm
+ lzo1x_decompress_asm_fast
+ lzo1y_decompress_asm
+ lzo1y_decompress_asm_fast

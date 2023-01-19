@@ -1,0 +1,213 @@
+============================================================================
+LZO Frequently Asked Questions
+============================================================================
+
+
+I hate reading docs - just tell me how to add compression to my program
+=======================================================================
+
+This is for the impatient: take a look at examples/simple.c and
+examples/lzopack.c and see how easy this is.
+
+But you will come back to read the documentation later, won't you ?
+
+
+Can you explain the naming conventions of the algorithms ?
+==========================================================
+
+Let's take a look at LZO1X:
+
+     The algorithm name is LZO1X.
+     The algorithm category is LZO1.
+     Various compression levels are implemented.
+
+     LZO1X-999
+        !---------- algorithm category
+         !--------- algorithm type
+           !!!----- compression level (1-9, 99, 999)
+
+     LZO1X-1(11)
+        !---------- algorithm category
+         !--------- algorithm type
+           !------- compression level (1-9, 99, 999)
+             !!---- memory level (memory requirements for compression)
+
+All compression/memory levels generate the same compressed data format,
+so e.g. the LZO1X decompressor handles all LZO1X-* compression levels
+(for more information about the decompressors see below).
+
+Category LZO1 algorithms: compressed data format is strictly byte aligned
+Category LZO2 algorithms: uses bit-shifting, slower decompression
+
+
+Why are there so many algorithms ?
+==================================
+
+Because of historical reasons - I want to support unlimited
+backward compatibility.
+
+Don't get misled by the size of the library - using one algorithm
+increases the size of your application by only a few KiB.
+
+If you just want to add a little bit of data compression to your
+application you may be looking for miniLZO.
+See minilzo/README.LZO for more information.
+
+
+Which algorithm should I use ?
+==============================
+
+LZO1X seems to be best choice in many cases, so:
+- when going for speed use LZO1X-1
+- when generating pre-compressed data use LZO1X-999
+- if you have little memory available for compression use LZO1X-1(11)
+  or LZO1X-1(12)
+
+Of course, your mileage may vary, and you are encouraged to run your
+own experiments. Try LZO1Y and LZO1F next.
+
+
+What's the difference between the decompressors per algorithm ?
+===============================================================
+
+Once again let's use LZO1X for explanation:
+
+- lzo1x_decompress
+    The 'standard' decompressor. Pretty fast - use this whenever possible.
+
+    This decompressor expects valid compressed data.
+    If the compressed data gets corrupted somehow (e.g. transmission
+    via an erroneous channel, disk errors, ...) it will probably crash
+    your application because absolutely no additional checks are done.
+
+- lzo1x_decompress_safe
+    The 'safe' decompressor. Somewhat slower.
+
+    This decompressor will catch all compressed data violations and
+    return an error code in this case - it will never crash.
+
+- lzo1x_decompress_asm
+    Same as lzo1x_decompress - written in assembler.
+
+- lzo1x_decompress_asm_safe
+    Same as lzo1x_decompress_safe - written in assembler.
+
+- lzo1x_decompress_asm_fast
+    Similar to lzo1x_decompress_asm - but even faster.
+
+    For reasons of speed this decompressor can write up to 3 bytes
+    past the end of the decompressed (output) block.
+    [ technical note: because data is transferred in 32-bit units ]
+
+    Use this when you are decompressing from one memory block to
+    another memory block - just provide output space for 3 extra bytes.
+    You shouldn't use it if e.g. you are directly decompressing to video
+    memory (because the extra bytes will be show up on the screen).
+
+- lzo1x_decompress_asm_fast_safe
+    This is the safe version of lzo1x_decompress_asm_fast.
+
+
+Notes:
+------
+- When using a safe decompressor you must pass the number of
+  bytes available in 'dst' via the parameter 'dst_len'.
+
+- If you want to be sure that your data is not corrupted you must
+  use a checksum - just using the safe decompressor is not enough,
+  because many data errors will not result in a compressed data violation.
+
+- Assembler versions are only available for the i386 family yet.
+  Please see also asm/i386/00README.TXT
+
+- You should test if the assembler versions are actually faster
+  than the C version on your machine - some compilers can do a very
+  good optimization job and they also can optimize the code
+  for a specific processor.
+
+
+What is this optimization thing ?
+=================================
+
+The compressors use a heuristic approach - they sometimes code
+information that doesn't improve compression ratio.
+
+Optimization removes this superfluos information in order to
+increase decompression speed.
+
+Optimization works similar to decompression except that the
+compressed data is modified as well. The length of the compressed
+data block will not change - only the compressed data-bytes will
+get rearranged a little bit.
+
+Don't expect too much, though - my tests have shown that the
+optimization step improves decompression speed by about 1-3%.
+
+
+I need even more decompression speed...
+=======================================
+
+Many RISC processors (like MIPS) can transfer 32-bit words much
+faster than bytes - this can significantly speed up decompression.
+So after verifying that everything works fine you can try if activating
+the LZO_ALIGNED_OK_4 macro improves LZO1X and LZO1Y decompression
+performance. Change the file config.h accordingly and recompile everything.
+
+On an i386 architecture you should evaluate the assembler versions.
+
+
+How can I reduce memory requirements when (de)compressing ?
+===========================================================
+
+If you cleverly arrange your data, you can do an overlapping (in-place)
+decompression which means that you can decompress to the *same*
+block where the compressed data resides. This effectively removes
+the space requirements for holding the compressed data block.
+
+This technique is essential e.g. for usage in an executable packer.
+
+You can also partly overlay the buffers when doing compression.
+
+See examples/overlap.c for a working example.
+
+
+Can you give a cookbook for using pre-compressed data ?
+=======================================================
+
+Let's assume you use LZO1X-999.
+
+1) pre-compression step
+   - call lzo_init()
+   - call lzo1x_999_compress()
+   - call lzo1x_optimize()
+   - compute an adler32 checksum of the *compressed* data
+   - store the compressed data and the checksum in a file
+   - if you are paranoid you should verify decompression now
+
+2) decompression step within your application
+   - call lzo_init()
+   - load your compressed data and the checksum
+   - optionally verify the checksum of the compressed data
+     (so that you can use the standard decompressor)
+   - decompress
+
+See examples/precomp.c and examples/precomp2.c for a working example.
+
+
+How much can my data expand during compression ?
+================================================
+
+LZO will expand incompressible data by a little amount.
+I still haven't computed the exact values, but I suggest using
+these formulas for a worst-case expansion calculation:
+
+  Algorithm LZO1, LZO1A, LZO1B, LZO1C, LZO1F, LZO1X, LZO1Y, LZO1Z:
+  ----------------------------------------------------------------
+    output_block_size = input_block_size + (input_block_size / 16) + 64 + 3
+
+    [This is about 106% for a large block size.]
+
+  Algorithm LZO2A:
+  ----------------
+    output_block_size = input_block_size + (input_block_size / 8) + 128 + 3
+

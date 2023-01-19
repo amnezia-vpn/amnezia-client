@@ -1,0 +1,261 @@
+
+============================================================================
+LZO -- a real-time data compression library                LIBRARY REFERENCE
+============================================================================
+
+
+[ please read LZO.FAQ first ]
+
+
+Table of Contents
+=================
+
+1      Introduction to the LZO Library Reference
+1.1      Preliminary notes
+1.2      Headers
+2      General
+2.1      The memory model
+2.2      Public integral types
+2.3      Public pointer types
+2.4      Public function types
+3      Function reference
+3.1      Initialization
+3.2      Compression
+3.3      Decompression
+3.4      Optimization
+3.5      String functions
+3.6      Checksum functions
+3.7      Version functions
+4      Variable reference
+
+
+
+1 Introduction to the LZO Library Reference
+=============================================
+
+
+1.1 Preliminary notes
+---------------------
+
+- 'C90' is short for ISO 9899-1990, the ANSI/ISO standard for the C
+  programming language
+
+
+1.2 Headers
+-----------
+
+This section briefly describes the headers.
+
+<lzo/lzoconf.h>
+
+    Contains definitions for the basic integral and pointer types,
+    provides wrappers for the library calling conventions, defines
+    error codes and contains prototypes for the generic functions.
+    This file is automatically included by all LZO headers.
+
+<lzo/lzo1.h>
+<lzo/lzo1a.h>
+<lzo/lzo1b.h>
+<lzo/lzo1c.h>
+<lzo/lzo1f.h>
+<lzo/lzo1x.h>
+<lzo/lzo1y.h>
+<lzo/lzo1z.h>
+<lzo/lzo2a.h>
+
+    These files provide definitions and prototypes for the
+    actual (de-)compression functions.
+
+
+
+2 General
+=========
+
+
+2.1 The memory model
+--------------------
+
+LZO requires a flat 32-bit or 64-bit memory model.
+
+
+2.2 Public integral types
+-------------------------
+
+lzo_uint
+
+    must match size_t
+
+lzo_bool
+
+    can store the values 0 ("false") and 1 ("true")
+
+
+2.3 Public pointer types
+------------------------
+
+lzo_voidp
+
+    pointer to void
+
+lzo_bytep
+
+    pointer to unsigned char
+
+
+2.4 Public function types
+-------------------------
+
+lzo_compress_t
+
+lzo_decompress_t
+
+lzo_optimize_t
+
+lzo_callback_t
+
+
+
+3 Function reference
+====================
+
+
+3.1 Initialization
+------------------
+
+int lzo_init ( void );
+
+  This function initializes the LZO library. It must be the first LZO
+  function you call, and you cannot use any of the other LZO library
+  functions if the call fails.
+
+  Return value:
+    Returns LZO_E_OK on success, error code otherwise.
+
+  Note:
+    This function is actually implemented using a macro.
+
+
+3.2 Compression
+---------------
+
+All compressors compress the memory block at 'src' with the uncompressed
+length 'src_len' to the address given by 'dst'.
+The length of the compressed blocked will be returned in the variable
+pointed by 'dst_len'.
+
+The two blocks may overlap under certain conditions (see examples/overlap.c),
+thereby allowing "in-place" compression.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#include <lzo/lzo1x.h>
+
+int lzo1x_1_compress ( const lzo_bytep src, lzo_uint  src_len,
+                             lzo_bytep dst, lzo_uintp dst_len,
+                             lzo_voidp wrkmem );
+
+  Algorithm:            LZO1X
+  Compression level:    LZO1X-1
+  Memory requirements:  LZO1X_1_MEM_COMPRESS    (64 KiB on 32-bit machines)
+
+  This compressor is pretty fast.
+
+  Return value:
+    Always returns LZO_E_OK (this function can never fail).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#include <lzo/lzo1x.h>
+
+int lzo1x_999_compress ( const lzo_bytep src, lzo_uint  src_len,
+                               lzo_bytep dst, lzo_uintp dst_len,
+                               lzo_voidp wrkmem );
+
+  Algorithm:            LZO1X
+  Compression level:    LZO1X-999
+  Memory requirements:  LZO1X_999_MEM_COMPRESS  (448 KiB on 32-bit machines)
+
+  This compressor is quite slow but achieves a good compression
+  ratio. It is mainly intended for generating pre-compressed data.
+
+  Return value:
+    Always returns LZO_E_OK (this function can never fail).
+
+
+[ ... lots of other compressors which all follow the same principle ... ]
+
+
+
+3.3 Decompression
+-----------------
+
+All decompressors decompress the memory block at 'src' with the compressed
+length 'src_len' to the address given by 'dst'.
+The length of the decompressed block will be returned in the variable
+pointed by 'dst_len' - on error the number of bytes that have
+been decompressed so far will be returned.
+
+The safe decompressors expect that the number of bytes available in
+the 'dst' block is passed via the variable pointed by 'dst_len'.
+
+The two blocks may overlap under certain conditions (see examples/overlap.c),
+thereby allowing "in-place" decompression.
+
+
+Description of return values:
+
+  LZO_E_OK
+    Success.
+
+  LZO_E_INPUT_NOT_CONSUMED
+    The end of the compressed block has been detected before all
+    bytes in the compressed block have been used.
+    This may actually not be an error (if 'src_len' is too large).
+
+  LZO_E_INPUT_OVERRUN
+    The decompressor requested more bytes from the compressed
+    block than available.
+    Your data is corrupted (or 'src_len' is too small).
+
+  LZO_E_OUTPUT_OVERRUN
+    The decompressor requested to write more bytes to the uncompressed
+    block than available.
+    Either your data is corrupted, or you should increase the number of
+    available bytes passed in the variable pointed by 'dst_len'.
+
+  LZO_E_LOOKBEHIND_OVERRUN
+    Your data is corrupted.
+
+  LZO_E_EOF_NOT_FOUND
+    No EOF code was found in the compressed block.
+    Your data is corrupted (or 'src_len' is too small).
+
+  LZO_E_ERROR
+    Any other error (data corrupted).
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#include <lzo1x.h>
+
+int lzo1x_decompress ( const lzo_bytep src, lzo_uint  src_len,
+                             lzo_bytep dst, lzo_uintp dst_len,
+                             lzo_voidp wrkmem );
+
+  Algorithm:            LZO1X
+  Memory requirements:  0
+
+
+[ ... lots of other decompressors which all follow the same principle ... ]
+
+
+
+4 Variable reference
+====================
+
+The variables are listed alphabetically.
+
+[ no public variables yet ]
+
+
+
+--------------------------- END OF LZOAPI.TXT ------------------------------
+

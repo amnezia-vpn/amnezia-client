@@ -1,0 +1,291 @@
+
+ ============================================================================
+ LZO -- a real-time data compression library
+ ============================================================================
+
+ Author  : Markus Franz Xaver Johannes Oberhumer
+           <markus@oberhumer.com>
+           http://www.oberhumer.com/opensource/lzo/
+ Version : 2.10
+ Date    : 01 Mar 2017
+
+
+ Abstract
+ --------
+ LZO is a portable lossless data compression library written in ANSI C.
+ It offers pretty fast compression and very fast decompression.
+ Decompression requires no memory.
+
+ In addition there are slower compression levels achieving a quite
+ competitive compression ratio while still decompressing at
+ this very high speed.
+
+ The LZO algorithms and implementations are copyrighted OpenSource
+ distributed under the GNU General Public License.
+
+
+ Introduction
+ ------------
+ LZO is a data compression library which is suitable for data
+ de-/compression in real-time. This means it favours speed
+ over compression ratio.
+
+ The acronym LZO is standing for Lempel-Ziv-Oberhumer.
+
+ LZO is written in ANSI C. Both the source code and the compressed
+ data format are designed to be portable across platforms.
+
+ LZO implements a number of algorithms with the following features:
+
+ - Decompression is simple and *very* fast.
+ - Requires no memory for decompression.
+ - Compression is pretty fast.
+ - Requires 64 KiB of memory for compression.
+ - Allows you to dial up extra compression at a speed cost in the
+   compressor. The speed of the decompressor is not reduced.
+ - Includes compression levels for generating pre-compressed
+   data which achieve a quite competitive compression ratio.
+ - There is also a compression level which needs only 8 KiB for compression.
+ - Algorithm is thread safe.
+ - Algorithm is lossless.
+
+ LZO supports overlapping compression and in-place decompression.
+
+
+ Design criteria
+ ---------------
+ LZO was designed with speed in mind. Decompressor speed has been
+ favoured over compressor speed. Real-time decompression should be
+ possible for virtually any application. The implementation of the
+ LZO1X decompressor in optimized i386 assembler code runs about at
+ the third of the speed of a memcpy() - and even faster for many files.
+
+ In fact I first wrote the decompressor of each algorithm thereby
+ defining the compressed data format, verified it with manually
+ created test data and at last added the compressor.
+
+
+ Performance
+ -----------
+ To keep you interested, here is an overview of the average results
+ when compressing the Calgary Corpus test suite with a blocksize
+ of 256 KiB, originally done on an ancient Intel Pentium 133.
+
+ The naming convention of the various algorithms goes LZOxx-N, where N is
+ the compression level. Range 1-9 indicates the fast standard levels using
+ 64 KiB memory for compression. Level 99 offers better compression at the
+ cost of more memory (256 KiB), and is still reasonably fast.
+ Level 999 achieves nearly optimal compression - but it is slow
+ and uses much memory, and is mainly intended for generating
+ pre-compressed data.
+
+ The C version of LZO1X-1 is about 4-5 times faster than the fastest
+ zlib compression level, and it also outperforms other algorithms
+ like LZRW1-A and LZV in both compression ratio and compression speed
+ and decompression speed.
+
+ +------------------------------------------------------------------------+
+ | Algorithm        Length  CxB   ComLen  %Remn  Bits   Com K/s   Dec K/s |
+ | ---------        ------  ---   ------  -----  ----   -------   ------- |
+ |                                                                        |
+ | memcpy()         224401    1   224401  100.0  8.00  60956.83  59124.58 |
+ |                                                                        |
+ | LZO1-1           224401    1   117362   53.1  4.25   4665.24  13341.98 |
+ | LZO1-99          224401    1   101560   46.7  3.73   1373.29  13823.40 |
+ |                                                                        |
+ | LZO1A-1          224401    1   115174   51.7  4.14   4937.83  14410.35 |
+ | LZO1A-99         224401    1    99958   45.5  3.64   1362.72  14734.17 |
+ |                                                                        |
+ | LZO1B-1          224401    1   109590   49.6  3.97   4565.53  15438.34 |
+ | LZO1B-2          224401    1   106235   48.4  3.88   4297.33  15492.79 |
+ | LZO1B-3          224401    1   104395   47.8  3.83   4018.21  15373.52 |
+ | LZO1B-4          224401    1   104828   47.4  3.79   3024.48  15100.11 |
+ | LZO1B-5          224401    1   102724   46.7  3.73   2827.82  15427.62 |
+ | LZO1B-6          224401    1   101210   46.0  3.68   2615.96  15325.68 |
+ | LZO1B-7          224401    1   101388   46.0  3.68   2430.89  15361.47 |
+ | LZO1B-8          224401    1    99453   45.2  3.62   2183.87  15402.77 |
+ | LZO1B-9          224401    1    99118   45.0  3.60   1677.06  15069.60 |
+ | LZO1B-99         224401    1    95399   43.6  3.48   1286.87  15656.11 |
+ | LZO1B-999        224401    1    83934   39.1  3.13    232.40  16445.05 |
+ |                                                                        |
+ | LZO1C-1          224401    1   111735   50.4  4.03   4883.08  15570.91 |
+ | LZO1C-2          224401    1   108652   49.3  3.94   4424.24  15733.14 |
+ | LZO1C-3          224401    1   106810   48.7  3.89   4127.65  15645.69 |
+ | LZO1C-4          224401    1   105717   47.7  3.82   3007.92  15346.44 |
+ | LZO1C-5          224401    1   103605   47.0  3.76   2829.15  15153.88 |
+ | LZO1C-6          224401    1   102585   46.5  3.72   2631.37  15257.58 |
+ | LZO1C-7          224401    1   101937   46.2  3.70   2378.57  15492.49 |
+ | LZO1C-8          224401    1   100779   45.6  3.65   2171.93  15386.07 |
+ | LZO1C-9          224401    1   100255   45.4  3.63   1691.44  15194.68 |
+ | LZO1C-99         224401    1    97252   44.1  3.53   1462.88  15341.37 |
+ | LZO1C-999        224401    1    87740   40.2  3.21    306.44  16411.94 |
+ |                                                                        |
+ | LZO1F-1          224401    1   113412   50.8  4.07   4755.97  16074.12 |
+ | LZO1F-999        224401    1    89599   40.3  3.23    280.68  16553.90 |
+ |                                                                        |
+ | LZO1X-1(11)      224401    1   118810   52.6  4.21   4544.42  15879.04 |
+ | LZO1X-1(12)      224401    1   113675   50.6  4.05   4411.15  15721.59 |
+ | LZO1X-1          224401    1   109323   49.4  3.95   4991.76  15584.89 |
+ | LZO1X-1(15)      224401    1   108500   49.1  3.93   5077.50  15744.56 |
+ | LZO1X-999        224401    1    82854   38.0  3.04    135.77  16548.48 |
+ |                                                                        |
+ | LZO1Y-1          224401    1   110820   49.8  3.98   4952.52  15638.82 |
+ | LZO1Y-999        224401    1    83614   38.2  3.05    135.07  16385.40 |
+ |                                                                        |
+ | LZO1Z-999        224401    1    83034   38.0  3.04    133.31  10553.74 |
+ |                                                                        |
+ | LZO2A-999        224401    1    87880   40.0  3.20    301.21   8115.75 |
+ +------------------------------------------------------------------------+
+
+ Notes:
+  - CxB is the number of blocks
+  - K/s is the speed measured in 1000 uncompressed bytes per second
+  - the assembler decompressors are even faster
+
+
+ Short documentation
+ -------------------
+ LZO is a block compression algorithm - it compresses and decompresses
+ a block of data. Block size must be the same for compression
+ and decompression.
+
+ LZO compresses a block of data into matches (a sliding dictionary)
+ and runs of non-matching literals. LZO takes care about long matches
+ and long literal runs so that it produces good results on highly
+ redundant data and deals acceptably with non-compressible data.
+
+ When dealing with incompressible data, LZO expands the input
+ block by a maximum of 64 bytes per 1024 bytes input.
+
+ I have verified LZO using such tools as valgrind and other memory checkers.
+ And in addition to compressing gigabytes of files when tuning some parameters
+ I have also consulted various 'lint' programs to spot potential portability
+ problems. LZO is free of any known bugs.
+
+
+ The algorithms
+ --------------
+ There are too many algorithms implemented. But I want to support
+ unlimited backward compatibility, so I will not reduce the LZO
+ distribution in the future.
+
+ As the many object files are mostly independent of each other, the
+ size overhead for an executable statically linked with the LZO library
+ is usually pretty low (just a few KiB) because the linker will only add
+ the modules that you are actually using.
+
+ I first published LZO1 and LZO1A in the Internet newsgroups
+ comp.compression and comp.compression.research in March 1996.
+ They are mainly included for compatibility reasons. The LZO2A
+ decompressor is too slow, and there is no fast compressor anyway.
+
+ My experiments have shown that LZO1B is good with a large blocksize
+ or with very redundant data, LZO1F is good with a small blocksize or
+ with binary data and that LZO1X is often the best choice of all.
+ LZO1Y and LZO1Z are almost identical to LZO1X - they can achieve a
+ better compression ratio on some files.
+ Beware, your mileage may vary.
+
+
+ Usage of the library
+ --------------------
+ Despite of its size, the basic usage of LZO is really very simple.
+
+ Let's assume you want to compress some data with LZO1X-1:
+   A) compression
+      * include <lzo/lzo1x.h>
+        call lzo_init()
+        compress your data with lzo1x_1_compress()
+      * link your application with the LZO library
+   B) decompression
+      * include <lzo/lzo1x.h>
+        call lzo_init()
+        decompress your data with lzo1x_decompress()
+      * link your application with the LZO library
+
+ The program examples/simple.c shows a fully working example.
+ See also LZO.FAQ for more information.
+
+
+ Building LZO
+ ------------
+ As LZO uses Autoconf+Automake+Libtool the building process under
+ UNIX systems should be very unproblematic. Shared libraries are
+ supported on many architectures as well.
+ For detailed instructions see the file INSTALL.
+
+ Please note that due to the design of the ELF executable format
+ the performance of a shared library on i386 systems (e.g. Linux)
+ is a little bit slower, so you may want to link your applications
+ with the static version (liblzo2.a) anyway.
+
+ For building under DOS, Win16, Win32, OS/2 and other systems
+ take a look at the file B/00readme.txt.
+
+ In case of troubles (like decompression data errors) try recompiling
+ everything without optimizations - LZO may break the optimizer
+ of your compiler. See the file BUGS.
+
+ LZO is written in ANSI C. In particular this means:
+   - your compiler must understand prototypes
+   - your compiler must understand prototypes in function pointers
+   - your compiler must correctly promote integrals ("value-preserving")
+   - your preprocessor must implement #elif, #error and stringizing
+   - you must have a conforming and correct <limits.h> header
+   - you must have <stddef.h>, <string.h> and other ANSI C headers
+   - you should have size_t and ptrdiff_t
+
+
+ Portability
+ -----------
+ I have built and tested LZO successfully on a variety of platforms
+ including DOS (16 + 32 bit), Windows 3.x (16-bit), Win32, Win64,
+ Linux, *BSD, HP-UX and many more.
+
+ LZO is also reported to work under AIX, ConvexOS, IRIX, MacOS, PalmOS (Pilot),
+ PSX (Sony Playstation), Solaris, SunOS, TOS (Atari ST) and VxWorks.
+ Furthermore it is said that its performance on a Cray is superior
+ to all other machines...
+
+ And I think it would be much fun to translate the decompressors
+ to Z-80 or 6502 assembly.
+
+
+ The future
+ ----------
+ Here is what I'm planning for the next months. No promises, though...
+
+ - interfaces to .NET and Mono
+ - interfaces to Perl, Java, Python, Delphi, Visual Basic, ...
+ - improve documentation and API reference
+
+
+ Some comments about the source code
+ -----------------------------------
+ Be warned: the main source code in the 'src' directory is a
+ real pain to understand as I've experimented with hundreds of slightly
+ different versions. It contains many #if and some gotos, and
+ is *completely optimized for speed* and not for readability.
+ Code sharing of the different algorithms is implemented by stressing
+ the preprocessor - this can be really confusing. Lots of marcos and
+ assertions don't make things better.
+
+ Nevertheless LZO compiles very quietly on a variety of
+ compilers with the highest warning levels turned on, even
+ in C++ mode.
+
+
+ Copyright
+ ---------
+ LZO is Copyright (C) 1996-2017 Markus Franz Xaver Oberhumer
+ All Rights Reserved.
+
+ LZO is distributed under the terms of the GNU General Public License (GPL).
+ See the file COPYING.
+
+ Special licenses for commercial and other applications which
+ are not willing to accept the GNU General Public License
+ are available by contacting the author.
+
+
+

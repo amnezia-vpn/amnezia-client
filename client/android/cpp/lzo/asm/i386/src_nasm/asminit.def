@@ -1,0 +1,123 @@
+;  asminit.def --
+;
+;  This file is part of the LZO real-time data compression library.
+;
+;  Copyright (C) 1996-2017 Markus Franz Xaver Johannes Oberhumer
+;  All Rights Reserved.
+;
+;  The LZO library is free software; you can redistribute it and/or
+;  modify it under the terms of the GNU General Public License as
+;  published by the Free Software Foundation; either version 2 of
+;  the License, or (at your option) any later version.
+;
+;  The LZO library is distributed in the hope that it will be useful,
+;  but WITHOUT ANY WARRANTY; without even the implied warranty of
+;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;  GNU General Public License for more details.
+;
+;  You should have received a copy of the GNU General Public License
+;  along with the LZO library; see the file COPYING.
+;  If not, write to the Free Software Foundation, Inc.,
+;  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+;
+;  Markus F.X.J. Oberhumer
+;  <markus@oberhumer.com>
+;  http://www.oberhumer.com/opensource/lzo/
+;
+
+bits 32
+%ifndef __OUTPUT_FORMAT__
+%error "__OUTPUT_FORMAT__ is not defined"
+%endif
+%ifidni __OUTPUT_FORMAT__,elf
+%undef  __OUTPUT_FORMAT__
+%define __OUTPUT_FORMAT__ elf32
+%endif
+%ifidni __OUTPUT_FORMAT__,macho
+%undef  __OUTPUT_FORMAT__
+%define __OUTPUT_FORMAT__ macho32
+%endif
+%ifidni __OUTPUT_FORMAT__,win
+%undef  __OUTPUT_FORMAT__
+%define __OUTPUT_FORMAT__ win32
+%endif
+%ifdef  __YASM_MAJOR__
+%ifidni __OUTPUT_FORMAT__,x64
+%undef  __OUTPUT_FORMAT__
+%define __OUTPUT_FORMAT__ win64
+%endif
+%endif
+
+%ifndef NAME1
+%ifidni __OUTPUT_FORMAT__,elf32
+%define NAME1(a)             a
+%elifidni __OUTPUT_FORMAT__,elf64
+%define NAME1(a)             a
+%elifidni __OUTPUT_FORMAT__,macho32
+%define NAME1(a)        _ %+ a
+%elifidni __OUTPUT_FORMAT__,macho64
+%define NAME1(a)        _ %+ a
+%elifidni __OUTPUT_FORMAT__,win32
+%define NAME1(a)        _ %+ a
+%elifidni __OUTPUT_FORMAT__,win64
+%define NAME1(a)             a
+%else
+%define NAME1(a)        _ %+ a
+%define NAME2(a)             a
+%endif
+%endif
+
+%ifidni __OUTPUT_FORMAT__,elf32
+%define globalf(a)      global a:function (a %+ _end - a)
+;define globalfh(a)     global a:function hidden
+%define globalfh(a)     global a:function hidden (a %+ _end - a)
+%define globalf_end(a)  a %+ _end:
+%elifidni __OUTPUT_FORMAT__,elf64
+%define globalf(a)      global a:function (a %+ _end - a)
+;define globalfh(a)     global a:function hidden
+%define globalfh(a)     global a:function hidden (a %+ _end - a)
+%define globalf_end(a)  a %+ _end:
+%else
+%define globalf(a)      global a
+%define globalfh(a)     global a
+%define globalf_end(a)
+%endif
+
+%ifndef LZO_SEH_EXCEPTIONS
+%ifidni __OUTPUT_FORMAT__,win64
+%define LZO_SEH_EXCEPTIONS  1
+%endif
+%endif
+%ifndef LZO_SEH_EXCEPTIONS
+%define LZO_SEH_EXCEPTIONS  0
+%endif
+
+%ifidni __OUTPUT_FORMAT__,elf32
+section .note.GNU-stack noalloc noexec nowrite progbits
+%elifidni __OUTPUT_FORMAT__,elf64
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif
+%ifidni __OUTPUT_FORMAT__,obj
+%if __BITS__==16
+segment _TEXT class=CODE public use16
+%else
+segment _TEXT class=CODE public use32 flat
+%endif
+%else
+section .text
+%endif
+%ifidni __OUTPUT_FORMAT__,elf32
+align 64
+%elifidni __OUTPUT_FORMAT__,elf64
+align 64
+%elifidni __OUTPUT_FORMAT__,macho32
+align 64
+%elifidni __OUTPUT_FORMAT__,macho64
+align 64
+%elifidni __OUTPUT_FORMAT__,win32
+align 64
+%elifidni __OUTPUT_FORMAT__,win64
+align 64
+%else
+align 16
+%endif

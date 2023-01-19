@@ -1,0 +1,21 @@
+#
+#  lzo2.pc -- LZO pkg-config configuration file
+#
+#  This file is part of the LZO data compression library.
+#    http://www.oberhumer.com/opensource/lzo/
+#
+#  Copyright (C) 1996-2017 Markus Franz Xaver Johannes Oberhumer
+#  All Rights Reserved.
+#
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+libdir=@libdir@
+
+Name: lzo2
+Version: @PACKAGE_VERSION@
+Description: LZO - a real-time data compression library
+URL: http://www.oberhumer.com/opensource/lzo/
+Cflags: -I${includedir}/lzo
+Libs: -L${libdir} -llzo2

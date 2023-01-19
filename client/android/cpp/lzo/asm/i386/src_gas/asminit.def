@@ -1,0 +1,106 @@
+/* asminit.def --
+
+   This file is part of the LZO real-time data compression library.
+
+   Copyright (C) 1996-2017 Markus Franz Xaver Johannes Oberhumer
+   All Rights Reserved.
+
+   The LZO library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The LZO library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the LZO library; see the file COPYING.
+   If not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+   Markus F.X.J. Oberhumer
+   <markus@oberhumer.com>
+   http://www.oberhumer.com/opensource/lzo/
+ */
+
+#undef _
+#ifndef NAME1
+#if defined(__ELF__)
+#  define NAME1(a)           a
+#elif (defined(__MACH__) && defined(__APPLE__))
+#  define NAME1(a)      _ ## a
+#elif defined(_WIN32) && !defined(_WIN64)
+#  define NAME1(a)      _ ## a
+#elif defined(_WIN64)
+#  define NAME1(a)           a
+#else
+#  define NAME1(a)      _ ## a
+#  define NAME2(a)           a
+#endif
+#endif
+#define XNAME(a,b,c)    LZO_PP_ECONCAT3(NAME1(a),b,c)
+
+#ifndef LZO_PP_CONCAT2
+#  define LZO_PP_CONCAT2(a,b)   a ## b
+#endif
+#ifndef LZO_PP_CONCAT3
+#  define LZO_PP_CONCAT3(a,b,c) a ## b ## c
+#endif
+#ifndef LZO_PP_ECONCAT3
+#  define LZO_PP_ECONCAT3(a,b,c) LZO_PP_CONCAT3(a,b,c)
+#endif
+
+#ifndef p2align
+#  define p2align(a)        .p2align a
+#endif
+#ifndef globalf
+#  define globalf(a)        .globl a
+#endif
+#ifndef hiddenf
+#  if defined(__ELF__)
+#    define hiddenf(a)      .hidden a
+#  elif (defined(__MACH__) && defined(__APPLE__))
+#    define hiddenf(a)      .private_extern a
+#  else
+#    define hiddenf(a)      /*empty*/
+#  endif
+#endif
+#ifndef typef
+#  if defined(__ELF__)
+#    define typef(a)        .type a,@function
+#  else
+#    define typef(a)        /*empty*/
+#  endif
+#endif
+#ifndef sizef
+#  if defined(__ELF__)
+#    define sizef(a,b)      .size a,b
+#  else
+#    define sizef(a,b)      /*empty*/
+#  endif
+#endif
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
+.text
+#if defined(_WIN32) && !defined(_WIN64)
+#if defined(LZO_WIN32_FEAT_00)
+LZO_WIN32_FEAT_00
+#else
+#if defined(__GNUC__) && !defined(__clang__)
+.globl @feat.00
+#endif
+@feat.00 = 1
+#endif
+#endif
+#if defined(__ELF__) || (defined(__MACH__) && defined(__APPLE__)) || defined(_WIN32) || defined(_WIN64)
+p2align(6)
+#else
+p2align(4)
+#endif
+#ifndef db
+#  define db            .byte
+#endif
