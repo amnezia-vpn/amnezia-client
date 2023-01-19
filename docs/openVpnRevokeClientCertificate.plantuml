@@ -12,7 +12,6 @@ cont -> cont: cd /opt/amnezia/openvpn
 cont -> cont: easyrsa revoke openvpnCertId
 cont -> cont: easyrsa gen-crl
 cont -> cont: cp pki/crl.pem crl.pem
-cont -> cont: add crl-verify crl.pem to server.conf
 cont -> ovpn: restart openvpn service
 note right
     In the OpenVpn config 

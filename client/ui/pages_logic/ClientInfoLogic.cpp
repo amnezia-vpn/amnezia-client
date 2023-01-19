@@ -125,20 +125,13 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
     auto error = m_serverController->runScript(credentials, script);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
+        emit uiLogic()->goToPage(Page::ServerSettings);
         return;
     }
 
     model->removeRows(m_currentClientIndex);
     const QJsonObject clientsTable = model->getContent(Proto::OpenVpn);
     error = setClientsList(credentials, container, Proto::OpenVpn, clientsTable);
-    if (isErrorOccured(error)) {
-        set_busyIndicatorIsRunning(false);
-        return;
-    }
-
-    error = m_serverController->uploadTextFileToContainer(container, credentials, "crl-verify crl.pem\n",
-                                                          protocols::openvpn::serverConfigPath,
-                                                          QSsh::SftpOverwriteMode::SftpAppendToExisting);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
