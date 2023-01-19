@@ -31,6 +31,7 @@ enum ErrorCode
     ServerPortAlreadyAllocatedError,
     ServerContainerMissingError,
     ServerDockerFailedError,
+    ServerCancelInstallation,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,

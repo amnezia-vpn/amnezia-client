@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.1
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.platform
+import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 import ContainerProps 1.0
 import ProtocolProps 1.0
@@ -46,7 +46,7 @@ PageBase {
             pageLoader.focus = true
         }
 
-        onContainerSelected: {
+        onContainerSelected: function(c_index) {
             var containerProto =  ContainerProps.defaultProtocol(c_index)
 
 
@@ -190,12 +190,12 @@ PageBase {
                 left: parent.left;
                 right: parent.right;
             }
-            topPadding: 20
             spacing: 10
 
             Caption {
                 id: cap1
                 text: qsTr("Installed Protocols and Services")
+                leftPadding: -20
                 font.pixelSize: 20
 
             }
@@ -300,7 +300,7 @@ PageBase {
 
                                 MessageDialog {
                                     id: dialogRemove
-                                    standardButtons: StandardButton.Yes | StandardButton.Cancel
+                                    buttons: StandardButton.Yes | StandardButton.Cancel
                                     title: "AmneziaVPN"
                                     text: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
                                     onAccepted: {

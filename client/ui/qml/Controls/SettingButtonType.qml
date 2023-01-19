@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 
 BasicButtonType {
     id: root
@@ -8,11 +8,11 @@ BasicButtonType {
 
     background: Item {}
     contentItem: Item {
-        anchors.fill: parent
         SvgImageType {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             svg.source: root.icon.source
+            enabled: root.enabled
             color: "#100A44"
             width: 25
             height: 25

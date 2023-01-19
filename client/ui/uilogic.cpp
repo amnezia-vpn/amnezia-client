@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QQmlFile>
 #include <QMetaObject>
+#include <QStandardPaths>
 
 #include "amnezia_application.h"
 
@@ -34,10 +35,10 @@
 
 #include "ui/qautostart.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 #include <functional>
 
@@ -189,9 +190,9 @@ void UiLogic::keyPressEvent(Qt::Key key)
     case Qt::Key_AsciiTilde:
     case Qt::Key_QuoteLeft: emit toggleLogPanel();
         break;
-    case Qt::Key_L: Debug::openLogsFolder();
+    case Qt::Key_L: Logger::openLogsFolder();
         break;
-    case Qt::Key_K: Debug::openServiceLogsFolder();
+    case Qt::Key_K: Logger::openServiceLogsFolder();
         break;
 #ifdef QT_DEBUG
     case Qt::Key_Q:
@@ -266,32 +267,6 @@ void UiLogic::onGotoCurrentProtocolsPage()
     emit goToPage(Page::ServerContainers);
 }
 
-//void UiLogic::showEvent(QShowEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(true);
-//    }
-//    if (needToHideCustomTitlebar) {
-//        ui->widget_tittlebar->hide();
-//        resize(width(), 640);
-//        ui->stackedWidget_main->move(0,0);
-//    }
-//#endif
-//}
-
-//void UiLogic::hideEvent(QHideEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(false);
-//    }
-//#endif
-//}
-
-
-
-
 void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
 {
     if (containers.isEmpty()) return;
@@ -302,44 +277,67 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
     loop.exec();
     qApp->processEvents();
 
-    PageFunc page_new_server_configuring;
-    page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
+    ServerConfiguringProgressLogic::PageFunc pageFunc;
+    pageFunc.setEnabledFunc = [this] (bool enabled) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_pageEnabled(enabled);
     };
-    ButtonFunc no_button;
-    LabelFunc label_new_server_configuring_wait_info;
-    label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
+
+    ServerConfiguringProgressLogic::ButtonFunc noButton;
+
+    ServerConfiguringProgressLogic::LabelFunc waitInfoFunc;
+    waitInfoFunc.setTextFunc = [this] (const QString& text) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoText(text);
     };
-    label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
+    waitInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoVisible(visible);
     };
-    ProgressFunc progressBar_new_server_configuring;
-    progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
+
+    ServerConfiguringProgressLogic::ProgressFunc progressBarFunc;
+    progressBarFunc.setVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarVisible(visible);
     };
-    progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
+    progressBarFunc.setValueFunc = [this] (int value) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarValue(value);
     };
-    progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
+    progressBarFunc.getValueFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarValue();
     };
-    progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
+    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximium();
     };
-    progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
+    progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarTextVisible(visible);
     };
-    progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
+    progressBarFunc.setTextFunc = [this] (const QString& text) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarText(text);
     };
-    bool ok = installContainers(installCredentials, containers,
-                                page_new_server_configuring,
-                                progressBar_new_server_configuring,
-                                no_button,
-                                label_new_server_configuring_wait_info);
 
-    if (ok) {
+    ServerConfiguringProgressLogic::LabelFunc busyInfoFunc;
+    busyInfoFunc.setTextFunc = [this] (const QString& text) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelServerBusyText(text);
+    };
+    busyInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelServerBusyVisible(visible);
+    };
+
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_pushButtonCancelVisible(visible);
+    };
+
+    int count = 0;
+    ErrorCode error;
+    for (QMap<DockerContainer, QJsonObject>::iterator i = containers.begin(); i != containers.end(); i++, count++) {
+        progressBarFunc.setTextFunc(QString("Installing %1 %2 %3").arg(count+1).arg(tr("of")).arg(containers.size()));
+
+        error = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([&] () {
+            return m_serverController->setupContainer(installCredentials, i.key(), i.value());
+        }, pageFunc, progressBarFunc, noButton, waitInfoFunc, busyInfoFunc, cancelButtonFunc);
+
+        m_serverController->disconnectFromHost(installCredentials);
+    }
+
+    if (error == ErrorCode::NoError) {
         QJsonObject server;
         server.insert(config_key::hostName, installCredentials.hostName);
         server.insert(config_key::userName, installCredentials.userName);
@@ -364,182 +362,6 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
     else {
         emit closePage();
     }
-}
-
-bool UiLogic::installContainers(ServerCredentials credentials,
-                                QMap<DockerContainer, QJsonObject> &containers,
-                                const PageFunc &page,
-                                const ProgressFunc &progress,
-                                const ButtonFunc &button,
-                                const LabelFunc &info)
-{
-    if (!progress.setValueFunc) return false;
-
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(false);
-    }
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(false);
-    }
-
-    if (info.setVisibleFunc) {
-        info.setVisibleFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
-    }
-
-    int cnt = 0;
-    for (QMap<DockerContainer, QJsonObject>::iterator i = containers.begin(); i != containers.end(); i++, cnt++) {
-        QTimer timer;
-        connect(&timer, &QTimer::timeout, [progress](){
-            progress.setValueFunc(progress.getValueFunc() + 1);
-        });
-
-        progress.setValueFunc(0);
-        timer.start(1000);
-
-        progress.setTextVisibleFunc(true);
-        progress.setTextFunc(QString("Installing %1 %2 %3").arg(cnt+1).arg(tr("of")).arg(containers.size()));
-
-        ErrorCode e = m_serverController->setupContainer(credentials, i.key(), i.value());
-        qDebug() << "Setup server finished with code" << e;
-        m_serverController->disconnectFromHost(credentials);
-
-        if (e) {
-            if (page.setEnabledFunc) {
-                page.setEnabledFunc(true);
-            }
-            if (button.setVisibleFunc) {
-                button.setVisibleFunc(true);
-            }
-            if (info.setVisibleFunc) {
-                info.setVisibleFunc(false);
-            }
-
-            QMessageBox::warning(nullptr, APPLICATION_NAME,
-                                 tr("Error occurred while configuring server.") + "\n" +
-                                 errorString(e));
-
-            return false;
-        }
-
-        // just ui progressbar tweak
-        timer.stop();
-
-        int remaining_val = progress.getMaximiumFunc() - progress.getValueFunc();
-
-        if (remaining_val > 0) {
-            QTimer timer1;
-            QEventLoop loop1;
-
-            connect(&timer1, &QTimer::timeout, [&](){
-                progress.setValueFunc(progress.getValueFunc() + 1);
-                if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
-                    loop1.quit();
-                }
-            });
-
-            timer1.start(5);
-            loop1.exec();
-        }
-    }
-
-
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(true);
-    }
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Amnezia server installed"));
-    }
-
-    return true;
-}
-
-ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
-                                   const PageFunc &page,
-                                   const ProgressFunc &progress,
-                                   const ButtonFunc &button,
-                                   const LabelFunc &info)
-{
-    progress.setVisibleFunc(true);
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(false);
-    }
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(false);
-    }
-    if (info.setVisibleFunc) {
-        info.setVisibleFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
-    }
-
-    QTimer timer;
-    connect(&timer, &QTimer::timeout, [progress](){
-        progress.setValueFunc(progress.getValueFunc() + 1);
-    });
-
-    progress.setValueFunc(0);
-    timer.start(1000);
-
-    ErrorCode e = action();
-    qDebug() << "doInstallAction finished with code" << e;
-
-    if (e) {
-        if (page.setEnabledFunc) {
-            page.setEnabledFunc(true);
-        }
-        if (button.setVisibleFunc) {
-            button.setVisibleFunc(true);
-        }
-        if (info.setVisibleFunc) {
-            info.setVisibleFunc(false);
-        }
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-                             tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
-
-        progress.setVisibleFunc(false);
-        return e;
-    }
-
-    // just ui progressbar tweak
-    timer.stop();
-
-    int remaining_val = progress.getMaximiumFunc() - progress.getValueFunc();
-
-    if (remaining_val > 0) {
-        QTimer timer1;
-        QEventLoop loop1;
-
-        connect(&timer1, &QTimer::timeout, [&](){
-            progress.setValueFunc(progress.getValueFunc() + 1);
-            if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
-                loop1.quit();
-            }
-        });
-
-        timer1.start(5);
-        loop1.exec();
-    }
-
-
-    progress.setVisibleFunc(false);
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(true);
-    }
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Operation finished"));
-    }
-    return ErrorCode::NoError;
 }
 
 PageProtocolLogicBase *UiLogic::protocolLogic(Proto p)

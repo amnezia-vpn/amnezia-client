@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import SortFilterProxyModel 0.2
 import ProtocolEnum 1.0
 import "./"
@@ -10,8 +10,6 @@ Drawer {
     id: root
     signal containerSelected(int c_index)
     property int selectedIndex: -1
-
-    z: -3
 
     y: 0
     x: 0
@@ -116,6 +114,7 @@ Drawer {
 
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             tb.currentIndex = index
                             tb_other.currentIndex = -1
@@ -180,6 +179,7 @@ Drawer {
 
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             tb_other.currentIndex = index
                             tb.currentIndex = -1

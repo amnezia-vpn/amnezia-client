@@ -1,4 +1,5 @@
 QT += gui network widgets
+equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD

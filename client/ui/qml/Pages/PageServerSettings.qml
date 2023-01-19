@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -87,19 +87,19 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 60
-                text: ServerSettingsLogic.pushButtonClearText
-                visible: ServerSettingsLogic.pushButtonClearVisible
+                text: ServerSettingsLogic.pushButtonClearClientCacheText
+                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearServer()
+                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
                 }
             }
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                text: ServerSettingsLogic.pushButtonClearClientCacheText
-                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                text: ServerSettingsLogic.pushButtonClearText
+                visible: ServerSettingsLogic.pushButtonClearVisible
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
+                    ServerSettingsLogic.onPushButtonClearServer()
                 }
             }
             BlueButtonType {

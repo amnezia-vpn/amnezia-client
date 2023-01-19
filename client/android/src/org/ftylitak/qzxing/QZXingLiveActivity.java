@@ -2,7 +2,7 @@ package org.ftylitak.qzxing;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import org.qtproject.qt5.android.bindings.QtActivity;
+import org.qtproject.qt.android.bindings.QtActivity;
 import static org.ftylitak.qzxing.Utilities.REQUEST_CAMERA;
 
 public class QZXingLiveActivity extends QtActivity {

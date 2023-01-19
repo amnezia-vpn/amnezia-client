@@ -1,7 +1,7 @@
 #ifndef UILOGIC_H
 #define UILOGIC_H
 
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QQmlEngine>
 #include <functional>
 #include <QKeyEvent>
@@ -136,38 +136,6 @@ private slots:
 
 private:
     PageEnumNS::Page currentPage();
-    struct ProgressFunc {
-        std::function<void(bool)> setVisibleFunc;
-        std::function<void(int)> setValueFunc;
-        std::function<int(void)> getValueFunc;
-        std::function<int(void)> getMaximiumFunc;
-        std::function<void(bool)> setTextVisibleFunc;
-        std::function<void(const QString&)> setTextFunc;
-    };
-    struct PageFunc {
-        std::function<void(bool)> setEnabledFunc;
-    };
-    struct ButtonFunc {
-        std::function<void(bool)> setVisibleFunc;
-    };
-    struct LabelFunc {
-        std::function<void(bool)> setVisibleFunc;
-        std::function<void(const QString&)> setTextFunc;
-    };
-
-    bool installContainers(ServerCredentials credentials,
-                           QMap<DockerContainer, QJsonObject> &containers,
-                           const PageFunc& page,
-                           const ProgressFunc& progress,
-                           const ButtonFunc& button,
-                           const LabelFunc& info);
-
-    ErrorCode doInstallAction(const std::function<ErrorCode()> &action,
-                              const PageFunc& page,
-                              const ProgressFunc& progress,
-                              const ButtonFunc& button,
-                              const LabelFunc& info);
-
 
 public:
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);

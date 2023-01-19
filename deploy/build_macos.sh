@@ -38,9 +38,9 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Seacrh Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=5.15.2;
+QT_VERSION=6.4.1;
 QIF_VERSION=4.1
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/clang_64/bin
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
 fi
 
@@ -49,16 +49,16 @@ echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qmake -v
-make -v
+$QT_BIN_DIR/qt-cmake --version
+cmake --version
 clang -v
 
 # Build App
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qmake $PROJECT_DIR/AmneziaVPN.pro 'CONFIG+=release CONFIG+=x86_64'
-make -j `sysctl -n hw.ncpu`
+$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR
+cmake --build . --config release --target all
 
 # Build and run tests here
 
@@ -72,7 +72,7 @@ echo "Packaging ..."
 #cd $DEPLOY_DIR
 
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
-cp -av $BUILD_DIR/service/server/$APP_NAME-service.app/Contents/macOS/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
+cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
 cp -Rv $PROJECT_DIR/deploy/data/macos/* $BUNDLE_DIR/Contents/macOS
 rm -f $BUNDLE_DIR/Contents/macOS/post_install.sh $BUNDLE_DIR/Contents/macOS/post_uninstall.sh
 

@@ -3,6 +3,8 @@
 
 #include "PageLogicBase.h"
 
+#include <QRegularExpression>
+
 class UiLogic;
 
 class StartPageLogic : public PageLogicBase
@@ -21,7 +23,7 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
 
-    READONLY_PROPERTY(QRegExp, ipAddressPortRegex)
+    READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:
     Q_INVOKABLE void onUpdatePage() override;
 

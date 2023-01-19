@@ -15,6 +15,7 @@ QString errorString(ErrorCode code){
     case(ServerPortAlreadyAllocatedError): return QObject::tr("Server port already used. Check for another software");
     case(ServerContainerMissingError): return QObject::tr("Server error: Docker container missing");
     case(ServerDockerFailedError): return QObject::tr("Server error: Docker failed");
+    case(ServerCancelInstallation): return QObject::tr("Installation canceled by user");
 
     // Ssh connection errors
     case(SshSocketError): return QObject::tr("Ssh connection error");

@@ -12,7 +12,7 @@
 #include <qtimer.h>
 
 #include "core/server_defs.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include "sftpdefs.h"
 
@@ -66,7 +66,7 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
 {
 #ifndef Q_OS_IOS
     QProcess *p = new QProcess();
-    p->setReadChannelMode(QProcess::SeparateChannels);
+    p->setProcessChannelMode(QProcess::SeparateChannels);
 
 #ifdef Q_OS_WIN
     p->setProcessEnvironment(prepareEnv());

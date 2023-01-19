@@ -663,7 +663,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
     d_ptr = new QtServiceBasePrivate(nm);
     d_ptr->q_ptr = this;
 
-    d_ptr->serviceFlags = 0;
+    d_ptr->serviceFlags = QtServiceBase::Default;
     d_ptr->sysd = 0;
     for (int i = 0; i < argc; ++i)
         d_ptr->args.append(QString::fromLocal8Bit(argv[i]));

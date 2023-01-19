@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -22,7 +22,6 @@ PageBase {
     FlickableType {
         id: fl
         anchors.top: caption.bottom
-        anchors.bottom: logo.top
         contentHeight: content.height
 
         ColumnLayout {
@@ -149,10 +148,5 @@ PageBase {
                 }
             }
         }
-    }
-
-    Logo {
-        id: logo
-        anchors.bottom: parent.bottom
     }
 }

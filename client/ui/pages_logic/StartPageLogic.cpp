@@ -5,14 +5,14 @@
 #include "configurators/ssh_configurator.h"
 #include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include "platforms/android/android_controller.h"
+#include <QJniObject>
+#include "../../platforms/android/androidutils.h"
 #endif
 
 namespace {
@@ -56,8 +56,9 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
 {
 #ifdef Q_OS_ANDROID
     // Set security screen for Android app
-    QtAndroid::runOnAndroidThread([]() {
-        QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
+    AndroidUtils::runOnAndroidThreadSync([]() {
+        QJniObject activity = AndroidUtils::getActivity();
+        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
         if (window.isValid()){
             const int FLAG_SECURE = 8192;
             window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
@@ -221,10 +222,6 @@ bool StartPageLogic::importConnectionFromCode(QString code)
         return importConnection(o);
     }
 
-    o = QJsonDocument::fromBinaryData(ba).object();
-    if (!o.isEmpty()) {
-        return importConnection(o);
-    }
     return false;
 }
 
