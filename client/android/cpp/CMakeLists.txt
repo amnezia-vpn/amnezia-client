@@ -50,10 +50,10 @@ endif()
             ${CMAKE_CURRENT_SOURCE_DIR}/openvpn3/client/ovpncli.i)
 
 
-  link_directories(${CMAKE_CURRENT_SOURCE_DIR}/pluginjni/${ANDROID_ABI}/)
+  link_directories(${CMAKE_CURRENT_SOURCE_DIR}/cloak/${ANDROID_ABI}/)
 
 
-  message("${CMAKE_CURRENT_SOURCE_DIR}/pluginjni/${ANDROID_ABI}/"})
+  message("${CMAKE_CURRENT_SOURCE_DIR}/cloak/${ANDROID_ABI}/"})
    
     set(ovpn3_SRCS
             openvpn3/client/ovpncli.cpp
