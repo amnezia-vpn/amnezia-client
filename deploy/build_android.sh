@@ -1,5 +1,36 @@
 #!/bin/bash
 
+echo "Build script started ..."
+
+set -o errexit -o nounset
+
+# Hold on to current directory
+PROJECT_DIR=$(pwd)
+DEPLOY_DIR=$PROJECT_DIR/deploy
+
+mkdir -p $DEPLOY_DIR/build
+BUILD_DIR=$DEPLOY_DIR/build
+
+echo "Project dir: ${PROJECT_DIR}" 
+echo "Build dir: ${BUILD_DIR}"
+
+APP_NAME=AmneziaVPN
+APP_FILENAME=$APP_NAME.app
+APP_DOMAIN=org.amneziavpn.package
+
+OUT_APP_DIR=$BUILD_DIR/client
+BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
+
+# Seacrh Qt
+if [ -z "${QT_VERSION+x}" ]; then
+QT_VERSION=6.4.1;
+QT_BIN_DIR=$HOME/Qt/$QT_VERSION/$ANDROID_CURRENT_ARCH/bin
+fi
+
+echo "Using Qt in $QT_BIN_DIR"
+echo "Using Android SDK in $ANDROID_SDK_ROOT"
+echo "Using Android NDK in $ANDROID_NDK_ROOT"
+
 function getHostTag() {
   # Copyright (C) 2010 The Android Open Source Project
   # Modified by Andy Wang (cbeuw.andy@gmail.com)
@@ -76,11 +107,6 @@ function try() {
   "$@" || exit -1
 }
 
-pushd ../..
-"${ANDROID_NDK_HOME:=$(./gradlew -q printNDKPath)}"
-CK_RELEASE_TAG=v"$(./gradlew -q printVersionName)"
-popd
-
 while [ ! -d "$ANDROID_NDK_HOME" ]; do
   echo "Path to ndk-bundle not found"
   exit -1
@@ -93,13 +119,10 @@ ANDROID_PREBUILT_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
 ANDROID_ARM_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/armv7a-linux-androideabi${MIN_API}-clang
 
 ANDROID_ARM64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android21-clang
-ANDROID_ARM64_STRIP=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android-strip
 
 ANDROID_X86_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android${MIN_API}-clang
-ANDROID_X86_STRIP=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android-strip
 
 ANDROID_X86_64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android${MIN_API}-clang
-ANDROID_X86_64_STRIP=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android-strip
 
 DEPS=$(pwd)/client/android/cpp/.deps
 SRC_DIR=$(pwd)/client/android/cpp
@@ -117,51 +140,17 @@ try mv ck-ovpn-plugin $SRC_DIR/cloak/armeabi-v7a/libck-ovpn-plugin.so
 
 echo "Cross compiling ckclient for arm64"
 try env CGO_ENABLED=1 CC="$ANDROID_ARM64_CC" GOOS=android GOARCH=arm64 go build -buildmode=c-shared -ldflags="-s -w"
-try "$ANDROID_ARM64_STRIP" ck-ovpn-plugin
 try mv ck-ovpn-plugin $SRC_DIR/cloak/arm64-v8a/libck-ovpn-plugin.so
 
 echo "Cross compiling ckclient for x86"
 try env CGO_ENABLED=1 CC="$ANDROID_X86_CC" GOOS=android GOARCH=386 go build -buildmode=c-shared -ldflags="-s -w"
-try "$ANDROID_X86_STRIP" ck-ovpn-plugin
 try mv ck-ovpn-plugin $SRC_DIR/cloak/x86/libck-ovpn-plugin.so
 
 echo "Cross compiling ckclient for x86_64"
 try env CGO_ENABLED=1 CC="$ANDROID_X86_64_CC" GOOS=android GOARCH=amd64 go build -buildmode=c-shared -ldflags="-s -w"
-try "$ANDROID_X86_64_STRIP" ck-ovpn-plugin
 try mv ck-ovpn-plugin $SRC_DIR/cloak/x86_64/libck-ovpn-plugin.so
 
 echo "Success"
-
-echo "Build script started ..."
-
-set -o errexit -o nounset
-
-# Hold on to current directory
-PROJECT_DIR=$(pwd)
-DEPLOY_DIR=$PROJECT_DIR/deploy
-
-mkdir -p $DEPLOY_DIR/build
-BUILD_DIR=$DEPLOY_DIR/build
-
-echo "Project dir: ${PROJECT_DIR}" 
-echo "Build dir: ${BUILD_DIR}"
-
-APP_NAME=AmneziaVPN
-APP_FILENAME=$APP_NAME.app
-APP_DOMAIN=org.amneziavpn.package
-
-OUT_APP_DIR=$BUILD_DIR/client
-BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
-
-# Seacrh Qt
-if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.4.1;
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/$ANDROID_CURRENT_ARCH/bin
-fi
-
-echo "Using Qt in $QT_BIN_DIR"
-echo "Using Android SDK in $ANDROID_SDK_ROOT"
-echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
 # Build App
 echo "Building App..."
