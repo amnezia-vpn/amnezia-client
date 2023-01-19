@@ -516,10 +516,10 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
 
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libjbcrypto.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopenvpn.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopvpnutil.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
+            #${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopenvpn.so
+            #${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopvpnutil.so
+            #${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
+            #${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
         )
     endforeach()
 
