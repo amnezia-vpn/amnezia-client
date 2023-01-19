@@ -158,11 +158,11 @@ android {
 //       }
 //   }
 
-//   externalNativeBuild {
-//       cmake {
-//           path 'openvpn/src/main/cpp/CMakeLists.txt'
-//       }
-//   }
+    externalNativeBuild {
+        cmake {
+            path "${projectDir}/cpp/CMakeLists.txt"
+        }
+    }
 }
 
 
