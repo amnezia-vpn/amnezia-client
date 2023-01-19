@@ -2,7 +2,7 @@
 
 #include <QProcess>
 #include <QThread>
-#include <utils.h>
+#include <utilities.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/route.h>

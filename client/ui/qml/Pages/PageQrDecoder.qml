@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
+import QtMultimedia
 import PageEnum 1.0
-import QtMultimedia 5.5
 import QZXing 3.2
 
 import "./"

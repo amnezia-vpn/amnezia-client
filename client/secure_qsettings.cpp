@@ -4,11 +4,12 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QEventLoop>
+#include <QIODevice>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSharedPointer>
 #include <QTimer>
-#include "utils.h"
+#include "utilities.h"
 #include <QRandomGenerator>
 #include "QAead.h"
 #include "QBlockCipher.h"

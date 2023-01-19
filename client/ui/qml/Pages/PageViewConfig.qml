@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -20,20 +20,10 @@ PageBase {
         text: qsTr("Check config")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -41,6 +31,7 @@ PageBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             TextAreaType {
                 id: ta_config
@@ -124,7 +115,7 @@ AmneziaVPN detected this profile may contain malicious scripts. Please, carefull
 
                 BasicButtonType {
                     Layout.preferredWidth: (content.width - parent.spacing) /2
-                    Layout.preferredHeight: 41
+                    Layout.preferredHeight: 40
                     font.pixelSize: btn_import.font.pixelSize
                     text: qsTr("Cancel")
                     onClicked: {
@@ -135,7 +126,6 @@ AmneziaVPN detected this profile may contain malicious scripts. Please, carefull
                 BlueButtonType {
                     id: btn_import
                     Layout.preferredWidth: (content.width - parent.spacing) /2
-                    Layout.preferredHeight: 41
                     text: qsTr("Import config")
                     onClicked: {
                         logic.importConfig()

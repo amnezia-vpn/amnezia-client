@@ -1,8 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.1
-import QtQuick.Layouts 1.15
-import QtGraphicalEffects 1.12
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
+import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 import ContainerProps 1.0
 import ProtocolProps 1.0
@@ -28,12 +27,11 @@ PageBase {
     }
 
 
-    Flickable {
+    FlickableType {
         clip: true
-        width: parent.width
         anchors.top: caption.bottom
-        anchors.bottom: root.bottom
         contentHeight: col.height
+        boundsBehavior: Flickable.StopAtBounds
 
         Column {
             id: col
@@ -55,7 +53,6 @@ PageBase {
 
 
             ShareConnectionContent {
-                x: 10
                 text: qsTr("Share for Amnezia")
                 height: 40
                 width: tb_c.width - 10
@@ -64,7 +61,6 @@ PageBase {
 
             ListView {
                 id: tb_c
-                x: 10
                 width: parent.width - 10
                 height: tb_c.contentItem.height
                 currentIndex: -1

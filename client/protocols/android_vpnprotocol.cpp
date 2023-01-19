@@ -1,9 +1,3 @@
-#include <QAndroidBinder>
-#include <QAndroidIntent>
-#include <QAndroidJniEnvironment>
-#include <QAndroidJniObject>
-#include <QAndroidParcel>
-#include <QAndroidServiceConnection>
 #include <QDebug>
 #include <QHostAddress>
 #include <QJsonArray>
@@ -12,10 +6,8 @@
 #include <QRandomGenerator>
 #include <QTextCodec>
 #include <QTimer>
-#include <QtAndroid>
 
 #include "android_vpnprotocol.h"
-#include "core/errorstrings.h"
 
 #include "platforms/android/android_controller.h"
 

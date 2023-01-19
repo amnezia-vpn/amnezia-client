@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QQmlFile>
 #include <QMetaObject>
+#include <QStandardPaths>
 
 #include "amnezia_application.h"
 
@@ -37,7 +38,7 @@
 #include "debug.h"
 #include "defines.h"
 #include "uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 #include <functional>
 
@@ -71,7 +72,7 @@
 #include "pages_logic/protocols/OpenVpnLogic.h"
 #include "pages_logic/protocols/ShadowSocksLogic.h"
 #include "pages_logic/protocols/OtherProtocolsLogic.h"
-
+#include "pages_logic/protocols/WireGuardLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -94,7 +95,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_protocolLogicMap.insert(Proto::OpenVpn, new OpenVpnLogic(this));
     m_protocolLogicMap.insert(Proto::ShadowSocks, new ShadowSocksLogic(this));
     m_protocolLogicMap.insert(Proto::Cloak, new CloakLogic(this));
-    //m_protocolLogicMap->insert(Proto::WireGuard, new WireguardLogic(this));
+    m_protocolLogicMap.insert(Proto::WireGuard, new WireGuardLogic(this));
 
     m_protocolLogicMap.insert(Proto::Dns, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Proto::Sftp, new OtherProtocolsLogic(this));

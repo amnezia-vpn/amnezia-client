@@ -19,7 +19,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include "android_controller.h"
+#include "../../platforms/android/android_controller.h"
 #include "protocols/android_vpnprotocol.h"
 #endif
 
@@ -27,7 +27,7 @@
 #include <protocols/ios_vpnprotocol.h>
 #endif
 
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,

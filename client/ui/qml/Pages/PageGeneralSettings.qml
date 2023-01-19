@@ -1,7 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
-import QtGraphicalEffects 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -17,20 +16,12 @@ PageBase {
         z: -1
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: back.bottom
         anchors.topMargin: 0
-        anchors.bottom: root.bottom
         anchors.bottomMargin: 10
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -39,6 +30,7 @@ PageBase {
             anchors.topMargin: 10
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: GC.defaultMargin
 
             spacing: 15
 
@@ -86,6 +78,7 @@ PageBase {
                 Layout.preferredHeight: 30
                 icon.source: "qrc:/images/svg/vpn_key_black_24dp.svg"
                 text: qsTr("Server Settings")
+                enabled: GeneralSettingsLogic.existsAnyServer
                 onClicked: {
                     GeneralSettingsLogic.onPushButtonGeneralSettingsServerSettingsClicked()
                 }
@@ -102,7 +95,8 @@ PageBase {
                 Layout.preferredHeight: 30
                 icon.source: "qrc:/images/svg/share_black_24dp.svg"
                 text: qsTr("Share connection")
-                enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable
+                enabled: GeneralSettingsLogic.pushButtonGeneralSettingsShareConnectionEnable &&
+                         GeneralSettingsLogic.existsAnyServer
                 onClicked: {
                     GeneralSettingsLogic.onPushButtonGeneralSettingsShareConnectionClicked()
                 }
@@ -119,6 +113,7 @@ PageBase {
                 Layout.preferredHeight: 30
                 icon.source: "qrc:/images/svg/format_list_bulleted_black_24dp.svg"
                 text: qsTr("Servers")
+                enabled: GeneralSettingsLogic.existsAnyServer
                 onClicked: {
                     UiLogic.goToPage(PageEnum.ServersList)
                 }
@@ -136,7 +131,12 @@ PageBase {
                 icon.source: "qrc:/images/svg/control_point_black_24dp.svg"
                 text: qsTr("Add server")
                 onClicked: {
-                    UiLogic.goToPage(PageEnum.Start)
+                    if(GeneralSettingsLogic.existsAnyServer)
+                        // If there is any server set we will go to Start Page
+                        UiLogic.goToPage(PageEnum.Start)
+                    else
+                        // Else just come back to start page
+                        UiLogic.closePage()
                 }
             }
 
@@ -163,6 +163,4 @@ PageBase {
             }
         }
     }
-
-
 }

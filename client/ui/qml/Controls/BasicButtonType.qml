@@ -1,10 +1,13 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 
 Button {
     id: root
-    hoverEnabled: true
     property bool containsMouse: hovered
+    hoverEnabled: true
+    flat: true
+    highlighted: false
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent

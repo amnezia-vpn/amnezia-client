@@ -1,15 +1,10 @@
 #ifndef ANDROID_VPNPROTOCOL_H
 #define ANDROID_VPNPROTOCOL_H
 
-#include <QAndroidBinder>
-#include <QAndroidServiceConnection>
-
 #include "vpnprotocol.h"
 #include "protocols/protocols_defs.h"
 
 using namespace amnezia;
-
-
 
 class AndroidVpnProtocol : public VpnProtocol
 {
@@ -35,7 +30,6 @@ protected:
 
 private:
     Proto m_protocol;
-
 };
 
 #endif // ANDROID_VPNPROTOCOL_H

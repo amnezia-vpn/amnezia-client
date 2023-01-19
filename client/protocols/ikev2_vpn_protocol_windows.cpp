@@ -8,7 +8,7 @@
 
 #include "debug.h"
 #include "ikev2_vpn_protocol_windows.h"
-#include "utils.h"
+#include "utilities.h"
 
 static Ikev2Protocol* self = nullptr;
 static std::mutex rasDialFuncMutex;

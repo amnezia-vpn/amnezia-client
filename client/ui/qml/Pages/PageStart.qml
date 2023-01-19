@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -13,6 +13,23 @@ PageBase {
     BackButton {
         id: back_from_start
         visible: pageLoader.depth > 1
+    }
+
+    ImageButtonType {
+        anchors {
+            right: parent.right
+            top: parent.top
+        }
+
+        width: 41
+        height: 41
+        imgMarginHover: 8
+        imgMargin: 9
+        icon.source: "qrc:/images/settings_grey.png"
+        visible: !GeneralSettingsLogic.existsAnyServer
+        onClicked: {
+            UiLogic.goToPage(PageEnum.GeneralSettings)
+        }
     }
 
     Caption {
@@ -29,12 +46,12 @@ PageBase {
 
     BasicButtonType {
         id: start_switch_page
+        width: parent.width - 2 * GC.defaultMargin
+        implicitHeight: 40
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: logo.top
         anchors.bottomMargin: 10
-
-        width: parent.width - 80
-        height: 40
         anchors.topMargin: 20
 
         text: qsTr("Set up your own server")
@@ -71,7 +88,6 @@ PageBase {
             verticalAlignment: Text.AlignVCenter
         }
         antialiasing: true
-
     }
 
     Item {
@@ -87,6 +103,7 @@ PageBase {
             id: label_connection_code
             anchors.top: parent.top
             anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
             text: qsTr("Connection code")
         }
         TextFieldType {
@@ -134,7 +151,7 @@ PageBase {
 
             text: qsTr("Scan QR code")
             onClicked: {
-                if (Qt.platform.os == "ios") {
+                if (Qt.platform.os === "ios") {
                     UiLogic.goToPage(PageEnum.QrDecoderIos)
                 } else {
                     UiLogic.goToPage(PageEnum.QrDecoder)
@@ -148,7 +165,7 @@ PageBase {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: qr_code_import.bottom
             anchors.topMargin: 30
-            visible: UiLogic.pagesStackDepth == 1
+            visible: UiLogic.pagesStackDepth === 1
             enabled: StartPageLogic.pushButtonConnectEnabled
 
             text: qsTr("Restore app config")
@@ -212,8 +229,8 @@ PageBase {
                 StartPageLogic.lineEditIpText = text
             }
 
-            validator: RegExpValidator {
-                regExp: StartPageLogic.ipAddressPortRegex
+            validator: RegularExpressionValidator {
+                regularExpression: StartPageLogic.ipAddressPortRegex
             }
         }
 
@@ -286,7 +303,8 @@ PageBase {
             }
             enabled: StartPageLogic.pushButtonConnectEnabled
         }
-        BasicButtonType {
+
+        UrlButtonType {
             id: new_sever_connect_key
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: new_sever_connect.bottom
@@ -294,21 +312,8 @@ PageBase {
             width: 281
             height: 21
             text: qsTr("Connect using SSH key")
-            background: Item {
-                anchors.fill: parent
-            }
 
-            contentItem: Text {
-                anchors.fill: parent
-                font.family: "Lato"
-                font.styleName: "normal"
-                font.pixelSize: 16
-                color: "#15CDCB";
-                text: new_sever_connect_key.text
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            antialiasing: true
+            label.font.pixelSize: 16
             checkable: true
             checked: StartPageLogic.pushButtonConnectKeyChecked
             onCheckedChanged: {

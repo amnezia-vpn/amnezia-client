@@ -104,7 +104,7 @@ void CFramelessWindow::addIgnoreWidget(QWidget* widget)
 bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
     if (QOperatingSystemVersion::current() <= QOperatingSystemVersion::Windows7) {
-        return QMainWindow::nativeEvent(eventType, message, result);
+        return QMainWindow::nativeEvent(eventType, message, reinterpret_cast<qintptr*>(result));
     }
 
     //Workaround for known bug -> check Qt forum : https://forum.qt.io/topic/93141/qtablewidget-itemselectionchanged/13
@@ -252,7 +252,7 @@ bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, l
         return false;
     }
     default:
-        return QMainWindow::nativeEvent(eventType, message, result);
+        return QMainWindow::nativeEvent(eventType, message, reinterpret_cast<qintptr*>(result));
     }
 }
 
@@ -280,7 +280,7 @@ QMargins CFramelessWindow::contentsMargins() const
 }
 void CFramelessWindow::getContentsMargins(int *left, int *top, int *right, int *bottom) const
 {
-    QMainWindow::getContentsMargins(left,top,right,bottom);
+    getContentsMargins(left,top,right,bottom);
     if (!(left&&top&&right&&bottom)) return;
     if (isMaximized())
     {

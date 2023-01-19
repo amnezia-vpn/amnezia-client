@@ -33,6 +33,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         const val setNotificationText = 8
         const val setFallBackNotification = 9
         const val shareConfig = 10
+        const val importConfig = 11
     }
 
     /**
@@ -75,13 +76,14 @@ class VPNServiceBinder(service: VPNService) : Binder() {
             ACTIONS.resumeActivate -> {
             // [data] is empty
             // Activate the current tunnel
-            try {
-                mResumeConfig?.let { this.mService.turnOn(it) }
+                Log.i(tag, "resume activate")
+                try {
+                    mResumeConfig?.let { this.mService.turnOn(it) }
                 } catch (e: Exception) {
                     Log.e(tag, "An Error occurred while enabling the VPN: ${e.localizedMessage}")
                 }
                 return true
-            }
+        }
 
             ACTIONS.deactivate -> {
                 // [data] here is empty
@@ -90,6 +92,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
             }
 
             ACTIONS.registerEventListener -> {
+                Log.i(tag, "register: start")
                 // [data] contains the Binder that we need to dispatch the Events
                 val binder = data.readStrongBinder()
                 mListener = binder
@@ -150,6 +153,23 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 return true
             }
 
+            ACTIONS.importConfig -> {
+                val buffer = data.readString()
+
+                val obj = JSONObject()
+                obj.put("config", buffer)
+
+                val resultString = obj.toString()
+
+                Log.i(tag, "Transact import config request")
+
+                if (mListener != null) {
+                    dispatchEvent(EVENTS.configImport, resultString)
+                } else {
+                    mImportedConfig = resultString
+                }
+            }
+
             IBinder.LAST_CALL_TRANSACTION -> {
                 Log.e(tag, "The OS Requested to shut down the VPN")
                 this.mService.turnOff()
@@ -176,9 +196,12 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         try {
             mListener?.let {
                 if (it.isBinderAlive) {
+                    Log.i(tag, "Dispatching event: binder alive")
                     val data = Parcel.obtain()
                     data.writeByteArray(payload?.toByteArray(charset("UTF-8")))
                     it.transact(code, data, Parcel.obtain(), 0)
+                } else {
+                    Log.i(tag, "Dispatching event: binder NOT alive")
                 }
             }
         } catch (e: DeadObjectException) {
@@ -197,23 +220,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         const val statisticUpdate = 3
         const val backendLogs = 4
         const val activationError = 5
-        const val configImport = 6
-    }
-
-    fun importConfig(config: String) {
-        val obj = JSONObject()
-        obj.put("config", config)
-
-        val resultString = obj.toString()
-
-        Log.i(tag, "Transact import config request")
-
-        if (mListener != null) {
-            Log.i(tag, "binder alive")
-            dispatchEvent(EVENTS.configImport, resultString)
-        } else {
-            Log.i(tag, "binder NOT alive")
-            mImportedConfig = resultString
-        }
+        const val permissionRequired = 6
+        const val configImport = 7
     }
 }

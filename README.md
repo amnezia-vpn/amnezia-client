@@ -67,7 +67,7 @@ a "`qmake` cannot be found in your `$PATH`" error. In this case run this script
 using QT\IOS\_BIN env to set the path for the Qt5 macos build bin folder.
 For example, the path could look like this:
 ```bash
-QT_IOS_BIN="/Users/username/Qt/5.15.2/ios/bin" ./scripts/apple_compile.sh ios
+QT_IOS_BIN="/Users/username/Qt/6.4.1/ios/bin" ./scripts/apple_compile.sh ios
 ```
 
 If you get `gomobile: command not found` make sure to set PATH to the location 

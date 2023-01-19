@@ -4,7 +4,6 @@ import os
 import Darwin
 import OpenVPNAdapter
 //import Tun2socks
-
 enum TunnelProtoType: String {
     case wireguard, openvpn, shadowsocks, none
 }
@@ -415,9 +414,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             }
         }
     }
-
     // MARK: -- Leaf provider methods
-
     private func prepareConfig(onInterface iface: String, fromSSConfig ssConfig: Data, andOvpnConfig ovpnConfig: Data) -> UnsafePointer<CChar>? {
         guard let ssConfig = try? JSONSerialization.jsonObject(with: ssConfig, options: []) as? [String: Any] else {
         self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
@@ -425,7 +422,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                                  userInfo: [NSLocalizedDescriptionKey: "Cannot parse json for ss in tunnel"]))
             return nil
         }
-
         guard let remoteHost = ssConfig[Constants.ssRemoteHost] as? String,
               let remotePort = ssConfig[Constants.ssRemotePort] as? Int,
               let method = ssConfig[Constants.ssCipherKey] as? String,
@@ -435,19 +431,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                                            userInfo: [NSLocalizedDescriptionKey: "Cannot asign profile params for ss in tunnel"]))
                   return nil
               }
-
         var insettings:  [String: Any] = .init()
         insettings["name"] = iface
         insettings["address"] = "127.0.0.2"
         insettings["netmask"] = "255.255.255.0"
         insettings["gateway"] = "127.0.0.1"
         insettings["mtu"] = 1600
-
         var inbounds: [String: Any] = .init()
         inbounds["protocol"] = "tun"
         inbounds["settings"] = insettings
         inbounds["tag"] = "tun_in"
-
         var outbounds: [String: Any] = .init()
         var outsettings: [String: Any] = .init()
         outsettings["address"] = remoteHost
@@ -457,18 +450,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         outbounds["protocol"] = "shadowsocks"
         outbounds["settings"] = outsettings
         outbounds["tag"] = "shadowsocks_out"
-
         var params: [String: Any] = .init()
         params["inbounds"] = [inbounds]
         params["outbounds"] =  [outbounds]
-
         wg_log(.error, message: "Config dictionary: \(params)")
-
         guard let jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted),
               let jsonString = String(data: jsonData, encoding: .utf8) else { return nil }
-
         wg_log(.error, message: "JSON String: \(jsonString)")
-
         var path = ""
         if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
                                                                in: .userDomainMask).first {
@@ -538,7 +526,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             
         }
     }
-
     private func stopLeafRedirector(completion: @escaping () -> Void) {
         leafProvider?.stopTunnel { error in
             // TODO: handle errors
@@ -571,7 +558,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 wg_log(.error, message: "Error starting ShadowSocks: \(String(describing: errorCode))")
                 return
             }
-
 //            self.setupAndHandleOpenVPNOverSSConnection(withConfig: ovpnConfig)
             self.startAndHandleTunnelOverSS(completionHandler: completion)
         }
@@ -735,12 +721,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         
         startHandler = completionHandler
         ovpnAdapter.connect(using: packetFlow)
+    
+//        let ifaces = Interface.allInterfaces()
+//            .filter { $0.family == .ipv4 }
+//            .map { iface in iface.name }
         
-        let ifaces = Interface.allInterfaces()
-            .filter { $0.family == .ipv4 }
-            .map { iface in iface.name }
-        
-        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+//        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
     }
     
     // MARK: -- Network observing methods

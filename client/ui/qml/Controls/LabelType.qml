@@ -1,9 +1,9 @@
-import QtQuick 2.12
+import QtQuick
+import "../Config"
 
 Text {
     id: root
-    x: 40
-    width: parent.width
+    width: parent.width - 2 * GC.defaultMargin
     anchors.topMargin: 10
 
     font.family: "Lato"

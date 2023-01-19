@@ -47,7 +47,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QNetworkProxy>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTcpSocket>
 
 namespace QSsh {
@@ -401,14 +401,14 @@ void SshConnectionPrivate::handleServerId()
     // "printable US-ASCII characters, with the exception of whitespace characters
     // and the minus sign"
     QString legalString = QLatin1String("[]!\"#$!&'()*+,./0-9:;<=>?@A-Z[\\\\^_`a-z{|}~]+");
-    const QRegExp versionIdpattern(QString::fromLatin1("SSH-(%1)-%1(?: .+)?.*").arg(legalString));
-    if (!versionIdpattern.exactMatch(QString::fromLatin1(m_serverId))) {
+    const QRegularExpression versionIdpattern(QString::fromLatin1("SSH-(%1)-%1(?: .+)?.*").arg(legalString));
+    if (!versionIdpattern.match(QString::fromLatin1(m_serverId)).hasMatch()) {
         throw SshServerException(SSH_DISCONNECT_PROTOCOL_ERROR,
             "Identification string is invalid.",
             tr("Server Identification string \"%1\" is invalid.")
                     .arg(QString::fromLatin1(m_serverId)));
     }
-    const QString serverProtoVersion = versionIdpattern.cap(1);
+    const QString serverProtoVersion = versionIdpattern.match(QString::fromLatin1(m_serverId)).captured(1);
     if (serverProtoVersion != QLatin1String("2.0") && serverProtoVersion != QLatin1String("1.99")) {
         throw SshServerException(SSH_DISCONNECT_PROTOCOL_VERSION_NOT_SUPPORTED,
             "Invalid protocol version.",

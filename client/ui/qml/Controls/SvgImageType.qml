@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.15
+import QtQuick
+import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 
 Item {
     id: root
@@ -18,6 +18,6 @@ Item {
     ColorOverlay {
         anchors.fill: image
         source: image
-        color: root.color
+        color: root.enabled ? root.color : "grey"
     }
 }

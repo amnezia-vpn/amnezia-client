@@ -8,6 +8,8 @@
 #include "loglevel.h"
 
 #include <QString>
+#include <QStringList>
+#include <QIODevice>
 #include <QTextStream>
 
 constexpr const char* LOG_CAPTIVEPORTAL = "captiveportal";

@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import ProtocolEnum 1.0
 import "../"
 import "../../Controls"
@@ -18,20 +18,10 @@ PageShareProtocolBase {
         text: qsTr("Share for Amnezia")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height + 20
-        clip: true
 
         Behavior on contentY{
             NumberAnimation {
@@ -46,6 +36,7 @@ PageShareProtocolBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             Text {
                 id: lb_desc

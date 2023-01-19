@@ -1,19 +1,20 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import Qt.labs.platform 1.0
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.platform
+import "../Config"
 
 TextField {
     id: root
     property bool error: false
 
-    width: parent.width - 80
+    width: parent.width - 2 * GC.defaultMargin
     height: 40
     anchors.topMargin: 5
     selectByMouse: true
-
     selectionColor: "darkgray"
     font.pixelSize: 16
     color: "#333333"
+
     background: Rectangle {
         implicitWidth: 200
         implicitHeight: 40

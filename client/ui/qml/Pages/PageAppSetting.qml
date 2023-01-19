@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -19,20 +19,10 @@ PageBase {
         text: qsTr("Application Settings")
     }
 
-    Flickable {
+    FlickableType {
         id: fl
-        width: root.width
         anchors.top: caption.bottom
-        anchors.topMargin: 20
-        anchors.bottom: logo.top
-        anchors.bottomMargin: 20
-        anchors.left: root.left
-        anchors.leftMargin: 30
-        anchors.right: root.right
-        anchors.rightMargin: 30
-
         contentHeight: content.height
-        clip: true
 
         ColumnLayout {
             id: content
@@ -40,6 +30,7 @@ PageBase {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.rightMargin: 15
 
             CheckBoxType {
                 visible: !GC.isMobile()
@@ -79,7 +70,6 @@ PageBase {
             BlueButtonType {
                 visible: !GC.isMobile()
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: qsTr("Check for updates")
                 onClicked: {
                     Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
@@ -98,7 +88,6 @@ PageBase {
             }
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 41
                 text: qsTr("Open logs folder")
                 onClicked: {
                     AppSettingsLogic.onPushButtonOpenLogsClicked()
@@ -108,7 +97,6 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                Layout.preferredHeight: 41
                 text: qsTr("Export logs")
                 onClicked: {
                     AppSettingsLogic.onPushButtonExportLogsClicked()
@@ -118,7 +106,6 @@ PageBase {
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
-                Layout.preferredHeight: 41
 
                 property string start_text: qsTr("Clear logs")
                 property string end_text: qsTr("Cleared")
@@ -161,10 +148,5 @@ PageBase {
                 }
             }
         }
-    }
-
-    Logo {
-        id: logo
-        anchors.bottom: parent.bottom
     }
 }

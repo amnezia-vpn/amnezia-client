@@ -1,14 +1,13 @@
-import QtQuick 2.14
-import QtQuick.Window 2.14
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
-import QtQuick.Controls.Material 2.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import PageType 1.0
-import Qt.labs.platform 1.1
-import Qt.labs.folderlistmodel 2.12
-import QtQuick.Dialogs 1.1
-import "./"
+import Qt.labs.platform
+import Qt.labs.folderlistmodel
+import QtQuick.Dialogs
+import QtQuick.Controls.Basic
 import "Controls"
 import "Pages"
 import "Pages/Protocols"
@@ -23,10 +22,10 @@ Window  {
     id: root
     visible: true
     width: GC.screenWidth
-    height: GC.isDesktop() ? GC.screenHeight + titleBar.height : GC.screenHeight
-    minimumWidth: 360
+    height: GC.screenHeight
+    minimumWidth: GC.isDesktop() ? 360 : 0
     minimumHeight: GC.isDesktop() ? 640 : 0
-    onClosing: {
+    onClosing: function() {
         console.debug("QML onClosing signal")
         UiLogic.onCloseWindow()
     }
@@ -85,29 +84,6 @@ Window  {
         }
     }
 
-    TitleBar {
-        id: titleBar
-        anchors.top: root.top
-        visible: GC.isDesktop()
-        DragHandler {
-            grabPermissions: TapHandler.CanTakeOverFromAnything
-            onActiveChanged: {
-                if (active) {
-                    root.startSystemMove();
-                }
-            }
-            target: null
-        }
-        onCloseButtonClicked: {
-            if (UiLogic.currentPageValue === PageEnum.Start ||
-                    UiLogic.currentPageValue === PageEnum.NewServer) {
-                Qt.quit()
-            } else {
-                root.hide()
-            }
-        }
-    }
-
     Rectangle {
         y: GC.isDesktop() ? titleBar.height : 0
         anchors.fill: parent
@@ -120,16 +96,15 @@ Window  {
         anchors.fill: parent
         focus: true
 
-        onCurrentItemChanged: {
-            //console.debug("QML onCurrentItemChanged " + pageLoader.currentItem)
+        onCurrentItemChanged: function() {
             UiLogic.currentPageValue = currentItem.page
         }
 
-        onDepthChanged: {
+        onDepthChanged: function() {
             UiLogic.pagesStackDepth = depth
         }
 
-        Keys.onPressed: {
+        Keys.onPressed: function(event) {
             UiLogic.keyPressEvent(event.key)
             event.accepted = true
         }
@@ -199,7 +174,7 @@ Window  {
                         sharePages[obj.protocol] = obj
                     }
 
-                    //console.debug("Created compenent " + component.url + " for " + type);
+//                    console.debug("Created compenent " + component.url + " for " + type);
                 }
             } else if (component.status === Component.Error) {
                 console.debug("Error loading component:", component.errorString());
@@ -209,7 +184,7 @@ Window  {
         if (c.status === Component.Ready)
             finishCreation(c);
         else {
-            console.debug("Warning: Pages components are not ready");
+            console.debug("Warning: " + file + " page components are not ready " + c.errorString());
         }
     }
 
@@ -263,10 +238,10 @@ Window  {
 //        y: (root.height - height) / 2
         title: qsTr("Exit")
         text: qsTr("Do you really want to quit?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
-            Qt.quit()
-        }
+//        standardButtons: StandardButton.Yes | StandardButton.No
+//        onYesClicked: {
+//            Qt.quit()
+//        }
         visible: false
     }
     MessageDialog {
@@ -285,7 +260,6 @@ Window  {
     Drawer {
         id: drawer_log
 
-        z: -3
         y: 0
         x: 0
         edge: Qt.BottomEdge

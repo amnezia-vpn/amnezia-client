@@ -12,8 +12,8 @@
 #include "core/server_defs.h"
 #include "core/servercontroller.h"
 #include "core/scripts_registry.h"
+#include "utilities.h"
 #include "settings.h"
-#include "utils.h"
 
 #include <openssl/rsa.h>
 #include <openssl/x509.h>

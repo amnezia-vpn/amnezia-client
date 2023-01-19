@@ -1,4 +1,4 @@
-import QtQuick 2.12
+import QtQuick
 
 LabelType {
     id: label_connection_code

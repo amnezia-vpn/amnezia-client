@@ -1,4 +1,5 @@
-QT += widgets core gui network xml remoteobjects quick svg
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
+equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
 TEMPLATE = app
@@ -7,7 +8,7 @@ TEMPLATE = app
 IS_CI=$$(CI)
 !isEmpty(IS_CI){
   message("Detected CI env")
-  CONFIG += silent ccache
+  CONFIG += silent #ccache
 }
 
 CONFIG += qtquickcompiler
@@ -16,6 +17,7 @@ include("3rd/QtSsh/src/ssh/qssh.pri")
 include("3rd/QtSsh/src/botan/botan.pri")
 !android:!ios:include("3rd/SingleApplication/singleapplication.pri")
 include ("3rd/SortFilterProxyModel/SortFilterProxyModel.pri")
+
 include("3rd/qrcodegen/qrcodegen.pri")
 include("3rd/QSimpleCrypto/QSimpleCrypto.pri")
 include("3rd/qtkeychain/qtkeychain.pri")
@@ -74,12 +76,13 @@ HEADERS  += \
     ui/pages_logic/protocols/OtherProtocolsLogic.h \
     ui/pages_logic/protocols/PageProtocolLogicBase.h \
     ui/pages_logic/protocols/ShadowSocksLogic.h \
+    ui/pages_logic/protocols/WireGuardLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
     ui/qautostart.h \
     ui/models/sites_model.h \
-    utils.h \
+    utilities.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
     logger.h \
@@ -136,10 +139,11 @@ SOURCES  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
     ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
+    ui/pages_logic/protocols/WireGuardLogic.cpp \
     ui/uilogic.cpp \
     ui/qautostart.cpp \
     ui/models/sites_model.cpp \
-    utils.cpp \
+    utilities.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     logger.cpp \
@@ -179,6 +183,7 @@ win32 {
         -lws2_32 \
         -lgdi32
 
+    QMAKE_LFLAGS_WINDOWS += /entry:mainCRTStartup
 
    !contains(QMAKE_TARGET.arch, x86_64) {
       message("Windows x86 build")
@@ -238,7 +243,15 @@ win32|macx|linux:!android {
 }
 
 android {
-   QT += androidextras
+    message(Platform: android)
+    message("$$ANDROID_TARGET_ARCH")
+    versionAtLeast(QT_VERSION, 6.0.0) {
+        # We need to include qtprivate api's
+        # As QAndroidBinder is not yet implemented with a public api
+        QT += core-private
+        ANDROID_ABIS = $$ANDROID_TARGET_ARCH
+    }
+
    DEFINES += MVPN_ANDROID
 
    INCLUDEPATH += platforms/android
@@ -246,13 +259,16 @@ android {
    HEADERS += \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
-      protocols/android_vpnprotocol.h
+      protocols/android_vpnprotocol.h \
+      platforms/android/androidutils.h \
+      platforms/android/androidvpnactivity.h
 
    SOURCES += \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
-      protocols/android_vpnprotocol.cpp
-
+      protocols/android_vpnprotocol.cpp \
+      platforms/android/androidutils.cpp \
+      platforms/android/androidvpnactivity.cpp
 
    DISTFILES += \
       android/AndroidManifest.xml \
@@ -281,6 +297,7 @@ android {
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
+
       equals(ANDROID_TARGET_ARCH,$$abi) {
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libcrypto.a
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libssl.a
@@ -350,21 +367,21 @@ ios {
     message("Building for iPhone OS")
     QMAKE_TARGET_BUNDLE_PREFIX = org.amnezia
     QMAKE_BUNDLE = AmneziaVPN
-    QMAKE_IOS_DEPLOYMENT_TARGET = 12.0
+    QMAKE_IOS_DEPLOYMENT_TARGET = 13.0
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
     QMAKE_DEVELOPMENT_TEAM = X7UJ388FXK
     QMAKE_PROVISIONING_PROFILE = f2fefb59-14aa-4aa9-ac14-1d5531b06dcc
     QMAKE_XCODE_CODE_SIGN_IDENTITY = "Apple Distribution"
     QMAKE_INFO_PLIST = $$PWD/ios/app/Info.plist
-    
+
     XCODEBUILD_FLAGS += -allowProvisioningUpdates
-    
+
     DEFINES += iphoneos
-    
+
     contains(QT_ARCH, arm64) {
       message("Building for iOS/ARM v8 64-bit architecture")
       ARCH_TAG = "ios_armv8_64"
-      
+
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
       LIBS += $$PWD/3rd/OpenSSL/lib/ios/iphone/libssl.a
     } else {
@@ -373,15 +390,15 @@ ios {
     }
   }
 #    }
-  
+
 
 #    CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
 #  iphonesimulator {
 #    message("Building for iPhone Simulator")
 #    ARCH_TAG = "ios_x86_64"
-#    
+#
 #    DEFINES += iphonesimulator
-#    
+#
 #    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libcrypto.a
 #    LIBS += $$PWD/3rd/OpenSSL/lib/ios/simulator/libssl.a
 #  }

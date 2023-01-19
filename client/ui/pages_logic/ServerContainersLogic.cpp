@@ -29,6 +29,7 @@ void ServerContainersLogic::onUpdatePage()
     ProtocolsModel *p_model = qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel());
     p_model->setSelectedServerIndex(uiLogic()->selectedServerIndex);
 
+    set_isManagedServer(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
     emit updatePage();
 }
 
