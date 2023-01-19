@@ -1,16 +1,21 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef ANDROID_CONTROLLER_H
 #define ANDROID_CONTROLLER_H
 
-#include <QtCore/private/qandroidextras_p.h>
+#include <QJniEnvironment>
+#include <QJniObject>
 
-#include "ui/uilogic.h"
 #include "ui/pages_logic/StartPageLogic.h"
 
 #include "protocols/vpnprotocol.h"
+
 using namespace amnezia;
 
 
-class AndroidController : public QObject, public QAndroidServiceConnection
+class AndroidController : public QObject
 {
     Q_OBJECT
 
@@ -34,10 +39,6 @@ public:
     void cleanupBackendLogs();
     void importConfig(const QString& data);
 
-    // from QAndroidServiceConnection
-    void onServiceConnected(const QString& name, const QAndroidBinder& serviceBinder) override;
-    void onServiceDisconnected(const QString& name) override;
-
     const QJsonObject &vpnConfig() const;
     void setVpnConfig(const QJsonObject &newVpnConfig);
 
@@ -52,13 +53,18 @@ signals:
     void initialized(bool status, bool connected,
                      const QDateTime& connectionDate);
 
+    void statusUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
+    void scheduleStatusCheckSignal();
+
 protected slots:
+    void scheduleStatusCheckSlot();
 
 protected:
 
 
 private:
-    //Protocol m_protocol;
+    bool m_init = false;
+
     QJsonObject m_vpnConfig;
 
     StartPageLogic *m_startPageLogic;
@@ -66,24 +72,11 @@ private:
     bool m_serviceConnected = false;
     std::function<void(const QString&)> m_logCallback;
 
-    QAndroidBinder m_serviceBinder;
-    class VPNBinder : public QAndroidBinder {
-     public:
-      VPNBinder(AndroidController* controller) : m_controller(controller) {}
-
-      bool onTransact(int code, const QAndroidParcel& data,
-                      const QAndroidParcel& reply,
-                      QAndroidBinder::CallType flags) override;
-
-      QString readUTF8Parcel(QAndroidParcel data);
-
-     private:
-      AndroidController* m_controller = nullptr;
-    };
-
-    VPNBinder m_binder;
-
     static void startActivityForResult(JNIEnv* env, jobject /*thiz*/, jobject intent);
+
+    bool isConnected = false;
+
+    void scheduleStatusCheck();
 };
 
 #endif // ANDROID_CONTROLLER_H

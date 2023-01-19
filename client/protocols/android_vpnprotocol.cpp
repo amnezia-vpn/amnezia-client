@@ -7,11 +7,7 @@
 #include <QTextCodec>
 #include <QTimer>
 
-#include <QtCore/private/qandroidextras_p.h>
-
-
 #include "android_vpnprotocol.h"
-#include "core/errorstrings.h"
 
 #include "platforms/android/android_controller.h"
 
@@ -19,9 +15,7 @@
 AndroidVpnProtocol::AndroidVpnProtocol(Proto protocol, const QJsonObject &configuration, QObject* parent)
     : VpnProtocol(configuration, parent),
       m_protocol(protocol)
-{
-
-}
+{ }
 
 ErrorCode AndroidVpnProtocol::start()
 {
@@ -33,5 +27,13 @@ void AndroidVpnProtocol::stop()
 {
     qDebug() << "AndroidVpnProtocol::stop()";
     AndroidController::instance()->stop();
+}
+
+void AndroidVpnProtocol::connectionDataUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4)
+{
+    quint64 rxBytes = totalRx.toLongLong();
+    quint64 txBytes = totalTx.toLongLong();
+
+    setBytesChanged(rxBytes, txBytes);
 }
 

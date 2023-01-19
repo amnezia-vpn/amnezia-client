@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick svg quickcontrols2 core5compat
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
 equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
@@ -241,14 +241,8 @@ android {
     versionAtLeast(QT_VERSION, 6.0.0) {
         # We need to include qtprivate api's
         # As QAndroidBinder is not yet implemented with a public api
-        QT+=core-private
-        ANDROID_ABIS=ANDROID_TARGET_ARCH
-
-        # for not changing qtkeychain sources for qt6
-        QT -= androidextras
-    }
-    else {
-        QT += androidextras
+        QT += core-private
+        ANDROID_ABIS = $$ANDROID_TARGET_ARCH
     }
 
    DEFINES += MVPN_ANDROID
@@ -258,13 +252,16 @@ android {
    HEADERS += \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
-      protocols/android_vpnprotocol.h
+      protocols/android_vpnprotocol.h \
+      platforms/android/androidutils.h \
+      platforms/android/androidvpnactivity.h
 
    SOURCES += \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
-      protocols/android_vpnprotocol.cpp
-
+      protocols/android_vpnprotocol.cpp \
+      platforms/android/androidutils.cpp \
+      platforms/android/androidvpnactivity.cpp
 
    DISTFILES += \
       android/AndroidManifest.xml \
@@ -293,6 +290,7 @@ android {
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
+
       equals(ANDROID_TARGET_ARCH,$$abi) {
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libcrypto.a
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libssl.a

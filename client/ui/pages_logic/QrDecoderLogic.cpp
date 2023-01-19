@@ -3,10 +3,6 @@
 #include "ui/uilogic.h"
 #include "ui/pages_logic/StartPageLogic.h"
 
-#if defined(Q_OS_ANDROID)
-#include "android_controller.h"
-#endif
-
 using namespace amnezia;
 using namespace PageEnumNS;
 
