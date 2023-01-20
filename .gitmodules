@@ -52,3 +52,6 @@
 [submodule "client/android/cpp/cloak"]
 	path = client/android/cpp/cloak
 	url = https://github.com/amnezia-vpn/Cloak
+[submodule "client/android/cpp/lzo"]
+	path = client/android/cpp/lzo
+	url = https://github.com/amnezia-vpn/lzo.git
