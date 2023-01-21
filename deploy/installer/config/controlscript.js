@@ -26,7 +26,7 @@ function appInstalled()
     } else if (runningOnMacOS()){
         appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
     } else if (runningOnLinux()){
-	allInstalledUninstallerPath = "/opt/" + appName();
+	    appInstalledUninstallerPath = "/opt/" + appName();
     }
 
     return installer.fileExists(appInstalledUninstallerPath) || installer.fileExists(appInstalledUninstallerPath_x86);
