@@ -26,7 +26,7 @@ function appInstalled()
     } else if (runningOnMacOS()){
         appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
     } else if (runningOnLinux()){
-	    appInstalledUninstallerPath = "/opt/" + appName();
+        appInstalledUninstallerPath = "/opt/" + appName() + "/maintenancetool";
     }
 
     return installer.fileExists(appInstalledUninstallerPath) || installer.fileExists(appInstalledUninstallerPath_x86);
@@ -49,7 +49,7 @@ function runningOnMacOS()
 
 function runningOnLinux()
 {
-    return (installer.value("os") === "linux");
+    return ((installer.value("os") === "linux") || (installer.value("os") === "x11"));
 }
 
 function sleep(miliseconds) {
