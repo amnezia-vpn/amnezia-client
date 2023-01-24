@@ -1,0 +1,20 @@
+@startuml configProcessingOnConnection
+start
+
+:connect button clicked;
+:createVpnConfiguration();
+:createVpnConfigurationForProto();
+
+if (serverConfig.contains(lastConfigStorage)) then (yes)
+    :download native config from lastConfigStorage;
+else if (serverConfig.contains(last_config)) then (yes)
+    :do nothing special;
+else if (serverConfig.contains(admin credentials)) then (yes)
+    :generate new native config;
+else 
+    :return empty config and error;
+    stop
+endif
+:continue connect process;
+stop
+@enduml

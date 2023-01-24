@@ -1,0 +1,20 @@
+@startjson
+{
+   "containers : array": 
+        {
+            "container : string": "amnezia-wireguard",
+            "wireguard : array": 
+                {
+                    "last_config : string": "native wireguard config",
+                    "port : string": "port number",
+                    "transport_proto : string": "udp"
+                }
+        },
+    "defaultContainer : string": "amnezia-wireguard",
+    "description : string": "server name alias",
+    "hostName : string": "server address",
+    "password : string": "password for user",
+    "port : string": "port number",
+    "userName : string": "user for ssh connection"
+}
+@endjson
