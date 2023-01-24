@@ -1,0 +1,11 @@
+@startjson
+{
+    "container : string": "amnezia-wireguard",
+    "wireguard : array": 
+        {
+            "last_config : string": "native wireguard config",
+            "port : string": "port number",
+            "transport_proto : string": "udp"
+        }
+}
+@endjson
