@@ -1,4 +1,4 @@
-@startuml configProcessingOnConnection
+@startuml serverConfigProcessingOnConnection
 start
 
 :connect button clicked;
