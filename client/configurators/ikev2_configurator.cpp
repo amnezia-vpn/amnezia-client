@@ -22,7 +22,7 @@ Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, std::sh
 }
 
 Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials,
-    DockerContainer container, ErrorCode *errorCode)
+                                                                        DockerContainer container, ErrorCode &errorCode)
 {
     Ikev2Configurator::ConnectionData connData;
     connData.host = credentials.hostName;
@@ -41,16 +41,16 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
                              "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
             .arg(connData.clientId);
 
-    ErrorCode e = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
+    errorCode = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
 
     QString scriptExportCert = QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"")
             .arg(connData.password)
             .arg(connData.clientId)
             .arg(certFileName);
-    e = m_serverController->runContainerScript(credentials, container, scriptExportCert);
+    errorCode = m_serverController->runContainerScript(credentials, container, scriptExportCert);
 
-    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, &e);
-    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
+    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, errorCode);
+    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", errorCode);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();
@@ -59,12 +59,12 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
 }
 
 QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+    DockerContainer container, const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     Q_UNUSED(containerConfig)
 
     ConnectionData connData = prepareIkev2Config(credentials, container, errorCode);
-    if (errorCode && *errorCode) {
+    if (errorCode) {
         return "";
     }
 

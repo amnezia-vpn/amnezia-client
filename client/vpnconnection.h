@@ -38,15 +38,12 @@ public:
     ErrorCode lastError() const;
 
     static QMap<Proto, QString> getLastVpnConfig(const QJsonObject &containerConfig);
-    QString createVpnConfigurationForProto(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
-        ErrorCode *errorCode = nullptr);
+    QString createVpnConfigurationForProto(int serverIndex, const ServerCredentials &credentials,
+                                           DockerContainer container, const QJsonObject &containerConfig,
+                                           Proto proto, ErrorCode &errorCode);
 
-    QJsonObject createVpnConfiguration(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
-
-
+    QJsonObject createVpnConfiguration(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                                       const QJsonObject &containerConfig, ErrorCode &errorCode);
 
     bool isConnected() const;
     bool isDisconnected() const;
@@ -86,6 +83,8 @@ protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
+    bool shouldProcessLastConfigWithRemoteSettings(const int serverIndex, const Proto proto);
+
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
     std::shared_ptr<ServerController> m_serverController;

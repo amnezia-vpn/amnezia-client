@@ -9,7 +9,7 @@ if (server config contains valid server credentials || containers) then (yes)
     if (user clicked continue import) then (yes)
         :append server config to app internal settings;
     else (no)
-        :do nothing;
+        :remove imported config;
     endif
 else (no)
     :show error;

@@ -14,7 +14,7 @@ public:
         std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
 
     QString genShadowSocksConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                                 const QJsonObject &containerConfig, ErrorCode &errorCode);
 };
 
 #endif // SHADOWSOCKS_CONFIGURATOR_H

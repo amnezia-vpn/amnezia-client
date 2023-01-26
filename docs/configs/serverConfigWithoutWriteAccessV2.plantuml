@@ -1,4 +1,4 @@
-@startjson
+@startjson serverConfigWithoutWriteAccessV2
 {
    "containers : array": 
    [
@@ -27,6 +27,6 @@
     "dns2 : string": "dns address",
     "hostName : string": "server address",
     "version : number": "2",
-    "lastConfigStorage : string": "storage address"
+    "nativeConfigParametrsStorage : string": "storage address"
 }
 @endjson

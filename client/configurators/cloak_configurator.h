@@ -15,7 +15,7 @@ public:
         std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
 
     QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                           const QJsonObject &containerConfig, ErrorCode &errorCode);
 };
 
 #endif // CLOAK_CONFIGURATOR_H

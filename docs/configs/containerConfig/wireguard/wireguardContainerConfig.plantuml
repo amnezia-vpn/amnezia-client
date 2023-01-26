@@ -1,4 +1,4 @@
-@startjson
+@startjson wireguardContainerConfig
 {
     "container : string": "amnezia-wireguard",
     "wireguard : array": 

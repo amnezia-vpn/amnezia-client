@@ -220,9 +220,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 }
 
 QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
-    const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode)
+    const ServerCredentials &credentials, const QString &path, ErrorCode &errorCode)
 {
-    if (errorCode) *errorCode = ErrorCode::NoError;
+    errorCode = ErrorCode::NoError;
 
     QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").
             arg(ContainerProps::containerToString(container)).arg(path);
@@ -231,14 +231,14 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
     SshConnection *client = connectToHost(sshParams(credentials));
     if (client->state() != SshConnection::State::Connected) {
-        if (errorCode) *errorCode = fromSshConnectionErrorCode(client->errorState());
+        errorCode = fromSshConnectionErrorCode(client->errorState());
         return {};
     }
 
     QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(script.toUtf8());
     if (!proc) {
         qCritical() << "Failed to create SshRemoteProcess, breaking.";
-        if (errorCode) *errorCode = ErrorCode::SshRemoteProcessCreationError;
+        errorCode = ErrorCode::SshRemoteProcessCreationError;
         return {};
     }
 
@@ -263,26 +263,26 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 //    }
 
     if (SshRemoteProcess::ExitStatus(exitStatus) != QSsh::SshRemoteProcess::ExitStatus::NormalExit) {
-        if (errorCode) *errorCode = fromSshProcessExitStatus(exitStatus);
+        errorCode = fromSshProcessExitStatus(exitStatus);
     }
 
-    if (errorCode) *errorCode = ErrorCode::NoError;
+    errorCode = ErrorCode::NoError;
     return QByteArray::fromHex(proc->readAllStandardOutput());
 }
 
 ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
 {
-    QString caCert = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::caCertPath);
-    QString taKey = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::taKeyPath);
-
-    if (!caCert.isEmpty() && !taKey.isEmpty()) {
-        return ErrorCode::NoError;
-    }
-    else {
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString caCert = ServerController::getTextFileFromContainer(container, credentials, protocols::openvpn::caCertPath, errorCode);
+    if (caCert.isEmpty() || errorCode != ErrorCode::NoError) {
         return ErrorCode::ServerCheckFailed;
     }
+    QString taKey = ServerController::getTextFileFromContainer(container, credentials, protocols::openvpn::taKeyPath, errorCode);
+    if (taKey.isEmpty() || errorCode != ErrorCode::NoError) {
+        return ErrorCode::ServerCheckFailed;
+    }
+
+    return ErrorCode::NoError;
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
@@ -756,7 +756,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     return vars;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
@@ -766,10 +766,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
         stdOut += data + "\n";
     };
 
-    ErrorCode e = runScript(credentials,
-        amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
-
-    if (errorCode) *errorCode = e;
+    errorCode = runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
 
     return stdOut;
 }

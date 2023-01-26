@@ -26,8 +26,8 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings,
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, serverController, this));
 }
 
-QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode)
+QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, Proto proto, ErrorCode &errorCode)
 {
     switch (proto) {
     case Proto::OpenVpn:
@@ -47,6 +47,25 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
 
     default:
         return "";
+    }
+}
+
+ErrorCode VpnConfigurator::processLastConfigWithRemoteSettings(QMap<Proto, QString> &lastVpnConfigs,
+                                                               const int serverIndex, const Proto proto)
+{
+    switch (proto) {
+    case Proto::OpenVpn:
+        return ErrorCode::NotImplementedError;
+    case Proto::ShadowSocks:
+        return ErrorCode::NotImplementedError;
+    case Proto::Cloak:
+        return ErrorCode::NotImplementedError;
+    case Proto::WireGuard:
+        return wireguardConfigurator->processLastConfigWithRemoteSettings(lastVpnConfigs, serverIndex);
+    case Proto::Ikev2:
+        return ErrorCode::NotImplementedError;
+    default:
+        return ErrorCode::ConfigMissing;
     }
 }
 

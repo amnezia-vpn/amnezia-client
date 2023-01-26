@@ -1,4 +1,4 @@
-@startjson
+@startjson serverConfigWithoutWriteAccessV1
 {
    "containers : array": 
    [

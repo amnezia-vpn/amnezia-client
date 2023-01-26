@@ -54,7 +54,7 @@ public:
         QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
 
     QByteArray getTextFileFromContainer(DockerContainer container,
-        const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
+        const ServerCredentials &credentials, const QString &path, ErrorCode &errorCode);
 
     ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 
@@ -70,7 +70,7 @@ public:
 
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
-    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
+    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode);
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     void setCancelInstallation(const bool cancel);

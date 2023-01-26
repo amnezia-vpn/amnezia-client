@@ -81,12 +81,12 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         QJsonObject containerConfig = m_settings->containerConfig(serverIndex, container);
         containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-        ErrorCode e = ErrorCode::NoError;
+        ErrorCode errorCode = ErrorCode::NoError;
         for (Proto p: ContainerProps::protocolsForContainer(container)) {
             QJsonObject protoConfig = m_settings->protocolConfig(serverIndex, container, p);
 
-            QString cfg = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, p, &e);
-            if (e) {
+            QString cfg = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, p, errorCode);
+            if (errorCode) {
                 cfg = "Error generating config";
                 break;
             }
@@ -95,7 +95,7 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
         }
 
         QByteArray ba;
-        if (!e) {
+        if (!errorCode) {
             serverConfig = m_settings->server(serverIndex);
             serverConfig.remove(config_key::userName);
             serverConfig.remove(config_key::password);
@@ -133,8 +133,8 @@ void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 
     const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
 
-    ErrorCode e = ErrorCode::NoError;
-    QString cfg = m_configurator->openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, &e);
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString cfg = m_configurator->openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, errorCode);
     cfg = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::OpenVpn, cfg);
 
     set_textEditShareOpenVpnCodeText(QJsonDocument::fromJson(cfg.toUtf8()).object()[config_key::config].toString());
@@ -152,8 +152,8 @@ void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
     if (cfg.isEmpty()) {
         const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
 
-        ErrorCode e = ErrorCode::NoError;
-        cfg = m_configurator->shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, &e);
+        ErrorCode errorCode = ErrorCode::NoError;
+        cfg = m_configurator->shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, errorCode);
     }
 
     QJsonObject ssConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
@@ -196,8 +196,8 @@ void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
     if (cfg.isEmpty()) {
         const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
 
-        ErrorCode e = ErrorCode::NoError;
-        cfg = m_configurator->cloakConfigurator->genCloakConfig(credentials, container, containerConfig, &e);
+        ErrorCode errorCode = ErrorCode::NoError;
+        cfg = m_configurator->cloakConfigurator->genCloakConfig(credentials, container, containerConfig, errorCode);
     }
 
     QJsonObject cloakConfig = QJsonDocument::fromJson(cfg.toUtf8()).object();
@@ -215,12 +215,12 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
     const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
 
-    ErrorCode e = ErrorCode::NoError;
-    QString cfg = m_configurator->wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, &e);
-    if (e) {
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString cfg = m_configurator->wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
+    if (errorCode) {
         QMessageBox::warning(nullptr, APPLICATION_NAME,
                              tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
+                             errorString(errorCode));
         return;
     }
     cfg = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::WireGuard, cfg);
@@ -240,7 +240,8 @@ void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
     DockerContainer container = uiLogic()->selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
-    Ikev2Configurator::ConnectionData connData = m_configurator->ikev2Configurator->prepareIkev2Config(credentials, container);
+    ErrorCode errorCode = ErrorCode::NoError;
+    Ikev2Configurator::ConnectionData connData = m_configurator->ikev2Configurator->prepareIkev2Config(credentials, container, errorCode);
 
     QString cfg = m_configurator->ikev2Configurator->genIkev2Config(connData);
     cfg = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::Ikev2, cfg);
