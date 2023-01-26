@@ -27,14 +27,14 @@ jobs:
         set-env: 'true'
         extra: '--external 7z'
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
         submodules: 'true'
         fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -80,14 +80,14 @@ jobs:
       with:
         arch: 'x64'
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
         submodules: 'true'
         fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       shell: cmd
