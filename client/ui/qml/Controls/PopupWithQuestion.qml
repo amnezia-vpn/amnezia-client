@@ -30,6 +30,7 @@ Popup {
         RowLayout {
             BlueButtonType {
                 id: yesButton
+                Layout.preferredWidth: parent.width / 2
                 Layout.fillWidth: true
                 text: yesText
                 onClicked: {
@@ -42,6 +43,7 @@ Popup {
             }
             BlueButtonType {
                 id: noButton
+                Layout.preferredWidth: parent.width / 2
                 Layout.fillWidth: true
                 text: noText
                 onClicked: {
