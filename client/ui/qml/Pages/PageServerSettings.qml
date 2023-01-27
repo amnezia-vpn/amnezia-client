@@ -93,24 +93,49 @@ PageBase {
                     ServerSettingsLogic.onPushButtonClearClientCacheClicked()
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 text: ServerSettingsLogic.pushButtonClearText
                 visible: ServerSettingsLogic.pushButtonClearVisible
-                onClicked: {
-                    ServerSettingsLogic.onPushButtonClearServer()
+                onClicked: {    
+                    popupClearServer.open()
                 }
             }
+
+            PopupWithQuestion {
+                id: popupClearServer
+                questionText: "Attention! All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted. Continue?"
+                yesFunc: function() {
+                    ServerSettingsLogic.onPushButtonClearServer()
+                    close()
+                }
+                noFunc: function() {
+                    close()
+                }
+            }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 text: qsTr("Forget this server")
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonForgetServer()
+                    popupForgetServer.open()
                 }
             }
 
+            PopupWithQuestion {
+                id: popupForgetServer
+                questionText: "Attention! Something will happen. Continue?"
+                yesFunc: function() {
+                    ServerSettingsLogic.onPushButtonForgetServer()
+                    close()
+                }
+                noFunc: function() {
+                    close()
+                }
+            }
         }
     }
 
