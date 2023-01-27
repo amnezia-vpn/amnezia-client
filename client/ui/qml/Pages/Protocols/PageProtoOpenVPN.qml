@@ -13,7 +13,7 @@ PageProtocolBase {
 
     BackButton {
         id: back
-        enabled: logic.pageEnabled
+        enabled: !logic.pushButtonCancelVisible
     }
 
     Caption {
@@ -285,8 +285,6 @@ PageProtocolBase {
                             }
                         }
                     }
-
-
                 }
 
                 BasicButtonType {
@@ -338,8 +336,6 @@ PageProtocolBase {
                             }
                         }
                     }
-
-
                 }
 
                 LabelType {
