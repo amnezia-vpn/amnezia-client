@@ -127,7 +127,7 @@ PageBase {
 
             PopupWithQuestion {
                 id: popupForgetServer
-                questionText: "Attention! Something will happen. Continue?"
+                questionText: "Attention! This action will not remove the container on the server, it will only remove the container information from the application. Continue?"
                 yesFunc: function() {
                     ServerSettingsLogic.onPushButtonForgetServer()
                     close()
