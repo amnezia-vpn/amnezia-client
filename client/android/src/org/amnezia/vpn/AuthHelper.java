@@ -3,7 +3,7 @@ package org.amnezia.vpn;
 import android.content.Context;
 import android.app.KeyguardManager;
 import android.content.Intent;
-import org.qtproject.qt5.android.bindings.QtActivity;
+import org.qtproject.qt.android.bindings.QtActivity;
 
 
 import static android.content.Context.KEYGUARD_SERVICE;

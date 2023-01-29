@@ -4,7 +4,8 @@
 #include "PageLogicBase.h"
 
 #if defined(Q_OS_ANDROID)
-#include <QAndroidActivityResultReceiver>
+#include <QJniObject>
+#include <private/qandroidextras_p.h>
 #endif
 
 class UiLogic;
@@ -52,7 +53,7 @@ public:
     ~authResultReceiver() {}
 
 public:
-    void handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &data) override;
+    void handleActivityResult(int receiverRequestCode, int resultCode, const QJniObject &data) override;
 
 private:
     int  m_serverIndex;

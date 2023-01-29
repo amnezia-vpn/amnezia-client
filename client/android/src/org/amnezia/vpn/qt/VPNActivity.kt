@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.amnezia.vpn.qt;
 
 import android.Manifest
@@ -20,18 +24,33 @@ import org.amnezia.vpn.VPNServiceBinder
 import org.amnezia.vpn.IMPORT_COMMAND_CODE
 import org.amnezia.vpn.IMPORT_ACTION_CODE
 import org.amnezia.vpn.IMPORT_CONFIG_KEY
-import org.qtproject.qt5.android.bindings.QtActivity
+import org.qtproject.qt.android.bindings.QtActivity
 import java.io.*
 
-class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
+class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
     private var configString: String? = null
-    private var vpnServiceBinder: Messenger? = null
+    private var vpnServiceBinder: IBinder? = null
     private var isBound = false
 
     private val TAG = "VPNActivity"
     private val STORAGE_PERMISSION_CODE = 42
 
+    companion object {
+        private lateinit var instance: VPNActivity
+
+        @JvmStatic fun getInstance(): VPNActivity {
+            return instance
+        }
+
+        @JvmStatic fun connectService() {
+            VPNActivity.getInstance().initServiceConnection()
+        }
+
+        @JvmStatic fun sendToService(actionCode: Int, body: String) {
+            VPNActivity.getInstance().dispatchParcel(actionCode, body)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val newIntent = intent
@@ -42,6 +61,48 @@ class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
         }
 
         super.onCreate(savedInstanceState)
+
+        instance = this;
+    }
+
+    override fun getSystemService(name: String): Any? {
+        return if (Build.VERSION.SDK_INT >= 29 && name == "clipboard") {
+            // QT will always attempt to read the clipboard if content is there.
+            // since we have no use of the clipboard in android 10+
+            // we _can_  return null
+            // And we defnitly should since android 12 displays clipboard access.
+            null
+        } else {
+            super.getSystemService(name)
+        }
+    }
+
+    external fun handleBackButton(): Boolean
+
+    external fun onServiceMessage(actionCode: Int, body: String?)
+    external fun qtOnServiceConnected()
+    external fun qtOnServiceDisconnected()
+
+    private fun dispatchParcel(actionCode: Int, body: String) {
+        if (!isBound) {
+            Log.d(TAG, "dispatchParcel: not bound")
+            return
+        } else {
+            Log.d(TAG, "dispatchParcel: bound")
+        }
+
+        val out: Parcel = Parcel.obtain()
+        out.writeByteArray(body.toByteArray())
+
+        try {
+            vpnServiceBinder?.transact(actionCode, out, Parcel.obtain(), 0)
+        } catch (e: DeadObjectException) {
+            isBound = false
+            vpnServiceBinder = null
+            qtOnServiceDisconnected()
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onNewIntent(newIntent: Intent) {
@@ -63,17 +124,9 @@ class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (configString != null && !isBound) {
-            bindVpnService()
+        if (configString != null && isBound) {
+            sendImportConfigCommand()
         }
-    }
-
-    override fun onPause() {
-        if (vpnServiceBinder != null && isBound) {
-            unbindService(connection)
-            isBound = false
-        }
-        super.onPause()
     }
 
     private fun isReadStorageAllowed(): Boolean {
@@ -90,23 +143,19 @@ class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "Storage read permission granted")
 
+                if (configString == null) {
+                    configString = processIntent(intent, intent.action!!)
+                }
+
                 if (configString != null) {
-                    bindVpnService()
+                    Log.d(TAG, "not empty")
+                    sendImportConfigCommand()
+                } else {
+                    Log.d(TAG, "empty")
                 }
             } else {
                 Toast.makeText(this, "Oops you just denied the permission", Toast.LENGTH_LONG).show()
             }
-        }
-    }
-
-    private fun bindVpnService() {
-        try {
-            val intent = Intent(this, VPNService::class.java)
-            intent.action = IMPORT_ACTION_CODE
-
-            bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -158,23 +207,35 @@ class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
         }
     }
 
+    private fun sendImportConfigCommand() {
+        if (configString != null) {
+            val msg: Parcel = Parcel.obtain()
+            msg.writeString(configString!!)
+
+            try {
+                vpnServiceBinder?.transact(ACTION_IMPORT_CONFIG, msg, Parcel.obtain(), 0)
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            }
+
+            configString = null
+        }
+    }
+
     private var connection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
-            vpnServiceBinder = Messenger(binder)
+            vpnServiceBinder = binder
 
-            if (configString != null) {
-                val msg: Message = Message.obtain(null, IMPORT_COMMAND_CODE, 0, 0)
-                val bundle = Bundle()
-                bundle.putString(IMPORT_CONFIG_KEY, configString!!)
-                msg.data = bundle
-
-                try {
-                    vpnServiceBinder?.send(msg)
-                } catch (e: RemoteException) {
-                    e.printStackTrace()
-                }
-
-                configString = null
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            if (registerBinder()){
+                qtOnServiceConnected();
+            } else {
+                qtOnServiceDisconnected();
+                return
             }
 
             isBound = true
@@ -183,7 +244,73 @@ class VPNActivity : org.qtproject.qt5.android.bindings.QtActivity() {
         override fun onServiceDisconnected(className: ComponentName) {
             vpnServiceBinder = null
             isBound = false
+            qtOnServiceDisconnected();
         }
+    }
+
+    private fun registerBinder(): Boolean {
+        val binder = VPNClientBinder()
+        val out: Parcel = Parcel.obtain()
+        out.writeStrongBinder(binder)
+
+        try {
+            // Register our IBinder Listener
+            vpnServiceBinder?.transact(ACTION_REGISTER_LISTENER, out, Parcel.obtain(), 0)
+            return true
+        } catch (e: DeadObjectException) {
+            isBound = false
+            vpnServiceBinder = null
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    private fun initServiceConnection() {
+        // We already have a connection to the service,
+        // just need to re-register the binder
+        if (isBound && vpnServiceBinder!!.isBinderAlive() && registerBinder()) {
+            qtOnServiceConnected()
+            return
+        }
+
+        bindService(Intent(this, VPNService::class.java), connection, Context.BIND_AUTO_CREATE)
+    }
+
+    // TODO: Move all ipc codes into a shared lib.
+    // this is getting out of hand.
+    private val PERMISSION_TRANSACTION = 1337
+    private val ACTION_REGISTER_LISTENER = 3
+    private val ACTION_RESUME_ACTIVATE = 7
+    private val ACTION_IMPORT_CONFIG = 11
+    private val EVENT_PERMISSION_REQURED = 6
+    private val EVENT_DISCONNECTED = 2
+
+
+    fun onPermissionRequest(code: Int, data: Parcel?) {
+        if (code != EVENT_PERMISSION_REQURED) {
+            return
+        }
+
+        val x = Intent()
+        x.readFromParcel(data)
+
+        startActivityForResult(x, PERMISSION_TRANSACTION)
+    }
+
+    override protected fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == PERMISSION_TRANSACTION) {
+            // THATS US!
+            if (resultCode == RESULT_OK) {
+                // Prompt accepted, tell service to retry.
+                dispatchParcel(ACTION_RESUME_ACTIVATE, "")
+            } else {
+                // Tell the Client we've disconnected
+                onServiceMessage(EVENT_DISCONNECTED, "")
+            }
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
