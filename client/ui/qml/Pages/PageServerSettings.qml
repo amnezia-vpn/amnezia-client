@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -16,113 +17,106 @@ PageBase {
         id: back
     }
     Caption {
+        id: caption
         text: qsTr("Server settings")
         anchors.horizontalCenter: parent.horizontalCenter
     }
-    LabelType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 150
-        width: 341
-        height: 31
-        font.pixelSize: 20
-        horizontalAlignment: Text.AlignHCenter
-        text: ServerSettingsLogic.labelCurrentVpnProtocolText
-    }
-//    LabelType {
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        y: 120
-//        width: 341
-//        height: 31
-//        font.pixelSize: 20
-//        horizontalAlignment: Text.AlignHCenter
-//        text: ServerSettingsLogic.labelServerText
-//    }
-    TextFieldType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 120
-        width: 341
-        height: 31
-        font.pixelSize: 20
-        horizontalAlignment: Text.AlignHCenter
-        text: ServerSettingsLogic.labelServerText
-        readOnly: true
-        background: Item {}
+
+    FlickableType {
+        id: fl
+        anchors.top: caption.bottom
+        anchors.bottom: logo.top
+        contentHeight: content.height
+
+        ColumnLayout {
+            id: content
+            enabled: logic.pageEnabled
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.rightMargin: 15
+
+            LabelType {
+                Layout.fillWidth: true
+                font.pixelSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                text: ServerSettingsLogic.labelCurrentVpnProtocolText
+            }
+
+            TextFieldType {
+                Layout.fillWidth: true
+                font.pixelSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                text: ServerSettingsLogic.labelServerText
+                readOnly: true
+                background: Item {}
+            }
+
+            LabelType {
+                Layout.fillWidth: true
+                text: ServerSettingsLogic.labelWaitInfoText
+                visible: ServerSettingsLogic.labelWaitInfoVisible
+            }
+            TextFieldType {
+                Layout.fillWidth: true
+                text: ServerSettingsLogic.lineEditDescriptionText
+                onEditingFinished: {
+                    ServerSettingsLogic.lineEditDescriptionText = text
+                    ServerSettingsLogic.onLineEditDescriptionEditingFinished()
+                }
+            }
+
+            BlueButtonType {
+                text: qsTr("Protocols and Services")
+                Layout.topMargin: 20
+                Layout.fillWidth: true
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.ServerContainers)
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                text: qsTr("Share Server (FULL ACCESS)")
+                visible: ServerSettingsLogic.pushButtonShareFullVisible
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonShareFullClicked()
+                }
+            }
+
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 60
+                text: ServerSettingsLogic.pushButtonClearClientCacheText
+                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                text: ServerSettingsLogic.pushButtonClearText
+                visible: ServerSettingsLogic.pushButtonClearVisible
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonClearServer()
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                text: qsTr("Forget this server")
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonForgetServer()
+                }
+            }
+
+        }
     }
 
-    LabelType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 530
-        width: 301
-        height: 41
-        text: ServerSettingsLogic.labelWaitInfoText
-        visible: ServerSettingsLogic.labelWaitInfoVisible
-    }
-    TextFieldType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 80
-        width: 251
-        height: 31
-        text: ServerSettingsLogic.lineEditDescriptionText
-        onEditingFinished: {
-            ServerSettingsLogic.lineEditDescriptionText = text
-            ServerSettingsLogic.onLineEditDescriptionEditingFinished()
-        }
-    }
-    BlueButtonType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 410
-        width: parent.width - 40
-        height: 40
-        text: ServerSettingsLogic.pushButtonClearText
-        visible: ServerSettingsLogic.pushButtonClearVisible
-        onClicked: {
-            ServerSettingsLogic.onPushButtonClearServer()
-        }
-    }
-    BlueButtonType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 350
-        width: parent.width - 40
-        height: 40
-        text: ServerSettingsLogic.pushButtonClearClientCacheText
-        visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
-        onClicked: {
-            ServerSettingsLogic.onPushButtonClearClientCacheClicked()
-        }
-    }
-    BlueButtonType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 470
-        width: parent.width - 40
-        height: 40
-        text: qsTr("Forget this server")
-        onClicked: {
-            ServerSettingsLogic.onPushButtonForgetServer()
-        }
-    }
-    BlueButtonType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 210
-        width: parent.width - 40
-        height: 40
-        text: qsTr("Protocols and Services")
-        onClicked: {
-            UiLogic.goToPage(PageEnum.ServerContainers)
-        }
-    }
-    BlueButtonType {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 260
-        width: parent.width - 40
-        height: 40
-        text: qsTr("Share Server (FULL ACCESS)")
-        visible: ServerSettingsLogic.pushButtonShareFullVisible
-        onClicked: {
-            ServerSettingsLogic.onPushButtonShareFullClicked()
-        }
-    }
 
     Logo {
+        id : logo
         anchors.bottom: parent.bottom
     }
 }

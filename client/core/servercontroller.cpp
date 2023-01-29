@@ -12,9 +12,11 @@
 #include <QApplication>
 #include <QTemporaryFile>
 #include <QFileInfo>
+#include <QThread>
+#include <QtConcurrent>
+
 #include <filesystem>
 #include <iostream>
-
 #include <fstream>
 #include <sys/stat.h>
 
@@ -22,7 +24,7 @@
 #include <thread>
 
 #include "containers/containers_defs.h"
-#include "debug.h"
+#include "logger.h"
 #include "server_defs.h"
 #include "settings.h"
 #include "scripts_registry.h"
@@ -77,7 +79,8 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
 
         qDebug().noquote() << "EXEC" << lineToExec;
-        Debug::appendSshLog("Run command:" + lineToExec);
+        Logger::appendSshLog("Run command:" + lineToExec);
+
 
         error = m_sshClient.executeCommand(lineToExec, cbReadStdOut, cbReadStdErr);
         if (error != ErrorCode::NoError) {
@@ -96,7 +99,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + QStringLiteral(":\n") + script);
+    Logger::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
@@ -374,14 +377,45 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         return ErrorCode::NoError;
     };
 
-    ErrorCode e = runScript(credentials,
-        replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
-            genVarsForScript(credentials)),
-                cbReadStdOut, cbReadStdErr);
+    QFutureWatcher<ErrorCode> watcher;
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
+        do {
+            if (m_cancelInstallation) {
+                return ErrorCode::ServerCancelInstallation;
+            }
+            stdOut.clear();
+            runScript(credentials,
+                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
+                                  genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+                emit serverIsBusy(true);
+                QThread::msleep(1000);
+            }
+        } while (!stdOut.isEmpty());
+        return ErrorCode::NoError;
+    });
+
+    watcher.setFuture(future);
+
+    QEventLoop wait;
+    QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+
+    m_cancelInstallation = false;
+    emit serverIsBusy(false);
+
+    if (future.result() != ErrorCode::NoError) {
+        return future.result();
+    }
+
+    ErrorCode error = runScript(credentials,
+                                replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
+                                            genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
-    return e;
+    return error;
 }
 
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
@@ -599,6 +633,11 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     if (errorCode) *errorCode = e;
 
     return stdOut;
+}
+
+void ServerController::setCancelInstallation(const bool cancel)
+{
+    m_cancelInstallation = cancel;
 }
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)

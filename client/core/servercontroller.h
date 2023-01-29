@@ -6,7 +6,6 @@
 
 #include "defs.h"
 #include "containers/containers_defs.h"
-
 #include "sshclient.h"
 
 class Settings;
@@ -70,6 +69,7 @@ public:
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
+    void setCancelInstallation(const bool cancel);
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
@@ -81,7 +81,10 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
+    bool m_cancelInstallation = false;
     libssh::Client m_sshClient;
+signals:
+    void serverIsBusy(const bool isBusy);
 };
 
 #endif // SERVERCONTROLLER_H

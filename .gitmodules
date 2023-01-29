@@ -34,3 +34,6 @@
 [submodule "deploy/amnezia-ios-certificates"]
 	path = deploy/amnezia-ios-certificates
 	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
+[submodule "client/3rd/SortFilterProxyModel"]
+	path = client/3rd/SortFilterProxyModel
+	url = https://github.com/mitchcurtis/SortFilterProxyModel.git

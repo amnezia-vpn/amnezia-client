@@ -1,90 +1,51 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "loglevel.h"
-
+#include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QString>
-#include <QStringList>
-#include <QIODevice>
 #include <QTextStream>
 
-constexpr const char* LOG_CAPTIVEPORTAL = "captiveportal";
-constexpr const char* LOG_CONTROLLER = "controller";
-constexpr const char* LOG_IAP = "iap";
-constexpr const char* LOG_INSPECTOR = "inspector";
-constexpr const char* LOG_MAIN = "main";
-constexpr const char* LOG_MODEL = "model";
-constexpr const char* LOG_NETWORKING = "networking";
-constexpr const char* LOG_SERVER = "server";
+#include "ui/property_helper.h"
 
-#if defined(MVPN_LINUX) || defined(MVPN_ANDROID)
-constexpr const char* LOG_LINUX = "linux";
-#endif
+class Logger : public QObject
+{
+    Q_OBJECT
+    AUTO_PROPERTY(QString, sshLog)
+    AUTO_PROPERTY(QString, allLog)
 
-#ifdef MVPN_WINDOWS
-constexpr const char* LOG_WINDOWS = "windows";
-#endif
+public:
+    static Logger& Instance();
 
-#if __APPLE__ || defined(MVPN_WASM)
-constexpr const char* LOG_MACOS = "macos";
-constexpr const char* LOG_IOS = "ios";
-#endif
+    static void appendSshLog(const QString &log);
+    static void appendAllLog(const QString &log);
 
-#if defined(MVPN_ANDROID) || defined(UNIT_TEST)
-constexpr const char* LOG_ANDROID = "android";
-#endif
 
-class Logger {
- public:
-  Logger(const QString& module, const QString& className);
-  Logger(const QStringList& modules, const QString& className);
+    static bool init();
+    static void deInit();
+    static bool openLogsFolder();
+    static bool openServiceLogsFolder();
+    static QString appLogFileNamePath();
+    static void clearLogs();
+    static void clearServiceLogs();
+    static void cleanUp();
 
-  const QStringList& modules() const { return m_modules; }
-  const QString& className() const { return m_className; }
+    static QString userLogsFilePath();
+    static QString getLogFile();
 
-  class Log {
-   public:
-    Log(Logger* logger, LogLevel level);
-    ~Log();
+private:
+    Logger() {}
+    Logger(Logger const &) = delete;
+    Logger& operator= (Logger const&) = delete;
 
-    Log& operator<<(uint64_t t);
-    Log& operator<<(const char* t);
-    Log& operator<<(const QString& t);
-    Log& operator<<(const QStringList& t);
-    Log& operator<<(const QByteArray& t);
-    Log& operator<<(QTextStreamFunction t);
-    Log& operator<<(void* t);
+    static QString userLogsDir();
 
-   private:
-    Logger* m_logger;
-    LogLevel m_logLevel;
+    static QFile m_file;
+    static QTextStream m_textStream;
+    static QString m_logFileName;
 
-    struct Data {
-      Data() : m_ts(&m_buffer, QIODevice::WriteOnly) {}
-
-      QString m_buffer;
-      QTextStream m_ts;
-    };
-
-    Data* m_data;
-  };
-
-  Log error();
-  Log warning();
-  Log info();
-  Log debug();
-
-  // Use this to log sensitive data such as IP address, session tokens, and so
-  // on.
-  QString sensitive(const QString& input);
-
- private:
-  QStringList m_modules;
-  QString m_className;
+    friend void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 };
 
-#endif  // LOGGER_H
+#endif // LOGGER_H

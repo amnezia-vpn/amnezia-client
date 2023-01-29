@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import org.amnezia.vpn.shadowsocks.core.Core;
 import org.amnezia.vpn.shadowsocks.core.VpnManager;
 
-public class VPNApplication extends org.qtproject.qt5.android.bindings.QtApplication {
+public class VPNApplication extends org.qtproject.qt.android.bindings.QtApplication {
     private static VPNApplication instance;
 
     @Override

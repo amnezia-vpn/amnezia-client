@@ -10,7 +10,7 @@ HEADERS = \
         ../../ipc/ipcserver.h \
         ../../ipc/ipcserverprocess.h \
         localserver.h \
-        log.h \
+        logger.h \
         router.h \
         systemservice.h
 
@@ -19,7 +19,7 @@ SOURCES = \
         ../../ipc/ipcserver.cpp \
         ../../ipc/ipcserverprocess.cpp \
         localserver.cpp \
-        log.cpp \
+        logger.cpp \
         main.cpp \
         router.cpp \
         systemservice.cpp

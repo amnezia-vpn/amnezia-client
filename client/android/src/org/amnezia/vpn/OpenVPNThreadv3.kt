@@ -31,6 +31,31 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     private var mAlreadyInitialised = false
     private var mService: VPNService = service
 
+    private var bytesInIndex = -1
+    private var bytesOutIndex = -1
+
+    init {
+        findConfigIndicies()
+    }
+
+    private fun findConfigIndicies() {
+        val n: Int = stats_n()
+
+        for (i in 0 until n) {
+            val name: String = stats_name(i)
+            if (name == "BYTES_IN") bytesInIndex = i
+            if (name == "BYTES_OUT") bytesOutIndex = i
+        }
+    }
+
+    fun getTotalRxBytes(): Long {
+        return stats_value(bytesInIndex)
+    }
+
+    fun getTotalTxBytes(): Long {
+        return stats_value(bytesOutIndex)
+    }
+
     override fun run() {
 
         val config: ClientAPI_Config = ClientAPI_Config()

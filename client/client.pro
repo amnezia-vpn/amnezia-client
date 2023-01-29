@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick svg quickcontrols2 core5compat
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
 equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
@@ -45,8 +45,8 @@ HEADERS  += \
     core/scripts_registry.h \
     core/server_defs.h \
     core/servercontroller.h \
-    debug.h \
     defines.h \
+    logger.h \
     managementserver.h \
     platforms/ios/MobileUtils.h \
     platforms/linux/leakdetector.h \
@@ -78,6 +78,7 @@ HEADERS  += \
     ui/pages_logic/protocols/OtherProtocolsLogic.h \
     ui/pages_logic/protocols/PageProtocolLogicBase.h \
     ui/pages_logic/protocols/ShadowSocksLogic.h \
+    ui/pages_logic/protocols/WireGuardLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
@@ -86,9 +87,6 @@ HEADERS  += \
     utilities.h \
     vpnconnection.h \
     protocols/vpnprotocol.h \
-    logger.h \
-    loghandler.h \
-    loglevel.h \
     constants.h \
     platforms/ios/QRCodeReaderBase.h
 
@@ -107,7 +105,7 @@ SOURCES  += \
     core/scripts_registry.cpp \
     core/server_defs.cpp \
     core/servercontroller.cpp \
-    debug.cpp \
+    logger.cpp \
     main.cpp \
     managementserver.cpp \
     platforms/ios/MobileUtils.cpp \
@@ -140,14 +138,13 @@ SOURCES  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
     ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
+    ui/pages_logic/protocols/WireGuardLogic.cpp \
     ui/uilogic.cpp \
     ui/qautostart.cpp \
     ui/models/sites_model.cpp \
     utilities.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
-    logger.cpp \
-    loghandler.cpp \
     platforms/ios/QRCodeReaderBase.cpp
 
 RESOURCES += \
@@ -164,11 +161,9 @@ win32 {
 
     HEADERS += \
        protocols/ikev2_vpn_protocol_windows.h \
-       ui/framelesswindow.h
 
     SOURCES += \
        protocols/ikev2_vpn_protocol_windows.cpp \
-       ui/framelesswindow.cpp
 
     VERSION = 2.0.0.0
     QMAKE_TARGET_COMPANY = "AmneziaVPN"
@@ -250,14 +245,8 @@ android {
     versionAtLeast(QT_VERSION, 6.0.0) {
         # We need to include qtprivate api's
         # As QAndroidBinder is not yet implemented with a public api
-        QT+=core-private
-        ANDROID_ABIS=ANDROID_TARGET_ARCH
-
-        # for not changing qtkeychain sources for qt6
-        QT -= androidextras
-    }
-    else {
-        QT += androidextras
+        QT += core-private
+        ANDROID_ABIS = $$ANDROID_TARGET_ARCH
     }
 
    DEFINES += MVPN_ANDROID
@@ -267,13 +256,16 @@ android {
    HEADERS += \
       platforms/android/android_controller.h \
       platforms/android/android_notificationhandler.h \
-      protocols/android_vpnprotocol.h
+      protocols/android_vpnprotocol.h \
+      platforms/android/androidutils.h \
+      platforms/android/androidvpnactivity.h
 
    SOURCES += \
       platforms/android/android_controller.cpp \
       platforms/android/android_notificationhandler.cpp \
-      protocols/android_vpnprotocol.cpp
-
+      protocols/android_vpnprotocol.cpp \
+      platforms/android/androidutils.cpp \
+      platforms/android/androidvpnactivity.cpp
 
    DISTFILES += \
       android/AndroidManifest.xml \
@@ -302,6 +294,7 @@ android {
       ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
    for (abi, ANDROID_ABIS): {
+
       equals(ANDROID_TARGET_ARCH,$$abi) {
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libcrypto.a
          LIBS += $$PWD/3rd/OpenSSL/lib/android/$${abi}/libssl.a

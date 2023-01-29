@@ -25,8 +25,10 @@ Proto currentProto = amnezia::Proto::Any;
 }
 
 IOSVpnProtocol::IOSVpnProtocol(Proto proto, const QJsonObject &configuration, QObject* parent)
-: VpnProtocol(configuration, parent),
-m_protocol(proto) {}
+: VpnProtocol(configuration, parent), m_protocol(proto)
+{
+    connect(this, &IOSVpnProtocol::newTransmitedDataCount, this, &IOSVpnProtocol::setBytesChanged);
+}
 
 IOSVpnProtocol* IOSVpnProtocol::instance() {
     return s_instance;
@@ -207,8 +209,7 @@ void IOSVpnProtocol::checkStatus()
         qDebug() << "ServerIpv4Gateway:" << QString::fromNSString(serverIpv4Gateway)
                     << "DeviceIpv4Address:" << QString::fromNSString(deviceIpv4Address)
                     << "RxBytes:" << rxBytes << "TxBytes:" << txBytes;
-        emit bytesChanged(rxBytes, txBytes);
-        
+        emit newTransmitedDataCount(rxBytes, txBytes);
     }];
 }
 

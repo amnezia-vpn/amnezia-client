@@ -15,7 +15,7 @@ set(HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
         ${CMAKE_CURRENT_LIST_DIR}/localserver.h
-        ${CMAKE_CURRENT_LIST_DIR}/log.h
+        ${CMAKE_CURRENT_LIST_DIR}/logger.h
         ${CMAKE_CURRENT_LIST_DIR}/router.h
         ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
 )
@@ -25,7 +25,7 @@ set(SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
         ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/log.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/logger.cpp
         ${CMAKE_CURRENT_LIST_DIR}/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/router.cpp
         ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
@@ -82,9 +82,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/../src/qtservice.cmake)
 
 include_directories(
+    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
-    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -104,7 +104,7 @@ if(WIN32)
         set(DEPLOY_ARTIFACT_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/serivce")
+    set(DEPLOY_ARTIFACT_PATH "linux/service")
 elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()

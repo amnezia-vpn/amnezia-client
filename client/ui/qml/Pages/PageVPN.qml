@@ -30,27 +30,13 @@ PageBase {
         font.pixelSize: 12
     }
 
-    BasicButtonType {
+    UrlButtonType {
+        id: button_donate
         y: 10
         anchors.horizontalCenter: parent.horizontalCenter
         height: 21
-        background: Item {}
-
-
-        contentItem: Text {
-            anchors.fill: parent
-            font.family: "Lato"
-            font.styleName: "normal"
-            font.pixelSize: 18
-            font.underline: true
-
-            text: qsTr("Donate")
-            color: "#D4D4D4"
-
-
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
+        label.color: "#D4D4D4"
+        label.text: qsTr("Donate")
 
         onClicked: {
             UiLogic.goToPage(PageEnum.About)
@@ -68,6 +54,21 @@ PageBase {
         onClicked: {
             UiLogic.goToPage(PageEnum.GeneralSettings)
         }
+    }
+
+    LabelType {
+        id: lb_log_enabled
+        anchors.top: button_donate.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width
+        height: 21
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+
+        text: "Logging enabled!"
+        color: "#D4D4D4"
+
+        visible: VpnLogic.labelLogEnabledVisible
     }
 
     AnimatedImage {

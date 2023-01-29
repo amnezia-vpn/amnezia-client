@@ -72,9 +72,9 @@ add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
 include_directories(
-    ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/include
     ${CLIENT_ROOT_DIR}/3rd/OpenSSL/include
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
+    ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
