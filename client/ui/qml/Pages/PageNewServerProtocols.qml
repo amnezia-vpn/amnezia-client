@@ -63,7 +63,7 @@ PageBase {
             pageLoader.focus = true
         }
 
-        onContainerSelected: {
+        onContainerSelected: function(c_index){
             var containerProto =  ContainerProps.defaultProtocol(c_index)
 
             tf_port_num.text = ProtocolProps.defaultPort(containerProto)
