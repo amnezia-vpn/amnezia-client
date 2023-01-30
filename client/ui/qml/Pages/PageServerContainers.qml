@@ -55,7 +55,6 @@ PageBase {
                 tf_port_num.text = qsTr("Default")
             }
             else tf_port_num.text = ProtocolProps.defaultPort(containerProto)
-
             cb_port_proto.currentIndex = ProtocolProps.defaultTransportProto(containerProto)
 
             tf_port_num.enabled = ProtocolProps.defaultPortChangeable(containerProto)
