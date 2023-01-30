@@ -20,7 +20,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -77,7 +77,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -170,15 +170,15 @@ jobs:
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
-    - name: iOS Build/Release With Multiple Targets Action
-      uses: kumarsunil0007/build-ios-action@latest
-      with:
-        project-path: build-ios/AmneziaVPN.xcodeproj
-        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
-        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
-        code-signing-identity:  'iOS Distribution'
-        team-id: 'X7UJ388FXK'
-        configuration: Release
+#    - name: iOS Build/Release With Multiple Targets Action
+#      uses: kumarsunil0007/build-ios-action@latest
+#      with:
+#        project-path: build-ios/AmneziaVPN.xcodeproj
+#        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
+#        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
+#        code-signing-identity:  'iOS Distribution'
+#        team-id: 'X7UJ388FXK'
+#        configuration: Release
 
 # ------------------------------------------------------
 
@@ -203,7 +203,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'

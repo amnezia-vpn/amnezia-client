@@ -70,7 +70,7 @@ QList<DockerContainer> ContainerProps::allContainers()
 QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return {
-        {DockerContainer::None, "Unknown (Old version)"},
+        {DockerContainer::None, "Not installed"},
         {DockerContainer::OpenVpn, "OpenVPN"},
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
