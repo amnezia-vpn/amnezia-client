@@ -371,7 +371,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         Log.i(tag, "Config: $mConfig")
         mProtocol = mConfig!!.getString("protocol")
         Log.i(tag, "Protocol: $mProtocol")
+
         when (mProtocol) {
+            "cloak",
             "openvpn" -> {
                 startOpenVpn()
             }
