@@ -98,11 +98,11 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
             resultingConfig.append("\n<cloak>\n")
             resultingConfig.append(cloakConfig)
             resultingConfig.append("\n</cloak>\n")
+
+            config.setUsePluggableTransports(true)
         }
 
         config.content = resultingConfig.toString()
-
-        config.setUsePluggableTransports(true)
 
         eval_config(config)
 
