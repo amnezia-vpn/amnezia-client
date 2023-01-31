@@ -27,7 +27,7 @@ if(APPLE AND NOT IOS)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.cpp)
 endif()
 
-if(LINUX)
+if(LINUX AND NOT ANDROID)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/linux)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.cpp)
