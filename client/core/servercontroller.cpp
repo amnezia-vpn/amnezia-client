@@ -396,10 +396,9 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         return ErrorCode::NoError;
     });
 
-    watcher.setFuture(future);
-
     QEventLoop wait;
     QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
     wait.exec();
 
     m_cancelInstallation = false;

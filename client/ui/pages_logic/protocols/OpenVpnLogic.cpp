@@ -51,9 +51,15 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     set_lineEditSubnetText(openvpnConfig.value(config_key::subnet_address).
                                       toString(protocols::openvpn::defaultSubnetAddress));
 
-    QString trasnsport = openvpnConfig.value(config_key::transport_proto).
-            toString(protocols::openvpn::defaultTransportProto);
-
+    QString trasnsport;
+    if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        trasnsport = "tcp";
+        set_radioButtonUdpEnabled(false);
+        set_radioButtonTcpEnabled(false);
+    } else {
+        trasnsport = openvpnConfig.value(config_key::transport_proto).
+                toString(protocols::openvpn::defaultTransportProto);
+    }
     set_radioButtonUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
     set_radioButtonTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
 
@@ -79,12 +85,6 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     QString additionalServerConfig = openvpnConfig.value(config_key::additional_server_config).
             toString(protocols::openvpn::defaultAdditionalServerConfig);
     set_textAreaAdditionalServerConfig(additionalServerConfig);
-
-    if (container == DockerContainer::ShadowSocks) {
-        set_radioButtonUdpEnabled(false);
-        set_radioButtonTcpEnabled(false);
-        set_radioButtonTcpChecked(true);
-    }
 
     set_lineEditPortText(openvpnConfig.value(config_key::port).
                                     toString(protocols::openvpn::defaultPort));

@@ -163,5 +163,6 @@
         <file>images/svg/control_point_black_24dp.svg</file>
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
+        <file>ui/qml/Controls/PopupWithQuestion.qml</file>
     </qresource>
 </RCC>
