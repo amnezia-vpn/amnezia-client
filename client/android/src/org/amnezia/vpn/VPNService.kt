@@ -185,6 +185,12 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         return super.onUnbind(intent)
     }
 
+    override fun onDestroy() {
+        turnOff()
+
+        super.onDestroy()
+    }
+
     /**
      * EntryPoint for the Service, gets Called when AndroidController.cpp
      * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
@@ -448,8 +454,13 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     fun turnOff() {
         Log.v(tag, "Aman: turnOff....................")
         when (mProtocol) {
-            "wireguard" -> wgTurnOff(currentTunnelHandle)
-            "openvpn" -> ovpnTurnOff()
+            "wireguard" -> {
+                wgTurnOff(currentTunnelHandle)
+            }
+            "cloak",
+            "openvpn" -> {
+                ovpnTurnOff()
+            }
             "shadowsocks" -> {
                 stopRunner(false)
                 stopTest()
@@ -458,6 +469,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 Log.e(tag, "No protocol")
             }
         }
+
         currentTunnelHandle = -1
         stopForeground(true)
         isUp = false
