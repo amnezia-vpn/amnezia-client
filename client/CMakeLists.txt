@@ -595,3 +595,6 @@ add_custom_command(
     COMMAND_EXPAND_LISTS
 )
 endif()
+if(IOS)
+ include(cmake/ios-arch-fixup.cmake)
+endif()
