@@ -42,9 +42,9 @@ namespace libssh {
         ErrorCode fromLibsshErrorCode(int errorCode);
         ErrorCode fromLibsshSftpErrorCode(int errorCode);
 
-        ssh_session m_session {};
-        ssh_channel m_channel {};
-        sftp_session m_sftpSession {};
+        ssh_session m_session = nullptr;
+        ssh_channel m_channel = nullptr;
+        sftp_session m_sftpSession = nullptr;
     signals:
         void writeToChannelFinished();
         void sftpFileCopyFinished();
