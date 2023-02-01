@@ -26,7 +26,7 @@ namespace libssh {
 //            qDebug() << "Failed to initialize ssh";
 //            return ErrorCode::InternalError;
 //        }
-        if (m_session != NULL) {
+        if (m_session == nullptr) {
             m_session = ssh_new();
 
             if (m_session == NULL) {
@@ -80,6 +80,7 @@ namespace libssh {
                 ssh_disconnect(m_session);
             }
             ssh_free(m_session);
+            m_session = nullptr;
         }
     }
 
@@ -186,6 +187,7 @@ namespace libssh {
                 ssh_channel_close(m_channel);
             }
             ssh_channel_free(m_channel);
+            m_channel = nullptr;
         }
         qDebug() << ssh_get_error(m_session);
         return fromLibsshErrorCode(ssh_get_error_code(m_session));
@@ -285,6 +287,7 @@ namespace libssh {
         auto errorCode = fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
         if (m_sftpSession != NULL) {
             sftp_free(m_sftpSession);
+            m_sftpSession = nullptr;
         }
         qDebug() << ssh_get_error(m_session);
         return errorCode;
