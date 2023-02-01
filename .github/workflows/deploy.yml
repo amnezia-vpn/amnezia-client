@@ -23,9 +23,9 @@ jobs:
 
     steps:
     - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
+      uses: maxim-lobanov/setup-xcode@v1.5.1
       with:
-        xcode-version: '13.4'
+        xcode-version: 'latest-stable'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
