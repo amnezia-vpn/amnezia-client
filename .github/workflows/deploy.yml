@@ -22,9 +22,6 @@ jobs:
       NE_ID: 'org.amnezia.AmneziaVPN.network-extension'
 
     steps:
-    - name: Install Xcode
-      run: xcode-select --install
-
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
       with:
