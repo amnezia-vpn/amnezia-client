@@ -29,7 +29,7 @@ namespace libssh {
         if (m_session == nullptr) {
             m_session = ssh_new();
 
-            if (m_session == NULL) {
+            if (m_session == nullptr) {
                 qDebug() << "Failed to create ssh session";
                 return ErrorCode::InternalError;
             }
@@ -75,7 +75,7 @@ namespace libssh {
 
     void Client::disconnectFromHost()
     {
-        if (m_session != NULL) {
+        if (m_session != nullptr) {
             if (ssh_is_connected(m_session)) {
                 ssh_disconnect(m_session);
             }
@@ -90,7 +90,7 @@ namespace libssh {
     {
         m_channel = ssh_channel_new(m_session);
 
-        if (m_channel == NULL) {
+        if (m_channel == nullptr) {
             return closeChannel();
         }
 
@@ -164,7 +164,7 @@ namespace libssh {
 
     ErrorCode Client::writeResponse(const QString &data)
     {
-        if (m_channel == NULL) {
+        if (m_channel == nullptr) {
             qDebug() << "ssh channel not initialized";
             return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
@@ -179,7 +179,7 @@ namespace libssh {
 
     ErrorCode Client::closeChannel()
     {
-        if (m_channel != NULL) {
+        if (m_channel != nullptr) {
             if (ssh_channel_is_eof(m_channel)) {
                 ssh_channel_send_eof(m_channel);
             }
@@ -197,7 +197,7 @@ namespace libssh {
     {
         m_sftpSession = sftp_new(m_session);
 
-        if (m_sftpSession == NULL) {
+        if (m_sftpSession == nullptr) {
             return closeSftpSession();
         }
 
@@ -218,7 +218,7 @@ namespace libssh {
 
             file = sftp_open(m_sftpSession, remotePath.c_str(), accessType, S_IRWXU);
 
-            if (file == NULL) {
+            if (file == nullptr) {
                 return closeSftpSession();
             }
 
@@ -285,7 +285,7 @@ namespace libssh {
     ErrorCode Client::closeSftpSession()
     {
         auto errorCode = fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
-        if (m_sftpSession != NULL) {
+        if (m_sftpSession != nullptr) {
             sftp_free(m_sftpSession);
             m_sftpSession = nullptr;
         }
