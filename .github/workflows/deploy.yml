@@ -72,7 +72,7 @@ jobs:
         export PATH=$PATH:~/go/bin
         cd client
         mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
     - name: Build iOS Action
       uses: Shahzainali/ios-build-action@2.1

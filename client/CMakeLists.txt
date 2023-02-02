@@ -75,13 +75,12 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
-
 )
 
 if(NOT IOS)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
 endif()
 
@@ -98,13 +97,12 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
-
 )
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
 endif()
 
