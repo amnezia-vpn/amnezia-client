@@ -55,7 +55,6 @@ PageBase {
                 tf_port_num.text = qsTr("Default")
             }
             else tf_port_num.text = ProtocolProps.defaultPort(containerProto)
-
             cb_port_proto.currentIndex = ProtocolProps.defaultTransportProto(containerProto)
 
             tf_port_num.enabled = ProtocolProps.defaultPortChangeable(containerProto)
@@ -297,21 +296,22 @@ PageBase {
                                 implicitHeight: 30
 
                                 checked: default_role
-
-                                MessageDialog {
-                                    id: dialogRemove
-                                    buttons: StandardButton.Yes | StandardButton.Cancel
-                                    title: "AmneziaVPN"
-                                    text: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
-                                    onAccepted: {
-                                        tb_c.currentIndex = -1
-                                        ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
-                                    }
-                                }
-
-                                onClicked: dialogRemove.open()
+                                onClicked: popupRemove.open()
 
                                 VisibleBehavior on visible { }
+                            }
+
+                            PopupWithQuestion {
+                                id: popupRemove
+                                questionText: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
+                                yesFunc: function() {
+                                    tb_c.currentIndex = -1
+                                    ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
+                                    close()
+                                }
+                                noFunc: function() {
+                                    close()
+                                }
                             }
 
                             ImageButtonType {
@@ -418,7 +418,7 @@ PageBase {
 
     BlueButtonType {
         id: pb_add_container
-        visible: container_selector.selectedIndex < 0
+        visible: container_selector.selectedIndex < 0 && ServerContainersLogic.isManagedServer
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -430,6 +430,5 @@ PageBase {
         text: qsTr("Install new service")
         font.pixelSize: 16
         onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
-
     }
 }
