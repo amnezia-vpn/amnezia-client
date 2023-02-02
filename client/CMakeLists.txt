@@ -596,5 +596,5 @@ add_custom_command(
 )
 endif()
 if(IOS)
- include(cmake/ios-arch-fixup.cmake)
+ #include(cmake/ios-arch-fixup.cmake)
 endif()
