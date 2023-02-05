@@ -31,6 +31,7 @@ include(tools.cmake)
 include(lzo.cmake)
 include(lz4.cmake)
 include(openssl/openssl.cmake)
+include(cloak.cmake)
 
 if(NOT ${OPENVPN3OSSL} OR ${OPENVPN2MBED})
     add_subdirectory(mbedtls)
@@ -75,7 +76,7 @@ endif()
         target_compile_definitions(ovpn3 PRIVATE
                 -DUSE_OPENSSL
                 )
-        target_link_libraries(ovpn3 crypto ssl lzo lz4 libck-ovpn-plugin.so)
+        target_link_libraries(ovpn3 crypto ssl lzo lz4 ck-ovpn-plugin)
     else ()
         target_compile_definitions(ovpn3 PRIVATE
                 -DUSE_MBEDTLS

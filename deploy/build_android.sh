@@ -114,43 +114,11 @@ done
 
 getHostTag
 MIN_API=21
-ANDROID_PREBUILT_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
-
-ANDROID_ARM_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/armv7a-linux-androideabi${MIN_API}-clang
-
-ANDROID_ARM64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android21-clang
-
-ANDROID_X86_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android${MIN_API}-clang
-
-ANDROID_X86_64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android${MIN_API}-clang
-
-DEPS=$(pwd)/client/android/cpp/.deps
-SRC_DIR=$(pwd)/client/android/cpp
-
-try mkdir -p $DEPS $SRC_DIR/cloak/armeabi-v7a $SRC_DIR/cloak/x86 $SRC_DIR/cloak/arm64-v8a $SRC_DIR/cloak/x86_64
-
-cd $SRC_DIR/cloak
-try go get ./...
-
-cd cmd/ck-ovpn-plugin
-
-echo "Cross compiling ckclient for arm"
-try env CGO_ENABLED=1 CC="$ANDROID_ARM_CC" GOOS=android GOARCH=arm GOARM=7 go build -buildmode=c-shared -ldflags="-s -w"
-try mv ck-ovpn-plugin $SRC_DIR/cloak/armeabi-v7a/libck-ovpn-plugin.so
-
-echo "Cross compiling ckclient for arm64"
-try env CGO_ENABLED=1 CC="$ANDROID_ARM64_CC" GOOS=android GOARCH=arm64 go build -buildmode=c-shared -ldflags="-s -w"
-try mv ck-ovpn-plugin $SRC_DIR/cloak/arm64-v8a/libck-ovpn-plugin.so
-
-echo "Cross compiling ckclient for x86"
-try env CGO_ENABLED=1 CC="$ANDROID_X86_CC" GOOS=android GOARCH=386 go build -buildmode=c-shared -ldflags="-s -w"
-try mv ck-ovpn-plugin $SRC_DIR/cloak/x86/libck-ovpn-plugin.so
-
-echo "Cross compiling ckclient for x86_64"
-try env CGO_ENABLED=1 CC="$ANDROID_X86_64_CC" GOOS=android GOARCH=amd64 go build -buildmode=c-shared -ldflags="-s -w"
-try mv ck-ovpn-plugin $SRC_DIR/cloak/x86_64/libck-ovpn-plugin.so
-
-echo "Success"
+export ANDROID_PREBUILT_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
+export ANDROID_ARM_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/armv7a-linux-androideabi${MIN_API}-clang
+export ANDROID_ARM64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android${MIN_API}-clang
+export ANDROID_X86_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android${MIN_API}-clang
+export ANDROID_X86_64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android${MIN_API}-clang
 
 # Build App
 echo "Building App..."
