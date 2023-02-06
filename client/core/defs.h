@@ -32,6 +32,7 @@ enum ErrorCode
     ServerContainerMissingError,
     ServerDockerFailedError,
     ServerCancelInstallation,
+    ServerContainerAlreadyInstalledError,
 
     // Ssh connection errors
     SshSocketError, SshTimeoutError, SshProtocolError,

@@ -82,6 +82,7 @@ private:
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    ErrorCode isContainerAlreadyInstalled(const ServerCredentials &credentials, DockerContainer container);
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;

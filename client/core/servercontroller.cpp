@@ -415,6 +415,9 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
 
+    e = isContainerAlreadyInstalled(credentials, container);
+    if (e) return e;
+
     e = installDockerWorker(credentials, container);
     if (e) return e;
     qDebug().noquote() << "ServerController::setupContainer installDockerWorker finished";
@@ -855,4 +858,29 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
     }
     //qDebug().noquote() << script;
     return s;
+}
+
+ErrorCode ServerController::isContainerAlreadyInstalled(const ServerCredentials &credentials, DockerContainer container)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
+        stdOut += data + "\n";
+    };
+
+    QString script = QString("sudo docker ps | grep %1").arg(ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = runScript(credentials,
+                                    replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (!stdOut.isEmpty()) {
+        return ErrorCode::ServerContainerAlreadyInstalledError;
+    }
+    return ErrorCode::NoError;
 }
