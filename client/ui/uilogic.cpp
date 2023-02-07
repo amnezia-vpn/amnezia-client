@@ -337,7 +337,7 @@ void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
         m_serverController->disconnectFromHost(installCredentials);
     }
 
-    if (error == ErrorCode::NoError) {
+    if (error == ErrorCode::NoError || error == ErrorCode::ServerContainerAlreadyInstalledError) {
         QJsonObject server;
         server.insert(config_key::hostName, installCredentials.hostName);
         server.insert(config_key::userName, installCredentials.userName);

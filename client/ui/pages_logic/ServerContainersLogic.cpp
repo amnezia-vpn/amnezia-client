@@ -87,11 +87,11 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
-    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, c, &config](){
+    ErrorCode error = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, c, &config](){
         return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), c, config);
     });
 
-    if (!e) {
+    if (error == ErrorCode::NoError || error == ErrorCode::ServerContainerAlreadyInstalledError) {
         m_settings->setContainerConfig(uiLogic()->selectedServerIndex, c, config);
         if (ContainerProps::containerService(c) == ServiceType::Vpn) {
             m_settings->setDefaultContainer(uiLogic()->selectedServerIndex, c);
