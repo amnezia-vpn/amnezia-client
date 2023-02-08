@@ -1,6 +1,5 @@
 name: 'Deploy workflow'
 
-
 on: [push]
 
 jobs:
@@ -113,13 +112,17 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.4
+      APP_ID: 'org.amnezia.AmneziaVPN'
+      IOS_APP_ID: 'org.amnezia.AmneziaVPN'
+      APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APPLE_KEY_CONTENT }}
+      APP_STORE_CONNECT_API_KEY_IS_KEY_CONTENT_BASE64: false
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }} 
+      NE_ID: 'org.amnezia.AmneziaVPN.network-extension'
 
     steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '13.4'
-
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
       with:
@@ -158,8 +161,9 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Rust'
+      run: |
+        rustup target add x86_64-apple-ios aarch64-apple-ios
 
     - name: 'Build project'
       run: |
@@ -167,18 +171,29 @@ jobs:
         export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
+        cd client
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
-#    - name: iOS Build/Release With Multiple Targets Action
-#      uses: kumarsunil0007/build-ios-action@latest
-#      with:
-#        project-path: build-ios/AmneziaVPN.xcodeproj
-#        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
-#        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
-#        code-signing-identity:  'iOS Distribution'
-#        team-id: 'X7UJ388FXK'
-#        configuration: Release
+    - name: Build iOS Action
+      uses: Shahzainali/ios-build-action@2.1
+      with:
+        upload-to-testflight: true
+        increment-build-number: true
+        configuration: Release
+        export-method: app-store
+        project-path: /Users/runner/work/desktop-client/desktop-client/client/build-ios/AmneziaVPN.xcodeproj
+        scheme: AmneziaVPN
+        output-path: build-${{ github.sha }}.ipa
+        apple-key-id: ${{ secrets.APPLE_KEY_ID }}
+        apple-key-issuer-id: ${{ secrets.APPLE_KEY_ISSUER_ID }}
+        apple-key-content: ${{ secrets.APPLE_KEY_CONTENT }}
+        team-id: ${{ secrets.TEAM_ID }}
+        team-name: ${{ secrets.TEAM_NAME }}
+        match-password: ${{ secrets.MATCH_PASSWORD }}
+        match-git-url: ${{ secrets.MATCH_GIT_URL }}
+        match-git-basic-authorization: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        match-build-type: 'appstore'
 
 # ------------------------------------------------------
 
