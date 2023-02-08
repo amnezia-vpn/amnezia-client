@@ -82,6 +82,8 @@ add_subdirectory(${CLIENT_ROOT_DIR}/3rd/libssh)
 add_compile_definitions(_WINSOCKAPI_)
 set(LIBS ${LIBS} ssh)
 
+set(WITH_GSSAPI OFF CACHE BOOL "" FORCE)
+
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
