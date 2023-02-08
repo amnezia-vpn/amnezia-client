@@ -41,6 +41,7 @@ jobs:
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
+
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v3
       with:
@@ -95,6 +96,7 @@ jobs:
         set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         call deploy\\build_windows.bat
+
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v3
       with:
@@ -149,6 +151,7 @@ jobs:
           export PATH=$PATH:~/go/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
+
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
@@ -166,6 +169,7 @@ jobs:
         export PATH=$PATH:~/go/bin
         mkdir build-ios
         $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+
 #    - name: iOS Build/Release With Multiple Targets Action
 #      uses: kumarsunil0007/build-ios-action@latest
 #      with:
@@ -220,6 +224,7 @@ jobs:
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
+
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v3
       with:
@@ -292,9 +297,11 @@ jobs:
         export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
         export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
         export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
+
         if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
           wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
           unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
         fi
+
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
         bash deploy/build_android.sh
