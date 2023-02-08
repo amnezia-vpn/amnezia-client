@@ -62,7 +62,7 @@
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/run_container.sh</file>
         <file>ui/qml/main.qml</file>
-        <file>ui/qml/TitleBar.qml</file>
+        <file>ui/qml/Pages/PageBase.qml</file>
         <file>ui/qml/Pages/PageAppSetting.qml</file>
         <file>ui/qml/Pages/PageGeneralSettings.qml</file>
         <file>ui/qml/Pages/PageNetworkSetting.qml</file>
@@ -81,6 +81,28 @@
         <file>ui/qml/Pages/PageSites.qml</file>
         <file>ui/qml/Pages/PageStart.qml</file>
         <file>ui/qml/Pages/PageVPN.qml</file>
+        <file>ui/qml/Pages/PageQrDecoder.qml</file>
+        <file>ui/qml/Pages/PageAbout.qml</file>
+        <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
+        <file>ui/qml/Pages/PageViewConfig.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoSftp.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoWireGuard.qml</file>
+        <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
+        <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtocolBase.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoOpenVPN.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoSftp.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoShadowSocks.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoTorWebSite.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoAmnezia.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoWireGuard.qml</file>
+        <file>ui/qml/Pages/Share/PageShareProtoIkev2.qml</file>
         <file>ui/qml/Controls/BasicButtonType.qml</file>
         <file>ui/qml/Controls/BlueButtonType.qml</file>
         <file>ui/qml/Controls/CheckBoxType.qml</file>
@@ -92,57 +114,41 @@
         <file>ui/qml/Controls/ShareConnectionButtonType.qml</file>
         <file>ui/qml/Controls/ShareConnectionContent.qml</file>
         <file>ui/qml/Controls/TextFieldType.qml</file>
-        <file>ui/qml/Pages/PageBase.qml</file>
-        <file>ui/qml/Config/GlobalConfig.qml</file>
-        <file>ui/qml/Config/qmldir</file>
-        <file>images/background_connected.png</file>
-        <file>images/background_connected@2x.png</file>
-        <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
-        <file>ui/qml/Controls/BackButton.qml</file>
-        <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
-        <file>ui/qml/Controls/Caption.qml</file>
-        <file>ui/qml/Controls/Logo.qml</file>
-        <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
-        <file>images/delete.png</file>
+        <file>ui/qml/Controls/RichLabelType.qml</file>
+        <file>ui/qml/Controls/SvgImageType.qml</file>
+        <file>ui/qml/Controls/FlickableType.qml</file>
+        <file>ui/qml/Controls/UrlButtonType.qml</file>
+        <file>ui/qml/Controls/TextAreaType.qml</file>
+        <file>ui/qml/Controls/ContextMenu.qml</file>
         <file>ui/qml/Controls/FadeBehavior.qml</file>
         <file>ui/qml/Controls/VisibleBehavior.qml</file>
+        <file>ui/qml/Controls/Caption.qml</file>
+        <file>ui/qml/Controls/Logo.qml</file>
+        <file>ui/qml/Controls/BackButton.qml</file>
+        <file>ui/qml/Controls/ShareConnectionButtonCopyType.qml</file>
+        <file>ui/qml/Controls/SvgButtonType.qml</file>
+        <file>ui/qml/Config/GlobalConfig.qml</file>
+        <file>ui/qml/Config/qmldir</file>
+        <file>server_scripts/check_server_is_busy.sh</file>
         <file>server_scripts/dns/configure_container.sh</file>
         <file>server_scripts/dns/Dockerfile</file>
         <file>server_scripts/dns/run_container.sh</file>
         <file>server_scripts/sftp/configure_container.sh</file>
         <file>server_scripts/sftp/Dockerfile</file>
         <file>server_scripts/sftp/run_container.sh</file>
-        <file>ui/qml/Pages/Protocols/PageProtoSftp.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
         <file>server_scripts/ipsec/configure_container.sh</file>
         <file>server_scripts/ipsec/Dockerfile</file>
         <file>server_scripts/ipsec/run_container.sh</file>
         <file>server_scripts/ipsec/start.sh</file>
-        <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtocolBase.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoOpenVPN.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoSftp.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoShadowSocks.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoTorWebSite.qml</file>
-        <file>ui/qml/Controls/TextAreaType.qml</file>
-        <file>ui/qml/Controls/ContextMenu.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoAmnezia.qml</file>
-        <file>ui/qml/Controls/ShareConnectionButtonCopyType.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoWireGuard.qml</file>
         <file>server_scripts/ipsec/mobileconfig.plist</file>
-        <file>ui/qml/Pages/Share/PageShareProtoIkev2.qml</file>
         <file>server_scripts/ipsec/strongswan.profile</file>
+        <file>images/background_connected.png</file>
+        <file>images/background_connected@2x.png</file>
+        <file>images/delete.png</file>
         <file>images/animation.gif</file>
         <file>images/connected.png</file>
         <file>images/disconnected.png</file>
-        <file>ui/qml/Pages/PageQrDecoder.qml</file>
-        <file>ui/qml/Pages/PageAbout.qml</file>
-        <file>ui/qml/Controls/RichLabelType.qml</file>
         <file>images/svg/gpp_good_black_24dp.svg</file>
-        <file>ui/qml/Controls/SvgImageType.qml</file>
         <file>images/svg/gpp_maybe_black_24dp.svg</file>
         <file>images/svg/close_black_24dp.svg</file>
         <file>images/svg/delete_black_24dp.svg</file>
@@ -156,9 +162,7 @@
         <file>images/svg/vpn_key_black_24dp.svg</file>
         <file>images/svg/control_point_black_24dp.svg</file>
         <file>images/svg/settings_suggest_black_24dp.svg</file>
-        <file>ui/qml/Controls/SvgButtonType.qml</file>
-        <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
         <file>server_scripts/website_tor/Dockerfile</file>
-        <file>ui/qml/Pages/PageViewConfig.qml</file>
+        <file>ui/qml/Controls/PopupWithQuestion.qml</file>
     </qresource>
 </RCC>

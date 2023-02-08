@@ -34,9 +34,20 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(QString, labelProtoOpenVpnInfoText)
     AUTO_PROPERTY(int, progressBarResetValue)
     AUTO_PROPERTY(int, progressBarResetMaximium)
+    AUTO_PROPERTY(bool, progressBarTextVisible)
+    AUTO_PROPERTY(QString, progressBarText)
+
+    AUTO_PROPERTY(bool, labelServerBusyVisible)
+    AUTO_PROPERTY(QString, labelServerBusyText)
+
+    AUTO_PROPERTY(bool, pushButtonCancelVisible)
+
+    AUTO_PROPERTY(QString, openVpnLastConfigText)
+    AUTO_PROPERTY(bool, isThirdPartyConfig)
 
 public:
-    Q_INVOKABLE void onPushButtonProtoOpenVpnSaveClicked();
+    Q_INVOKABLE void onPushButtonSaveClicked();
+    Q_INVOKABLE void onPushButtonCancelClicked();
 
 public:
     explicit OpenVpnLogic(UiLogic *uiLogic, QObject *parent = nullptr);

@@ -12,6 +12,8 @@
 #include <QApplication>
 #include <QTemporaryFile>
 #include <QFileInfo>
+#include <QThread>
+#include <QtConcurrent>
 
 #include "sftpchannel.h"
 #include "sshconnectionmanager.h"
@@ -79,7 +81,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
 
         qDebug().noquote() << "EXEC" << lineToExec;
-        Debug::appendSshLog("Run command:" + lineToExec);
+        Logger::appendSshLog("Run command:" + lineToExec);
 
         QSharedPointer<SshRemoteProcess> proc = client->createRemoteProcess(lineToExec.toUtf8());
 
@@ -105,7 +107,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
             QString s = proc->readAllStandardOutput();
 
             if (s != "." && !s.isEmpty()) {
-                Debug::appendSshLog("Output: " + s);
+                Logger::appendSshLog("Output: " + s);
                 qDebug().noquote() << "stdout" << s;
             }
             if (cbReadStdOut) cbReadStdOut(s, proc);
@@ -114,7 +116,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         QObject::connect(proc.data(), &SshRemoteProcess::readyReadStandardError, &wait, [proc, cbReadStdErr](){
             QString s = proc->readAllStandardError();
             if (s != "." && !s.isEmpty()) {
-                Debug::appendSshLog("Output: " + s);
+                Logger::appendSshLog("Output: " + s);
                 qDebug().noquote() << "stderr" << s;
             }
             if (cbReadStdErr) cbReadStdErr(s, proc);
@@ -140,7 +142,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     const std::function<void (const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    Debug::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
+    Logger::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e) return e;
@@ -528,14 +530,44 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         stdOut += data + "\n";
     };
 
-    ErrorCode e = runScript(credentials,
-        replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
-            genVarsForScript(credentials)),
-                cbReadStdOut, cbReadStdErr);
+    QFutureWatcher<ErrorCode> watcher;
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
+        do {
+            if (m_cancelInstallation) {
+                return ErrorCode::ServerCancelInstallation;
+            }
+            stdOut.clear();
+            runScript(credentials,
+                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
+                                  genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+                emit serverIsBusy(true);
+                QThread::msleep(1000);
+            }
+        } while (!stdOut.isEmpty());
+        return ErrorCode::NoError;
+    });
+
+    QEventLoop wait;
+    QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
+
+    m_cancelInstallation = false;
+    emit serverIsBusy(false);
+
+    if (future.result() != ErrorCode::NoError) {
+        return future.result();
+    }
+
+    ErrorCode error = runScript(credentials,
+                                replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
+                                            genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
-    return e;
+    return error;
 }
 
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
@@ -794,6 +826,11 @@ SshConnection *ServerController::connectToHost(const SshConnectionParameters &ss
     //    QObject::connect(proc, &SshProcess::failed, &wait, &QEventLoop::quit);
 
     return client;
+}
+
+void ServerController::setCancelInstallation(const bool cancel)
+{
+    m_cancelInstallation = cancel;
 }
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)

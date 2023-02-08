@@ -109,8 +109,6 @@ QString OpenVpnOverCloakProtocol::cloakExecPath()
 {
 #ifdef Q_OS_WIN
     return Utils::executable(QString("cloak/ck-client"), true);
-#elif defined Q_OS_LINUX
-        return Utils::usrExecutable("ck-client");
 #else
     return Utils::executable(QString("/ck-client"), true);
 #endif

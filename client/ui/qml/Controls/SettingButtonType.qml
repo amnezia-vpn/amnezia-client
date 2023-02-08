@@ -8,7 +8,6 @@ BasicButtonType {
 
     background: Item {}
     contentItem: Item {
-//        anchors.fill: parent
         SvgImageType {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter

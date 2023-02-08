@@ -11,9 +11,9 @@ PageProtocolBase {
     protocol: ProtocolEnum.Cloak
     logic: UiLogic.protocolLogic(protocol)
 
-    enabled: logic.pageEnabled
     BackButton {
         id: back
+        enabled: !logic.pushButtonCancelVisible
     }
 
     Caption {
@@ -111,15 +111,22 @@ PageProtocolBase {
     }
 
     LabelType {
+        id: label_server_busy
+        horizontalAlignment: Text.AlignHCenter
+        Layout.maximumWidth: parent.width
+        Layout.fillWidth: true
+        visible: logic.labelServerBusyVisible
+        text: logic.labelServerBusyText
+    }
+
+    LabelType {
         id: label_proto_cloak_info
-        x: 30
-        anchors.bottom: pb_save.top
-        anchors.bottomMargin: 10
-        width: parent.width - 40
+        horizontalAlignment: Text.AlignHCenter
+        Layout.maximumWidth: parent.width
+        Layout.fillWidth: true
         visible: logic.labelInfoVisible
         text: logic.labelInfoText
     }
-
 
     ProgressBar {
         id: progressBar_proto_cloak_reset
@@ -146,6 +153,19 @@ PageProtocolBase {
             }
         }
         visible: logic.progressBarResetVisible
+        LabelType {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            text: logic.progressBarText
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Lato"
+            font.styleName: "normal"
+            font.pixelSize: 16
+            color: "#D4D4D4"
+            visible: logic.progressBarTextVisible
+        }
     }
     BlueButtonType {
         id: pb_save
@@ -162,4 +182,13 @@ PageProtocolBase {
         }
     }
 
+    BlueButtonType {
+        anchors.fill: pb_save
+        text: qsTr("Cancel")
+        visible: logic.pushButtonCancelVisible
+        enabled: logic.pushButtonCancelVisible
+        onClicked: {
+            logic.onPushButtonCancelClicked()
+        }
+    }
 }

@@ -1,11 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <array name="qt_sources">
-        <item>https://download.qt.io/ministro/android/qt5/qt-5.14</item>
-    </array>
-
-    <!-- The following is handled automatically by the deployment tool. It should
-         not be edited manually. -->
+    <!-- DO NOT EDIT THIS: This file is populated automatically by the deployment tool. -->
 
     <array name="bundled_libs">
         <!-- %%INSERT_EXTRA_LIBS%% -->
@@ -19,4 +14,8 @@
         <!-- %%INSERT_LOCAL_LIBS%% -->
     </array>
 
+    <string name="static_init_classes"><!-- %%INSERT_INIT_CLASSES%% --></string>
+    <string name="use_local_qt_libs"><!-- %%USE_LOCAL_QT_LIBS%% --></string>
+    <string name="bundle_local_qt_libs"><!-- %%BUNDLE_LOCAL_QT_LIBS%% --></string>
+    <string name="system_libs_prefix"><!-- %%SYSTEM_LIBS_PREFIX%% --></string>
 </resources>
