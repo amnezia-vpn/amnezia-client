@@ -27,7 +27,7 @@ $OPENVPN_ADDITIONAL_SERVER_CONFIG
 EOF
 
 # V2RAY_VMESS_PORT port for v2ray  listening, for example 10086.
-# V2RAY_VMESS_CLIENT_UID client's id and secret as UUID.
+# V2RAY_VMESS_CLIENT_UUID client's id and secret as UUID.
 # UUID is 32 hexadecimal digits /([0-9a-f]-?){32}/ (128 bit value).
 
 mkdir -p /opt/amnezia/v2ray
@@ -43,7 +43,7 @@ cat < /opt/amnezia/v2ray/v2ray-server.json <<EOF
       "settings": {
         "clients": [
           {
-            "id": "$V2RAY_VMESS_CLIENT_UID",
+            "id": "$V2RAY_VMESS_CLIENT_UUID",
             "level": 1,
             "alterId": 64
           }
