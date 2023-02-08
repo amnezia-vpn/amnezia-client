@@ -13,7 +13,7 @@ set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 include(${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/zlib)
 if(WIN32)
     set(ZLIB_LIBRARY $<IF:$<CONFIG:Debug>,zlibd,zlib>)

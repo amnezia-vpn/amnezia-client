@@ -12,12 +12,12 @@
 namespace libssh {
     Client::Client(QObject *parent) : QObject(parent)
     {
-        ssh_init();
+//        ssh_init();
     }
 
     Client::~Client()
     {
-        ssh_finalize();
+//        ssh_finalize();
     }
 
     ErrorCode Client::connectToHost(const ServerCredentials &credentials)
