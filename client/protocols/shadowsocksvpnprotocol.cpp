@@ -109,8 +109,6 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 {
 #ifdef Q_OS_WIN
     return Utils::executable(QString("ss/ss-local"), true);
-#elif defined Q_OS_LINUX
-    return Utils::usrExecutable(QString("ss-local"));
 #else
     return Utils::executable(QString("/ss-local"), true);
 #endif
