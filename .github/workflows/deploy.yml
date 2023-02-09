@@ -47,13 +47,13 @@ jobs:
       with:
         name: AmneziaVPN_Linux_installer
         path: deploy/AmneziaVPN_Linux_Installer
-        retention-days: 3
+        retention-days: 7
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_Linux_unpacked
         path: deploy/AppDir
-        retention-days: 3
+        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -108,13 +108,13 @@ jobs:
       with:
         name: AmneziaVPN_Windows_installer
         path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
-        retention-days: 3
+        retention-days: 7
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_Windows_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 3
+        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -242,13 +242,13 @@ jobs:
       with:
         name: AmneziaVPN_MacOS_installer
         path: AmneziaVPN.dmg
-        retention-days: 3
+        retention-days: 7
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/installer
-        retention-days: 3
+        path: deploy/build/client/AmneziaVPN.app
+        retention-days: 7
 
 # ------------------------------------------------------
 
