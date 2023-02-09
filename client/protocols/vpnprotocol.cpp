@@ -9,6 +9,7 @@
 #include "shadowsocksvpnprotocol.h"
 #include "openvpnovercloakprotocol.h"
 #include "wireguardprotocol.h"
+#include "v2rayprotocol.h"
 #endif
 
 #ifdef Q_OS_WINDOWS
@@ -114,6 +115,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject& 
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
     case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);
     case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
+    case DockerContainer::V2Ray: return new V2RayProtocol(configuration);
 #endif
     default: return nullptr;
     }

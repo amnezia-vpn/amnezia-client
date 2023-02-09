@@ -8,8 +8,7 @@
 #include "wireguardprotocol.h"
 #include "utilities.h"
 
-WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) :
-    VpnProtocol(configuration, parent)
+WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) : VpnProtocol(configuration, parent)
 {
     m_configFile.setFileName(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     writeWireguardConfiguration(configuration);

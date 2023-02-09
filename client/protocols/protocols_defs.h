@@ -148,6 +148,7 @@ enum Proto {
     WireGuard,
     Ikev2,
     L2tp,
+    V2Ray,
 
     // non-vpn
     TorWebSite,

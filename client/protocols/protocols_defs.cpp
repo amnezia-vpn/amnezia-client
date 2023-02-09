@@ -75,6 +75,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
         {Proto::WireGuard, "WireGuard"},
         {Proto::Ikev2, "IKEv2"},
         {Proto::L2tp, "L2TP"},
+        {Proto::V2Ray, "V2Ray"},
 
         {Proto::TorWebSite, "Web site in Tor network"},
         {Proto::Dns, "DNS Service"},
@@ -96,10 +97,12 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::Cloak :        return ServiceType::Vpn;
     case Proto::ShadowSocks :  return ServiceType::Vpn;
     case Proto::WireGuard :    return ServiceType::Vpn;
-    case Proto::TorWebSite :      return ServiceType::Other;
+    case Proto::V2Ray :        return ServiceType::Vpn;
+
+    case Proto::TorWebSite :   return ServiceType::Other;
     case Proto::Dns :          return ServiceType::Other;
     case Proto::FileShare :    return ServiceType::Other;
-    default:                      return ServiceType::Other;
+    default:                   return ServiceType::Other;
     }
 }
 
@@ -113,12 +116,13 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::WireGuard :    return 51820;
     case Proto::Ikev2 :        return -1;
     case Proto::L2tp :         return -1;
+    case Proto::V2Ray :        return -1;
 
     case Proto::TorWebSite :   return -1;
     case Proto::Dns :          return 53;
     case Proto::FileShare :    return 139;
     case Proto::Sftp :         return 222;
-    default:                      return -1;
+    default:                   return -1;
     }
 }
 
@@ -132,12 +136,13 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::WireGuard :    return true;
     case Proto::Ikev2 :        return false;
     case Proto::L2tp :         return false;
+    case Proto::V2Ray :        return true;
 
 
     case Proto::TorWebSite :   return true;
     case Proto::Dns :          return false;
     case Proto::FileShare :    return false;
-    default:                      return -1;
+    default:                   return -1;
     }
 }
 
@@ -151,6 +156,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::WireGuard :    return TransportProto::Udp;
     case Proto::Ikev2 :        return TransportProto::Udp;
     case Proto::L2tp :         return TransportProto::Udp;
+    case Proto::V2Ray :        return TransportProto::Tcp;
     // non-vpn
     case Proto::TorWebSite :   return TransportProto::Tcp;
     case Proto::Dns :          return TransportProto::Udp;
@@ -169,6 +175,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::WireGuard :    return false;
     case Proto::Ikev2 :        return false;
     case Proto::L2tp :         return false;
+    case Proto::V2Ray :        return false;
     // non-vpn
     case Proto::TorWebSite :   return false;
     case Proto::Dns :          return false;

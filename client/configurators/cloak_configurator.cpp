@@ -7,14 +7,14 @@
 #include "core/servercontroller.h"
 #include "containers/containers_defs.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
-    ConfiguratorBase(settings, serverController, parent)
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController,
+                                     QObject *parent): ConfiguratorBase(settings, serverController, parent)
 {
 
 }
 
-QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
 
