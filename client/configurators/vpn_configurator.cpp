@@ -5,6 +5,7 @@
 #include "wireguard_configurator.h"
 #include "ikev2_configurator.h"
 #include "ssh_configurator.h"
+#include "v2ray_configurator.h"
 
 #include <QFile>
 #include <QJsonObject>
@@ -24,6 +25,7 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings,
     wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, serverController, this));
     ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, serverController, this));
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, serverController, this));
+    v2RayConfigurator = std::shared_ptr<V2RayConfigurator>(new V2RayConfigurator(settings, serverController, this));
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,
@@ -44,6 +46,9 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
 
     case Proto::Ikev2:
         return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
+
+    case Proto::V2Ray:
+        return v2RayConfigurator->genV2RayConfig(credentials, container, containerConfig, errorCode);
 
     default:
         return "";

@@ -164,5 +164,11 @@
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoV2Ray.qml</file>
+        <file>server_scripts/openvpn_v2ray_vmess/configure_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/Dockerfile</file>
+        <file>server_scripts/openvpn_v2ray_vmess/run_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/start.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/template.ovpn</file>
     </qresource>
 </RCC>

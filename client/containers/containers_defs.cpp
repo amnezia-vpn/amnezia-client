@@ -46,7 +46,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
         return { Proto::Ikev2 /*, Protocol::L2tp */};
 
     case DockerContainer::V2Ray:
-        return { Proto::V2Ray };
+        return { Proto::OpenVpn, Proto::V2Ray };
 
     case DockerContainer::Dns:
         return { };

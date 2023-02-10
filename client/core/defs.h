@@ -54,6 +54,7 @@ enum ErrorCode
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
+    V2RayExecutableMissing,
     ExecutableMissing,
 
     // VPN errors

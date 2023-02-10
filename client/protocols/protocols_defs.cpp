@@ -116,7 +116,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::WireGuard :    return 51820;
     case Proto::Ikev2 :        return -1;
     case Proto::L2tp :         return -1;
-    case Proto::V2Ray :        return -1;
+    case Proto::V2Ray :        return 10086;
 
     case Proto::TorWebSite :   return -1;
     case Proto::Dns :          return 53;
@@ -181,7 +181,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::Dns :          return false;
     case Proto::FileShare :    return false;
     case Proto::Sftp :         return false;
-    default:                      return false;
+    default:                   return false;
     }
 }
 
