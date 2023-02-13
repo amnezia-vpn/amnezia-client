@@ -32,6 +32,18 @@ jobs:
         dir: ${{ runner.temp }}
         set-env: 'true'
 
+    - name : 'check clang'
+      run : |
+          clang++ --version
+        
+    - name : 'install clang'
+      run : |
+          brew install llvm
+
+    - name : 'check clang after'
+      run : |
+          clang++ --version      
+
     - name: 'Install ios Qt'
       uses: jurplel/install-qt-action@v3
       with:
