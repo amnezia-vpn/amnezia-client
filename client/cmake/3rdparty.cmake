@@ -47,27 +47,21 @@ if(NOT LINUX)
         set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/libssl.a")
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/ios/iphone/libssl.a")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/ios/iphone/libcrypto.a")
+    elseif(ANDROID)
+        set(abi ${CMAKE_ANDROID_ARCH_ABI})
+
+        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libcrypto.a")
+        set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libssl.a")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/android/${abi}/libssl.a")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/android/${abi}/libcrypto.a")
+
+        set(OPENSSL_LIBRARIES_DIR "${OPENSSL_LIBRARIES_DIR}/android/${abi}")
     endif()
 
     file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
         DESTINATION ${OPENSSL_LIBRARIES_DIR})
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
-endif()
-
-if(ANDROID)
-    set(abi ${CMAKE_ANDROID_ARCH_ABI})
-
-    set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libcrypto.a")
-    set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libssl.a")
-    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/android/${abi}/libssl.a")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/android/${abi}/libcrypto.a")
-
-    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-        DESTINATION "${OPENSSL_LIBRARIES_DIR}/android/${abi}")
-    file(COPY "${OPENSSL_PATH}/include"
-        DESTINATION ${OPENSSL_ROOT_DIR})
-
 endif()
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
