@@ -334,16 +334,13 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm
+    #    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
 
-foreach(source IN LISTS _arg_SOURCES)
-      if (source MATCHES "^.*\.mm$")
-        set_source_files_properties(${source} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-      endif()
-    endforeach()
+
+
 
 endif()
 
@@ -368,12 +365,7 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
 
-    list(APPEND LANGUAGES OBJCXX)
-    set(CMAKE_OBJCXX_STANDARD 14)
-    set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
-    set(CMAKE_OBJCXX_EXTENSIONS OFF)
 
-    project(${PROJECT} VERSION 2.1.2 LANGUAGES ${LANGUAGES})
 
 
 
@@ -467,6 +459,8 @@ if(IOS)
     target_sources(${PROJECT} PRIVATE
         platforms/ios/iosvpnprotocol.swift
         platforms/ios/ioslogger.swift
+        platforms/ios/QRCodeReaderBase.mm
+
     )
 
     target_sources(${PROJECT} PRIVATE
