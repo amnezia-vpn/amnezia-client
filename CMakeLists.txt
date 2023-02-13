@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.23.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
+
+if(ANDROID)
+    set(QT_ANDROID_BUILD_ALL_ABIS ON)
+endif()
 
 add_subdirectory(client)
 

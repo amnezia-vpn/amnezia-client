@@ -93,8 +93,6 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
-    quint64 m_receivedBytes;
-    quint64 m_sentBytes;
     bool m_isIOSConnected;  //remove later move to isConnected,
 
 #ifdef AMNEZIA_DESKTOP

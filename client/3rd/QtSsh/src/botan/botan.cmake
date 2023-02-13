@@ -27,7 +27,7 @@ if(APPLE AND NOT IOS)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/macos/botan_all.cpp)
 endif()
 
-if(LINUX)
+if(LINUX AND NOT ANDROID)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/linux)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/linux/botan_all.cpp)
@@ -38,11 +38,13 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
-    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
 
-    link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH})
-    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.h)
-    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${ANDROID_TARGET_ARCH}/botan_all.cpp)
+    set(abi ${CMAKE_ANDROID_ARCH_ABI})
+
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/android/${abi})
+    set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.h)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/android/${abi}/botan_all.cpp)
 endif()
 
 if(IOS)
@@ -66,8 +68,4 @@ if(IOS)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/ios/iphone)
     set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.h)
     set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ios/iphone/botan_all.cpp)
-
-
-
-
 endif()

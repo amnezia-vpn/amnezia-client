@@ -32,6 +32,7 @@ PageBase {
 
     BackButton {
         id: back
+        onClicked: tb_c.currentIndex = -1
     }
     Caption {
         id: caption
@@ -54,7 +55,6 @@ PageBase {
                 tf_port_num.text = qsTr("Default")
             }
             else tf_port_num.text = ProtocolProps.defaultPort(containerProto)
-
             cb_port_proto.currentIndex = ProtocolProps.defaultTransportProto(containerProto)
 
             tf_port_num.enabled = ProtocolProps.defaultPortChangeable(containerProto)
@@ -174,11 +174,7 @@ PageBase {
         }
     }
 
-
-
-
-
-    Flickable {
+    FlickableType {
         visible: container_selector.selectedIndex <= 0
         clip: true
         width: parent.width
@@ -193,12 +189,12 @@ PageBase {
                 left: parent.left;
                 right: parent.right;
             }
-            topPadding: 20
             spacing: 10
 
             Caption {
                 id: cap1
                 text: qsTr("Installed Protocols and Services")
+                leftPadding: -20
                 font.pixelSize: 20
 
             }
@@ -224,7 +220,6 @@ PageBase {
 
             ListView {
                 id: tb_c
-                x: 10
                 width: parent.width - 10
                 height: tb_c.contentItem.height
                 currentIndex: -1
@@ -293,7 +288,7 @@ PageBase {
 
                             ImageButtonType {
                                 id: button_remove
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 checkable: true
                                 icon.source: "qrc:/images/delete.png"
@@ -301,26 +296,27 @@ PageBase {
                                 implicitHeight: 30
 
                                 checked: default_role
-
-                                MessageDialog {
-                                    id: dialogRemove
-                                    buttons: StandardButton.Yes | StandardButton.Cancel
-                                    title: "AmneziaVPN"
-                                    text: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
-                                    onAccepted: {
-                                        tb_c.currentIndex = -1
-                                        ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
-                                    }
-                                }
-
-                                onClicked: dialogRemove.open()
+                                onClicked: popupRemove.open()
 
                                 VisibleBehavior on visible { }
                             }
 
+                            PopupWithQuestion {
+                                id: popupRemove
+                                questionText: qsTr("Remove container") + " " + name_role + "?" + "\n" + qsTr("This action will erase all data of this container on the server.")
+                                yesFunc: function() {
+                                    tb_c.currentIndex = -1
+                                    ServerContainersLogic.onPushButtonRemoveClicked(proxyContainersModel.mapToSource(index))
+                                    close()
+                                }
+                                noFunc: function() {
+                                    close()
+                                }
+                            }
+
                             ImageButtonType {
                                 id: button_share
-                                visible: index === tb_c.currentIndex
+                                visible: (index === tb_c.currentIndex) && ServerContainersLogic.isManagedServer
                                 Layout.alignment: Qt.AlignRight
                                 icon.source: "qrc:/images/share.png"
                                 implicitWidth: 30
@@ -422,7 +418,7 @@ PageBase {
 
     BlueButtonType {
         id: pb_add_container
-        visible: container_selector.selectedIndex < 0
+        visible: container_selector.selectedIndex < 0 && ServerContainersLogic.isManagedServer
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -431,9 +427,8 @@ PageBase {
 
         width: parent.width - 40
         height: 40
-        text: qsTr("Install new protocols container")
+        text: qsTr("Install new service")
         font.pixelSize: 16
         onClicked: container_selector.visible ? container_selector.close() : container_selector.open()
-
     }
 }

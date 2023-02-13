@@ -6,7 +6,9 @@ Item {
     readonly property string screenHomeIntroGifEx1: "qrc:/ScreenHomeIntroGifEx1.qml"
 
     readonly property int screenWidth: 380
-    readonly property int screenHeight: 640
+    readonly property int screenHeight: 680
+
+    readonly property int defaultMargin: 20
 
     function isMobile() {
         if (Qt.platform.os == "android" ||
@@ -23,21 +25,5 @@ Item {
             return true
         }
         return false
-    }
-
-    function trX(x) {
-        return x
-    }
-
-    function trY(y) {
-        return y
-    }
-
-    function trW(w) {
-        return w
-    }
-
-    function trH(h) {
-        return h
     }
 }
