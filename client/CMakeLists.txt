@@ -315,6 +315,9 @@ if(IOS)
 
     add_compile_definitions(MVPN_IOS)
 
+    add_compile_options(-Xclang -include -Xclang ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/stdafx.h)
+
+
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h
@@ -338,6 +341,8 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
+
+
 
 
 
