@@ -21,17 +21,6 @@ jobs:
       NE_ID: 'org.amnezia.AmneziaVPN.network-extension'
 
     steps:
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-
     - name : 'check clang'
       run : |
           clang++ --version
@@ -42,7 +31,18 @@ jobs:
 
     - name : 'check clang after'
       run : |
-          clang++ --version      
+          opt/homebrew/opt/llvm/bin/clang++ --version     
+
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true' 
 
     - name: 'Install ios Qt'
       uses: jurplel/install-qt-action@v3
