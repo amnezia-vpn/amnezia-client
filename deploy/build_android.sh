@@ -114,11 +114,11 @@ done
 
 getHostTag
 MIN_API=21
-export ANDROID_PREBUILT_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
-export ANDROID_ARM_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/armv7a-linux-androideabi${MIN_API}-clang
-export ANDROID_ARM64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android${MIN_API}-clang
-export ANDROID_X86_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android${MIN_API}-clang
-export ANDROID_X86_64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android${MIN_API}-clang
+# export ANDROID_PREBUILT_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
+# export ANDROID_ARM_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/armv7a-linux-androideabi${MIN_API}-clang
+# export ANDROID_ARM64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/aarch64-linux-android${MIN_API}-clang
+# export ANDROID_X86_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/i686-linux-android${MIN_API}-clang
+# export ANDROID_X86_64_CC=$ANDROID_PREBUILT_TOOLCHAIN/bin/x86_64-linux-android${MIN_API}-clang
 
 # Build App
 echo "Building App..."
