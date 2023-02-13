@@ -325,8 +325,6 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
-
     )
 
     set(SOURCES ${SOURCES}
@@ -340,6 +338,13 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
+
+foreach(source IN LISTS _arg_SOURCES)
+      if (source MATCHES "^.*\.mm$")
+        set_source_files_properties(${source} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+      endif()
+    endforeach()
+
 endif()
 
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
@@ -362,6 +367,15 @@ if(IOS)
     enable_language(OBJC)
     enable_language(OBJCXX)
     enable_language(Swift)
+
+    list(APPEND LANGUAGES OBJCXX)
+    set(CMAKE_OBJCXX_STANDARD 14)
+    set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
+    set(CMAKE_OBJCXX_EXTENSIONS OFF)
+
+    project(${PROJECT} VERSION 2.1.2 LANGUAGES ${LANGUAGES})
+
+
 
     #disbale in cicd
     include(cmake/osxtools.cmake)
@@ -501,7 +515,9 @@ set_source_files_properties(
 
 
 
- #   set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "NO")
+    set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "NO")
+
+    set_target_properties(${PROJECT} PROPERTIES CLANG_ENABLE_MODULES "YES")
 
 
     set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
