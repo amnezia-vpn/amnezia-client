@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.23.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
 project(${PROJECT} VERSION 2.1.2)
@@ -22,16 +22,16 @@ set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
-find_package(Qt6 REQUIRED COMPONENTS 
-    Widgets Core Gui Network Xml 
-    RemoteObjects Quick Svg QuickControls2 
-    Core5Compat Concurrent
+find_package(Qt6 REQUIRED COMPONENTS
+    Widgets Core Gui Network Xml
+    RemoteObjects Quick Svg QuickControls2
+    Core5Compat
 )
-set(LIBS ${LIBS} 
+set(LIBS ${LIBS}
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
-    Qt6::Core5Compat Qt6::Concurrent
+    Qt6::Core5Compat
 )
 
 qt_standard_project_setup()
@@ -75,12 +75,12 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
+  ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
 )
 
 if(NOT IOS)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
 endif()
 
@@ -97,12 +97,12 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
 )
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
 endif()
 
@@ -138,10 +138,12 @@ if(WIN32)
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.h
+        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.h
     )
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ui/framelesswindow.cpp
     )
 
     set(RESOURCES ${RESOURCES}
@@ -219,7 +221,7 @@ if(APPLE)
         find_library(FW_APPKIT AppKit)
         find_library(FW_SECURITY Security)
 
-        set(LIBS ${LIBS} 
+        set(LIBS ${LIBS}
             ${FW_COCOA} ${FW_APPLICATIONSERVICES}
             ${FW_FOUNDATION} ${FW_APPKIT}
             ${FW_SECURITY} ${FW_CORESERVICES}
@@ -244,7 +246,7 @@ endif()
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
-    
+
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/core/ipcclient.h
         ${CMAKE_CURRENT_LIST_DIR}/core/privileged_process.h
@@ -271,6 +273,7 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
+    set(ANDROID_ABIS ANDROID_TARGET_ARCH)
 
     add_compile_definitions(MVPN_ANDROID)
 
@@ -279,16 +282,12 @@ if(ANDROID)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.h
     )
 
     set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_controller.cp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
 endif()
@@ -297,6 +296,8 @@ endif()
 
 if(IOS)
     message("Client iOS build")
+
+
 
     find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
     set(LIBS ${LIBS} Qt6::ShaderTools)
@@ -307,35 +308,35 @@ if(IOS)
     find_library(FW_STOREKIT StoreKit)
     find_library(FW_USERNOTIFICATIONS UserNotifications)
 
-    set(LIBS ${LIBS} 
-        ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT} 
-        ${FW_FOUNDATION} ${FW_STOREKIT} 
+    set(LIBS ${LIBS}
+        ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT}
+        ${FW_FOUNDATION} ${FW_STOREKIT}
         ${FW_USERNOTIFICATIONS}
     )
 
     add_compile_definitions(MVPN_IOS)
 
     set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h 
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
     )
 
     set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.cpp 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm 
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
     )
 endif()
@@ -350,11 +351,7 @@ qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 #qt_add_translations(${PROJECT} TS_FILES
 #    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
-if(APPLE AND NOT IOS)
-    set_target_properties(AmneziaVPN PROPERTIES
-        MACOSX_BUNDLE TRUE
-    )
-endif()
+# NETWORKEXTENSION=1
 
 if(IOS)
     enable_language(OBJC)
@@ -374,7 +371,7 @@ if(IOS)
 
 
     #need to change for debug and relase
-    set_target_properties(${PROJECT} 
+    set_target_properties(${PROJECT}
         PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
         XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
@@ -517,39 +514,38 @@ if(ANDROID)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_LIST_DIR}/android/AndroidManifest.xml 
-            ${CMAKE_CURRENT_LIST_DIR}/android/build.gradle 
-            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.jar 
-            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.properties 
-            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew 
-            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew.bat 
-            ${CMAKE_CURRENT_LIST_DIR}/android/gradle.properties 
-            ${CMAKE_CURRENT_LIST_DIR}/android/res/values/libs.xml 
+            ${CMAKE_CURRENT_LIST_DIR}/android/AndroidManifest.xml
+            ${CMAKE_CURRENT_LIST_DIR}/android/build.gradle
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.jar
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle/wrapper/gradle-wrapper.properties
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradlew.bat
+            ${CMAKE_CURRENT_LIST_DIR}/android/gradle.properties
+            ${CMAKE_CURRENT_LIST_DIR}/android/res/values/libs.xml
             ${CMAKE_CURRENT_LIST_DIR}/android/res/xml/fileprovider.xml
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/AuthHelper.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/IPCContract.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/NotificationUtil.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/OpenVPNThreadv3.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/Prefs.kt
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNLogger.kt
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNService.kt
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNServiceBinder.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnLogger.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnService.kt
+            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VpnServiceBinder.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/AmneziaApp.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNApplication.java
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNClientBinder.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
             ${CMAKE_CURRENT_BINARY_DIR}
     )
 
-    set_property(TARGET ${PROJECT} PROPERTY
-        QT_ANDROID_PACKAGE_SOURCE_DIR 
+    set_property(TARGET ${PROJECT}
+        QT_ANDROID_PACKAGE_SOURCE_DIR
         ${CMAKE_CURRENT_LIST_DIR}/android
     )
 
-    foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-        if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
+    foreach(abi IN ANDROID_ABIS)
+        if(ANDROID_TARGET_ARCH EQUAL ${abi})
             set(LIBS ${LIBS}
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
                 ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
@@ -568,7 +564,6 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
         )
     endforeach()
-
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
