@@ -1,21 +1,31 @@
 {
-  "inbounds": [{
-    "port": $V2RAY_SOCKS_LOCAL_PORT,
-    "listen": "127.0.0.1",
-    "protocol": "socks",
-    "settings": {
-      "auth": "noauth",
-      "udp": false
-    }
-  }],
-  "outbounds": [{
-    "protocol": "vmess",
-    "settings": {
-      "vnext": [{
-        "address": "$REMOTE_HOST",
-        "port": $V2RAY_VMESS_PORT,
-        "users": [{ "id": "$V2RAY_VMESS_CLIENT_UUID" }]
-      }]
-    }
-  }]
+  "inbounds": [
+      {
+          "listen": "127.0.0.1",
+          "port": $V2RAY_SOCKS_LOCAL_PORT,
+          "protocol": "socks",
+          "settings": {
+              "auth": "noauth",
+              "udp": true
+          }
+      }
+  ],
+  "outbounds": [
+      {
+          "protocol": "vmess",
+          "settings": {
+              "vnext": [
+                  {
+                      "address": "$REMOTE_HOST",
+                      "port": $V2RAY_VMESS_PORT,
+                      "users": [
+                          {
+                              "id": "$V2RAY_VMESS_CLIENT_UUID"
+                          }
+                      ]
+                  }
+              ]
+          }
+      }
+  ]
 }

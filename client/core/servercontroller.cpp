@@ -720,8 +720,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) }});
 
     // V2Ray vars
-    vars.append({{"$V2RAY_SERVER_PORT", v2RayConfig.value(config_key::port).toString(protocols::v2ray::defaultLocalPort) }});
-    vars.append({{"$V2RAY_LOCAL_PORT", v2RayConfig.value(config_key::local_port).toString(protocols::v2ray::defaultServerPort) }});
+    vars.append({{"$V2RAY_VMESS_PORT", v2RayConfig.value(config_key::port).toString(protocols::v2ray::defaultServerPort) }});
+    vars.append({{"$V2RAY_SOCKS_LOCAL_PORT", v2RayConfig.value(config_key::local_port).toString(protocols::v2ray::defaultLocalPort) }});
 
     // IPsec vars
     vars.append({{"$IPSEC_VPN_L2TP_NET", "192.168.42.0/24"}});

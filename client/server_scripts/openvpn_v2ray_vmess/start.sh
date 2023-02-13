@@ -26,6 +26,6 @@ killall -KILL openvpn
 
 # start daemons if configured
 if [ -f /opt/amnezia/openvpn/ca.crt ]; then (openvpn --config /opt/amnezia/openvpn/server.conf --daemon); fi
-if [ -f /opt/amnezia/v2ray/v2ray-server.json ]; then (v2ray - c /opt/amnezia/v2ray/v2ray-server.json &)
+if [ -f /opt/amnezia/v2ray/v2ray-server.json ]; then (v2ray -config /opt/amnezia/v2ray/v2ray-server.json &); fi
 
 tail -f /dev/null

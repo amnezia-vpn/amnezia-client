@@ -170,5 +170,6 @@
         <file>server_scripts/openvpn_v2ray_vmess/run_container.sh</file>
         <file>server_scripts/openvpn_v2ray_vmess/start.sh</file>
         <file>server_scripts/openvpn_v2ray_vmess/template.ovpn</file>
+        <file>server_scripts/openvpn_v2ray_vmess/template_v2ray_client.json</file>
     </qresource>
 </RCC>

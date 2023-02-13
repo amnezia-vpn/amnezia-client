@@ -3,7 +3,7 @@ sudo docker run -d \
 --log-driver none \
 --restart always \
 --cap-add=NET_ADMIN \
--p $V2RAY_SERVER_PORT:$V2RAY_SERVER_PORT/tcp \
+-p $V2RAY_VMESS_PORT:$V2RAY_VMESS_PORT/tcp \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
