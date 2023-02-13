@@ -5,7 +5,7 @@ on: [push]
 jobs:
   Build-IOS:
     name: 'Build-IOS'
-    runs-on: macos-latest
+    runs-on: macos-11
 
     env:
       QT_VERSION: 6.4.1
@@ -21,18 +21,6 @@ jobs:
       NE_ID: 'org.amnezia.AmneziaVPN.network-extension'
 
     steps:
-    - name : 'check clang'
-      run : |
-          clang++ --version
-        
-    - name : 'install clang'
-      run : |
-          brew install llvm
-
-    - name : 'check clang after'
-      run : |
-          opt/homebrew/opt/llvm/bin/clang++ --version     
-
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
       with:
