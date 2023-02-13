@@ -10,6 +10,12 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
     cmake_policy(SET CMP0099 OLD)
 endif()
 
+if(ANDROID)
+    # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
+    # We have to do this manually for building of libssh.
+    add_definitions(-D_BSD_SOURCE)
+endif()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)

@@ -13,7 +13,7 @@ set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 include(${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/zlib)
 if(WIN32)
     set(ZLIB_LIBRARY $<IF:$<CONFIG:Debug>,zlibd,zlib>)
@@ -47,6 +47,15 @@ if(NOT LINUX)
         set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/libssl.a")
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/ios/iphone/libssl.a")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/ios/iphone/libcrypto.a")
+    elseif(ANDROID)
+        set(abi ${CMAKE_ANDROID_ARCH_ABI})
+
+        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libcrypto.a")
+        set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libssl.a")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/android/${abi}/libssl.a")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/android/${abi}/libcrypto.a")
+
+        set(OPENSSL_LIBRARIES_DIR "${OPENSSL_LIBRARIES_DIR}/android/${abi}")
     endif()
 
     file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
@@ -62,6 +71,7 @@ set(LIBS ${LIBS}
     OpenSSL::SSL
 )
 
+set(WITH_GSSAPI OFF CACHE BOOL "" FORCE)
 set(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/libssh)
 add_compile_definitions(_WINSOCKAPI_)
