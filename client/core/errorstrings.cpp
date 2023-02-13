@@ -42,8 +42,11 @@ QString errorString(ErrorCode code){
     case (ShadowSocksExecutableMissing): return QObject::tr("ShadowSocks (ss-local) executable missing");
     case (CloakExecutableMissing): return QObject::tr("Cloak (ck-client) executable missing");
     case (AmneziaServiceConnectionFailed): return QObject::tr("Amnezia helper service error");
-    case (V2RayExecutableMissing): return QObject::tr("V2Ray (v2ray) executable missing");
     case (OpenSslFailed): return QObject::tr("OpenSSL failed");
+
+    // V2Ray errors
+    case (V2RayExecutableMissing): return QObject::tr("V2Ray (v2ray) executable missing");
+    case (V2RayKeyMissing): return QObject::tr("V2Ray key missing");
 
     // VPN errors
     case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");

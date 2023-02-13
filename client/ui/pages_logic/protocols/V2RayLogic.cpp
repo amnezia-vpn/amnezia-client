@@ -11,7 +11,6 @@ using namespace PageEnumNS;
 
 V2RayLogic::V2RayLogic(UiLogic *logic, QObject *parent):
       PageProtocolLogicBase(logic, parent),
-      m_comboBoxCipherText{"chacha20-poly1305"},
       m_lineEditPortText{},
       m_pushButtonSaveVisible{false},
       m_progressBarResetVisible{false},
@@ -24,36 +23,31 @@ V2RayLogic::V2RayLogic(UiLogic *logic, QObject *parent):
 
 }
 
-void V2RayLogic::updateProtocolPage(const QJsonObject &ssConfig, DockerContainer container, bool haveAuthData)
+void V2RayLogic::updateProtocolPage(const QJsonObject &v2RayConfig, DockerContainer container, bool haveAuthData)
 {
     set_pageEnabled(haveAuthData);
     set_pushButtonSaveVisible(haveAuthData);
     set_progressBarResetVisible(haveAuthData);
 
-    set_comboBoxCipherText(ssConfig.value(config_key::cipher).
-                           toString(protocols::shadowsocks::defaultCipher));
+    set_lineEditPortText(v2RayConfig.value(config_key::port).
+                         toString(protocols::v2ray::defaultServerPort));
 
-    set_lineEditPortText(ssConfig.value(config_key::port).
-                         toString(protocols::shadowsocks::defaultPort));
-
-    set_lineEditPortEnabled(container == DockerContainer::ShadowSocks);
+    set_lineEditPortEnabled(container == DockerContainer::V2Ray);
 }
 
 QJsonObject V2RayLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::cipher, comboBoxCipherText());
     oldConfig.insert(config_key::port, lineEditPortText());
-
     return oldConfig;
 }
 
 void V2RayLogic::onPushButtonSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::ShadowSocks);
+    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::V2Ray);
 
     QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
-    newContainerConfig.insert(ProtocolProps::protoToString(Proto::ShadowSocks), protocolConfig);
+    newContainerConfig.insert(ProtocolProps::protoToString(Proto::V2Ray), protocolConfig);
     ServerConfiguringProgressLogic::PageFunc pageFunc;
     pageFunc.setEnabledFunc = [this] (bool enabled) -> void {
         set_pageEnabled(enabled);
@@ -104,13 +98,15 @@ void V2RayLogic::onPushButtonSaveClicked()
 
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
-    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
+
+    auto installAction = [this, containerConfig, &newContainerConfig]() {
         return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
                                                    uiLogic()->selectedDockerContainer,
                                                    containerConfig,
                                                    newContainerConfig);
-    },
-                                                                                          pageFunc, progressBarFunc,
+    };
+
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
                                                                                           saveButtonFunc, waitInfoFunc,
                                                                                           busyInfoFuncy, cancelButtonFunc);
 

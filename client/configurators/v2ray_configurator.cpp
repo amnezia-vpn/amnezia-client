@@ -21,20 +21,24 @@ QString V2RayConfigurator::genV2RayConfig(const ServerCredentials &credentials, 
 {
     ErrorCode e = ErrorCode::NoError;
 
-    QString v2rayVmessClientUuid = m_serverController->getTextFileFromContainer(container, credentials,
+    QString v2RayVmessClientUuid = m_serverController->getTextFileFromContainer(container, credentials,
                                                                                 amnezia::protocols::v2ray::v2rayKeyPath, &e);
-    v2rayVmessClientUuid.replace("\n", "");
+    if (v2RayVmessClientUuid.isEmpty()) {
+        e = ErrorCode::V2RayKeyMissing;
+        return "";
+    }
+
+    v2RayVmessClientUuid.replace("\n", "");
 
     if (e) {
         if (errorCode) *errorCode = e;
         return "";
     }
 
-
     QString v2RayClientConfig = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::v2ray_client_template, container),
                                                                 m_serverController->genVarsForScript(credentials, container, containerConfig));
 
-    v2RayClientConfig.replace("$V2RAY_VMESS_CLIENT_UUID", v2rayVmessClientUuid);
+    v2RayClientConfig.replace("$V2RAY_VMESS_CLIENT_UUID", v2RayVmessClientUuid);
     v2RayClientConfig = m_serverController->replaceVars(v2RayClientConfig,
                                                         m_serverController->genVarsForScript(credentials, container, containerConfig));
 
