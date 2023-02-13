@@ -5,7 +5,7 @@ on: [push]
 jobs:
   Build-IOS:
     name: 'Build-IOS'
-    runs-on: macos-11
+    runs-on: macos-latest
 
     env:
       QT_VERSION: 6.4.1
