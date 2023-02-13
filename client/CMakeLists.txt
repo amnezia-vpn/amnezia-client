@@ -325,6 +325,8 @@ if(IOS)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
+
     )
 
     set(SOURCES ${SOURCES}
@@ -499,7 +501,7 @@ set_source_files_properties(
 
 
 
-    set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "NO")
+ #   set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "NO")
 
 
     set_target_properties (${PROJECT} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
