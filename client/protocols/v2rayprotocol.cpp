@@ -32,22 +32,21 @@ ErrorCode V2RayProtocol::start()
 
     QStringList args = QStringList() << "-c" << m_v2RayConfigFile.fileName();
 
-    qDebug().noquote() << "V2RayProtocol::start()"
-                       << v2RayExecPath() << args.join(" ");
+    qDebug().noquote() << "V2RayProtocol::start()" << v2RayExecPath() << args.join(" ");
 
     m_v2RayProcess.setProcessChannelMode(QProcess::MergedChannels);
 
     m_v2RayProcess.setProgram(v2RayExecPath());
     m_v2RayProcess.setArguments(args);
 
-    connect(&m_v2RayProcess, &QProcess::readyReadStandardOutput, this, [this](){
+    connect(&m_v2RayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
         qDebug().noquote() << "V2Ray:" << m_v2RayProcess.readAllStandardOutput();
     });
 
     connect(&m_v2RayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         qDebug().noquote() << "V2RayProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(VpnProtocol::Disconnected);
-        if (exitStatus != QProcess::NormalExit){
+        if (exitStatus != QProcess::NormalExit) {
             emit protocolError(amnezia::ErrorCode::V2RayExecutableCrashed);
             stop();
         }
@@ -64,7 +63,9 @@ ErrorCode V2RayProtocol::start()
         setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
-    } else return ErrorCode::V2RayExecutableMissing;
+    } else {
+        return ErrorCode::V2RayExecutableMissing;
+    }
 #else
     return ErrorCode::NotImplementedError;
 #endif

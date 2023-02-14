@@ -43,11 +43,31 @@ PageProtocolBase {
             TextFieldType {
                 Layout.fillWidth: true
                 height: 31
-                text: logic.lineEditPortText
+                text: logic.lineEditServerPortText
                 onEditingFinished: {
-                    logic.lineEditPortText = text
+                    logic.lineEditServerPortText = text
                 }
-                enabled: logic.lineEditPortEnabled
+                enabled: logic.lineEditServerPortEnabled
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            LabelType {
+                Layout.preferredWidth: 0.3 * root.width - 10
+                height: 31
+                text: qsTr("Local port")
+            }
+
+            TextFieldType {
+                Layout.fillWidth: true
+                height: 31
+                text: logic.lineEditLocalPortText
+                onEditingFinished: {
+                    logic.lineEditLocalPortText = text
+                }
+                enabled: logic.lineEditLocalPortEnabled
             }
         }
 

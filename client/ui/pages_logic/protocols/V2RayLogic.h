@@ -9,8 +9,11 @@ class V2RayLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
-    AUTO_PROPERTY(bool, lineEditPortEnabled)
-    AUTO_PROPERTY(QString, lineEditPortText)
+    AUTO_PROPERTY(bool, lineEditServerPortEnabled)
+    AUTO_PROPERTY(QString, lineEditServerPortText)
+
+    AUTO_PROPERTY(bool, lineEditLocalPortEnabled)
+    AUTO_PROPERTY(QString, lineEditLocalPortText)
 
     AUTO_PROPERTY(bool, labelInfoVisible)
     AUTO_PROPERTY(QString, labelInfoText)

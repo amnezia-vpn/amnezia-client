@@ -50,6 +50,7 @@ QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 void ShadowSocksLogic::onPushButtonSaveClicked()
 {
     QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::ShadowSocks);
+    protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
@@ -105,11 +106,9 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
 
-    auto installAction = [this, containerConfig, &newContainerConfig](){
+    auto installAction = [this, containerConfig, &newContainerConfig]() {
         return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                                   uiLogic()->selectedDockerContainer,
-                                                   containerConfig,
-                                                   newContainerConfig);
+                                                   uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     };
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
                                                                                           saveButtonFunc, waitInfoFunc,

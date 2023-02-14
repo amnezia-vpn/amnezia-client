@@ -11,14 +11,16 @@ using namespace PageEnumNS;
 
 V2RayLogic::V2RayLogic(UiLogic *logic, QObject *parent):
       PageProtocolLogicBase(logic, parent),
-      m_lineEditPortText{},
+      m_lineEditServerPortText{},
       m_pushButtonSaveVisible{false},
       m_progressBarResetVisible{false},
-      m_lineEditPortEnabled{false},
+      m_lineEditServerPortEnabled{false},
       m_labelInfoVisible{true},
       m_labelInfoText{},
       m_progressBarResetValue{0},
-      m_progressBarResetMaximium{100}
+      m_progressBarResetMaximium{100},
+      m_lineEditLocalPortEnabled{false},
+      m_lineEditLocalPortText{}
 {
 
 }
@@ -29,21 +31,25 @@ void V2RayLogic::updateProtocolPage(const QJsonObject &v2RayConfig, DockerContai
     set_pushButtonSaveVisible(haveAuthData);
     set_progressBarResetVisible(haveAuthData);
 
-    set_lineEditPortText(v2RayConfig.value(config_key::port).
-                         toString(protocols::v2ray::defaultServerPort));
+    set_lineEditServerPortText(v2RayConfig.value(config_key::port).toString(protocols::v2ray::defaultServerPort));
+    set_lineEditServerPortEnabled(container == DockerContainer::V2Ray);
 
-    set_lineEditPortEnabled(container == DockerContainer::V2Ray);
+    set_lineEditLocalPortText(v2RayConfig.value(config_key::local_port).toString(protocols::v2ray::defaultLocalPort));
+    set_lineEditLocalPortEnabled(container == DockerContainer::V2Ray);
+
 }
 
 QJsonObject V2RayLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
-    oldConfig.insert(config_key::port, lineEditPortText());
+    oldConfig.insert(config_key::port, lineEditServerPortText());
+    oldConfig.insert(config_key::local_port, lineEditLocalPortText());
     return oldConfig;
 }
 
 void V2RayLogic::onPushButtonSaveClicked()
 {
     QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::V2Ray);
+    protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
     QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
@@ -101,9 +107,7 @@ void V2RayLogic::onPushButtonSaveClicked()
 
     auto installAction = [this, containerConfig, &newContainerConfig]() {
         return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                                   uiLogic()->selectedDockerContainer,
-                                                   containerConfig,
-                                                   newContainerConfig);
+                                                   uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
     };
 
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
