@@ -12,10 +12,11 @@ class CloakConfigurator : ConfiguratorBase
     Q_OBJECT
 public:
     CloakConfigurator(std::shared_ptr<Settings> settings,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+                      std::shared_ptr<ServerController> serverController,
+                      QObject *parent = nullptr);
 
     QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                           const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 };
 
 #endif // CLOAK_CONFIGURATOR_H

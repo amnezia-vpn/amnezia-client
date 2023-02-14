@@ -10,10 +10,10 @@
 #include "core/scripts_registry.h"
 #include "containers/containers_defs.h"
 
-V2RayConfigurator::V2RayConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController,
+V2RayConfigurator::V2RayConfigurator(std::shared_ptr<Settings> settings,
+                                     std::shared_ptr<ServerController> serverController,
                                      QObject *parent) : ConfiguratorBase(settings, serverController, parent)
 {
-
 }
 
 QString V2RayConfigurator::genV2RayConfig(const ServerCredentials &credentials, DockerContainer container,

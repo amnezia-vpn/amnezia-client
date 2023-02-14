@@ -12,7 +12,8 @@ class WireguardConfigurator : ConfiguratorBase
     Q_OBJECT
 public:
     WireguardConfigurator(std::shared_ptr<Settings> settings,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+                          std::shared_ptr<ServerController> serverController,
+                          QObject *parent = nullptr);
 
     struct ConnectionData {
         QString clientPrivKey; // client private key
@@ -24,15 +25,14 @@ public:
     };
 
     QString genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                               const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     QString processConfigWithLocalSettings(QString config);
     QString processConfigWithExportSettings(QString config);
 
-
 private:
-    ConnectionData prepareWireguardConfig(const ServerCredentials &credentials,
-        DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+    ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     ConnectionData genClientKeys();
 };

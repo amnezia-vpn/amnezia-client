@@ -114,17 +114,5 @@ QString ShadowSocksVpnProtocol::shadowSocksExecPath()
 
 void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &configuration)
 {
-    QJsonObject shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::ShadowSocks)).toObject();
-    bool isLocalPortConvertOk = false;
-    bool isServerPortConvertOk = false;
-    int localPort = shadowSocksConfig.value("local_port").toString().toInt(&isLocalPortConvertOk);
-    int serverPort = shadowSocksConfig.value("server_port").toString().toInt(&isServerPortConvertOk);
-    if (!isLocalPortConvertOk) {
-        qDebug() << "Error when converting local_port field in ShadowSocks config";
-    } else if (!isServerPortConvertOk) {
-        qDebug() << "Error when converting server_port field in ShadowSocks config";
-    }
-    shadowSocksConfig["local_port"] = localPort;
-    shadowSocksConfig["server_port"] = serverPort;
-    m_shadowSocksConfig = shadowSocksConfig;
+    m_shadowSocksConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::ShadowSocks)).toObject();
 }

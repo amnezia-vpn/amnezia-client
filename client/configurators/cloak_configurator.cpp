@@ -7,10 +7,10 @@
 #include "core/servercontroller.h"
 #include "containers/containers_defs.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController,
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings,
+                                     std::shared_ptr<ServerController> serverController,
                                      QObject *parent): ConfiguratorBase(settings, serverController, parent)
 {
-
 }
 
 QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
@@ -19,11 +19,11 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, 
     ErrorCode e = ErrorCode::NoError;
 
     QString cloakPublicKey = m_serverController->getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckPublicKeyPath, &e);
+                                                                          amnezia::protocols::cloak::ckPublicKeyPath, &e);
     cloakPublicKey.replace("\n", "");
 
     QString cloakBypassUid = m_serverController->getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
+                                                                          amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
     cloakBypassUid.replace("\n", "");
 
     if (e) {
@@ -48,7 +48,7 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, 
     config.insert(config_key::port, "$CLOAK_SERVER_PORT");
 
     QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-        m_serverController->genVarsForScript(credentials, container, containerConfig));
+                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
 
     // qDebug().noquote() << textCfg;
     return textCfg;

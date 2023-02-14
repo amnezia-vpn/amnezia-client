@@ -26,7 +26,8 @@ enum ProtocolScriptType {
     container_startup,
     openvpn_template,
     wireguard_template,
-    v2ray_client_template
+    v2ray_client_template,
+    shadowsocks_client_template
 };
 
 

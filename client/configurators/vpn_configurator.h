@@ -21,10 +21,11 @@ class VpnConfigurator : ConfiguratorBase
     Q_OBJECT
 public:
     VpnConfigurator(std::shared_ptr<Settings> settings,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+                    std::shared_ptr<ServerController> serverController,
+                    QObject *parent = nullptr);
 
     QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
+                                 const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
 
     QPair<QString, QString> getDnsForConfig(int serverIndex);
     QString &processConfigWithDnsSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
@@ -33,8 +34,7 @@ public:
     QString &processConfigWithExportSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
 
     // workaround for containers which is not support normal configaration
-    void updateContainerConfigAfterInstallation(DockerContainer container,
-        QJsonObject &containerConfig, const QString &stdOut);
+    void updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
 
     std::shared_ptr<ServerController> m_serverController;
 

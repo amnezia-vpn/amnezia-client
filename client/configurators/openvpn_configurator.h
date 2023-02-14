@@ -12,7 +12,8 @@ class OpenVpnConfigurator : ConfiguratorBase
     Q_OBJECT
 public:
     OpenVpnConfigurator(std::shared_ptr<Settings> settings,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+                        std::shared_ptr<ServerController> serverController,
+                        QObject *parent = nullptr);
 
     struct ConnectionData {
         QString clientId;
@@ -25,20 +26,18 @@ public:
     };
 
     QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                             const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     QString processConfigWithLocalSettings(QString jsonConfig);
     QString processConfigWithExportSettings(QString jsonConfig);
 
-    ErrorCode signCert(DockerContainer container,
-        const ServerCredentials &credentials, QString clientId);
+    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId);
 
 private:
     ConnectionData createCertRequest();
 
-    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
-        DockerContainer container, ErrorCode *errorCode = nullptr);
-
+    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
+                                        ErrorCode *errorCode = nullptr);
 };
 
 #endif // OPENVPN_CONFIGURATOR_H
