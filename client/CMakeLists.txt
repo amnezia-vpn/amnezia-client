@@ -347,8 +347,8 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
-#qt_add_translations(${PROJECT} TS_FILES
-#    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
+qt_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 if(APPLE AND NOT IOS)
     set_target_properties(AmneziaVPN PROPERTIES
