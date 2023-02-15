@@ -103,6 +103,6 @@ const QString V2RayProtocol::v2RayExecPath() const
 #ifdef Q_OS_WIN
     return Utils::executable(QString("v2ray/v2ray"), true);
 #else
-    return Utils::executable(QString("/v2ray/v2ray"), true);
+    return Utils::executable(QString("v2ray"), true);
 #endif
 }
