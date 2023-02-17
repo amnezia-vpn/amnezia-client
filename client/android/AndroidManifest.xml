@@ -113,6 +113,10 @@
                 android:value="-- %%INSERT_APP_ARGUMENTS%% --" />
 
         </activity>
+    
+        <activity
+            android:name=".CameraActivity"
+            android:exported="false" />
 
         <service
             android:name=".VPNService"
