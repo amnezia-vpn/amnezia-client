@@ -155,7 +155,7 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectEnabled(true);
     set_pushButtonConnectText(tr("Connect"));
 
-    uiLogic()->installCredentials = serverCredentials;
+    uiLogic()->m_installCredentials = serverCredentials;
     if (ok) emit uiLogic()->goToPage(Page::NewServer);
 }
 

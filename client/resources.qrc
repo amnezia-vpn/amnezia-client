@@ -164,5 +164,7 @@
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
+        <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
+        <file>ui/qml/Controls/PopupWarning.qml</file>
     </qresource>
 </RCC>

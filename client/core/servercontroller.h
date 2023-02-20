@@ -74,6 +74,7 @@ public:
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     void setCancelInstallation(const bool cancel);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 private:
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
@@ -82,7 +83,6 @@ private:
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
-    ErrorCode isContainerAlreadyInstalled(const ServerCredentials &credentials, DockerContainer container);
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;

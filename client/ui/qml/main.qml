@@ -230,6 +230,10 @@ Window  {
         function onToggleLogPanel() {
             drawer_log.visible = !drawer_log.visible
         }
+        function onShowWarningMessage(message) {
+            popupWarning.popupWarningText = message
+            popupWarning.open()
+        }
     }
 
     MessageDialog {
@@ -352,5 +356,9 @@ Window  {
                 }
             }
         }
+    }
+
+    PopupWarning {
+        id: popupWarning
     }
 }

@@ -74,6 +74,7 @@ PageBase {
                     UiLogic.goToPage(PageEnum.ServerContainers)
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
@@ -86,33 +87,21 @@ PageBase {
 
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 60
-                text: ServerSettingsLogic.pushButtonClearClientCacheText
-                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                Layout.topMargin: 10
+                text: qsTr("Advanced server settings")
+                visible: ServerSettingsLogic.pushButtonShareFullVisible //todo
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
+                    UiLogic.goToPage(PageEnum.AdvancedServerSettings)
                 }
             }
 
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 10
-                text: ServerSettingsLogic.pushButtonClearText
-                visible: ServerSettingsLogic.pushButtonClearVisible
-                onClicked: {    
-                    popupClearServer.open()
-                }
-            }
-
-            PopupWithQuestion {
-                id: popupClearServer
-                questionText: "Attention! All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted. Continue?"
-                yesFunc: function() {
-                    ServerSettingsLogic.onPushButtonClearServer()
-                    close()
-                }
-                noFunc: function() {
-                    close()
+                Layout.topMargin: 60
+                text: ServerSettingsLogic.pushButtonClearClientCacheText
+                visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
+                onClicked: {
+                    ServerSettingsLogic.onPushButtonClearClientCacheClicked()
                 }
             }
 

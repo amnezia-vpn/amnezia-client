@@ -68,8 +68,8 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
     set_shareAmneziaQrCodeTextSeriesLength(0);
 
     QJsonObject serverConfig;
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
 
     // Full access
     if (shareFullAccess()) {
@@ -127,8 +127,8 @@ void ShareConnectionLogic::onPushButtonShareAmneziaGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 {
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
     const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
@@ -142,8 +142,8 @@ void ShareConnectionLogic::onPushButtonShareOpenVpnGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
 {
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
     QJsonObject protoConfig = m_settings->protocolConfig(serverIndex, container, Proto::ShadowSocks);
@@ -186,8 +186,8 @@ void ShareConnectionLogic::onPushButtonShareShadowSocksGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
 {
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
     QJsonObject protoConfig = m_settings->protocolConfig(serverIndex, container, Proto::Cloak);
@@ -209,8 +209,8 @@ void ShareConnectionLogic::onPushButtonShareCloakGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 {
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
     const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
@@ -236,8 +236,8 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
 
 void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
 {
-    int serverIndex = uiLogic()->selectedServerIndex;
-    DockerContainer container = uiLogic()->selectedDockerContainer;
+    int serverIndex = uiLogic()->m_selectedServerIndex;
+    DockerContainer container = uiLogic()->m_selectedDockerContainer;
     ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
 
     Ikev2Configurator::ConnectionData connData = m_configurator->ikev2Configurator->prepareIkev2Config(credentials, container);
@@ -259,8 +259,8 @@ void ShareConnectionLogic::onPushButtonShareIkev2GenerateClicked()
 
 void ShareConnectionLogic::updateSharingPage(int serverIndex, DockerContainer container)
 {
-    uiLogic()->selectedDockerContainer = container;
-    uiLogic()->selectedServerIndex = serverIndex;
+    uiLogic()->m_selectedDockerContainer = container;
+    uiLogic()->m_selectedServerIndex = serverIndex;
     set_shareFullAccess(container == DockerContainer::None);
 
     m_shareAmneziaQrCodeTextSeries.clear();

@@ -81,7 +81,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
 {
     QString mountPath;
     QString cmd;
-    QString host = m_settings->serverCredentials(uiLogic()->selectedServerIndex).hostName;
+    QString host = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex).hostName;
 
 
 #ifdef Q_OS_WINDOWS
