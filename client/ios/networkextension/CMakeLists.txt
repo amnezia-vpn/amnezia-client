@@ -79,29 +79,36 @@ target_sources(networkextension PRIVATE
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-## HACK: Build only the first architecture, this will break universal builds
-## for now, but they are already broken for mobile, which uses the arch to
-## determine iOS vs. simulator builds :)
-if(NOT CMAKE_OSX_ARCHITECTURES)
-    set(OSXARCH arm64)
-else()
-    list(GET CMAKE_OSX_ARCHITECTURES 0 OSXARCH)
-endif()
-
-## Build the wireguard go library
-## TODO: The upstream makefile also makes an attempt to patch the golang runtime
-## to provide the boot-time clock instead of an uptime clock. We should probably
-## make an attempt to do the same, somehow?
 include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
-if(OSXARCH STREQUAL "x86_64")
-    set(GOARCH amd64)
-else()
-    set(GOARCH ${FIRST_OSX_ARCHITECTURE})
-endif()
-add_go_library(libwg-go ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/api-apple.go
+## Build the wireguard go library for iOS simulation.
+## TODO: Some special handling around GOARCH for
+execute_process(OUTPUT_VARIABLE SIM_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk iphonesimulator --show-sdk-path)
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
-    GOARCH ${GOARCH}
-    CGO_CFLAGS -arch ${OSXARCH}
-    CGO_LDFLAGS -arch ${OSXARCH}
+    GOARCH amd64
+    CGO_CFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
+    CGO_LDFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
 )
-target_link_libraries(networkextension PRIVATE libwg-go)
+
+## Build the wireguard go library for iOS devices.
+execute_process(OUTPUT_VARIABLE IOS_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path)
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+    GOOS ios
+    GOARCH arm64
+    CGO_CFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
+    CGO_LDFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
+)
+
+## Unify the wireguard go libraries.
+add_custom_target(libwg_builder
+    DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a
+        ${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a
+    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/libwg-unified.a
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND lipo -create -output libwg-unified.a libwg-dev.a libwg-sim.a
+)
+
+## Link and depend on the wireguard library.
+add_dependencies(networkextension libwg_builder)
+target_link_libraries(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/libwg-unified.a)
