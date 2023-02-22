@@ -3,7 +3,6 @@
 #include "core/errorstrings.h"
 #include <QTimer>
 #include <QEventLoop>
-#include <QMessageBox>
 
 #include "core/servercontroller.h"
 
@@ -142,9 +141,6 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
         if (waitInfo.setVisibleFunc) {
             waitInfo.setVisibleFunc(false);
         }
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-                             tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
 
         progress.setVisibleFunc(false);
         return e;

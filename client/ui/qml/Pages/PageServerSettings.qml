@@ -128,7 +128,6 @@ PageBase {
         }
     }
 
-
     Logo {
         id : logo
         anchors.bottom: parent.bottom

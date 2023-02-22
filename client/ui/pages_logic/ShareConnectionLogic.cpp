@@ -1,7 +1,6 @@
 #include <QBuffer>
 #include <QImage>
 #include <QDataStream>
-#include <QMessageBox>
 
 #include "qrcodegen.hpp"
 
@@ -218,9 +217,9 @@ void ShareConnectionLogic::onPushButtonShareWireGuardGenerateClicked()
     ErrorCode e = ErrorCode::NoError;
     QString cfg = m_configurator->wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, &e);
     if (e) {
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-                             tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
+        emit uiLogic()->showWarningMessage(tr("Error occurred while generating the config.") + "\n" +
+                                           tr("Error message: ") + errorString(e) + "\n" +
+                                           tr("See logs for details."));
         return;
     }
     cfg = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::WireGuard, cfg);

@@ -47,9 +47,9 @@ void AdvancedServerSettingsLogic::onPushButtonClearServer()
     ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
     m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
     if (e) {
-        uiLogic()->set_dialogConnectErrorText(tr("Error occurred while configuring server.") + "\n" +
-                                              errorString(e) + "\n" + tr("See logs for details."));
-        emit uiLogic()->showConnectErrorDialog();
+        emit uiLogic()->showWarningMessage(tr("Error occurred while configuring server.") + "\n" +
+                                           tr("Error message: ") + errorString(e) + "\n" +
+                                           tr("See logs for details."));
     } else {
         set_labelWaitInfoVisible(true);
         set_labelWaitInfoText(tr("Amnezia server successfully uninstalled"));

@@ -242,12 +242,6 @@ Window  {
         text: qsTr("It's public key. Private key required")
         visible: false
     }
-    MessageDialog {
-        id: connectErrorDialog
-        title: "AmneziaVPN"
-        text: UiLogic.dialogConnectErrorText
-        visible: false
-    }
 
     Drawer {
         id: drawer_log

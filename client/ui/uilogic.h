@@ -61,7 +61,6 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, dialogConnectErrorText)
     AUTO_PROPERTY(QString, popupWarningText)
 
     READONLY_PROPERTY(QObject *, containersModel)
@@ -115,7 +114,7 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
-    Q_INVOKABLE amnezia::ErrorCode getInstalledContainers(bool addNewServerToGui);
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, const ServerCredentials& credentials);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
 

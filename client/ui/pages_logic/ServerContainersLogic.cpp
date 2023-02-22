@@ -14,6 +14,7 @@
 #include "../uilogic.h"
 #include "../pages_logic/VpnLogic.h"
 #include "vpnconnection.h"
+#include "core/errorstrings.h"
 
 
 ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
@@ -87,24 +88,33 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
-    uiLogic()->getInstalledContainers(false); //todo its work like should be?
-
     ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, credentials);
 
-    if (!uiLogic()->isContainerAlreadyAddedToGui(c, credentials)) {
-        auto installAction = [this, c, &config](){
-            return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), c, config);
-        };
-        ErrorCode error = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction);
+    if (errorCode == ErrorCode::NoError) {
+        if (!uiLogic()->isContainerAlreadyAddedToGui(c, credentials)) {
+            auto installAction = [this, c, &config]() {
+                return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), c, config);
+            };
+            errorCode = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction);
 
-        if (error == ErrorCode::NoError) {
-            m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, c, config);
-            if (ContainerProps::containerService(c) == ServiceType::Vpn) {
-                m_settings->setDefaultContainer(uiLogic()->m_selectedServerIndex, c);
+            if (errorCode == ErrorCode::NoError) {
+                m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, c, config);
+                if (ContainerProps::containerService(c) == ServiceType::Vpn) {
+                    m_settings->setDefaultContainer(uiLogic()->m_selectedServerIndex, c);
+                }
             }
+        } else {
+            emit uiLogic()->showWarningMessage("Attention! The container you are trying to install is already installed on the server. "
+                                               "All installed containers have been added to the application ");
         }
-    }
 
-    uiLogic()->onUpdateAllPages();
+        uiLogic()->onUpdateAllPages();
+    }
+    if (errorCode != ErrorCode::NoError) {
+        emit uiLogic()->showWarningMessage(tr("Error occurred while configuring server.") + "\n" +
+                                           tr("Error message: ") + errorString(errorCode) + "\n" +
+                                           tr("See logs for details."));
+    }
     emit uiLogic()->closePage();
 }

@@ -16,10 +16,8 @@
 ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_labelWaitInfoVisible{true},
-    m_pushButtonClearVisible{true},
     m_pushButtonClearClientCacheVisible{true},
     m_pushButtonShareFullVisible{true},
-    m_pushButtonClearText{tr("Clear server from Amnezia software")},
     m_pushButtonClearClientCacheText{tr("Clear client cached profile")}
 { }
 
@@ -27,7 +25,6 @@ void ServerSettingsLogic::onUpdatePage()
 {
     set_labelWaitInfoVisible(false);
     set_labelWaitInfoText("");
-    set_pushButtonClearVisible(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
     set_pushButtonClearClientCacheVisible(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
     set_pushButtonShareFullVisible(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
     const QJsonObject &server = m_settings->server(uiLogic()->m_selectedServerIndex);
@@ -48,36 +45,6 @@ void ServerSettingsLogic::onUpdatePage()
     DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
-}
-
-void ServerSettingsLogic::onPushButtonClearServer()
-{
-    set_pageEnabled(false);
-    set_pushButtonClearText(tr("Uninstalling Amnezia software..."));
-
-    if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex) {
-        uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
-    }
-
-    ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
-    m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
-    if (e) {
-        uiLogic()->set_dialogConnectErrorText(
-                    tr("Error occurred while configuring server.") + "\n" +
-                    errorString(e) + "\n" +
-                    tr("See logs for details."));
-        emit uiLogic()->showConnectErrorDialog();
-    }
-    else {
-        set_labelWaitInfoVisible(true);
-        set_labelWaitInfoText(tr("Amnezia server successfully uninstalled"));
-    }
-
-    m_settings->setContainers(uiLogic()->m_selectedServerIndex, {});
-    m_settings->setDefaultContainer(uiLogic()->m_selectedServerIndex, DockerContainer::None);
-
-    set_pageEnabled(true);
-    set_pushButtonClearText(tr("Clear server from Amnezia software"));
 }
 
 void ServerSettingsLogic::onPushButtonForgetServer()
