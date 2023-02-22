@@ -31,6 +31,20 @@ class CameraActivity : AppCompatActivity() {
 
     private lateinit var viewFinder: PreviewView
 
+    companion object {
+        private lateinit var instance: CameraActivity
+
+        @JvmStatic fun getInstance(): CameraActivity {
+            return instance
+        }
+
+        @JvmStatic fun stopQrCodeReader() {
+            CameraActivity.getInstance().finish()
+        }
+    }
+
+    external fun passDataToDecoder(data: String)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
@@ -39,6 +53,8 @@ class CameraActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
         analyzerExecutor = Executors.newSingleThreadExecutor()
+
+        instance = this
 
         checkPermissions()
 
@@ -74,20 +90,7 @@ class CameraActivity : AppCompatActivity() {
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-            val listener = object : OnBarcodeActivityResult {
-                override fun onSuccess(result: String) {
-                    val resultIntent = Intent()
-                    resultIntent.putExtra("result", result)
-                    setResult(Activity.RESULT_OK, resultIntent)
-                    finish()
-                }
-
-                override fun onFailure(result: Exception) {
-                    Log.d("WUTT", "exception: $result")
-                }
-            }
-
-            val imageAnalyzer = BarCodeAnalyzer(listener)
+            val imageAnalyzer = BarCodeAnalyzer()
 
             val analysisUseCase = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -112,7 +115,9 @@ class CameraActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private class BarCodeAnalyzer(val callback: OnBarcodeActivityResult): ImageAnalysis.Analyzer {
+    val barcodesSet = mutableSetOf<String>()
+
+    private inner class BarCodeAnalyzer(): ImageAnalysis.Analyzer {
 
         private val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
@@ -130,21 +135,24 @@ class CameraActivity : AppCompatActivity() {
                 scanner.process(image)
                     .addOnSuccessListener { barcodes ->
                         if (barcodes.isNotEmpty()) {
-                            callback.onSuccess(barcodes[0]?.displayValue ?: "empty?")
+                            val barcode = barcodes[0]
+                            if (barcode != null) {
+                                val str = barcode?.displayValue ?: ""
+                                if (str.isNotEmpty()) {
+                                    val isAdded = barcodesSet.add(str)
+                                    if (isAdded) {
+                                        passDataToDecoder(str)
+                                    }
+                                }
+                            }
                         }
 
                         imageProxy.close()
                     }
                     .addOnFailureListener {
-                        callback.onFailure(it)
                         imageProxy.close()
                     }
             }
         }
-    }
-
-    interface OnBarcodeActivityResult {
-        fun onSuccess(result: String)
-        fun onFailure(result: Exception)
     }
 }

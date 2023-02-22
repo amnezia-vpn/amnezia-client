@@ -34,6 +34,7 @@
         android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true"
         android:allowNativeHeapPointerTagging="false"
+        android:theme="@style/Theme.AppCompat.NoActionBar"
         android:icon="@drawable/icon">
         
         <activity
@@ -115,7 +116,7 @@
         </activity>
     
         <activity
-            android:name=".CameraActivity"
+            android:name=".qt.CameraActivity"
             android:exported="false" />
 
         <service
