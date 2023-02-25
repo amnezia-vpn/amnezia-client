@@ -873,7 +873,8 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         stdOut += data + "\n";
     };
 
-    const QJsonObject containerConfig = config.value(ContainerProps::containerTypeToString(container)).toObject();
+    const QString containerString = ProtocolProps::protoToString(ContainerProps::defaultProtocol(container));
+    const QJsonObject containerConfig = config.value(containerString).toObject();
 
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
