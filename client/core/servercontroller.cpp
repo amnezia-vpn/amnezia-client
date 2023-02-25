@@ -879,7 +879,7 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
         if (containerInfo.isEmpty()) {
             continue;
         }
-        const static QRegularExpression containerAndPortRegExp("(amnezia-[a-z]*).*?>([0-9]*)/(udp|tcp).*");
+        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?>([0-9]*)/(udp|tcp).*");
         QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
         if (containerAndPortMatch.hasMatch()) {
             QString name = containerAndPortMatch.captured(1);
@@ -890,8 +890,8 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
             QJsonObject config {
                 { config_key::container, name },
                 { ProtocolProps::protoToString(mainProto), QJsonObject {
-                        { config_key::port, port },
-                        { config_key::transport_proto, transportProto }}
+                    { config_key::port, port },
+                    { config_key::transport_proto, transportProto }}
                 }
             };
             installedContainers.insert(container, config);

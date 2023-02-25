@@ -35,7 +35,7 @@ void AdvancedServerSettingsLogic::onUpdatePage()
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 }
 
-void AdvancedServerSettingsLogic::onPushButtonClearServer()
+void AdvancedServerSettingsLogic::onPushButtonClearServerClicked()
 {
     set_pageEnabled(false);
     set_pushButtonClearText(tr("Uninstalling Amnezia software..."));
@@ -47,7 +47,7 @@ void AdvancedServerSettingsLogic::onPushButtonClearServer()
     ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
     m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
     if (e) {
-        emit uiLogic()->showWarningMessage(tr("Error occurred while configuring server.") + "\n" +
+        emit uiLogic()->showWarningMessage(tr("Error occurred while cleaning the server.") + "\n" +
                                            tr("Error message: ") + errorString(e) + "\n" +
                                            tr("See logs for details."));
     } else {
@@ -60,4 +60,29 @@ void AdvancedServerSettingsLogic::onPushButtonClearServer()
 
     set_pageEnabled(true);
     set_pushButtonClearText(tr("Clear server from Amnezia software"));
+}
+
+void AdvancedServerSettingsLogic::onPushButtonScanServerClicked()
+{
+    set_labelWaitInfoVisible(false);
+    set_pageEnabled(false);
+
+    bool isServerCreated;
+    auto containersCount = m_settings->containers(uiLogic()->m_selectedServerIndex).size();
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, isServerCreated);
+    if (errorCode != ErrorCode::NoError) {
+        emit uiLogic()->showWarningMessage(tr("Error occurred while scanning the server.") + "\n" +
+                                           tr("Error message: ") + errorString(errorCode) + "\n" +
+                                           tr("See logs for details."));
+    }
+    auto newContainersCount = m_settings->containers(uiLogic()->m_selectedServerIndex).size();
+    if (containersCount != newContainersCount) {
+        emit uiLogic()->showWarningMessage(tr("All containers installed on the server are added to the GUI"));
+    } else {
+        emit uiLogic()->showWarningMessage(tr("No installed containers found on the server"));
+    }
+
+
+    onUpdatePage();
+    set_pageEnabled(true);
 }

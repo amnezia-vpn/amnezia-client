@@ -88,11 +88,11 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
 
-    ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
-    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, credentials);
+    bool isServerCreated = false;
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, isServerCreated);
 
     if (errorCode == ErrorCode::NoError) {
-        if (!uiLogic()->isContainerAlreadyAddedToGui(c, credentials)) {
+        if (!uiLogic()->isContainerAlreadyAddedToGui(c)) {
             auto installAction = [this, c, &config]() {
                 return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), c, config);
             };

@@ -53,6 +53,7 @@ class OtherProtocolsLogic;
 
 class VpnConnection;
 
+class CreateServerTest;
 
 class UiLogic : public QObject
 {
@@ -97,6 +98,8 @@ public:
 
     friend class OtherProtocolsLogic;
 
+    friend class CreateServerTest;
+
     Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
     Q_INVOKABLE void onUpdateAllPages();
 
@@ -114,7 +117,7 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
-    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, const ServerCredentials& credentials);
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
 
@@ -135,11 +138,11 @@ signals:
 
 private slots:
     // containers - INOUT arg
-    void installServer(QMap<DockerContainer, QJsonObject> &containers);
+    void installServer(QPair<amnezia::DockerContainer, QJsonObject> &container);
 
 private:
     PageEnumNS::Page currentPage();
-    bool isContainerAlreadyAddedToGui(DockerContainer container, const ServerCredentials &selectedServerCredentials);
+    bool isContainerAlreadyAddedToGui(DockerContainer container);
 
 public:
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);

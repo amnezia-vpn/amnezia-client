@@ -16,10 +16,19 @@ PageBase {
     BackButton {
         id: back
     }
+
     Caption {
         id: caption
         text: qsTr("Advanced server settings")
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    BusyIndicator {
+        z: 99
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        visible: !AdvancedServerSettingsLogic.pageEnabled
+        running: !AdvancedServerSettingsLogic.pageEnabled
     }
 
     FlickableType {
@@ -54,6 +63,7 @@ PageBase {
 
             LabelType {
                 Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
                 text: AdvancedServerSettingsLogic.labelWaitInfoText
                 visible: AdvancedServerSettingsLogic.labelWaitInfoVisible
             }
@@ -64,7 +74,7 @@ PageBase {
                 text: "Scan the server for installed containers"
                 visible: AdvancedServerSettingsLogic.pushButtonClearVisible
                 onClicked: {
-                    UiLogic.getInstalledContainers(false)
+                    AdvancedServerSettingsLogic.onPushButtonScanServerClicked()
                 }
             }
 
@@ -82,8 +92,8 @@ PageBase {
                 id: popupClearServer
                 questionText: "Attention! All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted. Continue?"
                 yesFunc: function() {
-                    AdvancedServerSettingsLogic.onPushButtonClearServer()
                     close()
+                    AdvancedServerSettingsLogic.onPushButtonClearServerClicked()
                 }
                 noFunc: function() {
                     close()

@@ -16,7 +16,6 @@ QString errorString(ErrorCode code){
     case(ServerContainerMissingError): return QObject::tr("Server error: Docker container missing");
     case(ServerDockerFailedError): return QObject::tr("Server error: Docker failed");
     case(ServerCancelInstallation): return QObject::tr("Installation canceled by user");
-    case(ServerContainerAlreadyInstalledError): return QObject::tr("Container already installed");
 
     // Ssh connection errors
     case(SshSocketError): return QObject::tr("Ssh connection error");

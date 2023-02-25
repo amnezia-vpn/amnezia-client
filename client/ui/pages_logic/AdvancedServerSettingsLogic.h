@@ -24,7 +24,8 @@ public:
 
     Q_INVOKABLE void onUpdatePage() override;
 
-    Q_INVOKABLE void onPushButtonClearServer();
+    Q_INVOKABLE void onPushButtonClearServerClicked();
+    Q_INVOKABLE void onPushButtonScanServerClicked();
 };
 
 #endif // ADVANCEDSERVERSETTINGSLOGIC_H
