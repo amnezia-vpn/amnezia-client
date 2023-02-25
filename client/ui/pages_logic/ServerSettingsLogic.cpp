@@ -121,7 +121,7 @@ void ServerSettingsLogic::onPushButtonShareFullClicked()
     auto appContext = activity.callObjectMethod(
         "getApplicationContext", "()Landroid/content/Context;");
     if (appContext.isValid()) {
-        QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->selectedServerIndex);
+        QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->m_selectedServerIndex);
         auto intent = QJniObject::callStaticObjectMethod(
                "org/amnezia/vpn/AuthHelper", "getAuthIntent",
                "(Landroid/content/Context;)Landroid/content/Intent;", appContext.object());
@@ -130,7 +130,7 @@ void ServerSettingsLogic::onPushButtonShareFullClicked()
                     QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, receiver);
                 }
             } else {
-            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
+            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, DockerContainer::None);
             emit uiLogic()->goToShareProtocolPage(Proto::Any);
         }
     }
