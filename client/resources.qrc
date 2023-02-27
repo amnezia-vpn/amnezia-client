@@ -81,7 +81,6 @@
         <file>ui/qml/Pages/PageSites.qml</file>
         <file>ui/qml/Pages/PageStart.qml</file>
         <file>ui/qml/Pages/PageVPN.qml</file>
-        <file>ui/qml/Pages/PageQrDecoder.qml</file>
         <file>ui/qml/Pages/PageAbout.qml</file>
         <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
         <file>ui/qml/Pages/PageViewConfig.qml</file>

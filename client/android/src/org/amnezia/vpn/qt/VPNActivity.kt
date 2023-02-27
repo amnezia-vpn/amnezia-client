@@ -36,6 +36,8 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private val TAG = "VPNActivity"
     private val STORAGE_PERMISSION_CODE = 42
 
+    private val CAMERA_ACTION_CODE = 101
+
     companion object {
         private lateinit var instance: VPNActivity
 
@@ -45,6 +47,10 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
         @JvmStatic fun connectService() {
             VPNActivity.getInstance().initServiceConnection()
+        }
+
+        @JvmStatic fun startQrCodeReader() {
+            VPNActivity.getInstance().startQrCodeActivity()
         }
 
         @JvmStatic fun sendToService(actionCode: Int, body: String) {
@@ -62,7 +68,12 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
         super.onCreate(savedInstanceState)
 
-        instance = this;
+        instance = this
+    }
+
+    private fun startQrCodeActivity() {
+        val intent = Intent(this, CameraActivity::class.java)
+        startActivityForResult(intent, CAMERA_ACTION_CODE)
     }
 
     override fun getSystemService(name: String): Any? {
@@ -82,6 +93,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     external fun onServiceMessage(actionCode: Int, body: String?)
     external fun qtOnServiceConnected()
     external fun qtOnServiceDisconnected()
+    external fun onActivityMessage(actionCode: Int, body: String?)
 
     private fun dispatchParcel(actionCode: Int, body: String) {
         if (!isBound) {
@@ -286,6 +298,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private val EVENT_PERMISSION_REQURED = 6
     private val EVENT_DISCONNECTED = 2
 
+    private val UI_EVENT_QR_CODE_RECEIVED = 0
 
     fun onPermissionRequest(code: Int, data: Parcel?) {
         if (code != EVENT_PERMISSION_REQURED) {
@@ -310,7 +323,13 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             }
             return
         }
+
         super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == CAMERA_ACTION_CODE && resultCode == RESULT_OK) {
+            val extra = data?.getStringExtra("result") ?: ""
+            onActivityMessage(UI_EVENT_QR_CODE_RECEIVED, extra)
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
