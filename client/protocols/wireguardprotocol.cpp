@@ -12,7 +12,7 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* 
     VpnProtocol(configuration, parent)
 {
     m_configFile.setFileName(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
-    readWireguardConfiguration(configuration);
+    writeWireguardConfiguration(configuration);
 }
 
 WireguardProtocol::~WireguardProtocol()
@@ -70,7 +70,7 @@ void WireguardProtocol::stop()
 
 }
 
-void WireguardProtocol::readWireguardConfiguration(const QJsonObject &configuration)
+void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configuration)
 {
     QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toObject();
 

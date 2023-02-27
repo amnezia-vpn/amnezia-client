@@ -1,6 +1,6 @@
 cat > /opt/amnezia/openvpn/server.conf <<EOF
 port $OPENVPN_PORT
-proto $OPENVPN_TRANSPORT_PROTO
+proto tcp
 dev tun
 ca /opt/amnezia/openvpn/ca.crt
 cert /opt/amnezia/openvpn/AmneziaReq.crt
@@ -40,7 +40,7 @@ cat > /opt/amnezia/cloak/ck-config.json <<EOF
 {
   "ProxyBook": {
      "openvpn": [
-     "$OPENVPN_TRANSPORT_PROTO",
+     "tcp",
      "localhost:$OPENVPN_PORT"
     ],
      "shadowsocks": [

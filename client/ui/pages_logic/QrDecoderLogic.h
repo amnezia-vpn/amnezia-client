@@ -3,6 +3,10 @@
 
 #include "PageLogicBase.h"
 
+#ifdef Q_OS_ANDROID
+#include "jni.h"
+#endif
+
 class UiLogic;
 
 class QrDecoderLogic : public PageLogicBase
@@ -16,9 +20,16 @@ public:
     Q_INVOKABLE void onUpdatePage() override;
     Q_INVOKABLE void onDetectedQrCode(const QString &code);
 
+#ifdef Q_OS_ANDROID
+    static void onNewDataChunk(JNIEnv *env, jobject thiz, jstring data);
+#endif
+
 public:
     explicit QrDecoderLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~QrDecoderLogic() = default;
+
+private:
+    void stopDecodingQr();
 
 signals:
     void startDecode();

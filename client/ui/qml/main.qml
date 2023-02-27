@@ -255,18 +255,6 @@ Window  {
     }
 
     MessageDialog {
-        id: closePrompt
-//        x: (root.width - width) / 2
-//        y: (root.height - height) / 2
-        title: qsTr("Exit")
-        text: qsTr("Do you really want to quit?")
-//        standardButtons: StandardButton.Yes | StandardButton.No
-//        onYesClicked: {
-//            Qt.quit()
-//        }
-        visible: false
-    }
-    MessageDialog {
         id: publicKeyWarning
         title: "AmneziaVPN"
         text: qsTr("It's public key. Private key required")
