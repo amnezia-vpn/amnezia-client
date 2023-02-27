@@ -49,9 +49,9 @@ QJsonObject ShadowSocksLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 
 void ShadowSocksLogic::onPushButtonSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::ShadowSocks);
+    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, Proto::ShadowSocks);
 
-    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Proto::ShadowSocks), protocolConfig);
     ServerConfiguringProgressLogic::PageFunc pageFunc;
@@ -105,8 +105,8 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                                   uiLogic()->selectedDockerContainer,
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
+                                                   uiLogic()->m_selectedDockerContainer,
                                                    containerConfig,
                                                    newContainerConfig);
     },
@@ -115,10 +115,10 @@ void ShadowSocksLogic::onPushButtonSaveClicked()
     busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
-        m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
-        m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+        m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, newContainerConfig);
+        m_settings->clearLastConnectionConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     }
-    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->m_selectedServerIndex << uiLogic()->m_selectedDockerContainer;
 }
 
 void ShadowSocksLogic::onPushButtonCancelClicked()

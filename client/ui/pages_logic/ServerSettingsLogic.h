@@ -16,9 +16,7 @@ class ServerSettingsLogic : public PageLogicBase
 
     AUTO_PROPERTY(bool, labelWaitInfoVisible)
     AUTO_PROPERTY(QString, labelWaitInfoText)
-    AUTO_PROPERTY(QString, pushButtonClearText)
     AUTO_PROPERTY(QString, pushButtonClearClientCacheText)
-    AUTO_PROPERTY(bool, pushButtonClearVisible)
     AUTO_PROPERTY(bool, pushButtonClearClientCacheVisible)
     AUTO_PROPERTY(bool, pushButtonShareFullVisible)
     AUTO_PROPERTY(QString, labelServerText)
@@ -28,7 +26,6 @@ class ServerSettingsLogic : public PageLogicBase
 public:
     Q_INVOKABLE void onUpdatePage() override;
 
-    Q_INVOKABLE void onPushButtonClearServer();
     Q_INVOKABLE void onPushButtonForgetServer();
     Q_INVOKABLE void onPushButtonShareFullClicked();
     Q_INVOKABLE void onPushButtonClearClientCacheClicked();
