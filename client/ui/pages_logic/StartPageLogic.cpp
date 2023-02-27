@@ -13,6 +13,7 @@
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 #include "../../platforms/android/androidutils.h"
+#include "../../platforms/android/android_controller.h"
 #endif
 
 namespace {
@@ -183,6 +184,13 @@ void StartPageLogic::onPushButtonImportOpenFile()
         importConnectionFromCode(QString(data));
     }
 }
+
+#ifdef Q_OS_ANDROID
+void StartPageLogic::startQrDecoder()
+{
+    AndroidController::instance()->startQrReaderActivity();
+}
+#endif
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)
 {
