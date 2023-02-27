@@ -11,10 +11,9 @@ PageProtocolBase {
     protocol: ProtocolEnum.Cloak
     logic: UiLogic.protocolLogic(protocol)
 
-    enabled: logic.pageEnabled
     BackButton {
         id: back
-        enabled: logic.pageEnabled
+        enabled: !logic.pushButtonCancelVisible
     }
 
     Caption {

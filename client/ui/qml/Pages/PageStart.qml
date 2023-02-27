@@ -154,7 +154,7 @@ PageBase {
                 if (Qt.platform.os === "ios") {
                     UiLogic.goToPage(PageEnum.QrDecoderIos)
                 } else {
-                    UiLogic.goToPage(PageEnum.QrDecoder)
+                    StartPageLogic.startQrDecoder()
                 }
             }
             enabled: StartPageLogic.pushButtonConnectEnabled
