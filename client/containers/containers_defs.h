@@ -37,24 +37,26 @@ class ContainerProps : public QObject
     Q_OBJECT
 
 public:
-    Q_INVOKABLE static DockerContainer containerFromString(const QString &container);
-    Q_INVOKABLE static QString containerToString(DockerContainer container);
+    Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
+    Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
+    Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
 
-    Q_INVOKABLE static QList<DockerContainer> allContainers();
+    Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
 
-    Q_INVOKABLE static QMap<DockerContainer, QString> containerHumanNames();
-    Q_INVOKABLE static QMap<DockerContainer, QString> containerDescriptions();
+    Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerHumanNames();
+    Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDescriptions();
 
     // these protocols will be displayed in container settings
-    Q_INVOKABLE static QVector<Proto> protocolsForContainer(DockerContainer container);
+    Q_INVOKABLE static QVector<amnezia::Proto> protocolsForContainer(amnezia::DockerContainer container);
 
-    Q_INVOKABLE static ServiceType containerService(DockerContainer c);
+    Q_INVOKABLE static amnezia::ServiceType containerService(amnezia::DockerContainer c);
 
     // binding between Docker container and main protocol of given container
     // it may be changed fot future containers :)
-    Q_INVOKABLE static Proto defaultProtocol(DockerContainer c);
+    Q_INVOKABLE static amnezia::Proto defaultProtocol(amnezia::DockerContainer c);
 
-    Q_INVOKABLE static bool isSupportedByCurrentPlatform(DockerContainer c);
+    Q_INVOKABLE static bool isSupportedByCurrentPlatform(amnezia::DockerContainer c);
+    Q_INVOKABLE static QStringList fixedPortsForContainer(amnezia::DockerContainer c);
 };
 
 

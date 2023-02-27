@@ -31,6 +31,10 @@ public:
     Q_INVOKABLE void onPushButtonImport();
     Q_INVOKABLE void onPushButtonImportOpenFile();
 
+#ifdef Q_OS_ANDROID
+    Q_INVOKABLE void startQrDecoder();
+#endif
+
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);
     bool importConnectionFromQr(const QByteArray &data);

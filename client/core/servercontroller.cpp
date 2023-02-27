@@ -253,11 +253,17 @@ ErrorCode ServerController::removeContainer(const ServerCredentials &credentials
             genVarsForScript(credentials, container)));
 }
 
-ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
+ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container,
+                                           QJsonObject &config, bool isUpdate)
 {
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
+
+    if (!isUpdate) {
+        e = isServerPortBusy(credentials, container, config);
+        if (e) return e;
+    }
 
     e = installDockerWorker(credentials, container);
     if (e) return e;
@@ -296,7 +302,7 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
     qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
 
     if (reinstallRequred) {
-        return setupContainer(credentials, container, newConfig);
+        return setupContainer(credentials, container, newConfig, true);
     }
     else {
         ErrorCode e = configureContainerWorker(credentials, container, newConfig);
@@ -660,4 +666,36 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
     }
     //qDebug().noquote() << script;
     return s;
+}
+
+ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+        stdOut += data + "\n";
+    };
+    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
+        stdOut += data + "\n";
+    };
+
+    const QString containerString = ProtocolProps::protoToString(ContainerProps::defaultProtocol(container));
+    const QJsonObject containerConfig = config.value(containerString).toObject();
+
+    QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
+
+    QString port = containerConfig.value(config_key::port).toString();
+    QString transportProto = containerConfig.value(config_key::transport_proto).toString();
+
+    QString script = QString("sudo lsof -i -P -n | grep -E ':%1").arg(port);
+    for (auto &port : fixedPorts) {
+        script = script.append("|:%1").arg(port);
+    }
+    script = script.append("' | grep -i %1").arg(transportProto);
+    runScript(credentials,
+              replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+
+    if (!stdOut.isEmpty()) {
+        return ErrorCode::ServerPortAlreadyAllocatedError;
+    }
+    return ErrorCode::NoError;
 }

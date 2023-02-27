@@ -577,6 +577,16 @@ if(NOT IOS AND NOT ANDROID)
         COMMAND_EXPAND_LISTS
     )
 endif()
+
+if(WIN32)
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy,true>
+        $<TARGET_FILE_DIR:${PROJECT}>/../service/wireguard-service/wireguard-service.exe
+        $<TARGET_FILE_DIR:${PROJECT}>/wireguard/wireguard-service.exe
+        COMMAND_EXPAND_LISTS
+    )
+endif()
 if(IOS)
  #include(cmake/ios-arch-fixup.cmake)
 endif()

@@ -59,6 +59,11 @@ enum ServiceEvents {
 };
 typedef enum ServiceEvents ServiceEvents;
 
+enum UIEvents {
+    QR_CODED_DECODED = 0,
+};
+typedef enum UIEvents UIEvents;
+
 class AndroidVPNActivity : public QObject
 {
     Q_OBJECT
@@ -69,6 +74,7 @@ public:
     static bool handleBackButton(JNIEnv* env, jobject thiz);
     static void sendToService(ServiceAction type, const QString& data);
     static void connectService();
+    static void startQrCodeReader();
 
 signals:
     void serviceConnected();
@@ -80,6 +86,7 @@ signals:
     void eventBackendLogs(const QString& data);
     void eventActivationError(const QString& data);
     void eventConfigImport(const QString& data);
+    void eventQrCodeReceived(const QString& data);
 
 private:
     AndroidVPNActivity();
@@ -87,7 +94,9 @@ private:
     static void onServiceMessage(JNIEnv* env, jobject thiz, jint messageType, jstring body);
     static void onServiceConnected(JNIEnv* env, jobject thiz);
     static void onServiceDisconnected(JNIEnv* env, jobject thiz);
+    static void onAndroidVpnActivityMessage(JNIEnv* env, jobject thiz, jint messageType, jstring message);
     void handleServiceMessage(int code, const QString& data);
+    void handleActivityMessage(int code, const QString& data);
 };
 
 #endif // ANDROIDVPNACTIVITY_H
