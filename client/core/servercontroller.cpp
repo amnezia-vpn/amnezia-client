@@ -671,11 +671,13 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
 ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> ) {
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
     const QString containerString = ProtocolProps::protoToString(ContainerProps::defaultProtocol(container));
