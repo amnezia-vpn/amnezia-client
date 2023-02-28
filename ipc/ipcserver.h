@@ -25,6 +25,8 @@ public:
     virtual QStringList getTapList() override;
     virtual void cleanUp() override;
     virtual void setLogsEnabled(bool enabled) override;
+    virtual bool copyWireguardConfig(const QString &sourcePath) override;
+    virtual bool isWireguardRunning() override;
 
 private:
     int m_localpid = 0;

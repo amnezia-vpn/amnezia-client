@@ -28,7 +28,8 @@ private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
     QString serviceName() const;
-
+    QStringList stopArgs();
+    QStringList startArgs();
 
 private:
     QString m_configFileName;
@@ -36,6 +37,7 @@ private:
 
     QSharedPointer<PrivilegedProcess> m_wireguardStartProcess;
     QSharedPointer<PrivilegedProcess> m_wireguardStopProcess;
+    IpcClient *m_ipcClient;
 
     bool m_isConfigLoaded = false;
 

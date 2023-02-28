@@ -124,3 +124,48 @@ void IpcServer::setLogsEnabled(bool enabled)
         Logger::deinit();
     }
 }
+
+bool IpcServer::copyWireguardConfig(const QString &sourcePath)
+{
+#ifdef Q_OS_LINUX
+    QProcess copyWireguardConfigProcess;
+
+    bool errorOccurred = false;
+
+    connect(&copyWireguardConfigProcess, &QProcess::errorOccurred, this, [&errorOccurred](QProcess::ProcessError error) {
+        qDebug() << "WireguardProtocol::WireguardProtocol error occured while copying wireguard config: " << error;
+        errorOccurred = true;
+    });
+
+    copyWireguardConfigProcess.setProgram("/bin/cp");
+    copyWireguardConfigProcess.setArguments(QStringList{sourcePath, "/etc/wireguard/wg99.conf"});
+    copyWireguardConfigProcess.start();
+    copyWireguardConfigProcess.waitForFinished(10000);
+    return errorOccurred;
+#else
+    return false;
+#endif
+}
+
+bool IpcServer::isWireguardRunning()
+{
+#ifdef Q_OS_LINUX
+    QProcess checkWireguardStatusProcess;
+
+    connect(&checkWireguardStatusProcess, &QProcess::errorOccurred, this, [](QProcess::ProcessError error) {
+        qDebug() << "WireguardProtocol::WireguardProtocol error occured while checking wireguard status: " << error;
+    });
+
+    checkWireguardStatusProcess.setProgram("/bin/wg");
+    checkWireguardStatusProcess.setArguments(QStringList{"show"});
+    checkWireguardStatusProcess.start();
+    checkWireguardStatusProcess.waitForFinished(10000);
+    QString output = checkWireguardStatusProcess.readAllStandardOutput();
+    if (!output.isEmpty()) {
+        return true;
+    }
+    return false;
+#else
+    return false;
+#endif
+}

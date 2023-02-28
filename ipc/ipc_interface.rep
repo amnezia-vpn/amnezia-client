@@ -18,5 +18,8 @@ class IpcInterface
 
     SLOT( void cleanUp() );
     SLOT( void setLogsEnabled(bool enabled) );
+
+    SLOT( bool copyWireguardConfig(const QString &sourcePath) );
+    SLOT( bool isWireguardRunning() );
 };
 
