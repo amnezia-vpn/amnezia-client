@@ -48,10 +48,10 @@ QJsonObject V2RayLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 
 void V2RayLogic::onPushButtonSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::V2Ray);
+    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, Proto::V2Ray);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Proto::V2Ray), protocolConfig);
     ServerConfiguringProgressLogic::PageFunc pageFunc;
@@ -106,8 +106,8 @@ void V2RayLogic::onPushButtonSaveClicked()
     progressBarFunc.setTextFunc(QString("Configuring..."));
 
     auto installAction = [this, containerConfig, &newContainerConfig]() {
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex),
-                                                   uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
+                                                   uiLogic()->m_selectedDockerContainer, containerConfig, newContainerConfig);
     };
 
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
@@ -115,10 +115,10 @@ void V2RayLogic::onPushButtonSaveClicked()
                                                                                           busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
-        m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
-        m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+        m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, newContainerConfig);
+        m_settings->clearLastConnectionConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     }
-    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->m_selectedServerIndex << uiLogic()->m_selectedDockerContainer;
 }
 
 void V2RayLogic::onPushButtonCancelClicked()
