@@ -8,8 +8,7 @@
 #include "wireguardprotocol.h"
 #include "utilities.h"
 
-WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) :
-      VpnProtocol(configuration, parent)
+WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) : VpnProtocol(configuration, parent)
 {
     m_configFile.setFileName(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     writeWireguardConfiguration(configuration);
@@ -145,10 +144,17 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-    //    if (!QFileInfo::exists(configPath())) {
-    //        setLastError(ErrorCode::ConfigMissing);
-    //        return lastError();
-    //    }
+    if (IpcClient::Interface()) {
+        QRemoteObjectPendingReply<bool> result = IpcClient::Interface()->isWireguardConfigExists(configPath());
+        if (result.returnValue()) {
+            setLastError(ErrorCode::ConfigMissing);
+            return lastError();
+        }
+    } else {
+        qCritical() << "IPC client not initialized";
+        setLastError(ErrorCode::InternalError);
+        return lastError();
+    }
 
     setConnectionState(VpnConnectionState::Connecting);
 
@@ -198,7 +204,7 @@ ErrorCode WireguardProtocol::start()
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyReadStandardError, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAllStandardError();
-        reply.waitForFinished(1000);
+        reply.waitForFinished(10);
         qDebug() << "WireguardProtocol::WireguardProtocol readAllStandardError" << reply.returnValue();
     });
 
@@ -213,20 +219,20 @@ ErrorCode WireguardProtocol::start()
 
 void WireguardProtocol::updateVpnGateway(const QString &line)
 {
-    //    // line looks like
-    //    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
+//    // line looks like
+//    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
 
-    //    QStringList params = line.split(",");
-    //    for (const QString &l : params) {
-    //        if (l.contains("ifconfig")) {
-    //            if (l.split(" ").size() == 3) {
-    //                m_vpnLocalAddress = l.split(" ").at(1);
-    //                m_vpnGateway = l.split(" ").at(2);
+//    QStringList params = line.split(",");
+//    for (const QString &l : params) {
+//        if (l.contains("ifconfig")) {
+//            if (l.split(" ").size() == 3) {
+//                m_vpnLocalAddress = l.split(" ").at(1);
+//                m_vpnGateway = l.split(" ").at(2);
 
-    //                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
-    //            }
-    //        }
-    //    }
+//                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
+//            }
+//        }
+//    }
 }
 
 QString WireguardProtocol::serviceName() const

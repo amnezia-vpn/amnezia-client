@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QLocalSocket>
+#include <QFileInfo>
 
 #include "router.h"
 #include "logger.h"
@@ -168,4 +169,9 @@ bool IpcServer::isWireguardRunning()
 #else
     return false;
 #endif
+}
+
+bool IpcServer::isWireguardConfigExists(const QString &configPath)
+{
+    return QFileInfo::exists(configPath);
 }
