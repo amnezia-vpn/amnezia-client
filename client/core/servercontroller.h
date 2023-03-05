@@ -35,9 +35,10 @@ public:
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
+    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container,
+                             QJsonObject &config, bool isUpdate = false);
     ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &oldConfig, QJsonObject &newConfig);
+                              const QJsonObject &oldConfig, QJsonObject &newConfig);
 
     // create initial config - generate passwords, etc
     QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
@@ -74,6 +75,7 @@ public:
     QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     void setCancelInstallation(const bool cancel);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 private:
 
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
@@ -82,6 +84,7 @@ private:
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+    ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config);
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;

@@ -25,7 +25,7 @@ public:
     explicit WizardLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~WizardLogic() = default;
 
-    QMap<DockerContainer, QJsonObject> getInstallConfigsFromWizardPage() const;
+    QPair<DockerContainer, QJsonObject> getInstallConfigsFromWizardPage() const;
 
 };
 #endif // WIZARD_LOGIC_H

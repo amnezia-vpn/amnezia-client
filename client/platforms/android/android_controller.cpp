@@ -15,7 +15,6 @@
 #include "private/qandroidextras_p.h"
 #include "ui/pages_logic/StartPageLogic.h"
 
-#include "androidvpnactivity.h"
 #include "androidutils.h"
 
 namespace {
@@ -260,6 +259,11 @@ const QJsonObject &AndroidController::vpnConfig() const
 void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
 {
     m_vpnConfig = newVpnConfig;
+}
+
+void AndroidController::startQrReaderActivity()
+{
+    AndroidVPNActivity::instance()->startQrCodeReader();
 }
 
 void AndroidController::scheduleStatusCheckSlot()

@@ -13,6 +13,7 @@
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 #include "../../platforms/android/androidutils.h"
+#include "../../platforms/android/android_controller.h"
 #endif
 
 namespace {
@@ -155,7 +156,7 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectEnabled(true);
     set_pushButtonConnectText(tr("Connect"));
 
-    uiLogic()->installCredentials = serverCredentials;
+    uiLogic()->m_installCredentials = serverCredentials;
     if (ok) emit uiLogic()->goToPage(Page::NewServer);
 }
 
@@ -183,6 +184,13 @@ void StartPageLogic::onPushButtonImportOpenFile()
         importConnectionFromCode(QString(data));
     }
 }
+
+#ifdef Q_OS_ANDROID
+void StartPageLogic::startQrDecoder()
+{
+    AndroidController::instance()->startQrReaderActivity();
+}
+#endif
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)
 {

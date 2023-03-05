@@ -22,12 +22,10 @@ AndroidVPNActivity::AndroidVPNActivity() {
     AndroidUtils::runOnAndroidThreadAsync([]() {
         JNINativeMethod methods[]{
             {"handleBackButton", "()Z", reinterpret_cast<bool*>(handleBackButton)},
-            {"onServiceMessage", "(ILjava/lang/String;)V",
-             reinterpret_cast<void*>(onServiceMessage)},
-            {"qtOnServiceConnected", "()V",
-             reinterpret_cast<void*>(onServiceConnected)},
-            {"qtOnServiceDisconnected", "()V",
-             reinterpret_cast<void*>(onServiceDisconnected)},
+            {"onServiceMessage", "(ILjava/lang/String;)V", reinterpret_cast<void*>(onServiceMessage)},
+            {"qtOnServiceConnected", "()V", reinterpret_cast<void*>(onServiceConnected)},
+            {"qtOnServiceDisconnected", "()V", reinterpret_cast<void*>(onServiceDisconnected)},
+            {"onActivityMessage", "(ILjava/lang/String;)V", reinterpret_cast<void*>(onAndroidVpnActivityMessage)}
         };
 
         QJniObject javaClass(CLASSNAME);
@@ -52,6 +50,11 @@ bool AndroidVPNActivity::handleBackButton(JNIEnv* env, jobject thiz) {
 
 void AndroidVPNActivity::connectService() {
     QJniObject::callStaticMethod<void>(CLASSNAME, "connectService", "()V");
+}
+
+void AndroidVPNActivity::startQrCodeReader()
+{
+    QJniObject::callStaticMethod<void>(CLASSNAME, "startQrCodeReader", "()V");
 }
 
 // static
@@ -121,6 +124,19 @@ void AndroidVPNActivity::handleServiceMessage(int code, const QString& data) {
     }
 }
 
+void AndroidVPNActivity::handleActivityMessage(int code, const QString &data)
+{
+    auto mode = (UIEvents)code;
+
+    switch (mode) {
+    case UIEvents::QR_CODED_DECODED:
+        emit eventQrCodeReceived(data);
+        break;
+    default:
+        Q_ASSERT(false);
+    }
+}
+
 void AndroidVPNActivity::onServiceConnected(JNIEnv* env, jobject thiz) {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
@@ -133,4 +149,20 @@ void AndroidVPNActivity::onServiceDisconnected(JNIEnv* env, jobject thiz) {
     Q_UNUSED(thiz);
 
     emit AndroidVPNActivity::instance()->serviceDisconnected();
+}
+
+void AndroidVPNActivity::onAndroidVpnActivityMessage(JNIEnv *env, jobject thiz, jint messageType, jstring message)
+{
+    Q_UNUSED(thiz);
+    const char* buffer = env->GetStringUTFChars(message, nullptr);
+    if (!buffer) {
+        return;
+    }
+
+    QString parcelBody(buffer);
+    env->ReleaseStringUTFChars(message, buffer);
+
+    AndroidUtils::dispatchToMainThread([messageType, parcelBody] {
+        AndroidVPNActivity::instance()->handleActivityMessage(messageType, parcelBody);
+    });
 }

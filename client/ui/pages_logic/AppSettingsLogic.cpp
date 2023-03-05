@@ -7,7 +7,6 @@
 
 #include <QDesktopServices>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QStandardPaths>
 
 using namespace amnezia;
@@ -96,10 +95,8 @@ void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
     if (ok) {
         emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
-    }
-    else {
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-            tr("Can't import config, file is corrupted."));
+    } else {
+        emit uiLogic()->showWarningMessage(tr("Can't import config, file is corrupted."));
     }
 
 }
