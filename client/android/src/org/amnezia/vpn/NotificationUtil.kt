@@ -99,7 +99,7 @@ object NotificationUtil {
         val mainActivityName = "org.amnezia.vpn.qt.VPNActivity"
         val activity = Class.forName(mainActivityName)
         val intent = Intent(service, activity)
-        val pendingIntent = PendingIntent.getActivity(service, 0, intent, 0)
+        val pendingIntent = PendingIntent.getActivity(service, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         // Build our notification
         sNotificationBuilder?.let {
             it.setSmallIcon(org.amnezia.vpn.R.drawable.ic_amnezia_round)

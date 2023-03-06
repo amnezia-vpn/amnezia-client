@@ -68,7 +68,8 @@
             android:name="org.amnezia.vpn.shadowsocks.core.BootReceiver"
             android:directBootAware="true"
             android:enabled="false"
-            android:process=":QtOnlyProcess">
+            android:process=":QtOnlyProcess"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
