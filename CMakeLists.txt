@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT})
+
+set(BUILD_ID 1)
+project(${PROJECT} VERSION 2.1.2 
+        DESCRIPTION "AmneziaVPN"
+        HOMEPAGE_URL "https://amnezia.org/"
+)
 
 if(ANDROID)
     set(QT_ANDROID_BUILD_ALL_ABIS ON)

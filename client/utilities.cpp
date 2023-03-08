@@ -8,7 +8,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 
-#include "defines.h"
+#include "version.h"
 #include "utilities.h"
 
 QString Utils::getRandomString(int len)

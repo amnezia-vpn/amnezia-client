@@ -14,7 +14,7 @@
 #include "configurators/ikev2_configurator.h"
 #include "configurators/ssh_configurator.h"
 
-#include "defines.h"
+#include "version.h"
 #include "core/defs.h"
 #include "core/errorstrings.h"
 #include "core/servercontroller.h"

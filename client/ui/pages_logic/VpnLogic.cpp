@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <functional>
 #include "../uilogic.h"
-#include "defines.h"
+#include "version.h"
 #include <configurators/vpn_configurator.h>
 
 
@@ -88,7 +88,7 @@ void VpnLogic::onUpdatePage()
     else {
         set_labelErrorText("");
     }
-    QString ver = QString("v. %2").arg(QString(APP_MAJOR_VERSION));
+    QString ver = QString("v. %2").arg(QString(APP_VERSION));
     set_labelVersionText(ver);
 
     set_labelLogEnabledVisible(m_settings->isSaveLogs());

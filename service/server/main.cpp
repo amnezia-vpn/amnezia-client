@@ -1,6 +1,6 @@
 #include <QDir>
 
-#include "defines.h"
+#include "version.h"
 #include "localserver.h"
 #include "logger.h"
 #include "systemservice.h"
