@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
+
 set(TARGET ck_ovpn_plugin_go)
 
 set(CLOAK_SRCS cloak/cmd/ck-ovpn-plugin/ck-ovpn-plugin.go)
@@ -12,19 +14,22 @@ list(APPEND BUILD_CMD_ARGS -buildmode=c-shared -o ${CMAKE_CURRENT_BINARY_DIR}/${
 set(PREPARE_ENV_ARGS env)
 list(APPEND PREPARE_ENV_ARGS -w CGO_ENABLED=1 GOOS=android)
 
+string(REGEX MATCH ".+-([0-9]+)$" ANDROID_API_LEVEL ${ANDROID_PLATFORM})
+set(ANDROID_API_LEVEL ${CMAKE_MATCH_1})
+
 if ("${ANDROID_ABI}" STREQUAL "x86")
 	list(APPEND PREPARE_ENV_ARGS GOARCH=386)
-    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/i686-linux-android${ANDROID_PLATFORM}-clang)
+    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/i686-linux-android${ANDROID_API_LEVEL}-clang)
 elseif ("${ANDROID_ABI}" STREQUAL "x86_64")
 	list(APPEND PREPARE_ENV_ARGS GOARCH=amd64)
-    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/x86_64-linux-android${ANDROID_PLATFORM}-clang)
+    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/x86_64-linux-android${ANDROID_API_LEVEL}-clang)
 elseif ("${ANDROID_ABI}" STREQUAL "arm64-v8a")
 	list(APPEND PREPARE_ENV_ARGS GOARCH=arm64)
-    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/aarch64-linux-android${ANDROID_PLATFORM}-clang)
+    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang)
 elseif ("${ANDROID_ABI}" STREQUAL "armeabi-v7a")
 	list(APPEND PREPARE_ENV_ARGS GOARCH=arm)
 	list(APPEND PREPARE_ENV_ARGS GOARM=7)
-    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/armv7a-linux-androideabi${ANDROID_PLATFORM}-clang)
+    list(APPEND PREPARE_ENV_ARGS CC=${ANDROID_TOOLCHAIN_ROOT}/bin/armv7a-linux-androideabi${ANDROID_API_LEVEL}-clang)
 endif ()
 
 add_custom_command(

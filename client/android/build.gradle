@@ -12,6 +12,7 @@ buildscript {
        threetenabpVersion = '1.1.1'
        groupName = 'org.amnezia.vpn'
        minSdkVer = '24'
+       cmakeMinVersion = "3.25.0+"
    }
 
     repositories {
@@ -150,6 +151,7 @@ android {
            minifyEnabled false
            externalNativeBuild {
                cmake {
+                   version cmakeMinVersion
                    arguments "-DANDROID_PACKAGE_NAME=${groupName}",
                                 "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
                                 "-DANDROID_PLATFORM=${minSdkVer}"
@@ -162,6 +164,7 @@ android {
            minifyEnabled false
            externalNativeBuild {
                cmake {
+                   version cmakeMinVersion
                    arguments "-DANDROID_PACKAGE_NAME=${groupName}",
                                 "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
                                 "-DANDROID_PLATFORM=${minSdkVer}"
@@ -178,6 +181,7 @@ android {
 
     externalNativeBuild {
         cmake {
+            version cmakeMinVersion
             path "${projectDir}/cpp/CMakeLists.txt"
         }
     }
