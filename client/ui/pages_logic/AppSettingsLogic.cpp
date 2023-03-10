@@ -31,7 +31,7 @@ void AppSettingsLogic::onUpdatePage()
 
     QString ver = QString("%1: %2 (%3)")
             .arg(tr("Software version"))
-            .arg(QString(APP_VERSION))
+            .arg(QString(APP_MAJOR_VERSION))
             .arg(__DATE__);
     set_labelVersionText(ver);
 }

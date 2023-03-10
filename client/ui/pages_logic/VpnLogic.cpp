@@ -88,7 +88,7 @@ void VpnLogic::onUpdatePage()
     else {
         set_labelErrorText("");
     }
-    QString ver = QString("v. %2").arg(QString(APP_VERSION));
+    QString ver = QString("v. %2").arg(QString(APP_MAJOR_VERSION));
     set_labelVersionText(ver);
 
     set_labelLogEnabledVisible(m_settings->isSaveLogs());
