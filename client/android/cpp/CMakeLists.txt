@@ -76,7 +76,7 @@ endif()
         target_compile_definitions(ovpn3 PRIVATE
                 -DUSE_OPENSSL
                 )
-        target_link_libraries(ovpn3 crypto ssl lzo lz4 ck-ovpn-plugin)
+        target_link_libraries(ovpn3 crypto ssl lzo lz4 libck-ovpn-plugin)
     else ()
         target_compile_definitions(ovpn3 PRIVATE
                 -DUSE_MBEDTLS
