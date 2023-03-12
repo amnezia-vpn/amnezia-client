@@ -56,26 +56,6 @@ public class ClientAPI_OpenVPNClient extends ClientAPI_TunBuilderBase {
     ovpncliJNI.ClientAPI_OpenVPNClient_director_connect(this, swigCPtr, true, true);
   }
 
-  public static ClientAPI_MergeConfig merge_config_static(String path, boolean follow_references) {
-    return new ClientAPI_MergeConfig(ovpncliJNI.ClientAPI_OpenVPNClient_merge_config_static(path, follow_references), true);
-  }
-
-  public static ClientAPI_MergeConfig merge_config_string_static(String config_content) {
-    return new ClientAPI_MergeConfig(ovpncliJNI.ClientAPI_OpenVPNClient_merge_config_string_static(config_content), true);
-  }
-
-  public static ClientAPI_EvalConfig eval_config_static(ClientAPI_Config config) {
-    return new ClientAPI_EvalConfig(ovpncliJNI.ClientAPI_OpenVPNClient_eval_config_static(ClientAPI_Config.getCPtr(config), config), true);
-  }
-
-  public static int max_profile_size() {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_max_profile_size();
-  }
-
-  public static boolean parse_dynamic_challenge(String cookie, ClientAPI_DynamicChallenge dc) {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_parse_dynamic_challenge(cookie, ClientAPI_DynamicChallenge.getCPtr(dc), dc);
-  }
-
   public ClientAPI_EvalConfig eval_config(ClientAPI_Config arg0) {
     return new ClientAPI_EvalConfig(ovpncliJNI.ClientAPI_OpenVPNClient_eval_config(swigCPtr, this, ClientAPI_Config.getCPtr(arg0), arg0), true);
   }
@@ -174,22 +154,6 @@ public class ClientAPI_OpenVPNClient extends ClientAPI_TunBuilderBase {
 
   public void clock_tick() {
     if (getClass() == ClientAPI_OpenVPNClient.class) ovpncliJNI.ClientAPI_OpenVPNClient_clock_tick(swigCPtr, this); else ovpncliJNI.ClientAPI_OpenVPNClient_clock_tickSwigExplicitClientAPI_OpenVPNClient(swigCPtr, this);
-  }
-
-  public static String crypto_self_test() {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_crypto_self_test();
-  }
-
-  public static int app_expire() {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_app_expire();
-  }
-
-  public static String platform() {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_platform();
-  }
-
-  public static String copyright() {
-    return ovpncliJNI.ClientAPI_OpenVPNClient_copyright();
   }
 
 }

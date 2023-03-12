@@ -109,12 +109,20 @@ public class ClientAPI_Config {
     return ovpncliJNI.ClientAPI_Config_protoOverride_get(swigCPtr, this);
   }
 
-  public void setIpv6(String value) {
-    ovpncliJNI.ClientAPI_Config_ipv6_set(swigCPtr, this, value);
+  public void setProtoVersionOverride(int value) {
+    ovpncliJNI.ClientAPI_Config_protoVersionOverride_set(swigCPtr, this, value);
   }
 
-  public String getIpv6() {
-    return ovpncliJNI.ClientAPI_Config_ipv6_get(swigCPtr, this);
+  public int getProtoVersionOverride() {
+    return ovpncliJNI.ClientAPI_Config_protoVersionOverride_get(swigCPtr, this);
+  }
+
+  public void setAllowUnusedAddrFamilies(String value) {
+    ovpncliJNI.ClientAPI_Config_allowUnusedAddrFamilies_set(swigCPtr, this, value);
+  }
+
+  public String getAllowUnusedAddrFamilies() {
+    return ovpncliJNI.ClientAPI_Config_allowUnusedAddrFamilies_get(swigCPtr, this);
   }
 
   public void setConnTimeout(int value) {
@@ -211,14 +219,6 @@ public class ClientAPI_Config {
 
   public int getDefaultKeyDirection() {
     return ovpncliJNI.ClientAPI_Config_defaultKeyDirection_get(swigCPtr, this);
-  }
-
-  public void setForceAesCbcCiphersuites(boolean value) {
-    ovpncliJNI.ClientAPI_Config_forceAesCbcCiphersuites_set(swigCPtr, this, value);
-  }
-
-  public boolean getForceAesCbcCiphersuites() {
-    return ovpncliJNI.ClientAPI_Config_forceAesCbcCiphersuites_get(swigCPtr, this);
   }
 
   public void setTlsVersionMinOverride(String value) {
@@ -372,6 +372,30 @@ public class ClientAPI_Config {
 
   public boolean getWintun() {
     return ovpncliJNI.ClientAPI_Config_wintun_get(swigCPtr, this);
+  }
+
+  public void setAllowLocalDnsResolvers(boolean value) {
+    ovpncliJNI.ClientAPI_Config_allowLocalDnsResolvers_set(swigCPtr, this, value);
+  }
+
+  public boolean getAllowLocalDnsResolvers() {
+    return ovpncliJNI.ClientAPI_Config_allowLocalDnsResolvers_get(swigCPtr, this);
+  }
+
+  public void setEnableLegacyAlgorithms(boolean value) {
+    ovpncliJNI.ClientAPI_Config_enableLegacyAlgorithms_set(swigCPtr, this, value);
+  }
+
+  public boolean getEnableLegacyAlgorithms() {
+    return ovpncliJNI.ClientAPI_Config_enableLegacyAlgorithms_get(swigCPtr, this);
+  }
+
+  public void setEnableNonPreferredDCAlgorithms(boolean value) {
+    ovpncliJNI.ClientAPI_Config_enableNonPreferredDCAlgorithms_set(swigCPtr, this, value);
+  }
+
+  public boolean getEnableNonPreferredDCAlgorithms() {
+    return ovpncliJNI.ClientAPI_Config_enableNonPreferredDCAlgorithms_get(swigCPtr, this);
   }
 
   public ClientAPI_Config() {

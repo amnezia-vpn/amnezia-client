@@ -52,6 +52,22 @@ public class ClientAPI_ProvideCreds {
     return ovpncliJNI.ClientAPI_ProvideCreds_password_get(swigCPtr, this);
   }
 
+  public void setHttp_proxy_user(String value) {
+    ovpncliJNI.ClientAPI_ProvideCreds_http_proxy_user_set(swigCPtr, this, value);
+  }
+
+  public String getHttp_proxy_user() {
+    return ovpncliJNI.ClientAPI_ProvideCreds_http_proxy_user_get(swigCPtr, this);
+  }
+
+  public void setHttp_proxy_pass(String value) {
+    ovpncliJNI.ClientAPI_ProvideCreds_http_proxy_pass_set(swigCPtr, this, value);
+  }
+
+  public String getHttp_proxy_pass() {
+    return ovpncliJNI.ClientAPI_ProvideCreds_http_proxy_pass_get(swigCPtr, this);
+  }
+
   public void setResponse(String value) {
     ovpncliJNI.ClientAPI_ProvideCreds_response_set(swigCPtr, this, value);
   }

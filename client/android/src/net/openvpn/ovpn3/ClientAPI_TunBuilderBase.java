@@ -104,8 +104,8 @@ public class ClientAPI_TunBuilderBase {
     return ovpncliJNI.ClientAPI_TunBuilderBase_tun_builder_add_wins_server(swigCPtr, this, address);
   }
 
-  public boolean tun_builder_set_block_ipv6(boolean block_ipv6) {
-    return ovpncliJNI.ClientAPI_TunBuilderBase_tun_builder_set_block_ipv6(swigCPtr, this, block_ipv6);
+  public boolean tun_builder_set_allow_family(int af, boolean allow) {
+    return ovpncliJNI.ClientAPI_TunBuilderBase_tun_builder_set_allow_family(swigCPtr, this, af, allow);
   }
 
   public boolean tun_builder_set_adapter_domain_suffix(String name) {
