@@ -99,8 +99,6 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         if (!isBound) {
             Log.d(TAG, "dispatchParcel: not bound")
             return
-        } else {
-            Log.d(TAG, "dispatchParcel: bound")
         }
 
         val out: Parcel = Parcel.obtain()
@@ -330,13 +328,5 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             val extra = data?.getStringExtra("result") ?: ""
             onActivityMessage(UI_EVENT_QR_CODE_RECEIVED, extra)
         }
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0) {
-            onBackPressed()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
     }
 }
