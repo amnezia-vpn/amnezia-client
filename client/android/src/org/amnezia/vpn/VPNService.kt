@@ -293,6 +293,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             }
         }
         set(value) {
+            field = value
+
             if (value) {
                 mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
                 mConnectionTime = System.currentTimeMillis()
