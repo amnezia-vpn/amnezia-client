@@ -196,7 +196,6 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         try {
             mListener?.let {
                 if (it.isBinderAlive) {
-                    Log.i(tag, "Dispatching event: binder alive")
                     val data = Parcel.obtain()
                     data.writeByteArray(payload?.toByteArray(charset("UTF-8")))
                     it.transact(code, data, Parcel.obtain(), 0)
