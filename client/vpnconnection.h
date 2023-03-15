@@ -111,8 +111,8 @@ private:
 #endif
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol(DockerContainer container);
 
+   AndroidVpnProtocol* createDefaultAndroidVpnProtocol(DockerContainer container);
    void createAndroidConnections();
    void createAndroidConnections(DockerContainer container);
 #endif
