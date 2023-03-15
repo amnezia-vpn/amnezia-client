@@ -54,6 +54,10 @@ AndroidController::AndroidController() : QObject()
 
             isConnected = doc.object()["connected"].toBool();
 
+            if (isConnected) {
+                emit scheduleStatusCheckSignal();
+            }
+
             emit initialized(
                 true, isConnected,
                 time > 0 ? QDateTime::fromMSecsSinceEpoch(time) : QDateTime());
@@ -66,9 +70,11 @@ AndroidController::AndroidController() : QObject()
             Q_UNUSED(parcelBody);
             qDebug() << "Transact: connected";
 
-            isConnected = true;
+            if (!isConnected) {
+                emit scheduleStatusCheckSignal();
+            }
 
-            emit scheduleStatusCheckSignal();
+            isConnected = true;
 
             emit connectionStateChanged(VpnProtocol::Connected);
         }, Qt::QueuedConnection);
