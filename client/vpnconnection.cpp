@@ -378,6 +378,13 @@ void VpnConnection::connectToVpn(int serverIndex,
     if (e) emit VpnProtocol::Error;
 }
 
+void VpnConnection::createProtocolConnections() {
+    connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
+    connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+}
+
+#ifdef Q_OS_ANDROID
 void VpnConnection::restoreConnection() {
     createAndroidConnections();
 
@@ -402,12 +409,6 @@ void VpnConnection::createAndroidConnections(DockerContainer container)
     connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol, &AndroidVpnProtocol::connectionDataUpdated);
 }
 
-void VpnConnection::createProtocolConnections() {
-    connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
-    connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
-}
-
 AndroidVpnProtocol* VpnConnection::createDefaultAndroidVpnProtocol(DockerContainer container)
 {
     Proto proto = ContainerProps::defaultProtocol(container);
@@ -415,6 +416,7 @@ AndroidVpnProtocol* VpnConnection::createDefaultAndroidVpnProtocol(DockerContain
 
     return androidVpnProtocol;
 }
+#endif
 
 QString VpnConnection::bytesPerSecToText(quint64 bytes)
 {
