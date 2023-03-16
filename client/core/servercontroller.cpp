@@ -917,7 +917,7 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
         if (containerInfo.isEmpty()) {
             continue;
         }
-        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?>([0-9]*)/(udp|tcp).*");
+        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
         QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
         if (containerAndPortMatch.hasMatch()) {
             QString name = containerAndPortMatch.captured(1);
