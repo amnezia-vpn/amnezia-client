@@ -25,27 +25,31 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import org.amnezia.vpn.shadowsocks.core.Core.app
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 
 class BootReceiver : BroadcastReceiver() {
     companion object {
-        private val componentName by lazy { ComponentName(app, org.amnezia.vpn.shadowsocks.core.BootReceiver::class.java) }
+        private val componentName by lazy { ComponentName(app, BootReceiver::class.java) }
         var enabled: Boolean
-            get() = app.packageManager.getComponentEnabledSetting(org.amnezia.vpn.shadowsocks.core.BootReceiver.Companion.componentName) ==
+            get() = app.packageManager.getComponentEnabledSetting(componentName) ==
                     PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            set(value) = app.packageManager.setComponentEnabledSetting(
-                org.amnezia.vpn.shadowsocks.core.BootReceiver.Companion.componentName,
+            set(value) = app.packageManager.setComponentEnabledSetting(componentName,
                     if (value) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     else PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val locked = when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> false
-            Intent.ACTION_LOCKED_BOOT_COMPLETED -> true // constant will be folded so no need to do version checks
-            else -> return
+        if (!DataStore.persistAcrossReboot) {   // sanity check
+            enabled = false
+            return
         }
-        if (DataStore.directBootAware == locked) org.amnezia.vpn.shadowsocks.core.Core.startService()
+        val doStart = when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED -> !DataStore.directBootAware
+            Intent.ACTION_LOCKED_BOOT_COMPLETED -> DataStore.directBootAware
+            else -> DataStore.directBootAware || Build.VERSION.SDK_INT >= 24 && Core.user.isUserUnlocked
+        }
+        if (doStart) Core.startService()
     }
 }

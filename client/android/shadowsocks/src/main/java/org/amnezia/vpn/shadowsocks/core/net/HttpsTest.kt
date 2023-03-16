@@ -24,14 +24,15 @@ import android.os.Build
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.Core.app
-import org.amnezia.vpn.shadowsocks.core.acl.Acl
 import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Key
-import org.amnezia.vpn.shadowsocks.core.utils.disconnectFromMain
-import kotlinx.coroutines.*
+import org.amnezia.vpn.shadowsocks.core.utils.useCancellable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.Proxy
@@ -75,42 +76,38 @@ class HttpsTest : ViewModel() {
         }
     }
 
-    private var running: Pair<HttpURLConnection, Job>? = null
-    val status = MutableLiveData<Status>().apply { value = Status.Idle }
+    private var running: Job? = null
+    val status = MutableLiveData<Status>(Status.Idle)
 
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https", when ((Core.currentProfile ?: return).first.route) {
-            Acl.CHINALIST -> "www.qualcomm.cn"
-            else -> "www.google.com"
-        }, "/generate_204")
+        val url = URL("https://cp.cloudflare.com")
         val conn = (if (DataStore.serviceMode != Key.modeVpn) {
             url.openConnection(Proxy(Proxy.Type.SOCKS, DataStore.proxyAddress))
         } else url.openConnection()) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
-        running = conn to GlobalScope.launch(Dispatchers.Main.immediate) {
-            status.value = withContext(Dispatchers.IO) {
+        running = GlobalScope.launch(Dispatchers.Main.immediate) {
+            status.value = conn.useCancellable {
                 try {
                     val start = SystemClock.elapsedRealtime()
-                    val code = conn.responseCode
+                    val code = responseCode
                     val elapsed = SystemClock.elapsedRealtime() - start
-                    if (code == 204 || code == 200 && conn.responseLength == 0L) Status.Success(elapsed)
+                    if (code == 204 || code == 200 && responseLength == 0L) Status.Success(elapsed)
                     else Status.Error.UnexpectedResponseCode(code)
                 } catch (e: IOException) {
                     Status.Error.IOFailure(e)
                 } finally {
-                    conn.disconnect()
+                    disconnect()
                 }
             }
         }
     }
 
-    private fun cancelTest() = running?.let { (conn, job) ->
-        job.cancel()    // ensure job is cancelled before interrupting
-        conn.disconnectFromMain()
+    private fun cancelTest() {
+        running?.cancel()
         running = null
     }
 

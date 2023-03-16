@@ -21,79 +21,107 @@
 package org.amnezia.vpn.shadowsocks.core.bg
 
 import android.content.Context
-
+import android.util.Base64
+import org.amnezia.vpn.shadowsocks.core.Core.app
 import org.amnezia.vpn.shadowsocks.core.acl.Acl
 import org.amnezia.vpn.shadowsocks.core.acl.AclSyncer
+import org.amnezia.vpn.shadowsocks.core.R
 import org.amnezia.vpn.shadowsocks.core.database.Profile
-import org.amnezia.vpn.shadowsocks.core.database.ProfileManager
-import org.amnezia.vpn.shadowsocks.core.plugin.PluginConfiguration
-import org.amnezia.vpn.shadowsocks.core.plugin.PluginManager
+import org.amnezia.vpn.shadowsocks.plugin.PluginConfiguration
+import org.amnezia.vpn.shadowsocks.plugin.PluginManager
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
-import org.amnezia.vpn.shadowsocks.core.utils.DirectBoot
-import org.amnezia.vpn.shadowsocks.core.utils.parseNumericAddress
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
-import java.io.IOException
-import java.net.UnknownHostException
+import java.net.URI
+import java.net.URISyntaxException
 
 /**
  * This class sets up environment for ss-local.
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
-    private var configFile: File? = null
-    var trafficMonitor: TrafficMonitor? = null
-    private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
-    val pluginPath by lazy { PluginManager.init(plugin) }
-
-    suspend fun init(service: BaseService.Interface) {
-        if (route == Acl.CUSTOM_RULES) withContext(Dispatchers.IO) {
-            Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
+    init {
+        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isNotEmpty())) {
+            app.getString(R.string.proxy_empty)
         }
-
-        // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null) {
-            while (true) try {
-                val io = GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }
-                profile.host = io.await().firstOrNull()?.hostAddress ?: throw UnknownHostException()
-                return
-            } catch (e: UnknownHostException) {
-                // retries are only needed on Chrome OS where arc0 is brought up/down during VPN changes
-                if (!DataStore.hasArc0) throw e
-                Thread.yield()
-            }
+        // check the crypto
+        require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
+            "cipher ${profile.method} is deprecated."
+        }
+        // check the key format for aead-2022-cipher
+        require(profile.method !in setOf(
+            "2022-blake3-aes-128-gcm",
+            "2022-blake3-aes-256-gcm",
+            "2022-blake3-chacha20-poly1305",
+        ) || Base64.decode(profile.password, Base64.DEFAULT).size in arrayOf(16, 32)) {
+            "The Base64 Key is invalid."
         }
     }
+
+    private var configFile: File? = null
+    var trafficMonitor: TrafficMonitor? = null
+    val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
 
     /**
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, mode: String, dnsRelay: Boolean = true) {
+        // setup traffic monitor path
         trafficMonitor = TrafficMonitor(stat)
 
+        // init JSON config
         this.configFile = configFile
         val config = profile.toJson()
-        if (pluginPath != null) config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
+        plugin?.let { (path, opts, isV2) ->
+            if (service.isVpnService) {
+                if (isV2) opts["__android_vpn"] = "" else config.put("plugin_args", JSONArray(arrayOf("-V")))
+            }
+            config.put("plugin", path).put("plugin_opts", opts.toString())
+        }
+        config.put("dns", "system")
+        config.put("locals", JSONArray().apply {
+            // local SOCKS5 proxy
+            put(JSONObject().apply {
+                put("local_address", DataStore.listenAddress)
+                put("local_port", DataStore.portProxy)
+                put("local_udp_address", DataStore.listenAddress)
+                put("local_udp_port", DataStore.portProxy)
+                put("mode", mode)
+            })
+
+            // local DNS proxy
+            if (dnsRelay) try {
+                URI("dns://${profile.remoteDns}")
+            } catch (e: URISyntaxException) {
+                throw BaseService.ExpectedExceptionWrapper(e)
+            }.let { dns ->
+                put(JSONObject().apply {
+                    put("local_address", DataStore.listenAddress)
+                    put("local_port", DataStore.portLocalDns)
+                    put("local_dns_address", "local_dns_path")
+                    put("remote_dns_address", dns.host ?: "0.0.0.0")
+                    put("remote_dns_port", if (dns.port < 0) 53 else dns.port)
+                    put("protocol", "dns")
+                })
+            }
+        })
         configFile.writeText(config.toString())
 
-        val cmd = service.buildAdditionalArguments(arrayListOf(
+        // build the command line
+        val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "-b", DataStore.listenAddress,
-                "-l", DataStore.portProxy.toString(),
-                "-t", "600",
-                "-S", stat.absolutePath,
-                "-c", configFile.absolutePath))
-        if (extraFlag != null) cmd.add(extraFlag)
+                "--stat-path", stat.absolutePath,
+                "-c", configFile.absolutePath,
+        )
+
+        if (service.isVpnService) cmd += "--vpn"
 
         if (route != Acl.ALL) {
             cmd += "--acl"
             cmd += Acl.getFile(route).absolutePath
         }
-
-        // for UDP profile, it's only going to operate in UDP relay mode-only so this flag has no effect
-        if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_LAN) cmd += "-D"
-
-        if (DataStore.tcpFastOpen) cmd += "--fast-open"
 
         service.data.processes!!.start(cmd)
     }
@@ -105,22 +133,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
             thread.shutdown(scope)
-            // Make sure update total traffic when stopping the runner
-            try {
-                // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
-                val profile = ProfileManager.getProfile(profile.id) ?: return
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                ProfileManager.updateProfile(profile)
-            } catch (e: IOException) {
-                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-                val profile = DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single { it.id == profile.id }
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                profile.dirty = true
-                DirectBoot.update(profile)
-                DirectBoot.listenForUnlock()
-            }
+            persistStats(profile.id)    // Make sure update total traffic when stopping the runner
         }
         trafficMonitor = null
         configFile?.delete()    // remove old config possibly in device storage

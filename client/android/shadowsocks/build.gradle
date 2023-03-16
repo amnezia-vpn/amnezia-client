@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+//apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 //apply plugin: 'com.novoda.bintray-release'
 
 android {
@@ -28,6 +29,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    kapt { 
+    	correctErrorTypes = true 
+    }
 }
 
 androidExtensions {
@@ -42,29 +46,43 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.4.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.30-M1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
 
-    implementation "androidx.core:core-ktx:1.2.0"
+   
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:2.4.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
-    implementation "androidx.room:room-runtime:2.2.5" // runtime
-    implementation "androidx.preference:preference:1.1.0"
+    implementation "androidx.room:room-runtime:2.5.0" // runtime
+    implementation "androidx.preference:preference:1.2.0"
     implementation "androidx.work:work-runtime-ktx:2.7.1"
     implementation "androidx.browser:browser:1.3.0-alpha01"
     implementation "androidx.constraintlayout:constraintlayout:1.1.3"
     implementation "com.google.android.material:material:1.2.0-alpha05"
-    implementation "com.google.code.gson:gson:2.8.5"
+    implementation "androidx.work:work-multiprocess:2.7.1"
+    
+    implementation "com.android.support:support-compat:27.0.2"
+    implementation "androidx.activity:activity:1.6.1"
+    implementation "androidx.fragment:fragment:1.3.0"
+    implementation "com.jakewharton.timber:timber:5.0.1"
+    implementation "com.google.android.gms:play-services-oss-licenses:17.0.0"
+    implementation "com.google.code.gson:gson:2.10.1"
+    implementation "com.google.firebase:firebase-analytics-ktx:21.2.0"
+    implementation "com.google.firebase:firebase-crashlytics:18.3.3"
+    implementation "androidx.fragment:fragment-ktx:1.3.0-rc02"
+    implementation "androidx.core:core-ktx:1.9.0"
 
-    implementation "dnsjava:dnsjava:2.1.9"
+    implementation "dnsjava:dnsjava:3.5.2"
     implementation "org.connectbot.jsocks:jsocks:1.0.0"
     implementation "com.afollestad.material-dialogs:core:2.6.0"
 //    api "com.takisoft.preferencex:preferencex:1.0.0"
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
+    
     api 'org.connectbot.jsocks:jsocks:1.0.0'
-    kapt "androidx.room:room-compiler:2.2.5"
+    api 'androidx.fragment:fragment-ktx:1.5.5'
+    
+    kapt "androidx.room:room-compiler:2.5.0"
     kapt "androidx.lifecycle:lifecycle-compiler:2.4.0"
 }

@@ -26,18 +26,22 @@ import androidx.room.RoomDatabase
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.database.migration.RecreateSchemaMigration
 import org.amnezia.vpn.shadowsocks.core.utils.Key
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-@Database(entities = [KeyValuePair::class], version = 4)
+@Database(entities = [KeyValuePair::class], version = 3)
 abstract class PublicDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
-            Room.databaseBuilder(Core.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC)
-                    .allowMainThreadQueries()
-                    .addMigrations(
-                            Migration3
-                    )
-                    .fallbackToDestructiveMigration()
-                    .build()
+            Room.databaseBuilder(Core.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC).apply {
+                addMigrations(
+                        Migration3
+                )
+                allowMainThreadQueries()
+                enableMultiInstanceInvalidation()
+                fallbackToDestructiveMigration()
+                setQueryExecutor { GlobalScope.launch { it.run() } }
+            }.build()
         }
 
         val kvPairDao get() = instance.keyValuePairDao()

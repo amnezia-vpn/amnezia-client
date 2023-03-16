@@ -43,7 +43,7 @@ object Key {
 
     const val route = "route"
 
-    const val isAutoConnect = "isAutoConnect"
+    const val persistAcrossReboot = "isAutoConnect"
     const val directBootAware = "directBootAware"
 
     const val proxyApps = "isProxyApps"
@@ -64,7 +64,6 @@ object Key {
 
     const val dirty = "profileDirty"
 
-    const val tfo = "tcp_fastopen"
     const val assetUpdateTime = "assetUpdateTime"
 
     // TV specific values
@@ -72,12 +71,14 @@ object Key {
     const val controlImport = "control.import"
     const val controlExport = "control.export"
     const val about = "about"
+    const val aboutOss = "about.ossLicenses"
 }
 
 object Action {
-    const val SERVICE = "org.amnezia.vpn.shadowsocks.SERVICE"
-    const val CLOSE = "org.amnezia.vpn.shadowsocks.CLOSE"
-    const val RELOAD = "org.amnezia.vpn.shadowsocks.RELOAD"
+    const val SERVICE = "com.github.shadowsocks.SERVICE"
+    const val CLOSE = "com.github.shadowsocks.CLOSE"
+    const val RELOAD = "com.github.shadowsocks.RELOAD"
+    const val ABORT = "com.github.shadowsocks.ABORT"
 
-    const val EXTRA_PROFILE_ID = "org.amnezia.vpn.shadowsocks.EXTRA_PROFILE_ID"
+    const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }

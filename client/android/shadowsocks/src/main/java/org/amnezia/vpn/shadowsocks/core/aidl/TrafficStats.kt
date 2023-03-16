@@ -20,9 +20,10 @@
 
 package org.amnezia.vpn.shadowsocks.core.aidl
 
-import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class TrafficStats(
         // Bytes per second
         var txRate: Long = 0L,
@@ -35,18 +36,4 @@ data class TrafficStats(
     operator fun plus(other: TrafficStats) = TrafficStats(
             txRate + other.txRate, rxRate + other.rxRate,
             txTotal + other.txTotal, rxTotal + other.rxTotal)
-
-    constructor(parcel: Parcel) : this(parcel.readLong(), parcel.readLong(), parcel.readLong(), parcel.readLong())
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(txRate)
-        parcel.writeLong(rxRate)
-        parcel.writeLong(txTotal)
-        parcel.writeLong(rxTotal)
-    }
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<TrafficStats> {
-        override fun createFromParcel(parcel: Parcel) = TrafficStats(parcel)
-        override fun newArray(size: Int): Array<TrafficStats?> = arrayOfNulls(size)
-    }
 }

@@ -23,7 +23,10 @@ package org.amnezia.vpn.shadowsocks.core.bg
 import android.net.LocalSocket
 import android.os.SystemClock
 import org.amnezia.vpn.shadowsocks.core.aidl.TrafficStats
+import org.amnezia.vpn.shadowsocks.core.database.ProfileManager
 import org.amnezia.vpn.shadowsocks.core.net.LocalSocketListener
+import org.amnezia.vpn.shadowsocks.core.preference.DataStore
+import org.amnezia.vpn.shadowsocks.core.utils.DirectBoot
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -34,7 +37,11 @@ class TrafficMonitor(statFile: File) {
         private val buffer = ByteArray(16)
         private val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
         override fun acceptInternal(socket: LocalSocket) {
-            if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
+            when (val read = socket.inputStream.read(buffer)) {
+                -1 -> return
+                16 -> { }
+                else -> throw IOException("Unexpected traffic stat length $read")
+            }
             val tx = stat.getLong(0)
             val rx = stat.getLong(8)
             if (current.txTotal != tx) {
@@ -52,6 +59,7 @@ class TrafficMonitor(statFile: File) {
     var out = TrafficStats()
     private var timestampLast = 0L
     private var dirty = false
+    private var persisted: TrafficStats? = null
 
     fun requestUpdate(): Pair<TrafficStats, Boolean> {
         val now = SystemClock.elapsedRealtime()
@@ -78,5 +86,26 @@ class TrafficMonitor(statFile: File) {
             }
         }
         return Pair(out, updated)
+    }
+
+    fun persistStats(id: Long) {
+        val current = current
+        check(persisted == null || persisted == current) { "Data loss occurred" }
+        persisted = current
+        try {
+            // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
+            val profile = ProfileManager.getProfile(id) ?: return
+            profile.tx += current.txTotal
+            profile.rx += current.rxTotal
+            ProfileManager.updateProfile(profile)
+        } catch (e: IOException) {
+            if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
+            val profile = DirectBoot.getDeviceProfile()!!.toList().single { it.id == id }
+            profile.tx += current.txTotal
+            profile.rx += current.rxTotal
+            profile.dirty = true
+            DirectBoot.update(profile)
+            DirectBoot.listenForUnlock()
+        }
     }
 }

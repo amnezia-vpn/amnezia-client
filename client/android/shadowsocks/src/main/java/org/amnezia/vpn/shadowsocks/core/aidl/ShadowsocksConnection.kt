@@ -24,28 +24,27 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.DeadObjectException
-import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
 import org.amnezia.vpn.shadowsocks.core.bg.BaseService
 import org.amnezia.vpn.shadowsocks.core.bg.ProxyService
 import org.amnezia.vpn.shadowsocks.core.bg.TransproxyService
-import org.amnezia.vpn.shadowsocks.core.bg.ShadowsocksVpnService
+import org.amnezia.vpn.shadowsocks.core.bg.VpnService
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Action
 import org.amnezia.vpn.shadowsocks.core.utils.Key
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * This object should be compact as it will not get GC-ed.
  */
-class ShadowsocksConnection(private val handler: Handler = Handler(),
-                            private var listenForDeath: Boolean = false) :
-        ServiceConnection, IBinder.DeathRecipient {
+class ShadowsocksConnection(private var listenForDeath: Boolean = false) : ServiceConnection, IBinder.DeathRecipient {
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
             Key.modeProxy -> ProxyService::class
-            Key.modeVpn -> ShadowsocksVpnService::class
+            Key.modeVpn -> VpnService::class
             Key.modeTransproxy -> TransproxyService::class
             else -> throw UnknownError()
         }.java
@@ -70,38 +69,38 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val callback = callback ?: return
-            handler.post { callback.stateChanged(BaseService.State.values()[state], profileName, msg) }
+            GlobalScope.launch(Dispatchers.Main.immediate) {
+                callback.stateChanged(BaseService.State.values()[state], profileName, msg)
+            }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
             val callback = callback ?: return
-            handler.post {
-                callback.trafficUpdated(profileId, stats)
-            }
+            GlobalScope.launch(Dispatchers.Main.immediate) { callback.trafficUpdated(profileId, stats) }
         }
         override fun trafficPersisted(profileId: Long) {
             val callback = callback ?: return
-            handler.post { callback.trafficPersisted(profileId) }
+            GlobalScope.launch(Dispatchers.Main.immediate) { callback.trafficPersisted(profileId) }
         }
     }
     private var binder: IBinder? = null
 
     var bandwidthTimeout = 0L
         set(value) {
-            val service = service
-            if (bandwidthTimeout != value && service != null)
-                if (value > 0) service.startListeningForBandwidth(serviceCallback, value) else try {
-                    service.stopListeningForBandwidth(serviceCallback)
-                } catch (_: DeadObjectException) { }
+            try {
+                if (value > 0) service?.startListeningForBandwidth(serviceCallback, value)
+                else service?.stopListeningForBandwidth(serviceCallback)
+            } catch (_: RemoteException) { }
             field = value
         }
     var service: IShadowsocksService? = null
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder) {
         this.binder = binder
-        if (listenForDeath) binder.linkToDeath(this, 0)
         val service = IShadowsocksService.Stub.asInterface(binder)!!
         this.service = service
-        if (!callbackRegistered) try {
+        try {
+            if (listenForDeath) binder.linkToDeath(this, 0)
+            check(!callbackRegistered)
             service.registerCallback(serviceCallback)
             callbackRegistered = true
             if (bandwidthTimeout > 0) service.startListeningForBandwidth(serviceCallback, bandwidthTimeout)
@@ -118,7 +117,8 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
 
     override fun binderDied() {
         service = null
-        callback?.also { handler.post(it::onBinderDied) }
+        callbackRegistered = false
+        callback?.also { GlobalScope.launch(Dispatchers.Main.immediate) { it.onBinderDied() } }
     }
 
     private fun unregisterCallback() {
@@ -144,9 +144,13 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
             context.unbindService(this)
         } catch (_: IllegalArgumentException) { }   // ignore
         connectionActive = false
-        if (listenForDeath) binder?.unlinkToDeath(this, 0)
+        if (listenForDeath) try {
+            binder?.unlinkToDeath(this, 0)
+        } catch (_: NoSuchElementException) { }
         binder = null
-        service?.stopListeningForBandwidth(serviceCallback)
+        try {
+            service?.stopListeningForBandwidth(serviceCallback)
+        } catch (_: RemoteException) { }
         service = null
         callback = null
     }

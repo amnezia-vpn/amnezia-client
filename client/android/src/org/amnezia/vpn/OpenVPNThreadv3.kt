@@ -101,6 +101,31 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
             config.setUsePluggableTransports(true)
         }
+        
+        Log.i(tag, "resultingConfig() " + resultingConfig.toString())
+        
+        if (jsonVpnConfig.getString("protocol") == "shadowsocks") {
+            val socksIndex = resultingConfig.indexOf("socks-proxy")
+            val socksEndIndex =  resultingConfig.indexOf("\n", socksIndex)
+            resultingConfig.delete(socksIndex, socksEndIndex)
+            
+            val remoteIndex = resultingConfig.indexOf("remote ")
+            val remoteEndIndex = resultingConfig.indexOf("\n", remoteIndex)
+            
+            resultingConfig.insert(remoteEndIndex, "\nlocal 127.0.0.1\n") 
+            
+            val portStart = resultingConfig.lastIndexOf(" ", remoteEndIndex)
+            
+            resultingConfig.delete(remoteIndex, portStart)
+            
+            resultingConfig.insert(remoteIndex, "remote 172.19.0.2 ")
+            
+            
+            
+            Log.i(tag, "shadowsocks() " + resultingConfig.toString())
+            
+        }
+
 
         config.content = resultingConfig.toString()
 

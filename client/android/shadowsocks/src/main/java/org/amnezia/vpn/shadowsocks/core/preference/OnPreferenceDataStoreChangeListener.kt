@@ -23,5 +23,5 @@ package org.amnezia.vpn.shadowsocks.core.preference
 import androidx.preference.PreferenceDataStore
 
 interface OnPreferenceDataStoreChangeListener {
-    fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?)
+    fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String)
 }

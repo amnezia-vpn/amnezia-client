@@ -20,17 +20,19 @@
 
 package org.amnezia.vpn.shadowsocks.core.net
 
+import android.annotation.SuppressLint
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
-import org.amnezia.vpn.shadowsocks.core.utils.printLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
@@ -55,14 +57,15 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 try {
                     accept(serverSocket.accept())
                 } catch (e: IOException) {
-                    if (running) printLog(e)
+                    if (running) Timber.w(e)
                     continue
                 }
             }
         }
-        closeChannel.sendBlocking(Unit)
+        closeChannel.trySendBlocking(Unit).onFailure { throw it!! }
     }
 
+    @SuppressLint("NewApi")
     open fun shutdown(scope: CoroutineScope) {
         running = false
         localSocket.fileDescriptor?.apply {
@@ -71,7 +74,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 Os.shutdown(this, OsConstants.SHUT_RDWR)
             } catch (e: ErrnoException) {
                 // suppress fd inactive or already closed
-                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
+                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw e.rethrowAsSocketException()
             }
         }
         scope.launch { closeChannel.receive() }
