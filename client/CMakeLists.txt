@@ -305,13 +305,14 @@ if(IOS)
 
     find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
     find_library(FW_UIKIT UIKit)
+    find_library(FW_AVFOUNDATION AVFoundation)
     find_library(FW_FOUNDATION Foundation)
     find_library(FW_STOREKIT StoreKit)
     find_library(FW_USERNOTIFICATIONS UserNotifications)
 
-    set(LIBS ${LIBS}
-        ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT}
-        ${FW_FOUNDATION} ${FW_STOREKIT}
+    set(LIBS ${LIBS} 
+        ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT} 
+        ${FW_AVFOUNDATION} ${FW_FOUNDATION} ${FW_STOREKIT}
         ${FW_USERNOTIFICATIONS}
     )
 
@@ -461,7 +462,6 @@ if(IOS)
 
     target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
-
     )
     set_source_files_properties(
         ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
@@ -499,6 +499,7 @@ if(IOS)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
+
 endif()
 
 if(ANDROID)
