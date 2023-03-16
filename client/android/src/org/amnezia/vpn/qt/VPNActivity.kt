@@ -37,6 +37,9 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private val STORAGE_PERMISSION_CODE = 42
 
     private val CAMERA_ACTION_CODE = 101
+    private val CREATE_FILE_ACTION_CODE = 102
+
+    private var tmpFileContentToSave: String = ""
 
     companion object {
         private lateinit var instance: VPNActivity
@@ -56,6 +59,10 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         @JvmStatic fun sendToService(actionCode: Int, body: String) {
             VPNActivity.getInstance().dispatchParcel(actionCode, body)
         }
+
+        @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
+            VPNActivity.getInstance().saveFile(fileContent, suggestedName)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +81,18 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private fun startQrCodeActivity() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivityForResult(intent, CAMERA_ACTION_CODE)
+    }
+
+    private fun saveFile(fileContent: String, suggestedName: String) {
+        tmpFileContentToSave = fileContent
+
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/*"
+            putExtra(Intent.EXTRA_TITLE, suggestedName)
+        }
+
+        startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
     }
 
     override fun getSystemService(name: String): Any? {
@@ -328,5 +347,27 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             val extra = data?.getStringExtra("result") ?: ""
             onActivityMessage(UI_EVENT_QR_CODE_RECEIVED, extra)
         }
+
+        if (requestCode == CREATE_FILE_ACTION_CODE && resultCode == RESULT_OK) {
+            data?.data?.also { uri ->
+                alterDocument(uri)
+            }
+        }
+    }
+
+    private fun alterDocument(uri: Uri) {
+        try {
+            applicationContext.contentResolver.openFileDescriptor(uri, "w")?.use { fd ->
+                FileOutputStream(fd.fileDescriptor).use { fos ->
+                    fos.write(tmpFileContentToSave.toByteArray())
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        tmpFileContentToSave = ""
     }
 }

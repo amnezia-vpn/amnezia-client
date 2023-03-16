@@ -57,6 +57,14 @@ void AndroidVPNActivity::startQrCodeReader()
     QJniObject::callStaticMethod<void>(CLASSNAME, "startQrCodeReader", "()V");
 }
 
+void AndroidVPNActivity::saveFileAs(QString fileContent, QString suggestedFilename) {
+    QJniObject::callStaticMethod<void>(
+                CLASSNAME,
+                "saveFileAs", "(Ljava/lang/String;Ljava/lang/String;)V",
+                QJniObject::fromString(fileContent).object<jstring>(),
+                QJniObject::fromString(suggestedFilename).object<jstring>());
+}
+
 // static
 AndroidVPNActivity* AndroidVPNActivity::instance() {
     if (s_instance == nullptr) {
@@ -70,9 +78,9 @@ AndroidVPNActivity* AndroidVPNActivity::instance() {
 void AndroidVPNActivity::sendToService(ServiceAction type, const QString& data) {
     int messageType = (int)type;
 
-    QJniEnvironment env;
     QJniObject::callStaticMethod<void>(
-        CLASSNAME, "sendToService", "(ILjava/lang/String;)V",
+        CLASSNAME,
+        "sendToService", "(ILjava/lang/String;)V",
         static_cast<int>(messageType),
         QJniObject::fromString(data).object<jstring>());
 }

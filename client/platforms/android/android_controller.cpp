@@ -209,12 +209,7 @@ void AndroidController::setNotificationText(const QString& title,
 }
 
 void AndroidController::shareConfig(const QString& configContent, const QString& suggestedName) {
-    QJsonObject rootObject;
-    rootObject["data"] = configContent;
-    rootObject["suggestedName"] = suggestedName;
-    QJsonDocument doc(rootObject);
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_SHARE_CONFIG, doc.toJson());
+    AndroidVPNActivity::saveFileAs(configContent, suggestedName);
 }
 
 /*
