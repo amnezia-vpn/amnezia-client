@@ -86,3 +86,5 @@ dependencies {
     kapt "androidx.room:room-compiler:2.5.0"
     kapt "androidx.lifecycle:lifecycle-compiler:2.4.0"
 }
+
+apply plugin: 'com.google.gms.google-services'

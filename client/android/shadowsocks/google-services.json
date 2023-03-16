@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "94322785672",
+    "firebase_url": "https://amnezia-c6715-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "amnezia-c6715",
+    "storage_bucket": "amnezia-c6715.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94322785672:android:ed42ab188d6edecf754e3d",
+        "android_client_info": {
+          "package_name": "org.amnezia.vpn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "94322785672-p3q726tro36fr9nluj45l35gqv6nhjsq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvblU4w_NZbWk9bNQc-KGmg-WODjbb308"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "94322785672-p3q726tro36fr9nluj45l35gqv6nhjsq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94322785672:android:95e8779ff76d6641754e3d",
+        "android_client_info": {
+          "package_name": "org.amnezia.vpn.shadowsocks.core"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "94322785672-p3q726tro36fr9nluj45l35gqv6nhjsq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvblU4w_NZbWk9bNQc-KGmg-WODjbb308"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "94322785672-p3q726tro36fr9nluj45l35gqv6nhjsq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -111,7 +111,7 @@ object Core : Configuration.Provider {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        Firebase.initialize(deviceStorage)  // multiple processes needs manual set-up
+      /*  Firebase.initialize(deviceStorage)  // multiple processes needs manual set-up
         Timber.plant(object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
                 if (t == null) {
@@ -122,7 +122,7 @@ object Core : Configuration.Provider {
                     if (priority >= Log.INFO) FirebaseCrashlytics.getInstance().recordException(t)
                 }
             }
-        })
+        })*/
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware && user.isUserUnlocked) {

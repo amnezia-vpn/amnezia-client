@@ -7,12 +7,21 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="28"/>
+
+    <queries>
+        <intent>
+            <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" />
+        </intent>
+    </queries>
 
 
     <application
@@ -75,6 +84,7 @@
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        
 
         <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
         <provider
@@ -128,5 +138,18 @@
             android:directBootAware="true"
             android:process=":QtOnlyProcess"
             tools:replace="android:directBootAware" />
+            
+        <service android:name="com.google.firebase.components.ComponentDiscoveryService"
+        	 android:process=":QtOnlyProcess"
+                 android:directBootAware="true"/>
+                 
+        <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
+        	  android:process=":QtOnlyProcess"
+                  tools:node="remove"/>    
+                  
+       <service android:name="androidx.room.MultiInstanceInvalidationService"
+                 android:process=":bg"/>           
+            
+            
     </application>
 </manifest>
