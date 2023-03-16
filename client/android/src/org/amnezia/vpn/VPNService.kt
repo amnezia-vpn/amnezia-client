@@ -35,7 +35,6 @@ import org.amnezia.vpn.shadowsocks.core.net.DefaultNetworkListener
 import org.amnezia.vpn.shadowsocks.core.net.Subnet
 import org.amnezia.vpn.shadowsocks.core.preference.DataStore
 import org.amnezia.vpn.shadowsocks.core.utils.Key.modeVpn
-import org.amnezia.vpn.shadowsocks.core.utils.printLog
 import org.json.JSONObject
 import java.io.Closeable
 import java.io.File

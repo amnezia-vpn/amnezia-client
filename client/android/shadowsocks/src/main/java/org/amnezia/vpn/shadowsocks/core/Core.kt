@@ -150,7 +150,7 @@ object Core : Configuration.Provider {
     }.build()
 
     fun updateNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
+  /*      if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
             notification.createNotificationChannels(listOf(
                     NotificationChannel("service-vpn", app.getText(R.string.service_vpn),
                             if (Build.VERSION.SDK_INT >= 28) NotificationManager.IMPORTANCE_MIN
@@ -161,7 +161,7 @@ object Core : Configuration.Provider {
                             NotificationManager.IMPORTANCE_LOW),
                     SubscriptionService.notificationChannel))
             notification.deleteNotificationChannel("service-nat")   // NAT mode is gone for good
-        }
+        } */
     }
 
     fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,

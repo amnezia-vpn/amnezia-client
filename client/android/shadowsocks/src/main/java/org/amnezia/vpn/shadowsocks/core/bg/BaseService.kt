@@ -73,7 +73,7 @@ object BaseService {
     interface ExpectedException
     class ExpectedExceptionWrapper(e: Exception) : Exception(e.localizedMessage, e), ExpectedException
 
-    class Data internal constructor(private val service: Interface) {
+    class Data (private val service: Interface) {
         var state = State.Stopped
         var processes: GuardedProcessPool? = null
         var proxy: ProxyInstance? = null
