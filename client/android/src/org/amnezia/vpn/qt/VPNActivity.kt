@@ -5,6 +5,8 @@
 package org.amnezia.vpn.qt;
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
@@ -62,6 +64,10 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
         @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
             VPNActivity.getInstance().saveFile(fileContent, suggestedName)
+        }
+
+        @JvmStatic fun putTextToClipboard(text: String) {
+            VPNActivity.getInstance().putToClipboard(text)
         }
     }
 
@@ -369,5 +375,16 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         }
 
         tmpFileContentToSave = ""
+    }
+
+    private fun putToClipboard(text: String) {
+        this.runOnUiThread {
+            val clipboard = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
+
+            if (clipboard != null) {
+                val clip: ClipData = ClipData.newPlainText("", text)
+                clipboard.setPrimaryClip(clip)
+            }
+        }
     }
 }
