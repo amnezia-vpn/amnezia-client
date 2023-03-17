@@ -474,7 +474,11 @@ void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &da
 
 void UiLogic::copyToClipboard(const QString &text)
 {
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->copyTextToClipboard(text);
+#elif
     qApp->clipboard()->setText(text);
+#endif
 }
 
 void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QString& data) {
