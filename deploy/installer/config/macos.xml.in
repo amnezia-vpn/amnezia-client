@@ -13,7 +13,6 @@
     <AllowSpaceInPath>true</AllowSpaceInPath>
     <AllowNonAsciiCharacters>false</AllowNonAsciiCharacters>
     <ControlScript>controlscript.js</ControlScript>
-    <RepositorySettingsPageVisible>false</RepositorySettingsPageVisible>
     <DependsOnLocalInstallerBinary>true</DependsOnLocalInstallerBinary>
     <SupportsModify>false</SupportsModify>
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>

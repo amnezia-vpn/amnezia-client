@@ -8,4 +8,7 @@
     <ForcedInstallation>true</ForcedInstallation>
     <RequiresAdminRights>true</RequiresAdminRights>
     <Script>componentscript.js</Script>
+    <UserInterfaces>
+        <UserInterface>clearProfilesCheckboxForm.ui</UserInterface>
+    </UserInterfaces>
 </Package>

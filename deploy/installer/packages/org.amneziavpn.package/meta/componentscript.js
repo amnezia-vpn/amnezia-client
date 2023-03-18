@@ -47,7 +47,11 @@ function Component()
 
 Component.prototype.componentLoaded = function ()
 {
-
+    console.log("123");
+    // if (installer.isPackageManager()) {
+        installer.addWizardPageItem( component, "ClearProfilesCheckboxForm", QInstaller.ComponentSelection );
+        console.log("333");
+    // }
 }
 
 Component.prototype.installationFinishedPageIsShown = function()
@@ -62,7 +66,6 @@ Component.prototype.createOperations = function()
     component.createOperations();
 
     if (runningOnWindows()) {
-
         component.addOperation("CreateShortcut", "@TargetDir@/" + appExecutableFileName(),
                                QDesktopServices.storageLocation(QDesktopServices.DesktopLocation) + "/" + appName() + ".lnk",
                                "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
@@ -100,7 +103,6 @@ Component.prototype.createOperations = function()
 Component.prototype.installationFinished = function()
 {
     var command = "";
-    var args = [];
 
     if ((installer.status === QInstaller.Success) && (installer.isInstaller() || installer.isUpdater())) {
 
@@ -121,11 +123,21 @@ Component.prototype.installationFinished = function()
         } else if (runningOnMacOS()) {
             command = "/Applications/" + appName() + ".app/Contents/MacOS/" + appName();
         } else if (runningOnLinux()) {
-	    command = "@TargetDir@/client/" + appName();
-	}
+	        command = "@TargetDir@/client/" + appName();
+	    }
 
         installer.dropAdminRights()
 
+        if (installer.isUninstaller() || installer.isUpdater()) {
+            var checkboxForm = component.userInterface( "ClearProfilesCheckboxForm" );
+            if (checkboxForm && checkboxForm.ClearProfilesCheckbox.checked) {
+                var args = ["--clearProfiles"];
+                processStatus = installer.execute(command, args, installer.value("TargetDir"));
+            }
+        }
+
+        var args = [];
         processStatus = installer.executeDetached(command, args, installer.value("TargetDir"));
+
     }
 }

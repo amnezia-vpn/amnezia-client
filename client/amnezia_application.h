@@ -55,7 +55,11 @@ private:
     ProtocolProps* m_protocolProps {};
 
     QTranslator* m_translator;
+
     QCommandLineParser m_parser;
+    QCommandLineOption m_autoStartOption {{"a", "autoStart"}, tr("System autostart")};
+    QCommandLineOption m_cleanUpOption {{"c", "cleanUp"}, tr("Cleanup logs")};
+    QCommandLineOption m_clearProfilesOption {"clearProfiles", tr("Clear client cached profile")};
 
 };
 

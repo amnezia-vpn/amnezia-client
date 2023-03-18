@@ -1,8 +1,6 @@
 var requestToQuitFromApp = false;
 var updaterCompleted = 0;
 var desktopAppProcessRunning = false;
-var appInstalledUninstallerPath;
-var appInstalledUninstallerPath_x86;
 
 function appName()
 {
@@ -18,18 +16,20 @@ function appExecutableFileName()
     }
 }
 
-function appInstalled()
+function pathToMaintenanceTool()
 {
     if (runningOnWindows()) {
-        appInstalledUninstallerPath = installer.value("RootDir") + "Program Files/AmneziaVPN/maintenancetool.exe";
-        appInstalledUninstallerPath_x86 = installer.value("RootDir") + "Program Files (x86)/AmneziaVPN/maintenancetool.exe";
-    } else if (runningOnMacOS()){
-        appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
-    } else if (runningOnLinux()){
-        appInstalledUninstallerPath = "/opt/" + appName() + "/maintenancetool";
+        return installer.value("TargetDir") + "/maintenancetool.exe";
+    } else if (runningOnMacOS()) {
+        return installer.value("TargetDir") + "/maintenancetool.app/Contents/MacOS/maintenancetool";
+    } else if (runningOnLinux()) {
+        return installer.value("TargetDir") + "/maintenancetool";
     }
+}
 
-    return installer.fileExists(appInstalledUninstallerPath) || installer.fileExists(appInstalledUninstallerPath_x86);
+function appInstalled()
+{
+    return installer.fileExists(pathToMaintenanceTool());
 }
 
 function endsWith(str, suffix)
@@ -259,18 +259,13 @@ function Controller () {
                                                            qsTr("We need to remove the old installation first. Do you wish to proceed?"),
                                                            QMessageBox.Ok | QMessageBox.Cancel)) {
 
-
                 if (appInstalled()) {
                     var resultArray = [];
 
-                    if (installer.fileExists(appInstalledUninstallerPath_x86)) {
-                        console.log("Starting uninstallation " + appInstalledUninstallerPath_x86);
-                        resultArray = installer.execute(appInstalledUninstallerPath_x86);
-                    }
-
-                    if (installer.fileExists(appInstalledUninstallerPath)) {
-                        console.log("Starting uninstallation " + appInstalledUninstallerPath);
-                        resultArray = installer.execute(appInstalledUninstallerPath);
+                    if (installer.fileExists(pathToMaintenanceTool())) {
+                        console.log("Starting uninstallation " + pathToMaintenanceTool());
+                        var args = ["--sr"];
+                        resultArray = installer.execute(pathToMaintenanceTool(), args);
                     }
 
                     console.log("Uninstaller finished with code: " + resultArray[1])

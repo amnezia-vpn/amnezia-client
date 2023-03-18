@@ -197,16 +197,27 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    QCommandLineOption c_autostart {{"a", "autostart"}, "System autostart"};
-    m_parser.addOption(c_autostart);
-
-    QCommandLineOption c_cleanup {{"c", "cleanup"}, "Cleanup logs"};
-    m_parser.addOption(c_cleanup);
+    m_parser.addOption(m_autoStartOption);
+    m_parser.addOption(m_cleanUpOption);
+    m_parser.addOption(m_clearProfilesOption);
 
     m_parser.process(*this);
 
-    if (m_parser.isSet(c_cleanup)) {
+    if (m_parser.isSet(m_cleanUpOption)) {
         Logger::cleanUp();
+        QTimer::singleShot(100, this, [this]{
+            quit();
+        });
+        exec();
+        return false;
+    } else if (m_parser.isSet(m_clearProfilesOption)) {
+        for (int i = 0; i < m_settings->serversCount(); i++) {
+            const auto &containers = m_settings->containers(i).keys();
+            for (DockerContainer container : containers) {
+                m_settings->clearLastConnectionConfig(i, container);
+            }
+        }
+
         QTimer::singleShot(100, this, [this]{
             quit();
         });

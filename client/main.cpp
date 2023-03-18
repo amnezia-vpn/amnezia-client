@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     app.loadTranslator();
     app.loadFonts();
 
-    bool doExec = app.parseCommands();
+    bool runGuiApplication = app.parseCommands();
 
-    if (doExec) {
+    if (runGuiApplication) {
         app.init();
         return app.exec();
     }
