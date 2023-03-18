@@ -802,6 +802,8 @@ Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
                     }
             if (!profile.bypass) builder.addAllowedApplication(me)
         }
+        val me = packageName
+        builder.addDisallowedApplication(me)
         
         Log.i(tag, "startVpn: -----------------------4")
         when (profile.route) {
@@ -836,13 +838,14 @@ Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
         
         Log.i(tag, "startVpn: -----------------------9")
         
+        
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
                 "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
                 "--tunmtu", VPN_MTU.toString(),
-                "--sock-path", "sock_path",
+                "--sock-path", File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath,
                 "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
-                "--loglevel", "warning")
+                "--loglevel", "info")
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"
             cmd += PRIVATE_VLAN6_ROUTER

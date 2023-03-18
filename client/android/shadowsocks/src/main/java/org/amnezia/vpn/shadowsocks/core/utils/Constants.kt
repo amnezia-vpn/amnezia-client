@@ -75,10 +75,10 @@ object Key {
 }
 
 object Action {
-    const val SERVICE = "com.github.shadowsocks.SERVICE"
-    const val CLOSE = "com.github.shadowsocks.CLOSE"
-    const val RELOAD = "com.github.shadowsocks.RELOAD"
-    const val ABORT = "com.github.shadowsocks.ABORT"
+    const val SERVICE = "org.amnezia.vpn.shadowsocks.core.SERVICE"
+    const val CLOSE = "org.amnezia.vpn.shadowsocks.core.CLOSE"
+    const val RELOAD = "org.amnezia.vpn.shadowsocks.core.RELOAD"
+    const val ABORT = "org.amnezia.vpn.shadowsocks.core.ABORT"
 
-    const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
+    const val EXTRA_PROFILE_ID = "org.amnezia.vpn.shadowsocks.core.EXTRA_PROFILE_ID"
 }

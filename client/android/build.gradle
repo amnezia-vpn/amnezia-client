@@ -22,6 +22,8 @@ buildscript {
     }
 
     dependencies {
+    	classpath 'com.google.gms:google-services:4.3.2'
+    	classpath 'com.google.firebase:firebase-crashlytics-gradle:2.1.1' 
         classpath 'com.android.tools.build:gradle:7.2.1'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
@@ -63,6 +65,13 @@ dependencies {
 
     def camerax_ml_version = "1.2.0-beta02"
     def ml_kit_version = "17.0.3"
+    def work_version = "2.7.1"
+    
+    implementation "com.google.android.gms:play-services-oss-licenses:17.0.0"
+    implementation "com.google.code.gson:gson:2.10.1"
+    implementation "com.google.firebase:firebase-analytics-ktx:21.2.0"
+    implementation "com.google.firebase:firebase-crashlytics:18.3.3"
+    implementation "androidx.work:work-runtime-ktx:${work_version}"
     implementation("androidx.camera:camera-mlkit-vision:${camerax_ml_version}")
     implementation("com.google.mlkit:barcode-scanning:${ml_kit_version}")
 }

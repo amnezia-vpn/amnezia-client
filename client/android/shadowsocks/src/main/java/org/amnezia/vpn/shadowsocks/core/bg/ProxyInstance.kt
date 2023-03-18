@@ -117,6 +117,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         )
 
         if (service.isVpnService) cmd += "--vpn"
+	cmd += "--tcp-fast-open"
 
         if (route != Acl.ALL) {
             cmd += "--acl"

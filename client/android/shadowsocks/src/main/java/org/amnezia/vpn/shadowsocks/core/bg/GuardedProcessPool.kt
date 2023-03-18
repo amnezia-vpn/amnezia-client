@@ -28,6 +28,7 @@ import android.system.OsConstants
 import androidx.annotation.MainThread
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.utils.Commandline
+import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
@@ -61,10 +62,10 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
             try {
                 while (true) {
                     thread(name = "stderr-$cmdName") {
-                        streamLogger(process.errorStream) { Timber.tag(cmdName).e(it) }
+                        streamLogger(process.errorStream) { Log.e(cmdName, it) }
                     }
                     thread(name = "stdout-$cmdName") {
-                        streamLogger(process.inputStream) { Timber.tag(cmdName).v(it) }
+                        streamLogger(process.inputStream) { Log.e(cmdName, it) }
                         // this thread also acts as a daemon thread for waitFor
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }
@@ -74,16 +75,16 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                     when {
                         SystemClock.elapsedRealtime() - startTime < 1000 -> throw IOException(
                                 "$cmdName exits too fast (exit code: $exitCode)")
-                        exitCode == 128 + OsConstants.SIGKILL -> Timber.w("$cmdName was killed")
-                        else -> Timber.w(IOException("$cmdName unexpectedly exits with code $exitCode"))
+                        exitCode == 128 + OsConstants.SIGKILL -> Log.e(cmdName, "$cmdName was killed")
+                        else -> Log.e(cmdName, "$cmdName unexpectedly exits with code $exitCode")
                     }
-                    Timber.i("restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
+                    Log.e(cmdName, "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
                     running = true
                     onRestartCallback?.invoke()
                 }
             } catch (e: IOException) {
-                Timber.w("error occurred. stop guard: ${Commandline.toString(cmd)}")
+                Log.e(cmdName, "error occurred. stop guard: ${Commandline.toString(cmd)}")
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
                 if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
@@ -91,9 +92,9 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                         try {
                             Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
                         } catch (e: ErrnoException) {
-                            if (e.errno != OsConstants.ESRCH) Timber.w(e)
+                            if (e.errno != OsConstants.ESRCH) Log.e(cmdName, e.toString())
                         } catch (e: ReflectiveOperationException) {
-                            Timber.w(e)
+                            Log.e(cmdName, e.toString())
                         }
                         if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
                     }
@@ -112,7 +113,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
     @MainThread
     fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
-        Timber.i("start process: ${Commandline.toString(cmd)}")
+        Log.i("GuardedProcessPool", "start process: ${Commandline.toString(cmd)}")
         Guard(cmd).apply {
             start() // if start fails, IOException will be thrown directly
             launch { looper(onRestartCallback) }
