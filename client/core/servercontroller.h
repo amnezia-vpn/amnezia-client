@@ -3,14 +3,10 @@
 
 #include <QJsonObject>
 #include <QObject>
-#include "sshconnection.h"
-#include "sshremoteprocess.h"
-#include "logger.h"
+
 #include "defs.h"
-
 #include "containers/containers_defs.h"
-
-#include "sftpdefs.h"
+#include "sshclient.h"
 
 class Settings;
 class VpnConfigurator;
@@ -22,15 +18,16 @@ class ServerController : public QObject
     Q_OBJECT
 public:
     ServerController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    ~ServerController();
 
     typedef QList<QPair<QString, QString>> Vars;
 
-    ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
+//    ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
 
     // QSsh exitCode and exitStatus are different things
-    ErrorCode fromSshProcessExitStatus(int exitStatus);
+//    ErrorCode fromSshProcessExitStatus(int exitStatus);
 
-    QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
+//    QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
     void disconnectFromHost(const ServerCredentials &credentials);
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
@@ -48,11 +45,11 @@ public:
     ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-        const QString &remotePath, QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+        const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 
     ErrorCode uploadTextFileToContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &file, const QString &path,
-        QSsh::SftpOverwriteMode overwriteMode = QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+        libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 
     QByteArray getTextFileFromContainer(DockerContainer container,
         const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
@@ -62,22 +59,20 @@ public:
     QString replaceVars(const QString &script, const Vars &vars);
 
     ErrorCode runScript(const ServerCredentials &credentials, QString script,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+        const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
+        const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
     ErrorCode runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdOut = nullptr,
-        const std::function<void(const QString &, QSharedPointer<QSsh::SshRemoteProcess>)> &cbReadStdErr = nullptr);
+        const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
+        const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
-    QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     void setCancelInstallation(const bool cancel);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 private:
-
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
@@ -93,6 +88,7 @@ private:
     std::shared_ptr<VpnConfigurator> m_configurator;
 
     bool m_cancelInstallation = false;
+    libssh::Client m_sshClient;
 signals:
     void serverIsBusy(const bool isBusy);
 };

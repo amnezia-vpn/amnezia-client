@@ -64,7 +64,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     connData.taKey = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, &e);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::RemoteProcessCrashError;
+        if (errorCode) *errorCode = ErrorCode::SshSftpFailureError;
     }
 
     return connData;

@@ -1,1 +1,0 @@
-load(qt_parts)
