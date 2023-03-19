@@ -241,7 +241,7 @@ QString Utils::certUtilPath()
 {
 #ifdef Q_OS_WIN
     QString winPath = QString::fromUtf8(qgetenv("windir"));
-    return winPath + "system32\\certutil.exe";
+    return winPath + "\\system32\\certutil.exe";
 #else
     return "";
 #endif

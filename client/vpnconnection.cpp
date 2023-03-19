@@ -105,8 +105,8 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
     }
     else {
         m_isIOSConnected = false;
-        m_receivedBytes = 0;
-        m_sentBytes = 0;
+//        m_receivedBytes = 0;
+//        m_sentBytes = 0;
     }
 #endif
     emit connectionStateChanged(state);
