@@ -37,7 +37,6 @@ private:
 
     QSharedPointer<PrivilegedProcess> m_wireguardStartProcess;
     QSharedPointer<PrivilegedProcess> m_wireguardStopProcess;
-    IpcClient *m_ipcClient;
 
     bool m_isConfigLoaded = false;
 

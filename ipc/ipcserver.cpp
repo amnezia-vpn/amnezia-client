@@ -129,20 +129,17 @@ void IpcServer::setLogsEnabled(bool enabled)
 bool IpcServer::copyWireguardConfig(const QString &sourcePath)
 {
 #ifdef Q_OS_LINUX
-    QProcess copyWireguardConfigProcess;
+    const QString wireguardConfigPath = "/etc/wireguard/wg99.conf";
+    if (QFile::exists(wireguardConfigPath))
+    {
+        QFile::remove(wireguardConfigPath);
+    }
 
-    bool errorOccurred = false;
-
-    connect(&copyWireguardConfigProcess, &QProcess::errorOccurred, this, [&errorOccurred](QProcess::ProcessError error) {
-        qDebug() << "WireguardProtocol::WireguardProtocol error occured while copying wireguard config: " << error;
-        errorOccurred = true;
-    });
-
-    copyWireguardConfigProcess.setProgram("/bin/cp");
-    copyWireguardConfigProcess.setArguments(QStringList{sourcePath, "/etc/wireguard/wg99.conf"});
-    copyWireguardConfigProcess.start();
-    copyWireguardConfigProcess.waitForFinished(10000);
-    return errorOccurred;
+    if (!QFile::copy(sourcePath, wireguardConfigPath)) {
+        qDebug() << "WireguardProtocol::WireguardProtocol error occured while copying wireguard config:";
+        return false;
+    }
+    return true;
 #else
     return false;
 #endif
