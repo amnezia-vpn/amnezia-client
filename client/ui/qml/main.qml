@@ -252,18 +252,16 @@ Window  {
         function onToggleLogPanel() {
             drawer_log.visible = !drawer_log.visible
         }
+        function onShowWarningMessage(message) {
+            popupWarning.popupWarningText = message
+            popupWarning.open()
+        }
     }
 
     MessageDialog {
         id: publicKeyWarning
         title: "AmneziaVPN"
         text: qsTr("It's public key. Private key required")
-        visible: false
-    }
-    MessageDialog {
-        id: connectErrorDialog
-        title: "AmneziaVPN"
-        text: UiLogic.dialogConnectErrorText
         visible: false
     }
 
@@ -374,5 +372,9 @@ Window  {
                 }
             }
         }
+    }
+
+    PopupWarning {
+        id: popupWarning
     }
 }

@@ -75,6 +75,7 @@ PageBase {
                     UiLogic.goToPage(PageEnum.ServerContainers)
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
@@ -82,6 +83,16 @@ PageBase {
                 visible: ServerSettingsLogic.pushButtonShareFullVisible
                 onClicked: {
                     ServerSettingsLogic.onPushButtonShareFullClicked()
+                }
+            }
+
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                text: qsTr("Advanced server settings")
+                visible: ServerSettingsLogic.pushButtonShareFullVisible //todo
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.AdvancedServerSettings)
                 }
             }
 
@@ -100,28 +111,6 @@ PageBase {
                 visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
                     ServerSettingsLogic.onPushButtonClearClientCacheClicked()
-                }
-            }
-
-            BlueButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 10
-                text: ServerSettingsLogic.pushButtonClearText
-                visible: ServerSettingsLogic.pushButtonClearVisible
-                onClicked: {    
-                    popupClearServer.open()
-                }
-            }
-
-            PopupWithQuestion {
-                id: popupClearServer
-                questionText: "Attention! All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted. Continue?"
-                yesFunc: function() {
-                    ServerSettingsLogic.onPushButtonClearServer()
-                    close()
-                }
-                noFunc: function() {
-                    close()
                 }
             }
 
@@ -147,7 +136,6 @@ PageBase {
             }
         }
     }
-
 
     Logo {
         id : logo

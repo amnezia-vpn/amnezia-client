@@ -54,12 +54,12 @@ You SHOULD set this website address to some foreign website which is not blocked
                 text: WizardLogic.lineEditHighWebsiteMaskingText
                 onEditingFinished: {
                     let _text = website_masking.text
-                    _text.replace("http://", "");
-                    _text.replace("https://", "");
+                    _text = _text.replace("http://", "");
+                    _text = _text.replace("https://", "");
                     if (!_text) {
                         return
                     }
-                    _text = _text.split("/").first();
+                    _text = _text.split("/")[0];
                     WizardLogic.lineEditHighWebsiteMaskingText = _text
                 }
                 onAccepted: {

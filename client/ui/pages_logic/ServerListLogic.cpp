@@ -20,7 +20,8 @@ void ServerListLogic::onServerListPushbuttonDefaultClicked(int index)
 
 void ServerListLogic::onServerListPushbuttonSettingsClicked(int index)
 {
-    uiLogic()->selectedServerIndex = index;
+    uiLogic()->m_selectedServerIndex = index;
+    uiLogic()->m_installCredentials = m_settings->serverCredentials(index);
     uiLogic()->goToPage(Page::ServerSettings);
 }
 

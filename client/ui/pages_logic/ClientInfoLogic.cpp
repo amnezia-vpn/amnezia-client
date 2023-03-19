@@ -35,8 +35,8 @@ void ClientInfoLogic::onUpdatePage()
     set_pageContentVisible(false);
     set_busyIndicatorIsRunning(true);
 
-    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
-    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
     const QString containerNameString = ContainerProps::containerHumanNames().value(container);
     set_labelCurrentVpnProtocolText(tr("Service: ") + containerNameString);
 
@@ -88,8 +88,8 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
     const QModelIndex modelIndex = model->index(m_currentClientIndex);
     model->setData(modelIndex, m_lineEditNameAliasText, ClientManagementModel::ClientRoles::NameRole);
 
-    const DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+    const DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
     const QVector<amnezia::Proto> protocols = ContainerProps::protocolsForContainer(selectedContainer);
     if (!protocols.empty()) {
         const Proto currentMainProtocol = protocols.front();
@@ -108,8 +108,8 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
 void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
 {
     set_busyIndicatorIsRunning(true);
-    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
 
     auto model = qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel());
     const QModelIndex modelIndex = model->index(m_currentClientIndex);
@@ -137,7 +137,7 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
         return;
     }
 
-    const QJsonObject &containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, container);
+    const QJsonObject &containerConfig = m_settings->containerConfig(uiLogic()->m_selectedServerIndex, container);
     error = m_serverController->startupContainerWorker(credentials, container, containerConfig);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
@@ -151,8 +151,8 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
 {
     set_busyIndicatorIsRunning(true);
     ErrorCode error;
-    const DockerContainer container = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
-    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+    const DockerContainer container = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
+    const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
     const QString wireGuardConfigFile = "opt/amnezia/wireguard/wg0.conf";
     const QString wireguardConfigString = m_serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
     if (isErrorOccured(error)) {

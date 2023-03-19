@@ -45,6 +45,7 @@ class VpnLogic;
 class WizardLogic;
 class ClientManagementLogic;
 class ClientInfoLogic;
+class AdvancedServerSettingsLogic;
 
 class PageProtocolLogicBase;
 class OpenVpnLogic;
@@ -55,6 +56,7 @@ class OtherProtocolsLogic;
 
 class VpnConnection;
 
+class CreateServerTest;
 
 class UiLogic : public QObject
 {
@@ -63,7 +65,7 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, dialogConnectErrorText)
+    AUTO_PROPERTY(QString, popupWarningText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
@@ -93,6 +95,7 @@ public:
     friend class WizardLogic;
     friend class ClientManagementLogic;
     friend class ClientInfoLogic;
+    friend class AdvancedServerSettingsLogic;
 
     friend class PageProtocolLogicBase;
     friend class OpenVpnLogic;
@@ -100,6 +103,8 @@ public:
     friend class CloakLogic;
 
     friend class OtherProtocolsLogic;
+
+    friend class CreateServerTest;
 
     Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
     Q_INVOKABLE void onUpdateAllPages();
@@ -118,11 +123,11 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated);
+
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
 
 signals:
-    void dialogConnectErrorTextChanged();
-
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Proto protocol, bool reset = true, bool slide = true);
     void goToShareProtocolPage(Proto protocol, bool reset = true, bool slide = true);
@@ -136,13 +141,15 @@ signals:
     void hide();
     void raise();
     void toggleLogPanel();
+    void showWarningMessage(QString message);
 
 private slots:
     // containers - INOUT arg
-    void installServer(QMap<DockerContainer, QJsonObject> &containers);
+    void installServer(QPair<amnezia::DockerContainer, QJsonObject> &container);
 
 private:
     PageEnumNS::Page currentPage();
+    bool isContainerAlreadyAddedToGui(DockerContainer container);
 
 public:
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);
@@ -185,8 +192,8 @@ private:
 
     NotificationHandler* m_notificationHandler;
 
-    int selectedServerIndex = -1; // server index to use when proto settings page opened
-    DockerContainer selectedDockerContainer; // same
-    ServerCredentials installCredentials; // used to save cred between pages new_server and new_server_protocols and wizard
+    int m_selectedServerIndex = -1; // server index to use when proto settings page opened
+    DockerContainer m_selectedDockerContainer; // same
+    ServerCredentials m_installCredentials; // used to save cred between pages new_server and new_server_protocols and wizard
 };
 #endif // UILOGIC_H

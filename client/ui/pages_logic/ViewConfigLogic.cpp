@@ -79,8 +79,8 @@ void ViewConfigLogic::importConfig()
 
 
     if (!configJson().contains(config_key::containers) || configJson().value(config_key::containers).toArray().isEmpty()) {
-        uiLogic()->selectedServerIndex = m_settings->defaultServerIndex();
-        uiLogic()->selectedDockerContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+        uiLogic()->m_selectedServerIndex = m_settings->defaultServerIndex();
+        uiLogic()->m_selectedDockerContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
         uiLogic()->onUpdateAllPages();
         emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);

@@ -20,7 +20,7 @@ void ClientManagementLogic::onUpdatePage()
     set_busyIndicatorIsRunning(true);
 
     qobject_cast<ClientManagementModel*>(uiLogic()->clientManagementModel())->clearData();
-    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 
@@ -30,7 +30,7 @@ void ClientManagementLogic::onUpdatePage()
     if (!protocols.empty()) {
         m_currentMainProtocol = protocols.front();
 
-        const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->selectedServerIndex);
+        const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
 
         ErrorCode error = getClientsList(credentials, selectedContainer, m_currentMainProtocol, clients);
         m_serverController->disconnectFromHost(credentials);
