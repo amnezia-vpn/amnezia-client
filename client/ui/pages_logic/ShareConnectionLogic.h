@@ -50,6 +50,5 @@ public:
     QList<QString> genQrCodeImageSeries(const QByteArray &data);
 
     QString svgToBase64(const QString &image);
-
 };
 #endif // SHARE_CONNECTION_LOGIC_H

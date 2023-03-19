@@ -17,7 +17,6 @@ void NewServerProtocolsLogic::onUpdatePage()
 
 void NewServerProtocolsLogic::onPushButtonConfigureClicked(DockerContainer c, int port, TransportProto tp)
 {
-    QMap<DockerContainer, QJsonObject> containers;
     Proto mainProto = ContainerProps::defaultProtocol(c);
 
     QJsonObject config {
@@ -28,8 +27,8 @@ void NewServerProtocolsLogic::onPushButtonConfigureClicked(DockerContainer c, in
         }
     };
 
-    containers.insert(c, config);
+    QPair<DockerContainer, QJsonObject> container(c, config);
 
-    uiLogic()->installServer(containers);
+    uiLogic()->installServer(container);
 }
 

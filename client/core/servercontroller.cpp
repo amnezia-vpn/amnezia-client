@@ -701,3 +701,49 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     }
     return ErrorCode::NoError;
 }
+
+ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    QString script = QString("sudo docker ps --format '{{.Names}} {{.Ports}}'");
+
+    ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    auto containersInfo = stdOut.split("\n");
+    for (auto &containerInfo : containersInfo) {
+        if (containerInfo.isEmpty()) {
+            continue;
+        }
+        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
+        QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
+        if (containerAndPortMatch.hasMatch()) {
+            QString name = containerAndPortMatch.captured(1);
+            QString port = containerAndPortMatch.captured(2);
+            QString transportProto = containerAndPortMatch.captured(3);
+            DockerContainer container = ContainerProps::containerFromString(name);
+            Proto mainProto = ContainerProps::defaultProtocol(container);
+            QJsonObject config {
+                { config_key::container, name },
+                { ProtocolProps::protoToString(mainProto), QJsonObject {
+                    { config_key::port, port },
+                    { config_key::transport_proto, transportProto }}
+                }
+            };
+            installedContainers.insert(container, config);
+        }
+    }
+
+    return ErrorCode::NoError;
+}
