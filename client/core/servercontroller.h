@@ -71,6 +71,7 @@ public:
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
     void setCancelInstallation(const bool cancel);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());

@@ -18,7 +18,7 @@ void WizardLogic::onUpdatePage()
     set_radioButtonMediumChecked(true);
 }
 
-QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const
+QPair<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage() const
 {
     QJsonObject cloakConfig {
         { config_key::container, ContainerProps::containerToString(DockerContainer::Cloak) },
@@ -33,27 +33,29 @@ QMap<DockerContainer, QJsonObject> WizardLogic::getInstallConfigsFromWizardPage(
         { config_key::container, ContainerProps::containerToString(DockerContainer::OpenVpn) }
     };
 
-    QMap<DockerContainer, QJsonObject> containers;
+    QPair<DockerContainer, QJsonObject> container;
+
+    DockerContainer dockerContainer;
 
     if (radioButtonHighChecked()) {
-        containers.insert(DockerContainer::Cloak, cloakConfig);
+        container = {DockerContainer::Cloak, cloakConfig};
     }
 
     if (radioButtonMediumChecked()) {
-        containers.insert(DockerContainer::ShadowSocks, ssConfig);
+        container = {DockerContainer::ShadowSocks, ssConfig};
     }
 
     if (radioButtonLowChecked()) {
-        containers.insert(DockerContainer::OpenVpn, openVpnConfig);
+        container = {DockerContainer::OpenVpn, openVpnConfig};
     }
 
-    return containers;
+    return container;
 }
 
 void WizardLogic::onPushButtonVpnModeFinishClicked()
 {
-    auto containers = getInstallConfigsFromWizardPage();
-    uiLogic()->installServer(containers);
+    auto container = getInstallConfigsFromWizardPage();
+    uiLogic()->installServer(container);
     if (checkBoxVpnModeChecked()) {
         m_settings->setRouteMode(Settings::VpnOnlyForwardSites);
     } else {
@@ -63,6 +65,6 @@ void WizardLogic::onPushButtonVpnModeFinishClicked()
 
 void WizardLogic::onPushButtonLowFinishClicked()
 {
-    auto containers = getInstallConfigsFromWizardPage();
-    uiLogic()->installServer(containers);
+    auto container = getInstallConfigsFromWizardPage();
+    uiLogic()->installServer(container);
 }

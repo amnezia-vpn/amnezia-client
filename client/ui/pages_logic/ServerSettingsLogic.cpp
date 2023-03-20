@@ -16,10 +16,8 @@
 ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
     m_labelWaitInfoVisible{true},
-    m_pushButtonClearVisible{true},
     m_pushButtonClearClientCacheVisible{true},
     m_pushButtonShareFullVisible{true},
-    m_pushButtonClearText{tr("Clear server from Amnezia software")},
     m_pushButtonClearClientCacheText{tr("Clear client cached profile")}
 { }
 
@@ -27,10 +25,9 @@ void ServerSettingsLogic::onUpdatePage()
 {
     set_labelWaitInfoVisible(false);
     set_labelWaitInfoText("");
-    set_pushButtonClearVisible(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
-    set_pushButtonClearClientCacheVisible(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
-    set_pushButtonShareFullVisible(m_settings->haveAuthData(uiLogic()->selectedServerIndex));
-    const QJsonObject &server = m_settings->server(uiLogic()->selectedServerIndex);
+    set_pushButtonClearClientCacheVisible(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
+    set_pushButtonShareFullVisible(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
+    const QJsonObject &server = m_settings->server(uiLogic()->m_selectedServerIndex);
     const QString &port = server.value(config_key::port).toString();
 
     const QString &userName = server.value(config_key::userName).toString();
@@ -45,52 +42,22 @@ void ServerSettingsLogic::onUpdatePage()
     set_labelServerText(name);
     set_lineEditDescriptionText(server.value(config_key::description).toString());
 
-    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->selectedServerIndex);
+    DockerContainer selectedContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
     QString selectedContainerName = ContainerProps::containerHumanNames().value(selectedContainer);
     set_labelCurrentVpnProtocolText(tr("Service: ") + selectedContainerName);
 }
 
-void ServerSettingsLogic::onPushButtonClearServer()
-{
-    set_pageEnabled(false);
-    set_pushButtonClearText(tr("Uninstalling Amnezia software..."));
-
-    if (m_settings->defaultServerIndex() == uiLogic()->selectedServerIndex) {
-        uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
-    }
-
-    ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
-    m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->selectedServerIndex));
-    if (e) {
-        uiLogic()->set_dialogConnectErrorText(
-                    tr("Error occurred while configuring server.") + "\n" +
-                    errorString(e) + "\n" +
-                    tr("See logs for details."));
-        emit uiLogic()->showConnectErrorDialog();
-    }
-    else {
-        set_labelWaitInfoVisible(true);
-        set_labelWaitInfoText(tr("Amnezia server successfully uninstalled"));
-    }
-
-    m_settings->setContainers(uiLogic()->selectedServerIndex, {});
-    m_settings->setDefaultContainer(uiLogic()->selectedServerIndex, DockerContainer::None);
-
-    set_pageEnabled(true);
-    set_pushButtonClearText(tr("Clear server from Amnezia software"));
-}
-
 void ServerSettingsLogic::onPushButtonForgetServer()
 {
-    if (m_settings->defaultServerIndex() == uiLogic()->selectedServerIndex && uiLogic()->m_vpnConnection->isConnected()) {
+    if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex && uiLogic()->m_vpnConnection->isConnected()) {
         uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
-    m_settings->removeServer(uiLogic()->selectedServerIndex);
+    m_settings->removeServer(uiLogic()->m_selectedServerIndex);
 
-    if (m_settings->defaultServerIndex() == uiLogic()->selectedServerIndex) {
+    if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex) {
         m_settings->setDefaultServer(0);
     }
-    else if (m_settings->defaultServerIndex() > uiLogic()->selectedServerIndex) {
+    else if (m_settings->defaultServerIndex() > uiLogic()->m_selectedServerIndex) {
         m_settings->setDefaultServer(m_settings->defaultServerIndex() - 1);
     }
 
@@ -99,7 +66,7 @@ void ServerSettingsLogic::onPushButtonForgetServer()
     }
 
 
-    uiLogic()->selectedServerIndex = -1;
+    uiLogic()->m_selectedServerIndex = -1;
     uiLogic()->onUpdateAllPages();
 
     if (m_settings->serversCount() == 0) {
@@ -114,9 +81,9 @@ void ServerSettingsLogic::onPushButtonClearClientCacheClicked()
 {
     set_pushButtonClearClientCacheText(tr("Cache cleared"));
 
-    const auto &containers = m_settings->containers(uiLogic()->selectedServerIndex);
-    for (DockerContainer container: containers.keys()) {
-        m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, container);
+    const auto &containers = m_settings->containers(uiLogic()->m_selectedServerIndex);
+    for (DockerContainer container : containers.keys()) {
+        m_settings->clearLastConnectionConfig(uiLogic()->m_selectedServerIndex, container);
     }
 
     QTimer::singleShot(3000, this, [this]() {
@@ -127,9 +94,9 @@ void ServerSettingsLogic::onPushButtonClearClientCacheClicked()
 void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
 {
     const QString &newText = lineEditDescriptionText();
-    QJsonObject server = m_settings->server(uiLogic()->selectedServerIndex);
+    QJsonObject server = m_settings->server(uiLogic()->m_selectedServerIndex);
     server.insert(config_key::description, newText);
-    m_settings->editServer(uiLogic()->selectedServerIndex, server);
+    m_settings->editServer(uiLogic()->m_selectedServerIndex, server);
     uiLogic()->onUpdateAllPages();
 }
 
@@ -154,7 +121,7 @@ void ServerSettingsLogic::onPushButtonShareFullClicked()
     auto appContext = activity.callObjectMethod(
         "getApplicationContext", "()Landroid/content/Context;");
     if (appContext.isValid()) {
-        QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->selectedServerIndex);
+        QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->m_selectedServerIndex);
         auto intent = QJniObject::callStaticObjectMethod(
                "org/amnezia/vpn/AuthHelper", "getAuthIntent",
                "(Landroid/content/Context;)Landroid/content/Intent;", appContext.object());
@@ -163,12 +130,12 @@ void ServerSettingsLogic::onPushButtonShareFullClicked()
                     QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, receiver);
                 }
             } else {
-            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
+            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, DockerContainer::None);
             emit uiLogic()->goToShareProtocolPage(Proto::Any);
         }
     }
 #else
-    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->selectedServerIndex, DockerContainer::None);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, DockerContainer::None);
     emit uiLogic()->goToShareProtocolPage(Proto::Any);
 #endif
 }
