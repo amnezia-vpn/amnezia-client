@@ -685,8 +685,8 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
-    QString port = containerConfig.value(config_key::port).toString();
-    QString transportProto = containerConfig.value(config_key::transport_proto).toString();
+    QString port = containerConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
+    QString transportProto = containerConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
 
     QString script = QString("sudo lsof -i -P -n | grep -E ':%1").arg(port);
     for (auto &port : fixedPorts) {
