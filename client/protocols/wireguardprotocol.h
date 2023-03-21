@@ -28,7 +28,8 @@ private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
     QString serviceName() const;
-
+    QStringList stopArgs();
+    QStringList startArgs();
 
 private:
     QString m_configFileName;
