@@ -45,22 +45,29 @@ Look to the `build_macos.sh` and `build_windows.bat` scripts in `deploy` folder 
 1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, 
 at least version 12 or higher.
 
-2. We use `qmake` to generate the XCode project and then we "patch" it to add
-extra components such as the wireguard, the browser bridge and so on. We patch
-the XCode project using [xcodeproj](https://github.com/CocoaPods/Xcodeproj). To
-install it:
-```bash
-gem install xcodeproj # probably you want to run this command with `sudo`
-```
-3. You also need to install go >= v1.16. If you don't have it done already,
-download go from the [official website](https://golang.org/dl/) or use Homebrew. 
-Latest version is recommended.
+2. We use QT to generate the XCode project. With XCode 13 or lower, we need QT version 6.3. With XCode 14 or higher, we need QT version 6.4. Install QT for macos in [here](https://doc.qt.io/qt-6/macos.html)
 
-4. Navigate inside client folder and generate the XCode project using our script:
+3. Install cmake is require. We recommend cmake version 3.25. You can install cmake in [here](https://cmake.org/download/)
+
+4. You also need to install go >= v1.16. If you don't have it done already,
+download go from the [official website](https://golang.org/dl/) or use Homebrew. 
+Latest version is recommended. Install gomobile
+```bash
+export PATH=$PATH:~/go/bin
+go install golang.org/x/mobile/cmd/gomobile@latest
+gomobile init
+```
+
+5. Build project
 ```bash
 cd client
-./scripts/apple_compile.sh ios
+export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
+export QT_IOS_BIN=$QT_BIN_DIR
+export PATH=$PATH:~/go/bin
+mkdir build-ios
+$QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_BIN_DIR
 ```
+Replace PATH-TO-QT-FOLDER and QT-VERSION to your environment
 
 If you have more than one version of Qt installed, you'll most likely get
 a "`qmake` cannot be found in your `$PATH`" error. In this case run this script 
