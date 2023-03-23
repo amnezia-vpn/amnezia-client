@@ -39,7 +39,7 @@ PageBase {
         label.text: qsTr("Donate")
 
         onClicked: {
-            UiLogic.goToPage(PageEnum.About)
+            UiLogic.goToPage(PageEnum.Test)
         }
     }
 

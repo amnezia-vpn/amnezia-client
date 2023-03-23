@@ -165,5 +165,13 @@
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
+        <file>ui/qml/Controls2/BasicButtonType.qml</file>
+        <file>ui/qml/Controls2/TextFieldWithHeaderType.qml</file>
+        <file>ui/qml/Pages/PageTest.qml</file>
+        <file>fonts/pt-root-ui_vf.ttf</file>
+        <file>ui/qml/Controls2/LabelWithButtonType.qml</file>
+        <file>images/controls/arrow-right.svg</file>
+        <file>images/controls/chevron-right.svg</file>
+        <file>ui/qml/Controls2/ImageButtonType.qml</file>
     </qresource>
 </RCC>
