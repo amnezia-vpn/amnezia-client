@@ -59,6 +59,7 @@ include_directories(
 )
 
 set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.h
     ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.h
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.h
@@ -85,6 +86,7 @@ if(NOT IOS)
 endif()
 
 set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
