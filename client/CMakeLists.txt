@@ -131,7 +131,7 @@ if(WIN32)
 
     configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc
+        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
     set(HEADERS ${HEADERS}
@@ -143,7 +143,7 @@ if(WIN32)
     )
 
     set(RESOURCES ${RESOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc
+        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
     set(LIBS ${LIBS}
