@@ -83,7 +83,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                     Log.e(tag, "An Error occurred while enabling the VPN: ${e.localizedMessage}")
                 }
                 return true
-        }
+            }
 
             ACTIONS.deactivate -> {
                 // [data] here is empty

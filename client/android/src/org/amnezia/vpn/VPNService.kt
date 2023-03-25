@@ -49,8 +49,6 @@ class VPNService : BaseVpnService(), BaseService.Interface {
 
     override val data = BaseService.Data(this)
     override val tag: String get() = "VPNService"
-//    override fun createNotification(profileName: String): ServiceNotification =
-//        ServiceNotification(this, profileName, "service-vpn")
 
 
     private var conn: ParcelFileDescriptor? = null
@@ -179,10 +177,6 @@ class VPNService : BaseVpnService(), BaseService.Interface {
 
     override fun onCreate() {
         super.onCreate()
-//        Log.v(tag, "Aman: onCreate....................")
-//        Log.v(tag, "Aman: onCreate....................")
-//        Log.v(tag, "Aman: onCreate....................")
-//        NotificationUtil.show(this) // Go foreground
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -208,12 +202,27 @@ class VPNService : BaseVpnService(), BaseService.Interface {
     override fun onBind(intent: Intent): IBinder {
         Log.v(tag, "Aman: onBind....................")
 
+	// This start is from always-on
+        if (this.mConfig == null) {
+        
+            // We don't have tunnel to turn on - Try to create one with last config the service got
+            val prefs = Prefs.get(this)
+            val lastConfString = prefs.getString("lastConf", "")
+            if (lastConfString.isNullOrEmpty()) {
+                // We have nothing to connect to -> Exit
+                Log.e(tag, "VPN service was triggered without defining a Server or having a tunnel")
+                init()
+                return mBinder
+            }
+            this.mConfig = JSONObject(lastConfString)
+        }
+	
+        mProtocol = mConfig!!.getString("protocol")
+        Log.e(tag, "mProtocol: $mProtocol")
+       
         when (mProtocol) {
             "shadowsocks" -> {
-                when (intent.action) {
-                    SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
-                    else -> super<BaseService.Interface>.onBind(intent)
-                }
+                startShadowsocks()
                 startTest()
             }
             else -> {
@@ -400,7 +409,6 @@ class VPNService : BaseVpnService(), BaseService.Interface {
     }
 
     fun establish(): ParcelFileDescriptor? {
-        Log.v(tag, "Aman: establish....................")
         mbuilder.allowFamily(OsConstants.AF_INET)
         mbuilder.allowFamily(OsConstants.AF_INET6)
 
@@ -595,11 +603,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
         ifaceConfig["DNS"]!!.split(",").forEach {
             ifaceBuilder.addDnsServer(InetNetwork.parse(it.trim()).address)
         }
-        /*val jExcludedApplication = obj.getJSONArray("excludedApps")
-    (0 until jExcludedApplication.length()).toList().forEach {
-        val appName = jExcludedApplication.get(it).toString()
-        ifaceBuilder.excludeApplication(appName)
-    }*/
+
         confBuilder.setInterface(ifaceBuilder.build())
 
         return confBuilder.build()
@@ -617,17 +621,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
 
                 ProfileManager.clear()
                 val profile = Profile()
-//                val iter: Iterator<String> = mConfig!!.keys()
-//                while (iter.hasNext()) {
-//                    val key = iter.next()
-//                    try {
-//                        val value: Any = mConfig!!.get(key)
-//                        Log.i(tag, "startShadowsocks: $key : $value")
-//                    } catch (e: JSONException) {
-//                        // Something went wrong!
-//                    }
-//                }
-
+                
                 val shadowsocksConfig = mConfig?.getJSONObject("shadowsocks_config_data")
 
                 if (shadowsocksConfig?.has("name") == true) {
@@ -651,18 +645,12 @@ class VPNService : BaseVpnService(), BaseService.Interface {
                     Log.i(tag, "startShadowsocks: profile.remotePort" + profile.remotePort)
                     
                 }
-//               if(mConfig?.has("local_port") == true) {
-//                   profile. = mConfig?.getInt("local_port")
-//               }
-//                profile.name = "amnezia"
-//                profile.method = "chacha20-ietf-poly1305"
-//                profile.host = "de01-ss.sshocean.net"
-//                profile.password = "ZTZhN"
-//                profile.remotePort = 8388
+                
+                 val prefs = Prefs.get(this)
+		 prefs.edit()
+		    .putString("lastConf", mConfig.toString())
+		    .apply()
 
-
-Log.i(tag, "shadowsocksConfig: profile.host" + profile.host)
-Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
 
                 profile.proxyApps = false
                 profile.bypass = false
@@ -679,27 +667,7 @@ Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
                     flags,
                     startId
                 )
-//                startRunner()
-//                VpnManager.getInstance().run()
-//                VpnManager.getInstance()
-//                    .setOnStatusChangeListener(object : VpnManager.OnStatusChangeListener {
-//                        override fun onStatusChanged(state: BaseService.State) {
-//                            when (state) {
-//                                BaseService.State.Connected -> {
-//                                    isUp = true
-//                                }
-//                                BaseService.State.Stopped -> {
-//                                    isUp = false
-//                                }
-//                                else -> {}
-//                            }
-//                        }
-//
-//                        override fun onTrafficUpdated(profileId: Long, stats: TrafficStats) {
-//
-//                        }
-//                    })
-////                Core.startService()
+
             } catch (e: Exception) {
                 Log.e(tag, "Error in startShadowsocks: $e")
             }
@@ -810,13 +778,11 @@ Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
             Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> {
             	Log.i(tag, "add route 0.0.0.0")
                 builder.addRoute("0.0.0.0", 0)
-                builder.addRoute("1.1.1.1", 32)
                 if (profile.ipv6) builder.addRoute("::", 0)
             }
             else -> {
             	Log.i(tag, "else add route 0.0.0.0")
                 builder.addRoute("0.0.0.0", 0)
-                builder.addRoute("1.1.1.1", 32)
                 if (profile.ipv6) builder.addRoute("::", 0)
                 resources.getStringArray(R.array.bypass_private_route).forEach {
                     val subnet = Subnet.fromString(it)!!
@@ -835,8 +801,6 @@ Log.i(tag, "shadowsocksConfig: profile.remotePort" + profile.remotePort)
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
-        
-        Log.i(tag, "startVpn: -----------------------9")
         
         
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
