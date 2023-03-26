@@ -19,10 +19,8 @@
                       "address": "$REMOTE_HOST",
                       "port": $V2RAY_TROJAN_PORT,
                       "users": [
-                          {
-                              "id": "$V2RAY_VMESS_CLIENT_UUID"
-                          }
-                      ]
+                            "$V2RAY_TROJAN_CLIENT_PASSWORD"
+                       ]
                   }
               ]
           }
