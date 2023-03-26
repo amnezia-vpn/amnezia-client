@@ -96,6 +96,31 @@ Build might fail with "source files not found" error the first time you try it, 
 dependencies in parallel, and some dependencies end up being built after the ones that
 require them. In this case simply restart the build.
 
+## How to build the Android app
+_tested on Mac OS_
+
+The Android app has the following requirements:
+* JDK 11
+* Android platform SDK 33
+* cmake 3.25.0
+
+After you have installed QT, QT Creator and Android Studio installed, you need to configure QT Creator correctly. Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`. 
+    * set path to jdk 11
+    * set path to Android SDK ($ANDROID_HOME)
+
+In case you get errors regarding missing SDK or 'sdkmanager not running', you cannot fix them by correcting the paths and you have some spare GBs on your disk, you can let QT Creator install all requirements by choosing an empty folder for `Android SDK location` and click on `Set Up SDK`. Be aware: This will install a second Android SDK and NDK on your machine! 
+
+Double check that the right cmake version is configured:  Click on `QT Creator` -> `Preferences` and click on the side menu on `Kits`. Under the center content view's `Kits` tab you'll find an entry `CMake Tool`. If the default selected CMake version is lower than 3.25.0, install on your system CMake >= 3.25.0 and choose `System CMake at <path>` from the drop down list. If this entry is missing, you either have not installed CMake yet or QT Creator hasn't found the path to it. In that case click in the preferences window on the side menu item `CMake`, then on the tab `Tools`in the center content view and finally on the Button `Add` to set the path to your installed CMake. 
+
+Please make sure that you have selected Android Platform SDK 33 for your project: click in the main view's side menu on on `Projects`, on the left you'll see a section `Build & Run` showing different Android build targets. You can select any of them, Amnezia VPN's project setup is designed in a way that always all Android targets will be build. Click on the targets submenu item `Build` and scroll in the center content view to `Build Steps`. Click on `Details` at the end of the headline `Build Android APK` (The `Details` button might be hidden in case QT Creator Window is not running in full screen!). Here we are: choose `android-33` as `Android Build platfrom SDK`.
+
+That's it you should be ready to compile the project from QT Creator!
+
+### Development flow
+After you've hit the build button, QT-Creator copies the whole project to a folder in the repositories parent directory. The folder should look something like `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>`.
+If you want to develop Amnezia VPNs Android components written in Kotlin, such as components using system APIs, you need to import the generated project in Android Studio with `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>/client/android-build` as the projects root directory. While you should be able to compile the generated project from Android Studio, you cannot work directly in the repository's Android project. So whenever you are confident with your work in the generated proejct, you'll need to copy and paste the affected files to the corresponding path in the repositories Android project so that you can add and commit your changes!
+
+You may face compiling issues in QT Creator after you've worked in Android Studio on the generated project. Just do a `./gradlew clean` in the geneated project's root directory (`<path>/client/android-build/.`) and you should be good to continue.
 
 ## License
 GPL v.3
