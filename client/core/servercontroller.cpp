@@ -866,6 +866,10 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
 
 ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
+    if (container == DockerContainer::Dns) {
+        return ErrorCode::NoError;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
         stdOut += data + "\n";
@@ -882,13 +886,16 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString port = containerConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
 
-    QString script = QString("sudo lsof -i -P -n | grep -E ':%1").arg(port);
+    QString script = QString("sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
-    runScript(credentials,
+    ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
 
     if (!stdOut.isEmpty()) {
         return ErrorCode::ServerPortAlreadyAllocatedError;
