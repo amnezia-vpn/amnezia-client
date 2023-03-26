@@ -74,6 +74,7 @@
 #include "pages_logic/protocols/OtherProtocolsLogic.h"
 #include "pages_logic/protocols/WireGuardLogic.h"
 #include "pages_logic/protocols/V2RayLogic.h"
+#include "pages_logic/protocols/V2RayTrojanLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -98,6 +99,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_protocolLogicMap.insert(Proto::Cloak, new CloakLogic(this));
     m_protocolLogicMap.insert(Proto::WireGuard, new WireGuardLogic(this));
     m_protocolLogicMap.insert(Proto::V2Ray, new V2RayLogic(this));
+    m_protocolLogicMap.insert(Proto::V2RayTrojan, new V2RayTrojanLogic(this));
 
     m_protocolLogicMap.insert(Proto::Dns, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Proto::Sftp, new OtherProtocolsLogic(this));
@@ -509,7 +511,7 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<ViewConfigLogic>();
     registerPageLogic<VpnLogic>();
     registerPageLogic<WizardLogic>();
-    registerPageLogic<AdvancedServerSettingsLogic>();
+//    registerPageLogic<AdvancedServerSettingsLogic>();
 }
 
 ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated)

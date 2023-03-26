@@ -20,6 +20,7 @@ enum DockerContainer {
     WireGuard,
     Ipsec,
     V2Ray,
+    V2RayTrojan,
 
     //non-vpn
     TorWebSite,

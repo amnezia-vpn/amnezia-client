@@ -56,6 +56,7 @@ public:
     friend class CloakLogic;
     friend class UiLogic;
     friend class V2RayLogic;
+    friend class V2RayTrojanLogic;
 
     void onUpdatePage() override;
     ErrorCode doInstallAction(const std::function<ErrorCode()> &action);

@@ -173,5 +173,11 @@
         <file>server_scripts/openvpn_v2ray_vmess/template.ovpn</file>
         <file>server_scripts/openvpn_v2ray_vmess/template_v2ray_client.json</file>
         <file>server_scripts/openvpn_shadowsocks/template_ss_client.json</file>
+        <file>server_scripts/openvpn_v2ray_trojan/configure_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_trojan/start.sh</file>
+        <file>server_scripts/openvpn_v2ray_trojan/template_v2ray_trojan_client.json</file>
+        <file>server_scripts/openvpn_v2ray_trojan/template.ovpn</file>
+        <file>server_scripts/openvpn_v2ray_trojan/run_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_trojan/Dockerfile</file>
     </qresource>
 </RCC>

@@ -58,6 +58,9 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::V2Ray:
         return { Proto::OpenVpn, Proto::V2Ray };
 
+    case DockerContainer::V2RayTrojan:
+        return { Proto::OpenVpn, Proto::V2RayTrojan };
+
     case DockerContainer::Dns:
         return { };
 
@@ -90,6 +93,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::WireGuard, "WireGuard"},
         {DockerContainer::Ipsec, QObject::tr("IPsec")},
         {DockerContainer::V2Ray, "V2Ray"},
+        {DockerContainer::V2RayTrojan, "V2RayTrojan"},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
@@ -108,6 +112,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
         {DockerContainer::Ipsec, QObject::tr("IPsec container")},
         {DockerContainer::V2Ray, QObject::tr("V2Ray container")},
+        {DockerContainer::V2RayTrojan, QObject::tr("V2Ray Trojan container")},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
@@ -126,6 +131,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::WireGuard :    return ServiceType::Vpn;
     case DockerContainer::Ipsec :        return ServiceType::Vpn;
     case DockerContainer::V2Ray :        return ServiceType::Vpn;
+    case DockerContainer::V2RayTrojan :  return ServiceType::Vpn;
 
     case DockerContainer::TorWebSite :   return ServiceType::Other;
     case DockerContainer::Dns :          return ServiceType::Other;
@@ -145,6 +151,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::WireGuard :    return Proto::WireGuard;
     case DockerContainer::Ipsec :        return Proto::Ikev2;
     case DockerContainer::V2Ray :        return Proto::V2Ray;
+    case DockerContainer::V2RayTrojan :  return Proto::V2RayTrojan;
 
     case DockerContainer::TorWebSite :   return Proto::TorWebSite;
     case DockerContainer::Dns :          return Proto::Dns;
