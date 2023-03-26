@@ -180,7 +180,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.v(tag, "Aman: onUnbind....................")
+        
         if (!isUp) {
             // If the Qt Client got closed while we were not connected
             // we do not need to stay as a foreground service.
@@ -200,8 +200,6 @@ class VPNService : BaseVpnService(), BaseService.Interface {
      * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
      */
     override fun onBind(intent: Intent): IBinder {
-        Log.v(tag, "Aman: onBind....................")
-
 	// This start is from always-on
         if (this.mConfig == null) {
         
@@ -239,7 +237,6 @@ class VPNService : BaseVpnService(), BaseService.Interface {
      * or from Booting the device and having "connect on boot" enabled.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.v(tag, "Aman: onStartCommand....................")
         this.intent = intent
         this.flags = flags
         this.startId = startId
@@ -375,7 +372,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
     }
 
     fun turnOn(json: JSONObject?): Int {
-        Log.v(tag, "Aman: turnOn....................")
+    
         if (!checkPermissions()) {
             Log.e(tag, "turn on was called without no permissions present!")
             isUp = false
@@ -397,7 +394,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
             }
             "shadowsocks" -> {
                 startShadowsocks()
-                //startTest()
+                startTest()
             }
             else -> {
                 Log.e(tag, "No protocol")
@@ -460,7 +457,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
     }
 
     fun turnOff() {
-        Log.v(tag, "Aman: turnOff....................")
+    
         when (mProtocol) {
             "wireguard" -> {
                 wgTurnOff(currentTunnelHandle)
@@ -756,8 +753,9 @@ class VPNService : BaseVpnService(), BaseService.Interface {
         
         if (profile.ipv6) builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
 
+        val me = packageName
+
         if (profile.proxyApps) {
-            val me = packageName
             profile.individual.split('\n')
                     .filter { it != me }
                     .forEach {
@@ -768,9 +766,8 @@ class VPNService : BaseVpnService(), BaseService.Interface {
                             Log.i(tag, ex.message.toString())
                         }
                     }
-            if (!profile.bypass) builder.addAllowedApplication(me)
         }
-        val me = packageName
+        
         builder.addDisallowedApplication(me)
         
         Log.i(tag, "startVpn: -----------------------4")
@@ -801,8 +798,7 @@ class VPNService : BaseVpnService(), BaseService.Interface {
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
-        
-        
+         
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
                 "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
