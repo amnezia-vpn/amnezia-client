@@ -539,7 +539,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     QFutureWatcher<ErrorCode> watcher;
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
-        do {
+        while (true) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
@@ -547,12 +547,13 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                   genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
-            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+            if (stdOut.contains("/var/lib/dpkg/lock-frontend")) {
                 emit serverIsBusy(true);
                 QThread::msleep(1000);
+            } else {
+                return ErrorCode::NoError;
             }
-        } while (!stdOut.isEmpty());
-        return ErrorCode::NoError;
+        }
     });
 
     QEventLoop wait;
