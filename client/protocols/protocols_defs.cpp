@@ -76,6 +76,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
         {Proto::Ikev2, "IKEv2"},
         {Proto::L2tp, "L2TP"},
         {Proto::V2Ray, "V2Ray"},
+        {Proto::V2Ray, "V2Ray Trojan"},
 
         {Proto::TorWebSite, "Web site in Tor network"},
         {Proto::Dns, "DNS Service"},
@@ -98,6 +99,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::ShadowSocks :  return ServiceType::Vpn;
     case Proto::WireGuard :    return ServiceType::Vpn;
     case Proto::V2Ray :        return ServiceType::Vpn;
+    case Proto::V2RayTrojan :  return ServiceType::Vpn;
 
     case Proto::TorWebSite :   return ServiceType::Other;
     case Proto::Dns :          return ServiceType::Other;
@@ -117,6 +119,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::Ikev2 :        return -1;
     case Proto::L2tp :         return -1;
     case Proto::V2Ray :        return 10086;
+    case Proto::V2RayTrojan :  return 10086;
 
     case Proto::TorWebSite :   return -1;
     case Proto::Dns :          return 53;
@@ -137,6 +140,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Ikev2 :        return false;
     case Proto::L2tp :         return false;
     case Proto::V2Ray :        return true;
+    case Proto::V2RayTrojan :  return true;
 
 
     case Proto::TorWebSite :   return true;
@@ -157,6 +161,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Ikev2 :        return TransportProto::Udp;
     case Proto::L2tp :         return TransportProto::Udp;
     case Proto::V2Ray :        return TransportProto::Tcp;
+    case Proto::V2RayTrojan :  return TransportProto::Tcp;
     // non-vpn
     case Proto::TorWebSite :   return TransportProto::Tcp;
     case Proto::Dns :          return TransportProto::Udp;
@@ -176,6 +181,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::Ikev2 :        return false;
     case Proto::L2tp :         return false;
     case Proto::V2Ray :        return false;
+    case Proto::V2RayTrojan :  return false;
     // non-vpn
     case Proto::TorWebSite :   return false;
     case Proto::Dns :          return false;

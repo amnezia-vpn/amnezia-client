@@ -130,6 +130,12 @@ constexpr char defaultLocalPort[] = "1080";
 constexpr char defaultServerPort[] = "10086";
 }
 
+namespace v2ray_trojan {
+constexpr char v2rayTrojanPasswordPath[] = "/opt/amnezia/v2ray_trojan/v2ray_trojan.key";
+constexpr char defaultLocalPort[] = "1080";
+constexpr char defaultServerPort[] = "10086";
+}
+
 namespace sftp {
 constexpr char defaultUserName[] = "sftp_user";
 
@@ -155,6 +161,7 @@ enum Proto {
     Ikev2,
     L2tp,
     V2Ray,
+    V2RayTrojan,
 
     // non-vpn
     TorWebSite,

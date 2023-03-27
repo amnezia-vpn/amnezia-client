@@ -14,6 +14,7 @@ class WireguardConfigurator;
 class Ikev2Configurator;
 class SshConfigurator;
 class V2RayConfigurator;
+class V2RayTrojanConfigurator;
 
 // Retrieve connection settings from server
 class VpnConfigurator : ConfiguratorBase
@@ -45,6 +46,7 @@ public:
     std::shared_ptr<Ikev2Configurator> ikev2Configurator;
     std::shared_ptr<SshConfigurator> sshConfigurator;
     std::shared_ptr<V2RayConfigurator> v2RayConfigurator;
+    std::shared_ptr<V2RayTrojanConfigurator> v2RayTrojanConfigurator;
 };
 
 #endif // VPN_CONFIGURATOR_H

@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2 concurrent
 equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
@@ -34,6 +34,8 @@ HEADERS  += \
     configurators/ikev2_configurator.h \
     configurators/shadowsocks_configurator.h \
     configurators/ssh_configurator.h \
+    configurators/v2ray_configurator.h \
+    configurators/v2ray_trojan_configurator.h \
     configurators/vpn_configurator.h \
     configurators/wireguard_configurator.h \
     containers/containers_defs.h \
@@ -77,6 +79,8 @@ HEADERS  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.h \
     ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/pages_logic/protocols/WireGuardLogic.h \
+    ui/pages_logic/protocols/V2RayLogic.h \
+    ui/pages_logic/protocols/V2RayTrojanLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
@@ -95,6 +99,8 @@ SOURCES  += \
     configurators/ikev2_configurator.cpp \
     configurators/shadowsocks_configurator.cpp \
     configurators/ssh_configurator.cpp \
+    configurators/v2ray_configurator.cpp \
+    configurators/v2ray_trojan_configurator.cpp \
     configurators/vpn_configurator.cpp \
     configurators/wireguard_configurator.cpp \
     containers/containers_defs.cpp \
@@ -135,6 +141,8 @@ SOURCES  += \
     ui/pages_logic/protocols/OtherProtocolsLogic.cpp \
     ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
     ui/pages_logic/protocols/ShadowSocksLogic.cpp \
+    ui/pages_logic/protocols/V2RayLogic.cpp \
+    ui/pages_logic/protocols/V2RayTrojanLogic.cpp \
     ui/models/servers_model.cpp \
     ui/pages_logic/protocols/WireGuardLogic.cpp \
     ui/uilogic.cpp \
@@ -221,6 +229,8 @@ win32|macx|linux:!android {
       protocols/openvpnovercloakprotocol.h \
       protocols/shadowsocksvpnprotocol.h \
       protocols/wireguardprotocol.h \
+      protocols/v2rayprotocol.h \
+      protocols/v2raytrojanprotocol.h \
 
    SOURCES  += \
       core/ipcclient.cpp \
@@ -230,6 +240,8 @@ win32|macx|linux:!android {
       protocols/openvpnovercloakprotocol.cpp \
       protocols/shadowsocksvpnprotocol.cpp \
       protocols/wireguardprotocol.cpp \
+      protocols/v2rayprotocol.cpp \
+      protocols/v2raytrojanprotocol.cpp \
 
    REPC_REPLICA += ../ipc/ipc_interface.rep
    REPC_REPLICA += ../ipc/ipc_process_interface.rep

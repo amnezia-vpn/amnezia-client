@@ -674,6 +674,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &v2RayConfig = config.value(ProtocolProps::protoToString(Proto::V2Ray)).toObject();
+    const QJsonObject &v2RayTrojanConfig = config.value(ProtocolProps::protoToString(Proto::V2RayTrojan)).toObject();
     //
 
     Vars vars;
@@ -728,6 +729,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     // V2Ray vars
     vars.append({{"$V2RAY_VMESS_PORT", v2RayConfig.value(config_key::port).toString(protocols::v2ray::defaultServerPort) }});
     vars.append({{"$V2RAY_SOCKS_LOCAL_PORT", v2RayConfig.value(config_key::local_port).toString(protocols::v2ray::defaultLocalPort) }});
+
+    vars.append({{"$V2RAY_TROJAN_PORT", v2RayTrojanConfig.value(config_key::port).toString(protocols::v2ray_trojan::defaultServerPort) }});
 
     // IPsec vars
     vars.append({{"$IPSEC_VPN_L2TP_NET", "192.168.42.0/24"}});

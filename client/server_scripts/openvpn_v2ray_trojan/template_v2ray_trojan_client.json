@@ -1,0 +1,29 @@
+{
+  "inbounds": [
+      {
+          "listen": "127.0.0.1",
+          "port": $V2RAY_SOCKS_LOCAL_PORT,
+          "protocol": "socks",
+          "settings": {
+              "auth": "noauth",
+              "udp": true
+          }
+      }
+  ],
+  "outbounds": [
+      {
+          "protocol": "vmess",
+          "settings": {
+              "vnext": [
+                  {
+                      "address": "$REMOTE_HOST",
+                      "port": $V2RAY_TROJAN_PORT,
+                      "users": [
+                            "$V2RAY_TROJAN_CLIENT_PASSWORD"
+                       ]
+                  }
+              ]
+          }
+      }
+  ]
+}

@@ -48,6 +48,8 @@ enum ErrorCode
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
     ConfigMissing,
+    V2RayTrojanPasswordMissing,
+    
 
     // Distro errors
     OpenVpnExecutableMissing,

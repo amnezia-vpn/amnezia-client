@@ -47,6 +47,7 @@ QString errorString(ErrorCode code){
     // V2Ray errors
     case (V2RayExecutableMissing): return QObject::tr("V2Ray (v2ray) executable missing");
     case (V2RayKeyMissing): return QObject::tr("V2Ray key missing");
+    case (V2RayTrojanPasswordMissing): return QObject::tr("V2Ray Trojan password missing");
 
     // VPN errors
     case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");
