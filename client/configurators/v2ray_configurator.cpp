@@ -24,7 +24,7 @@ QString V2RayConfigurator::genV2RayConfig(const ServerCredentials &credentials, 
     QString v2RayVmessClientUuid = m_serverController->getTextFileFromContainer(container, credentials,
                                                                                 amnezia::protocols::v2ray::v2rayKeyPath, &e);
     if (v2RayVmessClientUuid.isEmpty()) {
-        e = ErrorCode::V2RayKeyMissing;
+        if (errorCode) *errorCode = ErrorCode::V2RayKeyMissing;
         return "";
     }
 
