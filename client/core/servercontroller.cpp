@@ -38,7 +38,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdOut,
     const std::function<void(const QString &, QSharedPointer<SshRemoteProcess>)> &cbReadStdErr)
 {
-    SshConnection *client = connectToHost(sshParams(credentials));
+    QSharedPointer<SshConnection> client = connectToHost(sshParams(credentials));
     if (client->state() == SshConnection::State::Connecting) {
         qDebug() << "ServerController::runScript aborted, connectToHost in progress";
         return ErrorCode::SshTimeoutError;
@@ -229,7 +229,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
     qDebug().noquote() << "Copy file from container\n" << script;
 
-    SshConnection *client = connectToHost(sshParams(credentials));
+    QSharedPointer<SshConnection> client = connectToHost(sshParams(credentials));
     if (client->state() != SshConnection::State::Connected) {
         if (errorCode) *errorCode = fromSshConnectionErrorCode(client->errorState());
         return {};
@@ -288,7 +288,7 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     QSsh::SftpOverwriteMode overwriteMode)
 {
-    SshConnection *client = connectToHost(sshParams(credentials));
+    QSharedPointer<SshConnection> client = connectToHost(sshParams(credentials));
     if (client->state() != SshConnection::State::Connected) {
         return fromSshConnectionErrorCode(client->errorState());
     }
@@ -780,23 +780,23 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     return stdOut;
 }
 
-SshConnection *ServerController::connectToHost(const SshConnectionParameters &sshParams)
+QSharedPointer<SshConnection> ServerController::connectToHost(const SshConnectionParameters &sshParams)
 {
-    SshConnection *client = acquireConnection(sshParams);
-    if (!client) return nullptr;
+    QSharedPointer<SshConnection> client(new SshConnection(sshParams));
+    if (!client.get()) return nullptr;
 
     QEventLoop waitssh;
-    QObject::connect(client, &SshConnection::connected, &waitssh, [&]() {
+    QObject::connect(client.get(), &SshConnection::connected, &waitssh, [&]() {
         qDebug() << "Server connected by ssh";
         waitssh.quit();
     });
 
-    QObject::connect(client, &SshConnection::disconnected, &waitssh, [&]() {
+    QObject::connect(client.get(), &SshConnection::disconnected, &waitssh, [&]() {
         qDebug() << "Server disconnected by ssh";
         waitssh.quit();
     });
 
-    QObject::connect(client, &SshConnection::error, &waitssh, [&](QSsh::SshError error) {
+    QObject::connect(client.get(), &SshConnection::error, &waitssh, [&](QSsh::SshError error) {
         qCritical() << "Ssh error:" << error << client->errorString();
         waitssh.quit();
     });
@@ -841,8 +841,8 @@ void ServerController::setCancelInstallation(const bool cancel)
 
 void ServerController::disconnectFromHost(const ServerCredentials &credentials)
 {
-    SshConnection *client = acquireConnection(sshParams(credentials));
-    if (client) client->disconnectFromHost();
+//    SshConnection *client = acquireConnection(sshParams(credentials));
+//    if (client) client->disconnectFromHost();
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
