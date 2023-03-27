@@ -79,6 +79,8 @@ rm -f $INSTALLER_DATA_DIR/data.7z
 
 ldd $CQTDEPLOYER_DIR/bin/binarycreator
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $PROJECT_DIR/deploy/installer/config/linux.xml -p $PROJECT_DIR/deploy/installer/packages/ -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
+cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
+
+$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
 
 
