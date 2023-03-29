@@ -15,6 +15,7 @@
 #include "private/qandroidextras_p.h"
 #include "ui/pages_logic/StartPageLogic.h"
 
+#include "androidvpnactivity.h"
 #include "androidutils.h"
 
 namespace {
@@ -54,6 +55,10 @@ AndroidController::AndroidController() : QObject()
 
             isConnected = doc.object()["connected"].toBool();
 
+            if (isConnected) {
+                emit scheduleStatusCheckSignal();
+            }
+
             emit initialized(
                 true, isConnected,
                 time > 0 ? QDateTime::fromMSecsSinceEpoch(time) : QDateTime());
@@ -66,9 +71,11 @@ AndroidController::AndroidController() : QObject()
             Q_UNUSED(parcelBody);
             qDebug() << "Transact: connected";
 
-            isConnected = true;
+            if (!isConnected) {
+                emit scheduleStatusCheckSignal();
+            }
 
-            emit scheduleStatusCheckSignal();
+            isConnected = true;
 
             emit connectionStateChanged(VpnProtocol::Connected);
         }, Qt::QueuedConnection);
@@ -203,12 +210,7 @@ void AndroidController::setNotificationText(const QString& title,
 }
 
 void AndroidController::shareConfig(const QString& configContent, const QString& suggestedName) {
-    QJsonObject rootObject;
-    rootObject["data"] = configContent;
-    rootObject["suggestedName"] = suggestedName;
-    QJsonDocument doc(rootObject);
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_SHARE_CONFIG, doc.toJson());
+    AndroidVPNActivity::saveFileAs(configContent, suggestedName);
 }
 
 /*
@@ -264,6 +266,11 @@ void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
 void AndroidController::startQrReaderActivity()
 {
     AndroidVPNActivity::instance()->startQrCodeReader();
+}
+
+void AndroidController::copyTextToClipboard(QString text)
+{
+    AndroidVPNActivity::instance()->copyTextToClipboard(text);
 }
 
 void AndroidController::scheduleStatusCheckSlot()
