@@ -92,7 +92,6 @@ AndroidController::AndroidController() : QObject()
     connect(activity, &AndroidVPNActivity::eventStatisticUpdate, this,
         [this](const QString& parcelBody) {
             qDebug() << "Transact: update";
-
             auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
 
             QString rx = doc.object()["rx_bytes"].toString();
@@ -250,7 +249,7 @@ void AndroidController::cleanupBackendLogs() {
 }
 
 void AndroidController::importConfig(const QString& data){
-    m_startPageLogic->importConnectionFromCode(data);
+    m_startPageLogic->selectConfigFormat(data);
 }
 
 const QJsonObject &AndroidController::vpnConfig() const
