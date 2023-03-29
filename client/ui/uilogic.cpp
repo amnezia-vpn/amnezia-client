@@ -476,7 +476,7 @@ void UiLogic::copyToClipboard(const QString &text)
 {
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->copyTextToClipboard(text);
-#elif
+#else
     qApp->clipboard()->setText(text);
 #endif
 }
