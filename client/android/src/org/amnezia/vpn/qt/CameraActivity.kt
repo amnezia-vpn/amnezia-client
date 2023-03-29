@@ -2,11 +2,11 @@ package org.amnezia.vpn.qt
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -17,9 +17,9 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import org.amnezia.vpn.R
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import org.amnezia.vpn.R
 
 
 class CameraActivity : AppCompatActivity() {
@@ -78,7 +78,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("UnsafeOptInUsageError")
+    @SuppressLint("UnsafeOptInUsageError", "ClickableViewAccessibility")
     private fun configureVideoPreview() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         val imageCapture = ImageCapture.Builder().build()
@@ -101,7 +101,20 @@ class CameraActivity : AppCompatActivity() {
             try {
                 preview.setSurfaceProvider(viewFinder.surfaceProvider)
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, analysisUseCase)
+                val camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, analysisUseCase)
+                viewFinder.setOnTouchListener(View.OnTouchListener { view: View, motionEvent: MotionEvent ->
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> return@OnTouchListener true
+                        MotionEvent.ACTION_UP -> {
+                            val factory = viewFinder.meteringPointFactory
+                            val point = factory.createPoint(motionEvent.x, motionEvent.y)
+                            val action = FocusMeteringAction.Builder(point).build()
+                            camera.cameraControl.startFocusAndMetering(action)
+                            return@OnTouchListener true
+                        }
+                        else -> return@OnTouchListener false
+                    }
+                })
             } catch(exc: Exception) {
                 Log.e("WUTT", "Use case binding failed", exc)
             }
@@ -146,7 +159,6 @@ class CameraActivity : AppCompatActivity() {
                                 }
                             }
                         }
-
                         imageProxy.close()
                     }
                     .addOnFailureListener {
