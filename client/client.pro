@@ -85,6 +85,7 @@ HEADERS  += \
     ui/models/sites_model.h \
     utilities.h \
     vpnconnection.h \
+    migrations.h \
     protocols/vpnprotocol.h \
     constants.h \
     platforms/ios/QRCodeReaderBase.h
@@ -143,6 +144,7 @@ SOURCES  += \
     ui/qautostart.cpp \
     ui/models/sites_model.cpp \
     utilities.cpp \
+    migrations.cpp \
     vpnconnection.cpp \
     protocols/vpnprotocol.cpp \
     platforms/ios/QRCodeReaderBase.cpp
