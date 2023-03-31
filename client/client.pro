@@ -1,4 +1,4 @@
-QT += widgets core gui network xml remoteobjects quick svg quickcontrols2
+QT += widgets core gui network xml remoteobjects quick svg quickcontrols2 concurrent
 equals(QT_MAJOR_VERSION, 6): QT += core5compat
 
 TARGET = AmneziaVPN
@@ -55,6 +55,7 @@ HEADERS  += \
     ui/models/containers_model.h \
     ui/models/protocols_model.h \
     ui/pages.h \
+    ui/pages_logic/AdvancedServerSettingsLogic.h \
     ui/pages_logic/AppSettingsLogic.h \
     ui/pages_logic/GeneralSettingsLogic.h \
     ui/pages_logic/NetworkSettingsLogic.h \
@@ -114,6 +115,7 @@ SOURCES  += \
     ui/notificationhandler.cpp \
     ui/models/containers_model.cpp \
     ui/models/protocols_model.cpp \
+    ui/pages_logic/AdvancedServerSettingsLogic.cpp \
     ui/pages_logic/AppSettingsLogic.cpp \
     ui/pages_logic/GeneralSettingsLogic.cpp \
     ui/pages_logic/NetworkSettingsLogic.cpp \

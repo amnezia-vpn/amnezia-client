@@ -64,3 +64,18 @@ void Router::resetIpStack()
 #endif
 }
 
+bool Router::createTun(const QString &dev, const QString &subnet)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().createTun(dev, subnet);
+#endif
+};
+
+bool Router::deleteTun(const QString &dev)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().deleteTun(dev);
+#endif
+};
+
+

@@ -8,13 +8,22 @@
 #include <net/route.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/ioctl.h>
+
 #include <paths.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <QFileInfo>
+
+#ifdef __linux__
+#include <linux/if.h>
+#include <linux/if_tun.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#endif
 
 RouterLinux &RouterLinux::Instance()
 {
@@ -127,6 +136,76 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
         return false;
     }
     return true;
+}
+
+
+
+bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
+       struct ifreq ifr;
+       int fd, err;
+
+       fd = open("/dev/net/tun", O_RDWR);
+       if (fd < 0) {
+           qDebug().noquote() << "can't open tun: " << errno;
+           return false;
+       }
+
+       memset(&ifr, 0, sizeof(ifr));
+       ifr.ifr_flags = IFF_TUN|IFF_NO_PI;
+       strncpy(ifr.ifr_name, dev.toStdString().c_str(), IFNAMSIZ);
+
+
+       ioctl(fd, TUNSETIFF, (void *) &ifr);
+
+       char cmd [1000] = {0x0};
+       sprintf(cmd,"ifconfig %s up %s/24 ", dev.toStdString().c_str(), subnet.toStdString().c_str() );
+       int sys = system(cmd);
+       if(sys < 0)
+       {
+           qDebug().noquote() << "Could not activate tun device!\n";
+           close(fd);
+           return false;
+       }
+    return true;
+}
+
+bool RouterLinux::deleteTun(const QString &dev)
+{
+    struct {
+        struct nlmsghdr  nh;
+        struct ifinfomsg ifm;
+        unsigned char    data[64];
+    } req;
+    struct rtattr *rta;
+    int ret, rtnl;
+
+    rtnl = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+    if (rtnl < 0) {
+        qDebug().noquote() << "can't open rtnl: " << errno;
+        return 1;
+    }
+
+    memset(&req, 0, sizeof(req));
+    req.nh.nlmsg_len = NLMSG_ALIGN(NLMSG_LENGTH(sizeof(req.ifm)));
+    req.nh.nlmsg_flags = NLM_F_REQUEST;
+    req.nh.nlmsg_type = RTM_DELLINK;
+
+    req.ifm.ifi_family = AF_UNSPEC;
+
+    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.nh.nlmsg_len));
+    rta->rta_type = IFLA_IFNAME;
+    rta->rta_len = RTA_LENGTH(IFNAMSIZ);
+    req.nh.nlmsg_len += rta->rta_len;
+    memcpy(RTA_DATA(rta), dev.toStdString().c_str(), IFNAMSIZ);
+
+    ret = send(rtnl, &req, req.nh.nlmsg_len, 0);
+    if (ret < 0)
+        qDebug().noquote() << "can't send: errno";
+    ret = (unsigned int)ret != req.nh.nlmsg_len;
+
+    close(rtnl);
+    qDebug().noquote() << "deleteTun ret" << ret;
+    return ret;
 }
 
 bool RouterLinux::routeDeleteList(const QString &gw, const QStringList &ips)

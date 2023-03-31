@@ -85,6 +85,16 @@ void IpcServer::flushDns()
     return Router::flushDns();
 }
 
+bool IpcServer::createTun(const QString &dev, const QString &subnet)
+{
+    return Router::createTun(dev, subnet);
+}
+
+bool IpcServer::deleteTun(const QString &dev)
+{
+    return Router::deleteTun(dev);
+}
+
 void IpcServer::resetIpStack()
 {
     Router::resetIpStack();

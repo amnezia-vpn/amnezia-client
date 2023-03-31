@@ -12,6 +12,8 @@ class IpcInterface
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
     SLOT( void flushDns() );
     SLOT( void resetIpStack() );
+    SLOT( bool createTun(const QString &dev, const QString &subnet) );
+    SLOT( bool deleteTun(const QString &dev) );
 
     SLOT( bool checkAndInstallDriver() );
     SLOT( QStringList getTapList() );

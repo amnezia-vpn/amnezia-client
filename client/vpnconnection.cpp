@@ -57,14 +57,18 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 {
 
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
+            qDebug() << "VpnConnection::onConnectionStateChanged";
+
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
+
             if (m_settings->routeMode() != Settings::VpnAllSites) {
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-                //qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
+               // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
             QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
             QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
@@ -86,13 +90,22 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
             }
 
-
         }
         else if (state == VpnProtocol::Error) {
             IpcClient::Interface()->flushDns();
 
+
+            if (proto == "amnezia-shadowsocks") {
+                IpcClient::Interface()->deleteTun("tun2");
+            }
+
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                 IpcClient::Interface()->clearSavedRoutes();
+            }
+        } else if (state == VpnProtocol::Connecting) {
+            if (proto == "amnezia-shadowsocks") {
+                IpcClient::Interface()->deleteTun("tun2");
+                IpcClient::Interface()->createTun("tun2", "10.33.0.1");
             }
         }
     }
@@ -392,8 +405,12 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
+
+        if (proto == "amnezia-shadowsocks")
+            IpcClient::Interface()->deleteTun("tun2");
 
         // delete cached routes
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
