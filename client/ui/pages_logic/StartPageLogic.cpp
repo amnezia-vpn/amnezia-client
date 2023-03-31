@@ -175,14 +175,7 @@ void StartPageLogic::onPushButtonImportOpenFile()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    auto configFormat = checkConfigFormat(QString(data));
-    if (configFormat == ConfigTypes::OpenVpn) {
-        importConnectionFromOpenVpnConfig(QString(data));
-    } else if (configFormat == ConfigTypes::WireGuard) {
-        importConnectionFromWireguardConfig(QString(data));
-    } else {
-        importConnectionFromCode(QString(data));
-    }
+    selectConfigFormat(QString(data));
 }
 
 #ifdef Q_OS_ANDROID
@@ -191,6 +184,18 @@ void StartPageLogic::startQrDecoder()
     AndroidController::instance()->startQrReaderActivity();
 }
 #endif
+
+void StartPageLogic::selectConfigFormat(QString configData)
+{
+    auto configFormat = checkConfigFormat(configData);
+    if (configFormat == ConfigTypes::OpenVpn) {
+        importConnectionFromOpenVpnConfig(configData);
+    } else if (configFormat == ConfigTypes::WireGuard) {
+        importConnectionFromWireguardConfig(configData);
+    } else {
+        importConnectionFromCode(configData);
+    }
+}
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)
 {

@@ -133,6 +133,7 @@ void UiLogic::initalizeUiLogic()
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
             pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
+            m_vpnConnection->restoreConnection();
         }
     });
     if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
@@ -224,9 +225,10 @@ void UiLogic::keyPressEvent(Qt::Key key)
         m_configurator->sshConfigurator->openSshTerminal(m_settings->serverCredentials(m_settings->defaultServerIndex()));
         break;
     case Qt::Key_Escape:
-    case Qt::Key_Back:
         if (currentPage() == Page::Vpn) break;
         if (currentPage() == Page::ServerConfiguringProgress) break;
+    case Qt::Key_Back:
+
 //        if (currentPage() == Page::Start && pagesStack.size() < 2) break;
 //        if (currentPage() == Page::Sites &&
 //                ui->tableView_sites->selectionModel()->selection().indexes().size() > 0) {
@@ -243,10 +245,16 @@ void UiLogic::keyPressEvent(Qt::Key key)
 
 void UiLogic::onCloseWindow()
 {
-    if (m_settings->serversCount() == 0) qApp->quit();
-    else {
-        hide();
+#ifdef Q_OS_ANDROID
+    qApp->quit();
+#else
+    if (m_settings->serversCount() == 0)
+    {
+        qApp->quit();
+    } else {
+        emit hide();
     }
+#endif
 }
 
 QString UiLogic::containerName(int container)
@@ -466,7 +474,11 @@ void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &da
 
 void UiLogic::copyToClipboard(const QString &text)
 {
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->copyTextToClipboard(text);
+#else
     qApp->clipboard()->setText(text);
+#endif
 }
 
 void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QString& data) {

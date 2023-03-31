@@ -39,7 +39,7 @@ androidExtensions {
 }
 
 //def lifecycleVersion = '2.0.0'
-//def roomVersion = '2.0.0'
+def roomVersion = "2.4.3"
 //def preferencexVersion = '1.0.0'
 dependencies {
 
@@ -49,8 +49,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
-
-   
+    implementation "androidx.core:core-ktx:1.2.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:2.4.0"

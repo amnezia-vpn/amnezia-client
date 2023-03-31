@@ -27,6 +27,9 @@ public:
     virtual void setLogsEnabled(bool enabled) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
+    virtual bool copyWireguardConfig(const QString &sourcePath) override;
+    virtual bool isWireguardRunning() override;
+    virtual bool isWireguardConfigExists(const QString &configPath) override;
 
 private:
     int m_localpid = 0;

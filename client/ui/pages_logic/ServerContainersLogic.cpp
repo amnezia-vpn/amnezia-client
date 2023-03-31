@@ -31,6 +31,7 @@ void ServerContainersLogic::onUpdatePage()
     p_model->setSelectedServerIndex(uiLogic()->m_selectedServerIndex);
 
     set_isManagedServer(m_settings->haveAuthData(uiLogic()->m_selectedServerIndex));
+    uiLogic()->m_installCredentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
     emit updatePage();
 }
 
