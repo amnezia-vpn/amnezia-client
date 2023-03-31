@@ -18,6 +18,10 @@
 #include "core/ipcclient.h"
 #endif
 
+#ifdef Q_OS_ANDROID
+#include "protocols/android_vpnprotocol.h"
+#endif
+
 class VpnConfigurator;
 class ServerController;
 
@@ -61,6 +65,10 @@ public:
     const QString &remoteAddress() const;
     void addSitesRoutes(const QString &gw, Settings::RouteMode mode);
 
+#ifdef Q_OS_ANDROID
+    void restoreConnection();
+#endif
+
 public slots:
     void connectToVpn(int serverIndex,
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
@@ -101,6 +109,15 @@ private:
 #ifdef Q_OS_IOS
     IOSVpnProtocol * iosVpnProtocol{nullptr};
 #endif
+#ifdef Q_OS_ANDROID
+   AndroidVpnProtocol* androidVpnProtocol = nullptr;
+
+   AndroidVpnProtocol* createDefaultAndroidVpnProtocol(DockerContainer container);
+   void createAndroidConnections();
+   void createAndroidConnections(DockerContainer container);
+#endif
+
+   void createProtocolConnections();
 };
 
 #endif // VPNCONNECTION_H

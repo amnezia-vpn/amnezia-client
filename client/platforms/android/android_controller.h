@@ -11,7 +11,6 @@
 #include "ui/pages_logic/StartPageLogic.h"
 
 #include "protocols/vpnprotocol.h"
-#include "androidvpnactivity.h"
 
 using namespace amnezia;
 
@@ -44,6 +43,7 @@ public:
     void setVpnConfig(const QJsonObject &newVpnConfig);
 
     void startQrReaderActivity();
+    void copyTextToClipboard(QString text);
 
 signals:
     void connectionStateChanged(VpnProtocol::VpnConnectionState state);
