@@ -5,8 +5,10 @@
 #include "QProcess"
 #include "containers/containers_defs.h"
 
-class ShadowSocksVpnProtocol : public OpenVpnProtocol
+class ShadowSocksVpnProtocol : public VpnProtocol
 {
+    Q_OBJECT
+
 public:
     ShadowSocksVpnProtocol(const QJsonObject& configuration, QObject* parent = nullptr);
     virtual ~ShadowSocksVpnProtocol() override;
@@ -21,6 +23,7 @@ protected:
 
 protected:
     QJsonObject m_shadowSocksConfig;
+    int m_localPort;
 
 private:
     static QString shadowSocksExecPath();

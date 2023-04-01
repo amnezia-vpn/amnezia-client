@@ -59,16 +59,20 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
     QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         if (state == VpnProtocol::Connected){
-            qDebug() << "VpnConnection::onConnectionStateChanged";
-
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
+            if (m_settings->routeMode() == Settings::VpnAllSites) {
+                if (proto == "amnezia-shadowsocks") {
+                    IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
+                    IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+                }
+            }
 
             if (m_settings->routeMode() != Settings::VpnAllSites) {
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-               // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
+
             QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
             QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
 

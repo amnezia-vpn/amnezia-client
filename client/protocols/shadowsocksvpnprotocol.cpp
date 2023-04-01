@@ -8,10 +8,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QJsonObject &configuration, QObject *parent):
-    OpenVpnProtocol(configuration, parent)
+ShadowSocksVpnProtocol::ShadowSocksVpnProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     readShadowSocksConfiguration(configuration);
+    m_routeGateway = "10.33.0.1";
+    m_vpnGateway = "10.33.0.1";
 }
 
 ShadowSocksVpnProtocol::~ShadowSocksVpnProtocol()
@@ -67,7 +68,6 @@ ErrorCode ShadowSocksVpnProtocol::start()
     });
 
     connect(&m_ssProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
-        qDebug().noquote() << "ShadowSocksVpnProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(VpnProtocol::Disconnected);
         if (exitStatus != QProcess::NormalExit){
             emit protocolError(amnezia::ErrorCode::ShadowSocksExecutableCrashed);
@@ -106,9 +106,11 @@ ErrorCode ShadowSocksVpnProtocol::startTun2Sock()
         Utils::killProcessByName(Utils::executable("tun2socks", false));
     }
 
+    QString SSConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
+
 #ifdef Q_OS_LINUX
     QStringList args = QStringList() << "-device" << "tun://tun2" <<
-                                        "-proxy" << "socks5://127.0.0.1:8585" <<
+                                        "-proxy" << SSConStr <<
                                         "-loglevel" << "debug";
 
 #else
@@ -159,8 +161,6 @@ ErrorCode ShadowSocksVpnProtocol::startTun2Sock()
 
 void ShadowSocksVpnProtocol::stop()
 {
-   // OpenVpnProtocol::stop();
-
     qDebug() << "ShadowSocksVpnProtocol::stop()";
 #ifndef Q_OS_IOS
     m_ssProcess.terminate();
@@ -205,5 +205,7 @@ void ShadowSocksVpnProtocol::readShadowSocksConfiguration(const QJsonObject &con
     }
     shadowSocksConfig["local_port"] = localPort;
     shadowSocksConfig["server_port"] = serverPort;
+    shadowSocksConfig["mode"] = "tcp_and_udp";
     m_shadowSocksConfig = shadowSocksConfig;
+    m_localPort = localPort;
 }
