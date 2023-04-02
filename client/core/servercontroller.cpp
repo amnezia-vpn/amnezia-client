@@ -839,12 +839,6 @@ void ServerController::setCancelInstallation(const bool cancel)
     m_cancelInstallation = cancel;
 }
 
-void ServerController::disconnectFromHost(const ServerCredentials &credentials)
-{
-//    SshConnection *client = acquireConnection(sshParams(credentials));
-//    if (client) client->disconnectFromHost();
-}
-
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
 {
     return runScript(credentials,

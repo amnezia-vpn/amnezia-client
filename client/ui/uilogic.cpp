@@ -342,8 +342,6 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
             errorCode = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
                                                                                      noButton, waitInfoFunc,
                                                                                      busyInfoFunc, cancelButtonFunc);
-            m_serverController->disconnectFromHost(m_installCredentials);
-
             if (errorCode == ErrorCode::NoError) {
                 if (!isServerCreated) {
                     QJsonObject server;
@@ -534,7 +532,6 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(credentials, installedContainers);
-    m_serverController->disconnectFromHost(credentials);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

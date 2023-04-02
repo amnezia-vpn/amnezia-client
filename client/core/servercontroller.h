@@ -31,7 +31,6 @@ public:
     ErrorCode fromSshProcessExitStatus(int exitStatus);
 
     QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
-    void disconnectFromHost(const ServerCredentials &credentials);
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
