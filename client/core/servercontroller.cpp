@@ -46,7 +46,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut,
     const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr) {
 
-    auto error = m_sshClient.connectToHost(credentials);
+    auto error = m_sshClient.connectToHost(credentials, m_passphraseCallback);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -221,7 +221,7 @@ ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     libssh::SftpOverwriteMode overwriteMode)
 {
-    auto error = m_sshClient.connectToHost(credentials);
+    auto error = m_sshClient.connectToHost(credentials, m_passphraseCallback);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -753,4 +753,9 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
     }
 
     return ErrorCode::NoError;
+}
+
+void ServerController::setPassphraseCallback(const std::function<QString()> &callback)
+{
+    m_passphraseCallback = callback;
 }

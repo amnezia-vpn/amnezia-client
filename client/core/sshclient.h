@@ -26,7 +26,7 @@ namespace libssh {
         Client(QObject *parent = nullptr);
         ~Client();
 
-        ErrorCode connectToHost(const ServerCredentials &credentials);
+        ErrorCode connectToHost(const ServerCredentials &credentials, const std::function<QString()> &passphraseCallback);
         void disconnectFromHost();
         ErrorCode executeCommand(const QString &data,
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
@@ -41,10 +41,13 @@ namespace libssh {
         ErrorCode closeSftpSession();
         ErrorCode fromLibsshErrorCode(int errorCode);
         ErrorCode fromLibsshSftpErrorCode(int errorCode);
+        static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
         ssh_session m_session = nullptr;
         ssh_channel m_channel = nullptr;
         sftp_session m_sftpSession = nullptr;
+
+        static std::function<QString()> m_passphraseCallback;
     signals:
         void writeToChannelFinished();
         void sftpFileCopyFinished();

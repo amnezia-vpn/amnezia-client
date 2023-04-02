@@ -62,7 +62,7 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, popupWarningText)
+    AUTO_PROPERTY(QString, privateKeyPassphrase);
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
@@ -135,6 +135,9 @@ signals:
     void raise();
     void toggleLogPanel();
     void showWarningMessage(QString message);
+
+    void showPassphraseRequestMessage();
+    void passphraseDialogClosed();
 
 private slots:
     // containers - INOUT arg
