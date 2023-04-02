@@ -31,7 +31,6 @@ public:
     ErrorCode fromSshProcessExitStatus(int exitStatus);
 
     QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
-    void disconnectFromHost(const ServerCredentials &credentials);
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
@@ -72,7 +71,7 @@ public:
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
-    QSsh::SshConnection *connectToHost(const QSsh::SshConnectionParameters &sshParams);
+    QSharedPointer<QSsh::SshConnection> connectToHost(const QSsh::SshConnectionParameters &sshParams);
 
     void setCancelInstallation(const bool cancel);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
