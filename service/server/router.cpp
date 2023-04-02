@@ -69,6 +69,8 @@ bool Router::createTun(const QString &dev, const QString &subnet)
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().createTun(dev, subnet);
 #endif
+
+    return true;
 };
 
 bool Router::deleteTun(const QString &dev)
@@ -76,6 +78,8 @@ bool Router::deleteTun(const QString &dev)
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().deleteTun(dev);
 #endif
+
+    return true;
 };
 
 

@@ -4,6 +4,7 @@ sudo docker run \
 -d --restart always \
 --cap-add=NET_ADMIN \
 -p $SHADOWSOCKS_SERVER_PORT:$SHADOWSOCKS_SERVER_PORT/tcp \
+-p $SHADOWSOCKS_SERVER_PORT:$SHADOWSOCKS_SERVER_PORT/udp \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME

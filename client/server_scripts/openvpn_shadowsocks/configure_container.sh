@@ -39,6 +39,7 @@ cat > /opt/amnezia/shadowsocks/ss-config.json <<EOF
     "password": "$SHADOWSOCKS_PASSWORD",
     "server": "0.0.0.0",
     "server_port": $SHADOWSOCKS_SERVER_PORT,
-    "timeout": 60
+    "timeout": 60,
+    "mode" : "tcp_and_udp"
 }
 EOF
