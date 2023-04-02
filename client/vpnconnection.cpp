@@ -389,8 +389,6 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     createProtocolConnections();
 
-    m_serverController->disconnectFromHost(credentials);
-
     e = m_vpnProtocol.data()->start();
     if (e) emit VpnProtocol::Error;
 }

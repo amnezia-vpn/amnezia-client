@@ -45,7 +45,6 @@ void AdvancedServerSettingsLogic::onPushButtonClearServerClicked()
     }
 
     ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
-    m_serverController->disconnectFromHost(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
     if (e) {
         emit uiLogic()->showWarningMessage(tr("Error occurred while cleaning the server.") + "\n" +
                                            tr("Error message: ") + errorString(e) + "\n" +
