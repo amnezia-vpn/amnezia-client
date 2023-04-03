@@ -47,7 +47,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
         return { Proto::OpenVpn };
 
     case DockerContainer::ShadowSocks:
-        return { Proto::OpenVpn, Proto::ShadowSocks };
+        return { Proto::ShadowSocks };
 
     case DockerContainer::Cloak:
         return { Proto::OpenVpn, Proto::ShadowSocks, Proto::Cloak };
@@ -82,7 +82,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
     return {
         {DockerContainer::None, "Not installed"},
         {DockerContainer::OpenVpn, "OpenVPN"},
-        {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
+        {DockerContainer::ShadowSocks, "ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
         {DockerContainer::WireGuard, "WireGuard"},
         {DockerContainer::Ipsec, QObject::tr("IPsec")},
@@ -98,7 +98,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
 {
     return {
         {DockerContainer::OpenVpn, QObject::tr("OpenVPN container")},
-        {DockerContainer::ShadowSocks, QObject::tr("Container with OpenVpn and ShadowSocks")},
+        {DockerContainer::ShadowSocks, QObject::tr("Container with ShadowSocks")},
         {DockerContainer::Cloak, QObject::tr("Container with OpenVpn and ShadowSocks protocols "
                                                         "configured with traffic masking by Cloak plugin")},
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},

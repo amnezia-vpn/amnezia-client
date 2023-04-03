@@ -8,9 +8,6 @@ ARG SERVER_ARCH
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools xz
 RUN apk --update upgrade --no-cache
 
-ENV EASYRSA_BATCH 1
-ENV PATH="/usr/share/easy-rsa:${PATH}"
-
 RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh

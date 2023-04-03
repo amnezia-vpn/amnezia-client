@@ -48,11 +48,10 @@
         <file>server_scripts/openvpn/template.ovpn</file>
         <file>server_scripts/openvpn/Dockerfile</file>
         <file>server_scripts/openvpn/start.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/configure_container.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/Dockerfile</file>
-        <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/start.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
+        <file>server_scripts/shadowsocks/configure_container.sh</file>
+        <file>server_scripts/shadowsocks/Dockerfile</file>
+        <file>server_scripts/shadowsocks/run_container.sh</file>
+        <file>server_scripts/shadowsocks/start.sh</file>
         <file>images/folder.png</file>
         <file>server_scripts/wireguard/configure_container.sh</file>
         <file>server_scripts/wireguard/Dockerfile</file>

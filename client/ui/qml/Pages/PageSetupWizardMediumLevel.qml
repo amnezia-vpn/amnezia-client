@@ -41,7 +41,7 @@ PageBase {
             LabelType {
                 Layout.fillWidth: true
                 Layout.topMargin: 15
-                text: qsTr('OpenVPN over ShadowSocks profile will be installed')
+                text: qsTr('ShadowSocks profile will be installed')
             }
         }
     }

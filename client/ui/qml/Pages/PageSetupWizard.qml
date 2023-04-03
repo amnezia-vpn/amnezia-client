@@ -65,7 +65,7 @@ OpenVPN and ShadowSocks over Cloak (VPN obfuscation) profiles will be installed.
                 Layout.leftMargin: 25
                 verticalAlignment: Text.AlignTop
                 text: qsTr("I'm living in a country with a medium censorship level. Some websites are blocked by my government, but VPNs are not blocked at all. I want to setup a flexible solution.
-OpenVPN over ShadowSocks profile will be installed.\n")
+ShadowSocks profile will be installed.\n")
             }
 
 

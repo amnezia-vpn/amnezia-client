@@ -435,9 +435,8 @@ This protocol support export connection profile to mobile devices using QR code 
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="1592"/>
-        <source>OpenVPN over ShadowSocks profile will be installed</source>
-        <translation>Будет установлен профиль
-OpenVPN over ShadowSocks</translation>
+        <source>ShadowSocks profile will be installed</source>
+        <translation>Будет установлен профиль ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="1745"/>
