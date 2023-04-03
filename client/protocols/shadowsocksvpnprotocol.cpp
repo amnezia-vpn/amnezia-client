@@ -108,14 +108,14 @@ ErrorCode ShadowSocksVpnProtocol::startTun2Sock()
 
     QString SSConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_WIN
     QStringList args = QStringList() << "-device" << "tun://tun2" <<
-                                        "-proxy" << SSConStr <<
-                                        "-loglevel" << "debug";
-
+                       "-proxy" << SSConStr <<
+                       "-tun-post-up" <<
+                       "netsh interface ip set address name=\"tun2\" static 10.33.0.1 255.255.255.0 10.33.0.1";
 #else
-    QStringList args = QStringList() << "-c" << m_shadowSocksCfgFile.fileName()
-                                     << "--no-delay";
+    QStringList args = QStringList() << "-device" << "tun://tun2" <<
+                       "-proxy" << SSConStr;
 #endif
 
     qDebug().noquote() << "ShadowSocksVpnProtocol::startTun2Sock()"
