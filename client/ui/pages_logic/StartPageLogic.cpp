@@ -6,6 +6,7 @@
 #include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
 #include "utilities.h"
+#include "core/servercontroller.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -94,8 +95,7 @@ void StartPageLogic::onPushButtonConnect()
             set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
-    }
-    else {
+    } else {
         if (lineEditIpText().isEmpty() ||
                 lineEditLoginText().isEmpty() ||
                 lineEditPasswordText().isEmpty() ) {
@@ -111,7 +111,7 @@ void StartPageLogic::onPushButtonConnect()
         serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
     }
     serverCredentials.userName = lineEditLoginText();
-    if (pushButtonConnectKeyChecked()){
+    if (pushButtonConnectKeyChecked()) {
         QString key = textEditSshKeyText();
         if (key.startsWith("ssh-rsa")) {
             emit uiLogic()->showPublicKeyWarning();
@@ -123,28 +123,34 @@ void StartPageLogic::onPushButtonConnect()
         }
 
         serverCredentials.password = key;
-    }
-    else {
+    } else {
         serverCredentials.password = lineEditPasswordText();
     }
 
     set_pushButtonConnectEnabled(false);
     set_pushButtonConnectText(tr("Connecting..."));
 
-    ErrorCode e = ErrorCode::NoError;
+    ErrorCode errorCode = ErrorCode::NoError;
 #ifdef Q_DEBUG
     //QString output = m_serverController->checkSshConnection(serverCredentials, &e);
 #else
     QString output;
 #endif
 
-    bool ok = true;
-    if (e) {
-        set_labelWaitInfoVisible(true);
-        set_labelWaitInfoText(errorString(e));
-        ok = false;
+    if (pushButtonConnectKeyChecked()) {
+        QString decryptedPrivateKey;
+        errorCode = uiLogic()->m_serverController->getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey);
+        if (errorCode == ErrorCode::NoError) {
+            serverCredentials.password = decryptedPrivateKey;
+        }
     }
-    else {
+
+    bool ok = true;
+    if (errorCode) {
+        set_labelWaitInfoVisible(true);
+        set_labelWaitInfoText(errorString(errorCode));
+        ok = false;
+    } else {
         if (output.contains("Please login as the user")) {
             output.replace("\n", "");
             set_labelWaitInfoVisible(true);

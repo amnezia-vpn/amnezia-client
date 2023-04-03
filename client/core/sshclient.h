@@ -26,7 +26,7 @@ namespace libssh {
         Client(QObject *parent = nullptr);
         ~Client();
 
-        ErrorCode connectToHost(const ServerCredentials &credentials, const std::function<QString()> &passphraseCallback);
+        ErrorCode connectToHost(const ServerCredentials &credentials);
         void disconnectFromHost();
         ErrorCode executeCommand(const QString &data,
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
@@ -36,6 +36,8 @@ namespace libssh {
                                const std::string& localPath,
                                const std::string& remotePath,
                                const std::string& fileDesc);
+        ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey);
+        void setPassphraseCallback(const std::function<QString()> &callback);
     private:
         ErrorCode closeChannel();
         ErrorCode closeSftpSession();

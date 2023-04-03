@@ -74,6 +74,7 @@ public:
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 
     void setPassphraseCallback(const std::function<QString()> &callback);
+    ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey);
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
@@ -88,7 +89,6 @@ private:
 
     bool m_cancelInstallation = false;
     libssh::Client m_sshClient;
-    std::function<QString()> m_passphraseCallback;
 signals:
     void serverIsBusy(const bool isBusy);
 };

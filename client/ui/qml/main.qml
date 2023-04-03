@@ -235,7 +235,7 @@ Window  {
             popupWarning.open()
         }
         function onShowPassphraseRequestMessage() {
-            popupWithInputField.open()
+            popupWithTextField.open()
         }
     }
 
@@ -358,8 +358,8 @@ Window  {
     PopupWarning {
         id: popupWarning
     }
-    PopupWithInputField {
-        id: popupWithInputField
+    PopupWithTextField {
+        id: popupWithTextField
         placeholderText: "Enter private key passphrase"
         yesFunc: function() {
             editingFinished()
