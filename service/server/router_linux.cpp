@@ -141,31 +141,33 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
 
 
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
-       struct ifreq ifr;
-       int fd, err;
+    qDebug().noquote() << "createTun start";
 
-       fd = open("/dev/net/tun", O_RDWR);
-       if (fd < 0) {
-           qDebug().noquote() << "can't open tun: " << errno;
-           return false;
-       }
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "ip tuntap add mode tun dev %s", dev.toStdString().c_str());
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+    memset(&sys, 0, sizeof(sys));
+    sprintf(cmd, "ip addr add %s/24 dev %s", subnet.toStdString().c_str(), dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+    memset(&sys, 0, sizeof(sys));
+    sprintf(cmd, "ip link set dev %s up", dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
 
-       memset(&ifr, 0, sizeof(ifr));
-       ifr.ifr_flags = IFF_TUN|IFF_NO_PI;
-       strncpy(ifr.ifr_name, dev.toStdString().c_str(), IFNAMSIZ);
-
-
-       ioctl(fd, TUNSETIFF, (void *) &ifr);
-
-       char cmd [1000] = {0x0};
-       sprintf(cmd,"ifconfig %s up %s/24 ", dev.toStdString().c_str(), subnet.toStdString().c_str() );
-       int sys = system(cmd);
-       if(sys < 0)
-       {
-           qDebug().noquote() << "Could not activate tun device!\n";
-           close(fd);
-           return false;
-       }
     return true;
 }
 

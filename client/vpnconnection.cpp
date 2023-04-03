@@ -110,6 +110,11 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 IpcClient::Interface()->deleteTun("tun2");
                 IpcClient::Interface()->createTun("tun2", "10.33.0.1");
             }
+
+        } else if (state == VpnProtocol::Disconnected){
+            if (proto == "amnezia-shadowsocks") {
+                IpcClient::Interface()->clearSavedRoutes();
+            }
         }
     }
 #endif
