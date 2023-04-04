@@ -735,13 +735,8 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
     return ErrorCode::NoError;
 }
 
-void ServerController::setPassphraseCallback(const std::function<QString()> &callback)
+ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &callback)
 {
-    m_sshClient.setPassphraseCallback(callback);
-}
-
-ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey)
-{
-    auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey);
+    auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey, callback);
     return error;
 }

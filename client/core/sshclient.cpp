@@ -338,12 +338,13 @@ namespace libssh {
         }
     }
 
-    ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey)
+    ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback)
     {
         int authResult = SSH_ERROR;
         ErrorCode errorCode = ErrorCode::NoError;
 
         ssh_key privateKey;
+        m_passphraseCallback = passphraseCallback;
         authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
         if (authResult == SSH_OK) {
             char* key = new char[65535];
@@ -362,10 +363,5 @@ namespace libssh {
 
         ssh_key_free(privateKey);
         return errorCode;
-    }
-
-    void Client::setPassphraseCallback(const std::function<QString()> &callback)
-    {
-        m_passphraseCallback = callback;
     }
 }

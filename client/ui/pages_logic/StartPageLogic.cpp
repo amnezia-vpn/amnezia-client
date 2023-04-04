@@ -143,17 +143,17 @@ void StartPageLogic::onPushButtonConnect()
 
             return m_privateKeyPassphrase;
         };
-        serverController.setPassphraseCallback(passphraseCallback);
-    }
 
-    QString output = serverController.checkSshConnection(serverCredentials, &errorCode);
-
-    if (pushButtonConnectKeyChecked()) {
         QString decryptedPrivateKey;
-        errorCode = serverController.getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey);
+        errorCode = serverController.getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey, passphraseCallback);
         if (errorCode == ErrorCode::NoError) {
             serverCredentials.password = decryptedPrivateKey;
         }
+    }
+
+    QString output;
+    if (errorCode == ErrorCode::NoError) {
+        output = serverController.checkSshConnection(serverCredentials, &errorCode);
     }
 
     bool ok = true;
