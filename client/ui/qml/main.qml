@@ -238,9 +238,6 @@ Window  {
             popupWarning.popupWarningText = message
             popupWarning.open()
         }
-        function onShowPassphraseRequestMessage() {
-            popupWithTextField.open()
-        }
     }
 
     MessageDialog {
@@ -361,22 +358,5 @@ Window  {
 
     PopupWarning {
         id: popupWarning
-    }
-    PopupWithTextField {
-        id: popupWithTextField
-        placeholderText: "Enter private key passphrase"
-        yesFunc: function() {
-            editingFinished()
-            close()
-            UiLogic.passphraseDialogClosed()
-            text = ""
-        }
-        noFunc: function() {
-            close()
-            UiLogic.passphraseDialogClosed()
-        }
-        onEditingFinished: {
-            UiLogic.privateKeyPassphrase = text
-        }
     }
 }

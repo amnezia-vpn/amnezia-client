@@ -10,6 +10,7 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QEventLoop>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
@@ -131,11 +132,20 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectText(tr("Connecting..."));
 
     ErrorCode errorCode = ErrorCode::NoError;
-#ifdef Q_DEBUG
-    //QString output = m_serverController->checkSshConnection(serverCredentials, &e);
-#else
-    QString output;
-#endif
+
+    if (pushButtonConnectKeyChecked()) {
+        auto passphraseCallback = [this]() {
+            emit showPassphraseRequestMessage();
+            QEventLoop loop;
+            QObject::connect(this, &StartPageLogic::passphraseDialogClosed, &loop, &QEventLoop::quit);
+            loop.exec();
+
+            return m_privateKeyPassphrase;
+        };
+        m_serverController->setPassphraseCallback(passphraseCallback);
+    }
+
+    QString output = m_serverController->checkSshConnection(serverCredentials, &errorCode);
 
     if (pushButtonConnectKeyChecked()) {
         QString decryptedPrivateKey;

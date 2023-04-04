@@ -22,12 +22,6 @@ public:
 
     typedef QList<QPair<QString, QString>> Vars;
 
-//    ErrorCode fromSshConnectionErrorCode(QSsh::SshError error);
-
-    // QSsh exitCode and exitStatus are different things
-//    ErrorCode fromSshProcessExitStatus(int exitStatus);
-
-//    QSsh::SshConnectionParameters sshParams(const ServerCredentials &credentials);
     void disconnectFromHost(const ServerCredentials &credentials);
 
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
@@ -36,27 +30,20 @@ public:
                              QJsonObject &config, bool isUpdate = false);
     ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
                               const QJsonObject &oldConfig, QJsonObject &newConfig);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 
     // create initial config - generate passwords, etc
     QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
 
-    bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+    ErrorCode uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
+                                        const QString &file, const QString &path,
+                                        libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 
-    ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
-
-    ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-        const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
-
-    ErrorCode uploadTextFileToContainer(DockerContainer container,
-        const ServerCredentials &credentials, const QString &file, const QString &path,
-        libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
-
-    QByteArray getTextFileFromContainer(DockerContainer container,
-        const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode = nullptr);
-
-    ErrorCode setupServerFirewall(const ServerCredentials &credentials);
+    QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
+                                        const QString &path, ErrorCode *errorCode = nullptr);
 
     QString replaceVars(const QString &script, const Vars &vars);
+    Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
 
     ErrorCode runScript(const ServerCredentials &credentials, QString script,
         const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
@@ -66,12 +53,9 @@ public:
         const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
         const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
-    Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None, const QJsonObject &config = QJsonObject());
-
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
     void setCancelInstallation(const bool cancel);
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 
     void setPassphraseCallback(const std::function<QString()> &callback);
     ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey);
@@ -82,7 +66,14 @@ private:
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
+
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config);
+    bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+
+    ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
+                               const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
+
+    ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;

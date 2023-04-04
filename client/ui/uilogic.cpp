@@ -150,16 +150,6 @@ void UiLogic::initalizeUiLogic()
     connect(m_notificationHandler, &NotificationHandler::connectRequested, pageLogic<VpnLogic>(), &VpnLogic::onConnect);
     connect(m_notificationHandler, &NotificationHandler::disconnectRequested, pageLogic<VpnLogic>(), &VpnLogic::onDisconnect);
 
-    auto passphraseCallback = [this]() {
-        emit showPassphraseRequestMessage();
-        QEventLoop loop;
-        QObject::connect(this, &UiLogic::passphraseDialogClosed, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        return m_privateKeyPassphrase;
-    };
-    m_serverController->setPassphraseCallback(passphraseCallback);
-
     if (m_settings->serversCount() > 0) {
         if (m_settings->defaultServerIndex() < 0) m_settings->setDefaultServer(0);
         emit goToPage(Page::Vpn, true, false);

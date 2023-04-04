@@ -92,7 +92,6 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     return ErrorCode::NoError;
 }
 
-
 ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials,
     DockerContainer container, QString script,
     const std::function<ErrorCode (const QString &, libssh::Client &)> &cbReadStdOut,
@@ -201,21 +200,6 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
     qDebug().noquote() << "Copy file from container END : \n" ;
 
     return QByteArray::fromHex(stdOut.toUtf8());
-}
-
-ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
-{
-    QString caCert = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::caCertPath);
-    QString taKey = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::taKeyPath);
-
-    if (!caCert.isEmpty() && !taKey.isEmpty()) {
-        return ErrorCode::NoError;
-    }
-    else {
-        return ErrorCode::ServerCheckFailed;
-    }
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
