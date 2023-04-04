@@ -44,10 +44,11 @@ void AdvancedServerSettingsLogic::onPushButtonClearServerClicked()
         uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
 
-    ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
-    if (e) {
+    ServerController serverController(m_settings);
+    ErrorCode errorCode = serverController.removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
+    if (errorCode) {
         emit uiLogic()->showWarningMessage(tr("Error occurred while cleaning the server.") + "\n" +
-                                           tr("Error message: ") + errorString(e) + "\n" +
+                                           tr("Error message: ") + errorString(errorCode) + "\n" +
                                            tr("See logs for details."));
     } else {
         set_labelWaitInfoVisible(true);

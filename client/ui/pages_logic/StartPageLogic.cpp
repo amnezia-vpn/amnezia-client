@@ -131,10 +131,11 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectEnabled(false);
     set_pushButtonConnectText(tr("Connecting..."));
 
+    ServerController serverController(m_settings);
     ErrorCode errorCode = ErrorCode::NoError;
 
     if (pushButtonConnectKeyChecked()) {
-        auto passphraseCallback = [this]() {
+        auto passphraseCallback = [this, &serverController]() {
             emit showPassphraseRequestMessage();
             QEventLoop loop;
             QObject::connect(this, &StartPageLogic::passphraseDialogClosed, &loop, &QEventLoop::quit);
@@ -142,14 +143,14 @@ void StartPageLogic::onPushButtonConnect()
 
             return m_privateKeyPassphrase;
         };
-        m_serverController->setPassphraseCallback(passphraseCallback);
+        serverController.setPassphraseCallback(passphraseCallback);
     }
 
-    QString output = m_serverController->checkSshConnection(serverCredentials, &errorCode);
+    QString output = serverController.checkSshConnection(serverCredentials, &errorCode);
 
     if (pushButtonConnectKeyChecked()) {
         QString decryptedPrivateKey;
-        errorCode = uiLogic()->m_serverController->getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey);
+        errorCode = serverController.getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey);
         if (errorCode == ErrorCode::NoError) {
             serverCredentials.password = decryptedPrivateKey;
         }

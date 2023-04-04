@@ -39,6 +39,7 @@ ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *
 
 ServerController::~ServerController()
 {
+    m_sshClient.disconnectFromHost();
 }
 
 
@@ -627,11 +628,6 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
 void ServerController::setCancelInstallation(const bool cancel)
 {
     m_cancelInstallation = cancel;
-}
-
-void ServerController::disconnectFromHost(const ServerCredentials &credentials)
-{
-    m_sshClient.disconnectFromHost();
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)

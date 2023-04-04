@@ -22,8 +22,6 @@ public:
 
     typedef QList<QPair<QString, QString>> Vars;
 
-    void disconnectFromHost(const ServerCredentials &credentials);
-
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container,

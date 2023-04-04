@@ -78,16 +78,14 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
-    std::shared_ptr<ServerController> serverController,
     QObject *parent) :
     QObject(parent),
     m_settings(settings),
-    m_configurator(configurator),
-    m_serverController(serverController)
+    m_configurator(configurator)
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
-    m_vpnConnection = new VpnConnection(settings, configurator, serverController);
+    m_vpnConnection = new VpnConnection(settings, configurator);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -337,7 +335,8 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
         if (!isContainerAlreadyAddedToGui(container.first)) {
             progressBarFunc.setTextFunc(QString("Installing %1").arg(ContainerProps::containerToString(container.first)));
             auto installAction = [&] () {
-                return m_serverController->setupContainer(m_installCredentials, container.first, container.second);
+                ServerController serverController(m_settings);
+                return serverController.setupContainer(m_installCredentials, container.first, container.second);
             };
             errorCode = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
                                                                                      noButton, waitInfoFunc,
@@ -531,7 +530,8 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &
     }
 
     QMap<DockerContainer, QJsonObject> installedContainers;
-    ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(credentials, installedContainers);
+    ServerController serverController(m_settings);
+    ErrorCode errorCode = serverController.getAlreadyInstalledContainers(credentials, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
