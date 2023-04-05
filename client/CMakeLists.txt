@@ -293,6 +293,8 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
+
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/3rd/strongswan DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/3rd)
 endif()
 
 

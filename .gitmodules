@@ -31,3 +31,6 @@
 [submodule "client/3rd/SortFilterProxyModel"]
 	path = client/3rd/SortFilterProxyModel
 	url = https://github.com/mitchcurtis/SortFilterProxyModel.git
+[submodule "client/3rd/strongswan"]
+	path = client/3rd/strongswan
+	url = https://github.com/kolobchanin/strongswan.git
