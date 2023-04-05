@@ -332,7 +332,7 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
     };
 
     bool isServerCreated = false;
-    ErrorCode errorCode = addAlreadyInstalledContainersGui(true, isServerCreated);
+    ErrorCode errorCode = addAlreadyInstalledContainersGui(isServerCreated);
     if (errorCode == ErrorCode::NoError) {
         if (!isContainerAlreadyAddedToGui(container.first)) {
             progressBarFunc.setTextFunc(QString("Installing %1").arg(ContainerProps::containerToString(container.first)));
@@ -520,18 +520,26 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<AdvancedServerSettingsLogic>();
 }
 
-ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated)
+ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool &isServerCreated)
 {
     isServerCreated = false;
-    ServerCredentials credentials;
-    if (createNewServer) {
-        credentials = m_installCredentials;
-    } else {
-        credentials = m_settings->serverCredentials(m_selectedServerIndex);
+    ServerCredentials installCredentials = m_installCredentials;
+    bool createNewServer = true;
+    int serverIndex;
+
+    for (int i = 0; i < m_settings->serversCount(); i++) {
+        const ServerCredentials credentials = m_settings->serverCredentials(i);
+        if (m_installCredentials.hostName == credentials.hostName && m_installCredentials.port == credentials.port) {
+            createNewServer = false;
+            isServerCreated = true;
+            installCredentials = credentials;
+            serverIndex = i;
+            break;
+        }
     }
 
     QMap<DockerContainer, QJsonObject> installedContainers;
-    ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(credentials, installedContainers);
+    ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(installCredentials, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -540,10 +548,10 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &
         QJsonObject server;
         QJsonArray containerConfigs;
         if (createNewServer) {
-            server.insert(config_key::hostName, credentials.hostName);
-            server.insert(config_key::userName, credentials.userName);
-            server.insert(config_key::password, credentials.password);
-            server.insert(config_key::port, credentials.port);
+            server.insert(config_key::hostName, installCredentials.hostName);
+            server.insert(config_key::userName, installCredentials.userName);
+            server.insert(config_key::password, installCredentials.password);
+            server.insert(config_key::port, installCredentials.port);
             server.insert(config_key::description, m_settings->nextAvailableServerName());
         }
 
@@ -556,8 +564,8 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool createNewServer, bool &
                 containerConfigs.append(container.value());
                 server.insert(config_key::containers, containerConfigs);
             } else {
-                m_settings->setContainerConfig(m_selectedServerIndex, container.key(), container.value());
-                m_settings->setDefaultContainer(m_selectedServerIndex, installedContainers.firstKey());
+                m_settings->setContainerConfig(serverIndex, container.key(), container.value());
+                m_settings->setDefaultContainer(serverIndex, installedContainers.firstKey());
             }
         }
 
