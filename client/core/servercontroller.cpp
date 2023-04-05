@@ -871,13 +871,16 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         stdOut += data + "\n";
     };
 
-    const QString containerString = ProtocolProps::protoToString(ContainerProps::defaultProtocol(container));
+    const Proto protocol = ContainerProps::defaultProtocol(container);
+    const QString containerString = ProtocolProps::protoToString(protocol);
     const QJsonObject containerConfig = config.value(containerString).toObject();
 
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
-    QString port = containerConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
-    QString transportProto = containerConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
+    QString defaultPort("%1");
+    QString port = containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
+    QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+    QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
     QString script = QString("sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
