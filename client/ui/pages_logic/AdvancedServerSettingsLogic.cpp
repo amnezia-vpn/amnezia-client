@@ -69,7 +69,7 @@ void AdvancedServerSettingsLogic::onPushButtonScanServerClicked()
 
     bool isServerCreated;
     auto containersCount = m_settings->containers(uiLogic()->m_selectedServerIndex).size();
-    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, isServerCreated);
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(isServerCreated);
     if (errorCode != ErrorCode::NoError) {
         emit uiLogic()->showWarningMessage(tr("Error occurred while scanning the server.") + "\n" +
                                            tr("Error message: ") + errorString(errorCode) + "\n" +
