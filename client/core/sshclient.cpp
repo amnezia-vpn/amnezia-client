@@ -56,8 +56,8 @@ namespace libssh {
 
             int authResult = SSH_ERROR;
             if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
-                ssh_key privateKey;
-                ssh_key publicKey;
+                ssh_key privateKey = nullptr;
+                ssh_key publicKey = nullptr;
                 authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
                 if (authResult == SSH_OK) {
                     authResult = ssh_pki_export_privkey_to_pubkey(privateKey, &publicKey);
@@ -71,8 +71,12 @@ namespace libssh {
                     authResult = ssh_userauth_publickey(m_session, authUsername.c_str(), privateKey);
                 }
 
-                ssh_key_free(publicKey);
-                ssh_key_free(privateKey);
+                if (publicKey) {
+                    ssh_key_free(publicKey);
+                }
+                if (privateKey) {
+                    ssh_key_free(privateKey);
+                }
             } else {
                 authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.password.toStdString().c_str());
             }
@@ -343,7 +347,7 @@ namespace libssh {
         int authResult = SSH_ERROR;
         ErrorCode errorCode = ErrorCode::NoError;
 
-        ssh_key privateKey;
+        ssh_key privateKey = nullptr;
         m_passphraseCallback = passphraseCallback;
         authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
         if (authResult == SSH_OK) {
@@ -361,7 +365,9 @@ namespace libssh {
             errorCode = ErrorCode::SshPrivateKeyError;
         }
 
-        ssh_key_free(privateKey);
+        if (privateKey) {
+            ssh_key_free(privateKey);
+        }
         return errorCode;
     }
 }
