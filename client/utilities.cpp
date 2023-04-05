@@ -247,6 +247,23 @@ QString Utils::certUtilPath()
 #endif
 }
 
+QString Utils::getOpenFileName(QWidget *parent, const QString &caption, const QString &dir, const QString &filter, QString *selectedFilter, QFileDialog::Options options)
+{
+    QString fileName = QFileDialog::getOpenFileName(parent, caption, dir, filter, selectedFilter, options);
+
+#ifdef Q_OS_ANDROID
+    // patch for files containing spaces etc
+    const QString sep {"raw%3A%2F"};
+    if (fileName.startsWith("content://") && fileName.contains(sep)) {
+        QString contentUrl = fileName.split(sep).at(0);
+        QString rawUrl = fileName.split(sep).at(1);
+        rawUrl.replace(" ", "%20");
+        fileName = contentUrl + sep + rawUrl;
+    }
+#endif
+    return fileName;
+}
+
 #ifdef Q_OS_WIN
 // Inspired from http://stackoverflow.com/a/15281070/1529139
 // and http://stackoverflow.com/q/40059902/1529139

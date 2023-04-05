@@ -4,9 +4,7 @@
 
 #include <QApplication>
 
-#include "protocols/CloakLogic.h"
-#include "protocols/OpenVpnLogic.h"
-#include "protocols/ShadowSocksLogic.h"
+#include "protocols/PageProtocolLogicBase.h"
 
 #include "core/servercontroller.h"
 #include <functional>
@@ -92,7 +90,7 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     qApp->processEvents();
 
     bool isServerCreated = false;
-    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, isServerCreated);
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(isServerCreated);
 
     if (errorCode == ErrorCode::NoError) {
         if (!uiLogic()->isContainerAlreadyAddedToGui(c)) {

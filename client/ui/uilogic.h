@@ -115,7 +115,7 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
-    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated);
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool &isServerCreated);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
 

@@ -1,6 +1,7 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include <QFileDialog>
 #include <QRegExp>
 #include <QString>
 #include <QRegularExpression>
@@ -49,6 +50,13 @@ public:
     static QString openVpnExecPath();
     static QString wireguardExecPath();
     static QString certUtilPath();
+
+    static QString getOpenFileName(QWidget *parent = nullptr,
+                                   const QString &caption = QString(),
+                                   const QString &dir = QString(),
+                                   const QString &filter = QString(),
+                                   QString *selectedFilter = nullptr,
+                                   QFileDialog::Options options = QFileDialog::Options());
 
 
 #ifdef Q_OS_WIN
