@@ -77,16 +77,21 @@ namespace libssh {
                 if (privateKey) {
                     ssh_key_free(privateKey);
                 }
+                if (authResult != SSH_OK) {
+                    qDebug() << ssh_get_error(m_session);
+                    ErrorCode errorCode = fromLibsshErrorCode(ssh_get_error_code(m_session));
+                    if (errorCode == ErrorCode::NoError) {
+                        errorCode = ErrorCode::SshPrivateKeyFormatError;
+                    }
+                    return errorCode;
+                }
             } else {
                 authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.password.toStdString().c_str());
+                if (authResult != SSH_OK) {
+                    qDebug() << ssh_get_error(m_session);
+                    return fromLibsshErrorCode(ssh_get_error_code(m_session));
+                }
             }
-
-            if (authResult != SSH_OK) {
-                qDebug() << ssh_get_error(m_session);
-                return fromLibsshErrorCode(ssh_get_error_code(m_session));
-            }
-
-            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
         return ErrorCode::NoError;
     }

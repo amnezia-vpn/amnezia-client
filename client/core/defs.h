@@ -35,7 +35,7 @@ enum ErrorCode
 
     // Ssh connection errors
     SshRequsetDeniedError, SshInterruptedError, SshInternalError,
-    SshPrivateKeyError,
+    SshPrivateKeyError, SshPrivateKeyFormatError,
 
     // Ssh sftp errors
     SshSftpEofError, SshSftpNoSuchFileError, SshSftpPermissionDeniedError,
