@@ -556,7 +556,7 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool &isServerCreated)
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ServerController serverController(m_settings);
-    ErrorCode errorCode = serverController.getAlreadyInstalledContainers(credentials, installedContainers);
+    ErrorCode errorCode = serverController.getAlreadyInstalledContainers(installCredentials, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
