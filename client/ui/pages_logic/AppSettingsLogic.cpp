@@ -8,6 +8,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <utilities.h>
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -82,8 +83,8 @@ void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
 
 void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open backup"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
+    QString fileName = Utils::getOpenFileName(Q_NULLPTR, tr("Open backup"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
     if (fileName.isEmpty()) return;
 
@@ -98,6 +99,5 @@ void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
     } else {
         emit uiLogic()->showWarningMessage(tr("Can't import config, file is corrupted."));
     }
-
 }
 
