@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFile>
-#include <QFileDialog>
 #include <QHostInfo>
 #include <QItemSelectionModel>
 #include <QJsonDocument>
@@ -495,6 +494,24 @@ void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QSt
     QStringList filesToSend;
     filesToSend.append(fileName);
     MobileUtils::shareText(filesToSend);
+}
+
+QString UiLogic::getOpenFileName(QWidget *parent, const QString &caption, const QString &dir,
+    const QString &filter, QString *selectedFilter, QFileDialog::Options options)
+{
+    QString fileName = QFileDialog::getOpenFileName(parent, caption, dir, filter, selectedFilter, options);
+
+#ifdef Q_OS_ANDROID
+    // patch for files containing spaces etc
+    const QString sep {"raw%3A%2F"};
+    if (fileName.startsWith("content://") && fileName.contains(sep)) {
+        QString contentUrl = fileName.split(sep).at(0);
+        QString rawUrl = fileName.split(sep).at(1);
+        rawUrl.replace(" ", "%20");
+        fileName = contentUrl + sep + rawUrl;
+    }
+#endif
+    return fileName;
 }
 
 void UiLogic::registerPagesLogic()

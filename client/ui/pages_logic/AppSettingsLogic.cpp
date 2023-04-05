@@ -83,7 +83,7 @@ void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
 
 void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
 {
-    QString fileName = Utils::getOpenFileName(Q_NULLPTR, tr("Open backup"),
+    QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open backup"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
     if (fileName.isEmpty()) return;

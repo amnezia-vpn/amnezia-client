@@ -184,7 +184,7 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = Utils::getOpenFileName(Q_NULLPTR, tr("Open config file"),
+    QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open config file"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
     if (fileName.isEmpty()) return;
 
