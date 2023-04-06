@@ -30,11 +30,9 @@
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
-    std::shared_ptr<VpnConfigurator> configurator,
-    std::shared_ptr<ServerController> serverController, QObject* parent) : QObject(parent),
+    std::shared_ptr<VpnConfigurator> configurator, QObject* parent) : QObject(parent),
     m_settings(settings),
     m_configurator(configurator),
-    m_serverController(serverController),
     m_isIOSConnected(false)
 {
 }
@@ -371,8 +369,6 @@ void VpnConnection::connectToVpn(int serverIndex,
 #endif
 
     createProtocolConnections();
-
-    m_serverController->disconnectFromHost(credentials);
 
     e = m_vpnProtocol.data()->start();
     if (e) emit VpnProtocol::Error;

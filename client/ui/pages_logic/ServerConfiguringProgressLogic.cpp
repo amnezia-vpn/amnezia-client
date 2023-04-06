@@ -96,19 +96,18 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.setValueFunc(0);
     timer.start(1000);
 
+    ServerController serverController(m_settings);
+
     QMetaObject::Connection cancelDoInstallActionConnection;
     if (cancelButton.setVisibleFunc) {
         cancelDoInstallActionConnection = connect(this, &ServerConfiguringProgressLogic::cancelDoInstallAction,
-                m_serverController.get(), &ServerController::setCancelInstallation);
+                &serverController, &ServerController::setCancelInstallation);
     }
 
 
     QMetaObject::Connection serverBusyConnection;
     if (serverBusyInfo.setVisibleFunc && serverBusyInfo.setTextFunc) {
-        serverBusyConnection = connect(m_serverController.get(),
-                             &ServerController::serverIsBusy,
-                             this,
-                             [&serverBusyInfo, &timer, &cancelButton](const bool isBusy) {
+        auto onServerIsBusy = [&serverBusyInfo, &timer, &cancelButton](const bool isBusy) {
             isBusy ? timer.stop() : timer.start(1000);
             serverBusyInfo.setVisibleFunc(isBusy);
             serverBusyInfo.setTextFunc(isBusy ? "Amnesia has detected that your server is currently "
@@ -118,7 +117,9 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
             if (cancelButton.setVisibleFunc) {
                 cancelButton.setVisibleFunc(isBusy ? true : false);
             }
-        });
+        };
+
+        serverBusyConnection = connect(&serverController, &ServerController::serverIsBusy, this, onServerIsBusy);
     }
 
     ErrorCode e = action();
@@ -182,5 +183,5 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
 
 void ServerConfiguringProgressLogic::onPushButtonCancelClicked()
 {
-    cancelDoInstallAction(true);
+    emit cancelDoInstallAction(true);
 }
