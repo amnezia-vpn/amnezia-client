@@ -483,7 +483,6 @@ if(IOS)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
-
 endif()
 
 if(ANDROID)
