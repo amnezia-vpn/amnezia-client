@@ -46,7 +46,7 @@ PageBase {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
 
-                defaultColor: "#0E0E11"
+                defaultColor: "transparent"
                 hoveredColor: Qt.rgba(255, 255, 255, 0.08)
                 pressedColor: Qt.rgba(255, 255, 255, 0.12)
                 disabledColor: "#878B91"
@@ -98,6 +98,24 @@ PageBase {
                 Layout.fillWidth: true
                 height: 1
                 color: "#2C2D30"
+            }
+
+            CardType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+
+                headerText: "Высокий"
+                bodyText: "Многие иностранные сайты и VPN-провайдеры заблокированы"
+                footerText: "футер"
+            }
+
+            CardType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+
+                headerText: "Высокий"
+                bodyText: "Многие иностранные сайты и VPN-провайдеры заблокированы"
+                footerText: "футер"
             }
         }
     }

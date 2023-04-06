@@ -173,5 +173,6 @@
         <file>images/controls/arrow-right.svg</file>
         <file>images/controls/chevron-right.svg</file>
         <file>ui/qml/Controls2/ImageButtonType.qml</file>
+        <file>ui/qml/Controls2/CardType.qml</file>
     </qresource>
 </RCC>

@@ -35,6 +35,10 @@ Button {
         }
         border.color: borderColor
         border.width: borderWidth
+
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
     }
 
     MouseArea {
