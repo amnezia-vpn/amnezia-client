@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.12
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Shapes 1.4
 import PageEnum 1.0
 import "../Controls"
 import "./"
@@ -69,26 +69,29 @@ PageBase {
                     mouseExitAni.start()
                 }
             }
-            LinearGradient {
-                visible: !ms.containsMouse
+            Rectangle {
                 anchors.fill: parent
-                start: Qt.point(0, 0)
-                end: Qt.point(0, height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FAFBFE" }
-                    GradientStop { position: 1.0; color: "#ECEEFF" }
+                gradient: ms.containsMouse ? gradient_containsMouse : gradient_notContainsMouse
+                LinearGradient {
+                    id: gradient_notContainsMouse
+                    x1: 0 ; y1:0
+                    x2: 0 ; y2: height
+                    stops: [
+                        GradientStop { position: 0.0; color: "#FAFBFE" },
+                        GradientStop { position: 1.0; color: "#ECEEFF" }
+                    ]
+                }
+                LinearGradient {
+                    id: gradient_containsMouse
+                    x1: 0 ; y1:0
+                    x2: 0 ; y2: height
+                    stops: [
+                        GradientStop { position: 0.0; color: "#FAFBFE" },
+                        GradientStop { position: 1.0; color: "#DCDEDF" }
+                    ]
                 }
             }
-            LinearGradient {
-                visible: ms.containsMouse
-                anchors.fill: parent
-                start: Qt.point(0, 0)
-                end: Qt.point(0, height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FAFBFE" }
-                    GradientStop { position: 1.0; color: "#DCDEDF" }
-                }
-            }
+
             LabelType {
                 id: label_address
                 x: 20

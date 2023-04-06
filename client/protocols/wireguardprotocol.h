@@ -23,12 +23,13 @@ public:
 
 private:
     QString configPath() const;
-    void readWireguardConfiguration(const QJsonObject &configuration);
+    void writeWireguardConfiguration(const QJsonObject &configuration);
 
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
     QString serviceName() const;
-
+    QStringList stopArgs();
+    QStringList startArgs();
 
 private:
     QString m_configFileName;

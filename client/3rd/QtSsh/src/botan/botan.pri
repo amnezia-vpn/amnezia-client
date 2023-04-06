@@ -37,13 +37,27 @@ linux-g++ {
 }
 
 android {
-   for (abi, ANDROID_ABIS): {
-      equals(ANDROID_TARGET_ARCH,$$abi) {
-         INCLUDEPATH += $$PWD/android/$${abi}
-         HEADERS += $$PWD/android/$${abi}/botan_all.h
-         SOURCES += $$PWD/android/$${abi}/botan_all.cpp
-      }
-   }
+    versionAtLeast(QT_VERSION, 6.0.0) {
+        # We need to include qtprivate api's
+        # As QAndroidBinder is not yet implemented with a public api
+        QT+=core-private
+        ANDROID_ABIS=ANDROID_TARGET_ARCH
+
+        INCLUDEPATH += $$PWD/android/$${ANDROID_TARGET_ARCH}
+        HEADERS += $$PWD/android/$${ANDROID_TARGET_ARCH}/botan_all.h
+        SOURCES += $$PWD/android/$${ANDROID_TARGET_ARCH}/botan_all.cpp
+    }
+    else {
+        QT += androidextras
+
+        for (abi, ANDROID_ABIS): {
+           equals(ANDROID_TARGET_ARCH,$$abi) {
+              INCLUDEPATH += $$PWD/android/$${abi}
+              HEADERS += $$PWD/android/$${abi}/botan_all.h
+              SOURCES += $$PWD/android/$${abi}/botan_all.cpp
+           }
+        }
+    }
 }
 
 ios: {

@@ -87,12 +87,12 @@ QStringList TapController::getTapList()
         return QStringList();
     }
 
-    QStringList l = output.split("\n", QString::SkipEmptyParts);
+    QStringList l = output.split("\n", Qt::SkipEmptyParts);
     if (l.size() > 0) l.removeLast();
 
     QStringList tapList;
     for (QString s : l) {
-        if (s.contains(" ")) tapList.append(s.split(" ", QString::SkipEmptyParts).first());
+        if (s.contains(" ")) tapList.append(s.split(" ", Qt::SkipEmptyParts).first());
         else tapList.append(s);
     }
 

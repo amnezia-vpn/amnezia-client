@@ -1,14 +1,14 @@
 #include "AppSettingsLogic.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "ui/qautostart.h"
 #include "ui/uilogic.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QStandardPaths>
+#include <utilities.h>
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -62,18 +62,18 @@ void AppSettingsLogic::onCheckBoxSaveLogsCheckedToggled(bool checked)
 
 void AppSettingsLogic::onPushButtonOpenLogsClicked()
 {
-    Debug::openLogsFolder();
+    Logger::openLogsFolder();
 }
 
 void AppSettingsLogic::onPushButtonExportLogsClicked()
 {
-    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Debug::getLogFile());
+    uiLogic()->saveTextFile(tr("Save log"), "AmneziaVPN.log", ".log", Logger::getLogFile());
 }
 
 void AppSettingsLogic::onPushButtonClearLogsClicked()
 {
-    Debug::clearLogs();
-    Debug::clearServiceLogs();
+    Logger::clearLogs();
+    Logger::clearServiceLogs();
 }
 
 void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
@@ -83,8 +83,8 @@ void AppSettingsLogic::onPushButtonBackupAppConfigClicked()
 
 void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open backup"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
+    QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open backup"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
     if (fileName.isEmpty()) return;
 
@@ -96,11 +96,8 @@ void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
     if (ok) {
         emit uiLogic()->goToPage(Page::Vpn);
         emit uiLogic()->setStartPage(Page::Vpn);
+    } else {
+        emit uiLogic()->showWarningMessage(tr("Can't import config, file is corrupted."));
     }
-    else {
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-            tr("Can't import config, file is corrupted."));
-    }
-
 }
 

@@ -4,7 +4,8 @@
 #include "PageLogicBase.h"
 
 #if defined(Q_OS_ANDROID)
-#include <QAndroidActivityResultReceiver>
+#include <QJniObject>
+#include <private/qandroidextras_p.h>
 #endif
 
 class UiLogic;
@@ -15,9 +16,7 @@ class ServerSettingsLogic : public PageLogicBase
 
     AUTO_PROPERTY(bool, labelWaitInfoVisible)
     AUTO_PROPERTY(QString, labelWaitInfoText)
-    AUTO_PROPERTY(QString, pushButtonClearText)
     AUTO_PROPERTY(QString, pushButtonClearClientCacheText)
-    AUTO_PROPERTY(bool, pushButtonClearVisible)
     AUTO_PROPERTY(bool, pushButtonClearClientCacheVisible)
     AUTO_PROPERTY(bool, pushButtonShareFullVisible)
     AUTO_PROPERTY(QString, labelServerText)
@@ -27,7 +26,6 @@ class ServerSettingsLogic : public PageLogicBase
 public:
     Q_INVOKABLE void onUpdatePage() override;
 
-    Q_INVOKABLE void onPushButtonClearServer();
     Q_INVOKABLE void onPushButtonForgetServer();
     Q_INVOKABLE void onPushButtonShareFullClicked();
     Q_INVOKABLE void onPushButtonClearClientCacheClicked();
@@ -52,7 +50,7 @@ public:
     ~authResultReceiver() {}
 
 public:
-    void handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &data) override;
+    void handleActivityResult(int receiverRequestCode, int resultCode, const QJniObject &data) override;
 
 private:
     int  m_serverIndex;

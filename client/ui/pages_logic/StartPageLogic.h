@@ -3,6 +3,8 @@
 
 #include "PageLogicBase.h"
 
+#include <QRegularExpression>
+
 class UiLogic;
 
 class StartPageLogic : public PageLogicBase
@@ -21,13 +23,19 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
 
-    READONLY_PROPERTY(QRegExp, ipAddressPortRegex)
+    READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:
     Q_INVOKABLE void onUpdatePage() override;
 
     Q_INVOKABLE void onPushButtonConnect();
     Q_INVOKABLE void onPushButtonImport();
     Q_INVOKABLE void onPushButtonImportOpenFile();
+
+#ifdef Q_OS_ANDROID
+    Q_INVOKABLE void startQrDecoder();
+#endif
+
+    void selectConfigFormat(QString configData);
 
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);

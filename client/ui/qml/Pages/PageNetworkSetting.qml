@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -63,8 +63,8 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
                     NetworkSettingsLogic.onLineEditDns1EditFinished(text)
                     UiLogic.onUpdateAllPages()
                 }
-                validator: RegExpValidator {
-                    regExp: NetworkSettingsLogic.ipAddressRegex
+                validator: RegularExpressionValidator {
+                    regularExpression: NetworkSettingsLogic.ipAddressRegex
                 }
             }
 
@@ -92,8 +92,8 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
                     NetworkSettingsLogic.onLineEditDns2EditFinished(text)
                     UiLogic.onUpdateAllPages()
                 }
-                validator: RegExpValidator {
-                    regExp: NetworkSettingsLogic.ipAddressRegex
+                validator: RegularExpressionValidator {
+                    regularExpression: NetworkSettingsLogic.ipAddressRegex
                 }
             }
 
@@ -110,6 +110,4 @@ If AmneziaDNS service is not installed on the same server, or this option is unc
             }
         }
     }
-
-
 }

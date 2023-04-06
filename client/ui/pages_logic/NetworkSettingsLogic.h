@@ -3,6 +3,8 @@
 
 #include "PageLogicBase.h"
 
+#include <QRegularExpression>
+
 class UiLogic;
 
 class NetworkSettingsLogic : public PageLogicBase
@@ -13,7 +15,7 @@ class NetworkSettingsLogic : public PageLogicBase
 
     AUTO_PROPERTY(QString, lineEditDns1Text)
     AUTO_PROPERTY(QString, lineEditDns2Text)
-    READONLY_PROPERTY(QRegExp, ipAddressRegex)
+    READONLY_PROPERTY(QRegularExpression, ipAddressRegex)
 
 public:
     Q_INVOKABLE void onUpdatePage() override;

@@ -3,8 +3,8 @@ package org.amnezia.vpn.qt
 import android.content.res.Configuration
 import org.amnezia.vpn.shadowsocks.core.Core
 import org.amnezia.vpn.shadowsocks.core.VpnManager
-import org.qtproject.qt5.android.bindings.QtActivity
-import org.qtproject.qt5.android.bindings.QtApplication
+import org.qtproject.qt.android.bindings.QtActivity
+import org.qtproject.qt.android.bindings.QtApplication
 import android.app.Application
 
 class AmneziaApp: Application() {

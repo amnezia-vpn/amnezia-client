@@ -5,14 +5,15 @@
 #include "configurators/ssh_configurator.h"
 #include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include "platforms/android/android_controller.h"
+#include <QJniObject>
+#include "../../platforms/android/androidutils.h"
+#include "../../platforms/android/android_controller.h"
 #endif
 
 namespace {
@@ -56,8 +57,9 @@ StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
 {
 #ifdef Q_OS_ANDROID
     // Set security screen for Android app
-    QtAndroid::runOnAndroidThread([]() {
-        QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
+    AndroidUtils::runOnAndroidThreadSync([]() {
+        QJniObject activity = AndroidUtils::getActivity();
+        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
         if (window.isValid()){
             const int FLAG_SECURE = 8192;
             window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
@@ -154,7 +156,7 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectEnabled(true);
     set_pushButtonConnectText(tr("Connect"));
 
-    uiLogic()->installCredentials = serverCredentials;
+    uiLogic()->m_installCredentials = serverCredentials;
     if (ok) emit uiLogic()->goToPage(Page::NewServer);
 }
 
@@ -165,7 +167,7 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open config file"),
+    QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open config file"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
     if (fileName.isEmpty()) return;
 
@@ -173,13 +175,25 @@ void StartPageLogic::onPushButtonImportOpenFile()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    auto configFormat = checkConfigFormat(QString(data));
+    selectConfigFormat(QString(data));
+}
+
+#ifdef Q_OS_ANDROID
+void StartPageLogic::startQrDecoder()
+{
+    AndroidController::instance()->startQrReaderActivity();
+}
+#endif
+
+void StartPageLogic::selectConfigFormat(QString configData)
+{
+    auto configFormat = checkConfigFormat(configData);
     if (configFormat == ConfigTypes::OpenVpn) {
-        importConnectionFromOpenVpnConfig(QString(data));
+        importConnectionFromOpenVpnConfig(configData);
     } else if (configFormat == ConfigTypes::WireGuard) {
-        importConnectionFromWireguardConfig(QString(data));
+        importConnectionFromWireguardConfig(configData);
     } else {
-        importConnectionFromCode(QString(data));
+        importConnectionFromCode(configData);
     }
 }
 
@@ -221,10 +235,6 @@ bool StartPageLogic::importConnectionFromCode(QString code)
         return importConnection(o);
     }
 
-    o = QJsonDocument::fromBinaryData(ba).object();
-    if (!o.isEmpty()) {
-        return importConnection(o);
-    }
     return false;
 }
 

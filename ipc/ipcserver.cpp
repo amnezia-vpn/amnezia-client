@@ -3,9 +3,10 @@
 #include <QObject>
 #include <QDateTime>
 #include <QLocalSocket>
+#include <QFileInfo>
 
 #include "router.h"
-#include "log.h"
+#include "logger.h"
 
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
@@ -111,16 +112,63 @@ QStringList IpcServer::getTapList()
 void IpcServer::cleanUp()
 {
     qDebug() << "IpcServer::cleanUp";
-    Log::deinit();
-    Log::cleanUp();
+    Logger::deinit();
+    Logger::cleanUp();
 }
 
 void IpcServer::setLogsEnabled(bool enabled)
 {
     if (enabled) {
-        Log::init();
+        Logger::init();
     }
     else {
-        Log::deinit();
+        Logger::deinit();
     }
+}
+
+bool IpcServer::copyWireguardConfig(const QString &sourcePath)
+{
+#ifdef Q_OS_LINUX
+    const QString wireguardConfigPath = "/etc/wireguard/wg99.conf";
+    if (QFile::exists(wireguardConfigPath))
+    {
+        QFile::remove(wireguardConfigPath);
+    }
+
+    if (!QFile::copy(sourcePath, wireguardConfigPath)) {
+        qDebug() << "WireguardProtocol::WireguardProtocol error occured while copying wireguard config:";
+        return false;
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool IpcServer::isWireguardRunning()
+{
+#ifdef Q_OS_LINUX
+    QProcess checkWireguardStatusProcess;
+
+    connect(&checkWireguardStatusProcess, &QProcess::errorOccurred, this, [](QProcess::ProcessError error) {
+        qDebug() << "WireguardProtocol::WireguardProtocol error occured while checking wireguard status: " << error;
+    });
+
+    checkWireguardStatusProcess.setProgram("/bin/wg");
+    checkWireguardStatusProcess.setArguments(QStringList{"show"});
+    checkWireguardStatusProcess.start();
+    checkWireguardStatusProcess.waitForFinished(10000);
+    QString output = checkWireguardStatusProcess.readAllStandardOutput();
+    if (!output.isEmpty()) {
+        return true;
+    }
+    return false;
+#else
+    return false;
+#endif
+}
+
+bool IpcServer::isWireguardConfigExists(const QString &configPath)
+{
+    return QFileInfo::exists(configPath);
 }

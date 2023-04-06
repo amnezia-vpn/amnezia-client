@@ -1,12 +1,13 @@
 #ifndef UILOGIC_H
 #define UILOGIC_H
 
-#include <QRegExpValidator>
-#include <QQmlEngine>
-#include <functional>
+#include <QFileDialog>
 #include <QKeyEvent>
+#include <QRegularExpressionValidator>
 #include <QThread>
+#include <QQmlEngine>
 
+#include <functional>
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
@@ -42,6 +43,7 @@ class StartPageLogic;
 class ViewConfigLogic;
 class VpnLogic;
 class WizardLogic;
+class AdvancedServerSettingsLogic;
 
 class PageProtocolLogicBase;
 class OpenVpnLogic;
@@ -52,6 +54,7 @@ class OtherProtocolsLogic;
 
 class VpnConnection;
 
+class CreateServerTest;
 
 class UiLogic : public QObject
 {
@@ -60,7 +63,7 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, dialogConnectErrorText)
+    AUTO_PROPERTY(QString, popupWarningText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
@@ -87,6 +90,7 @@ public:
     friend class ViewConfigLogic;
     friend class VpnLogic;
     friend class WizardLogic;
+    friend class AdvancedServerSettingsLogic;
 
     friend class PageProtocolLogicBase;
     friend class OpenVpnLogic;
@@ -94,6 +98,8 @@ public:
     friend class CloakLogic;
 
     friend class OtherProtocolsLogic;
+
+    friend class CreateServerTest;
 
     Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
     Q_INVOKABLE void onUpdateAllPages();
@@ -112,11 +118,16 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool &isServerCreated);
+
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
-
+    static QString getOpenFileName(QWidget *parent = nullptr,
+                                   const QString &caption = QString(),
+                                   const QString &dir = QString(),
+                                   const QString &filter = QString(),
+                                   QString *selectedFilter = nullptr,
+                                   QFileDialog::Options options = QFileDialog::Options());
 signals:
-    void dialogConnectErrorTextChanged();
-
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Proto protocol, bool reset = true, bool slide = true);
     void goToShareProtocolPage(Proto protocol, bool reset = true, bool slide = true);
@@ -129,45 +140,15 @@ signals:
     void hide();
     void raise();
     void toggleLogPanel();
+    void showWarningMessage(QString message);
 
 private slots:
     // containers - INOUT arg
-    void installServer(QMap<DockerContainer, QJsonObject> &containers);
+    void installServer(QPair<amnezia::DockerContainer, QJsonObject> &container);
 
 private:
     PageEnumNS::Page currentPage();
-    struct ProgressFunc {
-        std::function<void(bool)> setVisibleFunc;
-        std::function<void(int)> setValueFunc;
-        std::function<int(void)> getValueFunc;
-        std::function<int(void)> getMaximiumFunc;
-        std::function<void(bool)> setTextVisibleFunc;
-        std::function<void(const QString&)> setTextFunc;
-    };
-    struct PageFunc {
-        std::function<void(bool)> setEnabledFunc;
-    };
-    struct ButtonFunc {
-        std::function<void(bool)> setVisibleFunc;
-    };
-    struct LabelFunc {
-        std::function<void(bool)> setVisibleFunc;
-        std::function<void(const QString&)> setTextFunc;
-    };
-
-    bool installContainers(ServerCredentials credentials,
-                           QMap<DockerContainer, QJsonObject> &containers,
-                           const PageFunc& page,
-                           const ProgressFunc& progress,
-                           const ButtonFunc& button,
-                           const LabelFunc& info);
-
-    ErrorCode doInstallAction(const std::function<ErrorCode()> &action,
-                              const PageFunc& page,
-                              const ProgressFunc& progress,
-                              const ButtonFunc& button,
-                              const LabelFunc& info);
-
+    bool isContainerAlreadyAddedToGui(DockerContainer container);
 
 public:
     Q_INVOKABLE PageProtocolLogicBase *protocolLogic(Proto p);
@@ -210,8 +191,8 @@ private:
 
     NotificationHandler* m_notificationHandler;
 
-    int selectedServerIndex = -1; // server index to use when proto settings page opened
-    DockerContainer selectedDockerContainer; // same
-    ServerCredentials installCredentials; // used to save cred between pages new_server and new_server_protocols and wizard
+    int m_selectedServerIndex = -1; // server index to use when proto settings page opened
+    DockerContainer m_selectedDockerContainer; // same
+    ServerCredentials m_installCredentials; // used to save cred between pages new_server and new_server_protocols and wizard
 };
 #endif // UILOGIC_H

@@ -7,7 +7,7 @@
 #include "OtherProtocolsLogic.h"
 #include <functional>
 #include "../../uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 
 #ifdef Q_OS_WINDOWS
 #include <Windows.h>
@@ -81,7 +81,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
 {
     QString mountPath;
     QString cmd;
-    QString host = m_settings->serverCredentials(uiLogic()->selectedServerIndex).hostName;
+    QString host = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex).hostName;
 
 
 #ifdef Q_OS_WINDOWS
@@ -146,7 +146,7 @@ void OtherProtocolsLogic::onPushButtonSftpMountDriveClicked()
 //#ifndef Q_OS_WIN
 //    args.replace("reconnect-orellinks", "");
 //#endif
-    p->setArguments(args.split(" ", QString::SkipEmptyParts));
+    p->setArguments(args.split(" ", Qt::SkipEmptyParts));
     p->start();
     p->waitForStarted(50);
     if (p->state() != QProcess::Running) {

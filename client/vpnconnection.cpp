@@ -19,15 +19,14 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include "android_controller.h"
-#include "protocols/android_vpnprotocol.h"
+#include "../../platforms/android/android_controller.h"
 #endif
 
 #ifdef Q_OS_IOS
 #include <protocols/ios_vpnprotocol.h>
 #endif
 
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
@@ -36,8 +35,6 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     m_settings(settings),
     m_configurator(configurator),
     m_serverController(serverController),
-    m_receivedBytes(0),
-    m_sentBytes(0),
     m_isIOSConnected(false)
 {
 }
@@ -52,11 +49,7 @@ VpnConnection::~VpnConnection()
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 {
-    emit bytesChanged(receivedBytes - m_receivedBytes, sentBytes - m_sentBytes);
-
-    m_receivedBytes = receivedBytes;
-    m_sentBytes = sentBytes;
-
+    emit bytesChanged(receivedBytes, sentBytes);
 }
 
 void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
@@ -111,8 +104,8 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
     }
     else {
         m_isIOSConnected = false;
-        m_receivedBytes = 0;
-        m_sentBytes = 0;
+//        m_receivedBytes = 0;
+//        m_sentBytes = 0;
     }
 #endif
     emit connectionStateChanged(state);
@@ -359,9 +352,8 @@ void VpnConnection::connectToVpn(int serverIndex,
     }
     m_vpnProtocol->prepare();
 #elif defined Q_OS_ANDROID
-    Proto proto = ContainerProps::defaultProtocol(container);
-    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-    connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+    androidVpnProtocol = createDefaultAndroidVpnProtocol(container);
+    createAndroidConnections(container);
 
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
@@ -378,15 +370,51 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(iosVpnProtocol);
 #endif
 
-    connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
-    connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
-
-    m_serverController->disconnectFromHost(credentials);
+    createProtocolConnections();
 
     e = m_vpnProtocol.data()->start();
     if (e) emit VpnProtocol::Error;
 }
+
+void VpnConnection::createProtocolConnections() {
+    connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
+    connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+}
+
+#ifdef Q_OS_ANDROID
+void VpnConnection::restoreConnection() {
+    createAndroidConnections();
+
+    m_vpnProtocol.reset(androidVpnProtocol);
+
+    createProtocolConnections();
+}
+
+void VpnConnection::createAndroidConnections()
+{
+    int serverIndex = m_settings->defaultServerIndex();
+    DockerContainer container = m_settings->defaultContainer(serverIndex);
+
+    createAndroidConnections(container);
+}
+
+void VpnConnection::createAndroidConnections(DockerContainer container)
+{
+    androidVpnProtocol = createDefaultAndroidVpnProtocol(container);
+
+    connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol, &AndroidVpnProtocol::setConnectionState);
+    connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol, &AndroidVpnProtocol::connectionDataUpdated);
+}
+
+AndroidVpnProtocol* VpnConnection::createDefaultAndroidVpnProtocol(DockerContainer container)
+{
+    Proto proto = ContainerProps::defaultProtocol(container);
+    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
+
+    return androidVpnProtocol;
+}
+#endif
 
 QString VpnConnection::bytesPerSecToText(quint64 bytes)
 {
@@ -406,8 +434,6 @@ void VpnConnection::disconnectFromVpn()
     }
 #endif
 
-
-
     if (!m_vpnProtocol.data()) {
         emit connectionStateChanged(VpnProtocol::Disconnected);
 #ifdef Q_OS_ANDROID
@@ -420,11 +446,8 @@ void VpnConnection::disconnectFromVpn()
 
 VpnProtocol::VpnConnectionState VpnConnection::connectionState()
 {
-
-
     if (!m_vpnProtocol) return VpnProtocol::Disconnected;
     return m_vpnProtocol->connectionState();
-
 }
 
 bool VpnConnection::isConnected() const

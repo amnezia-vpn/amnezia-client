@@ -1,8 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQml.Models 2.15
-import Qt.labs.platform 1.0
-import QtQuick.Dialogs 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQml.Models
+import Qt.labs.platform
+import QtQuick.Dialogs
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -101,7 +101,7 @@ PageBase {
         id: fileDialog
         title: qsTr("Import IP addresses")
         visible: false
-        folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
         onAccepted: {
             SitesLogic.onPushButtonSitesImportClicked(fileUrl)
         }

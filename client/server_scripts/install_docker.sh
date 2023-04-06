@@ -6,4 +6,5 @@ if [[ -f "$pm_apt" ]]; then export DEBIAN_FRONTEND=noninteractive; fi;\
 if [[ -z "$docker_service" ]]; then sudo $pm update -y -q; sudo $pm install -y -q curl $docker_pkg; fi;\
 docker_service=$(systemctl list-units --full -all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
 if [[ -z "$docker_service" ]]; then sleep 5 && sudo systemctl start docker && sleep 5; fi;\
+if [[ -f "$pm_yum" ]]; then sudo systemctl enable docker && sudo systemctl start docker; fi;\
 docker --version

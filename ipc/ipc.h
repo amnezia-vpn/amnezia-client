@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QString>
 
-#include "../client/utils.h"
+#include "../client/utilities.h"
 
 #define IPC_SERVICE_URL "local:AmneziaVpnIpcInterface"
 
@@ -20,13 +20,12 @@ inline QString permittedProcessPath(PermittedProcess pid)
 {
     if (pid == PermittedProcess::OpenVPN) {
         return Utils::openVpnExecPath();
-    }
-    if (pid == PermittedProcess::Wireguard) {
+    } else if (pid == PermittedProcess::Wireguard) {
         return Utils::wireguardExecPath();
-    }
-    else if (pid == PermittedProcess::CertUtil) {
+    } else if (pid == PermittedProcess::CertUtil) {
         return Utils::certUtilPath();
     }
+    return "";
 }
 
 

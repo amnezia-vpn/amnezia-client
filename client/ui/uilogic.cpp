@@ -3,20 +3,19 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFile>
-#include <QFileDialog>
 #include <QHostInfo>
 #include <QItemSelectionModel>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
 #include <QMenu>
-#include <QMessageBox>
 #include <QMetaEnum>
 #include <QSysInfo>
 #include <QThread>
 #include <QTimer>
 #include <QQmlFile>
 #include <QMetaObject>
+#include <QStandardPaths>
 
 #include "amnezia_application.h"
 
@@ -34,10 +33,10 @@
 
 #include "ui/qautostart.h"
 
-#include "debug.h"
+#include "logger.h"
 #include "defines.h"
 #include "uilogic.h"
-#include "utils.h"
+#include "utilities.h"
 #include "vpnconnection.h"
 #include <functional>
 
@@ -66,6 +65,7 @@
 #include "pages_logic/ViewConfigLogic.h"
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
+#include "pages_logic/AdvancedServerSettingsLogic.h"
 
 #include "pages_logic/protocols/CloakLogic.h"
 #include "pages_logic/protocols/OpenVpnLogic.h"
@@ -132,6 +132,7 @@ void UiLogic::initalizeUiLogic()
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
             pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
+            m_vpnConnection->restoreConnection();
         }
     });
     if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
@@ -156,7 +157,7 @@ void UiLogic::initalizeUiLogic()
         emit goToPage(Page::Start, true, false);
     }
 
-    selectedServerIndex = m_settings->defaultServerIndex();
+    m_selectedServerIndex = m_settings->defaultServerIndex();
 
     qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
@@ -189,17 +190,17 @@ void UiLogic::keyPressEvent(Qt::Key key)
     case Qt::Key_AsciiTilde:
     case Qt::Key_QuoteLeft: emit toggleLogPanel();
         break;
-    case Qt::Key_L: Debug::openLogsFolder();
+    case Qt::Key_L: Logger::openLogsFolder();
         break;
-    case Qt::Key_K: Debug::openServiceLogsFolder();
+    case Qt::Key_K: Logger::openServiceLogsFolder();
         break;
 #ifdef QT_DEBUG
     case Qt::Key_Q:
         qApp->quit();
         break;
     case Qt::Key_H:
-        selectedServerIndex = m_settings->defaultServerIndex();
-        selectedDockerContainer = m_settings->defaultContainer(selectedServerIndex);
+        m_selectedServerIndex = m_settings->defaultServerIndex();
+        m_selectedDockerContainer = m_settings->defaultContainer(m_selectedServerIndex);
 
         //updateSharingPage(selectedServerIndex, m_settings->serverCredentials(selectedServerIndex), selectedDockerContainer);
         emit goToPage(Page::ShareConnection);
@@ -213,7 +214,7 @@ void UiLogic::keyPressEvent(Qt::Key key)
         emit goToPage(Page::Start);
         break;
     case Qt::Key_S:
-        selectedServerIndex = m_settings->defaultServerIndex();
+        m_selectedServerIndex = m_settings->defaultServerIndex();
         emit goToPage(Page::ServerSettings);
         break;
     case Qt::Key_P:
@@ -223,9 +224,10 @@ void UiLogic::keyPressEvent(Qt::Key key)
         m_configurator->sshConfigurator->openSshTerminal(m_settings->serverCredentials(m_settings->defaultServerIndex()));
         break;
     case Qt::Key_Escape:
-    case Qt::Key_Back:
         if (currentPage() == Page::Vpn) break;
         if (currentPage() == Page::ServerConfiguringProgress) break;
+    case Qt::Key_Back:
+
 //        if (currentPage() == Page::Start && pagesStack.size() < 2) break;
 //        if (currentPage() == Page::Sites &&
 //                ui->tableView_sites->selectionModel()->selection().indexes().size() > 0) {
@@ -242,10 +244,16 @@ void UiLogic::keyPressEvent(Qt::Key key)
 
 void UiLogic::onCloseWindow()
 {
-    if (m_settings->serversCount() == 0) qApp->quit();
-    else {
-        hide();
+#ifdef Q_OS_ANDROID
+    qApp->quit();
+#else
+    if (m_settings->serversCount() == 0)
+    {
+        qApp->quit();
+    } else {
+        emit hide();
     }
+#endif
 }
 
 QString UiLogic::containerName(int container)
@@ -261,285 +269,114 @@ QString UiLogic::containerDesc(int container)
 
 void UiLogic::onGotoCurrentProtocolsPage()
 {
-    selectedServerIndex = m_settings->defaultServerIndex();
-    selectedDockerContainer = m_settings->defaultContainer(selectedServerIndex);
+    m_selectedServerIndex = m_settings->defaultServerIndex();
+    m_selectedDockerContainer = m_settings->defaultContainer(m_selectedServerIndex);
     emit goToPage(Page::ServerContainers);
 }
 
-//void UiLogic::showEvent(QShowEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(true);
-//    }
-//    if (needToHideCustomTitlebar) {
-//        ui->widget_tittlebar->hide();
-//        resize(width(), 640);
-//        ui->stackedWidget_main->move(0,0);
-//    }
-//#endif
-//}
-
-//void UiLogic::hideEvent(QHideEvent *event)
-//{
-//#if defined Q_OS_MACX
-//    if (!event->spontaneous()) {
-//        setDockIconVisible(false);
-//    }
-//#endif
-//}
-
-
-
-
-void UiLogic::installServer(QMap<DockerContainer, QJsonObject> &containers)
+void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
 {
-    if (containers.isEmpty()) return;
-
     emit goToPage(Page::ServerConfiguringProgress);
     QEventLoop loop;
     QTimer::singleShot(500, &loop, SLOT(quit()));
     loop.exec();
     qApp->processEvents();
 
-    PageFunc page_new_server_configuring;
-    page_new_server_configuring.setEnabledFunc = [this] (bool enabled) -> void {
+    ServerConfiguringProgressLogic::PageFunc pageFunc;
+    pageFunc.setEnabledFunc = [this] (bool enabled) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_pageEnabled(enabled);
     };
-    ButtonFunc no_button;
-    LabelFunc label_new_server_configuring_wait_info;
-    label_new_server_configuring_wait_info.setTextFunc = [this] (const QString& text) -> void {
+
+    ServerConfiguringProgressLogic::ButtonFunc noButton;
+
+    ServerConfiguringProgressLogic::LabelFunc waitInfoFunc;
+    waitInfoFunc.setTextFunc = [this] (const QString& text) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoText(text);
     };
-    label_new_server_configuring_wait_info.setVisibleFunc = [this] (bool visible) ->void {
+    waitInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_labelWaitInfoVisible(visible);
     };
-    ProgressFunc progressBar_new_server_configuring;
-    progressBar_new_server_configuring.setVisibleFunc = [this] (bool visible) ->void {
+
+    ServerConfiguringProgressLogic::ProgressFunc progressBarFunc;
+    progressBarFunc.setVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarVisible(visible);
     };
-    progressBar_new_server_configuring.setValueFunc = [this] (int value) ->void {
+    progressBarFunc.setValueFunc = [this] (int value) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarValue(value);
     };
-    progressBar_new_server_configuring.getValueFunc = [this] (void) -> int {
+    progressBarFunc.getValueFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarValue();
     };
-    progressBar_new_server_configuring.getMaximiumFunc = [this] (void) -> int {
+    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximium();
     };
-    progressBar_new_server_configuring.setTextVisibleFunc = [this] (bool visible) ->void {
+    progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarTextVisible(visible);
     };
-    progressBar_new_server_configuring.setTextFunc = [this] (const QString& text) ->void {
+    progressBarFunc.setTextFunc = [this] (const QString& text) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarText(text);
     };
-    bool ok = installContainers(installCredentials, containers,
-                                page_new_server_configuring,
-                                progressBar_new_server_configuring,
-                                no_button,
-                                label_new_server_configuring_wait_info);
 
-    if (ok) {
-        QJsonObject server;
-        server.insert(config_key::hostName, installCredentials.hostName);
-        server.insert(config_key::userName, installCredentials.userName);
-        server.insert(config_key::password, installCredentials.password);
-        server.insert(config_key::port, installCredentials.port);
-        server.insert(config_key::description, m_settings->nextAvailableServerName());
+    ServerConfiguringProgressLogic::LabelFunc busyInfoFunc;
+    busyInfoFunc.setTextFunc = [this] (const QString& text) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelServerBusyText(text);
+    };
+    busyInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_labelServerBusyVisible(visible);
+    };
 
-        QJsonArray containerConfigs;
-        for (const QJsonObject &cfg : containers) {
-            containerConfigs.append(cfg);
-        }
-        server.insert(config_key::containers, containerConfigs);
-        server.insert(config_key::defaultContainer, ContainerProps::containerToString(containers.firstKey()));
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        pageLogic<ServerConfiguringProgressLogic>()->set_pushButtonCancelVisible(visible);
+    };
 
-        m_settings->addServer(server);
-        m_settings->setDefaultServer(m_settings->serversCount() - 1);
-        onUpdateAllPages();
+    bool isServerCreated = false;
+    ErrorCode errorCode = addAlreadyInstalledContainersGui(isServerCreated);
+    if (errorCode == ErrorCode::NoError) {
+        if (!isContainerAlreadyAddedToGui(container.first)) {
+            progressBarFunc.setTextFunc(QString("Installing %1").arg(ContainerProps::containerToString(container.first)));
+            auto installAction = [&] () {
+                return m_serverController->setupContainer(m_installCredentials, container.first, container.second);
+            };
+            errorCode = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
+                                                                                     noButton, waitInfoFunc,
+                                                                                     busyInfoFunc, cancelButtonFunc);
+            if (errorCode == ErrorCode::NoError) {
+                if (!isServerCreated) {
+                    QJsonObject server;
+                    server.insert(config_key::hostName, m_installCredentials.hostName);
+                    server.insert(config_key::userName, m_installCredentials.userName);
+                    server.insert(config_key::password, m_installCredentials.password);
+                    server.insert(config_key::port, m_installCredentials.port);
+                    server.insert(config_key::description, m_settings->nextAvailableServerName());
 
-        emit setStartPage(Page::Vpn);
-        qApp->processEvents();
-    }
-    else {
-        emit closePage();
-    }
-}
+                    server.insert(config_key::containers, QJsonArray{container.second});
+                    server.insert(config_key::defaultContainer, ContainerProps::containerToString(container.first));
 
-bool UiLogic::installContainers(ServerCredentials credentials,
-                                QMap<DockerContainer, QJsonObject> &containers,
-                                const PageFunc &page,
-                                const ProgressFunc &progress,
-                                const ButtonFunc &button,
-                                const LabelFunc &info)
-{
-    if (!progress.setValueFunc) return false;
-
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(false);
-    }
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(false);
-    }
-
-    if (info.setVisibleFunc) {
-        info.setVisibleFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
-    }
-
-    int cnt = 0;
-    for (QMap<DockerContainer, QJsonObject>::iterator i = containers.begin(); i != containers.end(); i++, cnt++) {
-        QTimer timer;
-        connect(&timer, &QTimer::timeout, [progress](){
-            progress.setValueFunc(progress.getValueFunc() + 1);
-        });
-
-        progress.setValueFunc(0);
-        timer.start(1000);
-
-        progress.setTextVisibleFunc(true);
-        progress.setTextFunc(QString("Installing %1 %2 %3").arg(cnt+1).arg(tr("of")).arg(containers.size()));
-
-        ErrorCode e = m_serverController->setupContainer(credentials, i.key(), i.value());
-        qDebug() << "Setup server finished with code" << e;
-        m_serverController->disconnectFromHost(credentials);
-
-        if (e) {
-            if (page.setEnabledFunc) {
-                page.setEnabledFunc(true);
-            }
-            if (button.setVisibleFunc) {
-                button.setVisibleFunc(true);
-            }
-            if (info.setVisibleFunc) {
-                info.setVisibleFunc(false);
-            }
-
-            QMessageBox::warning(nullptr, APPLICATION_NAME,
-                                 tr("Error occurred while configuring server.") + "\n" +
-                                 errorString(e));
-
-            return false;
-        }
-
-        // just ui progressbar tweak
-        timer.stop();
-
-        int remaining_val = progress.getMaximiumFunc() - progress.getValueFunc();
-
-        if (remaining_val > 0) {
-            QTimer timer1;
-            QEventLoop loop1;
-
-            connect(&timer1, &QTimer::timeout, [&](){
-                progress.setValueFunc(progress.getValueFunc() + 1);
-                if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
-                    loop1.quit();
+                    m_settings->addServer(server);
+                    m_settings->setDefaultServer(m_settings->serversCount() - 1);
+                } else {
+                    m_settings->setContainerConfig(m_settings->serversCount() - 1, container.first, container.second);
+                    m_settings->setDefaultContainer(m_settings->serversCount() - 1, container.first);
                 }
-            });
+                onUpdateAllPages();
 
-            timer1.start(5);
-            loop1.exec();
-        }
-    }
-
-
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(true);
-    }
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Amnezia server installed"));
-    }
-
-    return true;
-}
-
-ErrorCode UiLogic::doInstallAction(const std::function<ErrorCode()> &action,
-                                   const PageFunc &page,
-                                   const ProgressFunc &progress,
-                                   const ButtonFunc &button,
-                                   const LabelFunc &info)
-{
-    progress.setVisibleFunc(true);
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(false);
-    }
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(false);
-    }
-    if (info.setVisibleFunc) {
-        info.setVisibleFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Please wait, configuring process may take up to 5 minutes"));
-    }
-
-    QTimer timer;
-    connect(&timer, &QTimer::timeout, [progress](){
-        progress.setValueFunc(progress.getValueFunc() + 1);
-    });
-
-    progress.setValueFunc(0);
-    timer.start(1000);
-
-    ErrorCode e = action();
-    qDebug() << "doInstallAction finished with code" << e;
-
-    if (e) {
-        if (page.setEnabledFunc) {
-            page.setEnabledFunc(true);
-        }
-        if (button.setVisibleFunc) {
-            button.setVisibleFunc(true);
-        }
-        if (info.setVisibleFunc) {
-            info.setVisibleFunc(false);
-        }
-        QMessageBox::warning(nullptr, APPLICATION_NAME,
-                             tr("Error occurred while configuring server.") + "\n" +
-                             errorString(e));
-
-        progress.setVisibleFunc(false);
-        return e;
-    }
-
-    // just ui progressbar tweak
-    timer.stop();
-
-    int remaining_val = progress.getMaximiumFunc() - progress.getValueFunc();
-
-    if (remaining_val > 0) {
-        QTimer timer1;
-        QEventLoop loop1;
-
-        connect(&timer1, &QTimer::timeout, [&](){
-            progress.setValueFunc(progress.getValueFunc() + 1);
-            if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
-                loop1.quit();
+                emit setStartPage(Page::Vpn);
+                qApp->processEvents();
+                return;
             }
-        });
-
-        timer1.start(5);
-        loop1.exec();
+        } else {
+            onUpdateAllPages();
+            emit showWarningMessage("Attention! The container you are trying to install is already installed on the server. "
+                                    "All installed containers have been added to the application ");
+            emit setStartPage(Page::Vpn);
+            return;
+        }
     }
-
-
-    progress.setVisibleFunc(false);
-    if (button.setVisibleFunc) {
-        button.setVisibleFunc(true);
-    }
-    if (page.setEnabledFunc) {
-        page.setEnabledFunc(true);
-    }
-    if (info.setTextFunc) {
-        info.setTextFunc(tr("Operation finished"));
-    }
-    return ErrorCode::NoError;
+    emit showWarningMessage(tr("Error occurred while configuring server.") + "\n" +
+                            tr("Error message: ") + errorString(errorCode) + "\n" +
+                            tr("See logs for details."));
+    emit closePage();
 }
 
 PageProtocolLogicBase *UiLogic::protocolLogic(Proto p)
@@ -634,7 +471,11 @@ void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &da
 
 void UiLogic::copyToClipboard(const QString &text)
 {
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->copyTextToClipboard(text);
+#else
     qApp->clipboard()->setText(text);
+#endif
 }
 
 void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QString& data) {
@@ -656,6 +497,24 @@ void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QSt
     MobileUtils::shareText(filesToSend);
 }
 
+QString UiLogic::getOpenFileName(QWidget *parent, const QString &caption, const QString &dir,
+    const QString &filter, QString *selectedFilter, QFileDialog::Options options)
+{
+    QString fileName = QFileDialog::getOpenFileName(parent, caption, dir, filter, selectedFilter, options);
+
+#ifdef Q_OS_ANDROID
+    // patch for files containing spaces etc
+    const QString sep {"raw%3A%2F"};
+    if (fileName.startsWith("content://") && fileName.contains(sep)) {
+        QString contentUrl = fileName.split(sep).at(0);
+        QString rawUrl = fileName.split(sep).at(1);
+        rawUrl.replace(" ", "%20");
+        fileName = contentUrl + sep + rawUrl;
+    }
+#endif
+    return fileName;
+}
+
 void UiLogic::registerPagesLogic()
 {
     amnApp->qmlEngine()->rootContext()->setContextProperty("UiLogic", this);
@@ -675,4 +534,79 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<ViewConfigLogic>();
     registerPageLogic<VpnLogic>();
     registerPageLogic<WizardLogic>();
+    registerPageLogic<AdvancedServerSettingsLogic>();
+}
+
+ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool &isServerCreated)
+{
+    isServerCreated = false;
+    ServerCredentials installCredentials = m_installCredentials;
+    bool createNewServer = true;
+    int serverIndex;
+
+    for (int i = 0; i < m_settings->serversCount(); i++) {
+        const ServerCredentials credentials = m_settings->serverCredentials(i);
+        if (m_installCredentials.hostName == credentials.hostName && m_installCredentials.port == credentials.port) {
+            createNewServer = false;
+            isServerCreated = true;
+            installCredentials = credentials;
+            serverIndex = i;
+            break;
+        }
+    }
+
+    QMap<DockerContainer, QJsonObject> installedContainers;
+    ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(installCredentials, installedContainers);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (!installedContainers.empty()) {
+        QJsonObject server;
+        QJsonArray containerConfigs;
+        if (createNewServer) {
+            server.insert(config_key::hostName, installCredentials.hostName);
+            server.insert(config_key::userName, installCredentials.userName);
+            server.insert(config_key::password, installCredentials.password);
+            server.insert(config_key::port, installCredentials.port);
+            server.insert(config_key::description, m_settings->nextAvailableServerName());
+        }
+
+        for (auto container = installedContainers.begin(); container != installedContainers.end(); container++) {
+            if (isContainerAlreadyAddedToGui(container.key())) {
+                continue;
+            }
+
+            if (createNewServer) {
+                containerConfigs.append(container.value());
+                server.insert(config_key::containers, containerConfigs);
+            } else {
+                m_settings->setContainerConfig(serverIndex, container.key(), container.value());
+                m_settings->setDefaultContainer(serverIndex, installedContainers.firstKey());
+            }
+        }
+
+        if (createNewServer) {
+            server.insert(config_key::defaultContainer, ContainerProps::containerToString(installedContainers.firstKey()));
+            m_settings->addServer(server);
+            m_settings->setDefaultServer(m_settings->serversCount() - 1);
+            isServerCreated = true;
+        }
+    }
+
+    return ErrorCode::NoError;
+}
+
+bool UiLogic::isContainerAlreadyAddedToGui(DockerContainer container)
+{
+    for (int i = 0; i < m_settings->serversCount(); i++) {
+        const ServerCredentials credentials = m_settings->serverCredentials(i);
+        if (m_installCredentials.hostName == credentials.hostName && m_installCredentials.port == credentials.port) {
+            const QJsonObject containerConfig = m_settings->containerConfig(i, container);
+            if (!containerConfig.isEmpty()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

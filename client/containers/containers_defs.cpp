@@ -27,6 +27,16 @@ QString ContainerProps::containerToString(amnezia::DockerContainer c){
     return "amnezia-" + containerKey.toLower();
 }
 
+QString ContainerProps::containerTypeToString(amnezia::DockerContainer c){
+    if (c == DockerContainer::None) return "none";
+    if (c == DockerContainer::Ipsec) return "ikev2";
+
+    QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
+    QString containerKey = metaEnum.valueToKey(static_cast<int>(c));
+
+    return containerKey.toLower();
+}
+
 QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
 {
     switch (container) {
@@ -70,7 +80,7 @@ QList<DockerContainer> ContainerProps::allContainers()
 QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return {
-        {DockerContainer::None, "Unknown (Old version)"},
+        {DockerContainer::None, "Not installed"},
         {DockerContainer::OpenVpn, "OpenVPN"},
         {DockerContainer::ShadowSocks, "OpenVpn over ShadowSocks"},
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
@@ -171,3 +181,10 @@ return false;
 #endif
 }
 
+QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
+{
+    switch (c) {
+    case DockerContainer::Ipsec :        return QStringList{"500", "4500"};
+    default:                             return {};
+    }
+}

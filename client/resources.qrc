@@ -62,7 +62,6 @@
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/run_container.sh</file>
         <file>ui/qml/main.qml</file>
-        <file>ui/qml/TitleBar.qml</file>
         <file>ui/qml/Pages/PageBase.qml</file>
         <file>ui/qml/Pages/PageAppSetting.qml</file>
         <file>ui/qml/Pages/PageGeneralSettings.qml</file>
@@ -82,7 +81,6 @@
         <file>ui/qml/Pages/PageSites.qml</file>
         <file>ui/qml/Pages/PageStart.qml</file>
         <file>ui/qml/Pages/PageVPN.qml</file>
-        <file>ui/qml/Pages/PageQrDecoder.qml</file>
         <file>ui/qml/Pages/PageAbout.qml</file>
         <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
         <file>ui/qml/Pages/PageViewConfig.qml</file>
@@ -130,6 +128,7 @@
         <file>ui/qml/Controls/SvgButtonType.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
         <file>ui/qml/Config/qmldir</file>
+        <file>server_scripts/check_server_is_busy.sh</file>
         <file>server_scripts/dns/configure_container.sh</file>
         <file>server_scripts/dns/Dockerfile</file>
         <file>server_scripts/dns/run_container.sh</file>
@@ -163,5 +162,8 @@
         <file>images/svg/control_point_black_24dp.svg</file>
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
+        <file>ui/qml/Controls/PopupWithQuestion.qml</file>
+        <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
+        <file>ui/qml/Controls/PopupWarning.qml</file>
     </qresource>
 </RCC>

@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PageEnum 1.0
 import "./"
 import "../Controls"
@@ -74,6 +74,7 @@ PageBase {
                     UiLogic.goToPage(PageEnum.ServerContainers)
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
@@ -86,34 +87,46 @@ PageBase {
 
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 60
-                text: ServerSettingsLogic.pushButtonClearText
-                visible: ServerSettingsLogic.pushButtonClearVisible
+                Layout.topMargin: 10
+                text: qsTr("Advanced server settings")
+                visible: ServerSettingsLogic.pushButtonShareFullVisible //todo
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonClearServer()
+                    UiLogic.goToPage(PageEnum.AdvancedServerSettings)
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 10
+                Layout.topMargin: 60
                 text: ServerSettingsLogic.pushButtonClearClientCacheText
                 visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
                     ServerSettingsLogic.onPushButtonClearClientCacheClicked()
                 }
             }
+
             BlueButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 text: qsTr("Forget this server")
                 onClicked: {
-                    ServerSettingsLogic.onPushButtonForgetServer()
+                    popupForgetServer.open()
                 }
             }
 
+            PopupWithQuestion {
+                id: popupForgetServer
+                questionText: "Attention! This action will not remove the container on the server, it will only remove the container information from the application. Continue?"
+                yesFunc: function() {
+                    ServerSettingsLogic.onPushButtonForgetServer()
+                    close()
+                }
+                noFunc: function() {
+                    close()
+                }
+            }
         }
     }
-
 
     Logo {
         id : logo

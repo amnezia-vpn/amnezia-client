@@ -11,8 +11,8 @@
 #include <QJsonDocument>
 
 #include "containers/containers_defs.h"
+#include "utilities.h"
 #include "settings.h"
-#include "utils.h"
 
 VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings,
     std::shared_ptr<ServerController> serverController, QObject *parent):

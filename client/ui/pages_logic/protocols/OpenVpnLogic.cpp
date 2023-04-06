@@ -1,7 +1,10 @@
 #include "OpenVpnLogic.h"
-#include "core/servercontroller.h"
+
 #include <functional>
-#include "../../uilogic.h"
+
+#include "core/servercontroller.h"
+#include "ui/uilogic.h"
+#include "ui/pages_logic/ServerConfiguringProgressLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -48,9 +51,15 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     set_lineEditSubnetText(openvpnConfig.value(config_key::subnet_address).
                                       toString(protocols::openvpn::defaultSubnetAddress));
 
-    QString trasnsport = openvpnConfig.value(config_key::transport_proto).
-            toString(protocols::openvpn::defaultTransportProto);
-
+    QString trasnsport;
+    if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        trasnsport = "tcp";
+        set_radioButtonUdpEnabled(false);
+        set_radioButtonTcpEnabled(false);
+    } else {
+        trasnsport = openvpnConfig.value(config_key::transport_proto).
+                toString(protocols::openvpn::defaultTransportProto);
+    }
     set_radioButtonUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
     set_radioButtonTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
 
@@ -77,12 +86,6 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
             toString(protocols::openvpn::defaultAdditionalServerConfig);
     set_textAreaAdditionalServerConfig(additionalServerConfig);
 
-    if (container == DockerContainer::ShadowSocks) {
-        set_radioButtonUdpEnabled(false);
-        set_radioButtonTcpEnabled(false);
-        set_radioButtonTcpChecked(true);
-    }
-
     set_lineEditPortText(openvpnConfig.value(config_key::port).
                                     toString(protocols::openvpn::defaultPort));
 
@@ -100,55 +103,80 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     set_isThirdPartyConfig(openvpnConfig.value(config_key::isThirdPartyConfig).isBool());
 }
 
-void OpenVpnLogic::onPushButtonProtoOpenVpnSaveClicked()
+void OpenVpnLogic::onPushButtonSaveClicked()
 {
-    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, Proto::OpenVpn);
+    QJsonObject protocolConfig = m_settings->protocolConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, Proto::OpenVpn);
     protocolConfig = getProtocolConfigFromPage(protocolConfig);
 
-    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+    QJsonObject containerConfig = m_settings->containerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     QJsonObject newContainerConfig = containerConfig;
     newContainerConfig.insert(ProtocolProps::protoToString(Proto::OpenVpn), protocolConfig);
 
-    UiLogic::PageFunc page_proto_openvpn;
-    page_proto_openvpn.setEnabledFunc = [this] (bool enabled) -> void {
+    ServerConfiguringProgressLogic::PageFunc pageFunc;
+    pageFunc.setEnabledFunc = [this] (bool enabled) -> void {
         set_pageEnabled(enabled);
     };
-    UiLogic::ButtonFunc pushButton_proto_openvpn_save;
-    pushButton_proto_openvpn_save.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::ButtonFunc saveButtonFunc;
+    saveButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_pushButtonSaveVisible(visible);
     };
-    UiLogic::LabelFunc label_proto_openvpn_info;
-    label_proto_openvpn_info.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::LabelFunc waitInfoFunc;
+    waitInfoFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_labelProtoOpenVpnInfoVisible(visible);
     };
-    label_proto_openvpn_info.setTextFunc = [this] (const QString& text) ->void {
+    waitInfoFunc.setTextFunc = [this] (const QString& text) -> void {
         set_labelProtoOpenVpnInfoText(text);
     };
-    UiLogic::ProgressFunc progressBar_proto_openvpn_reset;
-    progressBar_proto_openvpn_reset.setVisibleFunc = [this] (bool visible) ->void {
+    ServerConfiguringProgressLogic::ProgressFunc progressBarFunc;
+    progressBarFunc.setVisibleFunc = [this] (bool visible) -> void {
         set_progressBarResetVisible(visible);
     };
-    progressBar_proto_openvpn_reset.setValueFunc = [this] (int value) ->void {
+    progressBarFunc.setValueFunc = [this] (int value) -> void {
         set_progressBarResetValue(value);
     };
-    progressBar_proto_openvpn_reset.getValueFunc = [this] (void) -> int {
+    progressBarFunc.getValueFunc = [this] (void) -> int {
         return progressBarResetValue();
     };
-    progressBar_proto_openvpn_reset.getMaximiumFunc = [this] (void) -> int {
+    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
         return progressBarResetMaximium();
     };
+    progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
+        set_progressBarTextVisible(visible);
+    };
+    progressBarFunc.setTextFunc = [this] (const QString& text) -> void {
+        set_progressBarText(text);
+    };
 
-    ErrorCode e = uiLogic()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->selectedServerIndex), uiLogic()->selectedDockerContainer, containerConfig, newContainerConfig);
+    ServerConfiguringProgressLogic::LabelFunc busyInfoFuncy;
+    busyInfoFuncy.setTextFunc = [this] (const QString& text) -> void {
+        set_labelServerBusyText(text);
+    };
+    busyInfoFuncy.setVisibleFunc = [this] (bool visible) -> void {
+        set_labelServerBusyVisible(visible);
+    };
+
+    ServerConfiguringProgressLogic::ButtonFunc cancelButtonFunc;
+    cancelButtonFunc.setVisibleFunc = [this] (bool visible) -> void {
+        set_pushButtonCancelVisible(visible);
+    };
+
+    progressBarFunc.setTextVisibleFunc(true);
+    progressBarFunc.setTextFunc(QString("Configuring..."));
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
+        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
+                                                   uiLogic()->m_selectedDockerContainer,
+                                                   containerConfig,
+                                                   newContainerConfig);
     },
-    page_proto_openvpn, progressBar_proto_openvpn_reset,
-    pushButton_proto_openvpn_save, label_proto_openvpn_info);
+    pageFunc, progressBarFunc,
+    saveButtonFunc, waitInfoFunc,
+    busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
-        m_settings->setContainerConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer, newContainerConfig);
-        m_settings->clearLastConnectionConfig(uiLogic()->selectedServerIndex, uiLogic()->selectedDockerContainer);
+        m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, newContainerConfig);
+        m_settings->clearLastConnectionConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
     }
-    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->selectedServerIndex << uiLogic()->selectedDockerContainer;
+    qDebug() << "Protocol saved with code:" << e << "for" << uiLogic()->m_selectedServerIndex << uiLogic()->m_selectedDockerContainer;
 }
 
 QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
@@ -166,4 +194,9 @@ QJsonObject OpenVpnLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
     oldConfig.insert(config_key::additional_client_config, textAreaAdditionalClientConfig());
     oldConfig.insert(config_key::additional_server_config, textAreaAdditionalServerConfig());
     return oldConfig;
+}
+
+void OpenVpnLogic::onPushButtonCancelClicked()
+{
+    emit uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->cancelDoInstallAction(true);
 }

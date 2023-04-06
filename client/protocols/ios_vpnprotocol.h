@@ -1,9 +1,9 @@
 #ifndef IOS_VPNPROTOCOL_H
 #define IOS_VPNPROTOCOL_H
 
+#include "platforms/ios/json.h"
 #include "vpnprotocol.h"
 #include "protocols/protocols_defs.h"
-#include "json.h"
 
 using namespace amnezia;
 
@@ -36,6 +36,7 @@ public:
     void cleanupBackendLogs();
 
 signals:
+    void newTransmitedDataCount(quint64 rxBytes, quint64 txBytes);
 
 protected slots:
 
