@@ -13,3 +13,13 @@ include_directories(${MBEDTLS_INCLUDE_DIR})
 
 # show the MBEDTLS_INCLUDE_DIRS and MBEDTLS_LIBRARIES variables only in the advanced view
 mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARIES)
+
+install(TARGETS mbedtls mbedx509 mbedcrypto
+        EXPORT mbedtls-config
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT libraries)
+
+install(EXPORT mbedtls-config
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
