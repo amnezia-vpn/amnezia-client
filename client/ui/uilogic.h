@@ -63,14 +63,12 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, popupWarningText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
 public:
-    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator, QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
 
@@ -187,7 +185,6 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
-    std::shared_ptr<ServerController> m_serverController;
 
     NotificationHandler* m_notificationHandler;
 

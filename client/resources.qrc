@@ -165,5 +165,6 @@
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
+        <file>ui/qml/Controls/PopupWithTextField.qml</file>
     </qresource>
 </RCC>
