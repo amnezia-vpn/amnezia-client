@@ -11,7 +11,6 @@ PageLogicBase::PageLogicBase(UiLogic *logic, QObject *parent):
 {
     m_settings = logic->m_settings;
     m_configurator = logic->m_configurator;
-    m_serverController = logic->m_serverController;
 }
 
 

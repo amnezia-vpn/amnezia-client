@@ -44,10 +44,11 @@ void AdvancedServerSettingsLogic::onPushButtonClearServerClicked()
         uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
 
-    ErrorCode e = m_serverController->removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
-    if (e) {
+    ServerController serverController(m_settings);
+    ErrorCode errorCode = serverController.removeAllContainers(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex));
+    if (errorCode) {
         emit uiLogic()->showWarningMessage(tr("Error occurred while cleaning the server.") + "\n" +
-                                           tr("Error message: ") + errorString(e) + "\n" +
+                                           tr("Error message: ") + errorString(errorCode) + "\n" +
                                            tr("See logs for details."));
     } else {
         set_labelWaitInfoVisible(true);
@@ -68,7 +69,7 @@ void AdvancedServerSettingsLogic::onPushButtonScanServerClicked()
 
     bool isServerCreated;
     auto containersCount = m_settings->containers(uiLogic()->m_selectedServerIndex).size();
-    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(false, isServerCreated);
+    ErrorCode errorCode = uiLogic()->addAlreadyInstalledContainersGui(isServerCreated);
     if (errorCode != ErrorCode::NoError) {
         emit uiLogic()->showWarningMessage(tr("Error occurred while scanning the server.") + "\n" +
                                            tr("Error message: ") + errorString(errorCode) + "\n" +

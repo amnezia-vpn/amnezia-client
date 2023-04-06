@@ -25,6 +25,12 @@
 [submodule "client/3rd/qtkeychain"]
 	path = client/3rd/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain.git
+[submodule "client/3rd/libssh"]
+	path = client/3rd/libssh
+	url = https://git.libssh.org/projects/libssh.git/
+[submodule "client/3rd/zlib"]
+	path = client/3rd/zlib
+	url = https://github.com/madler/zlib.git
 [submodule "deploy/amnezia-ios-certificates"]
 	path = deploy/amnezia-ios-certificates
 	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
@@ -55,3 +61,6 @@
 [submodule "client/android/cpp/lzo"]
 	path = client/android/cpp/lzo
 	url = https://github.com/amnezia-vpn/lzo.git
+[submodule "client/3rd/mbedtls"]
+	path = client/3rd/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
