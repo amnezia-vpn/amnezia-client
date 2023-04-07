@@ -29,6 +29,7 @@ Item {
         ImageButtonType {
             id: button
 
+            hoverEnabled: false
             image: buttonImage
             onClicked: {
                 if (onClickedFunc && typeof onClickedFunc === "function") {
@@ -37,7 +38,39 @@ Item {
             }
 
             Layout.alignment: Qt.AlignRight
+
+            Rectangle {
+                id: imageBackground
+                anchors.fill: button
+                radius: 12
+                color: "transparent"
+
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
+            }
         }
     }
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
 
+        onEntered: {
+            imageBackground.color = button.hoveredColor
+        }
+
+        onExited: {
+            imageBackground.color = button.defaultColor
+        }
+
+        onPressedChanged: {
+            imageBackground.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+        }
+
+        onClicked: {
+            button.clicked()
+        }
+    }
 }

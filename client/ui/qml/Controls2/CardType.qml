@@ -9,15 +9,16 @@ RadioButton {
     property string bodyText
     property string footerText
 
-    property string hoveredColor: Qt.rgba(255, 255, 255, 0)
-    property string defaultColor: Qt.rgba(255, 255, 255, 0.05)
+    property string hoveredColor: Qt.rgba(255, 255, 255, 0.05)
+    property string defaultColor: Qt.rgba(255, 255, 255, 0)
     property string disabledColor: Qt.rgba(255, 255, 255, 0)
     property string pressedColor: Qt.rgba(255, 255, 255, 0.05)
 
     property string textColor: "#0E0E11"
 
     property string pressedBorderColor: Qt.rgba(251, 178, 106, 0.3)
-    property string hoveredBorderColor: Qt.rgba(251, 178, 106, 1)
+    property string hoveredBorderColor: "transparent"
+    property string defaultBodredColor: "#FBB26A"
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
@@ -44,9 +45,9 @@ RadioButton {
                 if(root.checked) {
                     return pressedBorderColor
                 }
-                return hovered ? hoveredBorderColor : defaultColor
+                return hovered ? hoveredBorderColor : defaultBodredColor
             } else {
-                return disabledColor
+                return defaultBodredColor
             }
         }
         border.width: {
@@ -54,7 +55,7 @@ RadioButton {
                 if(root.checked) {
                     return 1
                 }
-                return hovered ? 1 : 0
+                return hovered ? 0 : 1
             } else {
                 return 0
             }
@@ -72,7 +73,7 @@ RadioButton {
 
         Text {
             text: root.headerText
-            color: "#878b91"
+            color: "#D7D8DB"
             font.pixelSize: 25
             font.weight: 700
             font.family: "PT Root UI VF"
@@ -87,7 +88,7 @@ RadioButton {
         Text {
             text: root.bodyText
             wrapMode: Text.WordWrap
-            color: "#878b91"
+            color: "#D7D8DB"
             font.pixelSize: 16
             font.weight: 400
             font.family: "PT Root UI VF"
@@ -103,7 +104,7 @@ RadioButton {
             text: root.footerText
             visible: root.footerText !== ""
             enabled: root.footerText !== ""
-            color: "#878b91"
+            color: "#878B91"
             font.pixelSize: 13
             font.weight: 400
             font.family: "PT Root UI VF"

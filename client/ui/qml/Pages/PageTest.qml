@@ -117,6 +117,10 @@ PageBase {
                 bodyText: "Многие иностранные сайты и VPN-провайдеры заблокированы"
                 footerText: "футер"
             }
+
+            CheckBoxType {
+//                text: qsTr("Auto-negotiate encryption")
+            }
         }
     }
 }

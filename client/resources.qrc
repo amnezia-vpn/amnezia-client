@@ -174,5 +174,7 @@
         <file>images/controls/chevron-right.svg</file>
         <file>ui/qml/Controls2/ImageButtonType.qml</file>
         <file>ui/qml/Controls2/CardType.qml</file>
+        <file>ui/qml/Controls2/CheckBoxType.qml</file>
+        <file>images/controls/check.svg</file>
     </qresource>
 </RCC>

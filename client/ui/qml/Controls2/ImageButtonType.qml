@@ -8,7 +8,7 @@ Button {
     property string image
 
     property string hoveredColor: Qt.rgba(255, 255, 255, 0.08)
-    property string defaultColor: Qt.rgba(255, 255, 255, 0)
+    property string defaultColor: "transparent"
     property string pressedColor: Qt.rgba(255, 255, 255, 0.12)
 
     property string imageColor: "#878B91"
@@ -33,6 +33,9 @@ Button {
                 }
                 return hovered ? hoveredColor : defaultColor
             }
+        }
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
         }
     }
 
