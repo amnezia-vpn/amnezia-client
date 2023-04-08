@@ -7,6 +7,12 @@ set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(ANDROID)
+    # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
+    # We have to do this manually for building of libssh.
+    add_definitions(-D_BSD_SOURCE)
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -51,6 +57,7 @@ include_directories(
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.h
     ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.h
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.h
@@ -68,6 +75,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
 )
 
 if(NOT IOS)
@@ -78,6 +86,7 @@ if(NOT IOS)
 endif()
 
 set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
@@ -90,6 +99,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
 )
 
 if(NOT IOS)
@@ -156,22 +166,6 @@ if(WIN32)
     )
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        message("Windows x86_64 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    else()
-        message("Windows x86 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    endif()
 endif()
 
 if(APPLE)
@@ -207,15 +201,9 @@ if(APPLE)
         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-        # set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
-        find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
-        find_library(LIB_SSL NAMES "libssl.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
 
         find_library(FW_COCOA Cocoa)
         find_library(FW_APPLICATIONSERVICES ApplicationServices)
@@ -228,7 +216,7 @@ if(APPLE)
             ${FW_COCOA} ${FW_APPLICATIONSERVICES}
             ${FW_FOUNDATION} ${FW_APPKIT}
             ${FW_SECURITY} ${FW_CORESERVICES}
-            ${LIB_LIBCRYPTO} ${LIB_SSL}
+            ${LIB_LIBCRYPTO}
         )
     endif()
 endif()
@@ -236,12 +224,6 @@ endif()
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
 
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
-    find_package(OpenSSL REQUIRED)
-    set(LIBS ${LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
-    )
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
@@ -499,7 +481,6 @@ if(IOS)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
-
 endif()
 
 if(ANDROID)
@@ -580,7 +561,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
-if(NOT IOS)
+if(NOT IOS AND NOT ANDROID)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>

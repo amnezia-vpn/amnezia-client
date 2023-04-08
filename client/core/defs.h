@@ -34,14 +34,15 @@ enum ErrorCode
     ServerCancelInstallation,
 
     // Ssh connection errors
-    SshSocketError, SshTimeoutError, SshProtocolError,
-    SshHostKeyError, SshKeyFileError, SshAuthenticationError,
-    SshClosedByServerError, SshInternalError,
+    SshRequsetDeniedError, SshInterruptedError, SshInternalError,
+    SshPrivateKeyError, SshPrivateKeyFormatError,
 
-    // Ssh remote process errors
-    SshRemoteProcessCreationError,
-    FailedToStartRemoteProcessError, RemoteProcessCrashError,
-    SshSftpError,
+    // Ssh sftp errors
+    SshSftpEofError, SshSftpNoSuchFileError, SshSftpPermissionDeniedError,
+    SshSftpFailureError, SshSftpBadMessageError, SshSftpNoConnectionError,
+    SshSftpConnectionLostError, SshSftpOpUnsupportedError, SshSftpInvalidHandleError,
+    SshSftpNoSuchPathError, SshSftpFileAlreadyExistsError, SshSftpWriteProtectError,
+    SshSftpNoMediaError,
 
     // Local errors
     FailedToSaveConfigData,

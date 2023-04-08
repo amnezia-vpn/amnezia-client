@@ -231,7 +231,7 @@ QString Utils::wireguardExecPath()
 #ifdef Q_OS_WIN
     return Utils::executable("wireguard/wireguard-service", true);
 #elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg");
+    return Utils::usrExecutable("wg-quick");
 #else
     return Utils::executable("/wireguard", true);
 #endif
@@ -241,7 +241,7 @@ QString Utils::certUtilPath()
 {
 #ifdef Q_OS_WIN
     QString winPath = QString::fromUtf8(qgetenv("windir"));
-    return winPath + "system32\\certutil.exe";
+    return winPath + "\\system32\\certutil.exe";
 #else
     return "";
 #endif
