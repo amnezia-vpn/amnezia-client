@@ -68,8 +68,7 @@
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
-    m_serverController = std::shared_ptr<ServerController>(new ServerController(m_settings, this));
-    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, m_serverController, this));
+    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
 }
 
 AmneziaApplication::~AmneziaApplication()
@@ -90,7 +89,7 @@ AmneziaApplication::~AmneziaApplication()
 void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
-    m_uiLogic = new UiLogic(m_settings, m_configurator, m_serverController);
+    m_uiLogic = new UiLogic(m_settings, m_configurator);
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
     QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated,

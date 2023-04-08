@@ -33,7 +33,6 @@ void ClientManagementLogic::onUpdatePage()
         const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
 
         ErrorCode error = getClientsList(credentials, selectedContainer, m_currentMainProtocol, clients);
-        m_serverController->disconnectFromHost(credentials);
         if (error != ErrorCode::NoError) {
             QMessageBox::warning(nullptr, APPLICATION_NAME,
                                  tr("An error occurred while getting the list of clients.") + "\n" + errorString(error));
@@ -60,14 +59,17 @@ ErrorCode ClientManagementLogic::getClientsList(const ServerCredentials &credent
 {
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
+        return ErrorCode::NoError;
     };
 
     const QString mainProtocolString = ProtocolProps::protoToString(mainProtocol);
 
+    ServerController serverController(m_settings);
+
     const QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable").arg(mainProtocolString);
-    const QByteArray clientsTableString = m_serverController->getTextFileFromContainer(container, credentials, clientsTableFile, &error);
+    const QByteArray clientsTableString = serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -76,8 +78,8 @@ ErrorCode ClientManagementLogic::getClientsList(const ServerCredentials &credent
 
     if (mainProtocol == Proto::OpenVpn) {
         const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
-        QString script = m_serverController->replaceVars(getOpenVpnClientsList, m_serverController->genVarsForScript(credentials, container));
-        error = m_serverController->runScript(credentials, script, cbReadStdOut);
+        QString script = serverController.replaceVars(getOpenVpnClientsList, serverController.genVarsForScript(credentials, container));
+        error = serverController.runScript(credentials, script, cbReadStdOut);
         if (error != ErrorCode::NoError) {
             return error;
         }
@@ -101,7 +103,7 @@ ErrorCode ClientManagementLogic::getClientsList(const ServerCredentials &credent
         }
     } else if (mainProtocol == Proto::WireGuard) {
         const QString wireGuardConfigFile = "opt/amnezia/wireguard/wg0.conf";
-        const QString wireguardConfigString = m_serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+        const QString wireguardConfigString = serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
         if (error != ErrorCode::NoError) {
             return error;
         }
@@ -128,7 +130,7 @@ ErrorCode ClientManagementLogic::getClientsList(const ServerCredentials &credent
 
     const QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
     if (clientsTableString != newClientsTableString) {
-        error = m_serverController->uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
+        error = serverController.uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
     }
 
     if (error != ErrorCode::NoError) {

@@ -64,8 +64,12 @@ Window  {
 
     function close_page() {
         if (pageLoader.depth <= 1) {
+            if (GC.isMobile()) {
+                root.close()
+            }
             return
         }
+
         pageLoader.currentItem.deactivated()
         pageLoader.pop()
     }

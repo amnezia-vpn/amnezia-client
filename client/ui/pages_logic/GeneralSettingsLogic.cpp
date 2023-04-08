@@ -13,7 +13,7 @@ GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent):
 void GeneralSettingsLogic::onUpdatePage()
 {
     uiLogic()->m_selectedServerIndex = m_settings->defaultServerIndex();
-    set_existsAnyServer(uiLogic()->m_selectedServerIndex >= 0);
+    set_existsAnyServer(m_settings->serversCount() > 0);
     uiLogic()->m_selectedDockerContainer = m_settings->defaultContainer(m_settings->defaultServerIndex());
 
     set_pushButtonGeneralSettingsShareConnectionEnable(m_settings->haveAuthData(m_settings->defaultServerIndex()));

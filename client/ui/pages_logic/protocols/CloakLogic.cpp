@@ -112,15 +112,16 @@ void CloakLogic::onPushButtonSaveClicked()
 
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
-    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
-                                                   uiLogic()->m_selectedDockerContainer,
-                                                   containerConfig,
-                                                   newContainerConfig);
-    },
-    pageFunc, progressBarFunc,
-    saveButtonFunc, waitInfoFunc,
-    busyInfoFuncy, cancelButtonFunc);
+
+    auto installAction = [this, containerConfig, &newContainerConfig]() {
+        ServerController serverController(m_settings);
+        return serverController.updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
+                                                   uiLogic()->m_selectedDockerContainer, containerConfig, newContainerConfig);
+    };
+
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
+                                                                                          saveButtonFunc, waitInfoFunc,
+                                                                                          busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
         m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, newContainerConfig);

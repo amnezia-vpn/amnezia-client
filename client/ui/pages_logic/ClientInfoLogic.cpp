@@ -54,16 +54,17 @@ void ClientInfoLogic::onUpdatePage()
 
             if (certData.isEmpty() && !certId.isEmpty()) {
                 QString stdOut;
-                auto cbReadStdOut = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
+                auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
                     stdOut += data + "\n";
+                    return ErrorCode::NoError;
                 };
 
                 const QString getOpenVpnCertData = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'cat /opt/amnezia/openvpn/pki/issued/%1.crt'")
                                                            .arg(certId);
-                const QString script = m_serverController->replaceVars(getOpenVpnCertData, m_serverController->genVarsForScript(credentials, container));
-                ErrorCode error = m_serverController->runScript(credentials, script, cbReadStdOut);
+                ServerController serverController(m_settings);
+                const QString script = serverController.replaceVars(getOpenVpnCertData, serverController.genVarsForScript(credentials, container));
+                ErrorCode error = serverController.runScript(credentials, script, cbReadStdOut);
                 certData = stdOut;
-                m_serverController->disconnectFromHost(credentials);
                 if (isErrorOccured(error)) {
                     set_busyIndicatorIsRunning(false);
                     emit uiLogic()->closePage();
@@ -101,7 +102,6 @@ void ClientInfoLogic::onLineEditNameAliasEditingFinished()
         isErrorOccured(error);
     }
 
-    m_serverController->disconnectFromHost(credentials);
     set_busyIndicatorIsRunning(false);
 }
 
@@ -120,9 +120,10 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
                                                "easyrsa revoke %1 ;\\"
                                                "easyrsa gen-crl ;\\"
                                                "cp pki/crl.pem .'").arg(certId);
-    const QString script = m_serverController->replaceVars(getOpenVpnCertData,
-                                                           m_serverController->genVarsForScript(credentials, container));
-    auto error = m_serverController->runScript(credentials, script);
+    ServerController serverController(m_settings);
+    const QString script = serverController.replaceVars(getOpenVpnCertData,
+                                                        serverController.genVarsForScript(credentials, container));
+    auto error = serverController.runScript(credentials, script);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         emit uiLogic()->goToPage(Page::ServerSettings);
@@ -138,12 +139,12 @@ void ClientInfoLogic::onRevokeOpenVpnCertificateClicked()
     }
 
     const QJsonObject &containerConfig = m_settings->containerConfig(uiLogic()->m_selectedServerIndex, container);
-    error = m_serverController->startupContainerWorker(credentials, container, containerConfig);
+    error = serverController.startupContainerWorker(credentials, container, containerConfig);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
     }
-    m_serverController->disconnectFromHost(credentials);
+
     set_busyIndicatorIsRunning(false);
 }
 
@@ -153,8 +154,11 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
     ErrorCode error;
     const DockerContainer container = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
     const ServerCredentials credentials = m_settings->serverCredentials(uiLogic()->m_selectedServerIndex);
+
+    ServerController serverController(m_settings);
+
     const QString wireGuardConfigFile = "opt/amnezia/wireguard/wg0.conf";
-    const QString wireguardConfigString = m_serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+    const QString wireguardConfigString = serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
@@ -172,9 +176,9 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
     }
     QString newWireGuardConfig = configSections.join("[");
     newWireGuardConfig.insert(0, "[");
-    error = m_serverController->uploadTextFileToContainer(container, credentials, newWireGuardConfig,
-                                                          protocols::wireguard::serverConfigPath,
-                                                          QSsh::SftpOverwriteMode::SftpOverwriteExisting);
+    error = serverController.uploadTextFileToContainer(container, credentials, newWireGuardConfig,
+                                                       protocols::wireguard::serverConfigPath,
+                                                       libssh::SftpOverwriteMode::SftpOverwriteExisting);
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
@@ -188,14 +192,14 @@ void ClientInfoLogic::onRevokeWireGuardKeyClicked()
         return;
     }
 
-    error = m_serverController->runScript(credentials,
-                                          m_serverController->replaceVars("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'",
-                                                                          m_serverController->genVarsForScript(credentials, container)));
+    const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip /opt/amnezia/wireguard/wg0.conf)'";
+    error = serverController.runScript(credentials,
+                                       serverController.replaceVars(script, serverController.genVarsForScript(credentials, container)));
     if (isErrorOccured(error)) {
         set_busyIndicatorIsRunning(false);
         return;
     }
-    m_serverController->disconnectFromHost(credentials);
+
     set_busyIndicatorIsRunning(false);
 }
 
@@ -203,6 +207,7 @@ ErrorCode ClientInfoLogic::setClientsList(const ServerCredentials &credentials, 
 {
     const QString mainProtocolString = ProtocolProps::protoToString(mainProtocol);
     const QString clientsTableFile = QString("opt/amnezia/%1/clientsTable").arg(mainProtocolString);
-    ErrorCode error = m_serverController->uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), clientsTableFile);
+    ServerController serverController(m_settings);
+    ErrorCode error = serverController.uploadTextFileToContainer(container, credentials, QJsonDocument(clietns).toJson(), clientsTableFile);
     return error;
 }

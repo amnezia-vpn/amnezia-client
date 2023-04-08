@@ -7,8 +7,8 @@
 #include "containers/containers_defs.h"
 #include "core/servercontroller.h"
 
-ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
-    ConfiguratorBase(settings, serverController, parent)
+ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
+    ConfiguratorBase(settings, parent)
 {
 
 }
@@ -17,9 +17,10 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
     DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
+    ServerController serverController(m_settings);
 
-    QString ssKey = m_serverController->getTextFileFromContainer(container, credentials,
-        amnezia::protocols::shadowsocks::ssKeyPath, &e);
+    QString ssKey = serverController.getTextFileFromContainer(container, credentials,
+                                                              amnezia::protocols::shadowsocks::ssKeyPath, &e);
     ssKey.replace("\n", "");
 
     if (e) {
@@ -36,8 +37,8 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
     config.insert("method", "$SHADOWSOCKS_CIPHER");
 
 
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-        m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
+                                                   serverController.genVarsForScript(credentials, container, containerConfig));
 
     //qDebug().noquote() << textCfg;
     return textCfg;
