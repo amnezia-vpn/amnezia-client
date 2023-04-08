@@ -9,7 +9,7 @@
 	url = https://github.com/WireGuard/wireguard-apple
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
-	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+	url = https://github.com/amnezia-vpn/OpenVPNAdapter/tree/master-amnezia
 [submodule "client/3rd/ShadowPath"]
 	path = client/3rd/ShadowPath
 	url = https://github.com/qman9501/ShadowPath
