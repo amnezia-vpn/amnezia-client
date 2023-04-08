@@ -15,8 +15,8 @@
 #include "utilities.h"
 
 
-SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
-    ConfiguratorBase(settings, serverController, parent)
+SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
+    ConfiguratorBase(settings, parent)
 {
 
 }

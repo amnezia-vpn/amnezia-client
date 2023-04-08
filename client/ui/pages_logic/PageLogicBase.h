@@ -28,7 +28,6 @@ protected:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
-    std::shared_ptr<ServerController> m_serverController;
 
 signals:
     void updatePage();

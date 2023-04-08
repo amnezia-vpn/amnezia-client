@@ -10,18 +10,23 @@
 #endif
 
 namespace libssh {
+    std::function<QString()> Client::m_passphraseCallback;
+
     Client::Client(QObject *parent) : QObject(parent)
     { }
 
     Client::~Client()
     { }
 
+    int Client::callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata)
+    {
+        auto passphrase = m_passphraseCallback();
+        passphrase.toStdString().copy(buf, passphrase.size() + 1);
+        return 0;
+    }
+
     ErrorCode Client::connectToHost(const ServerCredentials &credentials)
     {
-//        if (is_ssh_initialized()) {
-//            qDebug() << "Failed to initialize ssh";
-//            return ErrorCode::InternalError;
-//        }
         if (m_session == nullptr) {
             m_session = ssh_new();
 
@@ -51,20 +56,42 @@ namespace libssh {
 
             int authResult = SSH_ERROR;
             if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
-                ssh_key privateKey;
-                ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, nullptr, nullptr, &privateKey);
-                authResult = ssh_userauth_publickey(m_session, authUsername.c_str(), privateKey);
-            }
-            else {
+                ssh_key privateKey = nullptr;
+                ssh_key publicKey = nullptr;
+                authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+                if (authResult == SSH_OK) {
+                    authResult = ssh_pki_export_privkey_to_pubkey(privateKey, &publicKey);
+                }
+
+                if (authResult == SSH_OK) {
+                    authResult = ssh_userauth_try_publickey(m_session, authUsername.c_str(), publicKey);
+                }
+
+                if (authResult == SSH_OK) {
+                    authResult = ssh_userauth_publickey(m_session, authUsername.c_str(), privateKey);
+                }
+
+                if (publicKey) {
+                    ssh_key_free(publicKey);
+                }
+                if (privateKey) {
+                    ssh_key_free(privateKey);
+                }
+                if (authResult != SSH_OK) {
+                    qDebug() << ssh_get_error(m_session);
+                    ErrorCode errorCode = fromLibsshErrorCode(ssh_get_error_code(m_session));
+                    if (errorCode == ErrorCode::NoError) {
+                        errorCode = ErrorCode::SshPrivateKeyFormatError;
+                    }
+                    return errorCode;
+                }
+            } else {
                 authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.password.toStdString().c_str());
+                if (authResult != SSH_OK) {
+                    qDebug() << ssh_get_error(m_session);
+                    return fromLibsshErrorCode(ssh_get_error_code(m_session));
+                }
             }
-
-            if (authResult != SSH_OK) {
-                qDebug() << ssh_get_error(m_session);
-                return fromLibsshErrorCode(ssh_get_error_code(m_session));
-            }
-
-            return fromLibsshErrorCode(ssh_get_error_code(m_session));
         }
         return ErrorCode::NoError;
     }
@@ -318,5 +345,34 @@ namespace libssh {
         case(SSH_FX_NO_MEDIA): return ErrorCode::SshSftpNoMediaError;
         default: return ErrorCode::SshSftpFailureError;
         }
+    }
+
+    ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback)
+    {
+        int authResult = SSH_ERROR;
+        ErrorCode errorCode = ErrorCode::NoError;
+
+        ssh_key privateKey = nullptr;
+        m_passphraseCallback = passphraseCallback;
+        authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+        if (authResult == SSH_OK) {
+            char* key = new char[65535];
+
+            authResult = ssh_pki_export_privkey_base64(privateKey, nullptr, nullptr, nullptr, &key);
+            decryptedPrivateKey = key;
+            delete[] key;
+
+            if (authResult != SSH_OK) {
+                qDebug() << "failed to export private key";
+                errorCode = ErrorCode::InternalError;
+            }
+        } else {
+            errorCode = ErrorCode::SshPrivateKeyError;
+        }
+
+        if (privateKey) {
+            ssh_key_free(privateKey);
+        }
+        return errorCode;
     }
 }

@@ -65,6 +65,7 @@ include_directories(
 )
 
 set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.h
     ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.h
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.h
@@ -92,6 +93,7 @@ if(NOT IOS)
 endif()
 
 set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/migrations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
     ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
@@ -481,7 +483,6 @@ if(IOS)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
-
 endif()
 
 if(ANDROID)

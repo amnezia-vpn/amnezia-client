@@ -39,6 +39,7 @@ ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *
 
 ServerController::~ServerController()
 {
+    m_sshClient.disconnectFromHost();
 }
 
 
@@ -91,7 +92,6 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     qDebug() << "ServerController::runScript finished\n";
     return ErrorCode::NoError;
 }
-
 
 ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials,
     DockerContainer container, QString script,
@@ -203,21 +203,6 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
     return QByteArray::fromHex(stdOut.toUtf8());
 }
 
-ErrorCode ServerController::checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials)
-{
-    QString caCert = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::caCertPath);
-    QString taKey = ServerController::getTextFileFromContainer(container,
-        credentials, protocols::openvpn::taKeyPath);
-
-    if (!caCert.isEmpty() && !taKey.isEmpty()) {
-        return ErrorCode::NoError;
-    }
-    else {
-        return ErrorCode::ServerCheckFailed;
-    }
-}
-
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
     libssh::SftpOverwriteMode overwriteMode)
 {
@@ -259,8 +244,6 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
-
-    disconnectFromHost(credentials);
 
     e = isUserInSudo(credentials, container);
     if (e) return e;
@@ -622,11 +605,6 @@ void ServerController::setCancelInstallation(const bool cancel)
     m_cancelInstallation = cancel;
 }
 
-void ServerController::disconnectFromHost(const ServerCredentials &credentials)
-{
-    m_sshClient.disconnectFromHost();
-}
-
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
 {
     return runScript(credentials,
@@ -647,6 +625,10 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
 
 ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
+    if (container == DockerContainer::Dns) {
+        return ErrorCode::NoError;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -657,21 +639,27 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         return ErrorCode::NoError;
     };
 
-    const QString containerString = ProtocolProps::protoToString(ContainerProps::defaultProtocol(container));
+    const Proto protocol = ContainerProps::defaultProtocol(container);
+    const QString containerString = ProtocolProps::protoToString(protocol);
     const QJsonObject containerConfig = config.value(containerString).toObject();
 
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
-    QString port = containerConfig.value(config_key::port).toString();
-    QString transportProto = containerConfig.value(config_key::transport_proto).toString();
+    QString defaultPort("%1");
+    QString port = containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
+    QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+    QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
-    QString script = QString("sudo lsof -i -P -n | grep -E ':%1").arg(port);
+    QString script = QString("sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
-    runScript(credentials,
+    ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
 
     if (!stdOut.isEmpty()) {
         return ErrorCode::ServerPortAlreadyAllocatedError;
@@ -785,4 +773,10 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
     }
 
     return ErrorCode::NoError;
+}
+
+ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &callback)
+{
+    auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey, callback);
+    return error;
 }

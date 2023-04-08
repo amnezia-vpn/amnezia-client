@@ -36,15 +36,19 @@ namespace libssh {
                                const std::string& localPath,
                                const std::string& remotePath,
                                const std::string& fileDesc);
+        ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();
         ErrorCode closeSftpSession();
         ErrorCode fromLibsshErrorCode(int errorCode);
         ErrorCode fromLibsshSftpErrorCode(int errorCode);
+        static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
         ssh_session m_session = nullptr;
         ssh_channel m_channel = nullptr;
         sftp_session m_sftpSession = nullptr;
+
+        static std::function<QString()> m_passphraseCallback;
     signals:
         void writeToChannelFinished();
         void sftpFileCopyFinished();
