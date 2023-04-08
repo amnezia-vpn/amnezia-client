@@ -516,6 +516,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
+    const QJsonObject &v2RayConfig = config.value(ProtocolProps::protoToString(Proto::V2Ray)).toObject();
     //
 
     Vars vars;
@@ -566,6 +567,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$WIREGUARD_SUBNET_MASK", wireguarConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) }});
 
     vars.append({{"$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) }});
+
+    // V2Ray vars
+    vars.append({{"$V2RAY_VMESS_PORT", v2RayConfig.value(config_key::port).toString(protocols::v2ray::defaultServerPort) }});
+    vars.append({{"$V2RAY_SOCKS_LOCAL_PORT", v2RayConfig.value(config_key::local_port).toString(protocols::v2ray::defaultLocalPort) }});
 
     // IPsec vars
     vars.append({{"$IPSEC_VPN_L2TP_NET", "192.168.42.0/24"}});

@@ -1,4 +1,5 @@
 #include "ssh_configurator.h"
+
 #include <QApplication>
 #include <QProcess>
 #include <QString>
@@ -14,11 +15,9 @@
 #include "core/server_defs.h"
 #include "utilities.h"
 
-
-SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings,
+                                 QObject *parent): ConfiguratorBase(settings, parent)
 {
-
 }
 
 QString SshConfigurator::convertOpenSShKey(const QString &key)
@@ -73,10 +72,8 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
         // todo: connect by key
 //        p->setNativeArguments(QString("%1@%2")
 //            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.password));
-    }
-    else {
-        p->setNativeArguments(QString("%1@%2 -pw %3")
-            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.password));
+    } else {
+        p->setNativeArguments(QString("%1@%2 -pw %3").arg(credentials.userName).arg(credentials.hostName, credentials.password));
     }
 #else
     p->setProgram("/bin/bash");

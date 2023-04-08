@@ -166,5 +166,13 @@
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
         <file>ui/qml/Controls/PopupWithTextField.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoV2Ray.qml</file>
+        <file>server_scripts/openvpn_v2ray_vmess/configure_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/Dockerfile</file>
+        <file>server_scripts/openvpn_v2ray_vmess/run_container.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/start.sh</file>
+        <file>server_scripts/openvpn_v2ray_vmess/template.ovpn</file>
+        <file>server_scripts/openvpn_v2ray_vmess/template_v2ray_client.json</file>
+        <file>server_scripts/openvpn_shadowsocks/template_ss_client.json</file>
     </qresource>
 </RCC>

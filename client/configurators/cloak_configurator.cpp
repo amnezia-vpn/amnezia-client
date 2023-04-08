@@ -7,24 +7,24 @@
 #include "core/servercontroller.h"
 #include "containers/containers_defs.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings,
+                                     QObject *parent): ConfiguratorBase(settings, parent)
 {
-
 }
 
-QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
     ServerController serverController(m_settings);
 
+
     QString cloakPublicKey = serverController.getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckPublicKeyPath, &e);
+                                                                        amnezia::protocols::cloak::ckPublicKeyPath, &e);
     cloakPublicKey.replace("\n", "");
 
     QString cloakBypassUid = serverController.getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
+                                                                        amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
     cloakBypassUid.replace("\n", "");
 
     if (e) {

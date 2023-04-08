@@ -124,6 +124,12 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 }
 
+namespace v2ray {
+constexpr char v2rayKeyPath[] = "/opt/amnezia/v2ray/v2ray.key";
+constexpr char defaultLocalPort[] = "1080";
+constexpr char defaultServerPort[] = "10086";
+}
+
 namespace sftp {
 constexpr char defaultUserName[] = "sftp_user";
 
@@ -148,6 +154,7 @@ enum Proto {
     WireGuard,
     Ikev2,
     L2tp,
+    V2Ray,
 
     // non-vpn
     TorWebSite,

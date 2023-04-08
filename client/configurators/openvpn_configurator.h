@@ -24,20 +24,18 @@ public:
     };
 
     QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                             const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     QString processConfigWithLocalSettings(QString jsonConfig);
     QString processConfigWithExportSettings(QString jsonConfig);
 
-    ErrorCode signCert(DockerContainer container,
-        const ServerCredentials &credentials, QString clientId);
+    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId);
 
 private:
     ConnectionData createCertRequest();
 
-    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
-        DockerContainer container, ErrorCode *errorCode = nullptr);
-
+    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
+                                        ErrorCode *errorCode = nullptr);
 };
 
 #endif // OPENVPN_CONFIGURATOR_H

@@ -19,6 +19,7 @@ enum DockerContainer {
     Cloak,
     WireGuard,
     Ipsec,
+    V2Ray,
 
     //non-vpn
     TorWebSite,

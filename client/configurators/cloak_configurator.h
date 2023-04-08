@@ -14,7 +14,7 @@ public:
     CloakConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+                           const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 };
 
 #endif // CLOAK_CONFIGURATOR_H

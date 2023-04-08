@@ -13,6 +13,7 @@ class CloakConfigurator;
 class WireguardConfigurator;
 class Ikev2Configurator;
 class SshConfigurator;
+class V2RayConfigurator;
 
 // Retrieve connection settings from server
 class VpnConfigurator : ConfiguratorBase
@@ -22,7 +23,7 @@ public:
     VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
+                                 const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode = nullptr);
 
     QPair<QString, QString> getDnsForConfig(int serverIndex);
     QString &processConfigWithDnsSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
@@ -31,8 +32,7 @@ public:
     QString &processConfigWithExportSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
 
     // workaround for containers which is not support normal configaration
-    void updateContainerConfigAfterInstallation(DockerContainer container,
-        QJsonObject &containerConfig, const QString &stdOut);
+    void updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
 
     std::shared_ptr<OpenVpnConfigurator> openVpnConfigurator;
     std::shared_ptr<ShadowSocksConfigurator> shadowSocksConfigurator;
@@ -40,6 +40,7 @@ public:
     std::shared_ptr<WireguardConfigurator> wireguardConfigurator;
     std::shared_ptr<Ikev2Configurator> ikev2Configurator;
     std::shared_ptr<SshConfigurator> sshConfigurator;
+    std::shared_ptr<V2RayConfigurator> v2RayConfigurator;
 };
 
 #endif // VPN_CONFIGURATOR_H

@@ -49,6 +49,7 @@ class PageProtocolLogicBase;
 class OpenVpnLogic;
 class ShadowSocksLogic;
 class CloakLogic;
+class V2RayLogic;
 
 class OtherProtocolsLogic;
 
@@ -94,6 +95,7 @@ public:
     friend class OpenVpnLogic;
     friend class ShadowSocksLogic;
     friend class CloakLogic;
+    friend class V2RayLogic;
 
     friend class OtherProtocolsLogic;
 

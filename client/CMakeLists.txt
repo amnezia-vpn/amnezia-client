@@ -235,6 +235,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/v2rayprotocol.h
     )
 
     set(SOURCES ${SOURCES}
@@ -245,6 +246,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/v2rayprotocol.cpp
     )
 endif()
 
@@ -558,7 +560,7 @@ if(WIN32)
         set(DEPLOY_ARTIFACT_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/client")
+    set(DEPLOY_ARTIFACT_PATH "linux/client/bin")
 elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()

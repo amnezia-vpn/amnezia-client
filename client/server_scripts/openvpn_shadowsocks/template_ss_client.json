@@ -1,0 +1,8 @@
+{
+    "local_port": $SHADOWSOCKS_LOCAL_PORT,
+    "method": "$SHADOWSOCKS_CIPHER",
+    "password": "$SHADOWSOCKS_PASSWORD",
+    "server": "$REMOTE_HOST",
+    "server_port": $SHADOWSOCKS_SERVER_PORT,
+    "timeout": 60
+}

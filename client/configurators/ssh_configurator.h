@@ -16,7 +16,6 @@ public:
     QProcessEnvironment prepareEnv();
     QString convertOpenSShKey(const QString &key);
     void openSshTerminal(const ServerCredentials &credentials);
-
 };
 
 #endif // SSH_CONFIGURATOR_H

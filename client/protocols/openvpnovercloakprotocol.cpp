@@ -52,26 +52,25 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         args << "-u";
     }
 
-    qDebug().noquote() << "OpenVpnOverCloakProtocol::start()"
-                       << cloakExecPath() << args.join(" ");
+    qDebug().noquote() << "OpenVpnOverCloakProtocol::start()" << cloakExecPath() << args.join(" ");
 
     m_ckProcess.setProcessChannelMode(QProcess::MergedChannels);
 
     m_ckProcess.setProgram(cloakExecPath());
     m_ckProcess.setArguments(args);
 
-    connect(&m_ckProcess, &QProcess::readyReadStandardOutput, this, [this](){
+    connect(&m_ckProcess, &QProcess::readyReadStandardOutput, this, [this]() {
         qDebug().noquote() << "ck-client:" << m_ckProcess.readAllStandardOutput();
     });
 
-    m_errorHandlerConnection = connect(&m_ckProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
+    m_errorHandlerConnection = connect(&m_ckProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         qDebug().noquote() << "OpenVpnOverCloakProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(VpnProtocol::Disconnected);
-        if (exitStatus != QProcess::NormalExit){
+        if (exitStatus != QProcess::NormalExit) {
             emit protocolError(amnezia::ErrorCode::CloakExecutableCrashed);
             stop();
         }
-        if (exitCode !=0 ){
+        if (exitCode !=0 ) {
             emit protocolError(amnezia::ErrorCode::InternalError);
             stop();
         }
@@ -84,8 +83,9 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         setConnectionState(VpnConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
+    } else {
+        return ErrorCode::CloakExecutableMissing;
     }
-    else return ErrorCode::CloakExecutableMissing;
 #endif
 }
 

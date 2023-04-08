@@ -166,7 +166,7 @@ void OpenVpnLogic::onPushButtonSaveClicked()
     auto installAction = [this, containerConfig, &newContainerConfig]() {
         ServerController serverController(m_settings);
         return serverController.updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
-                                                   uiLogic()->m_selectedDockerContainer, containerConfig, newContainerConfig);
+                                                uiLogic()->m_selectedDockerContainer, containerConfig, newContainerConfig);
     };
 
     ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,

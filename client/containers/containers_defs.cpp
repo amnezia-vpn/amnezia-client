@@ -55,6 +55,9 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::Ipsec:
         return { Proto::Ikev2 /*, Protocol::L2tp */};
 
+    case DockerContainer::V2Ray:
+        return { Proto::OpenVpn, Proto::V2Ray };
+
     case DockerContainer::Dns:
         return { };
 
@@ -86,6 +89,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::Cloak, "OpenVpn over Cloak"},
         {DockerContainer::WireGuard, "WireGuard"},
         {DockerContainer::Ipsec, QObject::tr("IPsec")},
+        {DockerContainer::V2Ray, "V2Ray"},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
@@ -103,6 +107,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                                                         "configured with traffic masking by Cloak plugin")},
         {DockerContainer::WireGuard, QObject::tr("WireGuard container")},
         {DockerContainer::Ipsec, QObject::tr("IPsec container")},
+        {DockerContainer::V2Ray, QObject::tr("V2Ray container")},
 
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
@@ -120,6 +125,8 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::ShadowSocks :  return ServiceType::Vpn;
     case DockerContainer::WireGuard :    return ServiceType::Vpn;
     case DockerContainer::Ipsec :        return ServiceType::Vpn;
+    case DockerContainer::V2Ray :        return ServiceType::Vpn;
+
     case DockerContainer::TorWebSite :   return ServiceType::Other;
     case DockerContainer::Dns :          return ServiceType::Other;
     //case DockerContainer::FileShare :    return ServiceType::Other;
@@ -137,6 +144,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::ShadowSocks :  return Proto::ShadowSocks;
     case DockerContainer::WireGuard :    return Proto::WireGuard;
     case DockerContainer::Ipsec :        return Proto::Ikev2;
+    case DockerContainer::V2Ray :        return Proto::V2Ray;
 
     case DockerContainer::TorWebSite :   return Proto::TorWebSite;
     case DockerContainer::Dns :          return Proto::Dns;

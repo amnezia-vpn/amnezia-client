@@ -1,4 +1,5 @@
 #include "openvpn_configurator.h"
+
 #include <QApplication>
 #include <QProcess>
 #include <QString>
@@ -19,14 +20,13 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 
-OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings,
+                                         QObject *parent): ConfiguratorBase(settings, parent)
 {
-
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-    DockerContainer container, ErrorCode *errorCode)
+                                                                              DockerContainer container, ErrorCode *errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
@@ -36,9 +36,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    QString reqFileName = QString("%1/%2.req").
-            arg(amnezia::protocols::openvpn::clientsDirPath).
-            arg(connData.clientId);
+    QString reqFileName = QString("%1/%2.req").arg(amnezia::protocols::openvpn::clientsDirPath, connData.clientId);
 
     ServerController serverController(m_settings);
     ErrorCode e = serverController.uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
@@ -53,9 +51,11 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    connData.caCert = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, &e);
+    connData.caCert = serverController.getTextFileFromContainer(container, credentials,
+                                                                amnezia::protocols::openvpn::caCertPath, &e);
     connData.clientCert = serverController.getTextFileFromContainer(container, credentials,
-        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), &e);
+                                                                    QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath, connData.clientId),
+                                                                    &e);
 
     if (e) {
         if (errorCode) *errorCode = e;
@@ -71,12 +71,12 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     return connData;
 }
 
-QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ServerController serverController(m_settings);
     QString config = serverController.replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
-            serverController.genVarsForScript(credentials, container, containerConfig));
+                                                  serverController.genVarsForScript(credentials, container, containerConfig));
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
     if (errorCode && *errorCode) {
@@ -89,8 +89,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
 
     if (config.contains("$OPENVPN_TA_KEY")) {
         config.replace("$OPENVPN_TA_KEY", connData.taKey);
-    }
-    else {
+    } else {
         config.replace("<tls-auth>", "");
         config.replace("</tls-auth>", "");
     }
@@ -112,8 +111,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
 
     if (m_settings->routeMode() != Settings::VpnAllSites) {
         config.replace("redirect-gateway def1 bypass-dhcp", "");
-    }
-    else {
+    } else {
         if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
             config.append("redirect-gateway def1 bypass-dhcp\n");
         }
@@ -151,23 +149,22 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
     return QJsonDocument(json).toJson();
 }
 
-ErrorCode OpenVpnConfigurator::signCert(DockerContainer container,
-    const ServerCredentials &credentials, QString clientId)
+ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId)
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
-                             "easyrsa import-req %2/%3.req %3\"")
-            .arg(ContainerProps::containerToString(container))
-            .arg(amnezia::protocols::openvpn::clientsDirPath)
-            .arg(clientId);
+                                    "easyrsa import-req %2/%3.req %3\"")
+                                    .arg(ContainerProps::containerToString(container),
+                                         amnezia::protocols::openvpn::clientsDirPath,
+                                         clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
-                                    "easyrsa sign-req client %2\"")
-            .arg(ContainerProps::containerToString(container))
-            .arg(clientId);
+                                  "easyrsa sign-req client %2\"")
+                                  .arg(ContainerProps::containerToString(container), clientId);
 
     ServerController serverController(m_settings);
     QStringList scriptList {script_import, script_sign};
-    QString script = serverController.replaceVars(scriptList.join("\n"), serverController.genVarsForScript(credentials, container));
+    QString script = serverController.replaceVars(scriptList.join("\n"),
+                                                  serverController.genVarsForScript(credentials, container));
 
     return serverController.runScript(credentials, script);
 }
@@ -177,8 +174,8 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     ConnectionData connData;
     connData.clientId = Utils::getRandomString(32);
 
-    int             ret = 0;
-    int             nVersion = 1;
+    int ret = 0;
+    int nVersion = 1;
 
     QByteArray clientIdUtf8 = connData.clientId.toUtf8();
 
@@ -211,7 +208,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 
     // 4. set public key of x509 req
     ret = X509_REQ_set_pubkey(x509_req, pKey);
-    if (ret != 1){
+    if (ret != 1) {
         qWarning() << "Could not set pubkey!";
         X509_REQ_free(x509_req);
         EVP_PKEY_free(pKey);
@@ -220,7 +217,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 
     // 5. set sign key of x509 req
     ret = X509_REQ_sign(x509_req, pKey, EVP_sha256());    // return x509_req->signature->length
-    if (ret <= 0){
+    if (ret <= 0) {
         qWarning() << "Could not sign request!";
         X509_REQ_free(x509_req);
         EVP_PKEY_free(pKey);
@@ -230,8 +227,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     // save private key
     BIO * bp_private = BIO_new(BIO_s_mem());
     q_check_ptr(bp_private);
-    if (PEM_write_bio_PrivateKey(bp_private, pKey, nullptr, nullptr, 0, nullptr, nullptr) != 1)
-    {
+    if (PEM_write_bio_PrivateKey(bp_private, pKey, nullptr, nullptr, 0, nullptr, nullptr) != 1) {
         qFatal("PEM_write_bio_PrivateKey");
         EVP_PKEY_free(pKey);
         BIO_free_all(bp_private);

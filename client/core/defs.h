@@ -55,6 +55,7 @@ enum ErrorCode
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
     AmneziaServiceConnectionFailed,
+    V2RayExecutableMissing,
     ExecutableMissing,
 
     // VPN errors
@@ -67,7 +68,9 @@ enum ErrorCode
     OpenSslFailed,
     OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
-    CloakExecutableCrashed
+    CloakExecutableCrashed,
+    V2RayExecutableCrashed,
+    V2RayKeyMissing
 };
 
 } // namespace amnezia
