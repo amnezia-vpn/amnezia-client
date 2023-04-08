@@ -66,7 +66,9 @@ private:
 
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config);
     bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
-
+    ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container);
+    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
+    
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
                                const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 

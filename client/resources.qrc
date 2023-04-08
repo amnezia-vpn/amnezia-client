@@ -166,5 +166,6 @@
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
         <file>ui/qml/Controls/PopupWithTextField.qml</file>
+        <file>server_scripts/check_user_in_sudo.sh</file>
     </qresource>
 </RCC>
