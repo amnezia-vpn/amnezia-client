@@ -5,6 +5,8 @@
 package org.amnezia.vpn.qt;
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
@@ -32,11 +34,22 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private var configString: String? = null
     private var vpnServiceBinder: IBinder? = null
     private var isBound = false
+        set(value) {
+            field = value
+
+            if (value && configString != null) {
+                sendImportConfigCommand()
+            }
+        }
 
     private val TAG = "VPNActivity"
-    private val STORAGE_PERMISSION_CODE = 42
 
     private val CAMERA_ACTION_CODE = 101
+    private val CREATE_FILE_ACTION_CODE = 102
+
+    private var tmpFileContentToSave: String = ""
+
+    private val delayedCommands: ArrayList<Pair<Int, String>> = ArrayList()
 
     companion object {
         private lateinit var instance: VPNActivity
@@ -56,24 +69,44 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         @JvmStatic fun sendToService(actionCode: Int, body: String) {
             VPNActivity.getInstance().dispatchParcel(actionCode, body)
         }
+
+        @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
+            VPNActivity.getInstance().saveFile(fileContent, suggestedName)
+        }
+
+        @JvmStatic fun putTextToClipboard(text: String) {
+            VPNActivity.getInstance().putToClipboard(text)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val newIntent = intent
-        val newIntentAction = newIntent.action
-
-        if (newIntent != null && newIntentAction != null) {
-            configString = processIntent(newIntent, newIntentAction)
-        }
-
         super.onCreate(savedInstanceState)
 
         instance = this
+
+        val newIntent = intent
+        val newIntentAction: String? = newIntent.action
+
+        if (newIntent != null && newIntentAction != null && newIntentAction == "org.amnezia.vpn.qt.IMPORT_CONFIG") {
+            configString = newIntent.getStringExtra("CONFIG")
+        }
     }
 
     private fun startQrCodeActivity() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivityForResult(intent, CAMERA_ACTION_CODE)
+    }
+
+    private fun saveFile(fileContent: String, suggestedName: String) {
+        tmpFileContentToSave = fileContent
+
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/*"
+            putExtra(Intent.EXTRA_TITLE, suggestedName)
+        }
+
+        startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
     }
 
     override fun getSystemService(name: String): Any? {
@@ -98,11 +131,22 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private fun dispatchParcel(actionCode: Int, body: String) {
         if (!isBound) {
             Log.d(TAG, "dispatchParcel: not bound")
+            delayedCommands.add(Pair(actionCode, body))
             return
-        } else {
-            Log.d(TAG, "dispatchParcel: bound")
         }
 
+        if (delayedCommands.size > 0) {
+            for (command in delayedCommands) {
+                processCommand(command.first, command.second)
+            }
+
+            delayedCommands.clear()
+        }
+
+        processCommand(actionCode, body)
+    }
+
+    private fun processCommand(actionCode: Int, body: String) {
         val out: Parcel = Parcel.obtain()
         out.writeByteArray(body.toByteArray())
 
@@ -118,19 +162,15 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     }
 
     override fun onNewIntent(newIntent: Intent) {
-        intent = newIntent
+        super.onNewIntent(intent)
+
+        setIntent(newIntent)
 
         val newIntentAction = newIntent.action
 
-        if (newIntent != null && newIntentAction != null && newIntentAction != Intent.ACTION_MAIN) {
-            if (isReadStorageAllowed()) {
-                configString = processIntent(newIntent, newIntentAction)
-            } else {
-                requestStoragePermission()
-            }
-        }
-
-        super.onNewIntent(intent)
+        if (newIntent != null && newIntentAction != null && newIntentAction == INTENT_ACTION_IMPORT_CONFIG) {
+            configString = newIntent.getStringExtra("CONFIG")
+        } 
     }
 
     override fun onResume() {
@@ -138,84 +178,6 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
         if (configString != null && isBound) {
             sendImportConfigCommand()
-        }
-    }
-
-    private fun isReadStorageAllowed(): Boolean {
-        val permissionStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        return permissionStatus == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestStoragePermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
-        if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Storage read permission granted")
-
-                if (configString == null) {
-                    configString = processIntent(intent, intent.action!!)
-                }
-
-                if (configString != null) {
-                    Log.d(TAG, "not empty")
-                    sendImportConfigCommand()
-                } else {
-                    Log.d(TAG, "empty")
-                }
-            } else {
-                Toast.makeText(this, "Oops you just denied the permission", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun processIntent(intent: Intent, action: String): String? {
-        val scheme = intent.scheme
-
-        if (scheme == null) {
-            return null
-        }
-
-        if (action.compareTo(Intent.ACTION_VIEW) == 0) {
-            val resolver = contentResolver
-
-            if (scheme.compareTo(ContentResolver.SCHEME_CONTENT) == 0) {
-                val uri = intent.data
-                val name: String? = getContentName(resolver, uri)
-
-                Log.d(TAG, "Content intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
-
-                val input = resolver.openInputStream(uri!!)
-
-                return input?.bufferedReader()?.use(BufferedReader::readText)
-            } else if (scheme.compareTo(ContentResolver.SCHEME_FILE) == 0) {
-                val uri = intent.data
-                val name = uri!!.lastPathSegment
-
-                Log.d(TAG, "File intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
-
-                val input = resolver.openInputStream(uri)
-
-                return input?.bufferedReader()?.use(BufferedReader::readText)
-            }
-        }
-
-        return null
-    }
-
-    private fun getContentName(resolver: ContentResolver?, uri: Uri?): String? {
-        val cursor = resolver!!.query(uri!!, null, null, null, null)
-
-        cursor.use {
-            cursor!!.moveToFirst()
-            val nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-            return if (nameIndex >= 0) {
-                return cursor.getString(nameIndex)
-            } else {
-                null
-            }
         }
     }
 
@@ -234,7 +196,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         }
     }
 
-    private var connection: ServiceConnection = object : ServiceConnection {
+    private fun createConnection() = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             vpnServiceBinder = binder
 
@@ -259,6 +221,8 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             qtOnServiceDisconnected();
         }
     }
+
+    private var connection: ServiceConnection = createConnection()
 
     private fun registerBinder(): Boolean {
         val binder = VPNClientBinder()
@@ -330,13 +294,38 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             val extra = data?.getStringExtra("result") ?: ""
             onActivityMessage(UI_EVENT_QR_CODE_RECEIVED, extra)
         }
+
+        if (requestCode == CREATE_FILE_ACTION_CODE && resultCode == RESULT_OK) {
+            data?.data?.also { uri ->
+                alterDocument(uri)
+            }
+        }
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0) {
-            onBackPressed()
-            return true
+    private fun alterDocument(uri: Uri) {
+        try {
+            applicationContext.contentResolver.openFileDescriptor(uri, "w")?.use { fd ->
+                FileOutputStream(fd.fileDescriptor).use { fos ->
+                    fos.write(tmpFileContentToSave.toByteArray())
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
-        return super.onKeyDown(keyCode, event)
+
+        tmpFileContentToSave = ""
+    }
+
+    private fun putToClipboard(text: String) {
+        this.runOnUiThread {
+            val clipboard = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
+
+            if (clipboard != null) {
+                val clip: ClipData = ClipData.newPlainText("", text)
+                clipboard.setPrimaryClip(clip)
+            }
+        }
     }
 }
