@@ -8,8 +8,7 @@
 #include "containers/containers_defs.h"
 
 CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings,
-                                     std::shared_ptr<ServerController> serverController,
-                                     QObject *parent): ConfiguratorBase(settings, serverController, parent)
+                                     QObject *parent): ConfiguratorBase(settings, parent)
 {
 }
 
@@ -17,13 +16,15 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, 
                                           const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
+    ServerController serverController(m_settings);
 
-    QString cloakPublicKey = m_serverController->getTextFileFromContainer(container, credentials,
-                                                                          amnezia::protocols::cloak::ckPublicKeyPath, &e);
+
+    QString cloakPublicKey = serverController.getTextFileFromContainer(container, credentials,
+                                                                        amnezia::protocols::cloak::ckPublicKeyPath, &e);
     cloakPublicKey.replace("\n", "");
 
-    QString cloakBypassUid = m_serverController->getTextFileFromContainer(container, credentials,
-                                                                          amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
+    QString cloakBypassUid = serverController.getTextFileFromContainer(container, credentials,
+                                                                        amnezia::protocols::cloak::ckBypassUidKeyPath, &e);
     cloakBypassUid.replace("\n", "");
 
     if (e) {
@@ -47,8 +48,8 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials, 
     config.insert(config_key::remote, credentials.hostName);
     config.insert(config_key::port, "$CLOAK_SERVER_PORT");
 
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
+                                                   serverController.genVarsForScript(credentials, container, containerConfig));
 
     // qDebug().noquote() << textCfg;
     return textCfg;

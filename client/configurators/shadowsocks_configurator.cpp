@@ -9,8 +9,7 @@
 #include "core/servercontroller.h"
 
 ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings,
-                                                 std::shared_ptr<ServerController> serverController,
-                                                 QObject *parent): ConfiguratorBase(settings, serverController, parent)
+                                                 QObject *parent): ConfiguratorBase(settings, parent)
 {
 }
 
@@ -18,9 +17,10 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
                                                       const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     ErrorCode e = ErrorCode::NoError;
+    ServerController serverController(m_settings);
 
-    QString ssKey = m_serverController->getTextFileFromContainer(container, credentials,
-                                                                 amnezia::protocols::shadowsocks::ssKeyPath, &e);
+    QString ssKey = serverController.getTextFileFromContainer(container, credentials,
+                                                              amnezia::protocols::shadowsocks::ssKeyPath, &e);
     ssKey.replace("\n", "");
 
     if (e) {
@@ -28,11 +28,11 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
         return "";
     }
 
-    QString ssClientConfig = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::shadowsocks_client_template, container),
-                                                             m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString ssClientConfig = serverController.replaceVars(amnezia::scriptData(ProtocolScriptType::shadowsocks_client_template, container),
+                                                          serverController.genVarsForScript(credentials, container, containerConfig));
 
     ssClientConfig.replace("$SHADOWSOCKS_PASSWORD", ssKey);
-    ssClientConfig = m_serverController->replaceVars(ssClientConfig, m_serverController->genVarsForScript(credentials, container, containerConfig));
+    ssClientConfig = serverController.replaceVars(ssClientConfig, serverController.genVarsForScript(credentials, container, containerConfig));
 
     //qDebug().noquote() << textCfg;
     return ssClientConfig;

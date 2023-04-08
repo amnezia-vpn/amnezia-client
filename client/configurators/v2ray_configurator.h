@@ -10,9 +10,7 @@ using namespace amnezia;
 class V2RayConfigurator : ConfiguratorBase
 {
 public:
-    V2RayConfigurator(std::shared_ptr<Settings> settings,
-                      std::shared_ptr<ServerController> serverController,
-                      QObject *parent = nullptr);
+    V2RayConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     QString genV2RayConfig(const ServerCredentials &credentials, DockerContainer container,
                            const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);

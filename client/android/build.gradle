@@ -75,7 +75,7 @@ android {
      * The following variables:
      * - androidBuildToolsVersion,
      * - androidCompileSdkVersion
-     * - qt5AndroidDir - holds the path to qt android files
+     * - qtAndroidDir - holds the path to qt android files
      *                   needed to build any Qt application
      *                   on Android.
      *
@@ -106,7 +106,7 @@ android {
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
-            androidTest.assets.srcDirs += files("${qt5AndroidDir}/schemas".toString())
+            androidTest.assets.srcDirs += files("${qtAndroidDir}/schemas".toString())
        }
     }
 
@@ -140,7 +140,7 @@ android {
         versionName "2.0.10" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
-            "room.schemaLocation": "${qt5AndroidDir}/schemas".toString()
+            "room.schemaLocation": "${qtAndroidDir}/schemas".toString()
         ]
     }
 

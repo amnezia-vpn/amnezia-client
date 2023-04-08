@@ -50,7 +50,6 @@ public:
     static QString wireguardExecPath();
     static QString certUtilPath();
 
-
 #ifdef Q_OS_WIN
     static bool signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent);
 #endif

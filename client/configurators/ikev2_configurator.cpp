@@ -17,8 +17,7 @@
 
 
 Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings,
-                                     std::shared_ptr<ServerController> serverController,
-                                     QObject *parent): ConfiguratorBase(settings, serverController, parent)
+                                     QObject *parent): ConfiguratorBase(settings, parent)
 {
 }
 
@@ -41,14 +40,15 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
                                        "--keyUsage digitalSignature,keyEncipherment "\
                                        "--extKeyUsage serverAuth,clientAuth -8 \"%1\"").arg(connData.clientId);
 
-    ErrorCode e = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
+    ServerController serverController(m_settings);
+    ErrorCode e = serverController.runContainerScript(credentials, container, scriptCreateCert);
 
     QString scriptExportCert = QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"")
                                        .arg(connData.password, connData.clientId, certFileName);
-    e = m_serverController->runContainerScript(credentials, container, scriptExportCert);
+    e = serverController.runContainerScript(credentials, container, scriptExportCert);
 
-    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, &e);
-    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
+    connData.clientCert = serverController.getTextFileFromContainer(container, credentials, certFileName, &e);
+    connData.caCert = serverController.getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();

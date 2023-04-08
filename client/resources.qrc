@@ -165,6 +165,7 @@
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
+        <file>ui/qml/Controls/PopupWithTextField.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoV2Ray.qml</file>
         <file>server_scripts/openvpn_v2ray_vmess/configure_container.sh</file>
         <file>server_scripts/openvpn_v2ray_vmess/Dockerfile</file>

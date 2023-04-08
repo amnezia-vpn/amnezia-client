@@ -1,12 +1,13 @@
 #ifndef UILOGIC_H
 #define UILOGIC_H
 
-#include <QRegularExpressionValidator>
-#include <QQmlEngine>
-#include <functional>
+#include <QFileDialog>
 #include <QKeyEvent>
+#include <QRegularExpressionValidator>
 #include <QThread>
+#include <QQmlEngine>
 
+#include <functional>
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
@@ -63,14 +64,12 @@ class UiLogic : public QObject
     AUTO_PROPERTY(bool, pageEnabled)
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
-    AUTO_PROPERTY(QString, popupWarningText)
 
     READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
 
 public:
-    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
-        std::shared_ptr<ServerController> serverController, QObject *parent = nullptr);
+    explicit UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator, QObject *parent = nullptr);
     ~UiLogic();
     void showOnStartup();
 
@@ -119,10 +118,15 @@ public:
     Q_INVOKABLE void saveBinaryFile(const QString& desc, QString ext, const QString& data);
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
-    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool createNewServer, bool &isServerCreated);
+    Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool &isServerCreated);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
-
+    static QString getOpenFileName(QWidget *parent = nullptr,
+                                   const QString &caption = QString(),
+                                   const QString &dir = QString(),
+                                   const QString &filter = QString(),
+                                   QString *selectedFilter = nullptr,
+                                   QFileDialog::Options options = QFileDialog::Options());
 signals:
     void goToPage(PageEnumNS::Page page, bool reset = true, bool slide = true);
     void goToProtocolPage(Proto protocol, bool reset = true, bool slide = true);
@@ -183,7 +187,6 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
-    std::shared_ptr<ServerController> m_serverController;
 
     NotificationHandler* m_notificationHandler;
 

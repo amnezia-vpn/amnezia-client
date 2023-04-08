@@ -11,9 +11,7 @@ class WireguardConfigurator : ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings,
-                          std::shared_ptr<ServerController> serverController,
-                          QObject *parent = nullptr);
+    WireguardConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     struct ConnectionData {
         QString clientPrivKey; // client private key

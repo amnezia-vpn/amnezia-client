@@ -49,7 +49,6 @@ private:
     UiLogic *m_uiLogic {};
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
-    std::shared_ptr<ServerController> m_serverController;
 
     ContainerProps* m_containerProps {};
     ProtocolProps* m_protocolProps {};

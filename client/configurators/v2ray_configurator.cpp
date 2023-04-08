@@ -11,8 +11,7 @@
 #include "containers/containers_defs.h"
 
 V2RayConfigurator::V2RayConfigurator(std::shared_ptr<Settings> settings,
-                                     std::shared_ptr<ServerController> serverController,
-                                     QObject *parent) : ConfiguratorBase(settings, serverController, parent)
+                                     QObject *parent) : ConfiguratorBase(settings, parent)
 {
 }
 
@@ -21,8 +20,9 @@ QString V2RayConfigurator::genV2RayConfig(const ServerCredentials &credentials, 
 {
     ErrorCode e = ErrorCode::NoError;
 
-    QString v2RayVmessClientUuid = m_serverController->getTextFileFromContainer(container, credentials,
-                                                                                amnezia::protocols::v2ray::v2rayKeyPath, &e);
+    ServerController serverController(m_settings);
+    QString v2RayVmessClientUuid = serverController.getTextFileFromContainer(container, credentials,
+                                                                             amnezia::protocols::v2ray::v2rayKeyPath, &e);
     if (v2RayVmessClientUuid.isEmpty()) {
         if (errorCode) *errorCode = ErrorCode::V2RayKeyMissing;
         return "";
@@ -35,12 +35,12 @@ QString V2RayConfigurator::genV2RayConfig(const ServerCredentials &credentials, 
         return "";
     }
 
-    QString v2RayClientConfig = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::v2ray_client_template, container),
-                                                                m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString v2RayClientConfig = serverController.replaceVars(amnezia::scriptData(ProtocolScriptType::v2ray_client_template, container),
+                                                             serverController.genVarsForScript(credentials, container, containerConfig));
 
     v2RayClientConfig.replace("$V2RAY_VMESS_CLIENT_UUID", v2RayVmessClientUuid);
-    v2RayClientConfig = m_serverController->replaceVars(v2RayClientConfig,
-                                                        m_serverController->genVarsForScript(credentials, container, containerConfig));
+    v2RayClientConfig = serverController.replaceVars(v2RayClientConfig,
+                                                     serverController.genVarsForScript(credentials, container, containerConfig));
 
     return v2RayClientConfig;
 }

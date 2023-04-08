@@ -46,11 +46,8 @@ void WireguardProtocol::stop()
 
     m_wireguardStopProcess->setProgram(PermittedProcess::Wireguard);
 
-
-    QStringList arguments({"--remove", configPath()});
-    m_wireguardStopProcess->setArguments(arguments);
-
-    qDebug() << arguments.join(" ");
+    m_wireguardStopProcess->setArguments(stopArgs());
+    qDebug() << stopArgs().join(" ");
 
     connect(m_wireguardStopProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol Stop errorOccurred" << error;
@@ -61,12 +58,25 @@ void WireguardProtocol::stop()
         qDebug() << "WireguardProtocol::WireguardProtocol Stop stateChanged" << newState;
     });
 
+#ifdef Q_OS_LINUX
+    if (IpcClient::Interface()) {
+        QRemoteObjectPendingReply<bool> result = IpcClient::Interface()->isWireguardRunning();
+        if (result.returnValue()) {
+            setConnectionState(VpnProtocol::Disconnected);
+            return;
+        }
+    } else {
+        qCritical() << "IPC client not initialized";
+        setConnectionState(VpnProtocol::Disconnected);
+        return;
+    }
+#endif
+
     m_wireguardStopProcess->start();
     m_wireguardStopProcess->waitForFinished(10000);
 
     setConnectionState(VpnProtocol::Disconnected);
 #endif
-
 }
 
 void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configuration)
@@ -78,13 +88,28 @@ void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configura
         return;
     }
 
-    m_isConfigLoaded = true;
-
     m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
     m_configFile.close();
-    m_configFileName = m_configFile.fileName();
 
-    qDebug().noquote() << QString("Set config data") << m_configFileName;
+#ifdef Q_OS_LINUX
+    if (IpcClient::Interface()) {
+        QRemoteObjectPendingReply<bool> result = IpcClient::Interface()->copyWireguardConfig(m_configFile.fileName());
+        if (result.returnValue()) {
+            qCritical() << "Failed to copy wireguard config";
+            return;
+        }
+    } else {
+        qCritical() << "IPC client not initialized";
+        return;
+    }
+    m_configFileName = "/etc/wireguard/wg99.conf";
+#else
+    m_configFileName = m_configFile.fileName();
+#endif
+
+    m_isConfigLoaded = true;
+
+    qDebug().noquote() << QString("Set config data") << configPath();
     qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toString().toUtf8();
 
 }
@@ -119,8 +144,15 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-    if (!QFileInfo::exists(configPath())) {
-        setLastError(ErrorCode::ConfigMissing);
+    if (IpcClient::Interface()) {
+        QRemoteObjectPendingReply<bool> result = IpcClient::Interface()->isWireguardConfigExists(configPath());
+        if (result.returnValue()) {
+            setLastError(ErrorCode::ConfigMissing);
+            return lastError();
+        }
+    } else {
+        qCritical() << "IPC client not initialized";
+        setLastError(ErrorCode::InternalError);
         return lastError();
     }
 
@@ -142,11 +174,8 @@ ErrorCode WireguardProtocol::start()
 
     m_wireguardStartProcess->setProgram(PermittedProcess::Wireguard);
 
-
-    QStringList arguments({"--add", configPath()});
-    m_wireguardStartProcess->setArguments(arguments);
-
-    qDebug() << arguments.join(" ");
+    m_wireguardStartProcess->setArguments(startArgs());
+    qDebug() << startArgs().join(" ");
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol errorOccurred" << error;
@@ -175,7 +204,7 @@ ErrorCode WireguardProtocol::start()
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyReadStandardError, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAllStandardError();
-        reply.waitForFinished(1000);
+        reply.waitForFinished(10);
         qDebug() << "WireguardProtocol::WireguardProtocol readAllStandardError" << reply.returnValue();
     });
 
@@ -203,10 +232,33 @@ void WireguardProtocol::updateVpnGateway(const QString &line)
 //                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
 //            }
 //        }
-    //    }
+//    }
 }
 
 QString WireguardProtocol::serviceName() const
 {
     return "AmneziaVPN.WireGuard0";
 }
+
+QStringList WireguardProtocol::stopArgs()
+{
+#ifdef Q_OS_WIN
+    return {"--remove", configPath()};
+#elif defined Q_OS_LINUX
+    return {"down", "wg99"};
+#else
+    return {"--remove", configPath()};
+#endif
+}
+
+QStringList WireguardProtocol::startArgs()
+{
+#ifdef Q_OS_WIN
+    return {"--add", configPath()};
+#elif defined Q_OS_LINUX
+    return {"up", "wg99"};
+#else
+    return {"--add", configPath()};
+#endif
+}
+
