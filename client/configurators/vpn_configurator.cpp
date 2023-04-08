@@ -14,16 +14,15 @@
 #include "utilities.h"
 #include "settings.h"
 
-VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings,
-    std::shared_ptr<ServerController> serverController, QObject *parent):
-    ConfiguratorBase(settings, serverController, parent)
+VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
+    ConfiguratorBase(settings, parent)
 {
-    openVpnConfigurator = std::shared_ptr<OpenVpnConfigurator>(new OpenVpnConfigurator(settings, serverController, this));
-    shadowSocksConfigurator = std::shared_ptr<ShadowSocksConfigurator>(new ShadowSocksConfigurator(settings, serverController, this));
-    cloakConfigurator = std::shared_ptr<CloakConfigurator>(new CloakConfigurator(settings, serverController, this));
-    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, serverController, this));
-    ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, serverController, this));
-    sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, serverController, this));
+    openVpnConfigurator = std::shared_ptr<OpenVpnConfigurator>(new OpenVpnConfigurator(settings, this));
+    shadowSocksConfigurator = std::shared_ptr<ShadowSocksConfigurator>(new ShadowSocksConfigurator(settings, this));
+    cloakConfigurator = std::shared_ptr<CloakConfigurator>(new CloakConfigurator(settings, this));
+    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, this));
+    ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, this));
+    sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, this));
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,

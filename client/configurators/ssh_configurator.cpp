@@ -14,12 +14,9 @@
 #include "core/server_defs.h"
 #include "utilities.h"
 
-#include "sftpdefs.h"
 
-using namespace QSsh;
-
-SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, std::shared_ptr<ServerController> serverController, QObject *parent):
-    ConfiguratorBase(settings, serverController, parent)
+SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
+    ConfiguratorBase(settings, parent)
 {
 
 }

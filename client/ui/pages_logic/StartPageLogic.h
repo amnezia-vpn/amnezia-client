@@ -23,6 +23,8 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
 
+    AUTO_PROPERTY(QString, privateKeyPassphrase);
+
     READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:
     Q_INVOKABLE void onUpdatePage() override;
@@ -35,6 +37,8 @@ public:
     Q_INVOKABLE void startQrDecoder();
 #endif
 
+    void selectConfigFormat(QString configData);
+
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);
     bool importConnectionFromQr(const QByteArray &data);
@@ -45,5 +49,8 @@ public:
     explicit StartPageLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~StartPageLogic() = default;
 
+signals:
+    void showPassphraseRequestMessage();
+    void passphraseDialogClosed();
 };
 #endif // START_PAGE_LOGIC_H
