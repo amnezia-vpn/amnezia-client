@@ -1,0 +1,52 @@
+@startuml openVpnRevokeClientCertificate
+
+|client management page|
+start
+
+:on update client management page;
+:get clientsTable file from container;
+:get a list of issued certificates;
+
+repeat
+
+if (            for each issued certificate: 
+clientsTable contains the issued certificate) then (yes)
+else (no)
+    :add certificate id to clientsTable;
+endif
+
+repeat while (is this the last issued certificate?)
+
+if (if clientsTable has been changed) then (yes)
+    :save the clientsTable file on the server;
+else (no)
+endif
+
+:add clientsTable to the clientManagementModel;
+
+|client info page|
+:on update client info page;
+floating note
+    clicked on one of the clients 
+    on the client management page
+end note
+
+:get the certificate data for the selected client;
+if (if client name has been changed) then (yes)
+    :update clientManagementModel;
+    :get clientsTable from clientManagementModel;
+    :save the clientsTable file on the server;
+else (no)
+    if (if revoke certificate was clicked) then (yes)
+        :described in file openVpnRevokeClientCertificate.plantuml;
+        |client management page|
+        :return to page client management;
+        stop
+    else (no)
+        |client info page|
+        :just look at the beautiful page;
+        stop
+    endif
+endif
+stop
+@enduml

@@ -18,6 +18,7 @@ user nobody
 group nobody
 persist-key
 persist-tun
+crl-verify crl.pem
 status openvpn-status.log
 verb 1
 tls-server
