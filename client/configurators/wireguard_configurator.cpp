@@ -71,7 +71,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     ErrorCode e = ErrorCode::NoError;
 
-    // Get list of already created clients (only IP addreses)
+    // Get list of already created clients (only IP addresses)
     QString nextIpNumber;
     {
         QString script = QString("cat %1 | grep AllowedIPs").arg(amnezia::protocols::wireguard::serverConfigPath);
