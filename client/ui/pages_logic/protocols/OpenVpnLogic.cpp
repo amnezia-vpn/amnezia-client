@@ -33,7 +33,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     m_labelProtoOpenVpnInfoVisible{true},
     m_labelProtoOpenVpnInfoText{},
     m_progressBarResetValue{0},
-    m_progressBarResetMaximium{100}
+    m_progressBarResetMaximum{100}
 {
 
 }
@@ -137,8 +137,8 @@ void OpenVpnLogic::onPushButtonSaveClicked()
     progressBarFunc.getValueFunc = [this] (void) -> int {
         return progressBarResetValue();
     };
-    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
-        return progressBarResetMaximium();
+    progressBarFunc.getMaximumFunc = [this] (void) -> int {
+        return progressBarResetMaximum();
     };
     progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         set_progressBarTextVisible(visible);
