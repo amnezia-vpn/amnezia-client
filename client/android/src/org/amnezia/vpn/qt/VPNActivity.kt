@@ -114,7 +114,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             // QT will always attempt to read the clipboard if content is there.
             // since we have no use of the clipboard in android 10+
             // we _can_  return null
-            // And we defnitly should since android 12 displays clipboard access.
+            // And we definitely should since android 12 displays clipboard access.
             null
         } else {
             super.getSystemService(name)
