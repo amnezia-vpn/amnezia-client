@@ -582,7 +582,7 @@ OpenVPN over ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="4302"/>
-        <source>Secondray DNS server</source>
+        <source>Secondary DNS server</source>
         <translation>Вторичный DNS сервер</translation>
     </message>
     <message>
