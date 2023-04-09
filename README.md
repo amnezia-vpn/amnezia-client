@@ -87,7 +87,7 @@ Error 1
 Add a user defined variable to both AmneziaVPN and WireGuardNetworkExtension targets' build settings with
 key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
 
-if above error still persists on you M1 Mac, then most proably you need to install arch based cmake 
+if above error still persists on you M1 Mac, then most probably you need to install arch based cmake 
 ```
 arch -arm64 brew install cmake
 ```
