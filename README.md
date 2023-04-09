@@ -120,7 +120,7 @@ That's it you should be ready to compile the project from QT Creator!
 After you've hit the build button, QT-Creator copies the whole project to a folder in the repositories parent directory. The folder should look something like `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>`.
 If you want to develop Amnezia VPNs Android components written in Kotlin, such as components using system APIs, you need to import the generated project in Android Studio with `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>/client/android-build` as the projects root directory. While you should be able to compile the generated project from Android Studio, you cannot work directly in the repository's Android project. So whenever you are confident with your work in the generated proejct, you'll need to copy and paste the affected files to the corresponding path in the repositories Android project so that you can add and commit your changes!
 
-You may face compiling issues in QT Creator after you've worked in Android Studio on the generated project. Just do a `./gradlew clean` in the geneated project's root directory (`<path>/client/android-build/.`) and you should be good to continue.
+You may face compiling issues in QT Creator after you've worked in Android Studio on the generated project. Just do a `./gradlew clean` in the generated project's root directory (`<path>/client/android-build/.`) and you should be good to continue.
 
 ## License
 GPL v.3
