@@ -428,7 +428,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
               let password = ssConfig[Constants.ssPasswordKey] as? String else {
                   self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
                                            code: 100,
-                                           userInfo: [NSLocalizedDescriptionKey: "Cannot asign profile params for ss in tunnel"]))
+                                           userInfo: [NSLocalizedDescriptionKey: "Cannot assign profile params for ss in tunnel"]))
                   return nil
               }
         var insettings:  [String: Any] = .init()
