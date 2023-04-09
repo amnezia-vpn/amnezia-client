@@ -17,7 +17,7 @@ enum ServiceAction {
     ACTION_ACTIVATE = 1,
     // Deactivate the vpn. Body is empty
     ACTION_DEACTIVATE = 2,
-    // Register an IBinder to recieve events body is an Ibinder
+    // Register an IBinder to receive events body is an Ibinder
     ACTION_REGISTERLISTENER = 3,
     // Requests an EVENT_STATISTIC_UPDATE to be send
     ACTION_REQUEST_STATISTIC = 4,

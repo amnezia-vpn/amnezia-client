@@ -50,7 +50,7 @@ void Ikev2Protocol::stop()
 void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE rasconnstate, DWORD dwError)
 {
     Q_UNUSED(unMsg);
-    qDebug()<<"Recive the new event "<<static_cast<int>(rasconnstate);
+    qDebug()<<"Receive the new event "<<static_cast<int>(rasconnstate);
     switch (rasconnstate)
     {
     case RASCS_OpenPort:
