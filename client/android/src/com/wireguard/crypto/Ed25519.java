@@ -835,7 +835,7 @@ public final class Ed25519 {
     }
 
     /**
-     * Decodes {@code s} into an extented projective point.
+     * Decodes {@code s} into an extended projective point.
      * See Section 5.1.3 Decoding in https://tools.ietf.org/html/rfc8032#section-5.1.3
      */
     private static XYZT fromBytesNegateVarTime(byte[] s) throws GeneralSecurityException {
