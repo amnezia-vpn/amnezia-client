@@ -47,7 +47,7 @@ enum ServiceEvents {
     EVENT_CONNECTED = 1,
     // WG-Go has disabled the adapter (empty response)
     EVENT_DISCONNECTED = 2,
-    // Contains the Current transfered bytes to endpoint x.
+    // Contains the Current transferred bytes to endpoint x.
     EVENT_STATISTIC_UPDATE = 3,
     EVENT_BACKEND_LOGS = 4,
     // An Error happened during activation
