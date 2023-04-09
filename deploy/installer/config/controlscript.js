@@ -85,13 +85,13 @@ function appProcessIsRunning()
             }
         }
     } else {
-        return checkProccesIsRunning("pgrep -x '" + appName() + "'")
+        return checkProcessIsRunning("pgrep -x '" + appName() + "'")
     }
 
     return false;
 }
 
-function checkProccesIsRunning(arg)
+function checkProcessIsRunning(arg)
 {
     var cmdArgs = ["-c", arg];
     var result = installer.execute("/bin/bash", cmdArgs);
