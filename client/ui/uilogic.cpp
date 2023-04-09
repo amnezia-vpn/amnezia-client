@@ -126,7 +126,7 @@ UiLogic::~UiLogic()
     qDebug() << "Application closed";
 }
 
-void UiLogic::initalizeUiLogic()
+void UiLogic::initializeUiLogic()
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {

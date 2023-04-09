@@ -124,7 +124,7 @@ Window  {
                              for (var i=0; i<folderModelPages.count; i++) {
                                  createPagesObjects(folderModelPages.get(i, "filePath"), PageType.Basic);
                              }
-                             UiLogic.initalizeUiLogic()
+                             UiLogic.initializeUiLogic()
                          }
     }
 

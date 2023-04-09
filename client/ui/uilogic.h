@@ -104,7 +104,7 @@ public:
     Q_INVOKABLE virtual void onUpdatePage() {} // UiLogic is set as logic class for some qml pages
     Q_INVOKABLE void onUpdateAllPages();
 
-    Q_INVOKABLE void initalizeUiLogic();
+    Q_INVOKABLE void initializeUiLogic();
     Q_INVOKABLE void onCloseWindow();
 
     Q_INVOKABLE QString containerName(int container);
