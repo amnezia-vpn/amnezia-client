@@ -13,7 +13,7 @@
 # SYSTEM_LIB_PATH - are relative path to system libraries of a deployed distribution.
 # BASE_NAME - are base name of the executable that will be launched after run this script.
 # CUSTOM_SCRIPT_BLOCK - This is code from the customScript option
-# RUN_COMMAND - This is command for run application. Requred BASE_DIR variable.
+# RUN_COMMAND - This is command for run application. Required BASE_DIR variable.
 #
 # ####################################################################
 

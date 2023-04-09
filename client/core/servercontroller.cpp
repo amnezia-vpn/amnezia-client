@@ -453,10 +453,10 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
-    bool reinstallRequred = isReinstallContainerRequred(container, oldConfig, newConfig);
-    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
+    bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
-    if (reinstallRequred) {
+    if (reinstallRequired) {
         return setupContainer(credentials, container, newConfig, true);
     }
     else {
@@ -490,7 +490,7 @@ QJsonObject ServerController::createContainerInitialConfig(DockerContainer conta
     return config;
 }
 
-bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 

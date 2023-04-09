@@ -42,7 +42,7 @@ public:
     // create initial config - generate passwords, etc
     QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
 
-    bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+    bool isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
     ErrorCode checkOpenVpnServer(DockerContainer container, const ServerCredentials &credentials);
 
