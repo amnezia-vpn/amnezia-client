@@ -1111,7 +1111,7 @@ This code does not include server credentials.</source>
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="1756"/>
-        <source>VPN Protocol not choosen</source>
+        <source>VPN Protocol not chosen</source>
         <translation>VPN протокол не выбран</translation>
     </message>
     <message>
