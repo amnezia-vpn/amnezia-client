@@ -973,7 +973,7 @@ public final class Ed25519 {
      *
      * <p>NOTE that this function requires that {@code icopy} be 1 or 0; other values give wrong
      * results. Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the
-     * values in a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must
+     * values in a[10..19] or b[10..19] aren't swapped, and all values in a[0..9],b[0..9] must
      * have magnitude less than Integer.MAX_VALUE.
      */
     static void copyConditional(long[] a, long[] b, int icopy) {
