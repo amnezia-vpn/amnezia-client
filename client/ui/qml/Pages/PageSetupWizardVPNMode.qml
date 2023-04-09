@@ -37,7 +37,7 @@ PageBase {
                 Layout.fillWidth: true
                 verticalAlignment: Text.AlignTop
                 text: qsTr('Optional.\n
-You can enable VPN mode "For selected sites" and add blocked sites you need to visit manually. If you will choose this option, you will need add every bloked site you want to visit to the access list. You may switch between modes later.\n\nPlease note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.')
+You can enable VPN mode "For selected sites" and add blocked sites you need to visit manually. If you will choose this option, you will need add every blocked site you want to visit to the access list. You may switch between modes later.\n\nPlease note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.')
             }
 
             CheckBoxType {
