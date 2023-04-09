@@ -40,7 +40,7 @@ typedef enum ServiceAction ServiceAction;
 
 // Event Types that will be Dispatched after registration
 enum ServiceEvents {
-    // The Service has Accecpted our Binder
+    // The Service has Accepted our Binder
     // Responds with the current status of the vpn.
     EVENT_INIT = 0,
     // WG-Go has enabled the adapter (empty response)
