@@ -46,7 +46,7 @@ class Log {
             if (!BuildConfig.DEBUG) { return; }
             nativeLog.e(tag, message)
         }
-        // Only Prints && Loggs when in debug, noop in release.
+        // Only Prints && Logs when in debug, noop in release.
         fun sensitive(tag: String, message: String?) {
             if (!BuildConfig.DEBUG) { return; }
             if (message == null) { return; }
