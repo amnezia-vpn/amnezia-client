@@ -319,7 +319,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (!m_IpcClient->isSocketConnected()) {
         if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occured when init IPC client";
+            qWarning() << "Error occurred when init IPC client";
             emit serviceIsNotReady();
             emit connectionStateChanged(VpnProtocol::Error);
             return;
