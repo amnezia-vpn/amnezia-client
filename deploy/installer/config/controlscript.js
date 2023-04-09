@@ -52,9 +52,9 @@ function runningOnLinux()
     return ((installer.value("os") === "linux") || (installer.value("os") === "x11"));
 }
 
-function sleep(miliseconds) {
+function sleep(milliseconds) {
     var currentTime = new Date().getTime();
-    while (currentTime + miliseconds >= new Date().getTime()) {}
+    while (currentTime + milliseconds >= new Date().getTime()) {}
 }
 
 function raiseInstallerWindow()
