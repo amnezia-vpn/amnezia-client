@@ -31,7 +31,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 find_package(Qt6 REQUIRED COMPONENTS 
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
-    Core5Compat Concurrent
+    Core5Compat Concurrent LinguistTools
 )
 set(LIBS ${LIBS} 
     Qt6::Widgets Qt6::Core Qt6::Gui
@@ -47,13 +47,11 @@ if(IOS)
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
-set(IS_CI ${CI})
-if(IS_CI)
-    message("Detected CI env")
-    find_program(CCACHE "ccache")
-    if(CCACHE)
-        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
-    endif()
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    message("found ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)

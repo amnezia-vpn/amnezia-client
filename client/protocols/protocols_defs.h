@@ -64,6 +64,8 @@ constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
 constexpr char openvpn[] = "openvpn";
 constexpr char wireguard[] = "wireguard";
 
+constexpr char nativeConfigParametrsStorage[] = "nativeConfigParametrsStorage";
+
 }
 
 namespace protocols {

@@ -153,7 +153,7 @@ void StartPageLogic::onPushButtonConnect()
 
     QString output;
     if (errorCode == ErrorCode::NoError) {
-        output = serverController.checkSshConnection(serverCredentials, &errorCode);
+        output = serverController.checkSshConnection(serverCredentials, errorCode);
     }
 
     bool ok = true;

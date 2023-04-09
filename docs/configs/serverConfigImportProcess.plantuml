@@ -1,0 +1,23 @@
+@startuml serverConfigImportProcess
+start
+
+:import server config in any format;
+:decode server config into json;
+
+if (server config contains valid server credentials || containers) then (yes)
+    :show json server config to user;
+    if (user clicked continue import) then (yes)
+        :append server config to app internal settings;
+    else (no)
+        :remove imported config;
+    endif
+else (no)
+    :show error;
+    note right
+        now only output to the log
+    end note
+    stop
+endif
+
+stop
+@enduml

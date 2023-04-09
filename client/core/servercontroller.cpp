@@ -178,10 +178,9 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 }
 
 QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
-    const ServerCredentials &credentials, const QString &path, ErrorCode *errorCode)
+    const ServerCredentials &credentials, const QString &path, ErrorCode &errorCode)
 {
-
-    if (errorCode) *errorCode = ErrorCode::NoError;
+    errorCode = ErrorCode::NoError;
 
     QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").
             arg(ContainerProps::containerToString(container)).arg(path);
@@ -193,7 +192,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
         return ErrorCode::NoError;
     };
 
-    *errorCode = runScript(credentials, script, cbReadStdOut);
+    errorCode = runScript(credentials, script, cbReadStdOut);
 
     qDebug().noquote() << "Copy file from container stdout : \n" << stdOut;
 
@@ -580,7 +579,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     return vars;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -592,10 +591,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
         return ErrorCode::NoError;
     };
 
-    ErrorCode e = runScript(credentials,
-        amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
-
-    if (errorCode) *errorCode = e;
+    errorCode = runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
 
     return stdOut;
 }

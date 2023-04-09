@@ -26,13 +26,13 @@ OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, QOb
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-    DockerContainer container, ErrorCode *errorCode)
+                                                                              DockerContainer container, ErrorCode &errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::OpenSslFailed;
+        errorCode = ErrorCode::OpenSslFailed;
         return connData;
     }
 
@@ -41,45 +41,44 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
             arg(connData.clientId);
 
     ServerController serverController(m_settings);
-    ErrorCode e = serverController.uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
-    if (e) {
-        if (errorCode) *errorCode = e;
+    errorCode = serverController.uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
+    if (errorCode) {
         return connData;
     }
 
-    e = signCert(container, credentials, connData.clientId);
-    if (e) {
-        if (errorCode) *errorCode = e;
+    errorCode = signCert(container, credentials, connData.clientId);
+    if (errorCode) {
         return connData;
     }
 
-    connData.caCert = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, &e);
+    connData.caCert = serverController.getTextFileFromContainer(container, credentials,
+    															amnezia::protocols::openvpn::caCertPath, errorCode);
     connData.clientCert = serverController.getTextFileFromContainer(container, credentials,
-        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), &e);
+        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
 
-    if (e) {
-        if (errorCode) *errorCode = e;
+
+    if (errorCode) {
         return connData;
     }
 
-    connData.taKey = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, &e);
+    connData.taKey = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, errorCode);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
-        if (errorCode) *errorCode = ErrorCode::SshSftpFailureError;
+        errorCode = ErrorCode::SshSftpFailureError;
     }
 
     return connData;
 }
 
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+    DockerContainer container, const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     ServerController serverController(m_settings);
     QString config = serverController.replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
             serverController.genVarsForScript(credentials, container, containerConfig));
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
-    if (errorCode && *errorCode) {
+    if (errorCode) {
         return "";
     }
 

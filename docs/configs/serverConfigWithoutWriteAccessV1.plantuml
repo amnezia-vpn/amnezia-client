@@ -1,0 +1,30 @@
+@startjson serverConfigWithoutWriteAccessV1
+{
+   "containers : array": 
+   [
+        {
+            "container : string": "amnezia-openvpn",
+            "openvpn : array": "<color:blue>openvpn container config"
+        },
+        {
+            "container : string": "amnezia-openvpn-cloak",
+            "openvpn : array": "<color:blue>openvpn container config",
+            "cloak : array": "<color:blue>cloak container config"
+        },
+        {
+            "container : string": "amnezia-shadowsocks",
+            "openvpn : array": "<color:blue>openvpn container config",
+            "shadowsocks : array": "<color:blue>shadowsocks container config"
+        },
+        {
+            "container : string": "amnezia-wireguard",
+            "wireguard : array": "<color:blue>wireguard container config"
+        }
+   ],
+    "defaultContainer : string": "container name",
+    "description : string": "server name alias",
+    "dns1 : string": "dns address",
+    "dns2 : string": "dns address",
+    "hostName : string": "server address"
+}
+@endjson
