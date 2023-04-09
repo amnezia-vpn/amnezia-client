@@ -364,7 +364,7 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
 
-    #disbale in cicd
+    #disable in cicd
     include(cmake/osxtools.cmake)
     # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
