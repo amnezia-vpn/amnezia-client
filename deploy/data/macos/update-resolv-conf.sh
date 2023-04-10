@@ -2,7 +2,7 @@
 
 # Mac name-resolution updater based on @cl's script here:
 # https://blog.netnerds.net/2011/10/openvpn-update-client-dns-on-mac-os-x-using-from-the-command-line/
-# Openvpn envar parsing taken from the script in debian's openvpn package.
+# Openvpn envvar parsing taken from the script in debian's openvpn package.
 # Smushed together and improved by @andrewgdotcom.
 
 # Parses DHCP options from openvpn to update resolv.conf
