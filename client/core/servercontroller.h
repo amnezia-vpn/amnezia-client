@@ -32,11 +32,11 @@ public:
 
     // create initial config - generate passwords, etc
     QJsonObject createContainerInitialConfig(DockerContainer container, int port, TransportProto tp);
+    ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
     ErrorCode uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
                                         const QString &file, const QString &path,
                                         libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
-
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
                                         const QString &path, ErrorCode *errorCode = nullptr);
 
@@ -62,11 +62,12 @@ private:
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
-    ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
 
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config);
     bool isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
-
+    ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container);
+    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
+    
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
                                const QString &remotePath, libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
 

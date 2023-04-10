@@ -16,6 +16,7 @@ PageBase {
     BackButton {
         id: back
     }
+
     Caption {
         id: caption
         text: qsTr("Server settings")
@@ -96,8 +97,16 @@ PageBase {
             }
 
             BlueButtonType {
-                Layout.fillWidth: true
                 Layout.topMargin: 60
+                Layout.fillWidth: true
+                text: qsTr("Clients Management")
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.ClientManagement)
+                }
+            }
+            BlueButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
                 text: ServerSettingsLogic.pushButtonClearClientCacheText
                 visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
