@@ -245,10 +245,16 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     //qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
 
+    e = isUserInSudo(credentials, container);
+    if (e) return e;
+
     if (!isUpdate) {
         e = isServerPortBusy(credentials, container, config);
         if (e) return e;
     }
+
+    e = isServerDpkgBusy(credentials, container);
+    if (e) return e;
 
     e = installDockerWorker(credentials, container);
     if (e) return e;
@@ -367,37 +373,6 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-
-    QFutureWatcher<ErrorCode> watcher;
-
-    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
-        do {
-            if (m_cancelInstallation) {
-                return ErrorCode::ServerCancelInstallation;
-            }
-            stdOut.clear();
-            runScript(credentials,
-                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
-                                  genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
-            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
-                emit serverIsBusy(true);
-                QThread::msleep(1000);
-            }
-        } while (!stdOut.isEmpty());
-        return ErrorCode::NoError;
-    });
-
-    QEventLoop wait;
-    QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
-    watcher.setFuture(future);
-    wait.exec();
-
-    m_cancelInstallation = false;
-    emit serverIsBusy(false);
-
-    if (future.result() != ErrorCode::NoError) {
-        return future.result();
-    }
 
     ErrorCode error = runScript(credentials,
                                 replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
@@ -690,6 +665,68 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         return ErrorCode::ServerPortAlreadyAllocatedError;
     }
     return ErrorCode::NoError;
+}
+
+ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
+    ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+
+    if (!stdOut.contains("sudo")) return ErrorCode::ServerUserNotInSudo;
+
+    return error;
+}
+
+ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    QFutureWatcher<ErrorCode> watcher;
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
+        do {
+            if (m_cancelInstallation) {
+                return ErrorCode::ServerCancelInstallation;
+            }
+            stdOut.clear();
+            runScript(credentials,
+                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
+                                  genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+                emit serverIsBusy(true);
+                QThread::msleep(1000);
+            }
+        } while (!stdOut.isEmpty());
+        return ErrorCode::NoError;
+    });
+
+    QEventLoop wait;
+    QObject::connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
+
+    m_cancelInstallation = false;
+    emit serverIsBusy(false);
+
+    return future.result();
 }
 
 ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers)

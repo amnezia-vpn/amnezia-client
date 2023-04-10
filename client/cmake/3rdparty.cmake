@@ -24,6 +24,8 @@ link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 link_libraries(${ZLIB_LIBRARY})
 
 if(IOS)
+    set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)
+    set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
     add_subdirectory(${CLIENT_ROOT_DIR}/3rd/mbedtls)
     set(WITH_MBEDTLS ON CACHE BOOL "" FORCE)
     set(WITH_GCRYPT OFF CACHE BOOL "" FORCE)

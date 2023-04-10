@@ -12,12 +12,14 @@ import "Controls"
 import "Pages"
 import "Pages/Protocols"
 import "Pages/Share"
+import "Pages/ClientInfo"
 import "Config"
 
 Window  {
     property var pages: ({})
     property var protocolPages: ({})
     property var sharePages: ({})
+    property var clientInfoPages: ({})
 
     id: root
     visible: true
@@ -38,6 +40,7 @@ Window  {
         if (type === PageType.Basic) p_obj = pages[page]
         else if (type === PageType.Proto) p_obj = protocolPages[page]
         else if (type === PageType.ShareProto) p_obj = sharePages[page]
+        else if (type === PageType.ClientInfo) p_obj = clientInfoPages[page]
         else return
 
         //console.debug("QML gotoPage " + type + " " + page + " " + p_obj)
@@ -154,6 +157,19 @@ Window  {
         }
     }
 
+    FolderListModel {
+        id: folderModelClientInfo
+        folder: "qrc:/ui/qml/Pages/ClientInfo/"
+        nameFilters: ["*.qml"]
+        showDirs: false
+
+        onStatusChanged: if (status == FolderListModel.Ready) {
+                             for (var i=0; i<folderModelClientInfo.count; i++) {
+                                 createPagesObjects(folderModelClientInfo.get(i, "filePath"), PageType.ClientInfo);
+                             }
+        }
+    }
+
     function createPagesObjects(file, type) {
         if (file.indexOf("Base") !== -1) return; // skip Base Pages
         //console.debug("Creating compenent " + file + " for " + type);
@@ -176,6 +192,9 @@ Window  {
                     }
                     else if (type === PageType.ShareProto) {
                         sharePages[obj.protocol] = obj
+                    }
+                    else if (type === PageType.ClientInfo) {
+                        clientInfoPages[obj.protocol] = obj
                     }
 
 //                    console.debug("Created compenent " + component.url + " for " + type);
@@ -206,7 +225,10 @@ Window  {
             //console.debug("Qml Connections onGoToShareProtocolPage " + protocol);
             root.gotoPage(PageType.ShareProto, protocol, reset, slide)
         }
-
+        function onGoToClientInfoPage(protocol, reset, slide) {
+            //console.debug("Qml Connections onGoToClientInfoPage " + protocol);
+            root.gotoPage(PageType.ClientInfo, protocol, reset, slide)
+        }
 
         function onClosePage() {
             root.close_page()
