@@ -30,9 +30,9 @@
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     _screen = [UIScreen.mainScreen snapshotViewAfterScreenUpdates: false];
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle: UIBlurEffectStyleDark];
-    UIVisualEffectView *blurBackround = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
-    [_screen addSubview: blurBackround];
-    blurBackround.frame = _screen.frame;
+    UIVisualEffectView *blurBackground = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
+    [_screen addSubview: blurBackground];
+    blurBackground.frame = _screen.frame;
     UIWindow *_window = UIApplication.sharedApplication.keyWindow;
     [_window addSubview: _screen];
 }

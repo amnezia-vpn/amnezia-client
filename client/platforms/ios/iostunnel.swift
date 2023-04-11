@@ -428,7 +428,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
               let password = ssConfig[Constants.ssPasswordKey] as? String else {
                   self.ssCompletion?(0, NSError(domain: Bundle.main.bundleIdentifier ?? "unknown",
                                            code: 100,
-                                           userInfo: [NSLocalizedDescriptionKey: "Cannot asign profile params for ss in tunnel"]))
+                                           userInfo: [NSLocalizedDescriptionKey: "Cannot assign profile params for ss in tunnel"]))
                   return nil
               }
         var insettings:  [String: Any] = .init()
@@ -639,7 +639,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wg_log(.error, message: "Start reading packets to connection")
         wg_log(.error, message: "Connection is \(session != nil ? "not null" : "null")")
         packetFlow.readPackets { [weak self] packets, protocols in
-            wg_log(.error, message: "\(packets.count) outcoming packets proccessed of \(protocols.first?.stringValue ?? "unknown") type")
+            wg_log(.error, message: "\(packets.count) outcoming packets processed of \(protocols.first?.stringValue ?? "unknown") type")
             guard let `self` = self else { return }
             self.session?.writeMultipleDatagrams(packets, completionHandler: { _ in
                 self.processQueue.async {
@@ -662,7 +662,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         session?.setReadHandler({ ssdata, error in
             wg_log(.error, message: "Packets are \(ssdata != nil ? "not null" : "null"), error: \(error?.localizedDescription ?? "none")")
             guard error == nil, let packets = ssdata else { return }
-            wg_log(.error, message: "\(packets.count) incoming packets proccessed")
+            wg_log(.error, message: "\(packets.count) incoming packets processed")
             self.packetFlow.writePackets(packets, withProtocols: [NSNumber(value: AF_INET)])
         }, maxDatagrams: Int.max)
         

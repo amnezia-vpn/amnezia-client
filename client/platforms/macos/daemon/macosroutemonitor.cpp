@@ -120,7 +120,7 @@ void MacosRouteMonitor::handleRtmChange(const struct rt_msghdr* rtm,
   for (auto addr : addrlist) {
     list.append(addrToString(addr));
   }
-  logger.debug() << "Route chagned by" << rtm->rtm_pid
+  logger.debug() << "Route changed by" << rtm->rtm_pid
                  << QString("addrs(%1):").arg(rtm->rtm_addrs) << list.join(" ");
 }
 
@@ -138,7 +138,7 @@ void MacosRouteMonitor::handleIfaceInfo(const struct if_msghdr* ifm,
     list.append(addrToString(addr));
   }
   logger.debug() << "Interface " << ifm->ifm_index
-                 << "chagned flags:" << ifm->ifm_flags
+                 << "changed flags:" << ifm->ifm_flags
                  << QString("addrs(%1):").arg(ifm->ifm_addrs) << list.join(" ");
 }
 

@@ -33,7 +33,7 @@ OpenVpnLogic::OpenVpnLogic(UiLogic *logic, QObject *parent):
     m_labelProtoOpenVpnInfoVisible{true},
     m_labelProtoOpenVpnInfoText{},
     m_progressBarResetValue{0},
-    m_progressBarResetMaximium{100}
+    m_progressBarResetMaximum{100}
 {
 
 }
@@ -51,17 +51,17 @@ void OpenVpnLogic::updateProtocolPage(const QJsonObject &openvpnConfig, DockerCo
     set_lineEditSubnetText(openvpnConfig.value(config_key::subnet_address).
                                       toString(protocols::openvpn::defaultSubnetAddress));
 
-    QString trasnsport;
+    QString transport;
     if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-        trasnsport = "tcp";
+        transport = "tcp";
         set_radioButtonUdpEnabled(false);
         set_radioButtonTcpEnabled(false);
     } else {
-        trasnsport = openvpnConfig.value(config_key::transport_proto).
+        transport = openvpnConfig.value(config_key::transport_proto).
                 toString(protocols::openvpn::defaultTransportProto);
     }
-    set_radioButtonUdpChecked(trasnsport == protocols::openvpn::defaultTransportProto);
-    set_radioButtonTcpChecked(trasnsport != protocols::openvpn::defaultTransportProto);
+    set_radioButtonUdpChecked(transport == protocols::openvpn::defaultTransportProto);
+    set_radioButtonTcpChecked(transport != protocols::openvpn::defaultTransportProto);
 
     set_comboBoxVpnCipherText(openvpnConfig.value(config_key::cipher).
                                       toString(protocols::openvpn::defaultCipher));
@@ -137,8 +137,8 @@ void OpenVpnLogic::onPushButtonSaveClicked()
     progressBarFunc.getValueFunc = [this] (void) -> int {
         return progressBarResetValue();
     };
-    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
-        return progressBarResetMaximium();
+    progressBarFunc.getMaximumFunc = [this] (void) -> int {
+        return progressBarResetMaximum();
     };
     progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         set_progressBarTextVisible(visible);

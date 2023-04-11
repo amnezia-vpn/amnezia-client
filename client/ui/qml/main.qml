@@ -124,7 +124,7 @@ Window  {
                              for (var i=0; i<folderModelPages.count; i++) {
                                  createPagesObjects(folderModelPages.get(i, "filePath"), PageType.Basic);
                              }
-                             UiLogic.initalizeUiLogic()
+                             UiLogic.initializeUiLogic()
                          }
     }
 
@@ -156,7 +156,7 @@ Window  {
 
     function createPagesObjects(file, type) {
         if (file.indexOf("Base") !== -1) return; // skip Base Pages
-        //console.debug("Creating compenent " + file + " for " + type);
+        //console.debug("Creating component " + file + " for " + type);
 
         var c = Qt.createComponent("qrc" + file);
 
@@ -178,7 +178,7 @@ Window  {
                         sharePages[obj.protocol] = obj
                     }
 
-//                    console.debug("Created compenent " + component.url + " for " + type);
+//                    console.debug("Created component " + component.url + " for " + type);
                 }
             } else if (component.status === Component.Error) {
                 console.debug("Error loading component:", component.errorString());

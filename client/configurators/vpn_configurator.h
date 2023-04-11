@@ -31,7 +31,7 @@ public:
     QString &processConfigWithLocalSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
     QString &processConfigWithExportSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);
 
-    // workaround for containers which is not support normal configaration
+    // workaround for containers which is not support normal configuration
     void updateContainerConfigAfterInstallation(DockerContainer container,
         QJsonObject &containerConfig, const QString &stdOut);
 

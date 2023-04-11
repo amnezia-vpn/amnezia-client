@@ -364,7 +364,7 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
 
-    #disbale in cicd
+    #disable in cicd
     include(cmake/osxtools.cmake)
     # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
@@ -376,7 +376,7 @@ if(IOS)
     set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 
 
-    #need to change for debug and relase
+    #need to change for debug and release
     set_target_properties(${PROJECT} 
         PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
