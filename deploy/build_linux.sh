@@ -33,7 +33,7 @@ INSTALLER_DATA_DIR=$PROJECT_DIR/deploy/installer/packages/$APP_DOMAIN/data
 PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
 QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 
-# Seacrh Qt
+# Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
   QT_VERSION=5.15.2
   if [ -f /opt/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then

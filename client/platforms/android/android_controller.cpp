@@ -297,7 +297,7 @@ void AndroidController::startActivityForResult(JNIEnv *env, jobject, jobject int
          [](int receiverRequestCode, int resultCode,
             const QJniObject& data) {
            // Currently this function just used in
-           // VPNService.kt::checkPersmissions. So the result
+           // VPNService.kt::checkPermissions. So the result
            // we're getting is if the User gave us the
            // Vpn.bind permission. In case of NO we should
            // abort.

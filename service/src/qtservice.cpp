@@ -522,7 +522,7 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
     You can retrieve the service's description, state, and startup
     type using the serviceDescription(), serviceFlags() and
     startupType() functions respectively. The service's state is
-    decribed by the ServiceFlag enum. The mentioned properites can
+    described by the ServiceFlag enum. The mentioned properties can
     also be set using the corresponding set functions. In addition you
     can retrieve the service's name using the serviceName() function.
 
@@ -580,7 +580,7 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
     \row \i -e \i -exec
          \i Execute the service as a standalone application (useful for debug purposes).
             This is a blocking call, the service will be executed like a normal application.
-            In this mode you will not be able to communicate with the service from the contoller.
+            In this mode you will not be able to communicate with the service from the controller.
     \row \i -t \i -terminate \i Stop the service.
     \row \i -p \i -pause \i Pause the service.
     \row \i -r \i -resume \i Resume a paused service.
@@ -736,7 +736,7 @@ void QtServiceBase::setStartupType(QtServiceController::StartupType type)
 }
 
 /*!
-    Returns the service's state which is decribed using the
+    Returns the service's state which is described using the
     ServiceFlag enum.
 
     \sa ServiceFlags, setServiceFlags()

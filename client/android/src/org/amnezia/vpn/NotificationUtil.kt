@@ -27,7 +27,7 @@ object NotificationUtil {
      * Parcel - Gets called from AndroidController.cpp
      */
     fun update(data: Parcel) {
-        // [data] is here a json containing the noification content
+        // [data] is here a json containing the notification content
         val buffer = data.createByteArray()
         val json = buffer?.let { String(it) }
         val content = JSONObject(json)

@@ -30,7 +30,7 @@ object Key {
     const val id = "profileId"
     const val name = "profileName"
 
-    const val individual = "Proxyed"
+    const val individual = "Proxied"
 
     const val serviceMode = "serviceMode"
     const val modeProxy = "proxy"

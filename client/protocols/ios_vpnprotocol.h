@@ -36,7 +36,7 @@ public:
     void cleanupBackendLogs();
 
 signals:
-    void newTransmitedDataCount(quint64 rxBytes, quint64 txBytes);
+    void newTransmittedDataCount(quint64 rxBytes, quint64 txBytes);
 
 protected slots:
 

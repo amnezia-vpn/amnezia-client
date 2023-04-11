@@ -127,7 +127,7 @@ UiLogic::~UiLogic()
     qDebug() << "Application closed";
 }
 
-void UiLogic::initalizeUiLogic()
+void UiLogic::initializeUiLogic()
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
@@ -308,8 +308,8 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
     progressBarFunc.getValueFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarValue();
     };
-    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
-        return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximium();
+    progressBarFunc.getMaximumFunc = [this] (void) -> int {
+        return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximum();
     };
     progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarTextVisible(visible);
