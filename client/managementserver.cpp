@@ -49,9 +49,9 @@ void ManagementServer::onNewConnection()
     m_socket = QPointer<QTcpSocket>(m_tcpServer->nextPendingConnection());
     if (m_tcpServer) m_tcpServer->close();
 
-    QObject::connect(m_socket.data(), SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
-    QObject::connect(m_socket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-    QObject::connect(m_socket.data(), SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    QObject::connect(m_socket.data(), &QTcpSocket::disconnected, this, &ManagementServer::onSocketDisconnected);
+    QObject::connect(m_socket.data(), &QTcpSocket::errorOccurred, this, &ManagementServer::onSocketError);
+    QObject::connect(m_socket.data(), &QTcpSocket::readyRead, this, &ManagementServer::onReadyRead);
 }
 
 void ManagementServer::onSocketError(QAbstractSocket::SocketError socketError)

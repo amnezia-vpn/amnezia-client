@@ -32,6 +32,7 @@ QString amnezia::scriptName(SharedScriptType type)
     case SharedScriptType::setup_host_firewall: return QLatin1String("setup_host_firewall.sh");
     case SharedScriptType::check_connection: return QLatin1String("check_connection.sh");
     case SharedScriptType::check_server_is_busy: return QLatin1String("check_server_is_busy.sh");
+    case SharedScriptType::check_user_in_sudo: return QLatin1String("check_user_in_sudo.sh");
     }
 }
 

@@ -66,6 +66,8 @@
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
 #include "pages_logic/AdvancedServerSettingsLogic.h"
+#include "pages_logic/ClientManagementLogic.h"
+#include "pages_logic/ClientInfoLogic.h"
 
 #include "pages_logic/protocols/CloakLogic.h"
 #include "pages_logic/protocols/OpenVpnLogic.h"
@@ -77,16 +79,15 @@ using namespace amnezia;
 using namespace PageEnumNS;
 
 UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
-    std::shared_ptr<ServerController> serverController,
     QObject *parent) :
     QObject(parent),
     m_settings(settings),
-    m_configurator(configurator),
-    m_serverController(serverController)
+    m_configurator(configurator)
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
-    m_vpnConnection = new VpnConnection(settings, configurator, serverController);
+    m_clientManagementModel = new ClientManagementModel(this);
+    m_vpnConnection = new VpnConnection(settings, configurator);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -336,7 +337,8 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
         if (!isContainerAlreadyAddedToGui(container.first)) {
             progressBarFunc.setTextFunc(QString("Installing %1").arg(ContainerProps::containerToString(container.first)));
             auto installAction = [&] () {
-                return m_serverController->setupContainer(m_installCredentials, container.first, container.second);
+                ServerController serverController(m_settings);
+                return serverController.setupContainer(m_installCredentials, container.first, container.second);
             };
             errorCode = pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
                                                                                      noButton, waitInfoFunc,
@@ -534,6 +536,8 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<ViewConfigLogic>();
     registerPageLogic<VpnLogic>();
     registerPageLogic<WizardLogic>();
+    registerPageLogic<ClientManagementLogic>();
+    registerPageLogic<ClientInfoLogic>();
     registerPageLogic<AdvancedServerSettingsLogic>();
 }
 
@@ -556,7 +560,8 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool &isServerCreated)
     }
 
     QMap<DockerContainer, QJsonObject> installedContainers;
-    ErrorCode errorCode = m_serverController->getAlreadyInstalledContainers(installCredentials, installedContainers);
+    ServerController serverController(m_settings);
+    ErrorCode errorCode = serverController.getAlreadyInstalledContainers(installCredentials, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -610,3 +615,4 @@ bool UiLogic::isContainerAlreadyAddedToGui(DockerContainer container)
     }
     return false;
 }
+
