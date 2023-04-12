@@ -85,7 +85,6 @@ Window  {
     }
 
     Rectangle {
-        y: 0
         anchors.fill: parent
         color: "white"
     }

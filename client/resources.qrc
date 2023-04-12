@@ -176,5 +176,17 @@
         <file>ui/qml/Controls2/CardType.qml</file>
         <file>ui/qml/Controls2/CheckBoxType.qml</file>
         <file>images/controls/check.svg</file>
+        <file>ui/qml/Controls2/DropDownType.qml</file>
+        <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/main2.qml</file>
+        <file>ui/qml/PageLoader.qml</file>
+        <file>images/amneziaBigLogo.png</file>
+        <file>images/amneziaBigLogo.svg</file>
+        <file>ui/qml/Controls2/BodyTextType.qml</file>
+        <file>ui/qml/Controls2/FlickableType.qml</file>
+        <file>ui/qml/Controls2/Header2TextType.qml</file>
+        <file>ui/qml/Pages2/PageCredentials.qml</file>
+        <file>ui/qml/Controls2/HeaderTextType.qml</file>
+        <file>images/controls/arrow-left.svg</file>
     </qresource>
 </RCC>

@@ -7,6 +7,7 @@ Item {
 
     property string headerText
     property string textFieldText
+    property string textFieldPlaceholderText
     property bool textFieldEditable: true
 
     implicitWidth: 328
@@ -45,6 +46,9 @@ Item {
             enabled: root.textFieldEditable
             text: root.textFieldText
             color: "#d7d8db"
+
+            placeholderText: textFieldPlaceholderText
+
             font.pixelSize: 16
             font.weight: 400
             font.family: "PT Root UI VF"

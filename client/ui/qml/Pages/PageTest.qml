@@ -13,7 +13,6 @@ PageBase {
     logic: ViewConfigLogic
 
     Rectangle {
-        y: 0
         anchors.fill: parent
         color: "#0E0E11"
     }

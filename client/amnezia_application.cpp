@@ -92,7 +92,7 @@ void AmneziaApplication::init()
     m_engine = new QQmlApplicationEngine;
     m_uiLogic = new UiLogic(m_settings, m_configurator, m_serverController);
 
-    const QUrl url(QStringLiteral("qrc:/ui/qml/main.qml"));
+    const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
     QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated,
                      this, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
