@@ -18,6 +18,8 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
+include(${CLIENT_ROOT_DIR}/3rd/strongswan/strongswan.cmake)
+
 include_directories(
     ${CLIENT_ROOT_DIR}/3rd/OpenSSL/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/include

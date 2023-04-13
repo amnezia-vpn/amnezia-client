@@ -1,7 +1,7 @@
 apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
-   ext{
+   ext {
        kotlin_version = "1.7.22"
        //  for libwg
        appcompatVersion = '1.1.0'
@@ -11,6 +11,7 @@ buildscript {
        streamsupportVersion = '1.7.0'
        threetenabpVersion = '1.1.1'
        groupName = 'org.amnezia.vpn'
+       relativePathToStrongswan = '../3rd/strongswan/sources/src/frontends/android/app/src/main/jni'
    }
 
     repositories {
@@ -105,7 +106,7 @@ android {
             resources.srcDirs = ['resources']
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
-            jniLibs.srcDirs = ['libs']
+            jniLibs.srcDirs = ['libs', relativePathToStrongswan]
             androidTest.assets.srcDirs += files("${qtAndroidDir}/schemas".toString())
        }
     }
@@ -168,11 +169,29 @@ android {
        }
     }
 
-    externalNativeBuild {
-        ndkBuild {
-            path "../3rd/strongswan/src/frontends/android/app/src/main/jni/Android.mk"
+    task buildStrongSwanNative(type: Exec) {
+        workingDir "${relativePathToStrongswan}"
+        commandLine "${android.ndkDirectory}/ndk-build", '-j', Runtime.runtime.availableProcessors()
+
+        doLast {
+            copy {
+                from "${workingDir} + /../libs"
+                into 'libs'
+            }
         }
     }
+
+    task cleanStrongSwanNative(type: Exec) {
+        workingDir "${relativePathToStrongswan}"
+        commandLine "${android.ndkDirectory}/ndk-build", 'clean'
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildStrongSwanNative
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+
+    clean.dependsOn 'cleanStrongSwanNative'
 
 //   externalNativeBuild {
 //       cmake {

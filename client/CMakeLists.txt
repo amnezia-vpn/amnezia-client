@@ -533,7 +533,6 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNService.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNServiceBinder.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/AmneziaApp.kt
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNApplication.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNClientBinder.kt
