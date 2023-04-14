@@ -9,16 +9,17 @@ RadioButton {
     property string bodyText
     property string footerText
 
-    property string hoveredColor: Qt.rgba(255, 255, 255, 0.05)
-    property string defaultColor: Qt.rgba(255, 255, 255, 0)
-    property string disabledColor: Qt.rgba(255, 255, 255, 0)
-    property string pressedColor: Qt.rgba(255, 255, 255, 0.05)
+    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
+    property string defaultColor: Qt.rgba(1, 1, 1, 0)
+    property string disabledColor: Qt.rgba(1, 1, 1, 0)
+    property string pressedColor: Qt.rgba(1, 1, 1, 0.05)
+    property string selectedColor: Qt.rgba(1, 1, 1, 0)
 
     property string textColor: "#0E0E11"
 
-    property string pressedBorderColor: Qt.rgba(251, 178, 106, 0.3)
-    property string hoveredBorderColor: "transparent"
-    property string defaultBodredColor: "#FBB26A"
+    property string pressedBorderColor: Qt.rgba(251/255, 178/255, 106/255, 0.3)
+    property string selectedBorderColor: "#FBB26A"
+    property string defaultBodredColor: "transparent"
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
@@ -32,36 +33,43 @@ RadioButton {
 
         color: {
             if (root.enabled) {
-                if(root.checked) {
-                    return pressedColor
+                if (root.hovered) {
+                    return hoveredColor
+                } else if (root.checked) {
+                    return selectedColor
                 }
-                return hovered ? hoveredColor : defaultColor
+                return defaultColor
             } else {
                 return disabledColor
             }
         }
+
         border.color: {
             if (root.enabled) {
-                if(root.checked) {
+                if (root.pressed) {
                     return pressedBorderColor
+                } else if (root.checked) {
+                    return selectedBorderColor
                 }
-                return hovered ? hoveredBorderColor : defaultBodredColor
-            } else {
-                return defaultBodredColor
             }
+            return defaultBodredColor
         }
+
         border.width: {
             if (root.enabled) {
                 if(root.checked) {
                     return 1
                 }
-                return hovered ? 0 : 1
+                return root.pressed ? 1 : 0
             } else {
                 return 0
             }
         }
 
         Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
     }

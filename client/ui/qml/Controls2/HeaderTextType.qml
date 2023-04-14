@@ -1,40 +1,64 @@
 import QtQuick
 import QtQuick.Layouts
 
-ColumnLayout {
+Item {
     id: root
 
     property string buttonImage
     property string headerText
-    property var wrapMode
+    property string descriptionText
 
-    ImageButtonType {
-        id: button
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight
 
-        Layout.leftMargin: -6
+    ColumnLayout {
+        id: content
+        anchors.fill: parent
 
-        hoverEnabled: false
-        image: root.buttonImage
-        onClicked: {
-            if (onClickedFunc && typeof onClickedFunc === "function") {
-                onClickedFunc()
+        ImageButtonType {
+            id: backButton
+
+            Layout.leftMargin: -6
+
+            image: root.buttonImage
+            imageColor: "#D7D8DB"
+            onClicked: {
+                UiLogic.closePage()
             }
         }
-    }
 
-    Text {
-        id: header
+        Text {
+            id: header
 
-        text: root.headerText
+            text: root.headerText
 
-        color: "#D7D8DB"
-        font.pixelSize: 36
-        font.weight: 700
-        font.family: "PT Root UI VF"
-        font.letterSpacing: -0.03
+            color: "#D7D8DB"
+            font.pixelSize: 36
+            font.weight: 700
+            font.family: "PT Root UI VF"
+            font.letterSpacing: -0.03
 
-        wrapMode: Text.WordWrap
+            wrapMode: Text.WordWrap
 
-        height: 38
+            height: 38
+            Layout.fillWidth: true
+        }
+
+        Text {
+            id: description
+
+            text: root.descriptionText
+
+            color: "#878B91"
+            font.pixelSize: 16
+            font.weight: 400
+            font.family: "PT Root UI VF"
+            font.letterSpacing: -0.03
+
+            wrapMode: Text.WordWrap
+
+            height: 24
+            Layout.fillWidth: true
+        }
     }
 }

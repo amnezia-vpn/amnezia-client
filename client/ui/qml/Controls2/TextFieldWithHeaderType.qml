@@ -18,8 +18,12 @@ Item {
         anchors.fill: parent
         color: "#1c1d21"
         radius: 16
-        border.color: "#d7d8db"
-        border.width: textField.focus ? 1 : 0
+        border.color: textField.focus ? "#d7d8db" : "#2C2D30"
+        border.width: 1
+
+        Behavior on border.color {
+            PropertyAnimation { duration: 200 }
+        }
     }
 
     ColumnLayout {

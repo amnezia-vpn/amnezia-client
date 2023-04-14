@@ -11,7 +11,7 @@ import "../Config"
 
 PageBase {
     id: root
-    page: PageEnum.Credentials
+    page: PageEnum.WizardCredentials
 
     FlickableType {
         id: fl
@@ -32,15 +32,11 @@ PageBase {
 
             HeaderTextType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
-                Layout.topMargin: 66
-
-                Layout.preferredWidth: 328
+                Layout.topMargin: 20
 
                 buttonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Подключение к серверу"
-                wrapMode: Text.WordWrap
             }
 
             TextFieldWithHeaderType {
@@ -60,23 +56,31 @@ PageBase {
 
             BasicButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 24
 
                 text: qsTr("Настроить сервер простым образом")
+
+                onClicked: function() {
+                    UiLogic.goToPage(PageEnum.WizardEasySetup)
+                }
             }
 
             BasicButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: -8
 
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(255, 255, 255, 0.08)
-                pressedColor: Qt.rgba(255, 255, 255, 0.12)
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
                 disabledColor: "#878B91"
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
                 text: qsTr("Выбрать протокол для установки")
+
+                onClicked: function() {
+                    UiLogic.goToPage(PageEnum.WizardProtocols)
+                }
             }
         }
     }

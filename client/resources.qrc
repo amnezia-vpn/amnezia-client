@@ -185,8 +185,10 @@
         <file>ui/qml/Controls2/BodyTextType.qml</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
         <file>ui/qml/Controls2/Header2TextType.qml</file>
-        <file>ui/qml/Pages2/PageCredentials.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
         <file>ui/qml/Controls2/HeaderTextType.qml</file>
         <file>images/controls/arrow-left.svg</file>
+        <file>ui/qml/Pages2/PageSetupWizardProtocols.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
     </qresource>
 </RCC>

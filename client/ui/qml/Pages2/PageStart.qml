@@ -31,7 +31,7 @@ PageBase {
                 source: "qrc:/images/amneziaBigLogo.png"
 
                 Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: 80
+                Layout.topMargin: 32
                 Layout.leftMargin: 8
                 Layout.rightMargin: 8
                 Layout.preferredWidth: 344
@@ -67,8 +67,8 @@ PageBase {
                 Layout.rightMargin: 16
 
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(255, 255, 255, 0.08)
-                pressedColor: Qt.rgba(255, 255, 255, 0.12)
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
                 disabledColor: "#878B91"
                 textColor: "#D7D8DB"
                 borderWidth: 1
@@ -123,6 +123,7 @@ PageBase {
                     Layout.alignment: Qt.AlignHCenter
 
                     text: "Данные для подключения"
+                    wrapMode: Text.WordWrap
                 }
 
                 LabelWithButtonType {
@@ -134,7 +135,8 @@ PageBase {
                     buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                     onClickedFunc: function() {
-                        UiLogic.goToPage(PageEnum.Credentials)
+                        UiLogic.goToPage(PageEnum.WizardCredentials)
+                        drawer.visible = false
                     }
                 }
                 Rectangle {

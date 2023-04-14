@@ -6,24 +6,48 @@ Item {
     id: root
 
     property string text
+    property string descriptionText
 
     property var onClickedFunc
     property alias buttonImage : button.image
 
-    implicitWidth: 360
-    implicitHeight: 72
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight
 
     RowLayout {
+        id: content
         anchors.fill: parent
 
-        Text {
-            font.family: "PT Root UI"
-            font.styleName: "normal"
-            font.pixelSize: 18
-            color: "#d7d8db"
-            text: root.text
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
+            Text {
+                font.family: "PT Root UI"
+                font.styleName: "normal"
+                font.pixelSize: 18
+                color: "#d7d8db"
+                text: root.text
+
+                Layout.fillWidth: true
+                height: 22
+
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            Text {
+                font.family: "PT Root UI"
+                font.styleName: "normal"
+                font.pixelSize: 13
+                font.letterSpacing: 0.02
+                color: "#878B91"
+                text: root.descriptionText
+                wrapMode: Text.WordWrap
+
+                Layout.fillWidth: true
+                height: 16
+
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+            }
         }
 
         ImageButtonType {

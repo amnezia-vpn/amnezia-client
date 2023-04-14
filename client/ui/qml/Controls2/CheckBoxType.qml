@@ -6,9 +6,9 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: root
 
-    property string hoveredColor: Qt.rgba(255, 255, 255, 0.05)
+    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
     property string defaultColor: "transparent"
-    property string pressedColor: Qt.rgba(255, 255, 255, 0.05)
+    property string pressedColor: Qt.rgba(1, 1, 1, 0.05)
 
     property string defaultBorderColor: "#D7D8DB"
     property string checkedBorderColor: "#FBB26A"
