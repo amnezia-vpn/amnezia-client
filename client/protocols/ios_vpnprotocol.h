@@ -52,10 +52,12 @@ private:
     
     void setupWireguardProtocol(const QtJson::JsonObject& result);
     void setupOpenVPNProtocol(const QtJson::JsonObject& result);
+    void setupCloakProtocol(const QtJson::JsonObject& result);
     void setupShadowSocksProtocol(const QtJson::JsonObject& result);
     
     void launchWireguardTunnel(const QtJson::JsonObject &result);
     void launchOpenVPNTunnel(const QtJson::JsonObject &result);
+    void launchCloakTunnel(const QtJson::JsonObject &result);
     void launchShadowSocksTunnel(const QtJson::JsonObject &result);
     
     QString serializeSSConfig(const QtJson::JsonObject &ssConfig);
