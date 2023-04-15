@@ -23,7 +23,7 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
     m_labelSpeedSentText{tr("0 Mbps")},
     m_labelStateText{},
     m_isContainerHaveAuthData{false},
-    m_isContainerSupportedByCurrentPlatform{false},
+    m_isContainerSupportedByCurrentPlatform{true},
     m_widgetVpnModeEnabled{false}
 {
     connect(uiLogic()->m_vpnConnection, &VpnConnection::bytesChanged, this, &VpnLogic::onBytesChanged);
@@ -55,7 +55,7 @@ void VpnLogic::onUpdatePage()
     set_isCustomRoutesSupported  (selectedContainer == DockerContainer::OpenVpn ||
                                   selectedContainer == DockerContainer::ShadowSocks||
                                   selectedContainer == DockerContainer::Cloak);
-
+//    set_isCustomRoutesSupported(true);
     set_isContainerHaveAuthData(m_settings->haveAuthData(m_settings->defaultServerIndex()));
 
     set_radioButtonVpnModeAllSitesChecked(mode == Settings::VpnAllSites || !isCustomRoutesSupported());
@@ -79,7 +79,6 @@ void VpnLogic::onUpdatePage()
     else {
         set_labelCurrentDns(dns.first + ", " + dns.second);
     }
-
 
     set_isContainerSupportedByCurrentPlatform(ContainerProps::isSupportedByCurrentPlatform(selectedContainer));
     if (!isContainerSupportedByCurrentPlatform()) {

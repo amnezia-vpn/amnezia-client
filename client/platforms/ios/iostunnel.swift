@@ -705,6 +705,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let evaluation: OpenVPNConfigurationEvaluation
         do {
             evaluation = try ovpnAdapter.apply(configuration: configuration)
+            
         } catch {
             completionHandler(error)
             return

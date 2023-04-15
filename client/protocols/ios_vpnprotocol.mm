@@ -544,8 +544,27 @@ void IOSVpnProtocol::launchWireguardTunnel(const QtJson::JsonObject &result)
 void IOSVpnProtocol::launchOpenVPNTunnel(const QtJson::JsonObject &result)
 {
     QtJson::JsonObject ovpn = result["openvpn_config_data"].toMap();
+    if(result["protocol"].toString() == "cloak"){
+        QtJson::JsonObject cloak = result["cloak_config_data"].toMap();
+        cloak["NumConn"] = 1;
+        cloak["RemoteHost"] = cloak["remote"].toString();
+        cloak["RemotePort"] = cloak["port"].toString();
+        
+        cloak.remove("remote");
+        cloak.remove("port");
+        result["cloak_config_data"] = cloak;
+        
+        QString cloakString = result["cloak_config_data"].toString();
+        QString cloakBase64 = cloakString.toUtf8().toBase64();
+        
+        QtJson::JsonObject ovpnJson = ovpn["config"].toMap();
+        ovpnJson["cloak"] = cloakBase64;
+        
+        ovpn["config"] = ovpnJson;
+    }
     QString ovpnConfig = ovpn["config"].toString();
     
+    qDebug() << "debug: " <<ovpnConfig.toNSString();
     [m_controller connectWithOvpnConfig:ovpnConfig.toNSString()
                         failureCallback:^{
         qDebug() << "IOSVPNProtocol (OpenVPN) - connection failed";
