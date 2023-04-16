@@ -633,9 +633,8 @@ void IOSVpnProtocol::launchCloakTunnel(const QtJson::JsonObject &result)
     QtJson::JsonObject cloak_config_data = result[""].toMap();
     QString ovpnConfigBefor = ovpn["config"].toString();
     qDebug() << "ovpn: " << ovpnConfigBefor.toNSString();
-    
-    QString cloak_config_dataBefor = result["cloak_config_data"].toString();
-    qDebug() << "cloak: " << cloak_config_dataBefor.toNSString();
+
+    QString ovpnConfig = ovpn["config"].toString();
     
     if(result["protocol"].toString() == "cloak"){
         QtJson::JsonObject cloak = result["cloak_config_data"].toMap();
@@ -648,21 +647,24 @@ void IOSVpnProtocol::launchCloakTunnel(const QtJson::JsonObject &result)
         cloak.remove("remote");
         cloak.remove("port");
         
-        result["cloak_config_data2"] = cloak;
+        // Convert JSONObject to JSONDocument
+        QJsonObject jsonObject {};
+        foreach(const QString& key, cloak.keys()) {
+                qDebug() << "Key = " << key << ", Value = " << cloak.value(key).toString();
+            jsonObject.insert(key, cloak.value(key).toString());
+            }
+        QJsonDocument doc(jsonObject);
+        QString strJson(doc.toJson(QJsonDocument::Compact));
+        qDebug() << "str Object Cloak" << strJson.toNSString();
         
-        QString remote = cloak["RemoteHost"].toString();
-        qDebug() << "remote: " << remote;
-        
-        QString cloakString = result["cloak_config_data"].toString(); // empty in there
-        QString cloakBase64 = cloakString.toUtf8().toBase64();
+        QString cloakBase64 = strJson.toUtf8().toBase64();
         qDebug() << "base64: " << cloakBase64.toNSString();
-        QtJson::JsonObject ovpnJson = ovpn["config"].toMap();
-        ovpnJson["cloak"] = cloakBase64;
         
-        ovpn["config"] = ovpnJson;
-        
+        ovpnConfig.append("\n<cloak>\n");
+        ovpnConfig.append(cloakBase64);
+        ovpnConfig.append("\n</cloak>\n");
     }
-    QString ovpnConfig = ovpn["config"].toString();
+    
     
     qDebug() << "debug: " << ovpnConfig.toNSString();
     [m_controller connectWithOvpnConfig:ovpnConfig.toNSString()
