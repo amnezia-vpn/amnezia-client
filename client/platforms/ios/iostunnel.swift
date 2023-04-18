@@ -308,7 +308,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             let strData = strBytesin + "\n" + strBytesout;
             let data = Data(strData.utf8)
             completionHandler(data)
-    }
+        }
     }
     
 /*
