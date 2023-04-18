@@ -289,10 +289,10 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
-    bool reinstallRequred = isReinstallContainerRequred(container, oldConfig, newConfig);
-    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
+    bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
-    if (reinstallRequred) {
+    if (reinstallRequired) {
         return setupContainer(credentials, container, newConfig, true);
     }
     else {
@@ -326,7 +326,7 @@ QJsonObject ServerController::createContainerInitialConfig(DockerContainer conta
     return config;
 }
 
-bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
@@ -662,6 +662,14 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     }
 
     if (!stdOut.isEmpty()) {
+        if (transportProto == "tcp") {
+            const static QRegularExpression localPortRegExp(".*:(\\d+)->");
+            QRegularExpressionMatch localPortMatch = localPortRegExp.match(stdOut);
+            if (localPortMatch.hasMatch() && localPortMatch.captured(1) != port) {
+                return ErrorCode::NoError;
+            }
+        }
+
         return ErrorCode::ServerPortAlreadyAllocatedError;
     }
     return ErrorCode::NoError;
@@ -669,6 +677,10 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
 ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
 {
+    if (credentials.userName == "root") {
+        return ErrorCode::NoError;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";

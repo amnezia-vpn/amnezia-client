@@ -104,8 +104,8 @@ QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
     pd->localSocket->connectToServer(amnezia::getIpcProcessUrl(pid));
     pd->localSocket->waitForConnected();
 
-    auto proccessReplica = QSharedPointer<PrivilegedProcess>(pd->ipcProcess);
-    return proccessReplica;
+    auto processReplica = QSharedPointer<PrivilegedProcess>(pd->ipcProcess);
+    return processReplica;
 }
 
 

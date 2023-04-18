@@ -20,7 +20,7 @@ APP_DOMAIN=org.amneziavpn.package
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
-# Seacrh Qt
+# Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=6.4.1;
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/$ANDROID_CURRENT_ARCH/bin

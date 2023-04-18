@@ -548,7 +548,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * Create a Wireguard [Config]  from a [json] string -
      * The [json] will be created in AndroidVpnProtocol.cpp
      */
-    private fun buildWireugardConfig(obj: JSONObject): Config {
+    private fun buildWireguardConfig(obj: JSONObject): Config {
         val confBuilder = Config.Builder()
         val wireguardConfigData = obj.getJSONObject("wireguard_config_data")
         val config = parseConfigData(wireguardConfigData.getString("config"))
@@ -697,7 +697,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startWireGuard() {
-        val wireguard_conf = buildWireugardConfig(mConfig!!)
+        val wireguard_conf = buildWireguardConfig(mConfig!!)
         Log.i(tag, "startWireGuard: wireguard_conf : $wireguard_conf")
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")

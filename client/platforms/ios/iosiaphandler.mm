@@ -130,7 +130,7 @@ Logger logger(LOG_IAP, "IOSIAPHandler");
         logger.debug() << "transaction deferred";
         break;
       default:
-        logger.warning() << "transaction unknwon state";
+        logger.warning() << "transaction unknown state";
         break;
     }
   }

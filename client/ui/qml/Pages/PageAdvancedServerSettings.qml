@@ -88,6 +88,15 @@ PageBase {
                 }
             }
 
+            BlueButtonType {
+                Layout.topMargin: 10
+                Layout.fillWidth: true
+                text: qsTr("Clients Management")
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.ClientManagement)
+                }
+            }
+
             PopupWithQuestion {
                 id: popupClearServer
                 questionText: "Attention! All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted. Continue?"

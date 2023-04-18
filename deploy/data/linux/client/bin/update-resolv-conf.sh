@@ -8,7 +8,7 @@
 # Used snippets of resolvconf script by Thomas Hood <jdthood@yahoo.co.uk>
 # and Chris Hanson
 # Licensed under the GNU GPL.  See /usr/share/common-licenses/GPL.
-# 07/2013 colin@daedrum.net Fixed intet name
+# 07/2013 colin@daedrum.net Fixed intent name
 # 05/2006 chlauber@bnc.ch
 #
 # Example envs set from openvpn:
