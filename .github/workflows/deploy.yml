@@ -201,7 +201,7 @@ jobs:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-        SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        SIGNING_KEY_PASSWORD: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
         SIGNING_KEY_FILE_PATH: signing-cert.p12
       
     - name: 'Upload appstore .ipa and dSYMs to artifacts'
