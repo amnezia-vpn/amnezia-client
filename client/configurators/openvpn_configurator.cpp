@@ -118,6 +118,18 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
             config.append("redirect-gateway def1 bypass-dhcp\n");
         }
     }
+    
+    
+    // Prevent ipv6 leak
+    // We can use block-ipv6 option only with precompiled OpenVPN,
+    // because this option is supported from OpenVPN 2.5.0 version
+    // For Linux and MacOS, we use UP/DOWN Script for IPv6 block
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WIN))
+    config.append("\nblock-ipv6\n");
+    config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+    config.append("redirect-gateway ipv6\n");
+#endif
+
 
 #if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     config.replace("block-outside-dns", "");

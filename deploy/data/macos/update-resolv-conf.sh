@@ -20,6 +20,7 @@ SRCHS=()
 # Get adapter list
 IFS=$'\n' read -d '' -ra adapters < <(networksetup -listallnetworkservices |grep -v denotes) || true
 
+
 split_into_parts()
 {
         part1="$1"
@@ -41,6 +42,57 @@ update_all_dns()
 		fi
         done
 }
+
+
+disable_ipv6() {
+
+    if [ "$OSVER" = "10.4" ] ; then
+        exit
+    fi
+
+    # Get list of services and remove the first line which contains a heading
+    dipv6_services="$( networksetup  -listallnetworkservices | sed -e '1,1d')"
+
+    # Go through the list disabling IPv6 for enabled services, and outputting lines with the names of the services
+    printf %s "$dipv6_services
+" | \
+    while IFS= read -r dipv6_service ; do
+
+        # If first character of a line is an asterisk, the service is disabled, so we skip it
+        if [ "${dipv6_service:0:1}" != "*" ] ; then
+            dipv6_ipv6_status="$( networksetup -getinfo "$dipv6_service" | grep 'IPv6: ' | sed -e 's/IPv6: //')"
+            if [ "$dipv6_ipv6_status" = "Automatic" ] ; then
+                networksetup -setv6off "$dipv6_service"
+                echo "$dipv6_service"
+            fi
+        fi
+
+    done
+}
+
+enable_ipv6() {
+
+    if [ "$OSVER" = "10.4" ] ; then
+        exit
+    fi
+
+    # Get list of services and remove the first line which contains a heading
+    dipv6_services="$( networksetup  -listallnetworkservices | sed -e '1,1d')"
+
+    # Go through the list disabling IPv6 for enabled services, and outputting lines with the names of the services
+    printf %s "$dipv6_services
+" | \
+    while IFS= read -r dipv6_service ; do
+
+        # If first character of a line is an asterisk, the service is disabled, so we skip it
+        if [ "${dipv6_service:0:1}" != "*" ] ; then
+            networksetup -setv6automatic "$dipv6_service"
+            echo "$dipv6_service"
+        fi
+
+    done
+}
+
 
 clear_all_dns()
 {
@@ -67,8 +119,10 @@ case "$script_type" in
                 fi
         done
         update_all_dns
+        disable_ipv6
         ;;
   down)
         clear_all_dns
+        enable_ipv6 
         ;;
 esac
