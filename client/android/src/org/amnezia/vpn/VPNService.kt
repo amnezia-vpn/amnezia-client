@@ -176,7 +176,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.v(tag, "Aman: onUnbind....................")
         if (!isUp) {
             // If the Qt Client got closed while we were not connected
             // we do not need to stay as a foreground service.
@@ -196,7 +195,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
      */
     override fun onBind(intent: Intent): IBinder {
-        Log.v(tag, "Aman: onBind....................")
 
         when (mProtocol) {
             "shadowsocks" -> {
@@ -220,7 +218,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * or from Booting the device and having "connect on boot" enabled.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.v(tag, "Aman: onStartCommand....................")
         this.intent = intent
         this.flags = flags
         this.startId = startId
@@ -284,6 +281,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     var isUp: Boolean = false
         get() {
             return when (mProtocol) {
+                "cloak",
                 "openvpn" -> {
                     field
                 }
@@ -309,6 +307,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             val deviceIpv4: String = ""
 
             val status = when (mProtocol) {
+                "cloak",
                 "openvpn" -> {
                     if (mOpenVPNThreadv3 == null) {
                         Status(null, null, null, null)
@@ -703,6 +702,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startOpenVpn() {
+        if (isUp || mOpenVPNThreadv3 != null) {
+            ovpnTurnOff()
+        }
+
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
 
         Thread({
