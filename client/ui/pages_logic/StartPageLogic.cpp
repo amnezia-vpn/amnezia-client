@@ -6,9 +6,11 @@
 #include "configurators/vpn_configurator.h"
 #include "../uilogic.h"
 #include "utilities.h"
+#include "core/servercontroller.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QEventLoop>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
@@ -94,8 +96,7 @@ void StartPageLogic::onPushButtonConnect()
             set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
-    }
-    else {
+    } else {
         if (lineEditIpText().isEmpty() ||
                 lineEditLoginText().isEmpty() ||
                 lineEditPasswordText().isEmpty() ) {
@@ -111,7 +112,7 @@ void StartPageLogic::onPushButtonConnect()
         serverCredentials.hostName = serverCredentials.hostName.split(":").at(0);
     }
     serverCredentials.userName = lineEditLoginText();
-    if (pushButtonConnectKeyChecked()){
+    if (pushButtonConnectKeyChecked()) {
         QString key = textEditSshKeyText();
         if (key.startsWith("ssh-rsa")) {
             emit uiLogic()->showPublicKeyWarning();
@@ -123,28 +124,44 @@ void StartPageLogic::onPushButtonConnect()
         }
 
         serverCredentials.password = key;
-    }
-    else {
+    } else {
         serverCredentials.password = lineEditPasswordText();
     }
 
     set_pushButtonConnectEnabled(false);
     set_pushButtonConnectText(tr("Connecting..."));
 
-    ErrorCode e = ErrorCode::NoError;
-#ifdef Q_DEBUG
-    //QString output = m_serverController->checkSshConnection(serverCredentials, &e);
-#else
+    ServerController serverController(m_settings);
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    if (pushButtonConnectKeyChecked()) {
+        auto passphraseCallback = [this, &serverController]() {
+            emit showPassphraseRequestMessage();
+            QEventLoop loop;
+            QObject::connect(this, &StartPageLogic::passphraseDialogClosed, &loop, &QEventLoop::quit);
+            loop.exec();
+
+            return m_privateKeyPassphrase;
+        };
+
+        QString decryptedPrivateKey;
+        errorCode = serverController.getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey, passphraseCallback);
+        if (errorCode == ErrorCode::NoError) {
+            serverCredentials.password = decryptedPrivateKey;
+        }
+    }
+
     QString output;
-#endif
+    if (errorCode == ErrorCode::NoError) {
+        output = serverController.checkSshConnection(serverCredentials, &errorCode);
+    }
 
     bool ok = true;
-    if (e) {
+    if (errorCode) {
         set_labelWaitInfoVisible(true);
-        set_labelWaitInfoText(errorString(e));
+        set_labelWaitInfoText(errorString(errorCode));
         ok = false;
-    }
-    else {
+    } else {
         if (output.contains("Please login as the user")) {
             output.replace("\n", "");
             set_labelWaitInfoVisible(true);
@@ -167,7 +184,7 @@ void StartPageLogic::onPushButtonImport()
 
 void StartPageLogic::onPushButtonImportOpenFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, tr("Open config file"),
+    QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open config file"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
     if (fileName.isEmpty()) return;
 
@@ -175,14 +192,7 @@ void StartPageLogic::onPushButtonImportOpenFile()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    auto configFormat = checkConfigFormat(QString(data));
-    if (configFormat == ConfigTypes::OpenVpn) {
-        importConnectionFromOpenVpnConfig(QString(data));
-    } else if (configFormat == ConfigTypes::WireGuard) {
-        importConnectionFromWireguardConfig(QString(data));
-    } else {
-        importConnectionFromCode(QString(data));
-    }
+    selectConfigFormat(QString(data));
 }
 
 #ifdef Q_OS_ANDROID
@@ -191,6 +201,18 @@ void StartPageLogic::startQrDecoder()
     AndroidController::instance()->startQrReaderActivity();
 }
 #endif
+
+void StartPageLogic::selectConfigFormat(QString configData)
+{
+    auto configFormat = checkConfigFormat(configData);
+    if (configFormat == ConfigTypes::OpenVpn) {
+        importConnectionFromOpenVpnConfig(configData);
+    } else if (configFormat == ConfigTypes::WireGuard) {
+        importConnectionFromWireguardConfig(configData);
+    } else {
+        importConnectionFromCode(configData);
+    }
+}
 
 bool StartPageLogic::importConnection(const QJsonObject &profile)
 {

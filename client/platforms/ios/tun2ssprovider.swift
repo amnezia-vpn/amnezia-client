@@ -166,7 +166,7 @@ class TunProvider: NSObject {
         dispatchQueue.async {
             let success = leaf_shutdown(self.tunId)
             if !success {
-                let errMsg = "Tunnel canot be stopped for some odd reason."
+                let errMsg = "Tunnel cannot be stopped for some odd reason."
                 self.stopCompletion?(.undefinedError(errMsg))
             }
             pthread_kill(self.tunThreadId!, SIGUSR1)

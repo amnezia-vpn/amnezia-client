@@ -33,7 +33,7 @@ class OpenVpnLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(bool, labelProtoOpenVpnInfoVisible)
     AUTO_PROPERTY(QString, labelProtoOpenVpnInfoText)
     AUTO_PROPERTY(int, progressBarResetValue)
-    AUTO_PROPERTY(int, progressBarResetMaximium)
+    AUTO_PROPERTY(int, progressBarResetMaximum)
     AUTO_PROPERTY(bool, progressBarTextVisible)
     AUTO_PROPERTY(QString, progressBarText)
 

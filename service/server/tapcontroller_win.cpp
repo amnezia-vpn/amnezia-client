@@ -285,7 +285,7 @@ bool TapController::removeDriver(const QString& tapInstanceId)
         tapInstallProc.waitForFinished();
         QString output = QString( tapInstallProc.readAll() );
         if (output.contains("were removed")) {
-            qDebug() << "TAP device" << tapInstanceId << "suceccfully removed";
+            qDebug() << "TAP device" << tapInstanceId << "successfully removed";
             return true;
         }
         else {

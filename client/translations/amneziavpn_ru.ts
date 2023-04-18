@@ -403,7 +403,7 @@ Please note, this protocol still does not support export connection profile to m
         <location filename="../ui/mainwindow.ui" line="1388"/>
         <source>Optional.
 
-We recommend to enable VPN mode &quot;For selected sites&quot; and add blocked sites you need to visit manually. If you will choose this option, you will need add every bloked site you want to visit to the access list. You may switch between modes later.
+We recommend to enable VPN mode &quot;For selected sites&quot; and add blocked sites you need to visit manually. If you will choose this option, you will need add every blocked site you want to visit to the access list. You may switch between modes later.
 
 Please note, you should add addresses to the list after VPN connection established. You may add any domain, URL or IP address, it will be resolved to IP address.</source>
         <translation>Опционально.
@@ -582,7 +582,7 @@ OpenVPN over ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="4302"/>
-        <source>Secondray DNS server</source>
+        <source>Secondary DNS server</source>
         <translation>Вторичный DNS сервер</translation>
     </message>
     <message>
@@ -1111,7 +1111,7 @@ This code does not include server credentials.</source>
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="1756"/>
-        <source>VPN Protocol not choosen</source>
+        <source>VPN Protocol not chosen</source>
         <translation>VPN протокол не выбран</translation>
     </message>
     <message>

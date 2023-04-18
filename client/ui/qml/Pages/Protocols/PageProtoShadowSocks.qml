@@ -113,7 +113,7 @@ PageProtocolBase {
         id: progressBar_reset
         anchors.fill: pb_save
         from: 0
-        to: logic.progressBarResetMaximium
+        to: logic.progressBarResetMaximum
         value: logic.progressBarResetValue
         visible: logic.progressBarResetVisible
         background: Rectangle {

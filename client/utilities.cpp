@@ -120,9 +120,9 @@ QString Utils::getIPAddress(const QString& host)
         return host;
     }
 
-    QList<QHostAddress> adresses = QHostInfo::fromName(host).addresses();
-    if (!adresses.isEmpty()) {
-        return adresses.first().toString();
+    QList<QHostAddress> addresses = QHostInfo::fromName(host).addresses();
+    if (!addresses.isEmpty()) {
+        return addresses.first().toString();
     }
     qDebug() << "Unable to resolve address for " << host;
     return "";
@@ -231,7 +231,7 @@ QString Utils::wireguardExecPath()
 #ifdef Q_OS_WIN
     return Utils::executable("wireguard/wireguard-service", true);
 #elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg");
+    return Utils::usrExecutable("wg-quick");
 #else
     return Utils::executable("/wireguard", true);
 #endif

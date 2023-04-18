@@ -32,7 +32,6 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         const val resumeActivate = 7
         const val setNotificationText = 8
         const val setFallBackNotification = 9
-        const val shareConfig = 10
         const val importConfig = 11
     }
 
@@ -51,7 +50,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         when (code) {
             ACTIONS.activate -> {
                 try {
-                    Log.i(tag, "Activiation Requested, parsing Config")
+                    Log.i(tag, "Activation Requested, parsing Config")
                     // [data] is here a json containing the wireguard/openvpn conf
                     val buffer = data.createByteArray()
                     val json = buffer?.let { String(it) }
@@ -139,20 +138,6 @@ class VPNServiceBinder(service: VPNService) : Binder() {
                 return true
             }
 
-            ACTIONS.shareConfig -> {
-                val byteArray = data.createByteArray()
-                val json = byteArray?.let { String(it) }
-                val config = JSONObject(json)
-                val configContent = config.getString("data")
-                val suggestedName = config.getString("suggestedName")
-
-                val filePath = mService.saveAsFile(configContent, suggestedName)
-                Log.i(tag, "save file: $filePath")
-
-                mService.shareFile(filePath)
-                return true
-            }
-
             ACTIONS.importConfig -> {
                 val buffer = data.readString()
 
@@ -196,7 +181,6 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         try {
             mListener?.let {
                 if (it.isBinderAlive) {
-                    Log.i(tag, "Dispatching event: binder alive")
                     val data = Parcel.obtain()
                     data.writeByteArray(payload?.toByteArray(charset("UTF-8")))
                     it.transact(code, data, Parcel.obtain(), 0)

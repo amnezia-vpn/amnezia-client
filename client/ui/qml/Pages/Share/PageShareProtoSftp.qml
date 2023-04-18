@@ -15,7 +15,7 @@ PageShareProtocolBase {
 
     Caption {
         id: caption
-        text: qsTr("Share SFTF settings")
+        text: qsTr("Share SFTP settings")
     }
 
  }

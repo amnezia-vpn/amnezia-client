@@ -1,0 +1,34 @@
+@startuml openVpnRevokeClientCertificate
+actor Admin as adm
+participant "Amnezia Client" as cli
+participant "Amnezia Container" as cont
+participant "OpenVpn Service" as ovpn
+
+adm -> cli: revoke the selected client certificate
+cli -> cli: start busy indicator
+cli -> cont: execute script "revoke openvpn client"
+
+cont -> cont: cd /opt/amnezia/openvpn
+cont -> cont: easyrsa revoke openvpnCertId
+cont -> cont: easyrsa gen-crl
+cont -> cont: cp pki/crl.pem crl.pem
+cont -> ovpn: restart openvpn service
+note right
+    In the OpenVpn config 
+    there should be a line "crl-verify crl.pem".
+    After that, the service will ignore
+    the certificates contained in the crl.pem file
+end note 
+
+
+group#lightgreen #lightgreen if [successful case]
+    ovpn --> cont: restart result
+    cont --> cli: back to the client management page
+else #pink some kind of failure
+    cont --> cli: display an error depending on when it occurred
+end
+
+cli -> cli: stop busy indicator
+cli --> adm: return control to the user 
+
+@enduml

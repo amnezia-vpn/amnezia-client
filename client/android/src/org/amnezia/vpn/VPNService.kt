@@ -287,6 +287,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             }
         }
         set(value) {
+            field = value
+
             if (value) {
                 mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
                 mConnectionTime = System.currentTimeMillis()
@@ -546,7 +548,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * Create a Wireguard [Config]  from a [json] string -
      * The [json] will be created in AndroidVpnProtocol.cpp
      */
-    private fun buildWireugardConfig(obj: JSONObject): Config {
+    private fun buildWireguardConfig(obj: JSONObject): Config {
         val confBuilder = Config.Builder()
         val wireguardConfigData = obj.getJSONObject("wireguard_config_data")
         val config = parseConfigData(wireguardConfigData.getString("config"))
@@ -695,7 +697,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startWireGuard() {
-        val wireguard_conf = buildWireugardConfig(mConfig!!)
+        val wireguard_conf = buildWireguardConfig(mConfig!!)
         Log.i(tag, "startWireGuard: wireguard_conf : $wireguard_conf")
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")
@@ -885,46 +887,5 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     class CloseableFd(val fd: FileDescriptor) : Closeable {
         override fun close() = Os.close(fd)
-    }
-
-    fun saveAsFile(configContent: String?, suggestedFileName: String): String {
-        val rootDirPath = cacheDir.absolutePath
-        val rootDir = File(rootDirPath)
-
-        if (!rootDir.exists()) {
-            rootDir.mkdirs()
-        }
-
-        val fileName = if (!TextUtils.isEmpty(suggestedFileName)) suggestedFileName else "amnezia.cfg"
-
-        val file = File(rootDir, fileName)
-
-        try {
-            file.bufferedWriter().use { out -> out.write(configContent) }
-            return file.toString()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return ""
-    }
-
-    fun shareFile(attachmentFile: String?) {
-        try {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "text/*"
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-            val file = File(attachmentFile)
-            val uri = FileProvider.getUriForFile(this, "${BuildConfig.APPLICATION_ID}.fileprovider", file)
-            intent.putExtra(Intent.EXTRA_STREAM, uri)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            val createChooser = Intent.createChooser(intent, "Config sharing")
-            createChooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(createChooser)
-        } catch (e: Exception) {
-            Log.i(tag, e.message.toString())
-        }
     }
 }

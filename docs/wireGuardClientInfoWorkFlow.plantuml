@@ -1,0 +1,59 @@
+@startuml wireGuardRevokeClientCertificate
+
+|client management page|
+start
+
+:on update client management page;
+:get clientsTable file from server;
+:get wireguard config from server;
+
+repeat
+
+if (   for each public key in wireguard config: 
+clientsTable contains the public key) then (yes)
+else (no)
+    :add public key to clientsTable;
+endif
+
+repeat while (is this the last public key?)
+
+if (if clientsTable has been changed) then (yes)
+    :save the clientsTable file on the server;
+else (no)
+endif
+
+:add clientsTable to the clientManagementModel;
+
+|client info page|
+:on update client info page;
+floating note
+    clicked on one of the clients 
+    on the client management page
+end note
+
+:get the certificate data for the selected client;
+if (if client name has been changed) then (yes)
+    :update clientManagementModel;
+    :get clientsTable from clientManagementModel;
+    :save the clientsTable file on the server;
+else (no)
+    if (if revoke key was clicked) then (yes)
+        :update clientManagementModel;
+        :get clientsTable from clientManagementModel;
+
+        :delete section with public key from wireguard config;
+        :save wireguard config on the server;
+        :restart wireguard service;
+
+        :save the clientsTable file on the server;
+        |client management page|
+        :return to page client management;
+        stop
+    else (no)
+        |client info page|
+        :just look at the beautiful page;
+        stop
+    endif
+endif
+stop
+@enduml
