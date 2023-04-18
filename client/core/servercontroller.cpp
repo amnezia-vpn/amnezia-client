@@ -662,6 +662,14 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     }
 
     if (!stdOut.isEmpty()) {
+        if (transportProto == "tcp") {
+            const static QRegularExpression localPortRegExp(".*:(\\d+)->");
+            QRegularExpressionMatch localPortMatch = localPortRegExp.match(stdOut);
+            if (localPortMatch.hasMatch() && localPortMatch.captured(1) != port) {
+                return ErrorCode::NoError;
+            }
+        }
+
         return ErrorCode::ServerPortAlreadyAllocatedError;
     }
     return ErrorCode::NoError;
