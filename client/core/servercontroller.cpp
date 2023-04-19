@@ -655,6 +655,11 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
+
+    if (transportProto == "tcp") {
+        script = script.append(" | grep LISTEN");
+    }
+
     ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
@@ -662,14 +667,6 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     }
 
     if (!stdOut.isEmpty()) {
-        if (transportProto == "tcp") {
-            const static QRegularExpression localPortRegExp(".*:(\\d+)->");
-            QRegularExpressionMatch localPortMatch = localPortRegExp.match(stdOut);
-            if (localPortMatch.hasMatch() && localPortMatch.captured(1) != port) {
-                return ErrorCode::NoError;
-            }
-        }
-
         return ErrorCode::ServerPortAlreadyAllocatedError;
     }
     return ErrorCode::NoError;
