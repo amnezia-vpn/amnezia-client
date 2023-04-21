@@ -207,7 +207,7 @@ if(APPLE)
         find_library(FW_APPKIT AppKit)
         find_library(FW_SECURITY Security)
 
-        set(LIBS ${LIBS} 
+        set(LIBS ${LIBS}
             ${FW_COCOA} ${FW_APPLICATIONSERVICES}
             ${FW_FOUNDATION} ${FW_APPKIT}
             ${FW_SECURITY} ${FW_CORESERVICES}
@@ -543,6 +543,7 @@ if(ANDROID)
 
 endif()
 
+message(STATUS "target_link_libraries:  ${LIBS}")
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))

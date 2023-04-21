@@ -19,6 +19,7 @@ if(WIN32)
 else()
     set(ZLIB_LIBRARY z)
 endif()
+
 set(ZLIB_INCLUDE_DIR "${CLIENT_ROOT_DIR}/3rd/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib")
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/3rd/zlib)
 link_libraries(${ZLIB_LIBRARY})
@@ -52,8 +53,9 @@ if(IOS)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_ALLOW_PRIVATE_ACCESS")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_ALLOW_PRIVATE_ACCESS")
+endif(IOS)
 
-else(IOS)
+if(NOT LINUX)
     set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
     set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
@@ -71,6 +73,11 @@ else(IOS)
     elseif(APPLE AND NOT IOS)
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/macos/x86_64/libssl.a")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/macos/x86_64/libcrypto.a")
+    elseif(IOS)
+        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES_DIR}/libcrypto.a")
+        set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/libssl.a")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/ios/iphone/libssl.a")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/ios/iphone/libcrypto.a")
     elseif(ANDROID)
         set(abi ${CMAKE_ANDROID_ARCH_ABI})
 
@@ -87,13 +94,14 @@ else(IOS)
     file(COPY "${OPENSSL_PATH}/include"
         DESTINATION ${OPENSSL_ROOT_DIR})
 
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
-    find_package(OpenSSL REQUIRED)
-    set(LIBS ${LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
-    )
-endif(IOS)
+endif(NOT LINUX)
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+set(LIBS ${LIBS}
+    OpenSSL::Crypto
+    OpenSSL::SSL
+)
 
 set(WITH_GSSAPI OFF CACHE BOOL "" FORCE)
 set(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
