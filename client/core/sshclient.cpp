@@ -6,7 +6,7 @@
 #include <fstream>
 
 #ifdef Q_OS_WINDOWS
-#define S_IRWXU 0
+const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {

@@ -655,6 +655,11 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
+
+    if (transportProto == "tcp") {
+        script = script.append(" | grep LISTEN");
+    }
+
     ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
@@ -669,6 +674,10 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
 ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
 {
+    if (credentials.userName == "root") {
+        return ErrorCode::NoError;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
