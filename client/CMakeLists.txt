@@ -454,6 +454,9 @@ if(IOS)
     add_dependencies(${PROJECT} networkextension)
     set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
 
+    set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+        "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+    )
     set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
     set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
 
