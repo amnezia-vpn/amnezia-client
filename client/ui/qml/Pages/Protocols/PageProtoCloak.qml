@@ -133,7 +133,7 @@ PageProtocolBase {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.fill: pb_save
         from: 0
-        to: logic.progressBarResetMaximium
+        to: logic.progressBarResetMaximum
         value: logic.progressBarResetValue
         background: Rectangle {
             implicitWidth: parent.width

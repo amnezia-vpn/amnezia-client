@@ -114,7 +114,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             // QT will always attempt to read the clipboard if content is there.
             // since we have no use of the clipboard in android 10+
             // we _can_  return null
-            // And we defnitly should since android 12 displays clipboard access.
+            // And we definitely should since android 12 displays clipboard access.
             null
         } else {
             super.getSystemService(name)
@@ -259,13 +259,13 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private val ACTION_REGISTER_LISTENER = 3
     private val ACTION_RESUME_ACTIVATE = 7
     private val ACTION_IMPORT_CONFIG = 11
-    private val EVENT_PERMISSION_REQURED = 6
+    private val EVENT_PERMISSION_REQUIRED = 6
     private val EVENT_DISCONNECTED = 2
 
     private val UI_EVENT_QR_CODE_RECEIVED = 0
 
     fun onPermissionRequest(code: Int, data: Parcel?) {
-        if (code != EVENT_PERMISSION_REQURED) {
+        if (code != EVENT_PERMISSION_REQUIRED) {
             return
         }
 

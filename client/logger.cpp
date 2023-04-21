@@ -157,7 +157,7 @@ void Logger::clearServiceLogs()
 
     if (!m_IpcClient->isSocketConnected()) {
         if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occured when init IPC client";
+            qWarning() << "Error occurred when init IPC client";
             return;
         }
     }
@@ -167,7 +167,7 @@ void Logger::clearServiceLogs()
         m_IpcClient->Interface()->cleanUp();
     }
     else {
-        qWarning() << "Error occured cleaning up service logs";
+        qWarning() << "Error occurred cleaning up service logs";
     }
 #endif
 }

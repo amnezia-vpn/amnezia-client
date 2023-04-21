@@ -93,7 +93,7 @@ void NotificationHandler::unsecuredNetworkNotification(const QString& networkNam
 
 
     QString title = tr("AmneziaVPN notification");
-    QString message = tr("Unsucured network detected: ") + networkName;
+    QString message = tr("Unsecured network detected: ") + networkName;
 
     notifyInternal(UnsecuredNetwork, title, message, 2000);
 }

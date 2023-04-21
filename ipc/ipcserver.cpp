@@ -136,7 +136,7 @@ bool IpcServer::copyWireguardConfig(const QString &sourcePath)
     }
 
     if (!QFile::copy(sourcePath, wireguardConfigPath)) {
-        qDebug() << "WireguardProtocol::WireguardProtocol error occured while copying wireguard config:";
+        qDebug() << "WireguardProtocol::WireguardProtocol error occurred while copying wireguard config:";
         return false;
     }
     return true;
@@ -151,7 +151,7 @@ bool IpcServer::isWireguardRunning()
     QProcess checkWireguardStatusProcess;
 
     connect(&checkWireguardStatusProcess, &QProcess::errorOccurred, this, [](QProcess::ProcessError error) {
-        qDebug() << "WireguardProtocol::WireguardProtocol error occured while checking wireguard status: " << error;
+        qDebug() << "WireguardProtocol::WireguardProtocol error occurred while checking wireguard status: " << error;
     });
 
     checkWireguardStatusProcess.setProgram("/bin/wg");
