@@ -64,6 +64,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
                 if (proto == "amnezia-shadowsocks") {
                     IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+                    IpcClient::Interface()->StopRoutingIpv6();
                 }
             }
 
@@ -98,6 +99,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 
             if (proto == "amnezia-shadowsocks") {
                 IpcClient::Interface()->deleteTun("tun2");
+                IpcClient::Interface()->StartRoutingIpv6();
             }
 
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
@@ -329,7 +331,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
 void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
-    qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
+    qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                 .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
 
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
@@ -339,7 +341,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (!m_IpcClient->isSocketConnected()) {
         if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occured when init IPC client";
+            qWarning() << "Error occurred when init IPC client";
             emit serviceIsNotReady();
             emit connectionStateChanged(VpnProtocol::Error);
             return;
@@ -449,9 +451,11 @@ void VpnConnection::disconnectFromVpn()
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 
-        if (proto == "amnezia-shadowsocks")
-            IpcClient::Interface()->deleteTun("tun2");
+        if (proto == "amnezia-shadowsocks"){
 
+            IpcClient::Interface()->deleteTun("tun2");
+            IpcClient::Interface()->StartRoutingIpv6();
+        }
         // delete cached routes
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
         response.waitForFinished(1000);

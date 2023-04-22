@@ -83,3 +83,27 @@ bool Router::deleteTun(const QString &dev)
 };
 
 
+void Router::StopRoutingIpv6()
+{
+#ifdef Q_OS_WIN
+    RouterWin::Instance().StopRoutingIpv6();
+#elif defined (Q_OS_MAC)
+    // todo fixme
+#elif defined Q_OS_LINUX
+    RouterLinux::Instance().StopRoutingIpv6();
+#endif
+}
+
+void Router::StartRoutingIpv6()
+{
+#ifdef Q_OS_WIN
+    RouterWin::Instance().StartRoutingIpv6();
+#elif defined (Q_OS_MAC)
+    // todo fixme
+#elif defined Q_OS_LINUX
+    RouterLinux::Instance().StartRoutingIpv6();
+#endif
+}
+
+
+

@@ -15,6 +15,9 @@ class IpcInterface
     SLOT( bool createTun(const QString &dev, const QString &subnet) );
     SLOT( bool deleteTun(const QString &dev) );
 
+    SLOT( void StartRoutingIpv6() );
+    SLOT( void StopRoutingIpv6() );
+
     SLOT( bool checkAndInstallDriver() );
     SLOT( QStringList getTapList() );
 

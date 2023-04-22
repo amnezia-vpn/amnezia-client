@@ -31,6 +31,9 @@ public:
     virtual bool isWireguardRunning() override;
     virtual bool isWireguardConfigExists(const QString &configPath) override;
 
+    virtual void StartRoutingIpv6() override;
+    virtual void StopRoutingIpv6() override;
+
 private:
     int m_localpid = 0;
 

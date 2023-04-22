@@ -41,6 +41,8 @@ public:
     void flushDns();
     void resetIpStack();
 
+    void StartRoutingIpv6();
+    void StopRoutingIpv6();
     void suspendWcmSvc(bool suspend);
 
 private:

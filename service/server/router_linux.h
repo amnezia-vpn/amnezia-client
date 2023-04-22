@@ -25,6 +25,9 @@ public:
     void flushDns();
     bool createTun(const QString &dev, const QString &subnet);
     bool deleteTun(const QString &dev);
+    void StartRoutingIpv6();
+    void StopRoutingIpv6();
+
 
 public slots:
 

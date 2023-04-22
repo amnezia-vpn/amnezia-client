@@ -151,7 +151,7 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
         qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
-    memset(&sys, 0, sizeof(sys));
+    memset(&cmd, 0, sizeof(cmd));
     sprintf(cmd, "ip addr add %s/24 dev %s", subnet.toStdString().c_str(), dev.toStdString().c_str());
     sys = system(cmd);
     if(sys < 0)
@@ -159,7 +159,7 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
         qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
-    memset(&sys, 0, sizeof(sys));
+    memset(&cmd, 0, sizeof(cmd));
     sprintf(cmd, "ip link set dev %s up", dev.toStdString().c_str());
     sys = system(cmd);
     if(sys < 0)
@@ -244,4 +244,48 @@ void RouterLinux::flushDns()
         qDebug().noquote() << "Flush dns completed";
     else
         qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+}
+
+void RouterLinux::StartRoutingIpv6()
+{
+
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "sysctl -w net.ipv6.conf.all.disable_ipv6=0");
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate ipv6\n";
+        return;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "sysctl -w net.ipv6.conf.default.disable_ipv6=0");
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate ipv6\n";
+        return;
+    }
+
+    qDebug().noquote() << "StartRoutingIpv6 OK";
+}
+
+void RouterLinux::StopRoutingIpv6()
+{
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "sysctl -w net.ipv6.conf.all.disable_ipv6=1");
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not disable ipv6\n";
+        return;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "sysctl -w net.ipv6.conf.default.disable_ipv6=1");
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not disable ipv6\n";
+        return;
+    }
+    qDebug().noquote() << "StopRoutingIpv6 OK";
 }
