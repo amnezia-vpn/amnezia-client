@@ -690,10 +690,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
         let str = String(decoding: ovpnConfiguration, as: UTF8.self)
-        wg_log(.info, message: "OPENVPN config: \(str)")
+        wg_log(.error, message: "---> OPENVPN config: \(str)")
         
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = ovpnConfiguration
+        if(str.contains("cloak")){
+            configuration.setPTCloak();
+        }
         if viaSS {
 //            configuration.settings = [
 //                "remote": "137.74.6.148 1194",

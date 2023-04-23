@@ -296,7 +296,7 @@ public class IOSVpnProtocolImpl : NSObject {
     @objc func connect(ssConfig: String,
                        ovpnConfig: String,
                        failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
         
         self.openVPNConfig = ovpnConfig
@@ -315,7 +315,7 @@ public class IOSVpnProtocolImpl : NSObject {
     }
     
     @objc func connect(ovpnConfig: String, failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
         
         let addr: String = ovpnConfig
@@ -331,7 +331,7 @@ public class IOSVpnProtocolImpl : NSObject {
     }
 
     @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
 
         // Let's remove the previous config if it exists.

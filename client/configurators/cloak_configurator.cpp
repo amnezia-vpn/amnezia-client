@@ -39,7 +39,7 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
     config.insert("UID", cloakBypassUid);
     config.insert("PublicKey", cloakPublicKey);
     config.insert("ServerName", "$FAKE_WEB_SITE_ADDRESS");
-    config.insert("NumConn", 4);
+    config.insert("NumConn", 1);
     config.insert("BrowserSig", "chrome");
     config.insert("StreamTimeout", 300);
 

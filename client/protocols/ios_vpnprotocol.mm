@@ -651,7 +651,12 @@ void IOSVpnProtocol::launchCloakTunnel(const QtJson::JsonObject &result)
         QJsonObject jsonObject {};
         foreach(const QString& key, cloak.keys()) {
                 qDebug() << "Key = " << key << ", Value = " << cloak.value(key).toString();
-            jsonObject.insert(key, cloak.value(key).toString());
+            if(key == "NumConn" or key == "StreamTimeout"){
+                jsonObject.insert(key, cloak.value(key).toInt());
+            }else{
+                jsonObject.insert(key, cloak.value(key).toString());
+            }
+            
             }
         QJsonDocument doc(jsonObject);
         QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -659,7 +664,6 @@ void IOSVpnProtocol::launchCloakTunnel(const QtJson::JsonObject &result)
         
         QString cloakBase64 = strJson.toUtf8().toBase64();
         qDebug() << "base64: " << cloakBase64.toNSString();
-        
         ovpnConfig.append("\n<cloak>\n");
         ovpnConfig.append(cloakBase64);
         ovpnConfig.append("\n</cloak>\n");
