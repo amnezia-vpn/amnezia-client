@@ -68,7 +68,8 @@ void ServerContainersLogic::onPushButtonShareClicked(DockerContainer c)
 void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
 {
     //buttonSetEnabledFunc(false);
-    ErrorCode e = m_serverController->removeContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), container);
+    ServerController serverController(m_settings);
+    ErrorCode e = serverController.removeContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), container);
     m_settings->removeContainerConfig(uiLogic()->m_selectedServerIndex, container);
     //buttonSetEnabledFunc(true);
 
@@ -82,7 +83,8 @@ void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
 
 void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp)
 {
-    QJsonObject config = m_serverController->createContainerInitialConfig(c, port, tp);
+    ServerController serverController(m_settings);
+    QJsonObject config = serverController.createContainerInitialConfig(c, port, tp);
 
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
@@ -93,7 +95,8 @@ void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int p
     if (errorCode == ErrorCode::NoError) {
         if (!uiLogic()->isContainerAlreadyAddedToGui(c)) {
             auto installAction = [this, c, &config]() {
-                return m_serverController->setupContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), c, config);
+                ServerController serverController(m_settings);
+                return serverController.setupContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex), c, config);
             };
             errorCode = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction);
 

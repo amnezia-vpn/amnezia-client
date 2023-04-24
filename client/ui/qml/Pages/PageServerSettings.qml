@@ -16,6 +16,7 @@ PageBase {
     BackButton {
         id: back
     }
+
     Caption {
         id: caption
         text: qsTr("Server settings")
@@ -89,7 +90,6 @@ PageBase {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 text: qsTr("Advanced server settings")
-                visible: ServerSettingsLogic.pushButtonShareFullVisible //todo
                 onClicked: {
                     UiLogic.goToPage(PageEnum.AdvancedServerSettings)
                 }

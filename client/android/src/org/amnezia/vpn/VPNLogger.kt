@@ -11,14 +11,14 @@ import android.util.Log as nativeLog
 
 /*
  * Drop in replacement for android.util.Log 
- * Also stores a copy of all logs in tmp/mozilla_deamon_logs.txt
+ * Also stores a copy of all logs in tmp/mozilla_daemon_logs.txt
 */
 class Log {
     val LOG_MAX_FILE_SIZE = 204800
     private var file: File
     private constructor(context: Context) {
         val tempDIR = context.cacheDir
-        file = File(tempDIR, "mozilla_deamon_logs.txt")
+        file = File(tempDIR, "mozilla_daemon_logs.txt")
         if (file.length() > LOG_MAX_FILE_SIZE) {
             file.writeText("")
         }
@@ -46,7 +46,7 @@ class Log {
             if (!BuildConfig.DEBUG) { return; }
             nativeLog.e(tag, message)
         }
-        // Only Prints && Loggs when in debug, noop in release.
+        // Only Prints && Logs when in debug, noop in release.
         fun sensitive(tag: String, message: String?) {
             if (!BuildConfig.DEBUG) { return; }
             if (message == null) { return; }

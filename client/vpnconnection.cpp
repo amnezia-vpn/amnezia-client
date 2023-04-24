@@ -30,11 +30,9 @@
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
-    std::shared_ptr<VpnConfigurator> configurator,
-    std::shared_ptr<ServerController> serverController, QObject* parent) : QObject(parent),
+    std::shared_ptr<VpnConfigurator> configurator, QObject* parent) : QObject(parent),
     m_settings(settings),
     m_configurator(configurator),
-    m_serverController(serverController),
     m_isIOSConnected(false)
 {
 }
@@ -309,7 +307,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
 void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
-    qDebug() << QString("СonnectToVpn, Server index is %1, container is %2, route mode is")
+    qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                 .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
 
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
@@ -319,7 +317,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (!m_IpcClient->isSocketConnected()) {
         if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occured when init IPC client";
+            qWarning() << "Error occurred when init IPC client";
             emit serviceIsNotReady();
             emit connectionStateChanged(VpnProtocol::Error);
             return;

@@ -21,7 +21,7 @@ CloakLogic::CloakLogic(UiLogic *logic, QObject *parent):
     m_labelInfoVisible{true},
     m_labelInfoText{},
     m_progressBarResetValue{0},
-    m_progressBarResetMaximium{100}
+    m_progressBarResetMaximum{100}
 {
 
 }
@@ -87,8 +87,8 @@ void CloakLogic::onPushButtonSaveClicked()
     progressBarFunc.getValueFunc = [this] (void) -> int {
         return progressBarResetValue();
     };
-    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
-        return progressBarResetMaximium();
+    progressBarFunc.getMaximumFunc = [this] (void) -> int {
+        return progressBarResetMaximum();
     };
     progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         set_progressBarTextVisible(visible);
@@ -112,15 +112,16 @@ void CloakLogic::onPushButtonSaveClicked()
 
     progressBarFunc.setTextVisibleFunc(true);
     progressBarFunc.setTextFunc(QString("Configuring..."));
-    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction([this, containerConfig, &newContainerConfig](){
-        return m_serverController->updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
-                                                   uiLogic()->m_selectedDockerContainer,
-                                                   containerConfig,
-                                                   newContainerConfig);
-    },
-    pageFunc, progressBarFunc,
-    saveButtonFunc, waitInfoFunc,
-    busyInfoFuncy, cancelButtonFunc);
+
+    auto installAction = [this, containerConfig, &newContainerConfig]() {
+        ServerController serverController(m_settings);
+        return serverController.updateContainer(m_settings->serverCredentials(uiLogic()->m_selectedServerIndex),
+                                                   uiLogic()->m_selectedDockerContainer, containerConfig, newContainerConfig);
+    };
+
+    ErrorCode e = uiLogic()->pageLogic<ServerConfiguringProgressLogic>()->doInstallAction(installAction, pageFunc, progressBarFunc,
+                                                                                          saveButtonFunc, waitInfoFunc,
+                                                                                          busyInfoFuncy, cancelButtonFunc);
 
     if (!e) {
         m_settings->setContainerConfig(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer, newContainerConfig);

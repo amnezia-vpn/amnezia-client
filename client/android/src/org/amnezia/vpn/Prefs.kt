@@ -29,7 +29,7 @@ object Prefs {
             return sharedPreferences
         } catch (e: Exception) {
             Log.e("Android-Prefs", "Getting Encryption Storage failed, plaintext fallback")
-            return context.getSharedPreferences("com.amnezia.vpn.prefrences", Context.MODE_PRIVATE)
+            return context.getSharedPreferences("com.amnezia.vpn.preferences", Context.MODE_PRIVATE)
         }
     }
 }

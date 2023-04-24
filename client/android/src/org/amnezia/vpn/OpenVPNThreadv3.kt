@@ -35,10 +35,10 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     private var bytesOutIndex = -1
 
     init {
-        findConfigIndicies()
+        findConfigIndices()
     }
 
-    private fun findConfigIndicies() {
+    private fun findConfigIndices() {
         val n: Int = stats_n()
 
         for (i in 0 until n) {

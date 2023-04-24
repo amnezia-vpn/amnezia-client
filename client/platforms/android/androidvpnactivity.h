@@ -17,7 +17,7 @@ enum ServiceAction {
     ACTION_ACTIVATE = 1,
     // Deactivate the vpn. Body is empty
     ACTION_DEACTIVATE = 2,
-    // Register an IBinder to recieve events body is an Ibinder
+    // Register an IBinder to receive events body is an Ibinder
     ACTION_REGISTERLISTENER = 3,
     // Requests an EVENT_STATISTIC_UPDATE to be send
     ACTION_REQUEST_STATISTIC = 4,
@@ -40,14 +40,14 @@ typedef enum ServiceAction ServiceAction;
 
 // Event Types that will be Dispatched after registration
 enum ServiceEvents {
-    // The Service has Accecpted our Binder
+    // The Service has Accepted our Binder
     // Responds with the current status of the vpn.
     EVENT_INIT = 0,
     // WG-Go has enabled the adapter (empty response)
     EVENT_CONNECTED = 1,
     // WG-Go has disabled the adapter (empty response)
     EVENT_DISCONNECTED = 2,
-    // Contains the Current transfered bytes to endpoint x.
+    // Contains the Current transferred bytes to endpoint x.
     EVENT_STATISTIC_UPDATE = 3,
     EVENT_BACKEND_LOGS = 4,
     // An Error happened during activation

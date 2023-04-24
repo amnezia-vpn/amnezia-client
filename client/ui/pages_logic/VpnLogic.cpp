@@ -218,7 +218,7 @@ void VpnLogic::onConnect()
     }
 
     if (container == DockerContainer::None) {
-        set_labelErrorText(tr("VPN Protocol not choosen"));
+        set_labelErrorText(tr("VPN Protocol not chosen"));
         set_pushButtonConnectChecked(false);
         return;
     }

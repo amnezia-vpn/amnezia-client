@@ -1,5 +1,5 @@
-#ifndef CONTAIERNS_DEFS_H
-#define CONTAIERNS_DEFS_H
+#ifndef CONTAINERS_DEFS_H
+#define CONTAINERS_DEFS_H
 
 #include <QObject>
 #include <QQmlEngine>
@@ -75,4 +75,4 @@ static void declareQmlContainerEnum() {
 
 QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c);
 
-#endif // CONTAIERNS_DEFS_H
+#endif // CONTAINERS_DEFS_H
