@@ -150,9 +150,11 @@ android {
        release {
            // That would enable treeshaking and remove java code that is just called from qt
            minifyEnabled false
+
            externalNativeBuild {
                cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
+                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
                }
            }
        }
@@ -161,15 +163,19 @@ android {
            //applicationIdSuffix ".debug"
            //versionNameSuffix "-debug"
            minifyEnabled false
+
            externalNativeBuild {
                cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
+                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+
                }
            }
        }
     }
 
     task buildStrongSwanNative(type: Exec) {
+        environment = System.getenv() + ['JNI_PACKAGE': 'org_amnezia_vpn', 'JNI_PACKAGE_STRING': 'org/amnezia/vpn']
         workingDir "${relativePathToStrongswan}"
         commandLine "${android.ndkDirectory}/ndk-build", '-j', Runtime.runtime.availableProcessors()
 
