@@ -20,7 +20,7 @@ class VpnProfile : kotlin.Cloneable {
     var MTU: Int? = null
     var port: Int? = null
     var splitTunneling: Int? = null
-    var nATKeepAlive: Int? = null
+    var NATKeepAlive: Int? = null
     private var mFlags: Int? = null
     var selectedAppsHandling = SelectedAppsHandling.SELECTED_APPS_DISABLE
     private var mVpnType: VpnType? = null
@@ -73,11 +73,7 @@ class VpnProfile : kotlin.Cloneable {
         }
     }
 
-    var flags: Int?
-        get() = if (mFlags == null) 0 else mFlags
-        set(flags) {
-            mFlags = flags
-        }
+    var flags: Int = 0
 
     override fun toString(): String {
         return name!!

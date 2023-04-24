@@ -3,6 +3,7 @@ package org.amnezia.vpn
 import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.net.VpnService
+import android.net.VpnService.Builder
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.OsConstants
@@ -11,17 +12,191 @@ import java.lang.Runnable
 
 import org.amnezia.vpn.ikev2.VpnProfile
 import org.amnezia.vpn.ikev2.VpnProfile.SelectedAppsHandling
+import org.amnezia.vpn.ikev2.VpnType
+import org.amnezia.vpn.ikev2.VpnType.VpnTypeFeature
 import org.amnezia.vpn.ikev2.utils.IPRange
 import org.amnezia.vpn.ikev2.utils.IPRangeSet
 import org.amnezia.vpn.ikev2.utils.Utils
 import org.amnezia.vpn.ikev2.utils.Constants
+import org.amnezia.vpn.ikev2.utils.SettingsWriter
+import org.amnezia.vpn.ikev2.utils.SimpleFetcher
 
 const val PACKAGE_NAME = "org.amnezia.vpn"
+const val LOG_FILE = "charon.log"
+const val TAG = "amnezia_ikev2"
 
-class IKEv2Thread(val vpnService: VPNService): Runnable {
+class IKEv2Thread(
+    val vpnServiceBuilder: android.net.VpnService.Builder,
+    val filesDirAbsolutePath: String
+): Runnable {
+
+    private val mBuilderAdapter: BuilderAdapter = BuilderAdapter(vpnServiceBuilder)
+
+    private var mCurrentProfile: VpnProfile? = null
+    private var mNextProfile: VpnProfile? = null
+
+    @kotlin.jvm.Volatile
+    private var mCurrentCertificateAlias: String? = null
+
+    @kotlin.jvm.Volatile
+    private var mCurrentUserCertificateAlias: String? = null
+
+    @kotlin.jvm.Volatile
+    private var mProfileUpdated = false
+
+    @kotlin.jvm.Volatile
+    private var mTerminate = false
+
+    @kotlin.jvm.Volatile
+    private var mIsDisconnecting = false
+
+    private val mLogFile: String
+    private val mAppDir: String
+
+    init {
+        mLogFile = filesDirAbsolutePath + java.io.File.separator + LOG_FILE
+        mAppDir = filesDirAbsolutePath
+    }
 
     override fun run() {
+        while (true) {
+            synchronized(this) {
+                try {
+                    while (!mProfileUpdated) {
+                        continue
+                    }
+                    mProfileUpdated = false
+                    stopCurrentConnection()
 
+                    if (mNextProfile == null) {
+                        setState(State.DISABLED)
+                        if (mTerminate) {
+                            return@synchronized
+                        }
+                    } else {
+                        mCurrentProfile = mNextProfile
+                        mNextProfile = null
+
+                        val currentProfile = mCurrentProfile
+
+                        /* store this in a separate (volatile) variable to avoid
+                         * a possible deadlock during deinitialization */
+                        mCurrentCertificateAlias = currentProfile!!.certificateAlias
+                        mCurrentUserCertificateAlias = currentProfile!!.userCertificateAlias
+
+                        startConnection(currentProfile)
+
+                        mIsDisconnecting = false
+                        SimpleFetcher.enable()
+                        addNotification()
+                        mBuilderAdapter.setProfile(currentProfile)
+
+                        val flags: Int = currentProfile!!.flags
+
+                        if (initializeCharon(
+                                mBuilderAdapter,
+                                mLogFile,
+                                mAppDir,
+                                currentProfile.vpnType!!.has(VpnTypeFeature.BYOD),
+                                flags and VpnProfile.FLAGS_IPv6_TRANSPORT !== 0
+                            )
+                        ) {
+                            Log.i(TAG, "charon started")
+
+                            if (currentProfile.vpnType!!.has(VpnTypeFeature.USER_PASS) &&
+                                currentProfile.password == null
+                            ) {    /* this can happen if Always-on VPN is enabled with an incomplete profile */
+                                setError(ErrorState.PASSWORD_MISSING)
+                                return@synchronized
+                            }
+
+                            val writer = SettingsWriter()
+                            writer.setValue("global.language", java.util.Locale.getDefault().getLanguage())
+                            writer.setValue("global.mtu", currentProfile.MTU)
+                            writer.setValue("global.nat_keepalive", currentProfile.NATKeepAlive)
+                            writer.setValue("global.rsa_pss", flags and VpnProfile.FLAGS_RSA_PSS !== 0)
+                            writer.setValue("global.crl", flags and VpnProfile.FLAGS_DISABLE_CRL === 0)
+                            writer.setValue("global.ocsp", flags and VpnProfile.FLAGS_DISABLE_OCSP === 0)
+                            writer.setValue("connection.type", currentProfile.vpnType!!.identifier)
+                            writer.setValue("connection.server", currentProfile.gateway)
+                            writer.setValue("connection.port", currentProfile.port)
+                            writer.setValue("connection.username", currentProfile.username)
+                            writer.setValue("connection.password", currentProfile.password)
+                            writer.setValue("connection.local_id", currentProfile.localId)
+                            writer.setValue("connection.remote_id", currentProfile.remoteId)
+                            writer.setValue("connection.certreq", flags and VpnProfile.FLAGS_SUPPRESS_CERT_REQS === 0)
+                            writer.setValue("connection.strict_revocation", flags and VpnProfile.FLAGS_STRICT_REVOCATION !== 0)
+                            writer.setValue("connection.ike_proposal", currentProfile.ikeProposal)
+                            writer.setValue("connection.esp_proposal", currentProfile.espProposal)
+                            initiate(writer.serialize())
+                        } else {
+                            Log.e(TAG, "failed to start charon")
+                            setError(ErrorState.GENERIC_ERROR)
+                            setState(State.DISABLED)
+                            mCurrentProfile = null
+                        }
+                    }
+                } catch (ex: java.lang.InterruptedException) {
+                    stopCurrentConnection()
+                    setState(State.DISABLED)
+                }
+            }
+        }
+    }
+
+    /**
+     * Notify the state service about a new connection attempt.
+     * Called by the handler thread.
+     *
+     * @param profile currently active VPN profile
+     */
+    private fun startConnection(profile: VpnProfile) {
+//        synchronized(mServiceLock) {
+//            if (mService != null) {
+//                mService.startConnection(profile)
+//            }
+//        }
+    }
+
+    /**
+     * Stop any existing connection by deinitializing charon.
+     */
+    private fun stopCurrentConnection() {
+        synchronized(this) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mNextProfile?.let {
+                    mBuilderAdapter.setProfile(it)
+                    mBuilderAdapter.establishBlocking()
+                }
+            }
+
+            if (mCurrentProfile != null) {
+                setState(State.DISCONNECTING)
+                mIsDisconnecting = true
+                SimpleFetcher.disable()
+                deinitializeCharon()
+                Log.i(TAG, "charon stopped")
+                mCurrentProfile = null
+                if (mNextProfile == null) {    /* only do this if we are not connecting to another profile */
+                    removeNotification()
+                    mBuilderAdapter.closeBlocking()
+                }
+            }
+        }
+    }
+
+    /**
+     * Update the current VPN state on the state service. Called by the handler
+     * thread and any of charon's threads.
+     *
+     * @param state current state
+     */
+    private fun setState(state: State) {
+//        synchronized(mServiceLock) {
+//            if (mService != null) {
+//                mService.setState(state)
+//            }
+//        }
     }
 
     /**
@@ -518,5 +693,55 @@ class IKEv2Thread(val vpnService: VPNService): Runnable {
      */
     private fun getDeviceString(): String? {
         return ((Build.MODEL + " - " + Build.BRAND).toString() + "/" + Build.PRODUCT).toString() + "/" + Build.MANUFACTURER
+    }
+
+    /**
+     * Add a permanent notification while we are connected to avoid the service getting killed by
+     * the system when low on memory.
+     */
+    private fun addNotification() {
+//        mHandler.post(object : java.lang.Runnable {
+//            fun run() {
+//                mShowNotification = true
+//                startForeground(
+//                    org.strongswan.android.logic.CharonVpnService.VPN_STATE_NOTIFICATION_ID,
+//                    buildNotification(false)
+//                )
+//            }
+//        })
+    }
+
+    /**
+     * Remove the permanent notification.
+     */
+    private fun removeNotification() {
+//        mHandler.post(object : java.lang.Runnable {
+//            fun run() {
+//                mShowNotification = false
+//                stopForeground(true)
+//            }
+//        })
+    }
+
+    /**
+     * Set an error on the state service. Called by the handler thread and any
+     * of charon's threads.
+     *
+     * @param error error state
+     */
+    private fun setError(error: ErrorState) {
+//        synchronized(mServiceLock) {
+//            if (mService != null) {
+//                mService.setError(error)
+//            }
+//        }
+    }
+
+    enum class State {
+        DISABLED, CONNECTING, CONNECTED, DISCONNECTING
+    }
+
+    enum class ErrorState {
+        NO_ERROR, AUTH_FAILED, PEER_AUTH_FAILED, LOOKUP_FAILED, UNREACHABLE, GENERIC_ERROR, PASSWORD_MISSING, CERTIFICATE_UNAVAILABLE
     }
 }
