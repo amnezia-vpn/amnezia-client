@@ -10,6 +10,14 @@ PageBase {
     page: PageEnum.Start
     logic: StartPageLogic
 
+    Connections {
+        target: StartPageLogic
+
+        function onShowPassphraseRequestMessage() {
+            popupWithTextField.open()
+        }
+    }
+
     BackButton {
         id: back_from_start
         visible: pageLoader.depth > 1
@@ -323,6 +331,24 @@ PageBase {
                 new_server_password.visible = !checked
                 new_server_ssh_key.visible = checked
             }
+        }
+    }
+
+    PopupWithTextField {
+        id: popupWithTextField
+        placeholderText: "Enter private key passphrase"
+        yesFunc: function() {
+            editingFinished()
+            close()
+            StartPageLogic.passphraseDialogClosed()
+            text = ""
+        }
+        noFunc: function() {
+            close()
+            StartPageLogic.passphraseDialogClosed()
+        }
+        onEditingFinished: {
+            StartPageLogic.privateKeyPassphrase = text
         }
     }
 }

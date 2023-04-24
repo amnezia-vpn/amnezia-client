@@ -33,8 +33,7 @@ class VpnConnection : public QObject
 
 public:
     explicit VpnConnection(std::shared_ptr<Settings> settings,
-        std::shared_ptr<VpnConfigurator> configurator,
-        std::shared_ptr<ServerController> serverController, QObject* parent = nullptr);
+        std::shared_ptr<VpnConfigurator> configurator, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -96,7 +95,6 @@ protected:
 private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
-    std::shared_ptr<ServerController> m_serverController;
 
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;

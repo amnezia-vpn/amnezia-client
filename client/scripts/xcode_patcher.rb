@@ -334,14 +334,14 @@ class XCodeprojPatcher
   def setup_target_gobridge(platform)
     target_gobridge = legacy_target = @project.new(Xcodeproj::Project::PBXLegacyTarget)
 
-    bridge_platofrm = platform == 'ios' ? 'iOS' : 'macOS'
+    bridge_platform = platform == 'ios' ? 'iOS' : 'macOS'
 
     target_gobridge.build_working_directory = platform == 'ios' ? '3rd/wireguard-apple/Sources/WireGuardKitGo' : 'macos/gobridge'
     target_gobridge.build_tool_path = 'make'
     target_gobridge.pass_build_settings_in_environment = '1'
     target_gobridge.build_arguments_string = '$(ACTION)'
-    target_gobridge.name = "WireGuardGoBridge<#{bridge_platofrm}>"
-    target_gobridge.product_name = "WireGuardGoBridge<#{bridge_platofrm}>"
+    target_gobridge.name = "WireGuardGoBridge<#{bridge_platform}>"
+    target_gobridge.product_name = "WireGuardGoBridge<#{bridge_platform}>"
 
     @project.targets << target_gobridge
     @target_extension.add_dependency target_gobridge

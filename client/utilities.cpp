@@ -120,9 +120,9 @@ QString Utils::getIPAddress(const QString& host)
         return host;
     }
 
-    QList<QHostAddress> adresses = QHostInfo::fromName(host).addresses();
-    if (!adresses.isEmpty()) {
-        return adresses.first().toString();
+    QList<QHostAddress> addresses = QHostInfo::fromName(host).addresses();
+    if (!addresses.isEmpty()) {
+        return addresses.first().toString();
     }
     qDebug() << "Unable to resolve address for " << host;
     return "";

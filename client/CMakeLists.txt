@@ -10,6 +10,12 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
     cmake_policy(SET CMP0099 OLD)
 endif()
 
+if(ANDROID)
+    # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
+    # We have to do this manually for building of libssh.
+    add_definitions(-D_BSD_SOURCE)
+endif()
+
 if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
   cmake_policy(SET CMP0114 NEW)
 endif()
@@ -43,11 +49,11 @@ endif()
 
 set(IS_CI ${CI})
 if(IS_CI)
-  message("Detected CI env")
-  find_program(CCACHE "ccache")
-  if(CCACHE)
-      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
-  endif()
+    message("Detected CI env")
+    find_program(CCACHE "ccache")
+    if(CCACHE)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
+    endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
@@ -76,6 +82,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
 )
 
 if(NOT IOS)
@@ -99,6 +106,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
 )
 
 if(NOT IOS)
@@ -160,22 +168,6 @@ if(WIN32)
     )
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        message("Windows x86_64 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86_64)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    else()
-        message("Windows x86 build")
-        link_directories(${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/windows/x86)
-        set(LIBS ${LIBS}
-            libssl
-            libcrypto
-        )
-    endif()
 endif()
 
 if(APPLE)
@@ -204,15 +196,9 @@ if(APPLE)
         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-        # set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
-        find_library(LIB_LIBCRYPTO NAMES "libcrypto.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
-        find_library(LIB_SSL NAMES "libssl.a"
-            PATHS ${PROJECT_SOURCE_DIR}/3rd/OpenSSL/lib/macos/x86_64/ NO_DEFAULT_PATH)
-
 
         find_library(FW_COCOA Cocoa)
         find_library(FW_APPLICATIONSERVICES ApplicationServices)
@@ -225,7 +211,7 @@ if(APPLE)
             ${FW_COCOA} ${FW_APPLICATIONSERVICES}
             ${FW_FOUNDATION} ${FW_APPKIT}
             ${FW_SECURITY} ${FW_CORESERVICES}
-            ${LIB_LIBCRYPTO} ${LIB_SSL}
+            ${LIB_LIBCRYPTO}
         )
     endif()
 endif()
@@ -234,12 +220,6 @@ endif()
 if(LINUX AND NOT ANDROID)
     add_compile_definitions(MVPN_LINUX)
 
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
-    find_package(OpenSSL REQUIRED)
-    set(LIBS ${LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
-    )
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
@@ -297,8 +277,6 @@ if(ANDROID)
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/3rd/strongswan DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/3rd)
 endif()
 
-
-
 if(IOS)
     message("Client iOS build")
 
@@ -348,7 +326,6 @@ endif()
 if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
     message("Building for iPhone OS")
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
@@ -366,7 +343,7 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
 
-    #disbale in cicd
+    #disable in cicd
     include(cmake/osxtools.cmake)
     # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 
@@ -378,7 +355,7 @@ if(IOS)
     set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 
 
-    #need to change for debug and relase
+    #need to change for debug and release
     set_target_properties(${PROJECT} 
         PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.amnezia.${PROJECT}"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
@@ -508,7 +485,6 @@ if(IOS)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
     set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
-
 endif()
 
 if(ANDROID)
@@ -588,7 +564,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
-if(NOT IOS)
+if(NOT IOS AND NOT ANDROID)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>

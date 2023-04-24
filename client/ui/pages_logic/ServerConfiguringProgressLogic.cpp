@@ -12,7 +12,7 @@ ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, Q
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{tr("Please wait, configuring process may take up to 5 minutes")},
     m_progressBarVisible{true},
-    m_progressBarMaximium{100},
+    m_progressBarMaximum{100},
     m_progressBarTextVisible{true},
     m_progressBarText{tr("Configuring...")},
     m_labelServerBusyVisible{false},
@@ -46,8 +46,8 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.getValueFunc = [this] (void) -> int {
         return progressBarValue();
     };
-    progress.getMaximiumFunc = [this] (void) -> int {
-        return progressBarMaximium();
+    progress.getMaximumFunc = [this] (void) -> int {
+        return progressBarMaximum();
     };
 
     LabelFunc busyInfo;
@@ -96,19 +96,18 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.setValueFunc(0);
     timer.start(1000);
 
+    ServerController serverController(m_settings);
+
     QMetaObject::Connection cancelDoInstallActionConnection;
     if (cancelButton.setVisibleFunc) {
         cancelDoInstallActionConnection = connect(this, &ServerConfiguringProgressLogic::cancelDoInstallAction,
-                m_serverController.get(), &ServerController::setCancelInstallation);
+                &serverController, &ServerController::setCancelInstallation);
     }
 
 
     QMetaObject::Connection serverBusyConnection;
     if (serverBusyInfo.setVisibleFunc && serverBusyInfo.setTextFunc) {
-        serverBusyConnection = connect(m_serverController.get(),
-                             &ServerController::serverIsBusy,
-                             this,
-                             [&serverBusyInfo, &timer, &cancelButton](const bool isBusy) {
+        auto onServerIsBusy = [&serverBusyInfo, &timer, &cancelButton](const bool isBusy) {
             isBusy ? timer.stop() : timer.start(1000);
             serverBusyInfo.setVisibleFunc(isBusy);
             serverBusyInfo.setTextFunc(isBusy ? "Amnesia has detected that your server is currently "
@@ -118,7 +117,9 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
             if (cancelButton.setVisibleFunc) {
                 cancelButton.setVisibleFunc(isBusy ? true : false);
             }
-        });
+        };
+
+        serverBusyConnection = connect(&serverController, &ServerController::serverIsBusy, this, onServerIsBusy);
     }
 
     ErrorCode e = action();
@@ -149,7 +150,7 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     // just ui progressbar tweak
     timer.stop();
 
-    int remainingVal = progress.getMaximiumFunc() - progress.getValueFunc();
+    int remainingVal = progress.getMaximumFunc() - progress.getValueFunc();
 
     if (remainingVal > 0) {
         QTimer timer1;
@@ -157,7 +158,7 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
 
         connect(&timer1, &QTimer::timeout, [&](){
             progress.setValueFunc(progress.getValueFunc() + 1);
-            if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
+            if (progress.getValueFunc() >= progress.getMaximumFunc()) {
                 loop1.quit();
             }
         });
@@ -182,5 +183,5 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
 
 void ServerConfiguringProgressLogic::onPushButtonCancelClicked()
 {
-    cancelDoInstallAction(true);
+    emit cancelDoInstallAction(true);
 }

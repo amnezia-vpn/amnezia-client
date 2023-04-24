@@ -84,6 +84,10 @@
         <file>ui/qml/Pages/PageAbout.qml</file>
         <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
         <file>ui/qml/Pages/PageViewConfig.qml</file>
+        <file>ui/qml/Pages/PageClientManagement.qml</file>
+        <file>ui/qml/Pages/ClientInfo/PageClientInfoBase.qml</file>
+        <file>ui/qml/Pages/ClientInfo/PageClientInfoOpenVPN.qml</file>
+        <file>ui/qml/Pages/ClientInfo/PageClientInfoWireGuard.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
@@ -165,5 +169,7 @@
         <file>ui/qml/Controls/PopupWithQuestion.qml</file>
         <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
         <file>ui/qml/Controls/PopupWarning.qml</file>
+        <file>ui/qml/Controls/PopupWithTextField.qml</file>
+        <file>server_scripts/check_user_in_sudo.sh</file>
     </qresource>
 </RCC>
