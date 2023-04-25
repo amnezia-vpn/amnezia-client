@@ -20,7 +20,6 @@ SRCHS=()
 # Get adapter list
 IFS=$'\n' read -d '' -ra adapters < <(networksetup -listallnetworkservices |grep -v denotes) || true
 
-
 split_into_parts()
 {
         part1="$1"

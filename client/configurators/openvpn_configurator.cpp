@@ -119,7 +119,6 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
         }
     }
     
-    
     // Prevent ipv6 leak
     config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
     config.append("redirect-gateway ipv6\n");
