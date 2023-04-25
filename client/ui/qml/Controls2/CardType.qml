@@ -111,7 +111,6 @@ RadioButton {
         Text {
             text: root.footerText
             visible: root.footerText !== ""
-            enabled: root.footerText !== ""
             color: "#878B91"
             font.pixelSize: 13
             font.weight: 400

@@ -26,7 +26,7 @@ enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
            ServerContainers, ServersList, ShareConnection,  Sites,
            ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig,
-           AdvancedServerSettings, ClientManagement, ClientInfo
+           AdvancedServerSettings, ClientManagement, ClientInfo,
 
            Test, WizardCredentials, WizardProtocols, WizardEasySetup};
 Q_ENUM_NS(Page)

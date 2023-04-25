@@ -196,5 +196,7 @@
         <file>images/controls/arrow-left.svg</file>
         <file>ui/qml/Pages2/PageSetupWizardProtocols.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
+        <file>images/controls/chevron-down.svg</file>
+        <file>images/controls/chevron-up.svg</file>
     </qresource>
 </RCC>

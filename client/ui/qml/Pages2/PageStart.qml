@@ -79,18 +79,37 @@ PageBase {
 //                    UiLogic.goToPage(PageEnum.Start)
 //                }
             }
+
+            DropDownType {
+                Layout.fillWidth: true
+
+                text: "IP, логин и пароль от сервера"
+                descriptionText: "IP, логин и пароль от сервера"
+
+                menuModel: [
+                    qsTr("SHA512"),
+                    qsTr("SHA384"),
+                    qsTr("SHA256"),
+                    qsTr("SHA3-512"),
+                    qsTr("SHA3-384"),
+                    qsTr("SHA3-256"),
+                    qsTr("whirlpool"),
+                    qsTr("BLAKE2b512"),
+                    qsTr("BLAKE2s256"),
+                    qsTr("SHA1")
+                ]
+            }
         }
 
         Drawer {
             id: drawer
 
-            y: 0
-            x: 0
             edge: Qt.BottomEdge
             width: parent.width
             height: parent.height * 0.4375
 
             clip: true
+            modal: true
 
             background: Rectangle {
                 anchors.fill: parent
@@ -99,15 +118,9 @@ PageBase {
                 color: "#1C1D21"
             }
 
-            modal: true
-            //interactive: activeFocus
-
-//            onAboutToHide: {
-//                pageLoader.focus = true
-//            }
-//            onAboutToShow: {
-//                tfSshLog.focus = true
-//            }
+            Overlay.modal: Rectangle {
+                color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
+            }
 
             ColumnLayout {
                 anchors.top: parent.top

@@ -9,7 +9,7 @@ Item {
     property string descriptionText
 
     property var onClickedFunc
-    property alias buttonImage : button.image
+    property alias buttonImage: button.image
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -41,6 +41,8 @@ Item {
                 color: "#878B91"
                 text: root.descriptionText
                 wrapMode: Text.WordWrap
+
+                visible: root.descriptionText !== ""
 
                 Layout.fillWidth: true
                 height: 16

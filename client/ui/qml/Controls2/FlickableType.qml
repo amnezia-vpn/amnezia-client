@@ -9,8 +9,8 @@ Flickable {
     width: parent.width
 
     anchors.bottom: parent.bottom
-    anchors.left: root.left
-    anchors.right: root.right
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.rightMargin: 1
 
     Keys.onUpPressed: scrollBar.decrease()

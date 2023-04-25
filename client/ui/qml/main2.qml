@@ -135,7 +135,7 @@ Window  {
         id: pageLoader
 
         onFinished: {
-            UiLogic.initalizeUiLogic()
+            UiLogic.initializeUiLogic()
         }
     }
 
