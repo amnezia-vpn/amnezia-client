@@ -17,7 +17,7 @@ Item {
     property string checkedBorderColor: "#FBB26A"
 
     property string checkedImageColor: "#FBB26A"
-    property string hoveredImageColor: "#A85809"
+    property string pressedImageColor: "#A85809"
     property string defaultImageColor: "transparent"
 
     property string imageSource: "qrc:/images/controls/check.svg"
@@ -40,6 +40,7 @@ Item {
                 id: indicator
                 anchors.verticalCenter: checkBox.verticalCenter
                 anchors.horizontalCenter: checkBox.horizontalCenter
+
                 ColorOverlay {
                     id: imageColor
                     anchors.fill: indicator
@@ -112,8 +113,8 @@ Item {
         }
 
         onPressedChanged: {
-            indicator.source = pressed ? imageSource : ""
-            imageColor.color = pressed ? hoveredImageColor : defaultImageColor
+            indicator.source = pressed ? imageSource : checkBox.checked ? imageSource : ""
+            imageColor.color = pressed ? pressedImageColor : checkBox.checked ? checkedImageColor : defaultImageColor
             checkBoxBackground.color = pressed ? pressedColor : entered ? hoveredColor : defaultColor
         }
 

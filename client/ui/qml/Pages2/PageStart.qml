@@ -121,6 +121,7 @@ PageBase {
                     id: buttonGroup
 
                     spacing: 0
+
                     HorizontalRadioButton {
                         implicitWidth: (root.width - 32) / 2
                         text: "ddsasdasd"
@@ -134,9 +135,15 @@ PageBase {
 
             VerticalRadioButton {
                 text: "dsasd"
+                descriptionText: "asd"
+                checked: true
+
+                Layout.fillWidth: true
             }
             VerticalRadioButton {
                 text: "dsasd"
+
+                Layout.fillWidth: true
             }
         }
 

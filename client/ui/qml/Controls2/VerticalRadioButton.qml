@@ -26,16 +26,21 @@ RadioButton {
 
     property string defaultInnerCircleColor: "#FBB26A"
 
+    implicitWidth: background.implicitWidth + content.implicitWidth
+    implicitHeight: background.implicitWidth
+
     hoverEnabled: true
 
     indicator: Rectangle {
+        id: background
+
         implicitWidth: 56
         implicitHeight: 56
         radius: 16
 
         color: {
             if (root.enabled) {
-                if (root.hovered || contentMouseArea.entered) {
+                if (root.hovered) {
                     return hoveredColor
                 } else if (root.checked) {
                     return selectedColor
@@ -51,6 +56,8 @@ RadioButton {
         }
 
         Rectangle {
+            id: outerCircle
+
             width: 24
             height: 24
             radius: 16
@@ -114,12 +121,14 @@ RadioButton {
         }
     }
 
-    contentItem: ColumnLayout {
+    contentItem: Item {}
+
+    ColumnLayout {
         id: content
-        anchors.left: indicator.right
-        anchors.top: parent.top
-        anchors.leftMargin: 8
-        spacing: 16
+        anchors.fill: parent
+        anchors.leftMargin: 8 + background.width
+        anchors.topMargin: 4
+        anchors.bottomMargin: 4
 
         Text {
             text: root.text
@@ -150,31 +159,10 @@ RadioButton {
     }
 
     MouseArea {
-        id: contentMouseArea
-
-        anchors.fill: content
+        anchors.fill: root
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-//            onEntered: {
-//                checkBoxBackground.color = hoveredColor
-//            }
-
-//            onExited: {
-//                checkBoxBackground.color = defaultColor
-//            }
-
-//            onPressedChanged: {
-//                indicator.source = pressed ? imageSource : ""
-//                imageColor.color = pressed ? hoveredImageColor : defaultImageColor
-//                checkBoxBackground.color = pressed ? pressedColor : entered ? hoveredColor : defaultColor
-//            }
-
-//            onClicked: {
-//                checkBox.checked = !checkBox.checked
-//                indicator.source = checkBox.checked ? imageSource : ""
-//                imageColor.color = checkBox.checked ? checkedImageColor : defaultImageColor
-//                imageBorder.border.color = checkBox.checked ? checkedBorderColor : defaultBorderColor
-//            }
+        enabled: false
     }
 }
+
+
