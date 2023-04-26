@@ -30,7 +30,7 @@ PageBase {
 
             spacing: 16
 
-            HeaderTextType {
+            HeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
 

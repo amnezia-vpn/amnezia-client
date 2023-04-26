@@ -188,15 +188,17 @@
         <file>ui/qml/PageLoader.qml</file>
         <file>images/amneziaBigLogo.png</file>
         <file>images/amneziaBigLogo.svg</file>
-        <file>ui/qml/Controls2/BodyTextType.qml</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
-        <file>ui/qml/Controls2/Header2TextType.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
-        <file>ui/qml/Controls2/HeaderTextType.qml</file>
+        <file>ui/qml/Controls2/HeaderType.qml</file>
         <file>images/controls/arrow-left.svg</file>
         <file>ui/qml/Pages2/PageSetupWizardProtocols.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
         <file>images/controls/chevron-down.svg</file>
         <file>images/controls/chevron-up.svg</file>
+        <file>ui/qml/Controls2/TextTypes/BodyTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/Header2TextType.qml</file>
+        <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
+        <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
     </qresource>
 </RCC>

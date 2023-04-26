@@ -6,6 +6,9 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: root
 
+    property string text
+    property string descriptionText
+
     property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
     property string defaultColor: "transparent"
     property string pressedColor: Qt.rgba(1, 1, 1, 0.05)
@@ -71,7 +74,7 @@ Item {
 
         ColumnLayout {
             Text {
-                text: "Paragraph"
+                text: root.text
                 color: "#D7D8DB"
                 font.pixelSize: 18
                 font.weight: 400
@@ -82,7 +85,7 @@ Item {
             }
 
             Text {
-                text: "Caption"
+                text: root.descriptionText
                 color: "#878b91"
                 font.pixelSize: 13
                 font.weight: 400
@@ -94,6 +97,7 @@ Item {
             }
         }
     }
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

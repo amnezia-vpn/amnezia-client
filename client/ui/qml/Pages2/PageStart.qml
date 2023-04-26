@@ -8,6 +8,7 @@ import "./"
 import "../Pages"
 import "../Controls2"
 import "../Config"
+import "../Controls2/TextTypes"
 
 PageBase {
     id: root
@@ -98,6 +99,44 @@ PageBase {
                     qsTr("BLAKE2s256"),
                     qsTr("SHA1")
                 ]
+            }
+            CheckBoxType {
+//                text: qsTr("Auto-negotiate encryption")
+            }
+            CheckBoxType {
+                text: qsTr("Auto-negotiate encryption")
+                descriptionText: "dssaa"
+            }
+
+            Rectangle {
+                implicitWidth: buttonGroup.implicitWidth
+                implicitHeight: buttonGroup.implicitHeight
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                color: "#1C1D21"
+                radius: 16
+                RowLayout {
+                    id: buttonGroup
+
+                    spacing: 0
+                    HorizontalRadioButton {
+                        implicitWidth: (root.width - 32) / 2
+                        text: "ddsasdasd"
+                    }
+                    HorizontalRadioButton {
+                        implicitWidth: (root.width - 32) / 2
+                        text: "ddsasdasd"
+                    }
+                }
+            }
+
+            VerticalRadioButton {
+                text: "dsasd"
+            }
+            VerticalRadioButton {
+                text: "dsasd"
             }
         }
 

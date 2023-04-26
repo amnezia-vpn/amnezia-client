@@ -49,7 +49,7 @@ PageBase {
 
             spacing: 16
 
-            HeaderTextType {
+            HeaderType {
                 width: parent.width
                 buttonImage: "qrc:/images/controls/arrow-left.svg"
 
