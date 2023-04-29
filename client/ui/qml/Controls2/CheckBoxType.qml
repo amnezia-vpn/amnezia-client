@@ -3,10 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
-Item {
+CheckBox {
     id: root
 
-    property string text
     property string descriptionText
 
     property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
@@ -22,107 +21,87 @@ Item {
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
+    hoverEnabled: true
 
-    RowLayout {
-        id: content
+    indicator: Rectangle {
+        id: checkBoxBackground
 
-        anchors.fill: parent
+        implicitWidth: 56
+        implicitHeight: 56
+        radius: 16
 
-        CheckBox {
-            id: checkBox
+        color:  {
+            if (root.hovered) {
+                return hoveredColor
+            }
+            return defaultColor
+        }
 
-            implicitWidth: 56
-            implicitHeight: 56
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
 
-            indicator: Image {
+        Rectangle {
+            id: imageBorder
+
+            anchors.centerIn: parent
+            width: 24
+            height: 24
+            color: "transparent"
+            border.color: root.checked ? checkedBorderColor : defaultBorderColor
+            border.width: 1
+            radius: 4
+
+            Image {
                 id: indicator
-                anchors.verticalCenter: checkBox.verticalCenter
-                anchors.horizontalCenter: checkBox.horizontalCenter
+                anchors.centerIn: parent
+
+                source: root.pressed ? imageSource : root.checked ? imageSource : ""
 
                 ColorOverlay {
                     id: imageColor
                     anchors.fill: indicator
                     source: indicator
-                }
-            }
 
-            Rectangle {
-                id: imageBorder
-
-                anchors.verticalCenter: checkBox.verticalCenter
-                anchors.horizontalCenter: checkBox.horizontalCenter
-                width: 24
-                height: 24
-                color: "transparent"
-                border.color: checkBox.checked ? checkedBorderColor : defaultBorderColor
-                border.width: 1
-                radius: 4
-            }
-
-            background: Rectangle {
-                id: checkBoxBackground
-                radius: 16
-
-                color: "transparent"
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
+                    color: root.pressed ? pressedImageColor : root.checked ? checkedImageColor : defaultImageColor
                 }
             }
         }
+    }
 
-        ColumnLayout {
-            Text {
-                text: root.text
-                color: "#D7D8DB"
-                font.pixelSize: 18
-                font.weight: 400
-                font.family: "PT Root UI VF"
+    contentItem: ColumnLayout {
+        anchors.fill: parent
+        anchors.leftMargin: 8 + checkBoxBackground.width
 
-                height: 22
-                Layout.fillWidth: true
-            }
+        Text {
+            text: root.text
+            color: "#D7D8DB"
+            font.pixelSize: 18
+            font.weight: 400
+            font.family: "PT Root UI VF"
 
-            Text {
-                text: root.descriptionText
-                color: "#878b91"
-                font.pixelSize: 13
-                font.weight: 400
-                font.family: "PT Root UI VF"
-                font.letterSpacing: 0.02
+            height: 22
+            Layout.fillWidth: true
+        }
 
-                height: 16
-                Layout.fillWidth: true
-            }
+        Text {
+            text: root.descriptionText
+            color: "#878b91"
+            font.pixelSize: 13
+            font.weight: 400
+            font.family: "PT Root UI VF"
+            font.letterSpacing: 0.02
+
+            height: 16
+            Layout.fillWidth: true
         }
     }
 
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-        onEntered: {
-            checkBoxBackground.color = hoveredColor
-        }
-
-        onExited: {
-            checkBoxBackground.color = defaultColor
-        }
-
-        onPressedChanged: {
-            indicator.source = pressed ? imageSource : checkBox.checked ? imageSource : ""
-            imageColor.color = pressed ? pressedImageColor : checkBox.checked ? checkedImageColor : defaultImageColor
-            checkBoxBackground.color = pressed ? pressedColor : entered ? hoveredColor : defaultColor
-        }
-
-        onClicked: {
-            checkBox.checked = !checkBox.checked
-            indicator.source = checkBox.checked ? imageSource : ""
-            imageColor.color = checkBox.checked ? checkedImageColor : defaultImageColor
-            imageBorder.border.color = checkBox.checked ? checkedBorderColor : defaultBorderColor
-        }
+        enabled: false
     }
 }
+
+

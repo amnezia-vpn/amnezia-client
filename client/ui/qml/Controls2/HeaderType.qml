@@ -22,6 +22,9 @@ Item {
 
             image: root.buttonImage
             imageColor: "#D7D8DB"
+
+            visible: image ? true : false
+
             onClicked: {
                 UiLogic.closePage()
             }
@@ -58,6 +61,7 @@ Item {
             wrapMode: Text.WordWrap
 
             height: 24
+            Layout.topMargin: 16
             Layout.fillWidth: true
         }
     }

@@ -26,9 +26,6 @@ RadioButton {
 
     property string defaultInnerCircleColor: "#FBB26A"
 
-    implicitWidth: background.implicitWidth + content.implicitWidth
-    implicitHeight: background.implicitWidth
-
     hoverEnabled: true
 
     indicator: Rectangle {
@@ -121,14 +118,10 @@ RadioButton {
         }
     }
 
-    contentItem: Item {}
-
-    ColumnLayout {
+    contentItem: ColumnLayout {
         id: content
         anchors.fill: parent
         anchors.leftMargin: 8 + background.width
-        anchors.topMargin: 4
-        anchors.bottomMargin: 4
 
         Text {
             text: root.text

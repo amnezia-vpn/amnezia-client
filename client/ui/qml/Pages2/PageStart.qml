@@ -76,74 +76,9 @@ PageBase {
 
                 text: qsTr("У меня ничего нет")
 
-//                onClicked: {
-//                    UiLogic.goToPage(PageEnum.Start)
-//                }
-            }
-
-            DropDownType {
-                Layout.fillWidth: true
-
-                text: "IP, логин и пароль от сервера"
-                descriptionText: "IP, логин и пароль от сервера"
-
-                menuModel: [
-                    qsTr("SHA512"),
-                    qsTr("SHA384"),
-                    qsTr("SHA256"),
-                    qsTr("SHA3-512"),
-                    qsTr("SHA3-384"),
-                    qsTr("SHA3-256"),
-                    qsTr("whirlpool"),
-                    qsTr("BLAKE2b512"),
-                    qsTr("BLAKE2s256"),
-                    qsTr("SHA1")
-                ]
-            }
-            CheckBoxType {
-//                text: qsTr("Auto-negotiate encryption")
-            }
-            CheckBoxType {
-                text: qsTr("Auto-negotiate encryption")
-                descriptionText: "dssaa"
-            }
-
-            Rectangle {
-                implicitWidth: buttonGroup.implicitWidth
-                implicitHeight: buttonGroup.implicitHeight
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                color: "#1C1D21"
-                radius: 16
-                RowLayout {
-                    id: buttonGroup
-
-                    spacing: 0
-
-                    HorizontalRadioButton {
-                        implicitWidth: (root.width - 32) / 2
-                        text: "ddsasdasd"
-                    }
-                    HorizontalRadioButton {
-                        implicitWidth: (root.width - 32) / 2
-                        text: "ddsasdasd"
-                    }
+                onClicked: {
+                    UiLogic.goToPage(PageEnum.Test)
                 }
-            }
-
-            VerticalRadioButton {
-                text: "dsasd"
-                descriptionText: "asd"
-                checked: true
-
-                Layout.fillWidth: true
-            }
-            VerticalRadioButton {
-                text: "dsasd"
-
-                Layout.fillWidth: true
             }
         }
 

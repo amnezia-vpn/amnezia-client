@@ -173,7 +173,6 @@
         <file>server_scripts/check_user_in_sudo.sh</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
         <file>ui/qml/Controls2/TextFieldWithHeaderType.qml</file>
-        <file>ui/qml/Pages/PageTest.qml</file>
         <file>fonts/pt-root-ui_vf.ttf</file>
         <file>ui/qml/Controls2/LabelWithButtonType.qml</file>
         <file>images/controls/arrow-right.svg</file>
@@ -200,5 +199,8 @@
         <file>ui/qml/Controls2/TextTypes/Header2TextType.qml</file>
         <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
         <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
+        <file>ui/qml/Controls2/SwitcherType.qml</file>
+        <file>ui/qml/Pages2/PageTest.qml</file>
+        <file>ui/qml/Controls2/TabButtonType.qml</file>
     </qresource>
 </RCC>
