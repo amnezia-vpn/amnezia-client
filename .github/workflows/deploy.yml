@@ -58,131 +58,131 @@ jobs:
 
 # ------------------------------------------------------
 
-  Build-Windows:
-    name: Build-Windows
-    runs-on: windows-latest
-
-    env:
-      QT_VERSION: 6.4.1
-      QIF_VERSION: 4.5
-      BUILD_ARCH: 64
-
-    steps:
-    - name: 'Get sources'
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        tools: 'tools_ifw'
-        set-env: 'true'
-        extra: '--external 7z'
-
-    - name: 'Setup mvsc'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-          arch: 'x64'
-
-    - name: 'Build project'
-      shell: cmd
-      run: |
-        set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
-        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-        call deploy\\build_windows.bat
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: AmneziaVPN_Windows_installer
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
-        retention-days: 7
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: AmneziaVPN_Windows_unpacked
-        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 7
+#  Build-Windows:
+#    name: Build-Windows
+#    runs-on: windows-latest
+#
+#    env:
+#      QT_VERSION: 6.4.1
+#      QIF_VERSION: 4.5
+#      BUILD_ARCH: 64
+#
+#    steps:
+#    - name: 'Get sources'
+#      uses: actions/checkout@v3
+#      with:
+#        submodules: 'true'
+#        fetch-depth: 10
+#
+#    - name: 'Setup ccache'
+#      uses: hendrikmuhs/ccache-action@v1.2
+#
+#    - name: 'Install Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'windows'
+#        target: 'desktop'
+#        arch: 'win64_msvc2019_64'
+#        modules: 'qtremoteobjects qt5compat qtshadertools'
+#        dir: ${{ runner.temp }}
+#        setup-python: 'true'
+#        tools: 'tools_ifw'
+#        set-env: 'true'
+#        extra: '--external 7z'
+#
+#    - name: 'Setup mvsc'
+#      uses: ilammy/msvc-dev-cmd@v1
+#      with:
+#          arch: 'x64'
+#
+#    - name: 'Build project'
+#      shell: cmd
+#      run: |
+#        set BUILD_ARCH=${{ env.BUILD_ARCH }}
+#        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
+#        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
+#        call deploy\\build_windows.bat
+#
+#    - name: 'Upload installer artifact'
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: AmneziaVPN_Windows_installer
+#        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+#        retention-days: 7
+#    - name: 'Upload unpacked artifact'
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: AmneziaVPN_Windows_unpacked
+#        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+#        retention-days: 7
 
 # ------------------------------------------------------
 
-  Build-IOS:
-    name: 'Build-IOS'
-    runs-on: macos-latest
-
-    env:
-      QT_VERSION: 6.4.1
-      QIF_VERSION: 4.4
-
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '13.4'
-
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-
-    - name: 'Install ios Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z'
-
-    - name: 'Install go'
-      uses: actions/setup-go@v3
-
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
-
-    - name: 'Get sources'
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export QT_IOS_BIN=$QT_BIN_DIR
-        export PATH=$PATH:~/go/bin
-        mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-
+#  Build-IOS:
+#    name: 'Build-IOS'
+#    runs-on: macos-latest
+#
+#    env:
+#      QT_VERSION: 6.4.1
+#      QIF_VERSION: 4.4
+#
+#    steps:
+#    - name: 'Setup xcode'
+#      uses: maxim-lobanov/setup-xcode@v1
+#      with:
+#        xcode-version: '13.4'
+#
+#    - name: 'Install desktop Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'mac'
+#        target: 'desktop'
+#        arch: 'clang_64'
+#        modules: 'qtremoteobjects qt5compat qtshadertools'
+#        dir: ${{ runner.temp }}
+#        set-env: 'true'
+#
+#    - name: 'Install ios Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'mac'
+#        target: 'ios'
+#        modules: 'qtremoteobjects qt5compat qtshadertools'
+#        dir: ${{ runner.temp }}
+#        setup-python: 'true'
+#        set-env: 'true'
+#        extra: '--external 7z'
+#
+#    - name: 'Install go'
+#      uses: actions/setup-go@v3
+#
+#    - name: 'Setup gomobile'
+#      run: |
+#          export PATH=$PATH:~/go/bin
+#          go install golang.org/x/mobile/cmd/gomobile@latest
+#          gomobile init
+#
+#    - name: 'Get sources'
+#      uses: actions/checkout@v3
+#      with:
+#        submodules: 'true'
+#        fetch-depth: 10
+#
+#    - name: 'Setup ccache'
+#      uses: hendrikmuhs/ccache-action@v1.2
+#
+#    - name: 'Build project'
+#      run: |
+#        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
+#        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+#        export QT_IOS_BIN=$QT_BIN_DIR
+#        export PATH=$PATH:~/go/bin
+#        mkdir build-ios
+#        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+#
 #    - name: iOS Build/Release With Multiple Targets Action
 #      uses: kumarsunil0007/build-ios-action@latest
 #      with:
@@ -195,132 +195,132 @@ jobs:
 
 # ------------------------------------------------------
 
-  Build-MacOS:
-    name: 'Build-MacOS'
-    runs-on: macos-latest
-
-    env:
-      QT_VERSION: 6.4.1
-      QIF_VERSION: 4.5
-
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '13.4'
-
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        tools: 'tools_ifw'
-        set-env: 'true'
-        extra: '--external 7z'
-
-    - name: 'Get sources'
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
-        bash deploy/build_macos.sh
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: AmneziaVPN_MacOS_installer
-        path: AmneziaVPN.dmg
-        retention-days: 7
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+#  Build-MacOS:
+#    name: 'Build-MacOS'
+#    runs-on: macos-latest
+#
+#    env:
+#      QT_VERSION: 6.4.1
+#      QIF_VERSION: 4.5
+#
+#    steps:
+#    - name: 'Setup xcode'
+#      uses: maxim-lobanov/setup-xcode@v1
+#      with:
+#        xcode-version: '13.4'
+#
+#    - name: 'Install Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'mac'
+#        target: 'desktop'
+#        arch: 'clang_64'
+#        modules: 'qtremoteobjects qt5compat qtshadertools'
+#        dir: ${{ runner.temp }}
+#        setup-python: 'true'
+#        tools: 'tools_ifw'
+#        set-env: 'true'
+#        extra: '--external 7z'
+#
+#    - name: 'Get sources'
+#      uses: actions/checkout@v3
+#      with:
+#        submodules: 'true'
+#        fetch-depth: 10
+#
+#    - name: 'Setup ccache'
+#      uses: hendrikmuhs/ccache-action@v1.2
+#
+#    - name: 'Build project'
+#      run: |
+#        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+#        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+#        bash deploy/build_macos.sh
+#
+#    - name: 'Upload installer artifact'
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: AmneziaVPN_MacOS_installer
+#        path: AmneziaVPN.dmg
+#        retention-days: 7
+#    - name: 'Upload unpacked artifact'
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: AmneziaVPN_MacOS_unpacked
+#        path: deploy/build/client/AmneziaVPN.app
+#        retention-days: 7
 
 # ------------------------------------------------------
 
-  Build-Android:
-    name: 'Build-Android'
-    runs-on: ubuntu-latest
-    continue-on-error: true
-
-    strategy:
-      matrix:
-        arch: ['android_x86_64', 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
-
-    env:
-      QT_VERSION: 6.4.1
-      QIF_VERSION: 4.5
-
-    steps:
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'desktop'
-        arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z'
-
-    - name: 'Install android Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: ${{ matrix.arch }}
-        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z'
-
-    - name: 'Get sources'
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Setup Java'
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '11'
-
-    - name: 'Build project'
-      run: |
-        export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
-        export NDK_VERSION=23c
-        export ANDROID_NDK_PLATFORM=android-23
-        export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
-        export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-        export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
-
-        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
-          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
-          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
-        fi
-
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
-        bash deploy/build_android.sh
+#  Build-Android:
+#    name: 'Build-Android'
+#    runs-on: ubuntu-latest
+#    continue-on-error: true
+#
+#    strategy:
+#      matrix:
+#        arch: ['android_x86_64', 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
+#
+#    env:
+#      QT_VERSION: 6.4.1
+#      QIF_VERSION: 4.5
+#
+#    steps:
+#    - name: 'Install desktop Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'linux'
+#        target: 'desktop'
+#        arch: 'gcc_64'
+#        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+#        dir: ${{ runner.temp }}
+#        setup-python: 'true'
+#        set-env: 'true'
+#        extra: '--external 7z'
+#
+#    - name: 'Install android Qt'
+#      uses: jurplel/install-qt-action@v3
+#      with:
+#        version: ${{ env.QT_VERSION }}
+#        host: 'linux'
+#        target: 'android'
+#        arch: ${{ matrix.arch }}
+#        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+#        dir: ${{ runner.temp }}
+#        setup-python: 'true'
+#        set-env: 'true'
+#        extra: '--external 7z'
+#
+#    - name: 'Get sources'
+#      uses: actions/checkout@v3
+#      with:
+#        submodules: 'true'
+#        fetch-depth: 10
+#
+#    - name: 'Setup ccache'
+#      uses: hendrikmuhs/ccache-action@v1.2
+#
+#    - name: 'Setup Java'
+#      uses: actions/setup-java@v3
+#      with:
+#        distribution: 'temurin'
+#        java-version: '11'
+#
+#    - name: 'Build project'
+#      run: |
+#        export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
+#        export NDK_VERSION=23c
+#        export ANDROID_NDK_PLATFORM=android-23
+#        export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
+#        export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+#        export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
+#
+#        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then
+#          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
+#          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ;
+#        fi
+#
+#        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
+#        bash deploy/build_android.sh
