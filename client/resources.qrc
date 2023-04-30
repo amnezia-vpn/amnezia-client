@@ -95,6 +95,7 @@
         <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoWireGuard.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoNextcloud.qml</file>
         <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
         <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
         <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
@@ -171,6 +172,5 @@
         <file>ui/qml/Controls/PopupWarning.qml</file>
         <file>ui/qml/Controls/PopupWithTextField.qml</file>
         <file>server_scripts/check_user_in_sudo.sh</file>
-        <file>ui/qml/Pages/Protocols/PageNextcloudProtocol.qml</file>
     </qresource>
 </RCC>

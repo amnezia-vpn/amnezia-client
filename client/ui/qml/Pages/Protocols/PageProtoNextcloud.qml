@@ -48,7 +48,7 @@ PageProtocolBase {
             TextFieldType {
                 id: tf_port_num
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                text: logic.labelTftpPortText
+                text: logic.lineNextcloudPortText
                 readOnly: true
             }
 
@@ -59,7 +59,7 @@ PageProtocolBase {
             TextFieldType {
                 id: tf_admin_user
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                text: logic.labelTftpPortText
+                text: logic.lineAdminUserText
                 readOnly: true
             }
 
@@ -70,7 +70,7 @@ PageProtocolBase {
             TextFieldType {
                 id: tf_admin_password
                 width: parent.width - 130 - parent.spacing - parent.leftPadding * 2
-                text: logic.labelTftpUserNameText
+                text: logic.lineAdminPasswordText
                 readOnly: true
             }
 
