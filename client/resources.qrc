@@ -34,6 +34,9 @@
         <file>server_scripts/openvpn_cloak/configure_container.sh</file>
         <file>server_scripts/openvpn_cloak/start.sh</file>
         <file>server_scripts/openvpn_cloak/template.ovpn</file>
+        <file>server_scripts/nextcloud/Dockerfile</file>
+        <file>server_scripts/nextcloud/configure_container.sh</file>
+        <file>server_scripts/nextcloud/run_container.sh</file>
         <file>server_scripts/install_docker.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>

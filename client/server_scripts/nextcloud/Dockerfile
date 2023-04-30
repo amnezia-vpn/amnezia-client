@@ -1,3 +1,3 @@
-FROM nextcloud:latest
+FROM nextcloud:latest as amnezia-nextcloud
 
 LABEL maintainer="AmneziaVPN"
