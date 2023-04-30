@@ -79,7 +79,8 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
         {Proto::TorWebSite, "Web site in Tor network"},
         {Proto::Dns, "DNS Service"},
         {Proto::FileShare, "File Sharing Service"},
-        {Proto::Sftp, QObject::tr("Sftp service")}
+        {Proto::Sftp, QObject::tr("Sftp service")},
+        {Proto::Nextcloud, QObject::tr("Nextcloud")}
     };
 }
 
@@ -118,6 +119,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::Dns :          return 53;
     case Proto::FileShare :    return 139;
     case Proto::Sftp :         return 222;
+    case Proto::Nextcloud :    return 8080;
     default:                      return -1;
     }
 }
@@ -156,6 +158,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Dns :          return TransportProto::Udp;
     case Proto::FileShare :    return TransportProto::Udp;
     case Proto::Sftp :         return TransportProto::Tcp;
+    case Proto::Nextcloud :    return TransportProto::Tcp;
     }
 }
 

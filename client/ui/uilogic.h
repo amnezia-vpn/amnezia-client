@@ -52,6 +52,7 @@ class PageProtocolLogicBase;
 class OpenVpnLogic;
 class ShadowSocksLogic;
 class CloakLogic;
+class NextcloudLogic;
 
 class OtherProtocolsLogic;
 
@@ -100,6 +101,7 @@ public:
     friend class OpenVpnLogic;
     friend class ShadowSocksLogic;
     friend class CloakLogic;
+    friend class NextcloudLogic;
 
     friend class OtherProtocolsLogic;
 

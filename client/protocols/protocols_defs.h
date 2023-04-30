@@ -12,6 +12,9 @@ namespace config_key {
 constexpr char hostName[] = "hostName";
 constexpr char userName[] = "userName";
 constexpr char password[] = "password";
+constexpr char adminUser[] = "adminUser";
+constexpr char adminPassword[] = "adminPassword";
+
 constexpr char port[] = "port";
 constexpr char local_port[] = "local_port";
 
@@ -125,6 +128,12 @@ constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
 }
 
+namespace nextcloud {
+constexpr char defaultAdminUser[] = "admin";
+constexpr char defaultAdminPassword[] = "admin";
+}
+
+
 namespace sftp {
 constexpr char defaultUserName[] = "sftp_user";
 
@@ -154,7 +163,9 @@ enum Proto {
     TorWebSite,
     Dns,
     FileShare,
-    Sftp
+    // Fileshare
+    Sftp,
+    Nextcloud
 };
 Q_ENUM_NS(Proto)
 
