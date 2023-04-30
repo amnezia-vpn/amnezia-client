@@ -1,4 +1,4 @@
 # Run container
 sudo docker run -d \
--p 9090:80 \
+-p $NEXTCLOUD_PORT:80 \
 --name $CONTAINER_NAME $CONTAINER_NAME
