@@ -97,10 +97,11 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::Cloak :        return ServiceType::Vpn;
     case Proto::ShadowSocks :  return ServiceType::Vpn;
     case Proto::WireGuard :    return ServiceType::Vpn;
-    case Proto::TorWebSite :      return ServiceType::Other;
+    case Proto::TorWebSite :   return ServiceType::Other;
     case Proto::Dns :          return ServiceType::Other;
     case Proto::FileShare :    return ServiceType::Other;
-    default:                      return ServiceType::Other;
+    case Proto::Nextcloud :    return ServiceType::Other;
+    default:                   return ServiceType::Other;
     }
 }
 
@@ -132,6 +133,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Cloak :        return true;
     case Proto::ShadowSocks :  return true;
     case Proto::WireGuard :    return true;
+    case Proto::Nextcloud :    return true;
     case Proto::Ikev2 :        return false;
     case Proto::L2tp :         return false;
 
@@ -159,6 +161,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::FileShare :    return TransportProto::Udp;
     case Proto::Sftp :         return TransportProto::Tcp;
     case Proto::Nextcloud :    return TransportProto::Tcp;
+    default:                   return defaultTransportProto(Proto::Any);
     }
 }
 
@@ -177,7 +180,8 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::Dns :          return false;
     case Proto::FileShare :    return false;
     case Proto::Sftp :         return false;
-    default:                      return false;
+    case Proto::Nextcloud :    return false;
+    default:                   return false;
     }
 }
 

@@ -9,6 +9,7 @@ class NextcloudLogic : public PageProtocolLogicBase
 {
     Q_OBJECT
 
+    AUTO_PROPERTY(QString, lineNextcloudPortText)
     AUTO_PROPERTY(QString, lineAdminUserText)
     AUTO_PROPERTY(QString, lineAdminPasswordText)
 
@@ -42,6 +43,5 @@ private:
     UiLogic *m_uiLogic;
 
 };
-
 
 #endif // NEXTCLOUDLOGIC_H

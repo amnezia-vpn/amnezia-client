@@ -11,6 +11,7 @@ using namespace PageEnumNS;
 
 NextcloudLogic::NextcloudLogic(UiLogic *logic, QObject *parent):
       PageProtocolLogicBase(logic, parent),
+      m_lineNextcloudPortText{},
       m_lineAdminUserText{},
       m_lineAdminPasswordText{},
       m_pushButtonSaveVisible{false},
