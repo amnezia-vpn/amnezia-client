@@ -92,6 +92,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
+    ${CMAKE_CURRENT_LIST_DIR}/protocols/
 )
 
 if(NOT IOS)
