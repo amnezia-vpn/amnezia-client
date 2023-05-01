@@ -19,7 +19,6 @@ Item {
 
     property alias menuModel: menuContent.model
 
-    width: buttonContent.implicitWidth
     height: buttonContent.implicitHeight
 
     Rectangle {
@@ -136,89 +135,105 @@ Item {
             color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
         }
 
-        Column {
+        Header2TextType {
+            id: header
+            width: parent.width
+
+            text: "Данные для подключения"
+            wrapMode: Text.WordWrap
+
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 16
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+        }
 
-            spacing: 16
+        FlickableType {
+            anchors.top: header.bottom
+            anchors.topMargin: 16
+            contentHeight: col.implicitHeight
 
-            Header2TextType {
-                width: parent.width
+            Column {
+                id: col
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                text: "Данные для подключения"
-                wrapMode: Text.WordWrap
+                spacing: 16
 
-                leftPadding: 16
-                rightPadding: 16
-            }
+                ButtonGroup {
+                    id: radioButtonGroup
+                }
 
-            ButtonGroup {
-                id: radioButtonGroup
-            }
+                ListView {
+                    id: menuContent
+                    width: parent.width
+                    height: menuContent.contentItem.height
 
-            ListView {
-                id: menuContent
-                width: parent.width
-                height: menuContent.contentItem.height
+                    currentIndex: -1
 
-                currentIndex: -1
+                    clip: true
+                    interactive: false
 
-                clip: true
-                interactive: false
+                    delegate: Item {
+                        implicitWidth: menuContent.width
+                        implicitHeight: radioButton.implicitHeight
 
-                delegate: Item {
-                    implicitWidth: menuContent.width
-                    implicitHeight: radioButton.implicitHeight
+                        RadioButton {
+                            id: radioButton
 
-                    RadioButton {
-                        id: radioButton
+                            implicitWidth: parent.width
+                            implicitHeight: radioButtonContent.implicitHeight
 
-                        implicitWidth: parent.width
-                        implicitHeight: radioButtonContent.implicitHeight
+                            hoverEnabled: true
 
-                        hoverEnabled: true
+                            ButtonGroup.group: radioButtonGroup
 
-                        ButtonGroup.group: radioButtonGroup
-
-                        indicator: Rectangle {
-                            anchors.fill: parent
-                            color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
-                        }
-
-                        RowLayout {
-                            id: radioButtonContent
-                            anchors.fill: parent
-
-                            anchors.rightMargin: 16
-                            anchors.leftMargin: 16
-
-                            z: 1
-
-                            Text {
-                                id: text
-
-                                text: modelData
-                                color: "#D7D8DB"
-                                font.pixelSize: 16
-                                font.weight: 400
-                                font.family: "PT Root UI VF"
-
-                                height: 24
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 20
-                                Layout.bottomMargin: 20
+                            indicator: Rectangle {
+                                anchors.fill: parent
+                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
                             }
 
-                            Image {
-                                source: "qrc:/images/controls/check.svg"
-                                visible: radioButton.checked
-                                width: 24
-                                height: 24
+                            RowLayout {
+                                id: radioButtonContent
+                                anchors.fill: parent
 
-                                Layout.rightMargin: 8
+                                anchors.rightMargin: 16
+                                anchors.leftMargin: 16
+
+                                z: 1
+
+                                Text {
+                                    id: text
+
+                                    text: modelData
+                                    color: "#D7D8DB"
+                                    font.pixelSize: 16
+                                    font.weight: 400
+                                    font.family: "PT Root UI VF"
+
+                                    height: 24
+
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 20
+                                    Layout.bottomMargin: 20
+                                }
+
+                                Image {
+                                    source: "qrc:/images/controls/check.svg"
+                                    visible: radioButton.checked
+                                    width: 24
+                                    height: 24
+
+                                    Layout.rightMargin: 8
+                                }
+                            }
+
+                            onClicked: {
+                                root.text = modelData
+                                menu.visible = false
                             }
                         }
                     }
