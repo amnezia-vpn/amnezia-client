@@ -14,6 +14,7 @@ Window  {
     height: GC.screenHeight
     minimumWidth: GC.isDesktop() ? 360 : 0
     minimumHeight: GC.isDesktop() ? 640 : 0
+
     onClosing: function() {
         console.debug("QML onClosing signal")
         UiLogic.onCloseWindow()
@@ -21,28 +22,18 @@ Window  {
 
     title: "AmneziaVPN"
 
-    function gotoPage(type, page, reset, slide) {
-        let p_obj;
-        if (type === PageType.Basic) p_obj = pageLoader.pages[page]
-        else if (type === PageType.Proto) p_obj = protocolPages[page]
-        else if (type === PageType.ShareProto) p_obj = sharePages[page]
-        else return
-
+    function gotoPage(page, reset, slide) {
         if (pageStackView.depth > 0) {
             pageStackView.currentItem.deactivated()
         }
 
         if (slide) {
-            pageStackView.push(p_obj, {}, StackView.PushTransition)
+            pageStackView.push(UiLogic.pageEnumToString(page), {}, StackView.PushTransition)
         } else {
-            pageStackView.push(p_obj, {}, StackView.Immediate)
+            pageStackView.push(UiLogic.pageEnumToString(page), {}, StackView.Immediate)
         }
 
-//        if (reset) {
-//            p_obj.logic.onUpdatePage();
-//        }
-
-        p_obj.activated(reset)
+        pageStackView.currentItem.activated(reset)
     }
 
     function closePage() {
@@ -60,9 +51,9 @@ Window  {
 
         pageStackView.clear()
         if (slide) {
-            pageStackView.push(pages[page], {}, StackView.PushTransition)
+            pageStackView.push(UiLogic.pageEnumToString(page), {}, StackView.PushTransition)
         } else {
-            pageStackView.push(pages[page], {}, StackView.Immediate)
+            pageStackView.push(UiLogic.pageEnumToString(page), {}, StackView.Immediate)
         }
         if (page === PageEnum.Start) {
             UiLogic.pushButtonBackFromStartVisible = !pageStackView.empty
@@ -79,33 +70,12 @@ Window  {
         id: pageStackView
         anchors.fill: parent
         focus: true
-
-        onCurrentItemChanged: function() {
-            UiLogic.currentPageValue = currentItem.page
-        }
-
-        onDepthChanged: function() {
-            UiLogic.pagesStackDepth = depth
-        }
-
-        Keys.onPressed: function(event) {
-            UiLogic.keyPressEvent(event.key)
-            event.accepted = true
-        }
     }
 
     Connections {
         target: UiLogic
         function onGoToPage(page, reset, slide) {
-            root.gotoPage(PageType.Basic, page, reset, slide)
-        }
-
-        function onGoToProtocolPage(protocol, reset, slide) {
-            root.gotoPage(PageType.Proto, protocol, reset, slide)
-        }
-
-        function onGoToShareProtocolPage(protocol, reset, slide) {
-            root.gotoPage(PageType.ShareProto, protocol, reset, slide)
+            root.gotoPage(page, reset, slide)
         }
 
         function onClosePage() {
@@ -118,6 +88,7 @@ Window  {
 
         function onShow() {
             root.show()
+            UiLogic.initializeUiLogic()
         }
 
         function onHide() {
@@ -130,13 +101,4 @@ Window  {
             root.requestActivate()
         }
     }
-
-    PageLoader {
-        id: pageLoader
-
-        onFinished: {
-            UiLogic.initializeUiLogic()
-        }
-    }
-
 }

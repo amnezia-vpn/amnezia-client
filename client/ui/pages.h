@@ -28,7 +28,9 @@ enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
            ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig,
            AdvancedServerSettings, ClientManagement, ClientInfo,
 
-           Test, WizardCredentials, WizardProtocols, WizardEasySetup};
+           PageStart, PageTest, PageSetupWizardCredentials, PageSetupWizardProtocols, PageSetupWizardEasy,
+           PageSetupWizardProtocolSettings, PageSetupWizardInstalling, PageSetupWizardConfigSource,
+           PageSetupWizardTextKey};
 Q_ENUM_NS(Page)
 
 static void declareQmlPageEnum() {

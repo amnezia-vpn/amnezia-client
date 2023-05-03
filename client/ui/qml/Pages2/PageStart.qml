@@ -12,7 +12,7 @@ import "../Controls2/TextTypes"
 
 PageBase {
     id: root
-    page: PageEnum.Start
+    page: PageEnum.PageStart
 
     FlickableType {
         id: fl
@@ -77,7 +77,7 @@ PageBase {
                 text: qsTr("У меня ничего нет")
 
                 onClicked: {
-                    UiLogic.goToPage(PageEnum.Test)
+                    UiLogic.goToPage(PageEnum.PageTest)
                 }
             }
         }
@@ -129,7 +129,7 @@ PageBase {
                     buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                     onClickedFunc: function() {
-                        UiLogic.goToPage(PageEnum.WizardCredentials)
+                        UiLogic.goToPage(PageEnum.PageSetupWizardCredentials)
                         drawer.visible = false
                     }
                 }
@@ -144,9 +144,10 @@ PageBase {
                     text: "QR-код, ключ или файл настроек"
                     buttonImage: "qrc:/images/controls/chevron-right.svg"
 
-    //                onClickedFunc: function() {
-    //                    UiLogic.goToPage(PageEnum.Start)
-    //                }
+                    onClickedFunc: function() {
+                        UiLogic.goToPage(PageEnum.PageSetupWizardConfigSource)
+                        drawer.visible = false
+                    }
                 }
                 Rectangle {
                     Layout.fillWidth: true

@@ -67,7 +67,6 @@ class UiLogic : public QObject
     AUTO_PROPERTY(int, pagesStackDepth)
     AUTO_PROPERTY(int, currentPageValue)
 
-    READONLY_PROPERTY(QObject *, containersModel)
     READONLY_PROPERTY(QObject *, protocolsModel)
     READONLY_PROPERTY(QObject *, clientManagementModel)
 
@@ -123,6 +122,8 @@ public:
     Q_INVOKABLE void copyToClipboard(const QString& text);
 
     Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool &isServerCreated);
+
+    Q_INVOKABLE QString pageEnumToString(PageEnumNS::Page page);
 
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
     static QString getOpenFileName(QWidget *parent = nullptr,

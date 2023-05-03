@@ -22,8 +22,8 @@ ServerContainersLogic::ServerContainersLogic(UiLogic *logic, QObject *parent):
 
 void ServerContainersLogic::onUpdatePage()
 {
-    ContainersModel *c_model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
-    c_model->setSelectedServerIndex(uiLogic()->m_selectedServerIndex);
+//    ContainersModel *c_model = qobject_cast<ContainersModel *>(uiLogic()->containersModel());
+//    c_model->setSelectedServerIndex(uiLogic()->m_selectedServerIndex);
 
     ProtocolsModel *p_model = qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel());
     p_model->setSelectedServerIndex(uiLogic()->m_selectedServerIndex);

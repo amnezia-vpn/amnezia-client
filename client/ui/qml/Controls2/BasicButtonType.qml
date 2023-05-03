@@ -14,7 +14,6 @@ Button {
     property string borderColor: "#D7D8DB"
     property int borderWidth: 0
 
-    implicitWidth: 328
     implicitHeight: 56
 
     hoverEnabled: true

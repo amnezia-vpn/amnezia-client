@@ -14,11 +14,11 @@ import "../Config"
 
 PageBase {
     id: root
-    page: PageEnum.WizardProtocols
+    page: PageEnum.PageSetupWizardProtocols
 
     SortFilterProxyModel {
-        id: containersModel
-        sourceModel: UiLogic.containersModel
+        id: proxyContainersModel
+        sourceModel: ContainersModel
         filters: [
             ValueFilter {
                 roleName: "is_installed_role"
@@ -64,7 +64,7 @@ PageBase {
                 currentIndex: -1
                 clip: true
                 interactive: false
-                model: containersModel
+                model: proxyContainersModel
 
                 delegate: Item {
                     implicitWidth: containers.width
@@ -87,6 +87,10 @@ PageBase {
                             descriptionText: desc_role
                             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
+                            onClickedFunc: function() {
+                                ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
+                                UiLogic.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                            }
                         }
 
                         Rectangle {

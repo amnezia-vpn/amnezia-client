@@ -84,7 +84,6 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_settings(settings),
     m_configurator(configurator)
 {
-    m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
     m_clientManagementModel = new ClientManagementModel(this);
     m_vpnConnection = new VpnConnection(settings, configurator);
@@ -155,7 +154,7 @@ void UiLogic::initializeUiLogic()
         emit goToPage(Page::Vpn, true, false);
     }
     else {
-        emit goToPage(Page::Start, true, false);
+        emit goToPage(Page::PageStart, true, false);
     }
 
     m_selectedServerIndex = m_settings->defaultServerIndex();
@@ -619,3 +618,8 @@ bool UiLogic::isContainerAlreadyAddedToGui(DockerContainer container)
     return false;
 }
 
+QString UiLogic::pageEnumToString(Page page) {
+    QMetaEnum metaEnum = QMetaEnum::fromType<Page>();
+    QString pageName = metaEnum.valueToKey(static_cast<int>(page));
+    return "Pages2/" + pageName + ".qml";
+}

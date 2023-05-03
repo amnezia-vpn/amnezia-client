@@ -56,4 +56,14 @@ void ContainersModel::setSelectedServerIndex(int index)
     endResetModel();
 }
 
+void ContainersModel::setCurrentlyInstalledContainerIndex(int index)
+{
+//    beginResetModel();
+    m_currentlyInstalledContainerIndex = createIndex(index, 0);
+//    endResetModel();
+}
 
+QString ContainersModel::getCurrentlyInstalledContainerName()
+{
+    return data(m_currentlyInstalledContainerIndex, NameRole).toString();
+}

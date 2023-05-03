@@ -99,6 +99,10 @@ void AmneziaApplication::init()
     }, Qt::QueuedConnection);
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
+
+    m_containersModel.reset(new ContainersModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
+
     m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)
@@ -180,6 +184,8 @@ void AmneziaApplication::loadFonts()
     QFontDatabase::addApplicationFont(":/fonts/Lato-Regular.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-Thin.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-ThinItalic.ttf");
+
+    QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
 }
 
 void AmneziaApplication::loadTranslator()

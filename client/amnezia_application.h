@@ -56,6 +56,8 @@ private:
     QTranslator* m_translator;
     QCommandLineParser m_parser;
 
+    QScopedPointer<ContainersModel> m_containersModel;
+
 };
 
 #endif // AMNEZIA_APPLICATION_H

@@ -11,7 +11,7 @@ import "../Config"
 
 PageBase {
     id: root
-    page: PageEnum.WizardCredentials
+    page: PageEnum.PageSetupWizardCredentials
 
     FlickableType {
         id: fl
@@ -61,7 +61,7 @@ PageBase {
                 text: qsTr("Настроить сервер простым образом")
 
                 onClicked: function() {
-                    UiLogic.goToPage(PageEnum.WizardEasySetup)
+                    UiLogic.goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
 
@@ -79,7 +79,7 @@ PageBase {
                 text: qsTr("Выбрать протокол для установки")
 
                 onClicked: function() {
-                    UiLogic.goToPage(PageEnum.WizardProtocols)
+                    UiLogic.goToPage(PageEnum.PageSetupWizardProtocols)
                 }
             }
         }

@@ -11,7 +11,7 @@ import "../Config"
 
 PageBase {
     id: root
-    page: PageEnum.WizardEasySetup
+    page: PageEnum.PageSetupWizardEasy
 
     FlickableType {
         id: fl
