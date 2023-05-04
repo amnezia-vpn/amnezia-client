@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT} VERSION 2.1.2)
-set(BUILD_ID 1)
+project(${PROJECT} VERSION 3.0.5)
+set(BUILD_ID 2)
 SET(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,7 +40,7 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-qt_standard_project_setup()
+#qt_standard_project_setup()
 
 if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
