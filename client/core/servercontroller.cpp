@@ -576,9 +576,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$NEXTCLOUD_ADMIN_USER", nextcloudConfig.value(config_key::adminUser).toString(protocols::nextcloud::defaultAdminUser) }});
     vars.append({{"$NEXTCLOUD_ADMIN_PASSWORD", nextcloudConfig.value(config_key::adminPassword).toString(protocols::nextcloud::defaultAdminPassword) }});
 
-    // Nextcloud vars
-    QString port = jitsiConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::JitsiMeet)));
-    vars.append({{"$JITSI_HTTPS_PORT", port }});
+    // Jitsi vars
+    vars.append({{"$JITSI_HTTPS_PORT", jitsiConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::JitsiMeet))) }});
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
