@@ -25,8 +25,9 @@ enum DockerContainer {
     Dns,
     //FileShare,
     Sftp,
-    Nextcloud
-
+    Nextcloud,
+    // Video calls
+    JitsiMeet
 };
 Q_ENUM_NS(DockerContainer)
 } // namespace ContainerEnumNS

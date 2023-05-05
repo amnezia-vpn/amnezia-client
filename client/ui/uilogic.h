@@ -53,6 +53,7 @@ class OpenVpnLogic;
 class ShadowSocksLogic;
 class CloakLogic;
 class NextcloudLogic;
+class JitsiMeetLogic;
 
 class OtherProtocolsLogic;
 
@@ -102,6 +103,7 @@ public:
     friend class ShadowSocksLogic;
     friend class CloakLogic;
     friend class NextcloudLogic;
+    friend class JitsiMeetLogic;
 
     friend class OtherProtocolsLogic;
 

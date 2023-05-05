@@ -492,6 +492,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &nextcloudConfig = config.value(ProtocolProps::protoToString(Proto::Nextcloud)).toObject();
+    const QJsonObject &jitsiConfig = config.value(ProtocolProps::protoToString(Proto::JitsiMeet)).toObject();
     //
 
     Vars vars;
@@ -574,6 +575,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$NEXTCLOUD_PORT", port }});
     vars.append({{"$NEXTCLOUD_ADMIN_USER", nextcloudConfig.value(config_key::adminUser).toString(protocols::nextcloud::defaultAdminUser) }});
     vars.append({{"$NEXTCLOUD_ADMIN_PASSWORD", nextcloudConfig.value(config_key::adminPassword).toString(protocols::nextcloud::defaultAdminPassword) }});
+
+    // Nextcloud vars
+    QString port = jitsiConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::JitsiMeet)));
+    vars.append({{"$JITSI_HTTPS_PORT", port }});
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {

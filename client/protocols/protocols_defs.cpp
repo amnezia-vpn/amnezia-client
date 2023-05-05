@@ -80,7 +80,8 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
         {Proto::Dns, "DNS Service"},
         {Proto::FileShare, "File Sharing Service"},
         {Proto::Sftp, QObject::tr("Sftp service")},
-        {Proto::Nextcloud, QObject::tr("Nextcloud")}
+        {Proto::Nextcloud, QObject::tr("Nextcloud")},
+        {Proto::JitsiMeet, QObject::tr("Jitsi Meet")}
     };
 }
 
@@ -121,6 +122,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::FileShare :    return 139;
     case Proto::Sftp :         return 222;
     case Proto::Nextcloud :    return 8080;
+    case Proto::JitsiMeet :    return 8443;
     default:                      return -1;
     }
 }
@@ -161,6 +163,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::FileShare :    return TransportProto::Udp;
     case Proto::Sftp :         return TransportProto::Tcp;
     case Proto::Nextcloud :    return TransportProto::Tcp;
+    case Proto::JitsiMeet :    return TransportProto::Udp;
     default:                   return defaultTransportProto(Proto::Any);
     }
 }

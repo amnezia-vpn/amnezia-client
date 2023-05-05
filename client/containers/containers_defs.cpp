@@ -64,6 +64,9 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::Nextcloud:
         return { Proto::Nextcloud };
 
+    case DockerContainer::JitsiMeet:
+        return { Proto::JitsiMeet };
+
     default:
         return { defaultProtocol(container) };
     }
@@ -94,7 +97,8 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")},
-        {DockerContainer::Nextcloud, QObject::tr("Nextcloud")}
+        {DockerContainer::Nextcloud, QObject::tr("Nextcloud")},
+        {DockerContainer::JitsiMeet, QObject::tr("Jitsi Meet")}
     };
 }
 
@@ -113,6 +117,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
         {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")},
         {DockerContainer::Nextcloud, QObject::tr("Nextcloud private cloud")},
+        {DockerContainer::JitsiMeet, QObject::tr("Jitse Meet video conferencing")},
     };
 }
 
@@ -149,6 +154,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     //case DockerContainer::FileShare :    return Protocol::FileShare;
     case DockerContainer::Sftp :         return Proto::Sftp;
     case DockerContainer::Nextcloud :    return Proto::Nextcloud;
+    case DockerContainer::JitsiMeet :    return Proto::JitsiMeet;
     default:                             return Proto::Any;
     }
 }

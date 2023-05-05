@@ -165,7 +165,9 @@ enum Proto {
     FileShare,
     // Fileshare
     Sftp,
-    Nextcloud
+    Nextcloud,
+    // Video calls
+    JitsiMeet
 };
 Q_ENUM_NS(Proto)
 
