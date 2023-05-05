@@ -38,6 +38,10 @@
         <file>server_scripts/nextcloud/configure_container.sh</file>
         <file>server_scripts/nextcloud/run_container.sh</file>
         <file>server_scripts/install_docker.sh</file>
+        <file>server_scripts/jitsimeet/docker-compose.yml</file>
+        <file>server_scripts/jitsimeet/.env</file>
+        <file>server_scripts/jitsimeet/configure_container.sh</file>
+        <file>server_scripts/jitsimeet/run_container.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>
         <file>images/check.png</file>
