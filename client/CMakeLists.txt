@@ -532,8 +532,6 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
-
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libjbcrypto.so
         )
     endforeach()
 
