@@ -1,11 +1,11 @@
 import QtQuick
 
 Text {
-    height: 30
+    height: 24
 
     color: "#D7D8DB"
-    font.pixelSize: 25
-    font.weight: 700
+    font.pixelSize: 16
+    font.weight: 500
     font.family: "PT Root UI VF"
 
     wrapMode: Text.WordWrap

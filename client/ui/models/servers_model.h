@@ -2,8 +2,8 @@
 #define SERVERSMODEL_H
 
 #include <QAbstractListModel>
-#include <vector>
-#include <utility>
+
+#include "settings.h"
 
 struct ServerModelContent {
     QString desc;
@@ -15,7 +15,7 @@ class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    ServersModel(QObject *parent = nullptr);
+    ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 public:
     enum SiteRoles {
         DescRole = Qt::UserRole + 1,
@@ -24,7 +24,7 @@ public:
     };
 
     void clearData();
-    void setContent(const std::vector<ServerModelContent>& data);
+    void setContent(const QVector<ServerModelContent>& data);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -33,7 +33,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    std::vector<ServerModelContent> content;
+    QVector<ServerModelContent> m_content;
+    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // SERVERSMODEL_H

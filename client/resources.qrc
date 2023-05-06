@@ -182,7 +182,7 @@
         <file>ui/qml/Controls2/CheckBoxType.qml</file>
         <file>images/controls/check.svg</file>
         <file>ui/qml/Controls2/DropDownType.qml</file>
-        <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
         <file>ui/qml/main2.qml</file>
         <file>ui/qml/PageLoader.qml</file>
         <file>images/amneziaBigLogo.png</file>
@@ -195,7 +195,7 @@
         <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
         <file>images/controls/chevron-down.svg</file>
         <file>images/controls/chevron-up.svg</file>
-        <file>ui/qml/Controls2/TextTypes/BodyTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/ParagraphTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/Header2TextType.qml</file>
         <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
         <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
@@ -209,5 +209,17 @@
         <file>images/controls/qr-code.svg</file>
         <file>images/controls/text-cursor.svg</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
+        <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/Controls2/TabImageButtonType.qml</file>
+        <file>images/controls/home.svg</file>
+        <file>images/controls/settings-2.svg</file>
+        <file>images/controls/share-2.svg</file>
+        <file>ui/qml/Pages2/PageHome.qml</file>
+        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>ui/qml/Pages2/PageShare.qml</file>
+        <file>ui/qml/Controls2/TextTypes/Header1TextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/ButtonTextType.qml</file>
+        <file>ui/qml/Controls2/Header2Type.qml</file>
     </qresource>
 </RCC>

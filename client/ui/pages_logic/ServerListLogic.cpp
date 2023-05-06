@@ -6,7 +6,7 @@
 
 ServerListLogic::ServerListLogic(UiLogic *logic, QObject *parent):
     PageLogicBase(logic, parent),
-    m_serverListModel{new ServersModel(this)}
+    m_serverListModel{new ServersModel(m_settings, this)}
 {
 
 }
@@ -33,7 +33,7 @@ void ServerListLogic::onUpdatePage()
 {
     const QJsonArray &servers = m_settings->serversArray();
     int defaultServer = m_settings->defaultServerIndex();
-    std::vector<ServerModelContent> serverListContent;
+    QVector<ServerModelContent> serverListContent;
     for(int i = 0; i < servers.size(); i++) {
         ServerModelContent c;
         auto server = servers.at(i).toObject();

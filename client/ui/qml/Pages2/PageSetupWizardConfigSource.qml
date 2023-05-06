@@ -64,7 +64,6 @@ PageBase {
 
                 FileDialog {
                     id: fileDialog
-//                    currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
                     onAccepted: {
 
                     }
@@ -76,7 +75,7 @@ PageBase {
                 color: "#2C2D30"
             }
 
-            //todo ifdef mobile platforms>
+            //todo ifdef mobile platforms
             LabelWithButtonType {
                 Layout.fillWidth: true
 

@@ -1,29 +1,42 @@
 #include "servers_model.h"
 
-ServersModel::ServersModel(QObject *parent) :
-    QAbstractListModel(parent)
+ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
-
+    const QJsonArray &servers = m_settings->serversArray();
+    int defaultServer = m_settings->defaultServerIndex();
+    QVector<ServerModelContent> serverListContent;
+    for(int i = 0; i < servers.size(); i++) {
+        ServerModelContent c;
+        auto server = servers.at(i).toObject();
+        c.desc = server.value(config_key::description).toString();
+        c.address = server.value(config_key::hostName).toString();
+        if (c.desc.isEmpty()) {
+            c.desc = c.address;
+        }
+        c.isDefault = (i == defaultServer);
+        serverListContent.push_back(c);
+    }
+    setContent(serverListContent);
 }
 
 void ServersModel::clearData()
 {
     beginResetModel();
-    content.clear();
+    m_content.clear();
     endResetModel();
 }
 
-void ServersModel::setContent(const std::vector<ServerModelContent> &data)
+void ServersModel::setContent(const QVector<ServerModelContent> &data)
 {
     beginResetModel();
-    content = data;
+    m_content = data;
     endResetModel();
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(content.size());
+    return static_cast<int>(m_content.size());
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const {
@@ -37,17 +50,17 @@ QHash<int, QByteArray> ServersModel::roleNames() const {
 QVariant ServersModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0
-            || index.row() >= static_cast<int>(content.size())) {
+            || index.row() >= static_cast<int>(m_content.size())) {
         return QVariant();
     }
     if (role == DescRole) {
-        return content[index.row()].desc;
+        return m_content[index.row()].desc;
     }
     if (role == AddressRole) {
-        return content[index.row()].address;
+        return m_content[index.row()].address;
     }
     if (role == IsDefaultRole) {
-        return content[index.row()].isDefault;
+        return m_content[index.row()].isDefault;
     }
     return QVariant();
 }

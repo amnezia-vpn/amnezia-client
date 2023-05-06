@@ -2,102 +2,78 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "TextTypes"
+import PageEnum 1.0
 
-Item {
+import "./"
+import "../Pages"
+import "../Controls2"
+import "../Controls2/TextTypes"
+import "../Config"
+
+PageBase {
     id: root
-
-    property string text
-    property string descriptionText
-
-    property var onClickedFunc
-    property string buttonImage: "qrc:/images/controls/chevron-down.svg"
-    property string buttonImageColor: "#494B50"
-
+    page: PageEnum.PageHome
 
     property string defaultColor: "#1C1D21"
 
-    property string textColor: "#d7d8db"
+    property string borderColor: "#2C2D30"
 
-    property string borderColor: "#494B50"
-    property int borderWidth: 1
-
-    property alias menuModel: menuContent.model
-
-    implicitWidth: buttonContent.implicitWidth
-    implicitHeight: buttonContent.implicitHeight
+    property string currentServerName: menuContent.currentItem.delegateData.desc
+    property string currentServerDescription: menuContent.currentItem.delegateData.address
 
     Rectangle {
         id: buttonBackground
         anchors.fill: buttonContent
+        anchors.bottomMargin: -radius
 
         radius: 16
         color: defaultColor
         border.color: borderColor
-        border.width: borderWidth
+        border.width: 1
 
-        Behavior on border.width {
-            PropertyAnimation { duration: 200 }
+        Rectangle {
+            width: parent.width
+            height: 1
+            y: parent.height - height - parent.radius
+
+            color: borderColor
         }
     }
 
-    RowLayout {
+    ColumnLayout {
         id: buttonContent
-        anchors.fill: parent
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
 
-        spacing: 0
+        RowLayout {
+            Layout.topMargin: 24
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-        ColumnLayout {
-            Layout.leftMargin: 16
-
-            LabelTextType {
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-
-                visible: root.descriptionText !== ""
-
-                color: "#878B91"
-                text: root.descriptionText
+            Header1TextType {
+                text: currentServerName
             }
 
-            ButtonTextType {
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+            Image {
+                Layout.preferredWidth: 18
+                Layout.preferredHeight: 18
 
-                color: root.textColor
-                text: root.text
+                source: "qrc:/images/controls/chevron-down.svg"
             }
         }
 
-        ImageButtonType {
-            id: button
+        LabelTextType {
+            Layout.bottomMargin: 44
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            Layout.leftMargin: 4
-            Layout.rightMargin: 16
-
-            hoverEnabled: false
-            image: buttonImage
-            imageColor: buttonImageColor
-            onClicked: {
-                if (onClickedFunc && typeof onClickedFunc === "function") {
-                    onClickedFunc()
-                }
-            }
+            text: currentServerDescription
         }
     }
 
     MouseArea {
-        anchors.fill: buttonContent
+        anchors.fill: buttonBackground
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
-
-        onEntered: {
-            buttonBackground.border.width = borderWidth
-        }
-
-        onExited: {
-            buttonBackground.border.width = 0
-        }
 
         onClicked: {
             menu.visible = true
@@ -109,7 +85,7 @@ Item {
 
         edge: Qt.BottomEdge
         width: parent.width
-        height: parent.height * 0.9
+        height: parent.height * 0.90
 
         clip: true
         modal: true
@@ -118,8 +94,8 @@ Item {
             anchors.fill: parent
             anchors.bottomMargin: -radius
             radius: 16
-            color: "#1C1D21"
 
+            color: "#1C1D21"
             border.color: borderColor
             border.width: 1
         }
@@ -128,23 +104,76 @@ Item {
             color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
         }
 
-        Header2TextType {
-            id: header
-            width: parent.width
-
-            text: "Данные для подключения"
-            wrapMode: Text.WordWrap
-
+        ColumnLayout {
+            id: menuHeader
             anchors.top: parent.top
-            anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.left: parent.left
+
+            Header1TextType {
+                Layout.topMargin: 24
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                text: currentServerName
+            }
+
+            LabelTextType {
+                Layout.bottomMargin: 24
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                text: currentServerDescription
+            }
+
+            RowLayout {
+
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                spacing: 8
+
+                DropDownType {
+                    implicitHeight: 40
+
+                    borderWidth: 0
+                    buttonImageColor: "#0E0E11"
+
+                    defaultColor: "#D7D8DB"
+
+                    textColor: "#0E0E11"
+                    text: "testtesttest"
+                }
+
+                BasicButtonType {
+                    implicitHeight: 40
+
+                    text: "Amnezia DNS"
+                }
+            }
+
+            Header2Type {
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: "Серверы"
+            }
         }
 
+
+//        Header2TextType {
+//            id: menuHeader
+//            width: parent.width
+
+//            text: "Данные для подключения"
+//            wrapMode: Text.WordWrap
+
+//            anchors.top: parent.top
+//            anchors.left: parent.left
+//            anchors.right: parent.right
+//            anchors.topMargin: 16
+//            anchors.leftMargin: 16
+//            anchors.rightMargin: 16
+//        }
+
         FlickableType {
-            anchors.top: header.bottom
+            anchors.top: menuHeader.bottom
             anchors.topMargin: 16
             contentHeight: col.implicitHeight
 
@@ -165,12 +194,17 @@ Item {
                     width: parent.width
                     height: menuContent.contentItem.height
 
-                    currentIndex: -1
+                    model: ServersModel
+                    currentIndex: 0
 
                     clip: true
                     interactive: false
 
                     delegate: Item {
+                        id: menuContentDelegate
+
+                        property variant delegateData: model
+
                         implicitWidth: menuContent.width
                         implicitHeight: radioButton.implicitHeight
 
@@ -201,7 +235,7 @@ Item {
                                 Text {
                                     id: text
 
-                                    text: modelData
+                                    text: desc
                                     color: "#D7D8DB"
                                     font.pixelSize: 16
                                     font.weight: 400
@@ -222,11 +256,6 @@ Item {
 
                                     Layout.rightMargin: 8
                                 }
-                            }
-
-                            onClicked: {
-                                root.text = modelData
-                                menu.visible = false
                             }
                         }
                     }

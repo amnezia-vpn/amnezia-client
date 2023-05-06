@@ -3,5 +3,5 @@ import QtQuick.Controls
 
 StackView {
     id: stackView
-    initialItem: "PageStart"
+    initialItem: "PageSetupWizardStart"
 }

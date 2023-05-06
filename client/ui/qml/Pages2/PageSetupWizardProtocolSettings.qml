@@ -41,7 +41,7 @@ PageBase {
                 descriptionText: "Эти настройки можно будет изменить позже"
             }
 
-            BodyTextType {
+            ParagraphTextType {
                 Layout.topMargin: 16
 
                 text: "Network protocol"

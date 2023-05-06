@@ -32,7 +32,7 @@ Item {
             }
         }
 
-        Header1TextType {
+        Header2TextType {
             id: header
 
             Layout.fillWidth: true
@@ -49,6 +49,8 @@ Item {
             text: root.descriptionText
 
             color: "#878B91"
+
+            visible: root.descriptionText !== ""
         }
     }
 }

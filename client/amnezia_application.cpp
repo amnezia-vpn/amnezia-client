@@ -103,6 +103,9 @@ void AmneziaApplication::init()
     m_containersModel.reset(new ContainersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
 
+    m_serversModel.reset(new ServersModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
+
     m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)

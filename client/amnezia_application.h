@@ -12,6 +12,8 @@
 
 #include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
+#include "ui/models/servers_model.h"
+#include "ui/models/containers_model.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -57,6 +59,7 @@ private:
     QCommandLineParser m_parser;
 
     QScopedPointer<ContainersModel> m_containersModel;
+    QScopedPointer<ServersModel> m_serversModel;
 
 };
 
