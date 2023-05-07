@@ -131,7 +131,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.4' # needs to be the latest possible
+        xcode-version: '14.1' # needs to be the latest possible
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -190,12 +190,14 @@ jobs:
         bundler-cache: true
         
     - name: 'Decode signing certificate and save its content to the file'
+      working-directory: ./client
       env:
         CERTIFICATE_BASE64: ${{ secrets.IOS_DIST_SIGNING_KEY }}
       run: |
         echo $CERTIFICATE_BASE64 | base64 --decode > signing-cert.p12
 
     - name: 'Build and upload iOS binary'
+      working-directory: ./client
       run: bundle exec fastlane ios build_and_upload_to_testflight
       env:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}

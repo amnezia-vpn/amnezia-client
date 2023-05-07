@@ -4,7 +4,7 @@
 project_name = "AmneziaVPN"
 project_scheme = "AmneziaVPN"
 project_identifier = "org.amnezia.AmneziaVPN"
-itunes_username = "dartsyms@gmail.com"
+itunes_username = "admin@amnezia.org"
 
 before_all do
     ENV['GYM_SCHEME'] = project_scheme
