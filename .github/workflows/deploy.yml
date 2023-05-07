@@ -124,7 +124,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.4.1
+      QT_VERSION: 6.4.3
       QIF_VERSION: 4.4
 
     steps:
@@ -198,7 +198,7 @@ jobs:
 
     - name: 'Build and upload iOS binary'
       working-directory: ./client
-      run: bundle exec fastlane ios build_and_upload_to_testflight
+      run: bundle exec fastlane build_and_upload_to_testflight
       env:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
