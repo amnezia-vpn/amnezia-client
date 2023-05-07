@@ -4,23 +4,23 @@
 project_name = "AmneziaVPN"
 project_scheme = "AmneziaVPN"
 project_identifier = "org.amnezia.AmneziaVPN"
-itunes_username = "admin@amnezia.org"
+itunes_username = "dartsyms@gmail.com"
 
 before_all do
     ENV['GYM_SCHEME'] = project_scheme
 end
 
-platform :ios do
-  desc "Load AppStore Connect APIKey for using in lanes"
-  lane :load_api_key do
-    app_store_connect_api_key(
-      key_id: ENV['APPSTORE_CONNECT_KEY_ID'],
-      issuer_id: ENV['APPSTORE_CONNECT_ISSUER_ID'],
-      key_content: ENV['APPSTORE_CONNECT_PRIVATE_KEY'],
-      is_key_content_base64: true,
-      in_house: false
-    )
-  end
+default_platform :ios
+
+desc "Load AppStore Connect APIKey for using in lanes"
+lane :load_api_key do
+  app_store_connect_api_key(
+    key_id: ENV['APPSTORE_CONNECT_KEY_ID'],
+    issuer_id: ENV['APPSTORE_CONNECT_ISSUER_ID'],
+    key_content: ENV['APPSTORE_CONNECT_PRIVATE_KEY'],
+    is_key_content_base64: true,
+    in_house: false
+  )
 end
 
 desc "Increase build number based on most recent TestFlight existing one"
