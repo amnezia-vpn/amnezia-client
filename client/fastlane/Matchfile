@@ -1,4 +1,4 @@
-git_url("https://github.com/amnezia-vpn/amnezia-ios-certificates")
+git_url("git@github.com:amnezia-vpn/amnezia-ios-certificates.git")
 
 storage_mode("git")
 
