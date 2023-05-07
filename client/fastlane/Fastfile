@@ -4,7 +4,7 @@
 project_name = "AmneziaVPN"
 project_scheme = "AmneziaVPN"
 project_identifier = "org.amnezia.AmneziaVPN"
-itunes_username = "dartsyms@gmail.com"
+itunes_username = "admin@amnezia.org"
 
 before_all do
     ENV['GYM_SCHEME'] = project_scheme
@@ -26,7 +26,7 @@ end
 desc "Increase build number based on most recent TestFlight existing one"
 lane :fetch_and_increment_build_version do
   app_identifier = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
-  api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
+  api_key = lane_context[SharedValues::APPSTORE_CONNECT_PRIVATE_KEY]
   
   current_version = get_version_number(
     target: project_name
@@ -46,7 +46,7 @@ end
 desc "Set up signing identities: install certificates in keychain and download provisioning profiles"
 lane :setup_signing_identities do
   team_id = CredentialsManager::AppfileConfig.try_fetch_value(:team_id)
-  api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
+  api_key = lane_context[SharedValues::APPSTORE_CONNECT_PRIVATE_KEY]
   
   keychain_name = "signing"
   keycahin_password = "temporary_password"
@@ -64,8 +64,8 @@ lane :setup_signing_identities do
   )
 
   import_certifcate(
-    certificate_path: ENV['SIGNING_KEY_FILE_PATH'],
-    certificate_passwotd: ENV['SIGNING_KEY_PASSWORD'],
+    certificate_path: ENV['IOS_DIST_SIGNING_KEY_FILE_PATH'],
+    certificate_passwotd: ENV['IOS_DIST_SIGNING_KEY_PASSWORD'],
     keychain_name: keychain_name,
     keycahin_password: keycahin_password
   )
