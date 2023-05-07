@@ -6,6 +6,10 @@ FROM jitsi/jicofo:unstable as jitsi-jicofo
 FROM jitsi/jvb:unstable as jitsi-jvb
 
 ENV JVB_AUTH_USER=admin
+ENV JICOFO_AUTH_PASSWORD=admin
 ENV JVB_AUTH_PASSWORD=admin
+ENV CONFIG=.
+ENV HTTP_PORT=80
+ENV HTTPS_PORT=443
 
 LABEL maintainer="AmneziaVPN"

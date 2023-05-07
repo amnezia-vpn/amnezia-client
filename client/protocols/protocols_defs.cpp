@@ -122,7 +122,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::FileShare :    return 139;
     case Proto::Sftp :         return 222;
     case Proto::Nextcloud :    return 8080;
-    case Proto::JitsiMeet :    return 8443;
+    case Proto::JitsiMeet :    return 443;
     default:                      return -1;
     }
 }
