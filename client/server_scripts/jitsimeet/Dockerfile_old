@@ -1,6 +1,9 @@
 # Inspired by https://github.com/jitsi/docker-jitsi-meet/blob/master/docker-compose.yml
 
 FROM jitsi/web:unstable as jitsi-web
+FROM jitsi/prosody:unstable as jitsi-prosody
+FROM jitsi/jicofo:unstable as jitsi-jicofo
+FROM jitsi/jvb:unstable as jitsi-jvb
 
 ENV JVB_AUTH_USER=admin
 ENV JICOFO_AUTH_PASSWORD=admin
@@ -10,8 +13,7 @@ ENV HTTP_PORT=80
 ENV HTTPS_PORT=443
 ENV JICOFO_HOST=localhost
 
-EXPOSE 80 443
-
+EXPOSE 5222 5347 5280
 
 # XMPP password for Jigasi MUC client connections
 ENV JIGASI_XMPP_PASSWORD=56c1565a30f0b2d10e672b5a9cbd8a1c
