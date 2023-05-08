@@ -1,7 +1,24 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
-project(${PROJECT})
+
+if(NOT DEFINED A_PROJECT_BUILD_TYPE)
+	set(A_CMAKE_VERSION "${CMAKE_SOURCE_DIR}/../Version.cmake")
+	if(EXISTS ${A_CMAKE_VERSION})
+		include(${A_CMAKE_VERSION})
+		message(STATUS "Included Version.cmake in client: ${A_CMAKE_VERSION}")
+	else()
+		message(FATAL "No Version.cmake: ${A_CMAKE_VERSION}")
+	endif()
+else()
+	message(STATUS "Already included Version.cmake")
+endif()
+
+set(A_CLIENT_VERSION ${A_PROJECT_VERSION})
+
+project(${PROJECT}
+	VERSION ${A_CLIENT_VERSION}
+)
 
 set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -54,7 +71,21 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+set(A_CONFIGURE_FILE_VERSION)
+set(A_CONFIGURE_FILE_VERSION_GLOBAL "${CMAKE_SOURCE_DIR}/version.h.in")
+set(A_CONFIGURE_FILE_VERSION_CLIENT "${CMAKE_SOURCE_DIR}/../version.h.in")
+if(NOT DEFINED A_PROJECT_BUILD_TYPE)
+	set(A_CONFIGURE_FILE_VERSION ${A_CONFIGURE_FILE_VERSION_CLIENT})
+else()
+	set(A_CONFIGURE_FILE_VERSION ${A_CONFIGURE_FILE_VERSION_GLOBAL})
+endif()
+
+if(NOT EXISTS ${A_CONFIGURE_FILE_VERSION})
+	message(SEND_ERROR "No file: ${A_CONFIGURE_FILE_VERSION_GLOBAL}")
+	message(SEND_ERROR "No file: ${A_CONFIGURE_FILE_VERSION_CLIENT}")
+endif()
+
+configure_file(${A_CONFIGURE_FILE_VERSION} ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/migrations.h
