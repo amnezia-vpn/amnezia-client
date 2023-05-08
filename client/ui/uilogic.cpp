@@ -74,6 +74,8 @@
 #include "pages_logic/protocols/ShadowSocksLogic.h"
 #include "pages_logic/protocols/OtherProtocolsLogic.h"
 #include "pages_logic/protocols/WireGuardLogic.h"
+#include "pages_logic/protocols/NextcloudLogic.h"
+#include "pages_logic/protocols/JitsiMeetLogic.h"
 
 using namespace amnezia;
 using namespace PageEnumNS;
@@ -100,7 +102,8 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
     m_protocolLogicMap.insert(Proto::Dns, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Proto::Sftp, new OtherProtocolsLogic(this));
     m_protocolLogicMap.insert(Proto::TorWebSite, new OtherProtocolsLogic(this));
-
+    m_protocolLogicMap.insert(Proto::Nextcloud, new NextcloudLogic(this));
+    m_protocolLogicMap.insert(Proto::JitsiMeet, new JitsiMeetLogic(this));
 }
 
 UiLogic::~UiLogic()

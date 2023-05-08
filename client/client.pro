@@ -79,6 +79,7 @@ HEADERS  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.h \
     ui/pages_logic/protocols/ShadowSocksLogic.h \
     ui/pages_logic/protocols/WireGuardLogic.h \
+    ui/pages_logic/protocols/NextCloudLogic.h \
     ui/property_helper.h \
     ui/models/servers_model.h \
     ui/uilogic.h \
@@ -138,6 +139,7 @@ SOURCES  += \
     ui/pages_logic/protocols/PageProtocolLogicBase.cpp \
     ui/pages_logic/protocols/ShadowSocksLogic.cpp \
     ui/models/servers_model.cpp \
+    ui/pages_logic/protocols/NextCloudLogic.cpp \
     ui/pages_logic/protocols/WireGuardLogic.cpp \
     ui/uilogic.cpp \
     ui/qautostart.cpp \

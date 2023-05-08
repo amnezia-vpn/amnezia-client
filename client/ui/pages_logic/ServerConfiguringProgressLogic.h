@@ -55,6 +55,8 @@ public:
     friend class ShadowSocksLogic;
     friend class CloakLogic;
     friend class UiLogic;
+    friend class NextcloudLogic;
+    friend class JitsiMeetLogic;
 
     void onUpdatePage() override;
     ErrorCode doInstallAction(const std::function<ErrorCode()> &action);

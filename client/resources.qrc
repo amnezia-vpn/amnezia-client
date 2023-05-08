@@ -34,7 +34,13 @@
         <file>server_scripts/openvpn_cloak/configure_container.sh</file>
         <file>server_scripts/openvpn_cloak/start.sh</file>
         <file>server_scripts/openvpn_cloak/template.ovpn</file>
+        <file>server_scripts/nextcloud/Dockerfile</file>
+        <file>server_scripts/nextcloud/configure_container.sh</file>
+        <file>server_scripts/nextcloud/run_container.sh</file>
         <file>server_scripts/install_docker.sh</file>
+        <file>server_scripts/jitsimeet/Dockerfile</file>
+        <file>server_scripts/jitsimeet/configure_container.sh</file>
+        <file>server_scripts/jitsimeet/run_container.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>
         <file>images/check.png</file>
@@ -95,6 +101,7 @@
         <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
         <file>ui/qml/Pages/Protocols/PageProtoWireGuard.qml</file>
+        <file>ui/qml/Pages/Protocols/PageProtoNextcloud.qml</file>
         <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
         <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
         <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
@@ -171,5 +178,6 @@
         <file>ui/qml/Controls/PopupWarning.qml</file>
         <file>ui/qml/Controls/PopupWithTextField.qml</file>
         <file>server_scripts/check_user_in_sudo.sh</file>
+        <file>ui/qml/Pages/Protocols/PageProtoJitsiMeet.qml</file>
     </qresource>
 </RCC>

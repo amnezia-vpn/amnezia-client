@@ -61,6 +61,12 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::Sftp:
         return { Proto::Sftp};
 
+    case DockerContainer::Nextcloud:
+        return { Proto::Nextcloud };
+
+    case DockerContainer::JitsiMeet:
+        return { Proto::JitsiMeet };
+
     default:
         return { defaultProtocol(container) };
     }
@@ -90,7 +96,9 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service")},
-        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")}
+        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service")},
+        {DockerContainer::Nextcloud, QObject::tr("Nextcloud")},
+        {DockerContainer::JitsiMeet, QObject::tr("Jitsi Meet")}
     };
 }
 
@@ -107,7 +115,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
         {DockerContainer::TorWebSite, QObject::tr("Web site in Tor network")},
         {DockerContainer::Dns, QObject::tr("DNS Service")},
         //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
-        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")}
+        {DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service")},
+        {DockerContainer::Nextcloud, QObject::tr("Nextcloud private cloud")},
+        {DockerContainer::JitsiMeet, QObject::tr("Jitse Meet video conferencing")},
     };
 }
 
@@ -124,6 +134,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::Dns :          return ServiceType::Other;
     //case DockerContainer::FileShare :    return ServiceType::Other;
     case DockerContainer::Sftp :         return ServiceType::Other;
+    case DockerContainer::Nextcloud :    return ServiceType::Other;
     default:                             return ServiceType::Other;
     }
 }
@@ -142,6 +153,8 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns :          return Proto::Dns;
     //case DockerContainer::FileShare :    return Protocol::FileShare;
     case DockerContainer::Sftp :         return Proto::Sftp;
+    case DockerContainer::Nextcloud :    return Proto::Nextcloud;
+    case DockerContainer::JitsiMeet :    return Proto::JitsiMeet;
     default:                             return Proto::Any;
     }
 }

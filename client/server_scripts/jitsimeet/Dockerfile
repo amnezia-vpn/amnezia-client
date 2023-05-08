@@ -1,0 +1,24 @@
+# Inspired by https://github.com/jitsi/docker-jitsi-meet/blob/master/docker-compose.yml
+
+FROM jitsi/web:unstable as jitsi-web
+
+ENV JVB_AUTH_USER=admin
+ENV JICOFO_AUTH_PASSWORD=admin
+ENV JVB_AUTH_PASSWORD=admin
+ENV CONFIG=.
+ENV HTTP_PORT=80
+ENV HTTPS_PORT=443
+ENV JICOFO_HOST=localhost
+
+EXPOSE 80 443
+
+
+# XMPP password for Jigasi MUC client connections
+ENV JIGASI_XMPP_PASSWORD=56c1565a30f0b2d10e672b5a9cbd8a1c
+# XMPP recorder password for Jibri client connections
+ENV JIBRI_RECORDER_PASSWORD=925f6c19ecde03de64366362de9fbfeb
+# XMPP password for Jibri client connections
+ENV JIBRI_XMPP_PASSWORD=e6ccb76fe823163945ab9033d77071a1
+
+
+LABEL maintainer="AmneziaVPN"
