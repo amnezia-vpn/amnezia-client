@@ -133,6 +133,17 @@ jobs:
       with:
         xcode-version: '14.1' # needs to be the latest possible
 
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
+
     - name: 'Install ios Qt'
       uses: jurplel/install-qt-action@v3
       with:
