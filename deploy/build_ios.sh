@@ -33,7 +33,7 @@ cmake --version
 clang -v
 
 # Generate XCodeProj
-#$QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode
+$QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode
 
 
 # Setup keychain
