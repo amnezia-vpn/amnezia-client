@@ -177,6 +177,7 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
+        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         export PATH=$PATH:~/go/bin
         sh deploy/build_ios.sh
       env:

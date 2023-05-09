@@ -33,7 +33,7 @@ cmake --version
 clang -v
 
 # Generate XCodeProj
-$QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode
+$QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
 
 # Setup keychain
