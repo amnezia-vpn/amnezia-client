@@ -198,7 +198,7 @@ jobs:
 
     - name: 'Build and upload iOS binary'
       working-directory: ./client
-      run: bundle exec fastlane build_and_upload_to_testflight
+      run: bundle exec fastlane build_release
       env:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}

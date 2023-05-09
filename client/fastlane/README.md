@@ -13,71 +13,53 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 # Available Actions
 
-### beta
+### load_api_key
 
 ```sh
-[bundle exec] fastlane beta
+[bundle exec] fastlane load_api_key
 ```
 
+Load AppStore Connect APIKey for using in lanes
 
-
-### incrementVersion
+### fetch_and_increment_build_version
 
 ```sh
-[bundle exec] fastlane incrementVersion
+[bundle exec] fastlane fetch_and_increment_build_version
 ```
 
+Increase build number based on most recent TestFlight existing one
 
-
-### addToTestFlight
+### setup_signing_identities
 
 ```sh
-[bundle exec] fastlane addToTestFlight
+[bundle exec] fastlane setup_signing_identities
 ```
 
-Update Certificates, Run All tests, Build app
+Set up signing identities: install certificates in keychain and download provisioning profiles
 
-Add tag to git, send to Testflight, slack notification
-
-### certificates
+### build_release
 
 ```sh
-[bundle exec] fastlane certificates
+[bundle exec] fastlane build_release
 ```
 
+build app for release (TestFlight)
 
-
-### adhoc_certificates
+### upload_release_to_testflight
 
 ```sh
-[bundle exec] fastlane adhoc_certificates
+[bundle exec] fastlane upload_release_to_testflight
 ```
 
+Upload to TestFlight via AppStore Connect
 
-
-### createAPNS
+### build_and_upload_to_testflight
 
 ```sh
-[bundle exec] fastlane createAPNS
+[bundle exec] fastlane build_and_upload_to_testflight
 ```
 
-
-
-### firebase_test
-
-```sh
-[bundle exec] fastlane firebase_test
-```
-
-Distribute app via Firebase for testers
-
-### distribute_firebase
-
-```sh
-[bundle exec] fastlane distribute_firebase
-```
-
-Distribute app via Firebase for testers
+Build release and upload to TestFlight
 
 ----
 

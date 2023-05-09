@@ -18,7 +18,7 @@ lane :load_api_key do
     key_id: ENV['APPSTORE_CONNECT_KEY_ID'],
     issuer_id: ENV['APPSTORE_CONNECT_ISSUER_ID'],
     key_content: ENV['APPSTORE_CONNECT_PRIVATE_KEY'],
-    is_key_content_base64: true,
+    is_key_content_base64: false,
     in_house: false
   )
 end
@@ -90,6 +90,7 @@ lane :build_release do |options|
   export_method = "app-store"
   
   update_code_signing_settings(
+    path: File.expand_path("../build-ios/AmneziaVPN.xcodeproj/"),
     use_automatic_signing: false,
     targets: [project_name],
     code_sign_identity: "Apple Distribution", # TODO: replace with proper one
