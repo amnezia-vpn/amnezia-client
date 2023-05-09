@@ -173,47 +173,27 @@ jobs:
 
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
-
+        
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
-        mkdir client/build-ios
-        $QT_IOS_BIN/qt-cmake . -B client/build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-    
-    - name: 'Set up ruby environment'
-      uses: ruby/setup-ruby@v1.138.0
-      with:
-        ruby-version: 3.2.1
-        bundler-cache: true
-        
-    - name: 'Decode signing certificate and save its content to the file'
-      working-directory: ./client
+        sh deploy/build_ios.sh
       env:
-        CERTIFICATE_BASE64: ${{ secrets.IOS_DIST_SIGNING_KEY }}
-      run: |
-        echo $CERTIFICATE_BASE64 | base64 --decode > signing-cert.p12
-
-    - name: 'Build and upload iOS binary'
-      working-directory: ./client
-      run: bundle exec fastlane build_release
-      env:
+        IOS_DIST_SIGNING_KEY: ${{ secrets.IOS_DIST_SIGNING_KEY }}
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
         IOS_DIST_SIGNING_KEY_PASSWORD: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
-        IOS_DIST_SIGNING_KEY_FILE_PATH: signing-cert.p12
       
-    - name: 'Upload appstore .ipa and dSYMs to artifacts'
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-store ipa & dsyms
-        path: |
-          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
-          ${{ github.workspace }}/*.app.dSYM.zip
-        retention-days: 7
+#    - name: 'Upload appstore .ipa and dSYMs to artifacts'
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: app-store ipa & dsyms
+#        path: |
+#          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
+#          ${{ github.workspace }}/*.app.dSYM.zip
+#        retention-days: 7
 
 # ------------------------------------------------------
 
