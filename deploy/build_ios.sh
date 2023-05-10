@@ -58,6 +58,17 @@ if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
   security find-identity -p codesigning
   security unlock-keychain -p $TEMP_PASS $KEYCHAIN
 
+# Copy provisioning prifiles
+mkdir -p  "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+echo $IOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+echo $IOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
+
+profile_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+profile_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+
+mv ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_uuid.mobileprovision
+mv ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_ne_uuid.mobileprovision
 fi
 
 # Build project

@@ -186,6 +186,8 @@ jobs:
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
         IOS_DIST_SIGNING_KEY_PASSWORD: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
+        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
       
 #    - name: 'Upload appstore .ipa and dSYMs to artifacts'
 #      uses: actions/upload-artifact@v3
