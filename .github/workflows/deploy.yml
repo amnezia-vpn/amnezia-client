@@ -173,6 +173,9 @@ jobs:
 
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
+      
+    - name: Install dependencies
+      run: pip install jsonschema
         
     - name: 'Build project'
       run: |
