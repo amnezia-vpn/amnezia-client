@@ -1,21 +1,10 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(A_PROJECT_BUILD_TYPE "Global")
-
 set(PROJECT AmneziaVPN)
 
-set(A_CMAKE_VERSION "${CMAKE_SOURCE_DIR}/Version.cmake")
-if(EXISTS ${A_CMAKE_VERSION})
-	include(${A_CMAKE_VERSION})
-	message(STATUS "Included Version.cmake: ${A_CMAKE_VERSION}")
-else()
-	message(FATAL "No Version.cmake: ${A_CMAKE_VERSION}")
-endif()
-
-project(${PROJECT}
-	VERSION ${A_PROJECT_VERSION}
-	DESCRIPTION "AmneziaVPN"
-	HOMEPAGE_URL "https://amnezia.org/"
+project(${PROJECT} VERSION 3.0.3.1
+        DESCRIPTION "AmneziaVPN"
+        HOMEPAGE_URL "https://amnezia.org/"
 )
 set(RELEASE_DATE "2023-03-15")
 set(APP_MAJOR_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})

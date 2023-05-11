@@ -1,7 +1,6 @@
 enable_language(Swift)
 
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
-set(BUILD_ID ${A_PROJECT_BUILD})
 
 add_executable(networkextension)
 set_target_properties(networkextension PROPERTIES
@@ -93,7 +92,7 @@ include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
 ## Build the wireguard go library for iOS simulation.
 ## TODO: Some special handling around GOARCH for
 execute_process(OUTPUT_VARIABLE SIM_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk iphonesimulator --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/client/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH amd64
     CGO_CFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
@@ -102,7 +101,7 @@ build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CLIENT_ROOT_DIR}/3rd/
 
 ## Build the wireguard go library for iOS devices.
 execute_process(OUTPUT_VARIABLE IOS_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CMAKE_SOURCE_DIR}/client/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH arm64
     CGO_CFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
