@@ -2,41 +2,34 @@
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
+    refresh();
+}
+
+void ServersModel::refresh()
+{
+    beginResetModel();
     const QJsonArray &servers = m_settings->serversArray();
     int defaultServer = m_settings->defaultServerIndex();
     QVector<ServerModelContent> serverListContent;
     for(int i = 0; i < servers.size(); i++) {
-        ServerModelContent c;
+        ServerModelContent content;
         auto server = servers.at(i).toObject();
-        c.desc = server.value(config_key::description).toString();
-        c.address = server.value(config_key::hostName).toString();
-        if (c.desc.isEmpty()) {
-            c.desc = c.address;
+        content.desc = server.value(config_key::description).toString();
+        content.address = server.value(config_key::hostName).toString();
+        if (content.desc.isEmpty()) {
+            content.desc = content.address;
         }
-        c.isDefault = (i == defaultServer);
-        serverListContent.push_back(c);
+        content.isDefault = (i == defaultServer);
+        serverListContent.push_back(content);
     }
-    setContent(serverListContent);
-}
-
-void ServersModel::clearData()
-{
-    beginResetModel();
-    m_content.clear();
-    endResetModel();
-}
-
-void ServersModel::setContent(const QVector<ServerModelContent> &data)
-{
-    beginResetModel();
-    m_content = data;
+    m_data = serverListContent;
     endResetModel();
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(m_content.size());
+    return static_cast<int>(m_data.size());
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const {
@@ -50,19 +43,24 @@ QHash<int, QByteArray> ServersModel::roleNames() const {
 QVariant ServersModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0
-            || index.row() >= static_cast<int>(m_content.size())) {
+            || index.row() >= static_cast<int>(m_data.size())) {
         return QVariant();
     }
     if (role == DescRole) {
-        return m_content[index.row()].desc;
+        return m_data[index.row()].desc;
     }
     if (role == AddressRole) {
-        return m_content[index.row()].address;
+        return m_data[index.row()].address;
     }
     if (role == IsDefaultRole) {
-        return m_content[index.row()].isDefault;
+        return m_data[index.row()].isDefault;
     }
     return QVariant();
+}
+
+void ServersModel::setDefaultServerIndex(int index)
+{
+
 }
 
 

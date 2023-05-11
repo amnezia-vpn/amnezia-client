@@ -29,7 +29,7 @@ PageBase {
             Layout.bottomMargin: 32
             Layout.fillWidth: true
 
-            buttonImage: "qrc:/images/controls/arrow-left.svg"
+            backButtonImage: "qrc:/images/controls/arrow-left.svg"
             headerText: "Server 1"
             descriptionText: "root 192.168.111.111"
         }

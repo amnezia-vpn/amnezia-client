@@ -36,7 +36,7 @@ PageBase {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
 
-                buttonImage: "qrc:/images/controls/arrow-left.svg"
+                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Подключение к серверу"
                 descriptionText: "Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.\n

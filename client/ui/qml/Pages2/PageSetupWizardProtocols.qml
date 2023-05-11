@@ -51,7 +51,7 @@ PageBase {
 
             HeaderType {
                 width: parent.width
-                buttonImage: "qrc:/images/controls/arrow-left.svg"
+                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Протокол подключения"
                 descriptionText: "Выберите более приоритетный для вас. Позже можно будет установить остальные протоколы и доп сервисы, вроде DNS-прокси и SFTP."

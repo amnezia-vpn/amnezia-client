@@ -36,7 +36,7 @@ PageBase {
                 Layout.topMargin: 20
 
                 //TODO remove later
-                buttonImage: "qrc:/images/controls/arrow-left.svg"
+                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Установка"
                 descriptionText: ContainersModel.getCurrentlyInstalledContainerName()

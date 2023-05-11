@@ -6,7 +6,12 @@ import "TextTypes"
 Item {
     id: root
 
-    property string buttonImage
+    property string backButtonImage
+    property string actionButtonImage
+
+    property var backButtonFunction
+    property var actionButtonFunction
+
     property string headerText
     property string descriptionText
 
@@ -22,22 +27,43 @@ Item {
 
             Layout.leftMargin: -6
 
-            image: root.buttonImage
+            image: root.backButtonImage
             imageColor: "#D7D8DB"
 
             visible: image ? true : false
 
             onClicked: {
-                UiLogic.closePage()
+                if (backButtonFunction && typeof backButtonFunction === "function") {
+                    backButtonFunction()
+                }
             }
         }
 
-        Header1TextType {
-            id: header
+        RowLayout {
+            Header1TextType {
+                id: header
 
-            Layout.fillWidth: true
+                Layout.fillWidth: true
 
-            text: root.headerText
+                text: root.headerText
+            }
+
+            ImageButtonType {
+                id: headerActionButton
+
+                Layout.alignment: Qt.AlignRight
+
+                image: root.actionButtonImage
+                imageColor: "#D7D8DB"
+
+                visible: image ? true : false
+
+                onClicked: {
+                    if (actionButtonImage && typeof actionButtonImage === "function") {
+                        actionButtonImage()
+                    }
+                }
+            }
         }
 
         ParagraphTextType {
@@ -49,6 +75,8 @@ Item {
             text: root.descriptionText
 
             color: "#878B91"
+
+            visible: root.descriptionText !== ""
         }
     }
 }

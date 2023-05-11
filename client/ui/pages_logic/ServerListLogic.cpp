@@ -45,5 +45,5 @@ void ServerListLogic::onUpdatePage()
         c.isDefault = (i == defaultServer);
         serverListContent.push_back(c);
     }
-    qobject_cast<ServersModel*>(m_serverListModel)->setContent(serverListContent);
+//    qobject_cast<ServersModel*>(m_serverListModel)->setContent(serverListContent);
 }

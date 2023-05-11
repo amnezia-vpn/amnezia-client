@@ -10,6 +10,9 @@ Item {
     property string text
     property string descriptionText
 
+    property string headerText
+    property string headerBackButtonImage
+
     property var onClickedFunc
     property string buttonImage: "qrc:/images/controls/chevron-down.svg"
     property string buttonImageColor: "#494B50"
@@ -22,7 +25,10 @@ Item {
     property string borderColor: "#494B50"
     property int borderWidth: 1
 
-    property alias menuModel: menuContent.model
+    property Component menuDelegate
+    property variant menuModel
+
+    property alias menuVisible: menu.visible
 
     implicitWidth: buttonContent.implicitWidth
     implicitHeight: buttonContent.implicitHeight
@@ -128,12 +134,13 @@ Item {
             color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
         }
 
-        Header2TextType {
+        Header2Type {
             id: header
-            width: parent.width
 
-            text: "Данные для подключения"
-            wrapMode: Text.WordWrap
+            headerText: root.headerText
+            backButtonImage: root.headerBackButtonImage
+
+            width: parent.width
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -170,64 +177,13 @@ Item {
                     clip: true
                     interactive: false
 
-                    delegate: Item {
-                        implicitWidth: menuContent.width
-                        implicitHeight: radioButton.implicitHeight
+                    model: root.menuModel
 
-                        RadioButton {
-                            id: radioButton
-
-                            implicitWidth: parent.width
-                            implicitHeight: radioButtonContent.implicitHeight
-
-                            hoverEnabled: true
-
-                            ButtonGroup.group: radioButtonGroup
-
-                            indicator: Rectangle {
-                                anchors.fill: parent
-                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
-                            }
-
-                            RowLayout {
-                                id: radioButtonContent
-                                anchors.fill: parent
-
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
-
-                                z: 1
-
-                                Text {
-                                    id: text
-
-                                    text: modelData
-                                    color: "#D7D8DB"
-                                    font.pixelSize: 16
-                                    font.weight: 400
-                                    font.family: "PT Root UI VF"
-
-                                    height: 24
-
-                                    Layout.fillWidth: true
-                                    Layout.topMargin: 20
-                                    Layout.bottomMargin: 20
-                                }
-
-                                Image {
-                                    source: "qrc:/images/controls/check.svg"
-                                    visible: radioButton.checked
-                                    width: 24
-                                    height: 24
-
-                                    Layout.rightMargin: 8
-                                }
-                            }
-
-                            onClicked: {
-                                root.text = modelData
-                                menu.visible = false
-                            }
+                    delegate: Row {
+                        Loader {
+                            id: loader
+                            sourceComponent: root.menuDelegate
+                            property QtObject modelData: model
                         }
                     }
                 }

@@ -35,7 +35,7 @@ PageBase {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
 
-                buttonImage: "qrc:/images/controls/arrow-left.svg"
+                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Ключ для подключения"
                 descriptionText: "Строка, которая начинается с vpn://..."

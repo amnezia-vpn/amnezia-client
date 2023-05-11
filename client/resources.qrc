@@ -221,5 +221,6 @@
         <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/ButtonTextType.qml</file>
         <file>ui/qml/Controls2/Header2Type.qml</file>
+        <file>images/controls/plus.svg</file>
     </qresource>
 </RCC>

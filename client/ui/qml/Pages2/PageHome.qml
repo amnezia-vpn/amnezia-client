@@ -2,7 +2,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
+import ProtocolEnum 1.0
 
 import "./"
 import "../Pages"
@@ -125,11 +128,27 @@ PageBase {
             }
 
             RowLayout {
-
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 spacing: 8
 
+                SortFilterProxyModel {
+                    id: proxyContainersModel
+                    sourceModel: ContainersModel
+                    filters: [
+                        ValueFilter {
+                            roleName: "service_type_role"
+                            value: ProtocolEnum.Vpn
+                        },
+                        ValueFilter {
+                            roleName: "is_installed_role"
+                            value: true
+                        }
+                    ]
+                }
+
                 DropDownType {
+                    id: protocolsDropDown
+
                     implicitHeight: 40
 
                     borderWidth: 0
@@ -138,7 +157,83 @@ PageBase {
                     defaultColor: "#D7D8DB"
 
                     textColor: "#0E0E11"
-                    text: "testtesttest"
+                    headerText: "Протокол подключения"
+                    headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
+
+                    menuModel: proxyContainersModel
+
+                    menuDelegate: Item {
+                        implicitWidth: menuContent.width
+                        implicitHeight: radioButton.implicitHeight
+
+                        RadioButton {
+                            id: radioButton
+
+                            implicitWidth: parent.width
+                            implicitHeight: radioButtonContent.implicitHeight
+
+                            hoverEnabled: true
+
+                            ButtonGroup.group: radioButtonGroup
+
+                            indicator: Rectangle {
+                                anchors.fill: parent
+                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                            }
+
+                            RowLayout {
+                                id: radioButtonContent
+                                anchors.fill: parent
+
+                                anchors.rightMargin: 16
+                                anchors.leftMargin: 16
+
+                                z: 1
+
+                                Text {
+                                    id: text
+
+                                    // todo remove dirty hack?
+                                    text: {
+                                        if (modelData !== null) {
+                                            return modelData.name_role
+                                        } else
+                                            return ""
+                                    }
+                                    color: "#D7D8DB"
+                                    font.pixelSize: 16
+                                    font.weight: 400
+                                    font.family: "PT Root UI VF"
+
+                                    height: 24
+
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 20
+                                    Layout.bottomMargin: 20
+                                }
+
+                                Image {
+                                    source: "qrc:/images/controls/check.svg"
+                                    visible: radioButton.checked
+                                    width: 24
+                                    height: 24
+
+                                    Layout.rightMargin: 8
+                                }
+                            }
+
+                            onClicked: {
+                                protocolsDropDown.text = text.text
+                                protocolsDropDown.menuVisible = false
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            if (modelData !== null && modelData.default_role) {
+                                protocolsDropDown.text = modelData.name_role
+                            }
+                        }
+                    }
                 }
 
                 BasicButtonType {
@@ -149,28 +244,16 @@ PageBase {
             }
 
             Header2Type {
+                Layout.fillWidth: true
+                Layout.topMargin: 48
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
+                actionButtonImage: "qrc:/images/controls/plus.svg"
 
                 headerText: "Серверы"
             }
         }
-
-
-//        Header2TextType {
-//            id: menuHeader
-//            width: parent.width
-
-//            text: "Данные для подключения"
-//            wrapMode: Text.WordWrap
-
-//            anchors.top: parent.top
-//            anchors.left: parent.left
-//            anchors.right: parent.right
-//            anchors.topMargin: 16
-//            anchors.leftMargin: 16
-//            anchors.rightMargin: 16
-//        }
 
         FlickableType {
             anchors.top: menuHeader.bottom
@@ -256,6 +339,13 @@ PageBase {
 
                                     Layout.rightMargin: 8
                                 }
+                            }
+
+                            onClicked: {
+                                console.log(index)
+                                ContainersModel.setSelectedServerIndex(index)
+                                root.currentServerName = desc
+                                root.currentServerDescription = address
                             }
                         }
                     }

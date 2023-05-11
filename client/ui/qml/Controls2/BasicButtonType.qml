@@ -48,7 +48,7 @@ Button {
 
     contentItem: Text {
         anchors.fill: background
-        font.family: "PT Root UI"
+        font.family: "PT Root UI VF"
         font.styleName: "normal"
         font.weight: 400
         font.pixelSize: 16

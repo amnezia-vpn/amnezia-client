@@ -29,7 +29,7 @@ Item {
 
         ColumnLayout {
             Text {
-                font.family: "PT Root UI"
+                font.family: "PT Root UI VF"
                 font.styleName: "normal"
                 font.pixelSize: 18
                 color: "#d7d8db"
@@ -44,7 +44,7 @@ Item {
             }
 
             Text {
-                font.family: "PT Root UI"
+                font.family: "PT Root UI VF"
                 font.styleName: "normal"
                 font.pixelSize: 13
                 font.letterSpacing: 0.02

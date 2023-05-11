@@ -23,8 +23,7 @@ public:
         IsDefaultRole
     };
 
-    void clearData();
-    void setContent(const QVector<ServerModelContent>& data);
+    void refresh();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -33,7 +32,7 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QVector<ServerModelContent> m_content;
+    QVector<ServerModelContent> m_data;
     std::shared_ptr<Settings> m_settings;
 };
 

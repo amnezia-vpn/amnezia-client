@@ -136,7 +136,7 @@ RadioButton {
         }
 
         Text {
-            font.family: "PT Root UI"
+            font.family: "PT Root UI VF"
             font.styleName: "normal"
             font.pixelSize: 13
             font.letterSpacing: 0.02

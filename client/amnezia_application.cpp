@@ -187,7 +187,6 @@ void AmneziaApplication::loadFonts()
     QFontDatabase::addApplicationFont(":/fonts/Lato-Regular.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-Thin.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Lato-ThinItalic.ttf");
-
     QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
 }
 
