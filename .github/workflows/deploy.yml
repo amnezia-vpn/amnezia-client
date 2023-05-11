@@ -175,7 +175,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2
       
     - name: Install dependencies
-      run: pip install jsonschema
+      run: pip install jsonschema jinja2
         
     - name: 'Build project'
       run: |
