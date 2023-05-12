@@ -655,6 +655,11 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
+
+    if (transportProto == "tcp") {
+        script = script.append(" | grep LISTEN");
+    }
+
     ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
