@@ -17,6 +17,7 @@ Item {
     property string buttonImage: "qrc:/images/controls/chevron-down.svg"
     property string buttonImageColor: "#494B50"
 
+    property int buttonMaximumWidth
 
     property string defaultColor: "#1C1D21"
 
@@ -70,8 +71,13 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
 
+                Layout.maximumWidth: buttonMaximumWidth ? buttonMaximumWidth : implicitWidth
+
                 color: root.textColor
                 text: root.text
+
+                wrapMode: Text.NoWrap
+                elide: Text.ElideRight
             }
         }
 

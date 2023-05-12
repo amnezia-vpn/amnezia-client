@@ -1,10 +1,8 @@
 #include "containers_model.h"
 
-ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent) :
-    m_settings(settings),
-    QAbstractListModel(parent)
+ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
-
+    setSelectedServerIndex(m_settings->defaultServerIndex());
 }
 
 int ContainersModel::rowCount(const QModelIndex &parent) const
@@ -13,14 +11,19 @@ int ContainersModel::rowCount(const QModelIndex &parent) const
     return ContainerProps::allContainers().size();
 }
 
-QHash<int, QByteArray> ContainersModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[NameRole] = "name_role";
-    roles[DescRole] = "desc_role";
-    roles[DefaultRole] = "default_role";
-    roles[ServiceTypeRole] = "service_type_role";
-    roles[IsInstalledRole] = "is_installed_role";
-    return roles;
+bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+        return false;
+    }
+
+    if (role == DefaultRole) {
+        DockerContainer container = ContainerProps::allContainers().at(index.row());
+        m_settings->setDefaultContainer(m_selectedServerIndex, container);
+    }
+
+    emit dataChanged(index, index);
+    return true;
 }
 
 QVariant ContainersModel::data(const QModelIndex &index, int role) const
@@ -66,4 +69,14 @@ void ContainersModel::setCurrentlyInstalledContainerIndex(int index)
 QString ContainersModel::getCurrentlyInstalledContainerName()
 {
     return data(m_currentlyInstalledContainerIndex, NameRole).toString();
+}
+
+QHash<int, QByteArray> ContainersModel::roleNames() const {
+    QHash<int, QByteArray> roles;
+    roles[NameRole] = "name_role";
+    roles[DescRole] = "desc_role";
+    roles[DefaultRole] = "default_role";
+    roles[ServiceTypeRole] = "service_type_role";
+    roles[IsInstalledRole] = "is_installed_role";
+    return roles;
 }

@@ -21,8 +21,8 @@ PageBase {
 
     property string borderColor: "#2C2D30"
 
-    property string currentServerName: menuContent.currentItem.delegateData.desc
-    property string currentServerDescription: menuContent.currentItem.delegateData.address
+    property string currentServerName: serversMenuContent.currentItem.delegateData.desc
+    property string currentServerDescription: serversMenuContent.currentItem.delegateData.address
 
     Rectangle {
         id: buttonBackground
@@ -108,7 +108,7 @@ PageBase {
         }
 
         ColumnLayout {
-            id: menuHeader
+            id: serversMenuHeader
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.left: parent.left
@@ -147,12 +147,13 @@ PageBase {
                 }
 
                 DropDownType {
-                    id: protocolsDropDown
+                    id: containersDropDown
 
                     implicitHeight: 40
 
                     borderWidth: 0
                     buttonImageColor: "#0E0E11"
+                    buttonMaximumWidth: 150
 
                     defaultColor: "#D7D8DB"
 
@@ -162,27 +163,38 @@ PageBase {
 
                     menuModel: proxyContainersModel
 
+                    ButtonGroup {
+                        id: containersRadioButtonGroup
+                    }
+
                     menuDelegate: Item {
-                        implicitWidth: menuContent.width
-                        implicitHeight: radioButton.implicitHeight
+                        implicitWidth: root.width
+                        implicitHeight: containerRadioButton.implicitHeight
 
                         RadioButton {
-                            id: radioButton
+                            id: containerRadioButton
 
                             implicitWidth: parent.width
-                            implicitHeight: radioButtonContent.implicitHeight
+                            implicitHeight: containerRadioButtonContent.implicitHeight
 
                             hoverEnabled: true
 
-                            ButtonGroup.group: radioButtonGroup
+                            ButtonGroup.group: containersRadioButtonGroup
+
+                            checked: {
+                                if (modelData !== null) {
+                                    return modelData.default_role
+                                }
+                                return false
+                            }
 
                             indicator: Rectangle {
                                 anchors.fill: parent
-                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                                color: containerRadioButton.hovered ? "#2C2D30" : "#1C1D21"
                             }
 
                             RowLayout {
-                                id: radioButtonContent
+                                id: containerRadioButtonContent
                                 anchors.fill: parent
 
                                 anchors.rightMargin: 16
@@ -191,7 +203,7 @@ PageBase {
                                 z: 1
 
                                 Text {
-                                    id: text
+                                    id: containerRadioButtonText
 
                                     // todo remove dirty hack?
                                     text: {
@@ -214,7 +226,7 @@ PageBase {
 
                                 Image {
                                     source: "qrc:/images/controls/check.svg"
-                                    visible: radioButton.checked
+                                    visible: containerRadioButton.checked
                                     width: 24
                                     height: 24
 
@@ -223,14 +235,16 @@ PageBase {
                             }
 
                             onClicked: {
-                                protocolsDropDown.text = text.text
-                                protocolsDropDown.menuVisible = false
+                                modelData.default_role = true
+
+                                containersDropDown.text = containerRadioButtonText.text
+                                containersDropDown.menuVisible = false
                             }
                         }
 
                         Component.onCompleted: {
                             if (modelData !== null && modelData.default_role) {
-                                protocolsDropDown.text = modelData.name_role
+                                containersDropDown.text = modelData.name_role
                             }
                         }
                     }
@@ -256,7 +270,7 @@ PageBase {
         }
 
         FlickableType {
-            anchors.top: menuHeader.bottom
+            anchors.top: serversMenuHeader.bottom
             anchors.topMargin: 16
             contentHeight: col.implicitHeight
 
@@ -269,45 +283,46 @@ PageBase {
                 spacing: 16
 
                 ButtonGroup {
-                    id: radioButtonGroup
+                    id: serversRadioButtonGroup
                 }
 
                 ListView {
-                    id: menuContent
+                    id: serversMenuContent
                     width: parent.width
-                    height: menuContent.contentItem.height
+                    height: serversMenuContent.contentItem.height
 
                     model: ServersModel
-                    currentIndex: 0
+                    currentIndex: ServersModel.getDefaultServerIndex()
 
                     clip: true
-                    interactive: false
 
                     delegate: Item {
                         id: menuContentDelegate
 
                         property variant delegateData: model
 
-                        implicitWidth: menuContent.width
-                        implicitHeight: radioButton.implicitHeight
+                        implicitWidth: serversMenuContent.width
+                        implicitHeight: serverRadioButton.implicitHeight
 
                         RadioButton {
-                            id: radioButton
+                            id: serverRadioButton
 
                             implicitWidth: parent.width
-                            implicitHeight: radioButtonContent.implicitHeight
+                            implicitHeight: serverRadioButtonContent.implicitHeight
 
                             hoverEnabled: true
 
-                            ButtonGroup.group: radioButtonGroup
+                            checked: index === serversMenuContent.currentIndex
+
+                            ButtonGroup.group: serversRadioButtonGroup
 
                             indicator: Rectangle {
                                 anchors.fill: parent
-                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                                color: serverRadioButton.hovered ? "#2C2D30" : "#1C1D21"
                             }
 
                             RowLayout {
-                                id: radioButtonContent
+                                id: serverRadioButtonContent
                                 anchors.fill: parent
 
                                 anchors.rightMargin: 16
@@ -316,7 +331,7 @@ PageBase {
                                 z: 1
 
                                 Text {
-                                    id: text
+                                    id: serverRadioButtonText
 
                                     text: desc
                                     color: "#D7D8DB"
@@ -333,7 +348,7 @@ PageBase {
 
                                 Image {
                                     source: "qrc:/images/controls/check.svg"
-                                    visible: radioButton.checked
+                                    visible: serverRadioButton.checked
                                     width: 24
                                     height: 24
 
@@ -342,10 +357,11 @@ PageBase {
                             }
 
                             onClicked: {
-                                console.log(index)
-                                ContainersModel.setSelectedServerIndex(index)
                                 root.currentServerName = desc
                                 root.currentServerDescription = address
+
+                                ServersModel.setDefaultServerIndex(index)
+                                ContainersModel.setSelectedServerIndex(index)
                             }
                         }
                     }
