@@ -17,7 +17,7 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
         return false;
     }
 
-    if (role == DefaultRole) {
+    if (role == IsDefaultRole) {
         DockerContainer container = ContainerProps::allContainers().at(index.row());
         m_settings->setDefaultContainer(m_selectedServerIndex, container);
     }
@@ -33,22 +33,23 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    DockerContainer c = ContainerProps::allContainers().at(index.row());
-    if (role == NameRole) {
-        return ContainerProps::containerHumanNames().value(c);
+    DockerContainer container = ContainerProps::allContainers().at(index.row());
+
+    switch (role) {
+        case NameRole:
+            return ContainerProps::containerHumanNames().value(container);
+        case DescRole:
+            return ContainerProps::containerDescriptions().value(container);
+        case ConfigRole:
+            return m_settings->containerConfig(m_selectedServerIndex, container);
+        case ServiceTypeRole:
+            return ContainerProps::containerService(container);
+        case IsInstalledRole:
+            return m_settings->containers(m_selectedServerIndex).contains(container);
+        case IsDefaultRole:
+            return container == m_settings->defaultContainer(m_selectedServerIndex);
     }
-    if (role == DescRole) {
-        return ContainerProps::containerDescriptions().value(c);
-    }
-    if (role == DefaultRole) {
-        return c == m_settings->defaultContainer(m_selectedServerIndex);
-    }
-    if (role == ServiceTypeRole) {
-        return ContainerProps::containerService(c);
-    }
-    if (role == IsInstalledRole) {
-        return m_settings->containers(m_selectedServerIndex).contains(c);
-    }
+
     return QVariant();
 }
 
@@ -71,12 +72,17 @@ QString ContainersModel::getCurrentlyInstalledContainerName()
     return data(m_currentlyInstalledContainerIndex, NameRole).toString();
 }
 
+DockerContainer ContainersModel::getDefaultContainer()
+{
+    return m_settings->defaultContainer(m_selectedServerIndex);
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[NameRole] = "name_role";
-    roles[DescRole] = "desc_role";
-    roles[DefaultRole] = "default_role";
-    roles[ServiceTypeRole] = "service_type_role";
-    roles[IsInstalledRole] = "is_installed_role";
+    roles[NameRole] = "name";
+    roles[DescRole] = "description";
+    roles[ServiceTypeRole] = "serviceType";
+    roles[IsInstalledRole] = "isInstalled";
+    roles[IsDefaultRole] = "isDefault";
     return roles;
 }

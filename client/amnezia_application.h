@@ -9,11 +9,13 @@
 #include <QQmlContext>
 
 #include "settings.h"
+#include "vpnconnection.h"
 
 #include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/containers_model.h"
+#include "ui/controllers/connectionController.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -58,8 +60,12 @@ private:
     QTranslator* m_translator;
     QCommandLineParser m_parser;
 
-    QScopedPointer<ContainersModel> m_containersModel;
-    QScopedPointer<ServersModel> m_serversModel;
+    QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ServersModel> m_serversModel;
+
+    QScopedPointer<VpnConnection> m_vpnConnection;
+
+    QScopedPointer<ConnectionController> m_connectionController;
 
 };
 

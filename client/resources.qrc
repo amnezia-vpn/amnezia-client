@@ -222,5 +222,6 @@
         <file>ui/qml/Controls2/TextTypes/ButtonTextType.qml</file>
         <file>ui/qml/Controls2/Header2Type.qml</file>
         <file>images/controls/plus.svg</file>
+        <file>ui/qml/Components/ConnectButton.qml</file>
     </qresource>
 </RCC>

@@ -5,7 +5,7 @@ Text {
 
     color: "#D7D8DB"
     font.pixelSize: 16
-    font.weight: 500
+    font.weight: Font.Medium
     font.family: "PT Root UI VF"
 
     wrapMode: Text.WordWrap

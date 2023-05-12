@@ -5,7 +5,6 @@
 #include <QTimer>
 #include <QTranslator>
 
-
 #include "core/servercontroller.h"
 #include "logger.h"
 #include "defines.h"
@@ -100,12 +99,23 @@ void AmneziaApplication::init()
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
+    //
     m_containersModel.reset(new ContainersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
 
+    m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
+
+    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel));
+    connect(m_connectionController.get(), &ConnectionController::connectToVpn,
+            m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(m_connectionController.get(), &ConnectionController::disconnectFromVpn,
+            m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+    m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
+
+    //
     m_uiLogic->registerPagesLogic();
 
 #if defined(Q_OS_IOS)

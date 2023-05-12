@@ -37,36 +37,23 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     const QJsonArray &servers = m_settings->serversArray();
     const QJsonObject server = servers.at(index.row()).toObject();
 
-    if (role == DescRole) {
+    switch (role) {
+    case DescRole: {
         auto description = server.value(config_key::description).toString();
         if (description.isEmpty()) {
             return server.value(config_key::hostName).toString();
         }
         return description;
     }
-    if (role == AddressRole) {
+    case AddressRole:
         return server.value(config_key::hostName).toString();
-    }
-    if (role == IsDefaultRole) {
+    case CredentialsRole:
+        return QVariant::fromValue(m_settings->serverCredentials(index.row()));
+    case IsDefaultRole:
         return index.row() == m_settings->defaultServerIndex();
     }
+
     return QVariant();
-
-
-//    if (!index.isValid() || index.row() < 0
-//            || index.row() >= static_cast<int>(m_data.size())) {
-//        return QVariant();
-//    }
-//    if (role == DescRole) {
-//        return m_data[index.row()].desc;
-//    }
-//    if (role == AddressRole) {
-//        return m_data[index.row()].address;
-//    }
-//    if (role == IsDefaultRole) {
-//        return m_data[index.row()].isDefault;
-//    }
-//    return QVariant();
 }
 
 void ServersModel::setDefaultServerIndex(int index)

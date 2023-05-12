@@ -12,6 +12,7 @@ import "../Pages"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageBase {
     id: root
@@ -23,6 +24,12 @@ PageBase {
 
     property string currentServerName: serversMenuContent.currentItem.delegateData.desc
     property string currentServerDescription: serversMenuContent.currentItem.delegateData.address
+
+    ConnectButton {
+        anchors.centerIn: parent
+
+        text: "Подключиться"
+    }
 
     Rectangle {
         id: buttonBackground
@@ -136,11 +143,11 @@ PageBase {
                     sourceModel: ContainersModel
                     filters: [
                         ValueFilter {
-                            roleName: "service_type_role"
+                            roleName: "serviceType"
                             value: ProtocolEnum.Vpn
                         },
                         ValueFilter {
-                            roleName: "is_installed_role"
+                            roleName: "isInstalled"
                             value: true
                         }
                     ]
@@ -153,7 +160,7 @@ PageBase {
 
                     borderWidth: 0
                     buttonImageColor: "#0E0E11"
-                    buttonMaximumWidth: 150
+                    buttonMaximumWidth: 150 //todo make it dynamic
 
                     defaultColor: "#D7D8DB"
 
@@ -183,7 +190,7 @@ PageBase {
 
                             checked: {
                                 if (modelData !== null) {
-                                    return modelData.default_role
+                                    return modelData.isDefault
                                 }
                                 return false
                             }
@@ -208,7 +215,7 @@ PageBase {
                                     // todo remove dirty hack?
                                     text: {
                                         if (modelData !== null) {
-                                            return modelData.name_role
+                                            return modelData.name
                                         } else
                                             return ""
                                     }
@@ -235,7 +242,7 @@ PageBase {
                             }
 
                             onClicked: {
-                                modelData.default_role = true
+                                modelData.isDefault = true
 
                                 containersDropDown.text = containerRadioButtonText.text
                                 containersDropDown.menuVisible = false
@@ -243,14 +250,16 @@ PageBase {
                         }
 
                         Component.onCompleted: {
-                            if (modelData !== null && modelData.default_role) {
-                                containersDropDown.text = modelData.name_role
+                            if (modelData !== null && modelData.isDefault) {
+                                containersDropDown.text = modelData.name
                             }
                         }
                     }
                 }
 
                 BasicButtonType {
+                    id: dnsButton
+
                     implicitHeight: 40
 
                     text: "Amnezia DNS"

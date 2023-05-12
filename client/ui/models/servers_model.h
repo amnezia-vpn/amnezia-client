@@ -18,6 +18,7 @@ public:
     enum ServersModelRoles {
         DescRole = Qt::UserRole + 1,
         AddressRole,
+        CredentialsRole,
         IsDefaultRole
     };
 
