@@ -58,7 +58,7 @@ public slots:
     void onDisconnect();
 
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void onConnectionStateChanged(Vpn::ConnectionState state);
     void onVpnProtocolError(amnezia::ErrorCode errorCode);
 
 signals:

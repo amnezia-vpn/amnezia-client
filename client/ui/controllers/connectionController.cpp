@@ -11,11 +11,16 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 bool ConnectionController::onConnectionButtonClicked()
 {
-    if (!isConnected) {
+    if (!isConnected()) {
         openVpnConnection();
     } else {
         closeVpnConnection();
     }
+}
+
+bool ConnectionController::isConnected()
+{
+    return m_isConnected;
 }
 
 bool ConnectionController::openVpnConnection()
@@ -33,7 +38,7 @@ bool ConnectionController::openVpnConnection()
     //todo error handling
     qApp->processEvents();
     emit connectToVpn(serverIndex, credentials, container, containerConfig);
-    isConnected = true;
+    m_isConnected = true;
 
 
 //    int serverIndex = m_settings->defaultServerIndex();
@@ -67,5 +72,6 @@ bool ConnectionController::openVpnConnection()
 bool ConnectionController::closeVpnConnection()
 {
     emit disconnectFromVpn();
+    m_isConnected = false;
 }
 

@@ -45,16 +45,16 @@ void OpenVpnProtocol::stop()
 
     // TODO: need refactoring
     // sendTermSignal() will even return true while server connected ???
-    if ((m_connectionState == VpnProtocol::Preparing) ||
-            (m_connectionState == VpnProtocol::Connecting) ||
-            (m_connectionState == VpnProtocol::Connected) ||
-            (m_connectionState == VpnProtocol::Reconnecting)) {
+    if ((m_connectionState == Vpn::ConnectionState::Preparing) ||
+            (m_connectionState == Vpn::ConnectionState::Connecting) ||
+            (m_connectionState == Vpn::ConnectionState::Connected) ||
+            (m_connectionState == Vpn::ConnectionState::Reconnecting)) {
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
         m_managementServer.stop();
         qApp->processEvents();
-        setConnectionState(VpnProtocol::Disconnecting);
+        setConnectionState(Vpn::ConnectionState::Disconnecting);
     }
 }
 
@@ -175,7 +175,7 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-    setConnectionState(VpnConnectionState::Connecting);
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -208,7 +208,7 @@ ErrorCode OpenVpnProtocol::start()
     });
 
     connect(m_openVpnProcess.data(), &PrivilegedProcess::finished, this, [&]() {
-        setConnectionState(VpnConnectionState::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
     m_openVpnProcess->start();
@@ -256,14 +256,14 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             if (line.contains("CONNECTED,SUCCESS")) {
                 sendByteCount();
                 stopTimeoutTimer();
-                setConnectionState(VpnProtocol::Connected);
+                setConnectionState(Vpn::ConnectionState::Connected);
                 continue;
             } else if (line.contains("EXITING,SIGTER")) {
                 //openVpnStateSigTermHandler();
-                setConnectionState(VpnProtocol::Disconnecting);
+                setConnectionState(Vpn::ConnectionState::Disconnecting);
                 continue;
             } else if (line.contains("RECONNECTING")) {
-                setConnectionState(VpnProtocol::Reconnecting);
+                setConnectionState(Vpn::ConnectionState::Reconnecting);
                 continue;
             }
         }

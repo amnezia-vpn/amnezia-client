@@ -42,7 +42,7 @@ VpnLogic::VpnLogic(UiLogic *logic, QObject *parent):
         });
     }
     else {
-        onConnectionStateChanged(VpnProtocol::Disconnected);
+        onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
     }
 }
 
@@ -119,7 +119,7 @@ void VpnLogic::onBytesChanged(quint64 receivedData, quint64 sentData)
     set_labelSpeedSentText(VpnConnection::bytesPerSecToText(sentData));
 }
 
-void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
+void VpnLogic::onConnectionStateChanged(Vpn::ConnectionState state)
 {
     qDebug() << "VpnLogic::onConnectionStateChanged" << VpnProtocol::textConnectionState(state);
     if (uiLogic()->m_vpnConnection == NULL) {
@@ -134,50 +134,50 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
     set_labelStateText(VpnProtocol::textConnectionState(state));
 
     switch (state) {
-    case VpnProtocol::Disconnected:
+    case Vpn::ConnectionState::Disconnected:
         onBytesChanged(0,0);
         pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
-    case VpnProtocol::Preparing:
+    case Vpn::ConnectionState::Preparing:
         pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
-    case VpnProtocol::Connecting:
+    case Vpn::ConnectionState::Connecting:
         pbConnectChecked = true;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
-    case VpnProtocol::Connected:
+    case Vpn::ConnectionState::Connected:
         pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = false;
         break;
-    case VpnProtocol::Disconnecting:
+    case Vpn::ConnectionState::Disconnecting:
         pbConnectChecked = false;
         pbConnectEnabled = false;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
-    case VpnProtocol::Reconnecting:
+    case Vpn::ConnectionState::Reconnecting:
         pbConnectChecked = true;
         pbConnectEnabled = true;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
-    case VpnProtocol::Error:
+    case Vpn::ConnectionState::Error:
         pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
         rbModeEnabled = true;
         break;
-    case VpnProtocol::Unknown:
+    case Vpn::ConnectionState::Unknown:
         pbConnectChecked = false;
         pbConnectEnabled = true;
         pbConnectVisible = true;
@@ -241,6 +241,6 @@ void VpnLogic::onConnectWorker(int serverIndex, const ServerCredentials &credent
 
 void VpnLogic::onDisconnect()
 {
-    onConnectionStateChanged(VpnProtocol::Disconnected);
+    onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
     emit disconnectFromVpn();
 }

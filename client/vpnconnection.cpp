@@ -50,12 +50,12 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
     emit bytesChanged(receivedBytes, sentBytes);
 }
 
-void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
+void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 
 #ifdef AMNEZIA_DESKTOP
     if (IpcClient::Interface()) {
-        if (state == VpnProtocol::Connected){
+        if (state == Vpn::ConnectionState::Connected){
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
@@ -85,7 +85,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 
 
         }
-        else if (state == VpnProtocol::Error) {
+        else if (state == Vpn::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
@@ -96,7 +96,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 #endif
 
 #ifdef Q_OS_IOS
-    if (state == VpnProtocol::Connected){
+    if (state == Vpn::ConnectionState::Connected){
         m_isIOSConnected = true;
         checkIOSStatus();
     }
@@ -179,7 +179,7 @@ QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
 void VpnConnection::addRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
-    if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
+    if (connectionState() == Vpn::ConnectionState::Connected && IpcClient::Interface()) {
         if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
         }
@@ -193,7 +193,7 @@ void VpnConnection::addRoutes(const QStringList &ips)
 void VpnConnection::deleteRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
-    if (connectionState() == VpnProtocol::Connected && IpcClient::Interface()) {
+    if (connectionState() == Vpn::ConnectionState::Connected && IpcClient::Interface()) {
         if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeDeleteList(vpnProtocol()->vpnGateway(), ips);
         }
@@ -319,14 +319,14 @@ void VpnConnection::connectToVpn(int serverIndex,
         if (!IpcClient::init(m_IpcClient)) {
             qWarning() << "Error occurred when init IPC client";
             emit serviceIsNotReady();
-            emit connectionStateChanged(VpnProtocol::Error);
+            emit connectionStateChanged(Vpn::ConnectionState::Error);
             return;
         }
     }
 #endif
 
     m_remoteAddress = credentials.hostName;
-    emit connectionStateChanged(VpnProtocol::Connecting);
+    emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
@@ -338,14 +338,14 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
     if (e) {
-        emit connectionStateChanged(VpnProtocol::Error);
+        emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
     }
     
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
-        emit VpnProtocol::Error;
+        emit Vpn::ConnectionState::Error;
         return;
     }
     m_vpnProtocol->prepare();
@@ -362,7 +362,7 @@ void VpnConnection::connectToVpn(int serverIndex,
   //  IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
     if (!iosVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
+         emit Vpn::ConnectionState::Error;
          return;
     }
     m_vpnProtocol.reset(iosVpnProtocol);
@@ -371,12 +371,12 @@ void VpnConnection::connectToVpn(int serverIndex,
     createProtocolConnections();
 
     e = m_vpnProtocol.data()->start();
-    if (e) emit VpnProtocol::Error;
+    if (e) emit Vpn::ConnectionState::Error;
 }
 
 void VpnConnection::createProtocolConnections() {
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(VpnProtocol::VpnConnectionState)), this, SLOT(onConnectionStateChanged(VpnProtocol::VpnConnectionState)));
+    connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(Vpn::ConnectionState)), this, SLOT(onConnectionStateChanged(Vpn::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 }
 
@@ -433,7 +433,7 @@ void VpnConnection::disconnectFromVpn()
 #endif
 
     if (!m_vpnProtocol.data()) {
-        emit connectionStateChanged(VpnProtocol::Disconnected);
+        emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
 #ifdef Q_OS_ANDROID
         AndroidController::instance()->stop();
 #endif
@@ -442,9 +442,9 @@ void VpnConnection::disconnectFromVpn()
     m_vpnProtocol.data()->stop();
 }
 
-VpnProtocol::VpnConnectionState VpnConnection::connectionState()
+Vpn::ConnectionState VpnConnection::connectionState()
 {
-    if (!m_vpnProtocol) return VpnProtocol::Disconnected;
+    if (!m_vpnProtocol) return Vpn::ConnectionState::Disconnected;
     return m_vpnProtocol->connectionState();
 }
 

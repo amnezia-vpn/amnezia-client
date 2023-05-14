@@ -109,6 +109,9 @@ void AmneziaApplication::init()
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
 
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel));
+
+    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged,
+            m_connectionController.get(), &ConnectionController::connectionStateChanged);
     connect(m_connectionController.get(), &ConnectionController::connectToVpn,
             m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(m_connectionController.get(), &ConnectionController::disconnectFromVpn,
@@ -156,7 +159,6 @@ void AmneziaApplication::init()
 
 void AmneziaApplication::registerTypes()
 {
-    qRegisterMetaType<VpnProtocol::VpnConnectionState>("VpnProtocol::VpnConnectionState");
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
     qRegisterMetaType<DockerContainer>("DockerContainer");
@@ -164,7 +166,6 @@ void AmneziaApplication::registerTypes()
     qRegisterMetaType<Proto>("Proto");
     qRegisterMetaType<ServiceType>("ServiceType");
     qRegisterMetaType<Page>("Page");
-    qRegisterMetaType<VpnProtocol::VpnConnectionState>("ConnectionState");
 
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
 
@@ -181,6 +182,9 @@ void AmneziaApplication::registerTypes()
 
     m_protocolProps = new ProtocolProps;
     qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", m_protocolProps);
+
+    //
+    Vpn::declareQmlVpnConnectionStateEnum();
 }
 
 void AmneziaApplication::loadFonts()

@@ -51,7 +51,7 @@ void WireguardProtocol::stop()
 
     connect(m_wireguardStopProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol Stop errorOccurred" << error;
-        setConnectionState(VpnConnectionState::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
     connect(m_wireguardStopProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
@@ -62,12 +62,12 @@ void WireguardProtocol::stop()
     if (IpcClient::Interface()) {
         QRemoteObjectPendingReply<bool> result = IpcClient::Interface()->isWireguardRunning();
         if (result.returnValue()) {
-            setConnectionState(VpnProtocol::Disconnected);
+            setConnectionState(Vpn::ConnectionState::Disconnected);
             return;
         }
     } else {
         qCritical() << "IPC client not initialized";
-        setConnectionState(VpnProtocol::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
         return;
     }
 #endif
@@ -75,7 +75,7 @@ void WireguardProtocol::stop()
     m_wireguardStopProcess->start();
     m_wireguardStopProcess->waitForFinished(10000);
 
-    setConnectionState(VpnProtocol::Disconnected);
+    setConnectionState(Vpn::ConnectionState::Disconnected);
 #endif
 }
 
@@ -156,7 +156,7 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-    setConnectionState(VpnConnectionState::Connecting);
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
     m_wireguardStartProcess = IpcClient::CreatePrivilegedProcess();
 
@@ -179,7 +179,7 @@ ErrorCode WireguardProtocol::start()
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         qDebug() << "WireguardProtocol::WireguardProtocol errorOccurred" << error;
-        setConnectionState(VpnConnectionState::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
@@ -187,7 +187,7 @@ ErrorCode WireguardProtocol::start()
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [this]() {
-        setConnectionState(VpnConnectionState::Connected);
+        setConnectionState(Vpn::ConnectionState::Connected);
     });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyRead, this, [this]() {

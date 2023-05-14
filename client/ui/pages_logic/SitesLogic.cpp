@@ -116,14 +116,14 @@ void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
         if (!ok || row < 0 || row >= siteModel->rowCount()) return;
         sites.append(siteModel->data(row, 0).toString());
 
-        if (uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+        if (uiLogic()->m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected) {
             ips.append(siteModel->data(row, 1).toString());
         }
     }
 
     m_settings->removeVpnSites(mode, sites);
 
-    if (uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+    if (uiLogic()->m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected) {
         uiLogic()->m_vpnConnection->deleteRoutes(ips);
         uiLogic()->m_vpnConnection->flushDns();
     }

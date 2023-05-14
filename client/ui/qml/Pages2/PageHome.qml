@@ -27,8 +27,6 @@ PageBase {
 
     ConnectButton {
         anchors.centerIn: parent
-
-        text: "Подключиться"
     }
 
     Rectangle {

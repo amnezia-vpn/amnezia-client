@@ -23,14 +23,8 @@ PageBase {
         anchors.left: parent.left
         anchors.bottom: tabBar.top
 
-        width: {
-            console.log(parent.width)
-            return parent.width
-        }
-        height: {
-            console.log(root.height - tabBar.implicitHeight)
-            return root.height - tabBar.implicitHeight
-        }
+        width: parent.width
+        height: root.height - tabBar.implicitHeight
 
         PageHome {
         }

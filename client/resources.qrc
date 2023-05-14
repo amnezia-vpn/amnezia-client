@@ -223,5 +223,8 @@
         <file>ui/qml/Controls2/Header2Type.qml</file>
         <file>images/controls/plus.svg</file>
         <file>ui/qml/Components/ConnectButton.qml</file>
+        <file>images/connectionProgress.svg</file>
+        <file>images/connectionOff.svg</file>
+        <file>images/connectionOn.svg</file>
     </qresource>
 </RCC>

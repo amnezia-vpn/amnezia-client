@@ -45,13 +45,13 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     });
 
     m_systemTrayIcon.setContextMenu(&m_menu);
-    setTrayState(VpnProtocol::Disconnected);
+    setTrayState(Vpn::ConnectionState::Disconnected);
 }
 
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
 }
 
-void SystemTrayNotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState state)
+void SystemTrayNotificationHandler::setConnectionState(Vpn::ConnectionState state)
 {
     setTrayState(state);
     NotificationHandler::setConnectionState(state);
@@ -73,47 +73,47 @@ void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationR
 #endif
 }
 
-void SystemTrayNotificationHandler::setTrayState(VpnProtocol::VpnConnectionState state)
+void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
 {
     QString resourcesPath = ":/images/tray/%1";
 
     switch (state) {
-    case VpnProtocol::Disconnected:
+    case Vpn::ConnectionState::Disconnected:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         m_trayActionConnect->setEnabled(true);
         m_trayActionDisconnect->setEnabled(false);
         break;
-    case VpnProtocol::Preparing:
+    case Vpn::ConnectionState::Preparing:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
-    case VpnProtocol::Connecting:
+    case Vpn::ConnectionState::Connecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
-    case VpnProtocol::Connected:
+    case Vpn::ConnectionState::Connected:
         setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
-    case VpnProtocol::Disconnecting:
+    case Vpn::ConnectionState::Disconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
-    case VpnProtocol::Reconnecting:
+    case Vpn::ConnectionState::Reconnecting:
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
-    case VpnProtocol::Error:
+    case Vpn::ConnectionState::Error:
         setTrayIcon(QString(resourcesPath).arg(ErrorTrayIconName));
         m_trayActionConnect->setEnabled(true);
         m_trayActionDisconnect->setEnabled(false);
         break;
-    case VpnProtocol::Unknown:
+    case Vpn::ConnectionState::Unknown:
     default:
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);

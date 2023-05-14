@@ -107,7 +107,7 @@ UiLogic::~UiLogic()
     emit hide();
 
 #ifdef AMNEZIA_DESKTOP
-    if (m_vpnConnection->connectionState() != VpnProtocol::VpnConnectionState::Disconnected) {
+    if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Disconnected) {
         m_vpnConnection->disconnectFromVpn();
         for (int i = 0; i < 50; i++) {
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -131,13 +131,13 @@ void UiLogic::initializeUiLogic()
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
-            pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
+            pageLogic<VpnLogic>()->onConnectionStateChanged(Vpn::ConnectionState::Connected);
             m_vpnConnection->restoreConnection();
         }
     });
     if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
          qCritical() << QString("Init failed") ;
-         emit VpnProtocol::Error;
+         emit Vpn::ConnectionState::Error;
          return;
     }
 #endif

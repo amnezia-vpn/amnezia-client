@@ -54,7 +54,7 @@ public:
     bool isConnected() const;
     bool isDisconnected() const;
 
-    VpnProtocol::VpnConnectionState connectionState();
+    Vpn::ConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     void addRoutes(const QStringList &ips);
@@ -76,14 +76,14 @@ public slots:
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void connectionStateChanged(Vpn::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
 
     void serviceIsNotReady();
 
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void onConnectionStateChanged(Vpn::ConnectionState state);
 
 #ifdef Q_OS_IOS
     void checkIOSStatus();

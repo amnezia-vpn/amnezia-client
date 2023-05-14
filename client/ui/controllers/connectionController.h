@@ -3,6 +3,7 @@
 
 #include "ui/models/servers_model.h"
 #include "ui/models/containers_model.h"
+#include "protocols/vpnprotocol.h"
 
 class ConnectionController : public QObject
 {
@@ -16,9 +17,12 @@ public:
 public slots:
     bool onConnectionButtonClicked();
 
+    bool isConnected();
+
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void disconnectFromVpn();
+    void connectionStateChanged(Vpn::ConnectionState state);
 
 private:
     bool openVpnConnection();
@@ -27,7 +31,7 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
 
-    bool isConnected = false;
+    bool m_isConnected = false;
 };
 
 #endif // CONNECTIONCONTROLLER_H

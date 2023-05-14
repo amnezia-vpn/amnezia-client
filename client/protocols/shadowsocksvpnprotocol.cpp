@@ -66,7 +66,7 @@ ErrorCode ShadowSocksVpnProtocol::start()
 
     connect(&m_ssProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
         qDebug().noquote() << "ShadowSocksVpnProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
-        setConnectionState(VpnProtocol::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit){
             emit protocolError(amnezia::ErrorCode::ShadowSocksExecutableCrashed);
             stop();
@@ -81,7 +81,7 @@ ErrorCode ShadowSocksVpnProtocol::start()
     m_ssProcess.waitForStarted();
 
     if (m_ssProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(VpnConnectionState::Connecting);
+        setConnectionState(Vpn::ConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }
