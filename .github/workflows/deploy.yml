@@ -139,17 +139,16 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         dir: ${{ runner.temp }}
         set-env: 'true'
 
-    - name: 'Install ios Qt'
+    - name: 'Install iOS Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
