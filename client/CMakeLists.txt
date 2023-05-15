@@ -52,7 +52,7 @@ set(LIBS ${LIBS}
 if(IOS)
 	set(LIBS
 		${LIBS}
-		Multimedia
+		Qt6::Multimedia
 	)
 endif()
 
