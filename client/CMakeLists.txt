@@ -32,12 +32,14 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets Core Gui Network Xml 
     RemoteObjects Quick Svg QuickControls2 
     Core5Compat Concurrent
+	Multimedia
 )
 set(LIBS ${LIBS} 
     Qt6::Widgets Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
+	Qt6::Multimedia
 )
 
 qt_standard_project_setup()
