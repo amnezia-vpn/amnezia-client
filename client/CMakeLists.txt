@@ -54,7 +54,7 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/migrations.h
@@ -196,7 +196,7 @@ if(APPLE)
         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
 
@@ -330,7 +330,7 @@ qt_add_translations(${PROJECT} TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 
 if(APPLE AND NOT IOS)
-    set_target_properties(AmneziaVPN PROPERTIES MACOSX_BUNDLE TRUE)
+    set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 endif()
 
 if(IOS)
@@ -338,17 +338,7 @@ if(IOS)
     enable_language(OBJCXX)
     enable_language(Swift)
 
-    #disable in cicd
-    # include(cmake/osxtools.cmake)
-    # set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
-
-    set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
-    set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks")
-    set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
-
-    set_target_properties(${PROJECT} PROPERTIES
-        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
-    )
+    include(cmake/osxtools.cmake)
 
     set(LIBS ${LIBS}
         ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
@@ -360,12 +350,16 @@ if(IOS)
     set(BUILD_ID ${A_PROJECT_BUILD})
 
     set_target_properties(${PROJECT} PROPERTIES
+        XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
+
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/ios/app/Info.plist.in
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
         MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
         MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
         MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
         MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
+        MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}-${BUILD_ID}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
 
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_LIST_DIR}/ios/app/main.entitlements"
@@ -374,18 +368,36 @@ if(IOS)
         XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPN"
         XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "AmneziaVPN"
 
-        XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
-        XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
-        XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
-        XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "AmneziaVPN-Swift.h"
         XCODE_GENERATE_SCHEME TRUE
         XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
 
+        XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
+        XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
+
+        XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
+
+        XCODE_EMBED_APP_EXTENSIONS networkextension
+
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN"
+    )
+
+    set_target_properties(${PROJECT} PROPERTIES
+        XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
+        XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
+        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
+        XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
+        XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "AmneziaVPN-Swift.h"
+    )
+
+    set_target_properties(${PROJECT} PROPERTIES
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
     )
 
     target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
@@ -396,6 +408,9 @@ if(IOS)
     )
 
     target_sources(${PROJECT} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosvpnprotocol.swift
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ioslogger.swift
+
         ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
         ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
         ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
@@ -413,48 +428,28 @@ if(IOS)
     )
 
     target_sources(${PROJECT} PRIVATE
-        platforms/ios/iosvpnprotocol.swift
-        platforms/ios/ioslogger.swift
-    )
-
-    target_sources(${PROJECT} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
         ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
     )
     set_source_files_properties(
         ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
         ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
         PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
     )
 
-    target_sources(${PROJECT} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
-    )
-    set_source_files_properties(
-        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
-        PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
-    )
 
     add_subdirectory(ios/networkextension)
     add_dependencies(${PROJECT} networkextension)
-    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_APP_EXTENSIONS networkextension)
 
     set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
         "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
     )
-    set_target_properties(${PROJECT} PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-    set_target_properties(${PROJECT} PROPERTIES XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION)
 
-
+    set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
     target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
 
-    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
-    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN")
-    set_target_properties(${PROJECT} PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN")
-
-    set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual)
-    set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension")
-    set_target_properties("networkextension" PROPERTIES XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension")
 endif()
 
 if(ANDROID)
@@ -555,5 +550,5 @@ if(WIN32)
     )
 endif()
 if(IOS)
- #include(cmake/ios-arch-fixup.cmake)
+    include(cmake/ios-arch-fixup.cmake)
 endif()

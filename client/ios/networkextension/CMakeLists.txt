@@ -19,16 +19,26 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
     XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPNNetworkExtension"
 
-    XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
-    XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
-    XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
 
+    XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
+
     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+    XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension"
+    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension"
+)
+
+set_target_properties(networkextension PROPERTIES
+    XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
+    XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
+    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
+    XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
+    XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
 )
 
 set_target_properties("networkextension" PROPERTIES
@@ -92,7 +102,7 @@ include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
 ## Build the wireguard go library for iOS simulation.
 ## TODO: Some special handling around GOARCH for
 execute_process(OUTPUT_VARIABLE SIM_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk iphonesimulator --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/client/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH amd64
     CGO_CFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
@@ -101,7 +111,7 @@ build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/cli
 
 ## Build the wireguard go library for iOS devices.
 execute_process(OUTPUT_VARIABLE IOS_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CMAKE_SOURCE_DIR}/client/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH arm64
     CGO_CFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
