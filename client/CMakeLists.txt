@@ -47,7 +47,6 @@ set(LIBS ${LIBS}
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
-	Qt6::Multimedia
 )
 if(IOS)
 	set(LIBS
