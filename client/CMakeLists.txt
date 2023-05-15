@@ -196,7 +196,7 @@ if(APPLE)
         set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
         set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
 
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
         add_compile_definitions(MVPN_MACOS)
         # ICON   = $$PWD/images/app.icns
 
