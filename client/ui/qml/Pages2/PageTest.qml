@@ -4,15 +4,12 @@ import QtQuick.Layouts
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Config"
 import "../Controls2/TextTypes"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.Test
-    logic: ViewConfigLogic
 
     ColumnLayout {
         id: content

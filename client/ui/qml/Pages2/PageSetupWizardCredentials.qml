@@ -5,13 +5,11 @@ import QtQuick.Layouts
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Config"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardCredentials
 
     FlickableType {
         id: fl
@@ -61,7 +59,7 @@ PageBase {
                 text: qsTr("Настроить сервер простым образом")
 
                 onClicked: function() {
-                    UiLogic.goToPage(PageEnum.PageSetupWizardEasy)
+                    PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
 
@@ -79,7 +77,7 @@ PageBase {
                 text: qsTr("Выбрать протокол для установки")
 
                 onClicked: function() {
-                    UiLogic.goToPage(PageEnum.PageSetupWizardProtocols)
+                    PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                 }
             }
         }

@@ -13,9 +13,11 @@
 
 #include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
+
 #include "ui/models/servers_model.h"
 #include "ui/models/containers_model.h"
 #include "ui/controllers/connectionController.h"
+#include "ui/controllers/pageController.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -66,6 +68,7 @@ private:
     QScopedPointer<VpnConnection> m_vpnConnection;
 
     QScopedPointer<ConnectionController> m_connectionController;
+    QScopedPointer<PageController> m_pageController;
 
 };
 

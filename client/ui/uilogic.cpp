@@ -617,9 +617,3 @@ bool UiLogic::isContainerAlreadyAddedToGui(DockerContainer container)
     }
     return false;
 }
-
-QString UiLogic::pageEnumToString(Page page) {
-    QMetaEnum metaEnum = QMetaEnum::fromType<Page>();
-    QString pageName = metaEnum.valueToKey(static_cast<int>(page));
-    return "Pages2/" + pageName + ".qml";
-}

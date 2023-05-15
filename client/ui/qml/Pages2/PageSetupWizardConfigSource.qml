@@ -6,14 +6,12 @@ import QtQuick.Dialogs
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardInstalling
 
     FlickableType {
         id: fl
@@ -100,7 +98,7 @@ PageBase {
                 iconImage: "qrc:/images/controls/text-cursor.svg"
 
                 onClickedFunc: function() {
-                    UiLogic.goToPage(PageEnum.PageSetupWizardTextKey)
+                    PageController.goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
             Rectangle {

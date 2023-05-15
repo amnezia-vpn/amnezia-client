@@ -118,6 +118,9 @@ void AmneziaApplication::init()
             m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
+    m_pageController.reset(new PageController(m_serversModel));
+    m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
+
     //
     m_uiLogic->registerPagesLogic();
 
@@ -185,6 +188,7 @@ void AmneziaApplication::registerTypes()
 
     //
     Vpn::declareQmlVpnConnectionStateEnum();
+    PageLoader::declareQmlPageEnum();
 }
 
 void AmneziaApplication::loadFonts()

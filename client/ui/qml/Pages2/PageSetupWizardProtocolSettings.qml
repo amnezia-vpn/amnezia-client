@@ -5,14 +5,12 @@ import QtQuick.Layouts
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardProtocolSettings
 
     FlickableType {
         id: fl
@@ -90,7 +88,7 @@ PageBase {
         text: qsTr("Установить")
 
         onClicked: function() {
-            UiLogic.goToPage(PageEnum.PageSetupWizardInstalling)
+            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
         }
     }
 }

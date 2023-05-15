@@ -35,6 +35,8 @@ Item {
             onClicked: {
                 if (backButtonFunction && typeof backButtonFunction === "function") {
                     backButtonFunction()
+                } else {
+                    PageController.closePage()
                 }
             }
         }

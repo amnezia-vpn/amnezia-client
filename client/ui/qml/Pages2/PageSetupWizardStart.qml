@@ -5,14 +5,12 @@ import QtQuick.Layouts
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Config"
 import "../Controls2/TextTypes"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardStart
 
     FlickableType {
         id: fl
@@ -77,7 +75,7 @@ PageBase {
                 text: qsTr("У меня ничего нет")
 
                 onClicked: {
-                    UiLogic.goToPage(PageEnum.PageTest)
+                    PageController.goToPage(PageEnum.PageTest)
                 }
             }
         }
@@ -132,7 +130,7 @@ PageBase {
                     buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                     onClickedFunc: function() {
-                        UiLogic.goToPage(PageEnum.PageSetupWizardCredentials)
+                        PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                         drawer.visible = false
                     }
                 }
@@ -148,7 +146,7 @@ PageBase {
                     buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                     onClickedFunc: function() {
-                        UiLogic.goToPage(PageEnum.PageSetupWizardConfigSource)
+                        PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                         drawer.visible = false
                     }
                 }

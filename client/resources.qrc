@@ -226,5 +226,6 @@
         <file>images/connectionProgress.svg</file>
         <file>images/connectionOff.svg</file>
         <file>images/connectionOn.svg</file>
+        <file>images/controls/download.svg</file>
     </qresource>
 </RCC>

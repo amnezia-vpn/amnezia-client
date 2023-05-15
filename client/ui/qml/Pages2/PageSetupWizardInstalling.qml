@@ -5,14 +5,12 @@ import QtQuick.Layouts
 import PageEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardInstalling
 
     FlickableType {
         id: fl

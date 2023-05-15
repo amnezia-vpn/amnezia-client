@@ -31,7 +31,8 @@ public:
 
 public slots:
     void setDefaultServerIndex(int index);
-    int getDefaultServerIndex();
+    const int getDefaultServerIndex();
+    const int getServersCount();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

@@ -7,14 +7,7 @@ import ConnectionState 1.0
 Button {
     id: root
 
-    property var isConnected: ConnectionController.isConnected
-
     text: "Подключиться"
-
-//    implicitHeight: 190
-//    implicitWidth: 190
-
-//    color: "transparent"
 
     background: Image {
         id: border
@@ -54,56 +47,55 @@ Button {
 
     onClicked: {
         ConnectionController.onConnectionButtonClicked()
-        console.log(connectionProccess.from)
     }
 
     Connections {
         target: ConnectionController
         function onConnectionStateChanged(state) {
             switch(state) {
-            case ConnectionState.Unknown: {
-                console.log("Unknown")
-                break
-            }
-            case ConnectionState.Disconnected: {
-                console.log("Disconnected")
-                connectionProccess.running = false
-                root.text = "Подключиться"
-                break
-            }
-            case ConnectionState.Preparing: {
-                console.log("Preparing")
-                break
-            }
-            case ConnectionState.Connecting: {
-                console.log("Connecting")
-                connectionProccess.running = true
-                root.text = "Подключение..."
-                break
-            }
-            case ConnectionState.Connected: {
-                console.log("Connected")
-                connectionProccess.running = false
-                root.text = "Подключено"
-                break
-            }
-            case ConnectionState.Disconnecting: {
-                console.log("Disconnecting")
-                connectionProccess.running = true
-                root.text = "Отключение..."
-                break
-            }
-            case ConnectionState.Reconnecting: {
-                console.log("Reconnecting")
-                connectionProccess.running = true
-                root.text = "Переподключение..."
-                break
-            }
-            case ConnectionState.Error: {
-                console.log("Error")
-                connectionProccess.running = false
-                break
-            }
+                case ConnectionState.Unknown: {
+                    console.log("Unknown")
+                    break
+                }
+                case ConnectionState.Disconnected: {
+                    console.log("Disconnected")
+                    connectionProccess.running = false
+                    root.text = "Подключиться"
+                    break
+                }
+                case ConnectionState.Preparing: {
+                    console.log("Preparing")
+                    break
+                }
+                case ConnectionState.Connecting: {
+                    console.log("Connecting")
+                    connectionProccess.running = true
+                    root.text = "Подключение..."
+                    break
+                }
+                case ConnectionState.Connected: {
+                    console.log("Connected")
+                    connectionProccess.running = false
+                    root.text = "Подключено"
+                    break
+                }
+                case ConnectionState.Disconnecting: {
+                    console.log("Disconnecting")
+                    connectionProccess.running = true
+                    root.text = "Отключение..."
+                    break
+                }
+                case ConnectionState.Reconnecting: {
+                    console.log("Reconnecting")
+                    connectionProccess.running = true
+                    root.text = "Переподключение..."
+                    break
+                }
+                case ConnectionState.Error: {
+                    console.log("Error")
+                    connectionProccess.running = false
+                    break
+                }
             }
         }
     }

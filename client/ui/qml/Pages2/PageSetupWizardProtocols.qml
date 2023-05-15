@@ -8,13 +8,11 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Config"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageSetupWizardProtocols
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -89,7 +87,7 @@ PageBase {
 
                             onClickedFunc: function() {
                                 ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
-                                UiLogic.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                             }
                         }
 

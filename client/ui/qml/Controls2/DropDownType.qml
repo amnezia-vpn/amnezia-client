@@ -154,6 +154,10 @@ Item {
             anchors.topMargin: 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
+
+            backButtonFunction: function() {
+                root.menuVisible = false
+            }
         }
 
         FlickableType {
@@ -190,6 +194,7 @@ Item {
                             id: loader
                             sourceComponent: root.menuDelegate
                             property QtObject modelData: model
+                            property var delegateIndex: index
                         }
                     }
                 }

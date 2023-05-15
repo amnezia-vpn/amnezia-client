@@ -8,15 +8,13 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 
 import "./"
-import "../Pages"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-PageBase {
+Item {
     id: root
-    page: PageEnum.PageHome
 
     property string defaultColor: "#1C1D21"
 
@@ -143,10 +141,6 @@ PageBase {
                         ValueFilter {
                             roleName: "serviceType"
                             value: ProtocolEnum.Vpn
-                        },
-                        ValueFilter {
-                            roleName: "isInstalled"
-                            value: true
                         }
                     ]
                 }
@@ -196,6 +190,19 @@ PageBase {
                             indicator: Rectangle {
                                 anchors.fill: parent
                                 color: containerRadioButton.hovered ? "#2C2D30" : "#1C1D21"
+
+                                Behavior on color {
+                                    PropertyAnimation { duration: 200 }
+                                }
+                            }
+
+                            checkable: {
+                                if (modelData !== null) {
+                                    if (modelData.isInstalled) {
+                                        return true
+                                    }
+                                }
+                                return false
                             }
 
                             RowLayout {
@@ -207,10 +214,33 @@ PageBase {
 
                                 z: 1
 
+                                Image {
+                                    source: {
+                                        if (modelData !== null) {
+                                            if (modelData.isInstalled) {
+                                                return "qrc:/images/controls/check.svg"
+                                            }
+                                        }
+                                        return "qrc:/images/controls/download.svg"
+                                    }
+                                    visible: {
+                                        if (modelData !== null) {
+                                            if (modelData.isInstalled) {
+                                                return containerRadioButton.checked
+                                            }
+                                        }
+                                        return true
+                                    }
+
+                                    width: 24
+                                    height: 24
+
+                                    Layout.rightMargin: 8
+                                }
+
                                 Text {
                                     id: containerRadioButtonText
 
-                                    // todo remove dirty hack?
                                     text: {
                                         if (modelData !== null) {
                                             return modelData.name
@@ -228,22 +258,26 @@ PageBase {
                                     Layout.topMargin: 20
                                     Layout.bottomMargin: 20
                                 }
-
-                                Image {
-                                    source: "qrc:/images/controls/check.svg"
-                                    visible: containerRadioButton.checked
-                                    width: 24
-                                    height: 24
-
-                                    Layout.rightMargin: 8
-                                }
                             }
 
                             onClicked: {
-                                modelData.isDefault = true
+                                if (checked) {
+                                    modelData.isDefault = true
 
-                                containersDropDown.text = containerRadioButtonText.text
-                                containersDropDown.menuVisible = false
+                                    containersDropDown.text = containerRadioButtonText.text
+                                    containersDropDown.menuVisible = false
+                                } else {
+                                    ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(delegateIndex))
+                                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                                    containersDropDown.menuVisible = false
+                                    menu.visible = false
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: containerRadioButton
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: false
                             }
                         }
 
@@ -326,6 +360,10 @@ PageBase {
                             indicator: Rectangle {
                                 anchors.fill: parent
                                 color: serverRadioButton.hovered ? "#2C2D30" : "#1C1D21"
+
+                                Behavior on color {
+                                    PropertyAnimation { duration: 200 }
+                                }
                             }
 
                             RowLayout {
@@ -369,6 +407,12 @@ PageBase {
 
                                 ServersModel.setDefaultServerIndex(index)
                                 ContainersModel.setSelectedServerIndex(index)
+                            }
+
+                            MouseArea {
+                                anchors.fill: serverRadioButton
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: false
                             }
                         }
                     }

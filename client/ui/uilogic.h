@@ -123,8 +123,6 @@ public:
 
     Q_INVOKABLE amnezia::ErrorCode addAlreadyInstalledContainersGui(bool &isServerCreated);
 
-    Q_INVOKABLE QString pageEnumToString(PageEnumNS::Page page);
-
     void shareTempFile(const QString &suggestedName, QString ext, const QString& data);
     static QString getOpenFileName(QWidget *parent = nullptr,
                                    const QString &caption = QString(),

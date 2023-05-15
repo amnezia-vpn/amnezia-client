@@ -56,6 +56,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+//todo mode to setData?
 void ServersModel::setDefaultServerIndex(int index)
 {
 //    beginResetModel();
@@ -63,9 +64,14 @@ void ServersModel::setDefaultServerIndex(int index)
     //    endResetModel();
 }
 
-int ServersModel::getDefaultServerIndex()
+const int ServersModel::getDefaultServerIndex()
 {
     return m_settings->defaultServerIndex();
+}
+
+const int ServersModel::getServersCount()
+{
+    return m_settings->serversCount();
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const {
