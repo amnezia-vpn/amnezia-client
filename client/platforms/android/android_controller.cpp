@@ -249,7 +249,7 @@ void AndroidController::cleanupBackendLogs() {
 }
 
 void AndroidController::importConfig(const QString& data){
-    m_startPageLogic->selectConfigFormat(data);
+    m_startPageLogic->importAnyFile(data);
 }
 
 const QJsonObject &AndroidController::vpnConfig() const

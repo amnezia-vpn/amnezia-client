@@ -73,15 +73,13 @@
     NSLog(@"Application openURL: %@", url);
     if (url.fileURL) {
         QString filePath(url.path.UTF8String);
-        qDebug() << "filePath:" << filePath;
         if (filePath.isEmpty()) return NO;
 
         QFile file(filePath);
         bool isOpenFile = file.open(QIODevice::ReadOnly);
-        qDebug() << "isOpenFile:" << isOpenFile;
         QByteArray data = file.readAll();
         
-        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importConnectionFromCode(QString(data));
+        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importAnyFile(QString(data));
         return YES;
     }
     return NO;
