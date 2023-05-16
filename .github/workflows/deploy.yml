@@ -138,6 +138,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
