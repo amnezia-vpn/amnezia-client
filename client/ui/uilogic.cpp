@@ -34,7 +34,7 @@
 #include "ui/qautostart.h"
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "uilogic.h"
 #include "utilities.h"
 #include "vpnconnection.h"

@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat)
 qt_standard_project_setup()
 
+configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+
 set(HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
         ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
@@ -18,6 +20,7 @@ set(HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/logger.h
         ${CMAKE_CURRENT_LIST_DIR}/router.h
         ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
+        ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
 set(SOURCES

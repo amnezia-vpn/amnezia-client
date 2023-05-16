@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>AmneziaVPN</Name>
-    <Version>1.6.0.0</Version>
+    <Version>@CMAKE_PROJECT_VERSION@</Version>
     <Title>AmneziaVPN</Title>
     <Publisher>AmneziaVPN</Publisher>
     <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>@ApplicationsDir@/AmneziaVPN</TargetDir>
+    <TargetDir>/Applications/AmneziaVPN.app</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>
@@ -18,10 +18,10 @@
     <SupportsModify>false</SupportsModify>
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
-     <Repository>
-       <Url>https://amneziavpn.org/updates/linux</Url>
-       <Enabled>true</Enabled>
-       <DisplayName>AmneziaVPN - repository for Linux</DisplayName>
-     </Repository>
+        <Repository>
+            <Url>https://amneziavpn.org/updates/macos</Url>
+            <Enabled>true</Enabled>
+            <DisplayName>AmneziaVPN - repository for macOS</DisplayName>
+        </Repository>
     </RemoteRepositories>
 </Installer>

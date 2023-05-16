@@ -15,7 +15,7 @@
 #include <QIcon>
 #include <QWindow>
 
-#include "defines.h"
+#include "version.h"
 
 
 SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
