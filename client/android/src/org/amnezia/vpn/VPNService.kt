@@ -403,7 +403,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     fun establish(): ParcelFileDescriptor? {
         Log.v(tag, "Aman: establish....................")
         mbuilder.allowFamily(OsConstants.AF_INET)
-        mbuilder.allowFamily(OsConstants.AF_INET6)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mbuilder.setMetered(false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)

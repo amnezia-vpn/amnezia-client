@@ -8,7 +8,7 @@
 
 #include "core/servercontroller.h"
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include <QQuickStyle>
 
 #include "platforms/ios/QRCodeReaderBase.h"

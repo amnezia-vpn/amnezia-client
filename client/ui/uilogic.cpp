@@ -34,7 +34,7 @@
 #include "ui/qautostart.h"
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "uilogic.h"
 #include "utilities.h"
 #include "vpnconnection.h"
@@ -181,6 +181,9 @@ void UiLogic::showOnStartup()
 void UiLogic::onUpdateAllPages()
 {
     for (auto logic : m_logicMap) {
+        if (dynamic_cast<ClientInfoLogic*>(logic) || dynamic_cast<ClientManagementLogic*>(logic)) {
+            continue;
+        }
         logic->onUpdatePage();
     }
 }
