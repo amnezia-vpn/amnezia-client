@@ -38,18 +38,25 @@ Item {
             }
 
             TextFieldWithHeaderType {
+                id: hostname
+
                 Layout.fillWidth: true
                 headerText: "Server IP adress [:port]"
             }
 
             TextFieldWithHeaderType {
+                id: username
+
                 Layout.fillWidth: true
                 headerText: "Login to connect via SSH"
             }
 
             TextFieldWithHeaderType {
+                id: secretData
+
                 Layout.fillWidth: true
                 headerText: "Password / Private key"
+                textField.echoMode: TextInput.Password
             }
 
             BasicButtonType {
@@ -77,6 +84,9 @@ Item {
                 text: qsTr("Выбрать протокол для установки")
 
                 onClicked: function() {
+                    InstallController.setShouldCreateServer(true)
+                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+
                     PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                 }
             }

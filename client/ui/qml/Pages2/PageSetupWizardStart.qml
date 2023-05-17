@@ -96,7 +96,7 @@ Item {
                 radius: 16
                 color: "#1C1D21"
 
-                border.color: borderColor
+                border.color: "#2C2D30"
                 border.width: 1
             }
 

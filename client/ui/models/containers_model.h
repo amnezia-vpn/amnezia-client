@@ -15,12 +15,14 @@ class ContainersModel : public QAbstractListModel
 public:
     ContainersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 public:
-    enum ContainersModelRoles {
+    enum Roles {
         NameRole = Qt::UserRole + 1,
         DescRole,
         ServiceTypeRole,
         ConfigRole,
+        DockerContainerRole,
         IsInstalledRole,
+        IsCurrentlyInstalled,
         IsDefaultRole
     };
 
@@ -28,20 +30,20 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    Q_INVOKABLE void setSelectedServerIndex(int index);
-    Q_INVOKABLE void setCurrentlyInstalledContainerIndex(int index);
-
-    Q_INVOKABLE QString getCurrentlyInstalledContainerName();
 
 public slots:
     DockerContainer getDefaultContainer();
+
+    void setCurrentlyProcessedServerIndex(int index);
+    void setCurrentlyInstalledContainerIndex(int index);
+    int getCurrentlyInstalledContainerIndex();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    int m_selectedServerIndex;
-    QModelIndex m_currentlyInstalledContainerIndex;
+    int m_currentlyProcessedServerIndex;
+    int m_currentlyInstalledContainerIndex;
     std::shared_ptr<Settings> m_settings;
 };
 

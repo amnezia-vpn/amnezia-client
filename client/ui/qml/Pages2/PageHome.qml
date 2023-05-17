@@ -20,8 +20,10 @@ Item {
 
     property string borderColor: "#2C2D30"
 
-    property string currentServerName: serversMenuContent.currentItem.delegateData.desc
-    property string currentServerDescription: serversMenuContent.currentItem.delegateData.address
+    property string currentServerName: serversMenuContent.currentItem.delegateData.name
+    property string currentServerHostName: serversMenuContent.currentItem.delegateData.hostName
+
+    property string currentContainerName
 
     ConnectButton {
         anchors.centerIn: parent
@@ -72,7 +74,7 @@ Item {
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            text: currentServerDescription
+            text: currentContainerName + " | " + currentServerHostName
         }
     }
 
@@ -127,7 +129,7 @@ Item {
                 Layout.bottomMargin: 24
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                text: currentServerDescription
+                text: currentServerHostName
             }
 
             RowLayout {
@@ -150,15 +152,20 @@ Item {
 
                     implicitHeight: 40
 
-                    borderWidth: 0
-                    buttonImageColor: "#0E0E11"
-                    buttonMaximumWidth: 150 //todo make it dynamic
-
-                    defaultColor: "#D7D8DB"
+                    rootButtonBorderWidth: 0
+                    rootButtonImageColor: "#0E0E11"
+                    rootButtonMaximumWidth: 150 //todo make it dynamic
+                    rootButtonDefaultColor: "#D7D8DB"
 
                     textColor: "#0E0E11"
                     headerText: "Протокол подключения"
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
+
+                    onRootButtonClicked: function() {
+                        ServersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
+                        ContainersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
+                        containersDropDown.menuVisible = true
+                    }
 
                     menuModel: proxyContainersModel
 
@@ -265,9 +272,11 @@ Item {
                                     modelData.isDefault = true
 
                                     containersDropDown.text = containerRadioButtonText.text
+                                    root.currentContainerName = containerRadioButtonText.text
                                     containersDropDown.menuVisible = false
                                 } else {
                                     ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(delegateIndex))
+                                    InstallController.setShouldCreateServer(false)
                                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                                     containersDropDown.menuVisible = false
                                     menu.visible = false
@@ -307,6 +316,10 @@ Item {
                 actionButtonImage: "qrc:/images/controls/plus.svg"
 
                 headerText: "Серверы"
+
+                actionButtonFunction: function() {
+                    PageController.goToPage(PageEnum.PageSetupWizardStart)
+                }
             }
         }
 
@@ -378,7 +391,7 @@ Item {
                                 Text {
                                     id: serverRadioButtonText
 
-                                    text: desc
+                                    text: name
                                     color: "#D7D8DB"
                                     font.pixelSize: 16
                                     font.weight: 400
@@ -402,11 +415,11 @@ Item {
                             }
 
                             onClicked: {
-                                root.currentServerName = desc
-                                root.currentServerDescription = address
+                                serversMenuContent.currentIndex = index
+                                root.currentServerName = name
+                                root.currentServerHostName = hostName
 
                                 ServersModel.setDefaultServerIndex(index)
-                                ContainersModel.setSelectedServerIndex(index)
                             }
 
                             MouseArea {

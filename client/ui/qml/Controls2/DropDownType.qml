@@ -8,40 +8,38 @@ Item {
     id: root
 
     property string text
+    property string textColor: "#d7d8db"
+
     property string descriptionText
 
     property string headerText
     property string headerBackButtonImage
 
-    property var onClickedFunc
-    property string buttonImage: "qrc:/images/controls/chevron-down.svg"
-    property string buttonImageColor: "#494B50"
+    property var onRootButtonClicked
+    property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
+    property string rootButtonImageColor: "#494B50"
+    property string rootButtonDefaultColor: "#1C1D21"
+    property int rootButtonMaximumWidth
 
-    property int buttonMaximumWidth
-
-    property string defaultColor: "#1C1D21"
-
-    property string textColor: "#d7d8db"
-
-    property string borderColor: "#494B50"
-    property int borderWidth: 1
+    property string rootButtonBorderColor: "#494B50"
+    property int rootButtonBorderWidth: 1
 
     property Component menuDelegate
     property variant menuModel
 
     property alias menuVisible: menu.visible
 
-    implicitWidth: buttonContent.implicitWidth
-    implicitHeight: buttonContent.implicitHeight
+    implicitWidth: rootButtonContent.implicitWidth
+    implicitHeight: rootButtonContent.implicitHeight
 
     Rectangle {
-        id: buttonBackground
-        anchors.fill: buttonContent
+        id: rootButtonBackground
+        anchors.fill: rootButtonContent
 
         radius: 16
-        color: defaultColor
-        border.color: borderColor
-        border.width: borderWidth
+        color: rootButtonDefaultColor
+        border.color: rootButtonBorderColor
+        border.width: rootButtonBorderWidth
 
         Behavior on border.width {
             PropertyAnimation { duration: 200 }
@@ -49,7 +47,7 @@ Item {
     }
 
     RowLayout {
-        id: buttonContent
+        id: rootButtonContent
         anchors.fill: parent
 
         spacing: 0
@@ -71,7 +69,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
 
-                Layout.maximumWidth: buttonMaximumWidth ? buttonMaximumWidth : implicitWidth
+                Layout.maximumWidth: rootButtonMaximumWidth ? rootButtonMaximumWidth : implicitWidth
 
                 color: root.textColor
                 text: root.text
@@ -81,38 +79,36 @@ Item {
             }
         }
 
+        //todo change to image type
         ImageButtonType {
-            id: button
-
             Layout.leftMargin: 4
             Layout.rightMargin: 16
 
             hoverEnabled: false
-            image: buttonImage
-            imageColor: buttonImageColor
-            onClicked: {
-                if (onClickedFunc && typeof onClickedFunc === "function") {
-                    onClickedFunc()
-                }
-            }
+            image: rootButtonImage
+            imageColor: rootButtonImageColor
         }
     }
 
     MouseArea {
-        anchors.fill: buttonContent
+        anchors.fill: rootButtonContent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
 
         onEntered: {
-            buttonBackground.border.width = borderWidth
+            rootButtonBackground.border.width = rootButtonBorderWidth
         }
 
         onExited: {
-            buttonBackground.border.width = 0
+            rootButtonBackground.border.width = 0
         }
 
         onClicked: {
-            menu.visible = true
+            if (onRootButtonClicked && typeof onRootButtonClicked === "function") {
+                onRootButtonClicked()
+            } else {
+                menu.visible = true
+            }
         }
     }
 
@@ -132,7 +128,7 @@ Item {
             radius: 16
             color: "#1C1D21"
 
-            border.color: borderColor
+            border.color: "#494B50"
             border.width: 1
         }
 

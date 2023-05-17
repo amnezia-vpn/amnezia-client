@@ -33,7 +33,7 @@ bool ConnectionController::openVpnConnection()
     DockerContainer container = m_containersModel->getDefaultContainer();
     QModelIndex containerModelIndex = m_containersModel->index(container);
     const QJsonObject &containerConfig = qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex,
-                                                                                            ContainersModel::ContainersModelRoles::ConfigRole));
+                                                                                            ContainersModel::Roles::ConfigRole));
 
     //todo error handling
     qApp->processEvents();

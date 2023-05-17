@@ -65,6 +65,8 @@ Button {
                 }
                 case ConnectionState.Preparing: {
                     console.log("Preparing")
+                    connectionProccess.running = true
+                    root.text = "Подключение..."
                     break
                 }
                 case ConnectionState.Connecting: {

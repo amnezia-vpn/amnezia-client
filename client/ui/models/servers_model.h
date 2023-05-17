@@ -16,8 +16,8 @@ class ServersModel : public QAbstractListModel
     Q_OBJECT
 public:
     enum ServersModelRoles {
-        DescRole = Qt::UserRole + 1,
-        AddressRole,
+        NameRole = Qt::UserRole + 1,
+        HostNameRole,
         CredentialsRole,
         IsDefaultRole
     };
@@ -34,11 +34,16 @@ public slots:
     const int getDefaultServerIndex();
     const int getServersCount();
 
+    void setCurrentlyProcessedServerIndex(int index);
+    ServerCredentials getCurrentlyProcessedServerCredentials();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     std::shared_ptr<Settings> m_settings;
+
+    int m_currenlyProcessedServerIndex;
 };
 
 #endif // SERVERSMODEL_H

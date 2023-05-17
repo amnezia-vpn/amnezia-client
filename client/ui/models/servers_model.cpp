@@ -38,14 +38,14 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     const QJsonObject server = servers.at(index.row()).toObject();
 
     switch (role) {
-    case DescRole: {
+    case NameRole: {
         auto description = server.value(config_key::description).toString();
         if (description.isEmpty()) {
             return server.value(config_key::hostName).toString();
         }
         return description;
     }
-    case AddressRole:
+    case HostNameRole:
         return server.value(config_key::hostName).toString();
     case CredentialsRole:
         return QVariant::fromValue(m_settings->serverCredentials(index.row()));
@@ -74,10 +74,21 @@ const int ServersModel::getServersCount()
     return m_settings->serversCount();
 }
 
+void ServersModel::setCurrentlyProcessedServerIndex(int index)
+{
+    m_currenlyProcessedServerIndex = index;
+}
+
+ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
+{
+    return qvariant_cast<ServerCredentials>(data(index(m_currenlyProcessedServerIndex), CredentialsRole));
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[DescRole] = "desc";
-    roles[AddressRole] = "address";
-    roles[IsDefaultRole] = "is_default";
+    roles[NameRole] = "name";
+    roles[HostNameRole] = "hostName";
+    roles[CredentialsRole] = "credentials";
+    roles[IsDefaultRole] = "isDefault";
     return roles;
 }

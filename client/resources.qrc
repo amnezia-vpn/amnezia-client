@@ -227,5 +227,6 @@
         <file>images/connectionOff.svg</file>
         <file>images/connectionOn.svg</file>
         <file>images/controls/download.svg</file>
+        <file>ui/qml/Controls2/ProgressBarType.qml</file>
     </qresource>
 </RCC>

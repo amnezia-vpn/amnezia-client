@@ -19,10 +19,6 @@ Item {
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
-                roleName: "is_installed_role"
-                value: false
-            },
-            ValueFilter {
                 roleName: "service_type_role"
                 value: ProtocolEnum.Vpn
             }
