@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <functional>
 #include "../uilogic.h"
-#include "defines.h"
+#include "version.h"
 #include <configurators/vpn_configurator.h>
 
 

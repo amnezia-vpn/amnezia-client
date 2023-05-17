@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "defines.h"
+#include "version.h"
 #include "utilities.h"
 
 QFile Logger::m_file;

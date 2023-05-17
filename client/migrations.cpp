@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QStandardPaths>
 
-#include "defines.h"
+#include "version.h"
 
 Migrations::Migrations(QObject *parent)
     : QObject{parent}

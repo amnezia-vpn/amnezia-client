@@ -1,5 +1,5 @@
 #include "ServerConfiguringProgressLogic.h"
-#include "defines.h"
+#include "version.h"
 #include "core/errorstrings.h"
 #include <QTimer>
 #include <QEventLoop>

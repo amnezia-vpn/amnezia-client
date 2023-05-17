@@ -5,7 +5,7 @@
     <Title>AmneziaVPN</Title>
     <Publisher>AmneziaVPN</Publisher>
     <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>/Applications/AmneziaVPN.app</TargetDir>
+    <TargetDir>@ApplicationsDir@/AmneziaVPN</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>
@@ -18,10 +18,10 @@
     <SupportsModify>false</SupportsModify>
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
-     <Repository>
-       <Url>https://amneziavpn.org/updates/macos</Url>
-       <Enabled>true</Enabled>
-       <DisplayName>AmneziaVPN - repository for macOS</DisplayName>
-     </Repository>
+        <Repository>
+            <Url>https://amneziavpn.org/updates/linux</Url>
+            <Enabled>true</Enabled>
+            <DisplayName>AmneziaVPN - repository for Linux</DisplayName>
+        </Repository>
     </RemoteRepositories>
 </Installer>

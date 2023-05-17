@@ -6,7 +6,7 @@
 #include <QRandomGenerator>
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "utilities.h"
 #include "openvpnprotocol.h"
 

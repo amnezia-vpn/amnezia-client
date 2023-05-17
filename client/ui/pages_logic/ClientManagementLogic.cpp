@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 
-#include "defines.h"
+#include "version.h"
 #include "core/errorstrings.h"
 #include "core/servercontroller.h"
 #include "ui/pages_logic/ClientInfoLogic.h"

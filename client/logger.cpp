@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "defines.h"
+#include "version.h"
 #include "utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
