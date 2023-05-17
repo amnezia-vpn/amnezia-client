@@ -1,6 +1,3 @@
-[submodule "3rd/QtSsh"]
-	path = 3rd/QtSsh
-	url = https://github.com/amnezia-vpn/QtSsh.git
 [submodule "client/3rd/wireguard-tools"]
 	path = client/3rd/wireguard-tools
 	url = https://github.com/WireGuard/wireguard-tools/
@@ -31,18 +28,33 @@
 [submodule "client/3rd/zlib"]
 	path = client/3rd/zlib
 	url = https://github.com/madler/zlib.git
-[submodule "deploy/amnezia-ios-certificates"]
-	path = deploy/amnezia-ios-certificates
-	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
 [submodule "client/3rd/SortFilterProxyModel"]
 	path = client/3rd/SortFilterProxyModel
 	url = https://github.com/mitchcurtis/SortFilterProxyModel.git
-[submodule "client/3rd/openvpn3"]
-	path = client/3rd/openvpn3
-	url = https://github.com/amnezia-vpn/openvpn3/tree/master-amnezia
+[submodule "client/android/cpp/openvpn3"]
+	path = client/android/cpp/openvpn3
+	url = https://github.com/amnezia-vpn/openvpn3.git
+[submodule "client/android/cpp/asio"]
+	path = client/android/cpp/asio
+	url = https://github.com/chriskohlhoff/asio
+[submodule "client/android/cpp/lz4"]
+	path = client/android/cpp/lz4
+	url = https://github.com/lz4/lz4.git
+[submodule "client/android/cpp/mbedtls"]
+	path = client/android/cpp/mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "client/android/cpp/openvpn"]
+	path = client/android/cpp/openvpn
+	url = https://github.com/schwabe/openvpn.git
+[submodule "client/android/cpp/openssl"]
+	path = client/android/cpp/openssl
+	url = https://github.com/schwabe/platform_external_openssl.git
+[submodule "client/android/cpp/cloak"]
+	path = client/android/cpp/cloak
+	url = https://github.com/amnezia-vpn/Cloak
+[submodule "client/android/cpp/lzo"]
+	path = client/android/cpp/lzo
+	url = https://github.com/amnezia-vpn/lzo.git
 [submodule "client/3rd/mbedtls"]
 	path = client/3rd/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "client/3rd/Cloak"]
-	path = client/3rd/Cloak
-	url = https://github.com/amnezia-vpn/Cloak.git

@@ -34,7 +34,7 @@
 #include "ui/qautostart.h"
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "uilogic.h"
 #include "utilities.h"
 #include "vpnconnection.h"
@@ -66,6 +66,8 @@
 #include "pages_logic/VpnLogic.h"
 #include "pages_logic/WizardLogic.h"
 #include "pages_logic/AdvancedServerSettingsLogic.h"
+#include "pages_logic/ClientManagementLogic.h"
+#include "pages_logic/ClientInfoLogic.h"
 
 #include "pages_logic/protocols/CloakLogic.h"
 #include "pages_logic/protocols/OpenVpnLogic.h"
@@ -84,6 +86,7 @@ UiLogic::UiLogic(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigur
 {
     m_containersModel = new ContainersModel(settings, this);
     m_protocolsModel = new ProtocolsModel(settings, this);
+    m_clientManagementModel = new ClientManagementModel(this);
     m_vpnConnection = new VpnConnection(settings, configurator);
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
@@ -124,7 +127,7 @@ UiLogic::~UiLogic()
     qDebug() << "Application closed";
 }
 
-void UiLogic::initalizeUiLogic()
+void UiLogic::initializeUiLogic()
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
@@ -178,6 +181,9 @@ void UiLogic::showOnStartup()
 void UiLogic::onUpdateAllPages()
 {
     for (auto logic : m_logicMap) {
+        if (dynamic_cast<ClientInfoLogic*>(logic) || dynamic_cast<ClientManagementLogic*>(logic)) {
+            continue;
+        }
         logic->onUpdatePage();
     }
 }
@@ -305,8 +311,8 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
     progressBarFunc.getValueFunc = [this] (void) -> int {
         return pageLogic<ServerConfiguringProgressLogic>()->progressBarValue();
     };
-    progressBarFunc.getMaximiumFunc = [this] (void) -> int {
-        return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximium();
+    progressBarFunc.getMaximumFunc = [this] (void) -> int {
+        return pageLogic<ServerConfiguringProgressLogic>()->progressBarMaximum();
     };
     progressBarFunc.setTextVisibleFunc = [this] (bool visible) -> void {
         pageLogic<ServerConfiguringProgressLogic>()->set_progressBarTextVisible(visible);
@@ -533,6 +539,8 @@ void UiLogic::registerPagesLogic()
     registerPageLogic<ViewConfigLogic>();
     registerPageLogic<VpnLogic>();
     registerPageLogic<WizardLogic>();
+    registerPageLogic<ClientManagementLogic>();
+    registerPageLogic<ClientInfoLogic>();
     registerPageLogic<AdvancedServerSettingsLogic>();
 }
 

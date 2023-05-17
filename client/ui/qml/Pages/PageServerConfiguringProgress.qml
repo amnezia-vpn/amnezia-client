@@ -77,7 +77,7 @@ PageBase {
         enabled: ServerConfiguringProgressLogic.pageEnabled
         anchors.fill: pb_cancel
         from: 0
-        to: ServerConfiguringProgressLogic.progressBarMaximium
+        to: ServerConfiguringProgressLogic.progressBarMaximum
         value: ServerConfiguringProgressLogic.progressBarValue
         visible: ServerConfiguringProgressLogic.progressBarVisible
         background: Rectangle {

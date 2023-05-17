@@ -1,7 +1,7 @@
 #include "AppSettingsLogic.h"
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "ui/qautostart.h"
 #include "ui/uilogic.h"
 

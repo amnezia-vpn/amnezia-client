@@ -176,7 +176,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.v(tag, "Aman: onUnbind....................")
         if (!isUp) {
             // If the Qt Client got closed while we were not connected
             // we do not need to stay as a foreground service.
@@ -185,12 +184,17 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         return super.onUnbind(intent)
     }
 
+    override fun onDestroy() {
+        turnOff()
+
+        super.onDestroy()
+    }
+
     /**
      * EntryPoint for the Service, gets Called when AndroidController.cpp
      * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
      */
     override fun onBind(intent: Intent): IBinder {
-        Log.v(tag, "Aman: onBind....................")
 
         when (mProtocol) {
             "shadowsocks" -> {
@@ -214,7 +218,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * or from Booting the device and having "connect on boot" enabled.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.v(tag, "Aman: onStartCommand....................")
         this.intent = intent
         this.flags = flags
         this.startId = startId
@@ -278,6 +281,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     var isUp: Boolean = false
         get() {
             return when (mProtocol) {
+                "cloak",
                 "openvpn" -> {
                     field
                 }
@@ -303,6 +307,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             val deviceIpv4: String = ""
 
             val status = when (mProtocol) {
+                "cloak",
                 "openvpn" -> {
                     if (mOpenVPNThreadv3 == null) {
                         Status(null, null, null, null)
@@ -373,7 +378,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         Log.i(tag, "Config: $mConfig")
         mProtocol = mConfig!!.getString("protocol")
         Log.i(tag, "Protocol: $mProtocol")
+
         when (mProtocol) {
+            "cloak",
             "openvpn" -> {
                 startOpenVpn()
             }
@@ -396,7 +403,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     fun establish(): ParcelFileDescriptor? {
         Log.v(tag, "Aman: establish....................")
         mbuilder.allowFamily(OsConstants.AF_INET)
-        mbuilder.allowFamily(OsConstants.AF_INET6)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mbuilder.setMetered(false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
@@ -448,8 +454,13 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     fun turnOff() {
         Log.v(tag, "Aman: turnOff....................")
         when (mProtocol) {
-            "wireguard" -> wgTurnOff(currentTunnelHandle)
-            "openvpn" -> ovpnTurnOff()
+            "wireguard" -> {
+                wgTurnOff(currentTunnelHandle)
+            }
+            "cloak",
+            "openvpn" -> {
+                ovpnTurnOff()
+            }
             "shadowsocks" -> {
                 stopRunner(false)
                 stopTest()
@@ -458,6 +469,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 Log.e(tag, "No protocol")
             }
         }
+
         currentTunnelHandle = -1
         stopForeground(true)
         isUp = false
@@ -548,7 +560,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
      * Create a Wireguard [Config]  from a [json] string -
      * The [json] will be created in AndroidVpnProtocol.cpp
      */
-    private fun buildWireugardConfig(obj: JSONObject): Config {
+    private fun buildWireguardConfig(obj: JSONObject): Config {
         val confBuilder = Config.Builder()
         val wireguardConfigData = obj.getJSONObject("wireguard_config_data")
         val config = parseConfigData(wireguardConfigData.getString("config"))
@@ -689,6 +701,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startOpenVpn() {
+        if (isUp || mOpenVPNThreadv3 != null) {
+            ovpnTurnOff()
+        }
+
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
 
         Thread({
@@ -697,7 +713,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startWireGuard() {
-        val wireguard_conf = buildWireugardConfig(mConfig!!)
+        val wireguard_conf = buildWireguardConfig(mConfig!!)
         Log.i(tag, "startWireGuard: wireguard_conf : $wireguard_conf")
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")

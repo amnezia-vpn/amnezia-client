@@ -1,5 +1,5 @@
 #include "ServerConfiguringProgressLogic.h"
-#include "defines.h"
+#include "version.h"
 #include "core/errorstrings.h"
 #include <QTimer>
 #include <QEventLoop>
@@ -12,7 +12,7 @@ ServerConfiguringProgressLogic::ServerConfiguringProgressLogic(UiLogic *logic, Q
     m_labelWaitInfoVisible{true},
     m_labelWaitInfoText{tr("Please wait, configuring process may take up to 5 minutes")},
     m_progressBarVisible{true},
-    m_progressBarMaximium{100},
+    m_progressBarMaximum{100},
     m_progressBarTextVisible{true},
     m_progressBarText{tr("Configuring...")},
     m_labelServerBusyVisible{false},
@@ -46,8 +46,8 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     progress.getValueFunc = [this] (void) -> int {
         return progressBarValue();
     };
-    progress.getMaximiumFunc = [this] (void) -> int {
-        return progressBarMaximium();
+    progress.getMaximumFunc = [this] (void) -> int {
+        return progressBarMaximum();
     };
 
     LabelFunc busyInfo;
@@ -150,7 +150,7 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
     // just ui progressbar tweak
     timer.stop();
 
-    int remainingVal = progress.getMaximiumFunc() - progress.getValueFunc();
+    int remainingVal = progress.getMaximumFunc() - progress.getValueFunc();
 
     if (remainingVal > 0) {
         QTimer timer1;
@@ -158,7 +158,7 @@ ErrorCode ServerConfiguringProgressLogic::doInstallAction(const std::function<Er
 
         connect(&timer1, &QTimer::timeout, [&](){
             progress.setValueFunc(progress.getValueFunc() + 1);
-            if (progress.getValueFunc() >= progress.getMaximiumFunc()) {
+            if (progress.getValueFunc() >= progress.getMaximumFunc()) {
                 loop1.quit();
             }
         });

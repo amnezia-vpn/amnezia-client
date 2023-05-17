@@ -32,6 +32,7 @@ enum ErrorCode
     ServerContainerMissingError,
     ServerDockerFailedError,
     ServerCancelInstallation,
+    ServerUserNotInSudo,
 
     // Ssh connection errors
     SshRequsetDeniedError, SshInterruptedError, SshInternalError,

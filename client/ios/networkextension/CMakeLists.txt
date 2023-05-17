@@ -4,26 +4,45 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 add_executable(networkextension)
 set_target_properties(networkextension PROPERTIES
-    OUTPUT_NAME "AmneziaVPNNetworkExtension"
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
     BUNDLE_EXTENSION appex
-    MACOSX_BUNDLE ON
+
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
-    MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPNNetworkExtension"
-    MACOSX_BUNDLE_BUNDLE_VERSION "${BUILD_ID}"
-    MACOSX_BUNDLE_COPYRIGHT "MPL-2.0"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
     MACOSX_BUNDLE_INFO_STRING "AmneziaVPNNetworkExtension"
-    MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}-${BUILD_ID}"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+    MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPNNetworkExtension"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
+
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
+    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
+    XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
+    XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
+    XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPNNetworkExtension"
+
+    XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
+    XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
+    XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+
+    XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
+
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+    XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN.network-extension"
+    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN.network-extension"
+)
+
+set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
     XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
     XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
+    XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
-    XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
-    XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
-    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
+)
+
+set_target_properties("networkextension" PROPERTIES
+    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
 )
 
 find_library(FW_ASSETS_LIBRARY AssetsLibrary)
@@ -83,7 +102,7 @@ include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
 ## Build the wireguard go library for iOS simulation.
 ## TODO: Some special handling around GOARCH for
 execute_process(OUTPUT_VARIABLE SIM_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk iphonesimulator --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH amd64
     CGO_CFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
@@ -92,7 +111,7 @@ build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CMAKE_SOURCE_DIR}/3rd
 
 ## Build the wireguard go library for iOS devices.
 execute_process(OUTPUT_VARIABLE IOS_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CMAKE_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
+build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
     GOOS ios
     GOARCH arm64
     CGO_CFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}

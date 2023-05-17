@@ -14,6 +14,7 @@ import com.wireguard.android.util.SharedLibraryLoader
 import com.wireguard.config.*
 import com.wireguard.crypto.Key
 import org.json.JSONObject
+import java.util.Base64
 
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
@@ -25,6 +26,7 @@ import net.openvpn.ovpn3.ClientAPI_OpenVPNClient
 import net.openvpn.ovpn3.ClientAPI_ProvideCreds
 import net.openvpn.ovpn3.ClientAPI_Status
 import net.openvpn.ovpn3.ClientAPI_TransportStats
+import java.lang.StringBuilder
 
 class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runnable {
     private val tag = "OpenVPNThreadv3"
@@ -35,10 +37,10 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     private var bytesOutIndex = -1
 
     init {
-        findConfigIndicies()
+        findConfigIndices()
     }
 
-    private fun findConfigIndicies() {
+    private fun findConfigIndices() {
         val n: Int = stats_n()
 
         for (i in 0 until n) {
@@ -59,7 +61,48 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     override fun run() {
 
         val config: ClientAPI_Config = ClientAPI_Config()
-        config.content = mService.getVpnConfig().getJSONObject("openvpn_config_data").getString("config")
+
+        val jsonVpnConfig = mService.getVpnConfig()
+        val ovpnConfig = jsonVpnConfig.getJSONObject("openvpn_config_data").getString("config")
+
+        val resultingConfig = StringBuilder()
+        resultingConfig.append(ovpnConfig)
+
+        if (jsonVpnConfig.getString("protocol") == "cloak") {
+            val cloakConfigJson: JSONObject = jsonVpnConfig.getJSONObject("cloak_config_data")
+
+            if (cloakConfigJson.keySet().contains("NumConn")) {
+                cloakConfigJson.put("NumConn", 1)
+            }
+
+            if (cloakConfigJson.keySet().contains("ProxyMethod")) {
+                cloakConfigJson.put("ProxyMethod", "openvpn")
+            }
+
+            if (cloakConfigJson.keySet().contains("port")) {
+                val portValue = cloakConfigJson.get("port")
+                cloakConfigJson.remove("port")
+                cloakConfigJson.put("RemotePort", portValue)
+            }
+
+            if (cloakConfigJson.keySet().contains("remote")) {
+                val hostValue = cloakConfigJson.get("remote")
+                cloakConfigJson.remove("remote")
+                cloakConfigJson.put("RemoteHost", hostValue)
+            }
+
+            val cloakConfig = Base64.getEncoder().encodeToString(
+                jsonVpnConfig.getJSONObject("cloak_config_data").toString().toByteArray()
+            )
+
+            resultingConfig.append("\n<cloak>\n")
+            resultingConfig.append(cloakConfig)
+            resultingConfig.append("\n</cloak>\n")
+
+            config.setUsePluggableTransports(true)
+        }
+
+        config.content = resultingConfig.toString()
 
         eval_config(config)
 
@@ -67,7 +110,6 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         if (status.getError()) {
             Log.i(tag, "connect() error: " + status.getError() + ": " + status.getMessage())
         }
-
     }
 
     override fun log(arg0: ClientAPI_LogInfo){
