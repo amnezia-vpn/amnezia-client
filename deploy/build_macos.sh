@@ -49,7 +49,21 @@ echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qt-cmake --version
+brew_bin_dir=/opt/homebrew/bin
+if $QT_BIN_DIR/qt-cmake --version >/dev/null 2>&1; then
+  qt_cmake=$QT_BIN_DIR/qt-cmake
+  echo "Using qt-cmake in $QT_BIN_DIR"
+else
+  if $brew_bin_dir/qt-cmake --version >/dev/null 2>&1; then
+    qt_cmake=$brew_bin_dir/qt-cmake
+    echo "Using qt-cmake in $brew_bin_dir"
+  else
+    echo "'qt_cmake' not found in $QT_BIN_DIR or $brew_bin_dir directories."
+    exit 1
+  fi
+fi
+
+$qt_cmake --version
 cmake --version
 clang -v
 
@@ -57,7 +71,7 @@ clang -v
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR
+$qt_cmake -S $PROJECT_DIR -B $BUILD_DIR
 cmake --build . --config release --target all
 
 # Build and run tests here
