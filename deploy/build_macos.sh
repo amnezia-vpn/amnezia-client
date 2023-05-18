@@ -49,7 +49,21 @@ echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qt-cmake --version
+BREW_BIN_DIR=/opt/homebrew/bin
+if "$QT_BIN_DIR"/qt-cmake --version; then
+  QT_CMAKE=$QT_BIN_DIR/qt-cmake
+  echo "qt-cmake found at $QT_BIN_DIR/qt-cmake"
+else
+  if $BREW_BIN_DIR/qt-cmake --version; then
+    QT_CMAKE=$BREW_BIN_DIR/qt-cmake
+    echo "qt-cmake found at $BREW_BIN_DIR/qt-cmake"
+  else
+    echo "'qt_make' not found in $QT_BIN_DIR or $BREW_BIN_DIR directories."
+    exit 1
+  fi
+fi
+
+$QT_CMAKE --version
 cmake --version
 clang -v
 
