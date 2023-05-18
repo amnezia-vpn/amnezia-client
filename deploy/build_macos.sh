@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# If you want to just build the binary, you can pass `BUILD_ONLY=True` environment variable,
+# in this case you'll get only the binary, without any deployment steps like packaging installer
+
+# BUILD_ONLY requires:
+# qt – you can install minimal QT toolchain via brew: `brew install qt`
+
 echo "Build script started ..."
 
 set -o errexit -o nounset
@@ -73,6 +80,11 @@ cd $BUILD_DIR
 
 $QT_CMAKE -S $PROJECT_DIR -B $BUILD_DIR
 cmake --build . --config release --target all
+
+if [ "$BUILD_ONLY" = "True" ] || [ "$BUILD_ONLY" = "true" ]; then
+  echo Succesfull build $APP_NAME, path to binary: $BUNDLE_DIR
+  exit 0
+fi
 
 # Build and run tests here
 
