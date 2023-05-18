@@ -45,11 +45,11 @@ if(IOS)
 	)
 endif()
 
-#qt_standard_project_setup()
+qt_standard_project_setup()
 
 if(IOS)
-    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
-    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh args
+    #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
