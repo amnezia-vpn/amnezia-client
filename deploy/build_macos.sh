@@ -72,7 +72,6 @@ echo "Building App..."
 cd $BUILD_DIR
 
 $QT_CMAKE -S $PROJECT_DIR -B $BUILD_DIR
-
 cmake --build . --config release --target all
 
 # Build and run tests here
