@@ -58,7 +58,7 @@ else
     QT_CMAKE=$BREW_BIN_DIR/qt-cmake
     echo "qt-cmake found at $BREW_BIN_DIR/qt-cmake"
   else
-    echo "'qt_make' not found in $QT_BIN_DIR or $BREW_BIN_DIR directories."
+    echo "qt-cmake not found in $QT_BIN_DIR or $BREW_BIN_DIR directories."
     exit 1
   fi
 fi
