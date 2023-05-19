@@ -13,8 +13,13 @@ if(ANDROID)
     set(QT_ANDROID_BUILD_ALL_ABIS ON)
 endif()
 
+# TODO: determine build step for arm64 build, from x86_64 host
 if(APPLE AND NOT IOS)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    endif()
 endif()
 
 add_subdirectory(client)
