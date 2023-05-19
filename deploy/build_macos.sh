@@ -81,7 +81,7 @@ cd $BUILD_DIR
 $QT_CMAKE -S $PROJECT_DIR -B $BUILD_DIR
 cmake --build . --config release --target all
 
-if [ "$BUILD_ONLY" = "True" ] || [ "$BUILD_ONLY" = "true" ]; then
+if [ "${BUILD_ONLY:-}" = "True" ] || [ "${BUILD_ONLY:-}" = "true" ]; then
   echo Succesfull build $APP_NAME, path to binary: $BUNDLE_DIR
   exit 0
 fi
