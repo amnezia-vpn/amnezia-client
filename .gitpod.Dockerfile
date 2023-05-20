@@ -1,5 +1,5 @@
 FROM gitpod/workspace-full-vnc
-                    
+
 USER gitpod
 
 RUN sudo apt-get -q update \
@@ -29,13 +29,13 @@ RUN sudo apt-get -q update \
         p7zip-full \
     && sudo rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install aqtinstall
+RUN sudo pip3 install aqtinstall
 
 ARG QT_VERSION=6.4.1
 ARG QT_ARCH=gcc_64
 
 ARG QT_DIR=/opt/qt
-RUN aqt install-qt --outputdir ${QT_DIR} linux desktop ${QT_VERSION} ${QT_ARCH} --modules \
+RUN sudo aqt install-qt --outputdir ${QT_DIR} linux desktop ${QT_VERSION} ${QT_ARCH} --modules \
     qtremoteobjects \
     qt5compat \
     qtshadertools
@@ -43,5 +43,5 @@ ENV QT_BIN_DIR=${QT_DIR}/${QT_VERSION}/${QT_ARCH}/bin
 
 ARG QIF_VERSION=4.5
 ARG QIF_DIR=/opt/qif
-RUN aqt install-tool --outputdir ${QIF_DIR} linux desktop tools_ifw
+RUN sudo aqt install-tool --outputdir ${QIF_DIR} linux desktop tools_ifw
 ENV QIF_BIN_DIR=${QIF_DIR}/Tools/QtInstallerFramework/${QIF_VERSION}/bin
