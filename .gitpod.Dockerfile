@@ -34,7 +34,7 @@ RUN pip3 install aqtinstall
 ARG QT_VERSION=6.4.1
 ARG QT_ARCH=gcc_64
 
-ARG QT_DIR=/workspace/qt
+ARG QT_DIR=/opt/qt
 RUN aqt install-qt --outputdir ${QT_DIR} linux desktop ${QT_VERSION} ${QT_ARCH} --modules \
     qtremoteobjects \
     qt5compat \
@@ -42,6 +42,6 @@ RUN aqt install-qt --outputdir ${QT_DIR} linux desktop ${QT_VERSION} ${QT_ARCH} 
 ENV QT_BIN_DIR=${QT_DIR}/${QT_VERSION}/${QT_ARCH}/bin
 
 ARG QIF_VERSION=4.5
-ARG QIF_DIR=/workspace/qif
+ARG QIF_DIR=/opt/qif
 RUN aqt install-tool --outputdir ${QIF_DIR} linux desktop tools_ifw
 ENV QIF_BIN_DIR=${QIF_DIR}/Tools/QtInstallerFramework/${QIF_VERSION}/bin
