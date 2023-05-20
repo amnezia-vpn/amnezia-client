@@ -1,0 +1,5 @@
+tasks:
+- init: >-
+    deploy/build_linux.sh
+image:
+  file: .gitpod.Dockerfile
