@@ -314,7 +314,6 @@ if(IOS)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h
@@ -326,7 +325,6 @@ if(IOS)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp
