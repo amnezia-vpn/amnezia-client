@@ -12,10 +12,10 @@ struct ServerCredentials
 {
     QString hostName;
     QString userName;
-    QString password;
+    QString secretData;
     int port = 22;
 
-    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !password.isEmpty() && port > 0; }
+    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0; }
 };
 
 enum ErrorCode

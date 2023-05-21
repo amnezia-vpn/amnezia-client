@@ -188,3 +188,33 @@ QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
     default:                             return {};
     }
 }
+
+bool ContainerProps::isEasySetupContainer(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn :      return true;
+    case DockerContainer::Cloak :        return true;
+    case DockerContainer::ShadowSocks :  return true;
+    default:                             return false;
+    }
+}
+
+QString ContainerProps::easySetupHeader(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn :      return tr("Low");
+    case DockerContainer::Cloak :        return tr("High");
+    case DockerContainer::ShadowSocks :  return tr("Medium");
+    default:                             return "";
+    }
+}
+
+QString ContainerProps::easySetupDescription(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn :      return tr("Many foreign websites and VPN providers are blocked");
+    case DockerContainer::Cloak :        return tr("Some foreign sites are blocked, but VPN providers are not blocked");
+    case DockerContainer::ShadowSocks :  return tr("I just want to increase the level of privacy");
+    default:                             return "";
+    }
+}

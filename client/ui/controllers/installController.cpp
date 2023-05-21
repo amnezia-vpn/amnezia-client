@@ -41,7 +41,7 @@ ErrorCode InstallController::installServer(DockerContainer container, QJsonObjec
         QJsonObject server;
         server.insert(config_key::hostName, m_currentlyInstalledServerCredentials.hostName);
         server.insert(config_key::userName, m_currentlyInstalledServerCredentials.userName);
-        server.insert(config_key::password, m_currentlyInstalledServerCredentials.password);
+        server.insert(config_key::password, m_currentlyInstalledServerCredentials.secretData);
         server.insert(config_key::port, m_currentlyInstalledServerCredentials.port);
         server.insert(config_key::description, m_settings->nextAvailableServerName());
 
@@ -50,8 +50,12 @@ ErrorCode InstallController::installServer(DockerContainer container, QJsonObjec
 
         m_settings->addServer(server);
         m_settings->setDefaultServer(m_settings->serversCount() - 1);
+
+        //todo change to server finished
+        emit installContainerFinished();
     }
 
+    //todo error processing
     return errorCode;
 }
 
@@ -71,9 +75,15 @@ ErrorCode InstallController::installContainer(DockerContainer container, QJsonOb
     return errorCode;
 }
 
-void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &password, const int &port)
+void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
 {
-    m_currentlyInstalledServerCredentials = { hostName, userName, password, port };
+    m_currentlyInstalledServerCredentials.hostName = hostName;
+    if (m_currentlyInstalledServerCredentials.hostName.contains(":")) {
+        m_currentlyInstalledServerCredentials.port = m_currentlyInstalledServerCredentials.hostName.split(":").at(1).toInt();
+        m_currentlyInstalledServerCredentials.hostName = m_currentlyInstalledServerCredentials.hostName.split(":").at(0);
+    }
+    m_currentlyInstalledServerCredentials.userName = userName;
+    m_currentlyInstalledServerCredentials.secretData = secretData;
 }
 
 void InstallController::setShouldCreateServer(bool shouldCreateServer)

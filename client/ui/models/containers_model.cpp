@@ -33,6 +33,7 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
 //        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
     case IsDefaultRole:
         m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
+        emit defaultContainerChanged();
     }
 
     emit dataChanged(index, index);
@@ -59,12 +60,20 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
             return ContainerProps::containerService(container);
         case DockerContainerRole:
             return container;
+        case IsEasySetupContainerRole:
+            return ContainerProps::isEasySetupContainer(container);
+        case EasySetupHeaderRole:
+            return ContainerProps::easySetupHeader(container);
+        case EasySetupDescriptionRole:
+            return ContainerProps::easySetupDescription(container);
         case IsInstalledRole:
             return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
-        case IsCurrentlyInstalled:
+        case IsCurrentlyInstalledRole:
             return container == static_cast<DockerContainer>(m_currentlyInstalledContainerIndex);
         case IsDefaultRole:
             return container == m_settings->defaultContainer(m_currentlyProcessedServerIndex);
+        case IsSupportedRole:
+            return ContainerProps::isSupportedByCurrentPlatform(container);
     }
 
     return QVariant();
@@ -87,6 +96,11 @@ DockerContainer ContainersModel::getDefaultContainer()
     return m_settings->defaultContainer(m_currentlyProcessedServerIndex);
 }
 
+QString ContainersModel::getDefaultContainerName()
+{
+    return ContainerProps::containerHumanNames().value(getDefaultContainer());
+}
+
 int ContainersModel::getCurrentlyInstalledContainerIndex()
 {
     return m_currentlyInstalledContainerIndex;
@@ -98,8 +112,14 @@ QHash<int, QByteArray> ContainersModel::roleNames() const {
     roles[DescRole] = "description";
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
+
+    roles[IsEasySetupContainerRole] = "isEasySetupContainer";
+    roles[EasySetupHeaderRole] = "easySetupHeader";
+    roles[EasySetupDescriptionRole] = "easySetupDescription";
+
     roles[IsInstalledRole] = "isInstalled";
-    roles[IsCurrentlyInstalled] = "isCurrentlyInstalled";
+    roles[IsCurrentlyInstalledRole] = "isCurrentlyInstalled";
     roles[IsDefaultRole] = "isDefault";
+    roles[IsSupportedRole] = "isSupported";
     return roles;
 }

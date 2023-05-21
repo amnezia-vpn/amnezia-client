@@ -57,6 +57,10 @@ public:
 
     Q_INVOKABLE static bool isSupportedByCurrentPlatform(amnezia::DockerContainer c);
     Q_INVOKABLE static QStringList fixedPortsForContainer(amnezia::DockerContainer c);
+
+    static bool isEasySetupContainer(amnezia::DockerContainer container);
+    static QString easySetupHeader(amnezia::DockerContainer container);
+    static QString easySetupDescription(amnezia::DockerContainer container);
 };
 
 

@@ -350,7 +350,7 @@ void UiLogic::installServer(QPair<DockerContainer, QJsonObject> &container)
                     QJsonObject server;
                     server.insert(config_key::hostName, m_installCredentials.hostName);
                     server.insert(config_key::userName, m_installCredentials.userName);
-                    server.insert(config_key::password, m_installCredentials.password);
+                    server.insert(config_key::password, m_installCredentials.secretData);
                     server.insert(config_key::port, m_installCredentials.port);
                     server.insert(config_key::description, m_settings->nextAvailableServerName());
 
@@ -574,7 +574,7 @@ ErrorCode UiLogic::addAlreadyInstalledContainersGui(bool &isServerCreated)
         if (createNewServer) {
             server.insert(config_key::hostName, installCredentials.hostName);
             server.insert(config_key::userName, installCredentials.userName);
-            server.insert(config_key::password, installCredentials.password);
+            server.insert(config_key::password, installCredentials.secretData);
             server.insert(config_key::port, installCredentials.port);
             server.insert(config_key::description, m_settings->nextAvailableServerName());
         }

@@ -109,7 +109,7 @@ Item {
             running: false
             onTriggered: {
                 // todo go to root installing page
-                PageController.goToPage(PageEnum.PageHome)
+                PageController.goToPage(PageEnum.PageStart)
             }
         }
 

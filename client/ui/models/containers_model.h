@@ -14,16 +14,22 @@ class ContainersModel : public QAbstractListModel
     Q_OBJECT
 public:
     ContainersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
-public:
+
     enum Roles {
         NameRole = Qt::UserRole + 1,
         DescRole,
         ServiceTypeRole,
         ConfigRole,
         DockerContainerRole,
+
+        IsEasySetupContainerRole,
+        EasySetupHeaderRole,
+        EasySetupDescriptionRole,
+
         IsInstalledRole,
-        IsCurrentlyInstalled,
-        IsDefaultRole
+        IsCurrentlyInstalledRole,
+        IsDefaultRole,
+        IsSupportedRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -31,8 +37,12 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+signals:
+    void defaultContainerChanged();
+
 public slots:
     DockerContainer getDefaultContainer();
+    QString getDefaultContainerName();
 
     void setCurrentlyProcessedServerIndex(int index);
     void setCurrentlyInstalledContainerIndex(int index);

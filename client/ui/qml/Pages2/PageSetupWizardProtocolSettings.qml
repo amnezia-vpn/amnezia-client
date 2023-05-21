@@ -157,7 +157,6 @@ Item {
 
                             onClicked: function() {
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoButtonGroup.currentIndex)
                             }
                         }

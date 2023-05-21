@@ -185,7 +185,7 @@ bool Settings::haveAuthData(int serverIndex) const
 {
     if (serverIndex < 0) return false;
     ServerCredentials cred = serverCredentials(serverIndex);
-    return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.password.isEmpty());
+    return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.secretData.isEmpty());
 }
 
 QString Settings::nextAvailableServerName() const
@@ -321,7 +321,7 @@ ServerCredentials Settings::serverCredentials(int index) const
     ServerCredentials credentials;
     credentials.hostName = s.value(config_key::hostName).toString();
     credentials.userName = s.value(config_key::userName).toString();
-    credentials.password = s.value(config_key::password).toString();
+    credentials.secretData = s.value(config_key::password).toString();
     credentials.port = s.value(config_key::port).toInt();
 
     return credentials;

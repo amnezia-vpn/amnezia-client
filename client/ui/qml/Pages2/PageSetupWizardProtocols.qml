@@ -19,9 +19,14 @@ Item {
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
-                roleName: "service_type_role"
+                roleName: "serviceType"
                 value: ProtocolEnum.Vpn
+            },
+            ValueFilter {
+                roleName: "isSupported"
+                value: true
             }
+
         ]
     }
 
@@ -77,8 +82,8 @@ Item {
                             Layout.topMargin: 16
                             Layout.bottomMargin: 16
 
-                            text: name_role
-                            descriptionText: desc_role
+                            text: name
+                            descriptionText: description
                             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                             onClickedFunc: function() {

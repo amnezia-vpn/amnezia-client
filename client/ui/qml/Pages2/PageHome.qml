@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import ContainerProps 1.0
 
 import "./"
 import "../Controls2"
@@ -22,11 +23,18 @@ Item {
 
     property string currentServerName: serversMenuContent.currentItem.delegateData.name
     property string currentServerHostName: serversMenuContent.currentItem.delegateData.hostName
-
     property string currentContainerName
 
     ConnectButton {
         anchors.centerIn: parent
+    }
+
+    Connections {
+        target: ContainersModel
+
+        function onDefaultContainerChanged() {
+            root.currentContainerName = ContainersModel.getDefaultContainerName()
+        }
     }
 
     Rectangle {
@@ -35,8 +43,8 @@ Item {
         anchors.bottomMargin: -radius
 
         radius: 16
-        color: defaultColor
-        border.color: borderColor
+        color: root.defaultColor
+        border.color: root.borderColor
         border.width: 1
 
         Rectangle {
@@ -44,7 +52,7 @@ Item {
             height: 1
             y: parent.height - height - parent.radius
 
-            color: borderColor
+            color: root.borderColor
         }
     }
 
@@ -59,7 +67,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             Header1TextType {
-                text: currentServerName
+                text: root.currentServerName
             }
 
             Image {
@@ -74,7 +82,7 @@ Item {
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            text: currentContainerName + " | " + currentServerHostName
+            text: root.currentContainerName + " | " + root.currentServerHostName
         }
     }
 
@@ -104,7 +112,7 @@ Item {
             radius: 16
 
             color: "#1C1D21"
-            border.color: borderColor
+            border.color: root.borderColor
             border.width: 1
         }
 
@@ -122,14 +130,14 @@ Item {
                 Layout.topMargin: 24
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                text: currentServerName
+                text: root.currentServerName
             }
 
             LabelTextType {
                 Layout.bottomMargin: 24
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                text: currentServerHostName
+                text: root.currentServerHostName
             }
 
             RowLayout {
@@ -157,6 +165,7 @@ Item {
                     rootButtonMaximumWidth: 150 //todo make it dynamic
                     rootButtonDefaultColor: "#D7D8DB"
 
+                    text: root.currentContainerName
                     textColor: "#0E0E11"
                     headerText: "Протокол подключения"
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
@@ -167,134 +176,11 @@ Item {
                         containersDropDown.menuVisible = true
                     }
 
-                    menuModel: proxyContainersModel
+                    listView: ContainersPageHomeListView {
+                        rootWidth: root.width
 
-                    ButtonGroup {
-                        id: containersRadioButtonGroup
-                    }
-
-                    menuDelegate: Item {
-                        implicitWidth: root.width
-                        implicitHeight: containerRadioButton.implicitHeight
-
-                        RadioButton {
-                            id: containerRadioButton
-
-                            implicitWidth: parent.width
-                            implicitHeight: containerRadioButtonContent.implicitHeight
-
-                            hoverEnabled: true
-
-                            ButtonGroup.group: containersRadioButtonGroup
-
-                            checked: {
-                                if (modelData !== null) {
-                                    return modelData.isDefault
-                                }
-                                return false
-                            }
-
-                            indicator: Rectangle {
-                                anchors.fill: parent
-                                color: containerRadioButton.hovered ? "#2C2D30" : "#1C1D21"
-
-                                Behavior on color {
-                                    PropertyAnimation { duration: 200 }
-                                }
-                            }
-
-                            checkable: {
-                                if (modelData !== null) {
-                                    if (modelData.isInstalled) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
-
-                            RowLayout {
-                                id: containerRadioButtonContent
-                                anchors.fill: parent
-
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
-
-                                z: 1
-
-                                Image {
-                                    source: {
-                                        if (modelData !== null) {
-                                            if (modelData.isInstalled) {
-                                                return "qrc:/images/controls/check.svg"
-                                            }
-                                        }
-                                        return "qrc:/images/controls/download.svg"
-                                    }
-                                    visible: {
-                                        if (modelData !== null) {
-                                            if (modelData.isInstalled) {
-                                                return containerRadioButton.checked
-                                            }
-                                        }
-                                        return true
-                                    }
-
-                                    width: 24
-                                    height: 24
-
-                                    Layout.rightMargin: 8
-                                }
-
-                                Text {
-                                    id: containerRadioButtonText
-
-                                    text: {
-                                        if (modelData !== null) {
-                                            return modelData.name
-                                        } else
-                                            return ""
-                                    }
-                                    color: "#D7D8DB"
-                                    font.pixelSize: 16
-                                    font.weight: 400
-                                    font.family: "PT Root UI VF"
-
-                                    height: 24
-
-                                    Layout.fillWidth: true
-                                    Layout.topMargin: 20
-                                    Layout.bottomMargin: 20
-                                }
-                            }
-
-                            onClicked: {
-                                if (checked) {
-                                    modelData.isDefault = true
-
-                                    containersDropDown.text = containerRadioButtonText.text
-                                    root.currentContainerName = containerRadioButtonText.text
-                                    containersDropDown.menuVisible = false
-                                } else {
-                                    ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(delegateIndex))
-                                    InstallController.setShouldCreateServer(false)
-                                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                                    containersDropDown.menuVisible = false
-                                    menu.visible = false
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: containerRadioButton
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: false
-                            }
-                        }
-
-                        Component.onCompleted: {
-                            if (modelData !== null && modelData.isDefault) {
-                                containersDropDown.text = modelData.name
-                            }
-                        }
+                        model: proxyContainersModel
+                        currentIndex: ContainersModel.getDefaultContainer()
                     }
                 }
 
@@ -318,8 +204,13 @@ Item {
                 headerText: "Серверы"
 
                 actionButtonFunction: function() {
-                    PageController.goToPage(PageEnum.PageSetupWizardStart)
+                    menu.visible = false
+                    connectionTypeSelection.visible = true
                 }
+            }
+
+            ConnectionTypeSelectionDrawer {
+                id: connectionTypeSelection
             }
         }
 
@@ -416,10 +307,9 @@ Item {
 
                             onClicked: {
                                 serversMenuContent.currentIndex = index
-                                root.currentServerName = name
-                                root.currentServerHostName = hostName
 
                                 ServersModel.setDefaultServerIndex(index)
+                                ContainersModel.setCurrentlyProcessedServerIndex(index)
                             }
 
                             MouseArea {

@@ -41,7 +41,7 @@ Item {
                 id: hostname
 
                 Layout.fillWidth: true
-                headerText: "Server IP adress [:port]"
+                headerText: "Server IP address [:port]"
             }
 
             TextFieldWithHeaderType {
@@ -66,6 +66,9 @@ Item {
                 text: qsTr("Настроить сервер простым образом")
 
                 onClicked: function() {
+                    InstallController.setShouldCreateServer(true)
+                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }

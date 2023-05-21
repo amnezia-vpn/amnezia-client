@@ -228,5 +228,7 @@
         <file>images/connectionOn.svg</file>
         <file>images/controls/download.svg</file>
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
+        <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
+        <file>ui/qml/Components/ContainersPageHomeListView.qml</file>
     </qresource>
 </RCC>

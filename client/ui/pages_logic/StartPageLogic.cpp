@@ -123,9 +123,9 @@ void StartPageLogic::onPushButtonConnect()
             key = m_configurator->sshConfigurator->convertOpenSShKey(key);
         }
 
-        serverCredentials.password = key;
+        serverCredentials.secretData = key;
     } else {
-        serverCredentials.password = lineEditPasswordText();
+        serverCredentials.secretData = lineEditPasswordText();
     }
 
     set_pushButtonConnectEnabled(false);
@@ -147,7 +147,7 @@ void StartPageLogic::onPushButtonConnect()
         QString decryptedPrivateKey;
         errorCode = serverController.getDecryptedPrivateKey(serverCredentials, decryptedPrivateKey, passphraseCallback);
         if (errorCode == ErrorCode::NoError) {
-            serverCredentials.password = decryptedPrivateKey;
+            serverCredentials.secretData = decryptedPrivateKey;
         }
     }
 
@@ -220,7 +220,7 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
     credentials.hostName = profile.value(config_key::hostName).toString();
     credentials.port = profile.value(config_key::port).toInt();
     credentials.userName = profile.value(config_key::userName).toString();
-    credentials.password = profile.value(config_key::password).toString();
+    credentials.secretData = profile.value(config_key::password).toString();
 
     if (credentials.isValid() || profile.contains(config_key::containers)) {
         // check config

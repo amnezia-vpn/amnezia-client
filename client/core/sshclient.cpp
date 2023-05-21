@@ -55,10 +55,10 @@ namespace libssh {
             std::string authUsername = credentials.userName.toStdString();
 
             int authResult = SSH_ERROR;
-            if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
+            if (credentials.secretData.contains("BEGIN") && credentials.secretData.contains("PRIVATE KEY")) {
                 ssh_key privateKey = nullptr;
                 ssh_key publicKey = nullptr;
-                authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+                authResult = ssh_pki_import_privkey_base64(credentials.secretData.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
                 if (authResult == SSH_OK) {
                     authResult = ssh_pki_export_privkey_to_pubkey(privateKey, &publicKey);
                 }
@@ -86,7 +86,7 @@ namespace libssh {
                     return errorCode;
                 }
             } else {
-                authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.password.toStdString().c_str());
+                authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.secretData.toStdString().c_str());
                 if (authResult != SSH_OK) {
                     qDebug() << ssh_get_error(m_session);
                     return fromLibsshErrorCode(ssh_get_error_code(m_session));
@@ -354,7 +354,7 @@ namespace libssh {
 
         ssh_key privateKey = nullptr;
         m_passphraseCallback = passphraseCallback;
-        authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+        authResult = ssh_pki_import_privkey_base64(credentials.secretData.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
         if (authResult == SSH_OK) {
             char* key = new char[65535];
 

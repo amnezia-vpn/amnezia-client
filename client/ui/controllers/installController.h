@@ -19,7 +19,7 @@ public:
 
 public slots:
     ErrorCode install(DockerContainer container, int port, TransportProto transportProto);
-    void setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &password, const int &port);
+    void setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
     void setShouldCreateServer(bool shouldCreateServer);
 
 signals:

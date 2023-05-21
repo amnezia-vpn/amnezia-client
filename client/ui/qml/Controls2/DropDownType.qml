@@ -24,8 +24,7 @@ Item {
     property string rootButtonBorderColor: "#494B50"
     property int rootButtonBorderWidth: 1
 
-    property Component menuDelegate
-    property variant menuModel
+    property Component listView
 
     property alias menuVisible: menu.visible
 
@@ -169,30 +168,9 @@ Item {
 
                 spacing: 16
 
-                ButtonGroup {
-                    id: radioButtonGroup
-                }
-
-                ListView {
-                    id: menuContent
-                    width: parent.width
-                    height: menuContent.contentItem.height
-
-                    currentIndex: -1
-
-                    clip: true
-                    interactive: false
-
-                    model: root.menuModel
-
-                    delegate: Row {
-                        Loader {
-                            id: loader
-                            sourceComponent: root.menuDelegate
-                            property QtObject modelData: model
-                            property var delegateIndex: index
-                        }
-                    }
+                Loader {
+                    id: listViewLoader
+                    sourceComponent: root.listView
                 }
             }
         }
