@@ -287,6 +287,8 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
+
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/3rd/strongswan DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/3rd)
 endif()
 
 if(IOS)
@@ -489,7 +491,6 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNService.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/VPNServiceBinder.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/AmneziaApp.kt
-            ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNApplication.java
             ${CMAKE_CURRENT_LIST_DIR}/android/src/org/amnezia/vpn/qt/VPNClientBinder.kt

@@ -1,7 +1,7 @@
 apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
-   ext{
+   ext {
        kotlin_version = "1.7.22"
        //  for libwg
        appcompatVersion = '1.1.0'
@@ -11,6 +11,7 @@ buildscript {
        streamsupportVersion = '1.7.0'
        threetenabpVersion = '1.1.1'
        groupName = 'org.amnezia.vpn'
+       relativePathToStrongswan = '../3rd/strongswan/sources/src/frontends/android/app/src/main/jni'
    }
 
     repositories {
@@ -105,7 +106,7 @@ android {
             resources.srcDirs = ['resources']
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
-            jniLibs.srcDirs = ['libs']
+            jniLibs.srcDirs = ['libs', relativePathToStrongswan]
             androidTest.assets.srcDirs += files("${qtAndroidDir}/schemas".toString())
        }
     }
@@ -138,33 +139,65 @@ android {
         targetSdkVersion = 31
         versionCode 10 // Change to a higher number
         versionName "2.0.10" // Change to a higher number
+        multiDexEnabled true
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
             "room.schemaLocation": "${qtAndroidDir}/schemas".toString()
         ]
     }
 
-   buildTypes {
+    buildTypes {
        release {
            // That would enable treeshaking and remove java code that is just called from qt
            minifyEnabled false
+
            externalNativeBuild {
                cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
+                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
                }
            }
        }
+
        debug {
            //applicationIdSuffix ".debug"
            //versionNameSuffix "-debug"
            minifyEnabled false
+
            externalNativeBuild {
                cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
+                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
+
                }
            }
        }
-   }
+    }
+
+    task buildStrongSwanNative(type: Exec) {
+        environment = System.getenv() + ['JNI_PACKAGE': 'org_amnezia_vpn', 'JNI_PACKAGE_STRING': 'org/amnezia/vpn']
+        workingDir "${relativePathToStrongswan}"
+        commandLine "${android.ndkDirectory}/ndk-build", '-j', Runtime.runtime.availableProcessors()
+
+        doLast {
+            copy {
+                from "${workingDir} + /../libs"
+                into 'libs'
+            }
+        }
+    }
+
+    task cleanStrongSwanNative(type: Exec) {
+        workingDir "${relativePathToStrongswan}"
+        commandLine "${android.ndkDirectory}/ndk-build", 'clean'
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildStrongSwanNative
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+
+    clean.dependsOn 'cleanStrongSwanNative'
 
 //   externalNativeBuild {
 //       cmake {
