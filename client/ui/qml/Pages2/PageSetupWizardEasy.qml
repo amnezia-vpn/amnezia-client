@@ -124,6 +124,7 @@ Item {
                 text: qsTr("Continue")
 
                 onClicked: function() {
+                    ContainersModel.setCurrentlyInstalledContainerIndex(containers.dockerContainer)
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                     InstallController.install(containers.dockerContainer,
                                               containers.containerDefaultPort,

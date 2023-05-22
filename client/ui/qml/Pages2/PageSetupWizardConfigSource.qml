@@ -13,6 +13,14 @@ import "../Config"
 Item {
     id: root
 
+    Connections {
+        target: ImportController
+
+        function onImportFinished() {
+
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: root.top
@@ -63,7 +71,7 @@ Item {
                 FileDialog {
                     id: fileDialog
                     onAccepted: {
-
+                        ImportController.importFromFile(selectedFile)
                     }
                 }
             }
@@ -84,6 +92,7 @@ Item {
                 onClickedFunc: function() {
                 }
             }
+
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
@@ -101,6 +110,7 @@ Item {
                     PageController.goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
+
             Rectangle {
                 Layout.fillWidth: true
                 height: 1

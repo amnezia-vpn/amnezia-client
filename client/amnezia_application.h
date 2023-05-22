@@ -19,6 +19,7 @@
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/installController.h"
+#include "ui/controllers/importController.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -71,6 +72,7 @@ private:
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;
     QScopedPointer<InstallController> m_installController;
+    QScopedPointer<ImportController> m_importController;
 
 };
 

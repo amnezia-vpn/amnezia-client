@@ -124,6 +124,9 @@ void AmneziaApplication::init()
     m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
 
+    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
+    m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
+
     //
     m_uiLogic->registerPagesLogic();
 
