@@ -37,7 +37,7 @@ public:
     Q_INVOKABLE void startQrDecoder();
 #endif
 
-    void selectConfigFormat(QString configData);
+    void importAnyFile(const QString &configData);
 
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);
