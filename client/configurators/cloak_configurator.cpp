@@ -42,11 +42,8 @@ QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
     config.insert("NumConn", 4);
     config.insert("BrowserSig", "chrome");
     config.insert("StreamTimeout", 300);
-
-    // transfer params to protocol runner
-    config.insert(config_key::transport_proto, "tcp");
-    config.insert(config_key::remote, credentials.hostName);
-    config.insert(config_key::port, "$CLOAK_SERVER_PORT");
+    config.insert("RemoteHost", credentials.hostName);
+    config.insert("RemotePort", "$CLOAK_SERVER_PORT");
 
     QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
                                                    serverController.genVarsForScript(credentials, container, containerConfig));

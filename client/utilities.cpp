@@ -83,7 +83,7 @@ bool Utils::processIsRunning(const QString& fileName)
     QProcess process;
     process.setReadChannel(QProcess::StandardOutput);
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start(QString("wmic.exe /OUTPUT:STDOUT PROCESS get %1").arg("Caption"));
+    process.start("wmic.exe", QStringList() << "/OUTPUT:STDOUT" << "PROCESS" << "get" << "Caption");
     process.waitForStarted();
     process.waitForFinished();
     QString processData(process.readAll());
@@ -165,9 +165,8 @@ bool Utils::checkIpSubnetFormat(const QString &ip)
 void Utils::killProcessByName(const QString &name)
 {           
     qDebug().noquote() << "Kill process" << name;
-    qDebug() << "Hello";
 #ifdef Q_OS_WIN
-    QProcess::execute(QString("taskkill /im %1 /f").arg(name));
+    QProcess::execute("taskkill", QStringList() << "/IM" << name << "/F");
 #elif defined Q_OS_IOS
     return;
 #else
