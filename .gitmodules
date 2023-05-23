@@ -6,7 +6,7 @@
 	url = https://github.com/WireGuard/wireguard-apple
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
-	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+	url = https://github.com/amnezia-vpn/OpenVPNAdapter.git
 [submodule "client/3rd/ShadowPath"]
 	path = client/3rd/ShadowPath
 	url = https://github.com/qman9501/ShadowPath
@@ -28,9 +28,6 @@
 [submodule "client/3rd/zlib"]
 	path = client/3rd/zlib
 	url = https://github.com/madler/zlib.git
-[submodule "deploy/amnezia-ios-certificates"]
-	path = deploy/amnezia-ios-certificates
-	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
 [submodule "client/3rd/SortFilterProxyModel"]
 	path = client/3rd/SortFilterProxyModel
 	url = https://github.com/mitchcurtis/SortFilterProxyModel.git

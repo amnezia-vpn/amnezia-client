@@ -48,7 +48,8 @@ endif()
 qt_standard_project_setup()
 
 if(IOS)
-    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/openvpn.sh args
+    #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
@@ -313,7 +314,6 @@ if(IOS)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h
@@ -325,7 +325,6 @@ if(IOS)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/json.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp
@@ -362,7 +361,7 @@ if(IOS)
 
     target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
-    set(BUILD_ID ${A_PROJECT_BUILD})
+    set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
 
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
@@ -373,12 +372,12 @@ if(IOS)
         MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
         MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
         MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
-        MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}-${BUILD_ID}"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+        MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
 
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_LIST_DIR}/ios/app/main.entitlements"
-        XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
+        XCODE_ATTRIBUTE_MARKETING_VERSION "${APPLE_PROJECT_VERSION}"
         XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
         XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPN"
         XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "AmneziaVPN"

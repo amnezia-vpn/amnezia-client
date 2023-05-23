@@ -80,7 +80,6 @@ void VpnLogic::onUpdatePage()
         set_labelCurrentDns(dns.first + ", " + dns.second);
     }
 
-
     set_isContainerSupportedByCurrentPlatform(ContainerProps::isSupportedByCurrentPlatform(selectedContainer));
     if (!isContainerSupportedByCurrentPlatform()) {
         set_labelErrorText(tr("AmneziaVPN not supporting selected protocol on this device. Select another protocol."));
