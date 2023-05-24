@@ -100,6 +100,11 @@ void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
     uiLogic()->onUpdateAllPages();
 }
 
+bool ServerSettingsLogic::isCurrentServerHasCredentials()
+{
+    return m_settings->haveAuthData(uiLogic()->m_selectedServerIndex);
+}
+
 #if defined(Q_OS_ANDROID)
 /* Auth result handler for Android */
 void authResultReceiver::handleActivityResult(int receiverRequestCode, int resultCode, const QJniObject &data)

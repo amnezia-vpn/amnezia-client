@@ -257,7 +257,6 @@ namespace libssh {
                     int bytesWritten = sftp_write(file, buffer, bufferSize);
 
                     std::string chunk(buffer, bufferSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     if (bytesWritten != bufferSize) {
                         fin.close();
@@ -272,7 +271,6 @@ namespace libssh {
                     fin.read(buffer, lastChunkSize);
 
                     std::string chunk(buffer, lastChunkSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     int bytesWritten = sftp_write(file, buffer, lastChunkSize);
 
