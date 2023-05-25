@@ -9,7 +9,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     FlickableType {
@@ -66,7 +66,7 @@ Item {
         text: qsTr("Подключиться")
 
         onClicked: function() {
-//            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+//            goToPage(PageEnum.PageSetupWizardInstalling)
         }
     }
 }

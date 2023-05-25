@@ -5,15 +5,15 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
 {
 }
 
-void PageController::setStartPage()
+QString PageController::getInitialPage()
 {
     if (m_serversModel->getServersCount()) {
         if (m_serversModel->getDefaultServerIndex() < 0) {
             m_serversModel->setDefaultServerIndex(0);
         }
-        emit goToPage(PageLoader::PageEnum::PageStart, false);
+        return getPagePath(PageLoader::PageEnum::PageStart);
     } else {
-        emit goToPage(PageLoader::PageEnum::PageSetupWizardStart, false);
+        return getPagePath(PageLoader::PageEnum::PageSetupWizardStart);
     }
 }
 
@@ -21,5 +21,5 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<PageLoader::PageEnum>();
     QString pageName = metaEnum.valueToKey(static_cast<int>(page));
-    return "Pages2/" + pageName + ".qml";
+    return "qrc:/ui/qml/Pages2/" + pageName + ".qml";
 }

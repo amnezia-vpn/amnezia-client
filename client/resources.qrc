@@ -184,7 +184,6 @@
         <file>ui/qml/Controls2/DropDownType.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
         <file>ui/qml/main2.qml</file>
-        <file>ui/qml/PageLoader.qml</file>
         <file>images/amneziaBigLogo.png</file>
         <file>images/amneziaBigLogo.svg</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
@@ -215,7 +214,7 @@
         <file>images/controls/settings-2.svg</file>
         <file>images/controls/share-2.svg</file>
         <file>ui/qml/Pages2/PageHome.qml</file>
-        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServersList.qml</file>
         <file>ui/qml/Pages2/PageShare.qml</file>
         <file>ui/qml/Controls2/TextTypes/Header1TextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
@@ -230,5 +229,10 @@
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
         <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
         <file>ui/qml/Components/ContainersPageHomeListView.qml</file>
+        <file>ui/qml/Controls2/TextTypes/CaptionTextType.qml</file>
+        <file>images/controls/settings.svg</file>
+        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>ui/qml/Controls2/PageType.qml</file>
+        <file>ui/qml/Controls2/PopupType.qml</file>
     </qresource>
 </RCC>

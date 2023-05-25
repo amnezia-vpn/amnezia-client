@@ -10,8 +10,26 @@ import "../Config"
 import "../Controls2/TextTypes"
 import "../Components"
 
-Item {
+PageType {
     id: root
+
+    Connections {
+        target: PageController
+
+        function onShowErrorMessage(errorMessage) {
+            popupErrorMessage.popupErrorMessageText = errorMessage
+            popupErrorMessage.open()
+        }
+    }
+
+    Connections {
+        target: InstallController
+
+        function onInstallServerFinished() {
+            goToStartPage()
+//            goToPage(PageEnum.PageStart)
+        }
+    }
 
     FlickableType {
         id: fl
@@ -44,7 +62,7 @@ Item {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: "Бесплатный сервис для создания личного VPN на вашем сервере. Помогаем получать доступ к заблокированному контенту, не раскрывая конфиденциальность даже провайдерам VPN."
+                text: "Бесплатный сервис для создания личного VPN на вашем сервере. Помогаем получать доступ к заблокированному контенту, не раскрывая конфиденциальность даже провайдерам VPN."
             }
 
             BasicButtonType {
@@ -76,13 +94,25 @@ Item {
                 text: qsTr("У меня ничего нет")
 
                 onClicked: {
-                    PageController.goToPage(PageEnum.PageTest)
+                    goToPage(PageEnum.PageTest)
                 }
             }
         }
 
         ConnectionTypeSelectionDrawer {
             id: connectionTypeSelection
+        }
+    }
+
+    Item {
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        implicitHeight: popupErrorMessage.height
+
+        PopupType {
+            id: popupErrorMessage
         }
     }
 }

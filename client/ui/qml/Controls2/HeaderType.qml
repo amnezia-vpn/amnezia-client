@@ -36,7 +36,7 @@ Item {
                 if (backButtonFunction && typeof backButtonFunction === "function") {
                     backButtonFunction()
                 } else {
-                    PageController.closePage()
+                    closePage()
                 }
             }
         }
@@ -61,8 +61,8 @@ Item {
                 visible: image ? true : false
 
                 onClicked: {
-                    if (actionButtonImage && typeof actionButtonImage === "function") {
-                        actionButtonImage()
+                    if (actionButtonFunction && typeof actionButtonFunction === "function") {
+                        actionButtonFunction()
                     }
                 }
             }

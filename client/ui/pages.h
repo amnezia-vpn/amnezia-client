@@ -21,18 +21,19 @@ public:
 namespace PageEnumNS
 {
 Q_NAMESPACE
-enum class Page {Start = 0, NewServer, NewServerProtocols, Vpn,
-           Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
-           GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
-           ServerContainers, ServersList, ShareConnection,  Sites,
-           ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig,
-           AdvancedServerSettings, ClientManagement, ClientInfo,
+enum class Page { Start = 0, NewServer, NewServerProtocols, Vpn,
+                  Wizard, WizardLow, WizardMedium, WizardHigh, WizardVpnMode, ServerConfiguringProgress,
+                  GeneralSettings, AppSettings, NetworkSettings, ServerSettings,
+                  ServerContainers, ServersList, ShareConnection,  Sites,
+                  ProtocolSettings, ProtocolShare, QrDecoder, QrDecoderIos, About, ViewConfig,
+                  AdvancedServerSettings, ClientManagement, ClientInfo,
 
-           PageSetupWizardStart, PageTest, PageSetupWizardCredentials, PageSetupWizardProtocols, PageSetupWizardEasy,
-           PageSetupWizardProtocolSettings, PageSetupWizardInstalling, PageSetupWizardConfigSource,
-           PageSetupWizardTextKey,
+                  PageSetupWizardStart, PageTest, PageSetupWizardCredentials, PageSetupWizardProtocols, PageSetupWizardEasy,
+                  PageSetupWizardProtocolSettings, PageSetupWizardInstalling, PageSetupWizardConfigSource, PageSetupWizardTextKey,
 
-           PageStart, PageHome, PageSettings, PageShare};
+                  PageSettings, PageSettingsServersList,
+
+                  PageStart, PageHome, PageShare};
 Q_ENUM_NS(Page)
 
 static void declareQmlPageEnum() {

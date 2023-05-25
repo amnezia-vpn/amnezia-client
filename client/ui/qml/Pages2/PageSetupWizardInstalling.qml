@@ -11,10 +11,19 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     property real progressBarValue: 0
+
+    Connections {
+        target: InstallController
+
+        function onInstallationErrorOccurred(errorMessage) {
+            closePage()
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -98,27 +107,6 @@ Item {
                         }
                     }
                 }
-            }
-        }
-
-        Timer {
-            id: closePageTimer
-
-            interval: 1000
-            repeat: false
-            running: false
-            onTriggered: {
-                // todo go to root installing page
-                PageController.goToPage(PageEnum.PageStart)
-            }
-        }
-
-        Connections {
-            target: InstallController
-
-            function onInstallContainerFinished() {
-                progressBarValue = 1
-                closePageTimer.start()
             }
         }
     }

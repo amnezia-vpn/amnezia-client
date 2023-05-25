@@ -3,6 +3,7 @@
 #include <QJsonObject>
 
 #include "core/servercontroller.h"
+#include "core/errorstrings.h"
 
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel,
                                     const QSharedPointer<ContainersModel> &containersModel,
@@ -12,7 +13,7 @@ InstallController::InstallController(const QSharedPointer<ServersModel> &servers
 
 }
 
-ErrorCode InstallController::install(DockerContainer container, int port, TransportProto transportProto)
+void InstallController::install(DockerContainer container, int port, TransportProto transportProto)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
@@ -26,13 +27,13 @@ ErrorCode InstallController::install(DockerContainer container, int port, Transp
     };
 
     if (m_shouldCreateServer) {
-        return installServer(container, config);
+        installServer(container, config);
     } else {
-        return installContainer(container, config);
+        installContainer(container, config);
     }
 }
 
-ErrorCode InstallController::installServer(DockerContainer container, QJsonObject& config)
+void InstallController::installServer(DockerContainer container, QJsonObject& config)
 {
     //todo check if container already installed
     ServerController serverController(m_settings);
@@ -51,15 +52,14 @@ ErrorCode InstallController::installServer(DockerContainer container, QJsonObjec
         m_settings->addServer(server);
         m_settings->setDefaultServer(m_settings->serversCount() - 1);
 
-        //todo change to server finished
-        emit installContainerFinished();
+        emit installServerFinished();
+        return;
     }
 
-    //todo error processing
-    return errorCode;
+    emit installationErrorOccurred(errorString(errorCode));
 }
 
-ErrorCode InstallController::installContainer(DockerContainer container, QJsonObject& config)
+void InstallController::installContainer(DockerContainer container, QJsonObject& config)
 {
     //todo check if container already installed
     ServerCredentials serverCredentials = m_serversModel->getCurrentlyProcessedServerCredentials();
@@ -69,10 +69,10 @@ ErrorCode InstallController::installContainer(DockerContainer container, QJsonOb
     if (errorCode == ErrorCode::NoError) {
         m_containersModel->setData(m_containersModel->index(container), config, ContainersModel::Roles::ConfigRole);
         emit installContainerFinished();
+        return;
     }
 
-    //todo error processing
-    return errorCode;
+    emit installationErrorOccurred(errorString(errorCode));
 }
 
 void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)

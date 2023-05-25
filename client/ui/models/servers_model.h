@@ -19,7 +19,8 @@ public:
         NameRole = Qt::UserRole + 1,
         HostNameRole,
         CredentialsRole,
-        IsDefaultRole
+        IsDefaultRole,
+        IsCurrentlyProcessedRole
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -32,10 +33,13 @@ public:
 public slots:
     void setDefaultServerIndex(int index);
     const int getDefaultServerIndex();
+
     const int getServersCount();
 
     void setCurrentlyProcessedServerIndex(int index);
     ServerCredentials getCurrentlyProcessedServerCredentials();
+
+    void addServer();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

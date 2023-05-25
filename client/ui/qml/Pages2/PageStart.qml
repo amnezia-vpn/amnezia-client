@@ -9,8 +9,21 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Item {
+PageType {
     id: root
+
+    Connections {
+        target: PageController
+
+        function onGoToPageHome() {
+            tabBar.currentIndex = 0
+        }
+
+        function onShowErrorMessage(errorMessage) {
+            popupErrorMessage.popupErrorMessageText = errorMessage
+            popupErrorMessage.open()
+        }
+    }
 
     StackLayout {
         id: stackLayout
@@ -24,10 +37,18 @@ Item {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
-        PageHome {
+        StackView {
+            id: homeStackView
+            initialItem: "PageHome.qml" //PageController.getPagePath(PageEnum.PageSettingsServersList)
         }
 
-        PageSetupWizardEasy {
+        Item {
+
+        }
+
+        StackView {
+            id: settingsStackView
+            initialItem: "PageSettingsServersList.qml" //PageController.getPagePath(PageEnum.PageSettingsServersList)
         }
     }
 
@@ -68,5 +89,17 @@ Item {
         anchors.rightMargin: 96
         cursorShape: Qt.PointingHandCursor
         enabled: false
+    }
+
+    Item {
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        implicitHeight: popupErrorMessage.height
+
+        PopupType {
+            id: popupErrorMessage
+        }
     }
 }

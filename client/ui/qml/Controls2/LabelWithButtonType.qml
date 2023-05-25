@@ -8,7 +8,7 @@ Item {
     property string text
     property string descriptionText
 
-    property var onClickedFunc
+    property var clickedFunction
 
     property alias buttonImage: button.image
     property string iconImage
@@ -68,8 +68,8 @@ Item {
             hoverEnabled: false
             image: buttonImage
             onClicked: {
-                if (onClickedFunc && typeof onClickedFunc === "function") {
-                    onClickedFunc()
+                if (clickedFunction && typeof clickedFunction === "function") {
+                    clickedFunction()
                 }
             }
 

@@ -10,7 +10,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     Connections {
@@ -44,7 +44,7 @@ Item {
 
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
-                headerText: "Подключение к серверу"
+                headerText: "Подключение к серверу"
                 descriptionText: "Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.\n
 Всё в порядке, если код передал друг."
             }
@@ -64,7 +64,7 @@ Item {
                 buttonImage: "qrc:/images/controls/chevron-right.svg"
                 iconImage: "qrc:/images/controls/folder-open.svg"
 
-                onClickedFunc: function() {
+                clickedFunction: function() {
                     onClicked: fileDialog.open()
                 }
 
@@ -89,7 +89,7 @@ Item {
                 buttonImage: "qrc:/images/controls/chevron-right.svg"
                 iconImage: "qrc:/images/controls/qr-code.svg"
 
-                onClickedFunc: function() {
+                clickedFunction: function() {
                 }
             }
 
@@ -106,8 +106,8 @@ Item {
                 buttonImage: "qrc:/images/controls/chevron-right.svg"
                 iconImage: "qrc:/images/controls/text-cursor.svg"
 
-                onClickedFunc: function() {
-                    PageController.goToPage(PageEnum.PageSetupWizardTextKey)
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
 

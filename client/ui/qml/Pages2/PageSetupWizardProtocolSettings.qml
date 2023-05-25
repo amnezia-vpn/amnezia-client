@@ -13,7 +13,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     SortFilterProxyModel {
@@ -156,7 +156,7 @@ Item {
                             text: qsTr("Установить")
 
                             onClicked: function() {
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoButtonGroup.currentIndex)
                             }
                         }

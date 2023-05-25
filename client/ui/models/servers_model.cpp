@@ -51,6 +51,8 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return QVariant::fromValue(m_settings->serverCredentials(index.row()));
     case IsDefaultRole:
         return index.row() == m_settings->defaultServerIndex();
+    case IsCurrentlyProcessedRole:
+        return index.row() == m_currenlyProcessedServerIndex;
     }
 
     return QVariant();
@@ -59,7 +61,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
 //todo mode to setData?
 void ServersModel::setDefaultServerIndex(int index)
 {
-//    beginResetModel();
+    //    beginResetModel();
     m_settings->setDefaultServer(index);
     //    endResetModel();
 }
@@ -84,11 +86,17 @@ ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
     return qvariant_cast<ServerCredentials>(data(index(m_currenlyProcessedServerIndex), CredentialsRole));
 }
 
+void ServersModel::addServer()
+{
+
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
     roles[HostNameRole] = "hostName";
     roles[CredentialsRole] = "credentials";
     roles[IsDefaultRole] = "isDefault";
+    roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     return roles;
 }

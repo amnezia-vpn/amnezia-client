@@ -18,15 +18,18 @@ public:
                                QObject *parent = nullptr);
 
 public slots:
-    ErrorCode install(DockerContainer container, int port, TransportProto transportProto);
+    void install(DockerContainer container, int port, TransportProto transportProto);
     void setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
     void setShouldCreateServer(bool shouldCreateServer);
 
 signals:
     void installContainerFinished();
+    void installServerFinished();
+
+    void installationErrorOccurred(QString errorMessage);
 private:
-    ErrorCode installServer(DockerContainer container, QJsonObject& config);
-    ErrorCode installContainer(DockerContainer container, QJsonObject& config);
+    void installServer(DockerContainer container, QJsonObject& config);
+    void installContainer(DockerContainer container, QJsonObject& config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

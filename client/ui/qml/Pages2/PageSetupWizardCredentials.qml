@@ -8,7 +8,7 @@ import "./"
 import "../Controls2"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     FlickableType {
@@ -69,7 +69,7 @@ Item {
                     InstallController.setShouldCreateServer(true)
                     InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
-                    PageController.goToPage(PageEnum.PageSetupWizardEasy)
+                    goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
 
@@ -90,7 +90,7 @@ Item {
                     InstallController.setShouldCreateServer(true)
                     InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
-                    PageController.goToPage(PageEnum.PageSetupWizardProtocols)
+                    goToPage(PageEnum.PageSetupWizardProtocols)
                 }
             }
         }

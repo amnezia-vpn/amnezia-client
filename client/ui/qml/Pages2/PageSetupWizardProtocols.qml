@@ -11,7 +11,7 @@ import "./"
 import "../Controls2"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     SortFilterProxyModel {
@@ -86,9 +86,9 @@ Item {
                             descriptionText: description
                             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
-                            onClickedFunc: function() {
+                            clickedFunction: function() {
                                 ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
-                                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                                goToPage(PageEnum.PageSetupWizardProtocolSettings)
                             }
                         }
 

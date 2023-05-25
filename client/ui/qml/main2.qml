@@ -27,9 +27,9 @@ Window  {
         color: "#0E0E11"
     }
 
-    PageLoader {
-        id: pageLoader
+    StackView {
         anchors.fill: parent
         focus: true
+        initialItem: PageController.getInitialPage()
     }
 }

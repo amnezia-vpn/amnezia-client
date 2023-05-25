@@ -14,7 +14,7 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-Item {
+PageType {
     id: root
 
     property string defaultColor: "#1C1D21"
@@ -34,6 +34,21 @@ Item {
 
         function onDefaultContainerChanged() {
             root.currentContainerName = ContainersModel.getDefaultContainerName()
+        }
+    }
+
+    Connections {
+        target: InstallController
+
+        function onInstallContainerFinished() {
+            goToStartPage()
+            menu.visible = true
+            containersDropDown.menuVisible = true
+        }
+
+        function onInstallServerFinished() {
+            goToStartPage()
+            menu.visible = true
         }
     }
 
@@ -279,6 +294,15 @@ Item {
 
                                 z: 1
 
+                                Image {
+                                    source: "qrc:/images/controls/check.svg"
+                                    visible: serverRadioButton.checked
+                                    width: 24
+                                    height: 24
+
+                                    Layout.rightMargin: 8
+                                }
+
                                 Text {
                                     id: serverRadioButtonText
 
@@ -295,13 +319,10 @@ Item {
                                     Layout.bottomMargin: 20
                                 }
 
-                                Image {
-                                    source: "qrc:/images/controls/check.svg"
-                                    visible: serverRadioButton.checked
-                                    width: 24
-                                    height: 24
+                                ImageButtonType {
+                                    image: "qrc:/images/controls/settings.svg"
 
-                                    Layout.rightMargin: 8
+//                                    onClicked:
                                 }
                             }
 

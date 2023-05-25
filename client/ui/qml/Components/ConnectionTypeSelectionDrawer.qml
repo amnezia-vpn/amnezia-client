@@ -57,8 +57,8 @@ Drawer {
             text: "IP, логин и пароль от сервера"
             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
-            onClickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardCredentials)
+            clickedFunction: function() {
+                goToPage(PageEnum.PageSetupWizardCredentials)
                 root.visible = false
             }
         }
@@ -73,8 +73,8 @@ Drawer {
             text: "QR-код, ключ или файл настроек"
             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
-            onClickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+            clickedFunction: function() {
+                goToPage(PageEnum.PageSetupWizardConfigSource)
                 root.visible = false
             }
         }

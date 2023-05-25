@@ -12,7 +12,7 @@ import "./"
 import "../Controls2"
 import "../Config"
 
-Item {
+PageType {
     id: root
 
     SortFilterProxyModel {
@@ -34,7 +34,7 @@ Item {
         id: fl
         anchors.top: root.top
         anchors.bottom: root.bottom
-        contentHeight: content.height
+        contentHeight: content.implicitHeight + buttonContinue.anchors.bottomMargin
 
         Column {
             id: content
@@ -49,8 +49,9 @@ Item {
             spacing: 16
 
             HeaderType {
+                id: header
+
                 implicitWidth: parent.width
-                anchors.topMargin: 20
 
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
@@ -117,6 +118,8 @@ Item {
             }
 
             BasicButtonType {
+                id: buttonContinue
+
                 implicitWidth: parent.width
                 anchors.topMargin: 24
                 anchors.bottomMargin: 32
@@ -125,7 +128,7 @@ Item {
 
                 onClicked: function() {
                     ContainersModel.setCurrentlyInstalledContainerIndex(containers.dockerContainer)
-                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                    goToPage(PageEnum.PageSetupWizardInstalling);
                     InstallController.install(containers.dockerContainer,
                                               containers.containerDefaultPort,
                                               containers.containerDefaultTransportProto)

@@ -36,12 +36,12 @@ public:
                             QObject *parent = nullptr);
 
 public slots:
-    void setStartPage();
+    QString getInitialPage();
     QString getPagePath(PageLoader::PageEnum page);
 
 signals:
-    void goToPage(PageLoader::PageEnum page, bool slide = true);
-    void closePage();
+    void goToPageHome();
+    void showErrorMessage(QString errorMessage);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
