@@ -24,7 +24,9 @@ enum DockerContainer {
     TorWebSite,
     Dns,
     //FileShare,
-    Sftp
+    Sftp,
+    Nextcloud
+
 };
 Q_ENUM_NS(DockerContainer)
 } // namespace ContainerEnumNS

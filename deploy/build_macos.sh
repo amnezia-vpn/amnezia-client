@@ -40,8 +40,8 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=6.4.1;
 QIF_VERSION=4.1
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
-QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+# QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
+QIF_BIN_DIR=${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/macos/bin}/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
