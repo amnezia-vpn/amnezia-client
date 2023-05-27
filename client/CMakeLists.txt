@@ -214,7 +214,11 @@ if(APPLE)
 
         set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
         add_compile_definitions(MVPN_MACOS)
-        # ICON   = $$PWD/images/app.icns
+
+        set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
+        set(MACOSX_BUNDLE_ICON_FILE app.icns)
+        set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        set(SOURCES ${SOURCES} ${ICON_FILE})
 
         find_library(FW_COCOA Cocoa)
         find_library(FW_APPLICATIONSERVICES ApplicationServices)

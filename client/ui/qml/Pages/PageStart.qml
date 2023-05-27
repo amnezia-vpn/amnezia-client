@@ -233,9 +233,8 @@ PageBase {
             anchors.top: label_server_ip.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             text: StartPageLogic.lineEditIpText
-            onEditingFinished: {
-                StartPageLogic.lineEditIpText = text
-            }
+            onEditingFinished: { StartPageLogic.lineEditIpText = text }
+            onTextEdited: { StartPageLogic.lineEditIpText = text }
 
             validator: RegularExpressionValidator {
                 regularExpression: StartPageLogic.ipAddressPortRegex
@@ -253,9 +252,8 @@ PageBase {
             anchors.top: label_login.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             text: StartPageLogic.lineEditLoginText
-            onEditingFinished: {
-                StartPageLogic.lineEditLoginText = text
-            }
+            onEditingFinished: { StartPageLogic.lineEditLoginText = text }
+            onTextEdited: { StartPageLogic.lineEditLoginText = text }
         }
 
         LabelType {
@@ -268,25 +266,29 @@ PageBase {
             id: new_server_password
             anchors.top: label_new_server_password.bottom
             anchors.horizontalCenter: parent.horizontalCenter
+
+            inputMethodHints: Qt.ImhSensitiveData
             echoMode: TextInput.Password
             text: StartPageLogic.lineEditPasswordText
-            onEditingFinished: {
-                StartPageLogic.lineEditPasswordText = text
-            }
+            onEditingFinished: { StartPageLogic.lineEditPasswordText = text }
+            onTextEdited: { StartPageLogic.lineEditPasswordText = text }
+            onAccepted: { StartPageLogic.onPushButtonConnect() }
         }
         TextFieldType {
             id: new_server_ssh_key
             anchors.top: label_new_server_password.bottom
             anchors.horizontalCenter: parent.horizontalCenter
 
+            visible: false
             height: 71
             font.pixelSize: 10
             verticalAlignment: Text.AlignTop
+            inputMethodHints: Qt.ImhSensitiveData
+
             text: StartPageLogic.textEditSshKeyText
-            onEditingFinished: {
-                StartPageLogic.textEditSshKeyText = text
-            }
-            visible: false
+            onEditingFinished: { StartPageLogic.textEditSshKeyText = text }
+            onTextEdited: { StartPageLogic.textEditSshKeyText = text }
+            onAccepted: { StartPageLogic.onPushButtonConnect() }
         }
 
         LabelType {
