@@ -12,12 +12,9 @@ import "../Controls2/TextTypes"
 
 
 ListView {
-    id: menuContent
+    id: root
 
-    property var rootWidth
-
-    width: rootWidth
-    height: menuContent.contentItem.height
+    height: root.contentItem.height
 
     clip: true
 
@@ -26,7 +23,7 @@ ListView {
     }
 
     delegate: Item {
-        implicitWidth: rootWidth
+        implicitWidth: parent.width
         implicitHeight: containerRadioButton.implicitHeight
 
         RadioButton {
@@ -43,7 +40,7 @@ ListView {
 
             indicator: Rectangle {
                 anchors.fill: parent
-                color: containerRadioButton.hovered ? "#2C2D30" : "#1C1D21"
+                color: containerRadioButton.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -61,44 +58,42 @@ ListView {
 
                 z: 1
 
+                ColumnLayout {
+                    Layout.topMargin: 20
+                    Layout.bottomMargin: 20
+
+                    ListItemTitleType {
+                        Layout.fillWidth: true
+
+                        text: name
+                    }
+
+                    CaptionTextType {
+                        Layout.fillWidth: true
+
+                        text: description
+                        color: "#878B91"
+                    }
+                }
+
                 Image {
-                    source: isInstalled ? "qrc:/images/controls/check.svg" : "qrc:/images/controls/download.svg"
-                    visible: isInstalled ? containerRadioButton.checked : true
+                    source: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
                     width: 24
                     height: 24
 
                     Layout.rightMargin: 8
                 }
-
-                Text {
-                    id: containerRadioButtonText
-
-                    text: name
-                    color: "#D7D8DB"
-                    font.pixelSize: 16
-                    font.weight: 400
-                    font.family: "PT Root UI VF"
-
-                    height: 24
-
-                    Layout.fillWidth: true
-                    Layout.topMargin: 20
-                    Layout.bottomMargin: 20
-                }
             }
 
             onClicked: {
-                if (checked) {
-                    isDefault = true
-                    menuContent.currentIndex = index
-                    containersDropDown.menuVisible = false
+                if (isInstalled) {
+//                    isDefault = true
+//                    root.currentIndex = index
                 } else {
-                    ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
+                    ContainersModel.setCurrentlyInstalledContainerIndex(root.model.mapToSource(index))
                     InstallController.setShouldCreateServer(false)
                     goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                    containersDropDown.menuVisible = false
-                    menu.visible = false
                 }
             }
 
@@ -106,12 +101,6 @@ ListView {
                 anchors.fill: containerRadioButton
                 cursorShape: Qt.PointingHandCursor
                 enabled: false
-            }
-        }
-
-        Component.onCompleted: {
-            if (isDefault) {
-                root.currentContainerName = name
             }
         }
     }

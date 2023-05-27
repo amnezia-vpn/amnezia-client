@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "TextTypes"
+
 Item {
     id: root
 
@@ -13,12 +15,16 @@ Item {
     property alias buttonImage: button.image
     property string iconImage
 
+    property string textColor: "#d7d8db"
+
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
     RowLayout {
         id: content
         anchors.fill: parent
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
 
         Image {
             id: icon
@@ -28,34 +34,28 @@ Item {
         }
 
         ColumnLayout {
-            Text {
-                font.family: "PT Root UI VF"
-                font.styleName: "normal"
-                font.pixelSize: 18
-                color: "#d7d8db"
+            ListItemTitleType {
                 text: root.text
-                wrapMode: Text.WordWrap
+                color: textColor
 
                 Layout.fillWidth: true
-                height: 22
+                Layout.topMargin: 16
+                Layout.bottomMargin: description.visible ? 0 : 16
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
             }
 
-            Text {
-                font.family: "PT Root UI VF"
-                font.styleName: "normal"
-                font.pixelSize: 13
-                font.letterSpacing: 0.02
+            CaptionTextType {
+                id: description
+
                 color: "#878B91"
                 text: root.descriptionText
-                wrapMode: Text.WordWrap
 
                 visible: root.descriptionText !== ""
 
                 Layout.fillWidth: true
-                height: 16
+                Layout.bottomMargin: 16
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
@@ -88,21 +88,45 @@ Item {
             }
         }
     }
+
+    Rectangle {
+        id: background
+        anchors.fill: root
+        color: "transparent"
+
+
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
 
         onEntered: {
-            imageBackground.color = button.hoveredColor
+            if (buttonImage) {
+                imageBackground.color = button.hoveredColor
+            } else {
+                background.color = button.hoveredColor
+            }
         }
 
         onExited: {
-            imageBackground.color = button.defaultColor
+            if (buttonImage) {
+                imageBackground.color = button.defaultColor
+            } else {
+                background.color = button.defaultColor
+            }
         }
 
         onPressedChanged: {
-            imageBackground.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+            if (buttonImage) {
+                imageBackground.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+            } else {
+                background.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+            }
         }
 
         onClicked: {

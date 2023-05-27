@@ -1,5 +1,7 @@
 #include "containers_model.h"
 
+#include "core/servercontroller.h"
+
 ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
 }
@@ -104,6 +106,22 @@ QString ContainersModel::getDefaultContainerName()
 int ContainersModel::getCurrentlyInstalledContainerIndex()
 {
     return m_currentlyInstalledContainerIndex;
+}
+
+void ContainersModel::removeAllContainers()
+{
+
+    ServerController serverController(m_settings);
+    auto errorCode = serverController.removeAllContainers(m_settings->serverCredentials(m_currentlyProcessedServerIndex));
+
+    if (errorCode == ErrorCode::NoError) {
+    beginResetModel();
+        m_settings->setContainers(m_currentlyProcessedServerIndex, {});
+        m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, DockerContainer::None);
+        endResetModel();
+    }
+
+    //todo process errors
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const {

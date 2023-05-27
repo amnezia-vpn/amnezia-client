@@ -33,14 +33,12 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            spacing: 16
 
             HeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
@@ -52,6 +50,8 @@ PageType {
             Header2TextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 text: "Что у вас есть?"
             }
@@ -75,11 +75,8 @@ PageType {
                     }
                 }
             }
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "#2C2D30"
-            }
+
+            DividerType {}
 
             //todo ifdef mobile platforms
             LabelWithButtonType {
@@ -93,11 +90,7 @@ PageType {
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "#2C2D30"
-            }
+            DividerType {}
 
             LabelWithButtonType {
                 Layout.fillWidth: true
@@ -111,11 +104,7 @@ PageType {
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "#2C2D30"
-            }
+            DividerType {}
         }
     }
 }

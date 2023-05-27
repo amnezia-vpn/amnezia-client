@@ -38,8 +38,9 @@ PageType {
         height: root.height - tabBar.implicitHeight
 
         StackView {
-            id: homeStackView
-            initialItem: "PageHome.qml" //PageController.getPagePath(PageEnum.PageSettingsServersList)
+            initialItem: PageHome {
+                id: pageHome
+            }
         }
 
         Item {
@@ -47,8 +48,9 @@ PageType {
         }
 
         StackView {
-            id: settingsStackView
-            initialItem: "PageSettingsServersList.qml" //PageController.getPagePath(PageEnum.PageSettingsServersList)
+            initialItem: PageSettingsServersList {
+                id: pageSettingsServersList
+            }
         }
     }
 
@@ -72,6 +74,9 @@ PageType {
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
+            onClicked: {
+                pageSettingsServersList.goToStartPage()
+            }
         }
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 1
@@ -80,6 +85,9 @@ PageType {
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
+            onClicked: {
+                pageHome.goToStartPage()
+            }
         }
     }
 

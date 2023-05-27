@@ -234,5 +234,10 @@
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>ui/qml/Controls2/PageType.qml</file>
         <file>ui/qml/Controls2/PopupType.qml</file>
+        <file>images/controls/edit-3.svg</file>
+        <file>ui/qml/Pages2/PageSettingsData.qml</file>
+        <file>ui/qml/Components/PageSettingsContainersListView.qml</file>
+        <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
+        <file>ui/qml/Controls2/DividerType.qml</file>
     </qresource>
 </RCC>

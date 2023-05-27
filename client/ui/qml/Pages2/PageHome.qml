@@ -37,21 +37,6 @@ PageType {
         }
     }
 
-    Connections {
-        target: InstallController
-
-        function onInstallContainerFinished() {
-            goToStartPage()
-            menu.visible = true
-            containersDropDown.menuVisible = true
-        }
-
-        function onInstallServerFinished() {
-            goToStartPage()
-            menu.visible = true
-        }
-    }
-
     Rectangle {
         id: buttonBackground
         anchors.fill: buttonContent
@@ -166,6 +151,10 @@ PageType {
                         ValueFilter {
                             roleName: "serviceType"
                             value: ProtocolEnum.Vpn
+                        },
+                        ValueFilter {
+                            roleName: "isSupported"
+                            value: true
                         }
                     ]
                 }

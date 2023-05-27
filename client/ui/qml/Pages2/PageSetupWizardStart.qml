@@ -26,8 +26,9 @@ PageType {
         target: InstallController
 
         function onInstallServerFinished() {
+            //todo add smt like changeStartPage
             goToStartPage()
-//            goToPage(PageEnum.PageStart)
+            goToPage(PageEnum.PageStart)
         }
     }
 

@@ -75,12 +75,12 @@ PageType {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
+                        anchors.rightMargin: -16
+                        anchors.leftMargin: -16
 
                         LabelWithButtonType {
                             id: container
                             Layout.fillWidth: true
-                            Layout.topMargin: 16
-                            Layout.bottomMargin: 16
 
                             text: name
                             descriptionText: description
@@ -92,11 +92,7 @@ PageType {
                             }
                         }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 1
-                            color: "#2C2D30"
-                        }
+                        DividerType {}
                     }
                 }
             }

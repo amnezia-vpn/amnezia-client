@@ -48,6 +48,8 @@ public slots:
     void setCurrentlyInstalledContainerIndex(int index);
     int getCurrentlyInstalledContainerIndex();
 
+    void removeAllContainers();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

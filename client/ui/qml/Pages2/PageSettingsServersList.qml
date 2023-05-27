@@ -57,11 +57,6 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
-            spacing: 16
-
             ListView {
                 id: servers
                 width: parent.width
@@ -85,8 +80,6 @@ PageType {
                         LabelWithButtonType {
                             id: server
                             Layout.fillWidth: true
-                            Layout.topMargin: 16
-                            Layout.bottomMargin: 16
 
                             text: name
                             descriptionText: hostName
@@ -98,11 +91,7 @@ PageType {
                             }
                         }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 1
-                            color: "#2C2D30"
-                        }
+                        DividerType {}
                     }
                 }
             }

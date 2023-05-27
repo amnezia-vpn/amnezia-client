@@ -23,6 +23,14 @@ PageType {
             closePage()
             PageController.showErrorMessage(errorMessage)
         }
+
+        function onInstallContainerFinished() {
+            goToStartPage()
+        }
+
+        function onInstallServerFinished() {
+            goToStartPage()
+        }
     }
 
     SortFilterProxyModel {

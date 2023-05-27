@@ -37,12 +37,11 @@ Drawer {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
-
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 24
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
             Layout.alignment: Qt.AlignHCenter
 
             text: "Данные для подключения"
@@ -52,7 +51,7 @@ Drawer {
         LabelWithButtonType {
             id: ip
             Layout.fillWidth: true
-            Layout.topMargin: 32
+            Layout.topMargin: 16
 
             text: "IP, логин и пароль от сервера"
             buttonImage: "qrc:/images/controls/chevron-right.svg"
@@ -62,11 +61,9 @@ Drawer {
                 root.visible = false
             }
         }
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: "#2C2D30"
-        }
+
+        DividerType {}
+
         LabelWithButtonType {
             Layout.fillWidth: true
 
@@ -78,10 +75,7 @@ Drawer {
                 root.visible = false
             }
         }
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: "#2C2D30"
-        }
+
+        DividerType {}
     }
 }
