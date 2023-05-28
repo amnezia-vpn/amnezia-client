@@ -66,10 +66,8 @@ echo "____________________________________"
 echo "............Deploy.................."
 echo "____________________________________"
 
-# Package 
+# Package
 echo "Packaging ..."
-
-#cd $DEPLOY_DIR
 
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
 cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
@@ -147,7 +145,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -volname $APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -volname Amnezia -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."

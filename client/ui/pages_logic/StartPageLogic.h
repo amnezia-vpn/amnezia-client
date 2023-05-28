@@ -23,7 +23,7 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
 
-    AUTO_PROPERTY(QString, privateKeyPassphrase);
+    AUTO_PROPERTY(QString, privateKeyPassphrase)
 
     READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:

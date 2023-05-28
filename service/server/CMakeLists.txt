@@ -94,10 +94,15 @@ include_directories(
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
 
-qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
-if(NOT IOS)
-    qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
+if(APPLE)
+    set_target_properties(${PROJECT} PROPERTIES
+        INSTALL_RPATH "@executable_path/../Frameworks"
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
 endif()
+
+qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
+qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
@@ -112,12 +117,10 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_ARTIFACT_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMAND_EXPAND_LISTS
-    )
-endif()
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)
