@@ -491,6 +491,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
+    const QJsonObject &nextcloudConfig = config.value(ProtocolProps::protoToString(Proto::Nextcloud)).toObject();
     //
 
     Vars vars;
@@ -568,6 +569,11 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({{"$SFTP_USER", sftpConfig.value(config_key::userName).toString() }});
     vars.append({{"$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() }});
 
+    // Nextcloud vars
+    QString port = nextcloudConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Nextcloud)));
+    vars.append({{"$NEXTCLOUD_PORT", port }});
+    vars.append({{"$NEXTCLOUD_ADMIN_USER", nextcloudConfig.value(config_key::adminUser).toString(protocols::nextcloud::defaultAdminUser) }});
+    vars.append({{"$NEXTCLOUD_ADMIN_PASSWORD", nextcloudConfig.value(config_key::adminPassword).toString(protocols::nextcloud::defaultAdminPassword) }});
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
@@ -661,7 +667,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     }
 
     ErrorCode errorCode = runScript(credentials,
-              replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+              replaceVars(script, genVarsForScript(credentials, container, containerConfig)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
