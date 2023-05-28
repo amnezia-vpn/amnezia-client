@@ -145,7 +145,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -volname /Volumes/$APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -volname Amnezia -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."
