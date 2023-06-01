@@ -60,6 +60,7 @@ Switch {
     }
 
     contentItem: ColumnLayout {
+    contentItem: ColumnLayout {
         id: content
 
         Text {

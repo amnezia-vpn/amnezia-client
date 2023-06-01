@@ -7,7 +7,7 @@ import ConnectionState 1.0
 Button {
     id: root
 
-    text: "Подключиться"
+    text: qsTr("Connect")
 
     background: Image {
         id: border
@@ -60,37 +60,37 @@ Button {
                 case ConnectionState.Disconnected: {
                     console.log("Disconnected")
                     connectionProccess.running = false
-                    root.text = "Подключиться"
+                    root.text = qsTr("Connect")
                     break
                 }
                 case ConnectionState.Preparing: {
                     console.log("Preparing")
                     connectionProccess.running = true
-                    root.text = "Подключение..."
+                    root.text = qsTr("Connection...")
                     break
                 }
                 case ConnectionState.Connecting: {
                     console.log("Connecting")
                     connectionProccess.running = true
-                    root.text = "Подключение..."
+                    root.text = qsTr("Connection...")
                     break
                 }
                 case ConnectionState.Connected: {
                     console.log("Connected")
                     connectionProccess.running = false
-                    root.text = "Подключено"
+                    root.text = qsTr("Connected")
                     break
                 }
                 case ConnectionState.Disconnecting: {
                     console.log("Disconnecting")
                     connectionProccess.running = true
-                    root.text = "Отключение..."
+                    root.text = qsTr("Disconnection...")
                     break
                 }
                 case ConnectionState.Reconnecting: {
                     console.log("Reconnecting")
                     connectionProccess.running = true
-                    root.text = "Переподключение..."
+                    root.text = qsTr("Reconnection...")
                     break
                 }
                 case ConnectionState.Error: {

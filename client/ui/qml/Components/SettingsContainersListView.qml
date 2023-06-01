@@ -14,6 +14,7 @@ import "../Controls2/TextTypes"
 ListView {
     id: root
 
+    width: parent.width
     height: root.contentItem.height
 
     clip: true
@@ -23,7 +24,7 @@ ListView {
     }
 
     delegate: Item {
-        implicitWidth: parent.width
+        implicitWidth: root.width
         implicitHeight: containerRadioButton.implicitHeight
 
         RadioButton {

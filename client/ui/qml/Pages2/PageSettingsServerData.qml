@@ -33,6 +33,7 @@ PageType {
                 descriptionText: "May be needed when changing other settings"
 
                 clickedFunction: function() {
+                    ContainersModel.clearCachedProfiles()
                 }
             }
 
@@ -45,6 +46,15 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected()) {
+                        ConnectionController.closeVpnConnection()
+                    }
+                    ServersModel.removeServer()
+                    if (!ServersModel.getServersCount()) {
+                        PageController.replaceStartPage()
+                    } else {
+                        goToStartPage()
+                    }
                 }
             }
 
@@ -57,6 +67,9 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected()) {
+                        ConnectionController.closeVpnConnection()
+                    }
                     ContainersModel.removeAllContainers()
                 }
             }

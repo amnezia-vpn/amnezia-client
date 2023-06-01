@@ -228,16 +228,26 @@
         <file>images/controls/download.svg</file>
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
         <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
-        <file>ui/qml/Components/ContainersPageHomeListView.qml</file>
+        <file>ui/qml/Components/HomeContainersListView.qml</file>
         <file>ui/qml/Controls2/TextTypes/CaptionTextType.qml</file>
         <file>images/controls/settings.svg</file>
-        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerInfo.qml</file>
         <file>ui/qml/Controls2/PageType.qml</file>
         <file>ui/qml/Controls2/PopupType.qml</file>
         <file>images/controls/edit-3.svg</file>
-        <file>ui/qml/Pages2/PageSettingsData.qml</file>
-        <file>ui/qml/Components/PageSettingsContainersListView.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerData.qml</file>
+        <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>ui/qml/Controls2/DividerType.qml</file>
+        <file>ui/qml/Controls2/DrawerType.qml</file>
+        <file>ui/qml/Controls2/StackViewType.qml</file>
+        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>images/controls/amnezia.svg</file>
+        <file>images/controls/app.svg</file>
+        <file>images/controls/radio.svg</file>
+        <file>images/controls/save.svg</file>
+        <file>images/controls/server.svg</file>
+        <file>ui/qml/Pages2/PageSettingsServerProtocols.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerServices.qml</file>
     </qresource>
 </RCC>

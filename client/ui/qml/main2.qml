@@ -4,8 +4,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageType 1.0
+import PageEnum 1.0
 
 import "Config"
+import "Controls2"
 
 Window  {
     id: root
@@ -27,9 +29,27 @@ Window  {
         color: "#0E0E11"
     }
 
-    StackView {
+    StackViewType {
+        id: rootStackView
+
         anchors.fill: parent
         focus: true
-        initialItem: PageController.getInitialPage()
+
+        Component.onCompleted: {
+            var pagePath = PageController.getPagePath(PageEnum.PageStart)
+            rootStackView.push(pagePath, { "objectName" : pagePath })
+        }
+    }
+
+    Connections {
+        target: PageController
+
+        function onReplaceStartPage() {
+            var pagePath = PageController.getInitialPage()
+            while (rootStackView.depth > 1) {
+                rootStackView.pop()
+            }
+            rootStackView.replace(pagePath, { "objectName" : pagePath })
+        }
     }
 }

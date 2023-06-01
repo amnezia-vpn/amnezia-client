@@ -111,15 +111,11 @@ Item {
         }
     }
 
-    Drawer {
+    DrawerType {
         id: menu
 
-        edge: Qt.BottomEdge
         width: parent.width
         height: parent.height * 0.9
-
-        clip: true
-        modal: true
 
         background: Rectangle {
             anchors.fill: parent

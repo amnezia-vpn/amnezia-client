@@ -179,7 +179,7 @@ void AmneziaApplication::registerTypes()
     qRegisterMetaType<PageProtocolLogicBase *>("PageProtocolLogicBase *");
 
 
-    declareQmlPageEnum();
+//    declareQmlPageEnum();
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
 

@@ -74,4 +74,3 @@ bool ConnectionController::closeVpnConnection()
     emit disconnectFromVpn();
     m_isConnected = false;
 }
-

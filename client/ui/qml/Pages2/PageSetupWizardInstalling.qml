@@ -26,10 +26,26 @@ PageType {
 
         function onInstallContainerFinished() {
             goToStartPage()
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
+                PageController.restorePageHomeState(true)
+            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
+                goToPage(PageEnum.PageSettingsServersList, false)
+                goToPage(PageEnum.PageSettingsServerInfo, false)
+            } else {
+                goToPage(PageEnum.PageHome)
+            }
         }
 
         function onInstallServerFinished() {
             goToStartPage()
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
+                PageController.restorePageHomeState()
+            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
+                goToPage(PageEnum.PageSettingsServersList, false)
+            } else {
+                var pagePath = PageController.getPagePath(PageEnum.PageStart)
+                stackView.replace(pagePath, { "objectName" : pagePath })
+            }
         }
     }
 

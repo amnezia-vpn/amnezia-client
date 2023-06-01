@@ -8,15 +8,11 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-Drawer {
+DrawerType {
     id: root
 
-    edge: Qt.BottomEdge
     width: parent.width
     height: parent.height * 0.4375
-
-    clip: true
-    modal: true
 
     background: Rectangle {
         anchors.fill: parent

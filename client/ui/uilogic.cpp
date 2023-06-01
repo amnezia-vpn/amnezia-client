@@ -149,13 +149,13 @@ void UiLogic::initializeUiLogic()
     connect(m_notificationHandler, &NotificationHandler::connectRequested, pageLogic<VpnLogic>(), &VpnLogic::onConnect);
     connect(m_notificationHandler, &NotificationHandler::disconnectRequested, pageLogic<VpnLogic>(), &VpnLogic::onDisconnect);
 
-    if (m_settings->serversCount() > 0) {
-        if (m_settings->defaultServerIndex() < 0) m_settings->setDefaultServer(0);
-        emit goToPage(Page::PageStart, true, false);
-    }
-    else {
-        emit goToPage(Page::PageSetupWizardStart, true, false);
-    }
+//    if (m_settings->serversCount() > 0) {
+//        if (m_settings->defaultServerIndex() < 0) m_settings->setDefaultServer(0);
+//        emit goToPage(Page::PageStart, true, false);
+//    }
+//    else {
+//        emit goToPage(Page::PageSetupWizardStart, true, false);
+//    }
 
     m_selectedServerIndex = m_settings->defaultServerIndex();
 

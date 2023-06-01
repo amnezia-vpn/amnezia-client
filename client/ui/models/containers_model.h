@@ -49,6 +49,7 @@ public slots:
     int getCurrentlyInstalledContainerIndex();
 
     void removeAllContainers();
+    void clearCachedProfiles();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

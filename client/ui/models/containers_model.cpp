@@ -86,6 +86,7 @@ void ContainersModel::setCurrentlyProcessedServerIndex(int index)
     beginResetModel();
     m_currentlyProcessedServerIndex = index;
     endResetModel();
+    emit defaultContainerChanged();
 }
 
 void ContainersModel::setCurrentlyInstalledContainerIndex(int index)
@@ -115,13 +116,21 @@ void ContainersModel::removeAllContainers()
     auto errorCode = serverController.removeAllContainers(m_settings->serverCredentials(m_currentlyProcessedServerIndex));
 
     if (errorCode == ErrorCode::NoError) {
-    beginResetModel();
+        beginResetModel();
         m_settings->setContainers(m_currentlyProcessedServerIndex, {});
         m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, DockerContainer::None);
         endResetModel();
     }
 
     //todo process errors
+}
+
+void ContainersModel::clearCachedProfiles()
+{
+    const auto &containers = m_settings->containers(m_currentlyProcessedServerIndex);
+    for (DockerContainer container : containers.keys()) {
+        m_settings->clearLastConnectionConfig(m_currentlyProcessedServerIndex, container);
+    }
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const {

@@ -8,10 +8,11 @@ Item {
     property StackView stackView: StackView.view
 
     function goToPage(page, slide = true) {
+        var pagePath = PageController.getPagePath(page)
         if (slide) {
-            root.stackView.push(PageController.getPagePath(page), {}, StackView.PushTransition)
+            root.stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         } else {
-            root.stackView.push(PageController.getPagePath(page), {}, StackView.Immediate)
+            root.stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
         }
     }
 

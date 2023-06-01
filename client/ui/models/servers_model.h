@@ -31,15 +31,16 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void setDefaultServerIndex(int index);
     const int getDefaultServerIndex();
+    bool isDefaultServerCurrentlyProcessed();
 
     const int getServersCount();
 
     void setCurrentlyProcessedServerIndex(int index);
     ServerCredentials getCurrentlyProcessedServerCredentials();
 
-    void addServer();
+    void addServer(const QJsonObject &server);
+    void removeServer();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

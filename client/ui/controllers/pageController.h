@@ -9,7 +9,10 @@
 namespace PageLoader
 {
     Q_NAMESPACE
-    enum class PageEnum { PageStart = 0, PageHome, PageSettings, PageShare,
+    enum class PageEnum { PageStart = 0, PageHome, PageShare,
+
+                          PageSettingsServersList, PageSettings, PageSettingsServerData, PageSettingsServerInfo,
+                          PageSettingsServerProtocols, PageSettingsServerServices,
 
                           PageSetupWizardStart, PageTest, PageSetupWizardCredentials, PageSetupWizardProtocols, PageSetupWizardEasy,
                           PageSetupWizardProtocolSettings, PageSetupWizardInstalling, PageSetupWizardConfigSource,
@@ -41,6 +44,8 @@ public slots:
 
 signals:
     void goToPageHome();
+    void restorePageHomeState(bool isContainerInstalled = false);
+    void replaceStartPage();
     void showErrorMessage(QString errorMessage);
 
 private:

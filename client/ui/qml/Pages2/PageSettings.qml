@@ -1,142 +1,109 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
-import SortFilterProxyModel 0.2
+import QtQuick.Dialogs
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerProps 1.0
-import ProtocolProps 1.0
 
 import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
-import "../Components"
 
 PageType {
     id: root
 
-    SortFilterProxyModel {
-        id: proxyServersModel
-        sourceModel: ServersModel
-        filters: [
-            ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
-            }
-        ]
-    }
+    FlickableType {
+        id: fl
+        anchors.top: root.top
+        anchors.bottom: root.bottom
+        contentHeight: content.height
 
         ColumnLayout {
             id: content
 
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            spacing: 16
+            HeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
-            Repeater {
-                id: header
-                model: proxyServersModel
+                headerText: qsTr("Settings")
+            }
 
-                delegate: HeaderType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 20
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
 
-                    actionButtonImage: "qrc:/images/controls/edit-3.svg"
-                    backButtonImage: "qrc:/images/controls/arrow-left.svg"
+                text: qsTr("Servers")
+                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                iconImage: "qrc:/images/controls/server.svg"
 
-                    headerText: name
-                    descriptionText: hostName
-
-                    actionButtonFunction: function() {
-                        connectionTypeSelection.visible = true
-                    }
-
-                    backButtonFunction: function() {
-                        closePage()
-                    }
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsServersList)
                 }
             }
 
-            TabBar {
-                id: tabBar
+            DividerType {}
 
+            LabelWithButtonType {
                 Layout.fillWidth: true
 
-                background: Rectangle {
-                    color: "transparent"
-                }
+                text: qsTr("Connection")
+                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                iconImage: "qrc:/images/controls/radio.svg"
 
-                TabButtonType {
-                    isSelected: tabBar.currentIndex === 0
-                    text: qsTr("Protocols")
-                }
-                TabButtonType {
-                    isSelected: tabBar.currentIndex === 1
-                    text: qsTr("Services")
-                }
-                TabButtonType {
-                    isSelected: tabBar.currentIndex === 2
-                    text: qsTr("Data")
+                clickedFunction: function() {
                 }
             }
 
-            StackLayout {
-                id: stackLayout
-                currentIndex: tabBar.currentIndex
+            DividerType {}
 
+            LabelWithButtonType {
                 Layout.fillWidth: true
-                height: root.height
 
-                StackView {
-                    id: protocolsStackView
-                    initialItem: PageSettingsContainersListView {
-                        model: SortFilterProxyModel {
-                            sourceModel: ContainersModel
-                            filters: [
-                                ValueFilter {
-                                    roleName: "serviceType"
-                                    value: ProtocolEnum.Vpn
-                                },
-                                ValueFilter {
-                                    roleName: "isSupported"
-                                    value: true
-                                }
-                            ]
-                        }
-                    }
-                }
+                text: qsTr("Application")
+                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                iconImage: "qrc:/images/controls/app.svg"
 
-                StackView {
-                    id: servicesStackView
-                    initialItem: PageSettingsContainersListView {
-                        model: SortFilterProxyModel {
-                            sourceModel: ContainersModel
-                            filters: [
-                                ValueFilter {
-                                    roleName: "serviceType"
-                                    value: ProtocolEnum.Other
-                                },
-                                ValueFilter {
-                                    roleName: "isSupported"
-                                    value: true
-                                }
-                            ]
-                        }
-                    }
-                }
-
-                StackView {
-                    id: dataStackView
-                    initialItem: PageSettingsData {
-
-                    }
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Backup")
+                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                iconImage: "qrc:/images/controls/save.svg"
+
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSetupWizardTextKey)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("About AmneziaVPN")
+                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                iconImage: "qrc:/images/controls/amnezia.svg"
+
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSetupWizardTextKey)
+                }
+            }
+
+            DividerType {}
         }
-//    }
+    }
 }

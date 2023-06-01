@@ -49,8 +49,9 @@ void InstallController::installServer(DockerContainer container, QJsonObject& co
         server.insert(config_key::containers, QJsonArray{ config });
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
-        m_settings->addServer(server);
-        m_settings->setDefaultServer(m_settings->serversCount() - 1);
+        m_serversModel->addServer(server);
+        auto newServerIndex = m_serversModel->index(m_serversModel->getServersCount() - 1);
+        m_serversModel->setData(newServerIndex, true, ServersModel::ServersModelRoles::IsDefaultRole);
 
         emit installServerFinished();
         return;

@@ -37,6 +37,17 @@ PageType {
         }
     }
 
+    Connections {
+        target: PageController
+
+        function onRestorePageHomeState(isContainerInstalled) {
+            menu.visible = true
+            if (isContainerInstalled) {
+                containersDropDown.menuVisible = true
+            }
+        }
+    }
+
     Rectangle {
         id: buttonBackground
         anchors.fill: buttonContent
@@ -96,15 +107,11 @@ PageType {
         }
     }
 
-    Drawer {
+    DrawerType {
         id: menu
 
-        edge: Qt.BottomEdge
         width: parent.width
         height: parent.height * 0.90
-
-        clip: true
-        modal: true
 
         background: Rectangle {
             anchors.fill: parent
@@ -180,7 +187,7 @@ PageType {
                         containersDropDown.menuVisible = true
                     }
 
-                    listView: ContainersPageHomeListView {
+                    listView: HomeContainersListView {
                         rootWidth: root.width
 
                         model: proxyContainersModel
@@ -251,81 +258,63 @@ PageType {
                         property variant delegateData: model
 
                         implicitWidth: serversMenuContent.width
-                        implicitHeight: serverRadioButton.implicitHeight
+                        implicitHeight: serverRadioButtonContent.implicitHeight
 
-                        RadioButton {
-                            id: serverRadioButton
+                        ColumnLayout {
+                            id: serverRadioButtonContent
+                            anchors.fill: parent
 
-                            implicitWidth: parent.width
-                            implicitHeight: serverRadioButtonContent.implicitHeight
+                            anchors.rightMargin: 16
+                            anchors.leftMargin: 16
 
-                            hoverEnabled: true
-
-                            checked: index === serversMenuContent.currentIndex
-
-                            ButtonGroup.group: serversRadioButtonGroup
-
-                            indicator: Rectangle {
-                                anchors.fill: parent
-                                color: serverRadioButton.hovered ? "#2C2D30" : "#1C1D21"
-
-                                Behavior on color {
-                                    PropertyAnimation { duration: 200 }
-                                }
-                            }
+                            spacing: 0
 
                             RowLayout {
-                                id: serverRadioButtonContent
-                                anchors.fill: parent
-
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
-
-                                z: 1
-
-                                Image {
-                                    source: "qrc:/images/controls/check.svg"
-                                    visible: serverRadioButton.checked
-                                    width: 24
-                                    height: 24
-
-                                    Layout.rightMargin: 8
-                                }
-
-                                Text {
-                                    id: serverRadioButtonText
-
-                                    text: name
-                                    color: "#D7D8DB"
-                                    font.pixelSize: 16
-                                    font.weight: 400
-                                    font.family: "PT Root UI VF"
-
-                                    height: 24
+                                VerticalRadioButton {
+                                    id: serverRadioButton
 
                                     Layout.fillWidth: true
-                                    Layout.topMargin: 20
-                                    Layout.bottomMargin: 20
+
+                                    text: name
+                                    descriptionText: "description"
+
+                                    checked: index === serversMenuContent.currentIndex
+
+                                    ButtonGroup.group: serversRadioButtonGroup
+
+                                    onClicked: {
+                                        serversMenuContent.currentIndex = index
+
+                                        isDefault = true
+                                        ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: serverRadioButton
+                                        cursorShape: Qt.PointingHandCursor
+                                        enabled: false
+                                    }
                                 }
 
                                 ImageButtonType {
                                     image: "qrc:/images/controls/settings.svg"
 
-//                                    onClicked:
+                                    implicitWidth: 56
+                                    implicitHeight: 56
+
+                                    z: 1
+
+                                    onClicked: function() {
+                                        ServersModel.setCurrentlyProcessedServerIndex(index)
+                                        ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                        goToPage(PageEnum.PageSettingsServerInfo)
+                                        menu.visible = false
+                                    }
                                 }
                             }
 
-                            onClicked: {
-                                serversMenuContent.currentIndex = index
-
-                                ServersModel.setDefaultServerIndex(index)
-                                ContainersModel.setCurrentlyProcessedServerIndex(index)
-                            }
-
-                            MouseArea {
-                                anchors.fill: serverRadioButton
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: false
+                            DividerType {
+                                Layout.fillWidth: true
                             }
                         }
                     }

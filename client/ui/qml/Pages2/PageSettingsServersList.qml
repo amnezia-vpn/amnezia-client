@@ -36,10 +36,6 @@ PageType {
         actionButtonFunction: function() {
             connectionTypeSelection.visible = true
         }
-
-        backButtonFunction: function() {
-            PageController.goToPageHome()
-        }
     }
 
     ConnectionTypeSelectionDrawer {
@@ -87,7 +83,8 @@ PageType {
 
                             clickedFunction: function() {
                                 ServersModel.setCurrentlyProcessedServerIndex(index)
-                                goToPage(PageEnum.PageSettings)
+                                ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                goToPage(PageEnum.PageSettingsServerInfo)
                             }
                         }
 

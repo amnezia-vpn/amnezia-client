@@ -22,16 +22,6 @@ PageType {
         }
     }
 
-    Connections {
-        target: InstallController
-
-        function onInstallServerFinished() {
-            //todo add smt like changeStartPage
-            goToStartPage()
-            goToPage(PageEnum.PageStart)
-        }
-    }
-
     FlickableType {
         id: fl
         anchors.top: root.top

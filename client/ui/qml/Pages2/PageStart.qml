@@ -17,6 +17,7 @@ PageType {
 
         function onGoToPageHome() {
             tabBar.currentIndex = 0
+            tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageHome))
         }
 
         function onShowErrorMessage(errorMessage) {
@@ -25,9 +26,8 @@ PageType {
         }
     }
 
-    StackLayout {
-        id: stackLayout
-        currentIndex: tabBar.currentIndex
+    StackViewType {
+        id: tabBarStackView
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -37,20 +37,15 @@ PageType {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
-        StackView {
-            initialItem: PageHome {
-                id: pageHome
-            }
+        function goToTabBarPage(page) {
+            var pagePath = PageController.getPagePath(page)
+            tabBarStackView.clear(StackView.PopTransition)
+            tabBarStackView.replace(pagePath, { "objectName" : pagePath })
         }
 
-        Item {
-
-        }
-
-        StackView {
-            initialItem: PageSettingsServersList {
-                id: pageSettingsServersList
-            }
+        Component.onCompleted: {
+            var pagePath = PageController.getPagePath(PageEnum.PageHome)
+            tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
     }
 
@@ -70,12 +65,12 @@ PageType {
             color: "#1C1D21"
         }
 
-
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
-                pageSettingsServersList.goToStartPage()
+                tabBarStackView.goToTabBarPage(PageEnum.PageHome)
+                ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
             }
         }
         TabImageButtonType {
@@ -86,7 +81,7 @@ PageType {
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
-                pageHome.goToStartPage()
+                tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
             }
         }
     }

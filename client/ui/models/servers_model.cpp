@@ -17,15 +17,14 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         || index.row() >= static_cast<int>(m_settings->serversCount())) {
         return false;
     }
-//    if (role == DescRole) {
-//        return m_data[index.row()].desc;
-//    }
-//    if (role == AddressRole) {
-//        return m_data[index.row()].address;
-//    }
-//    if (role == IsDefaultRole) {
-//        return m_data[index.row()].isDefault;
-//    }
+
+    switch (role) {
+        case IsDefaultRole: m_settings->setDefaultServer(index.row());
+        default: return true;
+    }
+
+    emit dataChanged(index, index);
+    return true;
 }
 
 QVariant ServersModel::data(const QModelIndex &index, int role) const
@@ -58,14 +57,6 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-//todo mode to setData?
-void ServersModel::setDefaultServerIndex(int index)
-{
-    //    beginResetModel();
-    m_settings->setDefaultServer(index);
-    //    endResetModel();
-}
-
 const int ServersModel::getDefaultServerIndex()
 {
     return m_settings->defaultServerIndex();
@@ -81,14 +72,38 @@ void ServersModel::setCurrentlyProcessedServerIndex(int index)
     m_currenlyProcessedServerIndex = index;
 }
 
+bool ServersModel::isDefaultServerCurrentlyProcessed()
+{
+    return m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex;
+}
+
 ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
 {
     return qvariant_cast<ServerCredentials>(data(index(m_currenlyProcessedServerIndex), CredentialsRole));
 }
 
-void ServersModel::addServer()
+void ServersModel::addServer(const QJsonObject &server)
 {
+    beginResetModel();
+    m_settings->addServer(server);
+    endResetModel();
+}
 
+void ServersModel::removeServer()
+{
+    beginResetModel();
+    m_settings->removeServer(m_currenlyProcessedServerIndex);
+
+    if (m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex) {
+        m_settings->setDefaultServer(0);
+    } else if (m_settings->defaultServerIndex() > m_currenlyProcessedServerIndex) {
+        m_settings->setDefaultServer(m_settings->defaultServerIndex() - 1);
+    }
+
+    if (m_settings->serversCount() == 0) {
+        m_settings->setDefaultServer(-1);
+    }
+    endResetModel();
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const {
