@@ -10,6 +10,11 @@
 
 #include "ipcserver.h"
 
+#ifdef Q_OS_MAC
+#include "macos/daemon/macosdaemon.h"
+#include "../../client/daemon/daemonlocalserver.h"
+#endif
+
 class QLocalServer;
 class QLocalSocket;
 class QProcess;
@@ -27,6 +32,9 @@ public:
     IpcServer m_ipcServer;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
+
+    MacOSDaemon daemon;
+    DaemonLocalServer server{qApp};
 };
 
 #endif // LOCALSERVER_H

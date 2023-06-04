@@ -5,14 +5,14 @@
 #ifndef DNSUTILSMACOS_H
 #define DNSUTILSMACOS_H
 
-#include "dnsutils.h"
+#include <systemconfiguration/scdynamicstore.h>
+#include <systemconfiguration/systemconfiguration.h>
 
 #include <QHostAddress>
 #include <QMap>
 #include <QString>
 
-#include <systemconfiguration/scdynamicstore.h>
-#include <systemconfiguration/systemconfiguration.h>
+#include "daemon/dnsutils.h"
 
 class DnsUtilsMacos final : public DnsUtils {
   Q_OBJECT

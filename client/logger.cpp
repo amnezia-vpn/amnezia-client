@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
+#include <QMetaEnum>
+#include <QJsonDocument>
 #include <QStandardPaths>
 #include <QUrl>
 
@@ -179,4 +181,81 @@ void Logger::cleanUp()
     dir.removeRecursively();
 
     clearServiceLogs();
+}
+
+Logger::Log::Log(Logger* logger, LogLevel logLevel)
+    : m_logger(logger), m_logLevel(logLevel), m_data(new Data()) {}
+
+Logger::Log::~Log() {
+    qDebug() << "Mozilla" << m_logger->className() << m_data->m_buffer.trimmed();
+    delete m_data;
+}
+
+Logger::Log Logger::error() { return Log(this, LogLevel::Error); }
+Logger::Log Logger::warning() { return Log(this, LogLevel::Warning); }
+Logger::Log Logger::info() { return Log(this, LogLevel::Info); }
+Logger::Log Logger::debug() { return Log(this, LogLevel::Debug); }
+QString Logger::sensitive(const QString& input) {
+#ifdef Q_DEBUG
+    return input;
+#else
+    Q_UNUSED(input);
+    return QString(8, 'X');
+#endif
+}
+
+
+#define CREATE_LOG_OP_REF(x)                  \
+Logger::Log& Logger::Log::operator<<(x t) {   \
+    m_data->m_ts << t << ' ';                 \
+    return *this;                             \
+}
+
+CREATE_LOG_OP_REF(uint64_t);
+CREATE_LOG_OP_REF(const char*);
+CREATE_LOG_OP_REF(const QString&);
+CREATE_LOG_OP_REF(const QByteArray&);
+CREATE_LOG_OP_REF(const void*);
+
+#undef CREATE_LOG_OP_REF
+
+Logger::Log& Logger::Log::operator<<(const QStringList& t) {
+    m_data->m_ts << '[' << t.join(",") << ']' << ' ';
+    return *this;
+}
+
+Logger::Log& Logger::Log::operator<<(const QJsonObject& t) {
+    m_data->m_ts << QJsonDocument(t).toJson(QJsonDocument::Indented) << ' ';
+    return *this;
+}
+
+Logger::Log& Logger::Log::operator<<(QTextStreamFunction t) {
+    m_data->m_ts << t;
+    return *this;
+}
+
+void Logger::Log::addMetaEnum(quint64 value, const QMetaObject* meta,
+                              const char* name) {
+    QMetaEnum me = meta->enumerator(meta->indexOfEnumerator(name));
+
+    QString out;
+    QTextStream ts(&out);
+
+    if (const char* scope = me.scope()) {
+        ts << scope << "::";
+    }
+
+    const char* key = me.valueToKey(static_cast<int>(value));
+    const bool scoped = me.isScoped();
+    if (scoped || !key) {
+        ts << me.enumName() << (!key ? "(" : "::");
+    }
+
+    if (key) {
+        ts << key;
+    } else {
+        ts << value << ")";
+    }
+
+    m_data->m_ts << out;
 }

@@ -35,6 +35,8 @@
 #include "ui/pages_logic/protocols/OpenVpnLogic.h"
 #include "ui/pages_logic/protocols/ShadowSocksLogic.h"
 
+#include "protocols/qml_register_protocols.h"
+
 #if defined(Q_OS_IOS)
 #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif

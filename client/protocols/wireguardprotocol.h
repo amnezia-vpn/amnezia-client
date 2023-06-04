@@ -10,6 +10,8 @@
 #include "vpnprotocol.h"
 #include "core/ipcclient.h"
 
+#include "mozilla/controllerimpl.h"
+
 class WireguardProtocol : public VpnProtocol
 {
     Q_OBJECT
@@ -20,6 +22,9 @@ public:
 
     ErrorCode start() override;
     void stop() override;
+
+    ErrorCode startMzImpl();
+    ErrorCode stopMzImpl();
 
 private:
     QString configPath() const;
@@ -40,6 +45,7 @@ private:
 
     bool m_isConfigLoaded = false;
 
+    QScopedPointer<ControllerImpl> m_impl;
 };
 
 #endif // WIREGUARDPROTOCOL_H
