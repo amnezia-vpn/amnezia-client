@@ -6,33 +6,32 @@
 #include "core/errorstrings.h"
 
 namespace {
-    enum class ConfigTypes {
-        Amnezia,
-        OpenVpn,
-        WireGuard
-    };
+enum class ConfigTypes { Amnezia, OpenVpn, WireGuard };
 
-    ConfigTypes checkConfigFormat(const QString &config)
-    {
-        const QString openVpnConfigPatternCli = "client";
-        const QString openVpnConfigPatternProto1 = "proto tcp";
-        const QString openVpnConfigPatternProto2 = "proto udp";
-        const QString openVpnConfigPatternDriver1 = "dev tun";
-        const QString openVpnConfigPatternDriver2 = "dev tap";
+ConfigTypes checkConfigFormat(const QString &config)
+{
+    const QString openVpnConfigPatternCli = "client";
+    const QString openVpnConfigPatternProto1 = "proto tcp";
+    const QString openVpnConfigPatternProto2 = "proto udp";
+    const QString openVpnConfigPatternDriver1 = "dev tun";
+    const QString openVpnConfigPatternDriver2 = "dev tap";
 
-        const QString wireguardConfigPatternSectionInterface = "[Interface]";
-        const QString wireguardConfigPatternSectionPeer = "[Peer]";
+    const QString wireguardConfigPatternSectionInterface = "[Interface]";
+    const QString wireguardConfigPatternSectionPeer = "[Peer]";
 
-        if (config.contains(openVpnConfigPatternCli) &&
-            (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2)) &&
-            (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
-            return ConfigTypes::OpenVpn;
-        } else if (config.contains(wireguardConfigPatternSectionInterface) && config.contains(wireguardConfigPatternSectionPeer)) {
-            return ConfigTypes::WireGuard;
-        }
-        return ConfigTypes::Amnezia;
+    if (config.contains(openVpnConfigPatternCli)
+        && (config.contains(openVpnConfigPatternProto1)
+            || config.contains(openVpnConfigPatternProto2))
+        && (config.contains(openVpnConfigPatternDriver1)
+            || config.contains(openVpnConfigPatternDriver2))) {
+        return ConfigTypes::OpenVpn;
+    } else if (config.contains(wireguardConfigPatternSectionInterface)
+               && config.contains(wireguardConfigPatternSectionPeer)) {
+        return ConfigTypes::WireGuard;
     }
+    return ConfigTypes::Amnezia;
 }
+} // namespace
 
 ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
@@ -64,6 +63,7 @@ void ImportController::extractConfigFromFile(const QUrl &fileUrl)
 void ImportController::extractConfigFromCode(QString code)
 {
     m_config = extractAmneziaConfig(code);
+    m_configFileName = "";
 }
 
 QString ImportController::getConfig()

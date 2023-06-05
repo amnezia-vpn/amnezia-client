@@ -39,8 +39,6 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            spacing: 16
-
             ListView {
                 // todo change id naming
                 id: containers
@@ -63,6 +61,8 @@ PageType {
                         anchors.leftMargin: 16
 
                         BackButtonType {
+                            id: backButton
+
                             Layout.topMargin: 20
                         }
 
@@ -136,6 +136,7 @@ PageType {
                             id: port
 
                             Layout.fillWidth: true
+                            Layout.topMargin: 16
                             headerText: "Port"
                         }
 
@@ -143,7 +144,7 @@ PageType {
                             // todo make it dynamic
                             implicitHeight: root.height - port.implicitHeight -
                                             transportProtoBackground.implicitHeight - transportProtoHeader.implicitHeight -
-                                            header.implicitHeight - installButton.implicitHeight - 100
+                                            header.implicitHeight - backButton.implicitHeight - installButton.implicitHeight - 116
 
                             color: "transparent"
                         }

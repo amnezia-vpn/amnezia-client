@@ -3,7 +3,6 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import PageType 1.0
 import PageEnum 1.0
 
 import "Config"

@@ -7,27 +7,48 @@ import ConnectionState 1.0
 Button {
     id: root
 
+    Connections {
+        target: ConnectionController
+
+        function onConnectionErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
     text: qsTr("Connect")
 
-    background: Image {
-        id: border
+    background: Item {
+        clip: true
 
-        source: connectionProccess.running ? "/images/connectionProgress.svg" :
-                                             ConnectionController.isConnected ? "/images/connectionOff.svg" : "/images/connectionOn.svg"
+        implicitHeight: border.implicitHeight
+        implicitWidth: border.implicitWidth
 
-        RotationAnimator {
-            id: connectionProccess
+        Image {
+            id: border
 
-            target: border
-            running: false
-            from: 0
-            to: 360
-            loops: Animation.Infinite
-            duration: 1250
+            source: connectionProccess.running ? "/images/connectionProgress.svg" :
+                                                 ConnectionController.isConnected ? "/images/connectionOff.svg" : "/images/connectionOn.svg"
+            RotationAnimator {
+                id: connectionProccess
+
+                target: border
+                running: false
+                from: 0
+                to: 360
+                loops: Animation.Infinite
+                duration: 1250
+            }
+
+            Behavior on source {
+                PropertyAnimation { duration: 200 }
+            }
         }
 
-        Behavior on source {
-            PropertyAnimation { duration: 200 }
+        MouseArea {
+            anchors.fill: parent
+
+            cursorShape: Qt.PointingHandCursor
+            enabled: false
         }
     }
 
@@ -46,7 +67,7 @@ Button {
     }
 
     onClicked: {
-        ConnectionController.isConnected ? ConnectionController.closeConnection() : ConnectionController.openConnection()
+        connectionProccess.running ? ConnectionController.closeConnection() : ConnectionController.openConnection()
     }
 
     Connections {
@@ -98,6 +119,8 @@ Button {
                 case ConnectionState.Error: {
                     console.log("Error")
                     connectionProccess.running = false
+                    root.text = qsTr("Connect")
+                    PageController.showErrorMessage(ConnectionController.getLastConnectionError())
                     break
                 }
             }

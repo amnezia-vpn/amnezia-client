@@ -22,17 +22,19 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
 
     switch (role) {
     case NameRole:
-//        return ContainerProps::containerHumanNames().value(container);
+        //        return ContainerProps::containerHumanNames().value(container);
     case DescRole:
-//        return ContainerProps::containerDescriptions().value(container);
+        //        return ContainerProps::containerDescriptions().value(container);
     case ConfigRole:
-        m_settings->setContainerConfig(m_currentlyProcessedServerIndex, container, value.toJsonObject());
+        m_settings->setContainerConfig(m_currentlyProcessedServerIndex,
+                                       container,
+                                       value.toJsonObject());
     case ServiceTypeRole:
-//        return ContainerProps::containerService(container);
+        //        return ContainerProps::containerService(container);
     case DockerContainerRole:
-//        return container;
+        //        return container;
     case IsInstalledRole:
-//        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
+        //        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
     case IsDefaultRole:
         m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
         emit defaultContainerChanged();

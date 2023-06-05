@@ -262,7 +262,7 @@ PageType {
                                     Layout.fillWidth: true
 
                                     text: name
-                                    descriptionText: "description"
+                                    descriptionText: hostName
 
                                     checked: index === serversMenuContent.currentIndex
 

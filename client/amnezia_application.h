@@ -11,7 +11,6 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "ui/uilogic.h"
 #include "configurators/vpn_configurator.h"
 
 #include "ui/models/servers_model.h"
@@ -54,7 +53,6 @@ public:
 
 private:
     QQmlApplicationEngine *m_engine {};
-    UiLogic *m_uiLogic {};
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
@@ -67,7 +65,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ServersModel> m_serversModel;
 
-    QScopedPointer<VpnConnection> m_vpnConnection;
+    QSharedPointer<VpnConnection> m_vpnConnection;
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;

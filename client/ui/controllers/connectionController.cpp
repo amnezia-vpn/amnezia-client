@@ -2,11 +2,31 @@
 
 #include <QApplication>
 
+#include "core/errorstrings.h"
+
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
-                                           QObject *parent) : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel)
+                                           const QSharedPointer<VpnConnection> &vpnConnection,
+                                           QObject *parent)
+    : QObject(parent)
+    , m_serversModel(serversModel)
+    , m_containersModel(containersModel)
+    , m_vpnConnection(vpnConnection)
 {
-
+    connect(m_vpnConnection.get(),
+            &VpnConnection::connectionStateChanged,
+            this,
+            &ConnectionController::connectionStateChanged);
+    connect(this,
+            &ConnectionController::connectToVpn,
+            m_vpnConnection.get(),
+            &VpnConnection::connectToVpn,
+            Qt::QueuedConnection);
+    connect(this,
+            &ConnectionController::disconnectFromVpn,
+            m_vpnConnection.get(),
+            &VpnConnection::disconnectFromVpn,
+            Qt::QueuedConnection);
 }
 
 void ConnectionController::openConnection()
@@ -21,19 +41,11 @@ void ConnectionController::openConnection()
     const QJsonObject &containerConfig = qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex,
                                                                                             ContainersModel::Roles::ConfigRole));
 
-//    if (m_settings->containers(serverIndex).isEmpty()) {
-//        set_labelErrorText(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
-//        set_pushButtonConnectChecked(false);
-//        return;
-//    }
+    if (container == DockerContainer::None) {
+        emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
+        return;
+    }
 
-//    if (container == DockerContainer::None) {
-//        set_labelErrorText(tr("VPN Protocol not chosen"));
-//        set_pushButtonConnectChecked(false);
-//        return;
-//    }
-
-    //todo error handling
     qApp->processEvents();
     emit connectToVpn(serverIndex, credentials, container, containerConfig);
 }
@@ -41,6 +53,11 @@ void ConnectionController::openConnection()
 void ConnectionController::closeConnection()
 {
     emit disconnectFromVpn();
+}
+
+QString ConnectionController::getLastConnectionError()
+{
+    return errorString(m_vpnConnection->lastError());
 }
 
 bool ConnectionController::isConnected()
