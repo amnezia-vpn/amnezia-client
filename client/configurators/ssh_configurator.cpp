@@ -69,14 +69,14 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
     p->setProcessEnvironment(prepareEnv());
     p->setProgram(qApp->applicationDirPath() + "\\cygwin\\putty.exe");
 
-    if (credentials.password.contains("PRIVATE KEY")) {
+    if (credentials.secretData.contains("PRIVATE KEY")) {
         // todo: connect by key
 //        p->setNativeArguments(QString("%1@%2")
-//            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.password));
+//            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.secretData));
     }
     else {
         p->setNativeArguments(QString("%1@%2 -pw %3")
-            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.password));
+            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.secretData));
     }
 #else
     p->setProgram("/bin/bash");

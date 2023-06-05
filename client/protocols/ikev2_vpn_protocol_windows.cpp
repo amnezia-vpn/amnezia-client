@@ -35,14 +35,14 @@ Ikev2Protocol::~Ikev2Protocol()
 
 void Ikev2Protocol::stop()
 {
-    setConnectionState(VpnProtocol::Disconnecting);
+    setConnectionState(Vpn::ConnectionState::Disconnecting);
     {
         if (! disconnect_vpn() ){
             qDebug()<<"We don't disconnect";
-            setConnectionState(VpnProtocol::Error);
+            setConnectionState(Vpn::ConnectionState::Error);
         }
         else {
-            setConnectionState(VpnProtocol::Disconnected);
+            setConnectionState(Vpn::ConnectionState::Disconnected);
         }
     }
 }
@@ -55,40 +55,40 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
     {
     case RASCS_OpenPort:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_PortOpened:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_ConnectDevice:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_DeviceConnected:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_AllDevicesConnected:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_Authenticate:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_AuthNotify:
         //qDebug()<<__FUNCTION__ << __LINE__;
         if (dwError != 0) {
             //qDebug() << "have error" << dwError;
-            setConnectionState(Disconnected);
+            setConnectionState(Vpn::ConnectionState::Disconnected);
         } else {
             //qDebug() << "RASCS_AuthNotify but no error" << dwError;
         }
         break;
     case RASCS_AuthRetry:
         //qDebug()<<__FUNCTION__ << __LINE__;
-        setConnectionState(Preparing);
+        setConnectionState(Vpn::ConnectionState::Preparing);
         break;
     case RASCS_AuthCallback:
         qDebug()<<__FUNCTION__ << __LINE__;
@@ -151,16 +151,16 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
         qDebug()<<__FUNCTION__ << __LINE__;
         break;
     case RASCS_PasswordExpired:
-        setConnectionState(Error);
+        setConnectionState(Vpn::ConnectionState::Error);
         qDebug()<<__FUNCTION__ << __LINE__;
         break;
 
     case RASCS_Connected: // = RASCS_DONE:
-        setConnectionState(Connected);
+        setConnectionState(Vpn::ConnectionState::Connected);
         //qDebug()<<__FUNCTION__ << __LINE__;
         break;
     case RASCS_Disconnected:
-        setConnectionState(Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
         //qDebug()<<__FUNCTION__ << __LINE__;
         break;
     default:
@@ -177,7 +177,7 @@ void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 ErrorCode Ikev2Protocol::start()
 {
     QByteArray cert = QByteArray::fromBase64(m_config[config_key::cert].toString().toUtf8());
-    setConnectionState(Connecting);
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
     QTemporaryFile certFile;
     certFile.setAutoRemove(false);
