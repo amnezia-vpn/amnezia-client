@@ -117,27 +117,8 @@ Item {
         width: parent.width
         height: parent.height * 0.9
 
-        background: Rectangle {
-            anchors.fill: parent
-            anchors.bottomMargin: -radius
-            radius: 16
-            color: "#1C1D21"
-
-            border.color: "#494B50"
-            border.width: 1
-        }
-
-        Overlay.modal: Rectangle {
-            color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
-        }
-
-        Header2Type {
+        ColumnLayout {
             id: header
-
-            headerText: root.headerText
-            backButtonImage: root.headerBackButtonImage
-
-            width: parent.width
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -146,8 +127,11 @@ Item {
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 
-            backButtonFunction: function() {
-                root.menuVisible = false
+            BackButtonType {
+                backButtonImage: root.headerBackButtonImage
+                backButtonFunction: function() {
+                    root.menuVisible = false
+                }
             }
         }
 
@@ -163,6 +147,17 @@ Item {
                 anchors.right: parent.right
 
                 spacing: 16
+
+                Header2Type {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+
+                    headerText: root.headerText
+
+                    width: parent.width
+                }
 
                 Loader {
                     id: listViewLoader

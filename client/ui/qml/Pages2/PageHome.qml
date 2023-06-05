@@ -113,20 +113,6 @@ PageType {
         width: parent.width
         height: parent.height * 0.90
 
-        background: Rectangle {
-            anchors.fill: parent
-            anchors.bottomMargin: -radius
-            radius: 16
-
-            color: "#1C1D21"
-            border.color: root.borderColor
-            border.width: 1
-        }
-
-        Overlay.modal: Rectangle {
-            color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
-        }
-
         ColumnLayout {
             id: serversMenuHeader
             anchors.top: parent.top

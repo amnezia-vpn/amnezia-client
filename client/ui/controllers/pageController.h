@@ -9,14 +9,14 @@
 namespace PageLoader
 {
     Q_NAMESPACE
-    enum class PageEnum { PageStart = 0, PageHome, PageShare,
+    enum class PageEnum { PageStart = 0, PageHome, PageShare, PageDeinstalling,
 
                           PageSettingsServersList, PageSettings, PageSettingsServerData, PageSettingsServerInfo,
                           PageSettingsServerProtocols, PageSettingsServerServices,
 
                           PageSetupWizardStart, PageTest, PageSetupWizardCredentials, PageSetupWizardProtocols, PageSetupWizardEasy,
                           PageSetupWizardProtocolSettings, PageSetupWizardInstalling, PageSetupWizardConfigSource,
-                          PageSetupWizardTextKey
+                          PageSetupWizardTextKey, PageSetupWizardViewConfig
     };
     Q_ENUM_NS(PageEnum)
 

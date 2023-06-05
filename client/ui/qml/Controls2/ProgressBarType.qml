@@ -11,9 +11,11 @@ ProgressBar {
         color: "#412102"
     }
 
-    contentItem: Rectangle {
-        width: root.visualPosition * root.width
-        height: root.height
-        color: "#FBB26A"
+    contentItem: Item {
+        Rectangle {
+            width: root.visualPosition * parent.width
+            height: parent.height
+            color: "#FBB26A"
+        }
     }
 }

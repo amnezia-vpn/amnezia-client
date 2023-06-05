@@ -18,19 +18,26 @@ public:
                               QObject *parent = nullptr);
 
 public slots:
-    bool importFromFile(const QUrl &fileUrl);
+    void importConfig();
+    void extractConfigFromFile(const QUrl &fileUrl);
+    void extractConfigFromCode(QString code);
+    QString getConfig();
+    QString getConfigFileName();
 
 signals:
     void importFinished();
+    void importErrorOccurred(QString errorMessage);
 private:
-    bool import(const QJsonObject &config);
-    bool importAmneziaConfig(QString data);
-    bool importOpenVpnConfig(const QString &data);
-    bool importWireGuardConfig(const QString &data);
+    QJsonObject extractAmneziaConfig(QString &data);
+    QJsonObject extractOpenVpnConfig(const QString &data);
+    QJsonObject extractWireGuardConfig(const QString &data);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     std::shared_ptr<Settings> m_settings;
+
+    QJsonObject m_config;
+    QString m_configFileName;
 
 };
 

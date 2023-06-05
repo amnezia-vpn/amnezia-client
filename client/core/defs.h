@@ -68,7 +68,10 @@ enum ErrorCode
     OpenSslFailed,
     OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
-    CloakExecutableCrashed
+    CloakExecutableCrashed,
+
+    // import and install errors
+    ImportInvalidConfigError
 };
 
 } // namespace amnezia

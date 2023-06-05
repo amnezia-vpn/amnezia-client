@@ -11,9 +11,20 @@ import "../Config"
 PageType {
     id: root
 
+    BackButtonType {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+        anchors.leftMargin: 16
+        anchors.topMargin: 20
+    }
+
     FlickableType {
         id: fl
-        anchors.top: root.top
+        anchors.top: backButton.bottom
         anchors.bottom: root.bottom
         contentHeight: content.height
 
@@ -30,9 +41,6 @@ PageType {
 
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
-
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Подключение к серверу"
             }

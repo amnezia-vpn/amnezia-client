@@ -17,7 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    HeaderType {
+    ColumnLayout {
         id: header
 
         anchors.top: parent.top
@@ -28,13 +28,19 @@ PageType {
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        actionButtonImage: "qrc:/images/controls/plus.svg"
-        backButtonImage: "qrc:/images/controls/arrow-left.svg"
+        BackButtonType {
+        }
 
-        headerText: "Серверы"
+        HeaderType {
+            Layout.fillWidth: true
 
-        actionButtonFunction: function() {
-            connectionTypeSelection.visible = true
+            actionButtonImage: "qrc:/images/controls/plus.svg"
+
+            headerText: "Серверы"
+
+            actionButtonFunction: function() {
+                connectionTypeSelection.visible = true
+            }
         }
     }
 

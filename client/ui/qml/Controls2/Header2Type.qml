@@ -6,10 +6,7 @@ import "TextTypes"
 Item {
     id: root
 
-    property string backButtonImage
     property string actionButtonImage
-
-    property var backButtonFunction
     property var actionButtonFunction
 
     property string headerText
@@ -21,25 +18,6 @@ Item {
     ColumnLayout {
         id: content
         anchors.fill: parent
-
-        ImageButtonType {
-            id: backButton
-
-            Layout.leftMargin: -6
-
-            image: root.backButtonImage
-            imageColor: "#D7D8DB"
-
-            visible: image ? true : false
-
-            onClicked: {
-                if (backButtonFunction && typeof backButtonFunction === "function") {
-                    backButtonFunction()
-                } else {
-                    closePage()
-                }
-            }
-        }
 
         RowLayout {
             Header2TextType {

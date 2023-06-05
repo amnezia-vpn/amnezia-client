@@ -13,14 +13,6 @@ import "../Config"
 PageType {
     id: root
 
-    Connections {
-        target: ImportController
-
-        function onImportFinished() {
-
-        }
-    }
-
     FlickableType {
         id: fl
         anchors.top: root.top
@@ -34,13 +26,18 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            BackButtonType {
+                Layout.topMargin: 20
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+            }
+
             HeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Подключение к серверу"
                 descriptionText: "Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.\n
@@ -71,7 +68,8 @@ PageType {
                 FileDialog {
                     id: fileDialog
                     onAccepted: {
-                        ImportController.importFromFile(selectedFile)
+                        ImportController.extractConfigFromFile(selectedFile)
+                        goToPage(PageEnum.PageSetupWizardViewConfig)
                     }
                 }
             }

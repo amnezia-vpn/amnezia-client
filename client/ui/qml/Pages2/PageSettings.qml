@@ -71,7 +71,6 @@ PageType {
                 iconImage: "qrc:/images/controls/app.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
 
@@ -85,7 +84,6 @@ PageType {
                 iconImage: "qrc:/images/controls/save.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
 
@@ -99,7 +97,6 @@ PageType {
                 iconImage: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
 

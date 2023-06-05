@@ -249,5 +249,10 @@
         <file>images/controls/server.svg</file>
         <file>ui/qml/Pages2/PageSettingsServerProtocols.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerServices.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
+        <file>images/controls/file-cog-2.svg</file>
+        <file>ui/qml/Components/QuestionDrawer.qml</file>
+        <file>ui/qml/Pages2/PageDeinstalling.qml</file>
+        <file>ui/qml/Controls2/BackButtonType.qml</file>
     </qresource>
 </RCC>

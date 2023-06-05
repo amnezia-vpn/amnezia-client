@@ -6,7 +6,6 @@ Item {
     id: root
 
     property string headerText
-    property string textFieldText
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
 
@@ -14,6 +13,7 @@ Item {
     property var clickedFunc
 
     property alias textField: textField
+    property alias textFieldText: textField.text
 
     implicitHeight: 74
 
@@ -53,7 +53,6 @@ Item {
                 id: textField
 
                 enabled: root.textFieldEditable
-                text: root.textFieldText
                 color: "#d7d8db"
 
                 placeholderText: textFieldPlaceholderText

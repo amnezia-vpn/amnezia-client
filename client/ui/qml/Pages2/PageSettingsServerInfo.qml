@@ -30,8 +30,6 @@ PageType {
     }
 
     ColumnLayout {
-        id: content
-
         anchors.fill: parent
 
         spacing: 16
@@ -40,24 +38,27 @@ PageType {
             id: header
             model: proxyServersModel
 
-            delegate: HeaderType {
-                Layout.fillWidth: true
+            delegate: ColumnLayout {
+                id: content
+
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                actionButtonImage: "qrc:/images/controls/edit-3.svg"
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
-
-                headerText: name
-                descriptionText: hostName
-
-                actionButtonFunction: function() {
-                    connectionTypeSelection.visible = true
+                BackButtonType {
                 }
 
-                backButtonFunction: function() {
-                    closePage()
+                HeaderType {
+                    Layout.fillWidth: true
+
+                    actionButtonImage: "qrc:/images/controls/edit-3.svg"
+
+                    headerText: name
+                    descriptionText: hostName
+
+                    actionButtonFunction: function() {
+                        connectionTypeSelection.visible = true
+                    }
                 }
             }
         }
@@ -74,23 +75,14 @@ PageType {
             TabButtonType {
                 isSelected: tabBar.currentIndex === 0
                 text: qsTr("Protocols")
-//                onClicked: {
-//                    tabBarStackView.goToTabBarPage(PageEnum.PageSettingsServerProtocols)
-//                }
             }
             TabButtonType {
                 isSelected: tabBar.currentIndex === 1
                 text: qsTr("Services")
-//                onClicked: {
-//                    tabBarStackView.goToTabBarPage(PageEnum.PageSettingsServerServices)
-//                }
             }
             TabButtonType {
                 isSelected: tabBar.currentIndex === 2
                 text: qsTr("Data")
-//                onClicked: {
-//                    tabBarStackView.goToTabBarPage(PageEnum.PageSettingsServerData)
-//                }
             }
         }
 
@@ -110,25 +102,5 @@ PageType {
                 stackView: root.stackView
             }
         }
-
-//        StackViewType {
-//            id: tabBarStackView
-
-//            Layout.preferredWidth: root.width
-//            Layout.preferredHeight: root.height - tabBar.implicitHeight - header.implicitHeight
-
-//            function goToTabBarPage(page) {
-//                var pagePath = PageController.getPagePath(page)
-//                while (tabBarStackView.depth > 1) {
-//                    tabBarStackView.pop()
-//                }
-//                tabBarStackView.replace(pagePath, { "objectName" : pagePath })
-//            }
-
-//            Component.onCompleted: {
-//                var pagePath = PageController.getPagePath(PageEnum.PageSettingsServerProtocols)
-//                tabBarStackView.push(pagePath, { "objectName" : pagePath })
-//            }
-//        }
     }
 }

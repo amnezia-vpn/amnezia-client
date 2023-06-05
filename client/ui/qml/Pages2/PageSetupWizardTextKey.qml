@@ -29,23 +29,26 @@ PageType {
 
             spacing: 16
 
+            BackButtonType {
+                Layout.topMargin: 20
+            }
+
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
 
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
-
-                headerText: "Ключ для подключения"
-                descriptionText: "Строка, которая начинается с vpn://..."
+                headerText: qsTr("Connection key")
+                descriptionText: qsTr("A line that starts with vpn://...")
             }
 
             TextFieldWithHeaderType {
+                id: textKey
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
 
-                headerText: "Ключ"
+                headerText: qsTr("Key")
                 textFieldPlaceholderText: "vpn://"
-                buttonText: "Вставить"
+                buttonText: qsTr("Insert")
 
                 clickedFunc: function() {
                     textField.text = ""
@@ -63,10 +66,11 @@ PageType {
         anchors.leftMargin: 16
         anchors.bottomMargin: 32
 
-        text: qsTr("Подключиться")
+        text: qsTr("Continue")
 
         onClicked: function() {
-//            goToPage(PageEnum.PageSetupWizardInstalling)
+            ImportController.extractConfigFromCode(textKey.textFieldText)
+            goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
 }

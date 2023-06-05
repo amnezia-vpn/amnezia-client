@@ -62,13 +62,14 @@ PageType {
                         anchors.rightMargin: 16
                         anchors.leftMargin: 16
 
+                        BackButtonType {
+                            Layout.topMargin: 20
+                        }
+
                         HeaderType {
                             id: header
 
                             Layout.fillWidth: true
-                            Layout.topMargin: 20
-
-                            backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                             headerText: "Установка " + name
                             descriptionText: "Эти настройки можно будет изменить позже"

@@ -1,6 +1,9 @@
 #include "importController.h"
 
 #include <QFile>
+#include <QFileInfo>
+
+#include "core/errorstrings.h"
 
 namespace {
     enum class ConfigTypes {
@@ -39,50 +42,68 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 
 }
 
-bool ImportController::importFromFile(const QUrl &fileUrl)
+void ImportController::extractConfigFromFile(const QUrl &fileUrl)
 {
     QFile file(fileUrl.toLocalFile());
     if (file.open(QIODevice::ReadOnly)) {
-        QByteArray data = file.readAll();
+        QString data = file.readAll();
 
         auto configFormat = checkConfigFormat(data);
         if (configFormat == ConfigTypes::OpenVpn) {
-            return importOpenVpnConfig(data);
+            m_config = extractOpenVpnConfig(data);
         } else if (configFormat == ConfigTypes::WireGuard) {
-            return importWireGuardConfig(data);
+            m_config = extractWireGuardConfig(data);
         } else {
-            return importAmneziaConfig(data);
+            m_config = extractAmneziaConfig(data);
         }
+
+        m_configFileName = QFileInfo(file.fileName()).fileName();
     }
-    return false;
 }
 
-bool ImportController::import(const QJsonObject &config)
+void ImportController::extractConfigFromCode(QString code)
+{
+    m_config = extractAmneziaConfig(code);
+}
+
+QString ImportController::getConfig()
+{
+    return QJsonDocument(m_config).toJson(QJsonDocument::Indented);
+}
+
+QString ImportController::getConfigFileName()
+{
+    return m_configFileName;
+}
+
+void ImportController::importConfig()
 {
     ServerCredentials credentials;
-    credentials.hostName = config.value(config_key::hostName).toString();
-    credentials.port = config.value(config_key::port).toInt();
-    credentials.userName = config.value(config_key::userName).toString();
-    credentials.secretData = config.value(config_key::password).toString();
+    credentials.hostName = m_config.value(config_key::hostName).toString();
+    credentials.port = m_config.value(config_key::port).toInt();
+    credentials.userName = m_config.value(config_key::userName).toString();
+    credentials.secretData = m_config.value(config_key::password).toString();
 
-    if (credentials.isValid() || config.contains(config_key::containers)) {
-        m_settings->addServer(config);
+    if (credentials.isValid() || m_config.contains(config_key::containers)) {
+        m_serversModel->addServer(m_config);
 
-        if (config.value(config_key::containers).toArray().isEmpty()) {
-            m_settings->setDefaultServer(m_settings->serversCount() - 1);
+        if (!m_config.value(config_key::containers).toArray().isEmpty()) {
+            auto newServerIndex = m_serversModel->index(m_serversModel->getServersCount() - 1);
+            m_serversModel->setData(newServerIndex, true, ServersModel::ServersModelRoles::IsDefaultRole);
         }
 
         emit importFinished();
     } else {
         qDebug() << "Failed to import profile";
-        qDebug().noquote() << QJsonDocument(config).toJson();
-        return false;
+        qDebug().noquote() << QJsonDocument(m_config).toJson();
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
     }
 
-    return true;
+    m_config = {};
+    m_configFileName.clear();
 }
 
-bool ImportController::importAmneziaConfig(QString data)
+QJsonObject ImportController::extractAmneziaConfig(QString &data)
 {
     data.replace("vpn://", "");
     QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
@@ -92,13 +113,7 @@ bool ImportController::importAmneziaConfig(QString data)
         ba = ba_uncompressed;
     }
 
-    QJsonObject config;
-    config = QJsonDocument::fromJson(ba).object();
-    if (!config.isEmpty()) {
-        return import(config);
-    }
-
-    return false;
+    return QJsonDocument::fromJson(ba).object();
 }
 
 //bool ImportController::importConnectionFromQr(const QByteArray &data)
@@ -116,7 +131,7 @@ bool ImportController::importAmneziaConfig(QString data)
 //    return false;
 //}
 
-bool ImportController::importOpenVpnConfig(const QString &data)
+QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
 {
     QJsonObject openVpnConfig;
     openVpnConfig[config_key::config] = data;
@@ -156,10 +171,10 @@ bool ImportController::importOpenVpnConfig(const QString &data)
 
     config[config_key::hostName] = hostName;
 
-    return import(config);
+    return config;
 }
 
-bool ImportController::importWireGuardConfig(const QString &data)
+QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 {
     QJsonObject lastConfig;
     lastConfig[config_key::config] = data;
@@ -200,5 +215,5 @@ bool ImportController::importWireGuardConfig(const QString &data)
 
     config[config_key::hostName] = hostName;
 
-    return import(config);
+    return config;
 }

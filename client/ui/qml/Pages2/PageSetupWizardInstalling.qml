@@ -109,7 +109,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
-                            value: progressBarValue
+//                            value: progressBarValue
 
                             Timer {
                                 id: timer
@@ -118,7 +118,7 @@ PageType {
                                 repeat: true
                                 running: true
                                 onTriggered: {
-                                    progressBarValue += 0.001
+                                    progressBar.value += 0.001
                                 }
                             }
                         }

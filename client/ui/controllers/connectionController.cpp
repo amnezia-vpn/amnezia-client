@@ -9,21 +9,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 }
 
-bool ConnectionController::onConnectionButtonClicked()
-{
-    if (!isConnected()) {
-        openVpnConnection();
-    } else {
-        closeVpnConnection();
-    }
-}
-
-bool ConnectionController::isConnected()
-{
-    return m_isConnected;
-}
-
-bool ConnectionController::openVpnConnection()
+void ConnectionController::openConnection()
 {
     int serverIndex = m_serversModel->getDefaultServerIndex();
     QModelIndex serverModelIndex = m_serversModel->index(serverIndex);
@@ -34,16 +20,6 @@ bool ConnectionController::openVpnConnection()
     QModelIndex containerModelIndex = m_containersModel->index(container);
     const QJsonObject &containerConfig = qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex,
                                                                                             ContainersModel::Roles::ConfigRole));
-
-    //todo error handling
-    qApp->processEvents();
-    emit connectToVpn(serverIndex, credentials, container, containerConfig);
-    m_isConnected = true;
-
-
-//    int serverIndex = m_settings->defaultServerIndex();
-//    ServerCredentials credentials = m_settings->serverCredentials(serverIndex);
-//    DockerContainer container = m_settings->defaultContainer(serverIndex);
 
 //    if (m_settings->containers(serverIndex).isEmpty()) {
 //        set_labelErrorText(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
@@ -57,20 +33,23 @@ bool ConnectionController::openVpnConnection()
 //        return;
 //    }
 
-
-//    const QJsonObject &containerConfig = m_settings->containerConfig(serverIndex, container);
-
-//    set_labelErrorText("");
-//    set_pushButtonConnectChecked(true);
-//    set_pushButtonConnectEnabled(false);
-
-//    qApp->processEvents();
-
-//    emit connectToVpn(serverIndex, credentials, container, containerConfig);
+    //todo error handling
+    qApp->processEvents();
+    emit connectToVpn(serverIndex, credentials, container, containerConfig);
 }
 
-bool ConnectionController::closeVpnConnection()
+void ConnectionController::closeConnection()
 {
     emit disconnectFromVpn();
-    m_isConnected = false;
+}
+
+bool ConnectionController::isConnected()
+{
+    return m_isConnected;
+}
+
+void ConnectionController::setIsConnected(bool isConnected)
+{
+    m_isConnected = isConnected;
+    emit isConnectedChanged();
 }

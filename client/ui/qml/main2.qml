@@ -36,7 +36,7 @@ Window  {
         focus: true
 
         Component.onCompleted: {
-            var pagePath = PageController.getPagePath(PageEnum.PageStart)
+            var pagePath = PageController.getInitialPage()
             rootStackView.push(pagePath, { "objectName" : pagePath })
         }
     }

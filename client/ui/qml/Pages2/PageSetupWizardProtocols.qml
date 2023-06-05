@@ -48,9 +48,12 @@ PageType {
 
             spacing: 16
 
+            BackButtonType {
+                width: parent.width
+            }
+
             HeaderType {
                 width: parent.width
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                 headerText: "Протокол подключения"
                 descriptionText: "Выберите более приоритетный для вас. Позже можно будет установить остальные протоколы и доп сервисы, вроде DNS-прокси и SFTP."

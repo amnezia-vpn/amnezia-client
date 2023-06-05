@@ -30,11 +30,22 @@ PageType {
         }
     }
 
+    BackButtonType {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+        anchors.leftMargin: 16
+        anchors.topMargin: 20
+    }
+
     FlickableType {
         id: fl
-        anchors.top: root.top
+        anchors.top: backButton.bottom
         anchors.bottom: root.bottom
-        contentHeight: content.implicitHeight + buttonContinue.anchors.bottomMargin
+        contentHeight: content.implicitHeight + continueButton.anchors.bottomMargin
 
         Column {
             id: content
@@ -44,7 +55,6 @@ PageType {
             anchors.right: parent.right
             anchors.rightMargin: 16
             anchors.leftMargin: 16
-            anchors.topMargin: 20
 
             spacing: 16
 
@@ -53,9 +63,7 @@ PageType {
 
                 implicitWidth: parent.width
 
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
-
-                headerText: qsTr("What is the level of Internet control in your region?")
+                headerText: qsTr("What is the level of internet control in your region?")
             }
 
             ListView {
@@ -118,11 +126,10 @@ PageType {
             }
 
             BasicButtonType {
-                id: buttonContinue
+                id: continueButton
 
                 implicitWidth: parent.width
-                anchors.topMargin: 24
-                anchors.bottomMargin: 32
+                anchors.bottomMargin: 24
 
                 text: qsTr("Continue")
 

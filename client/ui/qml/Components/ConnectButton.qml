@@ -13,7 +13,7 @@ Button {
         id: border
 
         source: connectionProccess.running ? "/images/connectionProgress.svg" :
-                                             ConnectionController.isConnected() ? "/images/connectionOff.svg" : "/images/connectionOn.svg"
+                                             ConnectionController.isConnected ? "/images/connectionOff.svg" : "/images/connectionOn.svg"
 
         RotationAnimator {
             id: connectionProccess
@@ -46,7 +46,7 @@ Button {
     }
 
     onClicked: {
-        ConnectionController.onConnectionButtonClicked()
+        ConnectionController.isConnected ? ConnectionController.closeConnection() : ConnectionController.openConnection()
     }
 
     Connections {
@@ -61,6 +61,7 @@ Button {
                     console.log("Disconnected")
                     connectionProccess.running = false
                     root.text = qsTr("Connect")
+                    ConnectionController.isConnected = false
                     break
                 }
                 case ConnectionState.Preparing: {
@@ -78,7 +79,8 @@ Button {
                 case ConnectionState.Connected: {
                     console.log("Connected")
                     connectionProccess.running = false
-                    root.text = qsTr("Connected")
+                    root.text = qsTr("Disconnect")
+                    ConnectionController.isConnected = true
                     break
                 }
                 case ConnectionState.Disconnecting: {

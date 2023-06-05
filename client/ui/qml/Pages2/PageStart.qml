@@ -46,6 +46,8 @@ PageType {
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
+            ServersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
+            ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
         }
     }
 

@@ -27,44 +27,54 @@ ListView {
 
     delegate: Item {
         implicitWidth: rootWidth
-        implicitHeight: containerRadioButton.implicitHeight
+        implicitHeight: content.implicitHeight
 
-        VerticalRadioButton {
-            id: containerRadioButton
+        ColumnLayout {
+            id: content
 
             anchors.fill: parent
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
-            text: name
-            descriptionText: description
+            VerticalRadioButton {
+                id: containerRadioButton
 
-            ButtonGroup.group: containersRadioButtonGroup
+                Layout.fillWidth: true
 
-            imageSource: "qrc:/images/controls/download.svg"
-            showImage: !isInstalled
+                text: name
+                descriptionText: description
 
-            checkable: isInstalled
-            checked: isDefault
+                ButtonGroup.group: containersRadioButtonGroup
 
-            onClicked: {
-                if (checked) {
-                    isDefault = true
-                    menuContent.currentIndex = index
-                    containersDropDown.menuVisible = false
-                } else {
-                    ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
-                    InstallController.setShouldCreateServer(false)
-                    goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                    containersDropDown.menuVisible = false
-                    menu.visible = false
+                imageSource: "qrc:/images/controls/download.svg"
+                showImage: !isInstalled
+
+                checkable: isInstalled
+                checked: isDefault
+
+                onClicked: {
+                    if (checked) {
+                        isDefault = true
+                        menuContent.currentIndex = index
+                        containersDropDown.menuVisible = false
+                    } else {
+                        ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
+                        InstallController.setShouldCreateServer(false)
+                        goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                        containersDropDown.menuVisible = false
+                        menu.visible = false
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: containerRadioButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
                 }
             }
 
-            MouseArea {
-                anchors.fill: containerRadioButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
+            DividerType {
+                Layout.fillWidth: true
             }
         }
 

@@ -10,24 +10,26 @@ class ConnectionController : public QObject
     Q_OBJECT
 
 public:
+    Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
+
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
                                   QObject *parent = nullptr);
 
-public slots:
-    bool onConnectionButtonClicked();
-
     bool isConnected();
+    void setIsConnected(bool isConnected);
+
+public slots:
+    void openConnection();
+    void closeConnection();
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void disconnectFromVpn();
     void connectionStateChanged(Vpn::ConnectionState state);
+    void isConnectedChanged();
 
 private:
-    bool openVpnConnection();
-    bool closeVpnConnection();
-
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
 
