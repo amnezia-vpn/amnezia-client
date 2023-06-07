@@ -38,8 +38,6 @@ ListView {
 
             ButtonGroup.group: containersRadioButtonGroup
 
-            checked: isDefault
-
             indicator: Rectangle {
                 anchors.fill: parent
                 color: containerRadioButton.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"

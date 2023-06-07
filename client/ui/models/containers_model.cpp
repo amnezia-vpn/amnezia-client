@@ -21,23 +21,25 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
     DockerContainer container = ContainerProps::allContainers().at(index.row());
 
     switch (role) {
-    case NameRole:
-        //        return ContainerProps::containerHumanNames().value(container);
-    case DescRole:
-        //        return ContainerProps::containerDescriptions().value(container);
-    case ConfigRole:
-        m_settings->setContainerConfig(m_currentlyProcessedServerIndex,
-                                       container,
-                                       value.toJsonObject());
-    case ServiceTypeRole:
-        //        return ContainerProps::containerService(container);
-    case DockerContainerRole:
-        //        return container;
-    case IsInstalledRole:
-        //        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
-    case IsDefaultRole:
-        m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
-        emit defaultContainerChanged();
+        case NameRole:
+            //        return ContainerProps::containerHumanNames().value(container);
+        case DescRole:
+            //        return ContainerProps::containerDescriptions().value(container);
+        case ConfigRole:
+            m_settings->setContainerConfig(m_currentlyProcessedServerIndex,
+                                           container,
+                                           value.toJsonObject());
+        case ServiceTypeRole:
+            //        return ContainerProps::containerService(container);
+        case DockerContainerRole:
+            //        return container;
+        case IsInstalledRole:
+            //        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
+        case IsDefaultRole: {
+            m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
+            m_defaultContainerIndex = container;
+            emit defaultContainerChanged();
+        }
     }
 
     emit dataChanged(index, index);
@@ -58,8 +60,10 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
             return ContainerProps::containerHumanNames().value(container);
         case DescRole:
             return ContainerProps::containerDescriptions().value(container);
-        case ConfigRole:
-            return m_settings->containerConfig(m_currentlyProcessedServerIndex, container);
+        case ConfigRole: {
+            if (container == DockerContainer::None) return QJsonObject();
+            return m_containers.value(container);
+        }
         case ServiceTypeRole:
             return ContainerProps::containerService(container);
         case DockerContainerRole:
@@ -71,11 +75,11 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         case EasySetupDescriptionRole:
             return ContainerProps::easySetupDescription(container);
         case IsInstalledRole:
-            return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
+            return m_containers.contains(container);
         case IsCurrentlyInstalledRole:
             return container == static_cast<DockerContainer>(m_currentlyInstalledContainerIndex);
         case IsDefaultRole:
-            return container == m_settings->defaultContainer(m_currentlyProcessedServerIndex);
+            return container == m_defaultContainerIndex;
         case IsSupportedRole:
             return ContainerProps::isSupportedByCurrentPlatform(container);
     }
@@ -87,6 +91,8 @@ void ContainersModel::setCurrentlyProcessedServerIndex(int index)
 {
     beginResetModel();
     m_currentlyProcessedServerIndex = index;
+    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+    m_defaultContainerIndex = m_settings->defaultContainer(m_currentlyProcessedServerIndex);
     endResetModel();
     emit defaultContainerChanged();
 }
@@ -98,12 +104,12 @@ void ContainersModel::setCurrentlyInstalledContainerIndex(int index)
 
 DockerContainer ContainersModel::getDefaultContainer()
 {
-    return m_settings->defaultContainer(m_currentlyProcessedServerIndex);
+    return m_defaultContainerIndex;
 }
 
 QString ContainersModel::getDefaultContainerName()
 {
-    return ContainerProps::containerHumanNames().value(getDefaultContainer());
+    return ContainerProps::containerHumanNames().value(m_defaultContainerIndex);
 }
 
 int ContainersModel::getCurrentlyInstalledContainerIndex()

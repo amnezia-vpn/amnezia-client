@@ -2,24 +2,28 @@
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
-
+    m_servers = m_settings->serversArray();
+    m_defaultServerIndex = m_settings->defaultServerIndex();
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(m_settings->serversCount());
+    return static_cast<int>(m_servers.size());
 }
 
 bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid() || index.row() < 0
-        || index.row() >= static_cast<int>(m_settings->serversCount())) {
+        || index.row() >= static_cast<int>(m_servers.size())) {
         return false;
     }
 
     switch (role) {
-        case IsDefaultRole: m_settings->setDefaultServer(index.row());
+        case IsDefaultRole: {
+            m_settings->setDefaultServer(index.row());
+            m_defaultServerIndex = m_settings->defaultServerIndex();
+        }
         default: return true;
     }
 
@@ -29,12 +33,11 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 QVariant ServersModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_settings->serversCount())) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_servers.size())) {
         return QVariant();
     }
 
-    const QJsonArray &servers = m_settings->serversArray();
-    const QJsonObject server = servers.at(index.row()).toObject();
+    const QJsonObject server = m_servers.at(index.row()).toObject();
 
     switch (role) {
     case NameRole: {
@@ -49,7 +52,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case CredentialsRole:
         return QVariant::fromValue(m_settings->serverCredentials(index.row()));
     case IsDefaultRole:
-        return index.row() == m_settings->defaultServerIndex();
+        return index.row() == m_defaultServerIndex;
     case IsCurrentlyProcessedRole:
         return index.row() == m_currenlyProcessedServerIndex;
     }
@@ -59,12 +62,12 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
 
 const int ServersModel::getDefaultServerIndex()
 {
-    return m_settings->defaultServerIndex();
+    return m_defaultServerIndex;
 }
 
 const int ServersModel::getServersCount()
 {
-    return m_settings->serversCount();
+    return m_servers.count();
 }
 
 void ServersModel::setCurrentlyProcessedServerIndex(int index)
@@ -74,7 +77,7 @@ void ServersModel::setCurrentlyProcessedServerIndex(int index)
 
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
-    return m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex;
+    return m_defaultServerIndex == m_currenlyProcessedServerIndex;
 }
 
 ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
@@ -86,6 +89,7 @@ void ServersModel::addServer(const QJsonObject &server)
 {
     beginResetModel();
     m_settings->addServer(server);
+    m_servers = m_settings->serversArray();
     endResetModel();
 }
 
@@ -93,6 +97,7 @@ void ServersModel::removeServer()
 {
     beginResetModel();
     m_settings->removeServer(m_currenlyProcessedServerIndex);
+    m_servers = m_settings->serversArray();
 
     if (m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex) {
         m_settings->setDefaultServer(0);
