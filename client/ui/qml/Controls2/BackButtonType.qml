@@ -34,22 +34,6 @@ Item {
             Layout.fillWidth: true
 
             color: "transparent"
-
-            ShaderEffectSource {
-                id: effectSource
-
-                sourceItem: background
-                anchors.fill: background
-                sourceRect: Qt.rect(x,y, width, height)
-            }
-
-            FastBlur {
-                id: blur
-                anchors.fill: effectSource
-
-                source: effectSource
-                radius: 100
-            }
         }
     }
 }

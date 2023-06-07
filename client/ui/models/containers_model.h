@@ -55,8 +55,13 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    QMap<DockerContainer, QJsonObject> m_containers;
+
+
     int m_currentlyProcessedServerIndex;
     int m_currentlyInstalledContainerIndex;
+    DockerContainer m_defaultContainerIndex;
+
     std::shared_ptr<Settings> m_settings;
 };
 

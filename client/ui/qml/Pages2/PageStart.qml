@@ -45,9 +45,9 @@ PageType {
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            tabBarStackView.push(pagePath, { "objectName" : pagePath })
             ServersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
             ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
+            tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
     }
 
@@ -71,8 +71,8 @@ PageType {
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
-                tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
+                tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             }
         }
         TabImageButtonType {

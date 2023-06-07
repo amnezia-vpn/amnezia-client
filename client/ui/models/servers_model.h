@@ -46,8 +46,11 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    QJsonArray m_servers;
+
     std::shared_ptr<Settings> m_settings;
 
+    int m_defaultServerIndex;
     int m_currenlyProcessedServerIndex;
 };
 

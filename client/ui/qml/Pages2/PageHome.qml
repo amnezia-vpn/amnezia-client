@@ -137,21 +137,6 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 spacing: 8
 
-                SortFilterProxyModel {
-                    id: proxyContainersModel
-                    sourceModel: ContainersModel
-                    filters: [
-                        ValueFilter {
-                            roleName: "serviceType"
-                            value: ProtocolEnum.Vpn
-                        },
-                        ValueFilter {
-                            roleName: "isSupported"
-                            value: true
-                        }
-                    ]
-                }
-
                 DropDownType {
                     id: containersDropDown
 
@@ -176,7 +161,20 @@ PageType {
                     listView: HomeContainersListView {
                         rootWidth: root.width
 
-                        model: proxyContainersModel
+                        model: SortFilterProxyModel {
+                            id: proxyContainersModel
+                            sourceModel: ContainersModel
+                            filters: [
+                                ValueFilter {
+                                    roleName: "serviceType"
+                                    value: ProtocolEnum.Vpn
+                                },
+                                ValueFilter {
+                                    roleName: "isSupported"
+                                    value: true
+                                }
+                            ]
+                        }
                         currentIndex: ContainersModel.getDefaultContainer()
                     }
                 }
