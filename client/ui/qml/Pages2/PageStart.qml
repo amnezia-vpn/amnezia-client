@@ -78,6 +78,7 @@ PageType {
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
+            onClicked: {}
         }
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 2

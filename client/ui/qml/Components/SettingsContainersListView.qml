@@ -18,6 +18,7 @@ ListView {
     height: root.contentItem.height
 
     clip: true
+    interactive: false
 
     ButtonGroup {
         id: containersRadioButtonGroup
@@ -89,8 +90,7 @@ ListView {
 
             onClicked: {
                 if (isInstalled) {
-//                    isDefault = true
-//                    root.currentIndex = index
+                    goToPage(PageEnum.PageSettingsServerProtocol)
                 } else {
                     ContainersModel.setCurrentlyInstalledContainerIndex(root.model.mapToSource(index))
                     InstallController.setShouldCreateServer(false)

@@ -67,6 +67,7 @@ PageType {
                 model: ServersModel
 
                 clip: true
+                interactive: false
 
                 delegate: Item {
                     implicitWidth: servers.width

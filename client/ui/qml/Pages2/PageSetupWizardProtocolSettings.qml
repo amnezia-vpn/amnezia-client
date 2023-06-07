@@ -12,6 +12,7 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
@@ -83,53 +84,11 @@ PageType {
                             text: "Network protocol"
                         }
 
-                        Rectangle {
-                            id: transportProtoBackground
+                        TransportProtoSelector {
+                            id: transportProtoSelector
 
-                            implicitWidth: transportProtoButtonGroup.implicitWidth
-                            implicitHeight: transportProtoButtonGroup.implicitHeight
-
-                            color: "#1C1D21"
-                            radius: 16
-
-                            RowLayout {
-                                id: transportProtoButtonGroup
-
-                                property int currentIndex
-                                spacing: 0
-
-                                HorizontalRadioButton {
-                                    checked: transportProtoButtonGroup.currentIndex === 0
-
-                                    implicitWidth: (root.width - 32) / 2
-                                    text: "UDP"
-
-                                    hoverEnabled: !transportProtoButtonMouseArea.enabled
-
-                                    onClicked: {
-                                        transportProtoButtonGroup.currentIndex = 0
-                                    }
-                                }
-
-                                HorizontalRadioButton {
-                                    checked: transportProtoButtonGroup.currentIndex === 1
-
-                                    implicitWidth: (root.width - 32) / 2
-                                    text: "TCP"
-
-                                    hoverEnabled: !transportProtoButtonMouseArea.enabled
-
-                                    onClicked: {
-                                        transportProtoButtonGroup.currentIndex = 1
-                                    }
-                                }    
-                            }
-
-                            MouseArea {
-                                id: transportProtoButtonMouseArea
-
-                                anchors.fill: parent
-                            }
+                            Layout.fillWidth: true
+                            rootWidth: root.width
                         }
 
                         TextFieldWithHeaderType {
@@ -143,7 +102,7 @@ PageType {
                         Rectangle {
                             // todo make it dynamic
                             implicitHeight: root.height - port.implicitHeight -
-                                            transportProtoBackground.implicitHeight - transportProtoHeader.implicitHeight -
+                                            transportProtoSelector.implicitHeight - transportProtoHeader.implicitHeight -
                                             header.implicitHeight - backButton.implicitHeight - installButton.implicitHeight - 116
 
                             color: "transparent"
@@ -159,7 +118,7 @@ PageType {
 
                             onClicked: function() {
                                 goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.install(dockerContainer, port.textFieldText, transportProtoButtonGroup.currentIndex)
+                                InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
                         }
 
@@ -172,10 +131,10 @@ PageType {
                             } else {
                                 port.textFieldText = ProtocolProps.defaultPort(defaultContainerProto)
                             }
-                            transportProtoButtonGroup.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
+                            transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
 
                             port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
-                            transportProtoButtonMouseArea.enabled = !ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                            transportProtoSelector.mouseArea.enabled = !ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
                         }
                     }
                 }

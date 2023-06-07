@@ -164,7 +164,7 @@ PageType {
 
                     text: root.currentContainerName
                     textColor: "#0E0E11"
-                    headerText: "Протокол подключения"
+                    headerText: qsTr("Протокол подключения")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                     onRootButtonClicked: function() {
@@ -198,7 +198,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/plus.svg"
 
-                headerText: "Серверы"
+                headerText: qsTr("Servers")
 
                 actionButtonFunction: function() {
                     menu.visible = false
@@ -237,6 +237,7 @@ PageType {
                     currentIndex: ServersModel.getDefaultServerIndex()
 
                     clip: true
+                    interactive: false
 
                     delegate: Item {
                         id: menuContentDelegate

@@ -20,6 +20,7 @@ ListView {
     height: menuContent.contentItem.height
 
     clip: true
+    interactive: false
 
     ButtonGroup {
         id: containersRadioButtonGroup

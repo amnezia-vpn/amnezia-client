@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "TextTypes"
+
 RadioButton {
     id: root
 
@@ -74,15 +76,9 @@ RadioButton {
         anchors.fill: parent
         spacing: 16
 
-        Text {
+        ButtonTextType {
             text: root.text
-            wrapMode: Text.WordWrap
-            color: "#D7D8DB"
-            font.pixelSize: 16
-            font.weight: 400
-            font.family: "PT Root UI VF"
 
-            height: 24
             Layout.fillWidth: true
             Layout.rightMargin: 16
             Layout.leftMargin: 16

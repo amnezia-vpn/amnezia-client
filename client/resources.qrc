@@ -254,5 +254,8 @@
         <file>ui/qml/Components/QuestionDrawer.qml</file>
         <file>ui/qml/Pages2/PageDeinstalling.qml</file>
         <file>ui/qml/Controls2/BackButtonType.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerProtocol.qml</file>
+        <file>ui/qml/Components/Protocols/OpenVpnSettings.qml</file>
+        <file>ui/qml/Components/TransportProtoSelector.qml</file>
     </qresource>
 </RCC>
