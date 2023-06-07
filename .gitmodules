@@ -58,3 +58,6 @@
 [submodule "client/3rd/mbedtls"]
 	path = client/3rd/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "client/3rd-prebuilt"]
+	path = client/3rd-prebuilt
+	url = git@github.com:amnezia-vpn/3rd-prebuilt.git
