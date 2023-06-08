@@ -54,12 +54,13 @@ else(IOS)
 
         set(OPENSSL_PATH "${CLIENT_ROOT_DIR}/3rd/OpenSSL")
         if(WIN32)
+            set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/lib/windows/include")
             if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-                set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/x86_64/libssl.lib")
-                set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/x86_64/libcrypto.lib")
+                set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/win64/libssl.lib")
+                set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/win64/libcrypto.lib")
             else()
-                set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/x86/libssl.lib")
-                set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/x86/libcrypto.lib")
+                set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/windows/win32/libssl.lib")
+                set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/windows/win32/libcrypto.lib")
             endif()
         elseif(APPLE AND NOT IOS)
             set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/macos/x86_64/libssl.a")
@@ -71,7 +72,7 @@ else(IOS)
             set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_PATH}/lib/ios/iphone/libcrypto.a")
         elseif(ANDROID)
             set(abi ${CMAKE_ANDROID_ARCH_ABI})
-
+            set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/lib/android/include")
             set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libcrypto.a")
             set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIBRARIES_DIR}/android/${abi}/libssl.a")
             set(OPENSSL_LIB_SSL_PATH "${OPENSSL_PATH}/lib/android/${abi}/libssl.a")
@@ -82,7 +83,7 @@ else(IOS)
 
         file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
             DESTINATION ${OPENSSL_LIBRARIES_DIR})
-        file(COPY "${OPENSSL_PATH}/include"
+        file(COPY "${OPENSSL_INCLUDE_DIR}"
             DESTINATION ${OPENSSL_ROOT_DIR})
     endif()
 
