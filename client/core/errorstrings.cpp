@@ -24,6 +24,7 @@ QString errorString(ErrorCode code){
     case(SshInternalError): return QObject::tr("Ssh internal error");
     case(SshPrivateKeyError): return QObject::tr("Invalid private key or invalid passphrase entered");
     case(SshPrivateKeyFormatError): return QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types");
+    case(SshTimeoutError): return QObject::tr("Timeout connecting to server");
 
     // Libssh sftp errors
     case(SshSftpEofError): return QObject::tr("Sftp error: End-of-file encountered");

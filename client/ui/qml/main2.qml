@@ -16,17 +16,15 @@ Window  {
     minimumWidth: GC.isDesktop() ? 360 : 0
     minimumHeight: GC.isDesktop() ? 640 : 0
 
+    color: "#0E0E11"
+
+    // todo
     onClosing: function() {
         console.debug("QML onClosing signal")
         UiLogic.onCloseWindow()
     }
 
     title: "AmneziaVPN"
-
-    Rectangle {
-        anchors.fill: parent
-        color: "#0E0E11"
-    }
 
     StackViewType {
         id: rootStackView

@@ -74,6 +74,7 @@ PageType {
                             PageController.replaceStartPage()
                         } else {
                             goToStartPage()
+                            goToPage(PageEnum.PageSettingsServersList)
                         }
                     }
                     questionDrawer.noButtonFunction = function() {

@@ -24,10 +24,10 @@ Button {
         radius: 16
         color: {
             if (root.enabled) {
-                if(root.pressed) {
+                if (root.pressed) {
                     return pressedColor
                 }
-                return hovered ? hoveredColor : defaultColor
+                return root.hovered ? hoveredColor : defaultColor
             } else {
                 return disabledColor
             }
