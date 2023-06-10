@@ -47,7 +47,7 @@ if(IOS)
     include_directories(${CLIENT_ROOT_DIR}/3rd/mbedtls/include)
 else(IOS)
     if(NOT LINUX)
-        set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rd/OpenSSL")
+        set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd/OpenSSL")
         set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
         set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
         set(OPENSSL_LIBRARIES "ssl" "crypto")
@@ -107,7 +107,7 @@ add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
 include_directories(
-    ${CLIENT_ROOT_DIR}/3rd/OpenSSL/include
+    ${OPENSSL_INCLUDE_DIR}
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain
