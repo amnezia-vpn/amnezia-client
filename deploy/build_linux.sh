@@ -28,6 +28,7 @@ APP_FILENAME=$APP_NAME.app
 APP_DOMAIN=org.amneziavpn.package
 
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/linux
+PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/deploy-prebuilt/linux/client/bin
 INSTALLER_DATA_DIR=$PROJECT_DIR/deploy/installer/packages/$APP_DOMAIN/data
 
 PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
@@ -62,6 +63,7 @@ cmake --build . --config release
 #echo "............Deploy.................."
 
 cp -r $DEPLOY_DATA_DIR/* $APP_DIR
+cp -r PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/deploy-prebuilt/linux/client/bin/* $APP_DIR
 
 if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
   wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
