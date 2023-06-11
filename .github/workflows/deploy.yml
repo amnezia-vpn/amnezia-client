@@ -43,7 +43,6 @@ jobs:
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         ls client/3rd-prebuilt
         echo "***"
-        ls deploy/data/deploy-prebuilt
         bash deploy/build_linux.sh
 
     - name: 'Upload installer artifact'

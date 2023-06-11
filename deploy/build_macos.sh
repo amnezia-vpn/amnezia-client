@@ -28,7 +28,9 @@ PLIST_NAME=$APP_NAME.plist
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
+PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/deploy-prebuilt/macos
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
+
 INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 
@@ -114,6 +116,7 @@ fi
 echo "Packaging installer..."
 mkdir -p $INSTALLER_DATA_DIR
 cp -av $PROJECT_DIR/deploy/installer $BUILD_DIR
+cp -r $PREBUILT_DEPLOY_DATA_DIR/* $DEPLOY_DATA_DIR
 cp -av $DEPLOY_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_install.sh
 cp -av $DEPLOY_DATA_DIR/post_uninstall.sh $INSTALLER_DATA_DIR/post_uninstall.sh
 cp -av $DEPLOY_DATA_DIR/$PLIST_NAME $INSTALLER_DATA_DIR/$PLIST_NAME
