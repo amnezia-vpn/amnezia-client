@@ -37,6 +37,7 @@ public slots:
     const int getServersCount();
 
     void setCurrentlyProcessedServerIndex(int index);
+    int getCurrentlyProcessedServerIndex();
     ServerCredentials getCurrentlyProcessedServerCredentials();
 
     void addServer(const QJsonObject &server);

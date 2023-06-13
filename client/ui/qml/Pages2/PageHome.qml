@@ -111,7 +111,7 @@ PageType {
         id: menu
 
         width: parent.width
-        height: parent.height * 0.90
+        height: parent.height * 0.9
 
         ColumnLayout {
             id: serversMenuHeader
@@ -247,8 +247,8 @@ PageType {
 
                         ColumnLayout {
                             id: serverRadioButtonContent
-                            anchors.fill: parent
 
+                            anchors.fill: parent
                             anchors.rightMargin: 16
                             anchors.leftMargin: 16
 

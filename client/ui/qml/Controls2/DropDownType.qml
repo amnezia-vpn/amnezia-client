@@ -19,11 +19,12 @@ Item {
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
     property string rootButtonImageColor: "#494B50"
     property string rootButtonDefaultColor: "#1C1D21"
-    property int rootButtonMaximumWidth
+    property int rootButtonMaximumWidth: 0
 
     property string rootButtonBorderColor: "#494B50"
     property int rootButtonBorderWidth: 1
 
+    property real drawerHeight: 0.9
     property Component listView
 
     property alias menuVisible: menu.visible
@@ -55,7 +56,9 @@ Item {
             Layout.leftMargin: 16
 
             LabelTextType {
-                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: true
+
+                horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
 
                 visible: root.descriptionText !== ""
@@ -65,7 +68,9 @@ Item {
             }
 
             ButtonTextType {
-                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: true
+
+                horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
 
                 Layout.maximumWidth: rootButtonMaximumWidth ? rootButtonMaximumWidth : implicitWidth
@@ -115,7 +120,7 @@ Item {
         id: menu
 
         width: parent.width
-        height: parent.height * 0.9
+        height: parent.height * drawerHeight
 
         ColumnLayout {
             id: header

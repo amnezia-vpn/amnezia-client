@@ -13,12 +13,13 @@
 
 #include "configurators/vpn_configurator.h"
 
-#include "ui/models/servers_model.h"
-#include "ui/models/containers_model.h"
 #include "ui/controllers/connectionController.h"
-#include "ui/controllers/pageController.h"
-#include "ui/controllers/installController.h"
+#include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
+#include "ui/controllers/installController.h"
+#include "ui/controllers/pageController.h"
+#include "ui/models/containers_model.h"
+#include "ui/models/servers_model.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -71,7 +72,7 @@ private:
     QScopedPointer<PageController> m_pageController;
     QScopedPointer<InstallController> m_installController;
     QScopedPointer<ImportController> m_importController;
-
+    QScopedPointer<ExportController> m_exportController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

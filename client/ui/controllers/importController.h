@@ -27,6 +27,7 @@ public slots:
 signals:
     void importFinished();
     void importErrorOccurred(QString errorMessage);
+
 private:
     QJsonObject extractAmneziaConfig(QString &data);
     QJsonObject extractOpenVpnConfig(const QString &data);

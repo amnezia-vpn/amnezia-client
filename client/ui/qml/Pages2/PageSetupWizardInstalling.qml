@@ -54,7 +54,7 @@ PageType {
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyInstalled"
+                roleName: "isCurrentlyProcessed"
                 value: true
             }
         ]

@@ -9,8 +9,7 @@ InstallController::InstallController(const QSharedPointer<ServersModel> &servers
                                     const QSharedPointer<ContainersModel> &containersModel,
                                     const std::shared_ptr<Settings> &settings,
                                     QObject *parent) : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel),  m_settings(settings)
-{
-}
+{}
 
 void InstallController::install(DockerContainer container, int port, TransportProto transportProto)
 {

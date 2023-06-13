@@ -75,6 +75,11 @@ void ServersModel::setCurrentlyProcessedServerIndex(int index)
     m_currenlyProcessedServerIndex = index;
 }
 
+int ServersModel::getCurrentlyProcessedServerIndex()
+{
+    return m_currenlyProcessedServerIndex;
+}
+
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currenlyProcessedServerIndex;

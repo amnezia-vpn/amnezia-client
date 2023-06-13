@@ -90,7 +90,7 @@ PageType {
                             buttonImage: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
+                                ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                                 goToPage(PageEnum.PageSetupWizardProtocolSettings)
                             }
                         }

@@ -23,12 +23,6 @@ RadioButton {
     property string defaultBodredColor: "transparent"
     property int borderWidth: 0
 
-    property string defaultCircleBorderColor: "#878B91"
-    property string selectedCircleBorderColor: "#A85809"
-    property string pressedCircleBorderColor: Qt.rgba(251/255, 178/255, 106/255, 0.3)
-
-    property string defaultInnerCircleColor: "#FBB26A"
-
     property string imageSource
     property bool showImage
 
@@ -61,80 +55,38 @@ RadioButton {
         }
 
         Image {
-            source: imageSource
-            visible: showImage
+            source: {
+                if (showImage) {
+                    return imageSource
+                } else if (root.pressed) {
+                    return "qrc:/images/controls/radio-button-inner-circle-pressed.png"
+                } else if (root.checked) {
+                    return "qrc:/images/controls/radio-button-inner-circle.png"
+                }
+
+                return ""
+            }
 
             anchors.centerIn: parent
 
             width: 24
             height: 24
         }
-
-        Rectangle {
-            id: outerCircle
-
-            width: 24
-            height: 24
-            radius: 16
-
-            visible: !showImage
+        Image {
+            source: {
+                if (showImage) {
+                    return ""
+                } else if (root.pressed || root.checked) {
+                    return "qrc:/images/controls/radio-button-pressed.svg"
+                } else {
+                    return "qrc:/images/controls/radio-button.svg"
+                }
+            }
 
             anchors.centerIn: parent
 
-            color: "transparent"
-            border.color: {
-                if (root.enabled) {
-                    if (root.pressed) {
-                        return pressedCircleBorderColor
-                    } else if (root.checked) {
-                        return selectedCircleBorderColor
-                    }
-                }
-                return defaultCircleBorderColor
-            }
-
-            border.width: 1
-
-            Behavior on border.color {
-                PropertyAnimation { duration: 200 }
-            }
-
-            Rectangle {
-                id: innerCircle
-
-                width: 12
-                height: 12
-                radius: 16
-
-                anchors.centerIn: parent
-
-                color: "transparent"
-                border.color: defaultInnerCircleColor
-                border.width: {
-                    if (root.enabled) {
-                        if(root.checked) {
-                            return 6
-                        }
-                        return root.pressed ? 6 : 0
-                    } else {
-                        return 0
-                    }
-                }
-
-                Behavior on border.width {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-
-            DropShadow {
-                anchors.fill: innerCircle
-                horizontalOffset: 0
-                verticalOffset: 0
-                radius: 12
-                samples: 13
-                color: "#FBB26A"
-                source: innerCircle
-            }
+            width: 24
+            height: 24
         }
     }
 

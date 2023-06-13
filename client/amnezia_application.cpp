@@ -46,7 +46,6 @@
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
-    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
 }
 
 AmneziaApplication::~AmneziaApplication()
@@ -80,10 +79,10 @@ void AmneziaApplication::init()
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
 
+    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
 
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
-
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
     m_pageController.reset(new PageController(m_serversModel));
@@ -94,6 +93,10 @@ void AmneziaApplication::init()
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
+
+    m_exportController.reset(
+        new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
+    m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     //
 

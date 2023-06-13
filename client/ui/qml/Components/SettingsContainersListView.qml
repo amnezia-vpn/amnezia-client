@@ -88,9 +88,10 @@ ListView {
 
             onClicked: {
                 if (isInstalled) {
+                    ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
                     goToPage(PageEnum.PageSettingsServerProtocol)
                 } else {
-                    ContainersModel.setCurrentlyInstalledContainerIndex(root.model.mapToSource(index))
+                    ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
                     InstallController.setShouldCreateServer(false)
                     goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }

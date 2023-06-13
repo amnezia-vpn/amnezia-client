@@ -27,7 +27,7 @@ public:
         EasySetupDescriptionRole,
 
         IsInstalledRole,
-        IsCurrentlyInstalledRole,
+        IsCurrentlyProcessedRole,
         IsDefaultRole,
         IsSupportedRole
     };
@@ -45,8 +45,8 @@ public slots:
     QString getDefaultContainerName();
 
     void setCurrentlyProcessedServerIndex(int index);
-    void setCurrentlyInstalledContainerIndex(int index);
-    int getCurrentlyInstalledContainerIndex();
+    void setCurrentlyProcessedContainerIndex(int index);
+    int getCurrentlyProcessedContainerIndex();
 
     void removeAllContainers();
     void clearCachedProfiles();
@@ -59,7 +59,7 @@ private:
 
 
     int m_currentlyProcessedServerIndex;
-    int m_currentlyInstalledContainerIndex;
+    int m_currentlyProcessedContainerIndex;
     DockerContainer m_defaultContainerIndex;
 
     std::shared_ptr<Settings> m_settings;

@@ -78,7 +78,9 @@ PageType {
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
-            onClicked: {}
+            onClicked: {
+                tabBarStackView.goToTabBarPage(PageEnum.PageShare)
+            }
         }
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 2

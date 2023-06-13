@@ -6,10 +6,6 @@
         <file>images/favorites_disabled.png</file>
         <file>images/favorites_enabled.png</file>
         <file>images/favorites_hover.png</file>
-        <file>images/controls/check_off.png</file>
-        <file>images/controls/check_on.png</file>
-        <file>images/controls/radio_off.png</file>
-        <file>images/controls/radio_on.png</file>
         <file>images/download.png</file>
         <file>images/upload.png</file>
         <file>images/tray/active.png</file>
@@ -257,5 +253,11 @@
         <file>ui/qml/Pages2/PageSettingsServerProtocol.qml</file>
         <file>ui/qml/Components/Protocols/OpenVpnSettings.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
+        <file>ui/qml/Controls2/ListViewType.qml</file>
+        <file>images/controls/radio-button.svg</file>
+        <file>images/controls/radio-button-inner-circle.png</file>
+        <file>images/controls/radio-button-pressed.svg</file>
+        <file>images/controls/radio-button-inner-circle-pressed.png</file>
+        <file>ui/qml/Components/ShareConnectionDrawer.qml</file>
     </qresource>
 </RCC>

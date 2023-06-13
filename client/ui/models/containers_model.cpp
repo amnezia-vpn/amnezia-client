@@ -25,10 +25,10 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
             //        return ContainerProps::containerHumanNames().value(container);
         case DescRole:
             //        return ContainerProps::containerDescriptions().value(container);
-        case ConfigRole:
-            m_settings->setContainerConfig(m_currentlyProcessedServerIndex,
-                                           container,
-                                           value.toJsonObject());
+        case ConfigRole: //todo save to model also
+        m_settings->setContainerConfig(m_currentlyProcessedServerIndex,
+                                       container,
+                                       value.toJsonObject());
         case ServiceTypeRole:
             //        return ContainerProps::containerService(container);
         case DockerContainerRole:
@@ -76,8 +76,8 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
             return ContainerProps::easySetupDescription(container);
         case IsInstalledRole:
             return m_containers.contains(container);
-        case IsCurrentlyInstalledRole:
-            return container == static_cast<DockerContainer>(m_currentlyInstalledContainerIndex);
+        case IsCurrentlyProcessedRole:
+            return container == static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
         case IsDefaultRole:
             return container == m_defaultContainerIndex;
         case IsSupportedRole:
@@ -97,9 +97,9 @@ void ContainersModel::setCurrentlyProcessedServerIndex(int index)
     emit defaultContainerChanged();
 }
 
-void ContainersModel::setCurrentlyInstalledContainerIndex(int index)
+void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
 {
-    m_currentlyInstalledContainerIndex = index;
+    m_currentlyProcessedContainerIndex = index;
 }
 
 DockerContainer ContainersModel::getDefaultContainer()
@@ -112,9 +112,9 @@ QString ContainersModel::getDefaultContainerName()
     return ContainerProps::containerHumanNames().value(m_defaultContainerIndex);
 }
 
-int ContainersModel::getCurrentlyInstalledContainerIndex()
+int ContainersModel::getCurrentlyProcessedContainerIndex()
 {
-    return m_currentlyInstalledContainerIndex;
+    return m_currentlyProcessedContainerIndex;
 }
 
 void ContainersModel::removeAllContainers()
@@ -153,7 +153,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const {
     roles[EasySetupDescriptionRole] = "easySetupDescription";
 
     roles[IsInstalledRole] = "isInstalled";
-    roles[IsCurrentlyInstalledRole] = "isCurrentlyInstalled";
+    roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsDefaultRole] = "isDefault";
     roles[IsSupportedRole] = "isSupported";
     return roles;

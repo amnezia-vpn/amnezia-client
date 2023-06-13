@@ -24,7 +24,6 @@ namespace PageLoader
         PageSettingsServerProtocol,
 
         PageSetupWizardStart,
-        PageTest,
         PageSetupWizardCredentials,
         PageSetupWizardProtocols,
         PageSetupWizardEasy,

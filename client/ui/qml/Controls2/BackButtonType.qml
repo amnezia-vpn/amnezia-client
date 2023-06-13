@@ -11,6 +11,8 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
+    visible: backButtonImage !== ""
+
     RowLayout {
         id: content
 

@@ -59,7 +59,7 @@ ListView {
                         menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
                     } else {
-                        ContainersModel.setCurrentlyInstalledContainerIndex(proxyContainersModel.mapToSource(index))
+                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.menuVisible = false
