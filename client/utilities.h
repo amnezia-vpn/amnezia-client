@@ -1,9 +1,10 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include <QFileDialog>
 #include <QRegExp>
-#include <QString>
 #include <QRegularExpression>
+#include <QString>
 
 #ifdef Q_OS_WIN
 #include "Windows.h"
@@ -49,6 +50,18 @@ public:
     static QString openVpnExecPath();
     static QString wireguardExecPath();
     static QString certUtilPath();
+
+    static void saveFile(const QString &fileExtension,
+                         const QString &caption,
+                         const QString &fileName,
+                         const QString &data);
+
+    static QString getFileName(QWidget *parent = nullptr,
+                               const QString &caption = QString(),
+                               const QString &dir = QString(),
+                               const QString &filter = QString(),
+                               QString *selectedFilter = nullptr,
+                               QFileDialog::Options options = QFileDialog::Options());
 
 #ifdef Q_OS_WIN
     static bool signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent);

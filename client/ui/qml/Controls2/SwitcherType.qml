@@ -2,8 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "TextTypes"
+
 Switch {
     id: root
+
+    property alias descriptionText: description.text
 
     property string checkedIndicatorColor: "#412102"
     property string defaultIndicatorColor: "transparent"
@@ -16,10 +20,18 @@ Switch {
     property string hoveredIndicatorBackgroundColor: Qt.rgba(1, 1, 1, 0.08)
     property string defaultIndicatorBackgroundColor: "transparent"
 
+    implicitWidth: content.implicitWidth + switcher.implicitWidth
+    implicitHeight: content.implicitHeight
+
     indicator: Rectangle {
+        id: switcher
+
+        anchors.left: content.right
+        anchors.verticalCenter: parent.verticalCenter
+
         implicitWidth: 52
         implicitHeight: 32
-        x: content.width - width
+
         radius: 16
         color: root.checked ? checkedIndicatorColor : defaultIndicatorColor
         border.color: root.checked ? checkedIndicatorBorderColor : defaultIndicatorBorderColor
@@ -62,16 +74,23 @@ Switch {
     contentItem: ColumnLayout {
         id: content
 
-        Text {
-            text: root.text
-            color: "#D7D8DB"
-            font.pixelSize: 18
-            font.weight: 400
-            font.family: "PT Root UI VF"
+        anchors.fill: parent
+        anchors.rightMargin: switcher.implicitWidth
 
-            height: 22
+        ListItemTitleType {
             Layout.fillWidth: true
-            Layout.bottomMargin: 16
+
+            text: root.text
+        }
+
+        CaptionTextType {
+            id: description
+
+            Layout.fillWidth: true
+
+            color: "#878B91"
+
+            visible: text !== ""
         }
     }
 

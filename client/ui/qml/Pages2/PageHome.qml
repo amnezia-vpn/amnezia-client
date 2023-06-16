@@ -145,14 +145,14 @@ PageType {
                     rootButtonBorderWidth: 0
                     rootButtonImageColor: "#0E0E11"
                     rootButtonMaximumWidth: 150 //todo make it dynamic
-                    rootButtonDefaultColor: "#D7D8DB"
+                    rootButtonBackgroundColor: "#D7D8DB"
 
                     text: root.currentContainerName
                     textColor: "#0E0E11"
                     headerText: qsTr("Протокол подключения")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
-                    onRootButtonClicked: function() {
+                    rootButtonClickedFunction: function() {
                         ServersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
                         ContainersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
                         containersDropDown.menuVisible = true

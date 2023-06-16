@@ -98,6 +98,10 @@ void AmneziaApplication::init()
         new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
+    m_settingsController.reset(
+        new SettingsController(m_serversModel, m_containersModel, m_settings));
+    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+
     //
 
     m_engine->load(url);

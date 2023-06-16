@@ -15,13 +15,15 @@ Item {
     property string headerText
     property string headerBackButtonImage
 
-    property var onRootButtonClicked
+    property var rootButtonClickedFunction
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
-    property string rootButtonImageColor: "#494B50"
-    property string rootButtonDefaultColor: "#1C1D21"
+    property string rootButtonImageColor: "#D7D8DB"
+    property string rootButtonBackgroundColor: "#1C1D21"
     property int rootButtonMaximumWidth: 0
 
-    property string rootButtonBorderColor: "#494B50"
+    property string rootButtonHoveredBorderColor: "#494B50"
+    property string rootButtonDefaultBorderColor: "transparent"
+    property string rootButtonPressedBorderColor: "#D7D8DB"
     property int rootButtonBorderWidth: 1
 
     property real drawerHeight: 0.9
@@ -32,16 +34,29 @@ Item {
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
+    onMenuVisibleChanged: {
+        if (menuVisible) {
+            rootButtonBackground.border.color = rootButtonPressedBorderColor
+            rootButtonBackground.border.width = rootButtonBorderWidth
+        } else {
+            rootButtonBackground.border.color = rootButtonDefaultBorderColor
+            rootButtonBackground.border.width = 0
+        }
+    }
+
     Rectangle {
         id: rootButtonBackground
         anchors.fill: rootButtonContent
 
         radius: 16
-        color: rootButtonDefaultColor
-        border.color: rootButtonBorderColor
-        border.width: rootButtonBorderWidth
+        color: rootButtonBackgroundColor
+        border.color: rootButtonDefaultBorderColor
+        border.width: 0
 
         Behavior on border.width {
+            PropertyAnimation { duration: 200 }
+        }
+        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
     }
@@ -83,7 +98,6 @@ Item {
             }
         }
 
-        //todo change to image type
         ImageButtonType {
             Layout.leftMargin: 4
             Layout.rightMargin: 16
@@ -100,16 +114,22 @@ Item {
         hoverEnabled: true
 
         onEntered: {
-            rootButtonBackground.border.width = rootButtonBorderWidth
+            if (menu.visible === false) {
+                rootButtonBackground.border.width = rootButtonBorderWidth
+                rootButtonBackground.border.color = rootButtonHoveredBorderColor
+            }
         }
 
         onExited: {
-            rootButtonBackground.border.width = 0
+            if (menu.visible === false) {
+                rootButtonBackground.border.width = 0
+                rootButtonBackground.border.color = rootButtonDefaultBorderColor
+            }
         }
 
         onClicked: {
-            if (onRootButtonClicked && typeof onRootButtonClicked === "function") {
-                onRootButtonClicked()
+            if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
+                rootButtonClickedFunction()
             } else {
                 menu.visible = true
             }

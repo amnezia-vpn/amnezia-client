@@ -259,5 +259,14 @@
         <file>images/controls/radio-button-pressed.svg</file>
         <file>images/controls/radio-button-inner-circle-pressed.png</file>
         <file>ui/qml/Components/ShareConnectionDrawer.qml</file>
+        <file>ui/qml/Pages2/PageSettingsConnection.qml</file>
+        <file>ui/qml/Pages2/PageSettingsDns.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApplication.qml</file>
+        <file>ui/qml/Pages2/PageSettingsBackup.qml</file>
+        <file>images/controls/delete.svg</file>
+        <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
+        <file>images/controls/github.svg</file>
+        <file>images/controls/mail.svg</file>
+        <file>images/controls/telegram.svg</file>
     </qresource>
 </RCC>

@@ -6,7 +6,7 @@ project(${PROJECT})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat)
+find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat Widgets)
 qt_standard_project_setup()
 
 set(HEADERS
@@ -89,14 +89,14 @@ include_directories(
 )
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
+target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::Widgets ${LIBS})
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 if(NOT IOS)
     qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 endif()
 
-# deploy artifacts required to run the application to the debug build folder
+# copy deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DEPLOY_ARTIFACT_PATH "windows/x64")

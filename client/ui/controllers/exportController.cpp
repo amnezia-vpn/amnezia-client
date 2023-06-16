@@ -11,6 +11,8 @@
 
 #include "qrcodegen.hpp"
 
+#include "core/errorstrings.h"
+
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
                                    const std::shared_ptr<Settings> &settings,
@@ -35,6 +37,7 @@ void ExportController::generateFullAccessConfig()
                                                                | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
+    emit exportConfigChanged();
 }
 
 void ExportController::generateConnectionConfig()
@@ -49,25 +52,25 @@ void ExportController::generateConnectionConfig()
         m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    ErrorCode e = ErrorCode::NoError;
-    for (Proto p : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject protoConfig = m_settings->protocolConfig(serverIndex, container, p);
+    ErrorCode errorCode = ErrorCode::NoError;
+    for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+        QJsonObject protocolConfig = m_settings->protocolConfig(serverIndex, container, protocol);
 
-        QString cfg = m_configurator->genVpnProtocolConfig(credentials,
-                                                           container,
-                                                           containerConfig,
-                                                           p,
-                                                           &e);
-        if (e) {
-            cfg = "Error generating config";
-            break;
+        QString vpnConfig = m_configurator->genVpnProtocolConfig(credentials,
+                                                                 container,
+                                                                 containerConfig,
+                                                                 protocol,
+                                                                 &errorCode);
+        if (errorCode) {
+            emit exportErrorOccurred(errorString(errorCode));
+            return;
         }
-        protoConfig.insert(config_key::last_config, cfg);
-        containerConfig.insert(ProtocolProps::protoToString(p), protoConfig);
+        protocolConfig.insert(config_key::last_config, vpnConfig);
+        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
     }
 
     QJsonObject config = m_settings->server(serverIndex);
-    if (!e) {
+    if (!errorCode) {
         config.remove(config_key::userName);
         config.remove(config_key::password);
         config.remove(config_key::port);
@@ -77,11 +80,8 @@ void ExportController::generateConnectionConfig()
         auto dns = m_configurator->getDnsForConfig(serverIndex);
         config.insert(config_key::dns1, dns.first);
         config.insert(config_key::dns2, dns.second);
+    }
 
-    } /*else {
-        set_textEditShareAmneziaCodeText(tr("Error while generating connection profile"));
-        return;
-    }*/
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     m_amneziaCode = QString("vpn://%1")
@@ -89,6 +89,7 @@ void ExportController::generateConnectionConfig()
                                                                | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
+    emit exportConfigChanged();
 }
 
 QString ExportController::getAmneziaCode()
@@ -153,4 +154,9 @@ QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &dat
 QString ExportController::svgToBase64(const QString &image)
 {
     return "data:image/svg;base64," + QString::fromLatin1(image.toUtf8().toBase64().data());
+}
+
+int ExportController::getQrCodesCount()
+{
+    return m_qrCodes.size();
 }

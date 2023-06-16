@@ -22,6 +22,11 @@ namespace PageLoader
         PageSettingsServerProtocols,
         PageSettingsServerServices,
         PageSettingsServerProtocol,
+        PageSettingsConnection,
+        PageSettingsDns,
+        PageSettingsApplication,
+        PageSettingsBackup,
+        PageSettingsAbout,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

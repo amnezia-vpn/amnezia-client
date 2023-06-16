@@ -25,9 +25,6 @@ PageType {
             } else {
                 ExportController.generateConnectionConfig()
             }
-
-            shareConnectionDrawer.configText = ExportController.getAmneziaCode()
-            shareConnectionDrawer.qrCodes = ExportController.getQrCodes()
         }
     }
 
@@ -125,7 +122,8 @@ PageType {
             ParagraphTextType {
                 Layout.fillWidth: true
 
-                text: qsTr("VPN access without the ability to manage the server")
+                text: accessTypeSelector.currentIndex === 0 ? qsTr("VPN access without the ability to manage the server") :
+                                                              qsTr("Full access to server")
                 color: "#878B91"
             }
 
@@ -137,7 +135,6 @@ PageType {
 
                 implicitHeight: 74
 
-                rootButtonBorderWidth: 0
                 drawerHeight: 0.4375
 
                 descriptionText: qsTr("Server and service")
@@ -234,6 +231,7 @@ PageType {
                                 clickedFunction: function () {
                                     serverSelector.text += ", " + selectedText
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+                                    ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                                     protocolSelector.visible = false
                                     serverSelector.menuVisible = false
@@ -244,6 +242,7 @@ PageType {
                                 Component.onCompleted: {
                                     serverSelector.text += ", " + selectedText
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+                                    ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                                     fillConnectionTypeModel()
                                 }
@@ -273,7 +272,6 @@ PageType {
 
                 implicitHeight: 74
 
-                rootButtonBorderWidth: 0
                 drawerHeight: 0.4375
 
                 visible: accessTypeSelector.currentIndex === 0

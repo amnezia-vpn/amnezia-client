@@ -15,8 +15,6 @@ import "../Controls2/TextTypes"
 DrawerType {
     id: root
 
-    property var qrCodes: []
-    property alias configText: configContent.text
     property alias headerText: header.headerText
 
     width: parent.width
@@ -120,6 +118,8 @@ DrawerType {
                         font.weight: Font.Medium
                         font.family: "PT Root UI VF"
 
+                        text: ExportController.amneziaCode
+
                         wrapMode: Text.Wrap
 
                         enabled: false
@@ -135,6 +135,8 @@ DrawerType {
                     Layout.preferredHeight: width
                     Layout.topMargin: 20
 
+                    visible: ExportController.qrCodesCount > 0
+
                     color: "white"
 
                     Image {
@@ -144,22 +146,20 @@ DrawerType {
                         Timer {
                             property int idx: 0
                             interval: 1000
-                            running: qrCodes.length > 0
+                            running: ExportController.qrCodesCount > 0
                             repeat: true
                             onTriggered: {
                                 idx++
-                                if (idx >= qrCodes.length) {
+                                if (idx >= ExportController.qrCodesCount) {
                                     idx = 0
                                 }
-                                parent.source = qrCodes[idx]
+                                parent.source = ExportController.qrCodes[idx]
                             }
                         }
 
                         Behavior on source {
                             PropertyAnimation { duration: 200 }
                         }
-
-                        visible: qrCodes.length > 0
                     }
                 }
 

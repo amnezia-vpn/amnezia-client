@@ -58,6 +58,7 @@ PageType {
                 iconImage: "qrc:/images/controls/radio.svg"
 
                 clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsConnection)
                 }
             }
 
@@ -71,6 +72,7 @@ PageType {
                 iconImage: "qrc:/images/controls/app.svg"
 
                 clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsApplication)
                 }
             }
 
@@ -84,6 +86,7 @@ PageType {
                 iconImage: "qrc:/images/controls/save.svg"
 
                 clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsBackup)
                 }
             }
 
@@ -97,6 +100,7 @@ PageType {
                 iconImage: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsAbout)
                 }
             }
 

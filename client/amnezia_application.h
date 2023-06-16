@@ -18,6 +18,7 @@
 #include "ui/controllers/importController.h"
 #include "ui/controllers/installController.h"
 #include "ui/controllers/pageController.h"
+#include "ui/controllers/settingsController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 
@@ -73,6 +74,7 @@ private:
     QScopedPointer<InstallController> m_installController;
     QScopedPointer<ImportController> m_importController;
     QScopedPointer<ExportController> m_exportController;
+    QScopedPointer<SettingsController> m_settingsController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

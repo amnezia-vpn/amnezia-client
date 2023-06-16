@@ -17,9 +17,14 @@ public:
                               const std::shared_ptr<VpnConfigurator> &configurator,
                               QObject *parent = nullptr);
 
+    Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
+    Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
+    Q_PROPERTY(QString amneziaCode READ getAmneziaCode NOTIFY exportConfigChanged)
+
 public slots:
     void generateFullAccessConfig();
     void generateConnectionConfig();
+
     QString getAmneziaCode();
     QList<QString> getQrCodes();
 
@@ -27,10 +32,15 @@ public slots:
 
 signals:
     void generateConfig(bool isFullAccess);
+    void exportErrorOccurred(QString errorMessage);
+
+    void exportConfigChanged();
 
 private:
     QList<QString> generateQrCodeImageSeries(const QByteArray &data);
     QString svgToBase64(const QString &image);
+
+    int getQrCodesCount();
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

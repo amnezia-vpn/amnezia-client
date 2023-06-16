@@ -59,8 +59,6 @@ Item {
             Layout.fillWidth: true
             implicitHeight: 74
 
-            rootButtonBorderWidth: 0
-
             descriptionText: qsTr("Hash")
             headerText: qsTr("Hash")
 
@@ -96,8 +94,6 @@ Item {
             id: cipher
             Layout.fillWidth: true
             implicitHeight: 74
-
-            rootButtonBorderWidth: 0
 
             descriptionText: qsTr("Cipher")
             headerText: qsTr("Cipher")
