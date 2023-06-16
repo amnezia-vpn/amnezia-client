@@ -136,8 +136,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         @JvmStatic
         private external fun wgTurnOn(ifName: String, tunFd: Int, settings: String): Int
 
-        @JvmStatic
-        private external fun wgVersion(): String?
+    //    @JvmStatic
+    //    private external fun wgVersion(): String?
     }
 
     private var mBinder: VPNServiceBinder = VPNServiceBinder(this)
@@ -162,7 +162,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         SharedLibraryLoader.loadSharedLibrary(this, "wg-go")
         SharedLibraryLoader.loadSharedLibrary(this, "ovpn3")
         Log.i(tag, "Loaded libs")
-        Log.e(tag, "Wireguard Version ${wgVersion()}")
+      //  Log.e(tag, "Wireguard Version ${wgVersion()}")
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
         mAlreadyInitialised = true
     }
@@ -726,7 +726,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         builder.setSession("Amnezia")
         builder.establish().use { tun ->
             if (tun == null) return
-            Log.i(tag, "Go backend " + wgVersion())
+      //      Log.i(tag, "Go backend " + wgVersion())
             currentTunnelHandle = wgTurnOn("Amnezia", tun.detachFd(), wgConfig)
         }
         if (currentTunnelHandle < 0) {

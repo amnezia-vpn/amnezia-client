@@ -179,12 +179,12 @@ android {
 //       }
 //   }
 
-    externalNativeBuild {
-        cmake {
-            version cmakeMinVersion
-            path "${projectDir}/cpp/CMakeLists.txt"
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            version cmakeMinVersion
+//            path "${projectDir}/cpp/CMakeLists.txt"
+//        }
+//    }
 }
 
 

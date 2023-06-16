@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      QT_VERSION: 6.4.2
+      QT_VERSION: 6.5.0
       QIF_VERSION: 4.5
 
     steps:
@@ -65,7 +65,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.4.2
+      QT_VERSION: 6.5.0
       QIF_VERSION: 4.5
       BUILD_ARCH: 64
 
@@ -130,7 +130,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.4.2
+      QT_VERSION: 6.5.0
 
     steps:
     - name: 'Setup xcode'
@@ -208,7 +208,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.4.2
+      QT_VERSION: 6.5.0
       QIF_VERSION: 4.5
 
     steps:
@@ -268,10 +268,10 @@ jobs:
 
     strategy:
       matrix:
-        arch: ['android_x86_64', 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
+        arch: ['android_x86_64'] #, 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
 
     env:
-      QT_VERSION: 6.4.2
+      QT_VERSION: 6.5.0
 
     steps:
     - name: 'Install desktop Qt'
