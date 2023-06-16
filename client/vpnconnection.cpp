@@ -336,7 +336,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     ErrorCode e = ErrorCode::NoError;
 
-    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
+    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
     if (e) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
@@ -345,7 +345,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
-        emit Vpn::ConnectionState::Error;
+        emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
     }
     m_vpnProtocol->prepare();
@@ -371,7 +371,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     createProtocolConnections();
 
     e = m_vpnProtocol.data()->start();
-    if (e) emit Vpn::ConnectionState::Error;
+    if (e) emit connectionStateChanged(Vpn::ConnectionState::Error);
 }
 
 void VpnConnection::createProtocolConnections() {

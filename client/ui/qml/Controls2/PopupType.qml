@@ -27,15 +27,17 @@ Popup {
     background: Rectangle {
         anchors.fill: parent
 
-        color: Qt.rgba(215/255, 216/255, 219/255, 0.95)
+        color: "white"//Qt.rgba(215/255, 216/255, 219/255, 0.95)
         radius: 4
     }
 
     contentItem: RowLayout {
-        width: parent.width
+        anchors.fill: parent
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
 
         CaptionTextType {
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
             Layout.fillWidth: true
 
             text: root.popupErrorMessageText
@@ -44,7 +46,7 @@ Popup {
         BasicButtonType {
             visible: closeButtonVisible
 
-            defaultColor: Qt.rgba(215/255, 216/255, 219/255, 0.95)
+            defaultColor: "white"//"transparent"//Qt.rgba(215/255, 216/255, 219/255, 0.95)
             hoveredColor: "#C1C2C5"
             pressedColor: "#AEB0B7"
             disabledColor: "#494B50"
@@ -52,7 +54,7 @@ Popup {
             textColor: "#0E0E11"
             borderWidth: 0
 
-            text: "Close"
+            text: qsTr("Close")
             onClicked: {
                 root.close()
             }

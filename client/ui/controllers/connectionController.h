@@ -19,13 +19,14 @@ public:
                                   QObject *parent = nullptr);
 
     bool isConnected();
-    void setIsConnected(bool isConnected);
+    void setIsConnected(bool isConnected); //todo take state from vpnconnection?
 
 public slots:
     void openConnection();
     void closeConnection();
 
     QString getLastConnectionError();
+    Vpn::ConnectionState connectionState(){return {};}; //todo update ConnectButton text on page change
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
