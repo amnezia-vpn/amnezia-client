@@ -62,8 +62,7 @@ PageBase {
                 implicitHeight: contentHeight + 20
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                anchors.rightMargin: 20
                 topMargin: 10
                 spacing: 10
                 clip: true

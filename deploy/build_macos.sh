@@ -36,7 +36,7 @@ PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
 QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
-# Seacrh Qt
+# Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=6.4.1;
 QIF_VERSION=4.1
@@ -66,10 +66,8 @@ echo "____________________________________"
 echo "............Deploy.................."
 echo "____________________________________"
 
-# Package 
+# Package
 echo "Packaging ..."
-
-#cd $DEPLOY_DIR
 
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
 cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
@@ -102,7 +100,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
   spctl -a -vvvv $BUNDLE_DIR || true
 
   if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notatizing App bundle..."
+    echo "Notarizing App bundle..."
     /usr/bin/ditto -c -k --keepParent $BUNDLE_DIR $PROJECT_DIR/Bundle_to_notarize.zip
     xcrun altool --notarize-app -f $PROJECT_DIR/Bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
     rm $PROJECT_DIR/Bundle_to_notarize.zip
@@ -135,7 +133,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
   /usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
 
   if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notatizing installer bundle..."
+    echo "Notarizing installer bundle..."
     /usr/bin/ditto -c -k --keepParent $INSTALLER_BUNDLE_DIR $PROJECT_DIR/Installer_bundle_to_notarize.zip
     xcrun altool --notarize-app -f $PROJECT_DIR/Installer_bundle_to_notarize.zip -t osx --primary-bundle-id "$APP_DOMAIN" -u "$APPLE_DEV_EMAIL" -p $APPLE_DEV_PASSWORD
     rm $PROJECT_DIR/Installer_bundle_to_notarize.zip
@@ -147,7 +145,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -volname $APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -volname Amnezia -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."
@@ -156,7 +154,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
   /usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
 
   if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notatizing DMG installer..."
+    echo "Notarizing DMG installer..."
     xcrun altool --notarize-app -f $DMG_FILENAME -t osx --primary-bundle-id $APP_DOMAIN -u $APPLE_DEV_EMAIL -p $APPLE_DEV_PASSWORD
     sleep 600
     xcrun stapler staple $DMG_FILENAME

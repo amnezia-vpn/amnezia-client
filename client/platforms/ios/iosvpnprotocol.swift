@@ -41,8 +41,6 @@ public class IOSVpnProtocolImpl : NSObject {
         super.init()
         Logger.configureGlobal(tagged: "APP", withFilePath: "")
         
-        print("Config from caller: \(config)")
-
         vpnBundleID = bundleID;
         precondition(!vpnBundleID.isEmpty)
         
@@ -296,7 +294,7 @@ public class IOSVpnProtocolImpl : NSObject {
     @objc func connect(ssConfig: String,
                        ovpnConfig: String,
                        failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
         
         self.openVPNConfig = ovpnConfig
@@ -315,7 +313,7 @@ public class IOSVpnProtocolImpl : NSObject {
     }
     
     @objc func connect(ovpnConfig: String, failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
         
         let addr: String = ovpnConfig
@@ -331,7 +329,7 @@ public class IOSVpnProtocolImpl : NSObject {
     }
 
     @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Connecting")
+        Logger.global?.log(message: "Logger Connecting")
 //        assert(tunnel != nil)
 
         // Let's remove the previous config if it exists.
@@ -525,11 +523,7 @@ public class IOSVpnProtocolImpl : NSObject {
     }
 
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
-        Logger.global?.log(message: "Check status")
-//        assert(tunnel != nil)
-        print("check status")
         let protoType = (tunnel!.localizedDescription ?? "").toTunnelType
-        print(protoType);
         
         switch protoType {
         case .wireguard:
@@ -545,7 +539,6 @@ public class IOSVpnProtocolImpl : NSObject {
     }
     
     private func checkShadowSocksStatus(callback: @escaping (String, String, String) -> Void) {
-        Logger.global?.log(message: "Check ShadowSocks")
         guard let proto = tunnel?.protocolConfiguration as? NETunnelProviderProtocol else {
             callback("", "", "")
             return
@@ -557,11 +550,8 @@ public class IOSVpnProtocolImpl : NSObject {
             callback("", "", "")
             return
         }
-        
-        print("server IP: \(serverIpv4Gateway)")
-        
+                
         let deviceIpv4Address = getWiFiAddress()
-        print("device IP: \(serverIpv4Gateway)")
         if deviceIpv4Address == nil {
             callback("", "", "")
             return
@@ -591,7 +581,6 @@ public class IOSVpnProtocolImpl : NSObject {
     }
     
     private func checkOVPNStatus(callback: @escaping (String, String, String) -> Void) {
-        Logger.global?.log(message: "Check OpenVPN")
         guard let proto = tunnel?.protocolConfiguration as? NETunnelProviderProtocol else {
             callback("", "", "")
             return
@@ -607,13 +596,8 @@ public class IOSVpnProtocolImpl : NSObject {
             .splitToArray(separator: "\n", trimmingCharacters: nil)
             .first {  $0.starts(with: "remote ") }
             .splitToArray(separator: " ", trimmingCharacters: nil)[1]
-        
-        print("server IP: \(serverIpv4Gateway)")
-        
-        
-        
+                
         let deviceIpv4Address = getWiFiAddress()
-        print("device IP: \(deviceIpv4Address)")
         if deviceIpv4Address == nil {
             callback("", "", "")
             return

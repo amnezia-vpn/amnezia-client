@@ -17,7 +17,7 @@ class ShadowSocksLogic : public PageProtocolLogicBase
     AUTO_PROPERTY(bool, labelInfoVisible)
     AUTO_PROPERTY(QString, labelInfoText)
     AUTO_PROPERTY(int, progressBarResetValue)
-    AUTO_PROPERTY(int, progressBarResetMaximium)
+    AUTO_PROPERTY(int, progressBarResetMaximum)
     AUTO_PROPERTY(bool, progressBarTextVisible)
     AUTO_PROPERTY(QString, progressBarText)
 

@@ -1,9 +1,9 @@
 # Run container
-sudo docker run -d \
+sudo docker run \
 --log-driver none \
---restart always \
+-d --restart always \
 --cap-add=NET_ADMIN \
--p $CLOAK_SERVER_PORT:443/tcp \
+-p $SHADOWSOCKS_SERVER_PORT:$SHADOWSOCKS_SERVER_PORT/tcp \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME

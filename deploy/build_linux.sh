@@ -33,7 +33,7 @@ INSTALLER_DATA_DIR=$PROJECT_DIR/deploy/installer/packages/$APP_DOMAIN/data
 PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
 QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 
-# Seacrh Qt
+# Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
   QT_VERSION=5.15.2
   if [ -f /opt/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
@@ -79,6 +79,8 @@ rm -f $INSTALLER_DATA_DIR/data.7z
 
 ldd $CQTDEPLOYER_DIR/bin/binarycreator
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $PROJECT_DIR/deploy/installer/config/linux.xml -p $PROJECT_DIR/deploy/installer/packages/ -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
+cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
+
+$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
 
 

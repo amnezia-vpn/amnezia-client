@@ -30,9 +30,9 @@
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     _screen = [UIScreen.mainScreen snapshotViewAfterScreenUpdates: false];
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle: UIBlurEffectStyleDark];
-    UIVisualEffectView *blurBackround = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
-    [_screen addSubview: blurBackround];
-    blurBackround.frame = _screen.frame;
+    UIVisualEffectView *blurBackground = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
+    [_screen addSubview: blurBackground];
+    blurBackground.frame = _screen.frame;
     UIWindow *_window = UIApplication.sharedApplication.keyWindow;
     [_window addSubview: _screen];
 }
@@ -73,15 +73,13 @@
     NSLog(@"Application openURL: %@", url);
     if (url.fileURL) {
         QString filePath(url.path.UTF8String);
-        qDebug() << "filePath:" << filePath;
         if (filePath.isEmpty()) return NO;
 
         QFile file(filePath);
         bool isOpenFile = file.open(QIODevice::ReadOnly);
-        qDebug() << "isOpenFile:" << isOpenFile;
         QByteArray data = file.readAll();
         
-        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importConnectionFromCode(QString(data));
+        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importAnyFile(QString(data));
         return YES;
     }
     return NO;

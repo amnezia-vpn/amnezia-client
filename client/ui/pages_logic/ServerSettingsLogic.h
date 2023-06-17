@@ -31,6 +31,8 @@ public:
     Q_INVOKABLE void onPushButtonClearClientCacheClicked();
     Q_INVOKABLE void onLineEditDescriptionEditingFinished();
 
+    Q_INVOKABLE bool isCurrentServerHasCredentials();
+
 public:
     explicit ServerSettingsLogic(UiLogic *uiLogic, QObject *parent = nullptr);
     ~ServerSettingsLogic() = default;

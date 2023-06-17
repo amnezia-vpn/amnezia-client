@@ -17,7 +17,7 @@ class ServerConfiguringProgressLogic : public PageLogicBase
     AUTO_PROPERTY(bool, labelWaitInfoVisible)
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, progressBarVisible)
-    AUTO_PROPERTY(int, progressBarMaximium)
+    AUTO_PROPERTY(int, progressBarMaximum)
     AUTO_PROPERTY(bool, progressBarTextVisible)
     AUTO_PROPERTY(QString, progressBarText)
     AUTO_PROPERTY(bool, labelServerBusyVisible)
@@ -32,7 +32,7 @@ private:
         std::function<void(bool)> setVisibleFunc;
         std::function<void(int)> setValueFunc;
         std::function<int(void)> getValueFunc;
-        std::function<int(void)> getMaximiumFunc;
+        std::function<int(void)> getMaximumFunc;
         std::function<void(bool)> setTextVisibleFunc;
         std::function<void(const QString&)> setTextFunc;
     };

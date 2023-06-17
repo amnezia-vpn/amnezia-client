@@ -3,7 +3,7 @@
 #include <QTimer>
 
 #include "amnezia_application.h"
-#include "defines.h"
+#include "version.h"
 #include "migrations.h"
 
 #ifdef Q_OS_WIN

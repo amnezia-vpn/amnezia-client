@@ -127,7 +127,7 @@ Window  {
                              for (var i=0; i<folderModelPages.count; i++) {
                                  createPagesObjects(folderModelPages.get(i, "filePath"), PageType.Basic);
                              }
-                             UiLogic.initalizeUiLogic()
+                             UiLogic.initializeUiLogic()
                          }
     }
 
@@ -172,7 +172,7 @@ Window  {
 
     function createPagesObjects(file, type) {
         if (file.indexOf("Base") !== -1) return; // skip Base Pages
-        //console.debug("Creating compenent " + file + " for " + type);
+        //console.debug("Creating component " + file + " for " + type);
 
         var c = Qt.createComponent("qrc" + file);
 
@@ -197,7 +197,7 @@ Window  {
                         clientInfoPages[obj.protocol] = obj
                     }
 
-//                    console.debug("Created compenent " + component.url + " for " + type);
+//                    console.debug("Created component " + component.url + " for " + type);
                 }
             } else if (component.status === Component.Error) {
                 console.debug("Error loading component:", component.errorString());
@@ -354,7 +354,7 @@ Window  {
                 }
                 textArea.wrapMode: cbLogWrap.checked ? TextEdit.WordWrap: TextEdit.NoWrap
 
-                Keys.onPressed: {
+                Keys.onPressed: function(event) {
                     UiLogic.keyPressEvent(event.key)
                     event.accepted = true
                 }

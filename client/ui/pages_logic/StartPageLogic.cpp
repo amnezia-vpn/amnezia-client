@@ -192,7 +192,7 @@ void StartPageLogic::onPushButtonImportOpenFile()
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
-    selectConfigFormat(QString(data));
+    importAnyFile(QString(data));
 }
 
 #ifdef Q_OS_ANDROID
@@ -202,7 +202,7 @@ void StartPageLogic::startQrDecoder()
 }
 #endif
 
-void StartPageLogic::selectConfigFormat(QString configData)
+void StartPageLogic::importAnyFile(const QString &configData)
 {
     auto configFormat = checkConfigFormat(configData);
     if (configFormat == ConfigTypes::OpenVpn) {

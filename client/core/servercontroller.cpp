@@ -289,10 +289,10 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
-    bool reinstallRequred = isReinstallContainerRequred(container, oldConfig, newConfig);
-    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequred;
+    bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
-    if (reinstallRequred) {
+    if (reinstallRequired) {
         return setupContainer(credentials, container, newConfig, true);
     }
     else {
@@ -326,7 +326,7 @@ QJsonObject ServerController::createContainerInitialConfig(DockerContainer conta
     return config;
 }
 
-bool ServerController::isReinstallContainerRequred(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
@@ -655,6 +655,11 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append("|:%1").arg(port);
     }
     script = script.append("' | grep -i %1").arg(transportProto);
+
+    if (transportProto == "tcp") {
+        script = script.append(" | grep LISTEN");
+    }
+
     ErrorCode errorCode = runScript(credentials,
               replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
@@ -669,6 +674,10 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
 ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
 {
+    if (credentials.userName == "root") {
+        return ErrorCode::NoError;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";

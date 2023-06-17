@@ -54,7 +54,7 @@ private:
 private:
     QJsonObject m_config;
 
-    //RAS functions and parametrs
+    //RAS functions and parameters
     HRASCONN        hRasConn{nullptr};
     bool create_new_vpn(const QString & vpn_name,
                         const QString & serv_addr);

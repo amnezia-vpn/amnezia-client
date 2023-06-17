@@ -90,23 +90,14 @@ PageBase {
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 text: qsTr("Advanced server settings")
-                visible: ServerSettingsLogic.pushButtonShareFullVisible //todo
                 onClicked: {
                     UiLogic.goToPage(PageEnum.AdvancedServerSettings)
                 }
             }
 
             BlueButtonType {
+                Layout.fillWidth: true
                 Layout.topMargin: 60
-                Layout.fillWidth: true
-                text: qsTr("Clients Management")
-                onClicked: {
-                    UiLogic.goToPage(PageEnum.ClientManagement)
-                }
-            }
-            BlueButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 10
                 text: ServerSettingsLogic.pushButtonClearClientCacheText
                 visible: ServerSettingsLogic.pushButtonClearClientCacheVisible
                 onClicked: {
@@ -119,13 +110,18 @@ PageBase {
                 Layout.topMargin: 10
                 text: qsTr("Forget this server")
                 onClicked: {
+                    if (ServerSettingsLogic.isCurrentServerHasCredentials()) {
+                        popupForgetServer.questionText = "Attention! This action will not remove any data from the server, it will just remove server from the list. Continue?"
+                    }
+                    else {
+                        popupForgetServer.questionText = "Remove server from the list?"
+                    }
                     popupForgetServer.open()
                 }
             }
 
             PopupWithQuestion {
                 id: popupForgetServer
-                questionText: "Attention! This action will not remove the container on the server, it will only remove the container information from the application. Continue?"
                 yesFunc: function() {
                     ServerSettingsLogic.onPushButtonForgetServer()
                     close()

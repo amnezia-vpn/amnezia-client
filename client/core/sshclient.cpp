@@ -6,7 +6,7 @@
 #include <fstream>
 
 #ifdef Q_OS_WINDOWS
-#define S_IRWXU 0
+const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
@@ -257,7 +257,6 @@ namespace libssh {
                     int bytesWritten = sftp_write(file, buffer, bufferSize);
 
                     std::string chunk(buffer, bufferSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     if (bytesWritten != bufferSize) {
                         fin.close();
@@ -272,7 +271,6 @@ namespace libssh {
                     fin.read(buffer, lastChunkSize);
 
                     std::string chunk(buffer, lastChunkSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     int bytesWritten = sftp_write(file, buffer, lastChunkSize);
 

@@ -236,7 +236,6 @@ public class IOSControllerImpl : NSObject {
     }
 
     @objc func checkStatus(callback: @escaping (String, String, String) -> Void) {
-        Logger.global?.log(message: "Check status")
         assert(tunnel != nil)
 
         let proto = tunnel!.protocolConfiguration as? NETunnelProviderProtocol

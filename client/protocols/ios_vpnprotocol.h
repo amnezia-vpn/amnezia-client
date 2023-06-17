@@ -1,7 +1,6 @@
 #ifndef IOS_VPNPROTOCOL_H
 #define IOS_VPNPROTOCOL_H
 
-#include "platforms/ios/json.h"
 #include "vpnprotocol.h"
 #include "protocols/protocols_defs.h"
 
@@ -36,7 +35,7 @@ public:
     void cleanupBackendLogs();
 
 signals:
-    void newTransmitedDataCount(quint64 rxBytes, quint64 txBytes);
+    void newTransmittedDataCount(quint64 rxBytes, quint64 txBytes);
 
 protected slots:
 
@@ -50,15 +49,17 @@ private:
     
     bool m_isChangingState = false;
     
-    void setupWireguardProtocol(const QtJson::JsonObject& result);
-    void setupOpenVPNProtocol(const QtJson::JsonObject& result);
-    void setupShadowSocksProtocol(const QtJson::JsonObject& result);
+    void setupWireguardProtocol(const QJsonObject& rawConfig);
+    void setupOpenVPNProtocol(const QJsonObject& rawConfig);
+    void setupCloakProtocol(const QJsonObject& rawConfig);
+    void setupShadowSocksProtocol(const QJsonObject& rawConfig);
     
-    void launchWireguardTunnel(const QtJson::JsonObject &result);
-    void launchOpenVPNTunnel(const QtJson::JsonObject &result);
-    void launchShadowSocksTunnel(const QtJson::JsonObject &result);
+    void launchWireguardTunnel(const QJsonObject& rawConfig);
+    void launchOpenVPNTunnel(const QJsonObject& rawConfig);
+    void launchCloakTunnel(const QJsonObject& rawConfig);
+    void launchShadowSocksTunnel(const QJsonObject& rawConfig);
     
-    QString serializeSSConfig(const QtJson::JsonObject &ssConfig);
+    QString serializeSSConfig(const QJsonObject &ssConfig);
 };
 
 

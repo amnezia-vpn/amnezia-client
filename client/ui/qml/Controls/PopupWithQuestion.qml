@@ -13,12 +13,18 @@ Popup {
 
     anchors.centerIn: Overlay.overlay
     modal: true
-    closePolicy: Popup.NoAutoClose
+    closePolicy: Popup.CloseOnEscape
 
     width: parent.width - 20
+    focus: true
+
+    onAboutToHide: {
+        parent.forceActiveFocus(true)
+    }
 
     ColumnLayout {
         width: parent.width
+
         Text {
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
@@ -28,9 +34,9 @@ Popup {
         }
 
         RowLayout {
+            Layout.fillWidth: true
             BlueButtonType {
                 id: yesButton
-                Layout.preferredWidth: parent.width / 2
                 Layout.fillWidth: true
                 text: yesText
                 onClicked: {
@@ -43,7 +49,6 @@ Popup {
             }
             BlueButtonType {
                 id: noButton
-                Layout.preferredWidth: parent.width / 2
                 Layout.fillWidth: true
                 text: noText
                 onClicked: {

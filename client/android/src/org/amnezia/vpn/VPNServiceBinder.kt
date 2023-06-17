@@ -50,7 +50,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
         when (code) {
             ACTIONS.activate -> {
                 try {
-                    Log.i(tag, "Activiation Requested, parsing Config")
+                    Log.i(tag, "Activation Requested, parsing Config")
                     // [data] is here a json containing the wireguard/openvpn conf
                     val buffer = data.createByteArray()
                     val json = buffer?.let { String(it) }

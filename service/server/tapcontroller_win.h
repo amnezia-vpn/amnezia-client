@@ -7,7 +7,7 @@
 
 #define IPv6_DEBUG
 
-//! The TapController class verifies Windows Tap Controller for existance on Windows platform.
+//! The TapController class verifies Windows Tap Controller for existence on Windows platform.
 
 class TapController
 {
