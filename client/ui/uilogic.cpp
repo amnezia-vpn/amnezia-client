@@ -133,13 +133,13 @@ void UiLogic::initializeUiLogic()
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
             pageLogic<VpnLogic>()->onConnectionStateChanged(VpnProtocol::Connected);
-            m_vpnConnection->restoreConnection();
+            if (m_vpnConnection) m_vpnConnection->restoreConnection();
         }
     });
     if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
-         qCritical() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         return;
+        qCritical() << QString("Init failed");
+        if (m_vpnConnection) m_vpnConnection->connectionStateChanged(VpnProtocol::Error);
+        return;
     }
 #endif
 
