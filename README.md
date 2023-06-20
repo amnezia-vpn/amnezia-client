@@ -4,13 +4,21 @@
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
-Amnezia is a VPN client with the key feature of deploying your own VPN server on you virtual server.
+Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
 ## Features
-- Very easy to use - enter your ip address, ssh login and password, and Amnezia client will automatically install VPN docker containers to your server and connect to VPN.
+- Very easy to use - enter your ip address, ssh login and password, and Amnezia will automatically install VPN docker containers to your server and connect to VPN.
 - OpenVPN, ShadowSocks, WireGuard, IKEv2 protocols support.
+- Masking VPN with OpenVPN over Cloak plugin
 - Split tunneling support - add any sites to client to enable VPN only for them (only for desktops)
 - Windows, MacOS, Linux, Android, iOS releases.
+
+## Links
+[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit 
+[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
+[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
+[https://amnezia.org](https://amnezia.org) - project website  
 
 ## Tech
 
@@ -120,12 +128,6 @@ You may face compiling issues in QT Creator after you've worked in Android Studi
 
 ## License
 GPL v.3
-
-## Contacts
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
-[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
-[https://amnezia.org](https://amnezia.org) - project website  
 
 ## Donate
 Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u  
