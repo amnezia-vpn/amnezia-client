@@ -14,11 +14,11 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 - Windows, MacOS, Linux, Android, iOS releases.
 
 ## Links
-[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit 
+[https://amnezia.org](https://amnezia.org) - project website  
+[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
 [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
 [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
 [https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
-[https://amnezia.org](https://amnezia.org) - project website  
 
 ## Tech
 
