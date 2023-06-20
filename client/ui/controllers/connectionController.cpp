@@ -32,9 +32,8 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
     int serverIndex = m_serversModel->getDefaultServerIndex();
-    QModelIndex serverModelIndex = m_serversModel->index(serverIndex);
-    ServerCredentials credentials = qvariant_cast<ServerCredentials>(m_serversModel->data(serverModelIndex,
-                                                                                          ServersModel::ServersModelRoles::CredentialsRole));
+    ServerCredentials credentials = qvariant_cast<ServerCredentials>(
+        m_serversModel->data(serverIndex, ServersModel::ServersModelRoles::CredentialsRole));
 
     DockerContainer container = m_containersModel->getDefaultContainer();
     QModelIndex containerModelIndex = m_containersModel->index(container);

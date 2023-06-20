@@ -19,12 +19,23 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         return false;
     }
 
+    QJsonObject server = m_servers.at(index.row()).toObject();
+
     switch (role) {
-        case IsDefaultRole: {
-            m_settings->setDefaultServer(index.row());
-            m_defaultServerIndex = m_settings->defaultServerIndex();
-        }
-        default: return true;
+    case NameRole: {
+        server.insert(config_key::description, value.toString());
+        m_settings->editServer(index.row(), server);
+        m_servers.replace(index.row(), server);
+        break;
+    }
+    case IsDefaultRole: {
+        m_settings->setDefaultServer(index.row());
+        m_defaultServerIndex = m_settings->defaultServerIndex();
+        break;
+    }
+    default: {
+        return true;
+    }
     }
 
     emit dataChanged(index, index);
@@ -51,6 +62,8 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return server.value(config_key::hostName).toString();
     case CredentialsRole:
         return QVariant::fromValue(m_settings->serverCredentials(index.row()));
+    case CredentialsLoginRole:
+        return m_settings->serverCredentials(index.row()).userName;
     case IsDefaultRole:
         return index.row() == m_defaultServerIndex;
     case IsCurrentlyProcessedRole:
@@ -58,6 +71,12 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
+}
+
+QVariant ServersModel::data(const int index, int role) const
+{
+    QModelIndex modelIndex = this->index(index);
+    return data(modelIndex, role);
 }
 
 const int ServersModel::getDefaultServerIndex()
@@ -83,11 +102,6 @@ int ServersModel::getCurrentlyProcessedServerIndex()
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currenlyProcessedServerIndex;
-}
-
-ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
-{
-    return qvariant_cast<ServerCredentials>(data(index(m_currenlyProcessedServerIndex), CredentialsRole));
 }
 
 void ServersModel::addServer(const QJsonObject &server)
@@ -121,6 +135,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const {
     roles[NameRole] = "name";
     roles[HostNameRole] = "hostName";
     roles[CredentialsRole] = "credentials";
+    roles[CredentialsLoginRole] = "credentialsLogin";
     roles[IsDefaultRole] = "isDefault";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     return roles;

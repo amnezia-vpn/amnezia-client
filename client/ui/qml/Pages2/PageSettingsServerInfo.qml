@@ -54,10 +54,60 @@ PageType {
                     actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
                     headerText: name
-                    descriptionText: hostName
+                    descriptionText: credentialsLogin + " · " + hostName
 
                     actionButtonFunction: function() {
-                        connectionTypeSelection.visible = true
+                        serverNameEditDrawer.visible = true
+                    }
+                }
+
+                DrawerType {
+                    id: serverNameEditDrawer
+
+                    width: root.width
+                    height: root.height * 0.35
+
+                    onVisibleChanged: {
+                        if (serverNameEditDrawer.visible) {
+                            serverName.textField.forceActiveFocus()
+                        }
+                    }
+
+                    ColumnLayout {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 16
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+
+                        TextFieldWithHeaderType {
+                            id: serverName
+
+                            Layout.fillWidth: true
+                            headerText: qsTr("Server name")
+                            textFieldText: name
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            disabledColor: "#878B91"
+                            textColor: "#D7D8DB"
+                            borderWidth: 1
+
+                            text: qsTr("Save")
+
+                            onClicked: {
+                                if (serverName.textFieldText !== name) {
+                                    name = serverName.textFieldText
+                                    serverNameEditDrawer.visible = false
+                                }
+                            }
+                        }
                     }
                 }
             }

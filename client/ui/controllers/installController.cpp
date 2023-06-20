@@ -61,7 +61,9 @@ void InstallController::installServer(DockerContainer container, QJsonObject& co
 void InstallController::installContainer(DockerContainer container, QJsonObject& config)
 {
     //todo check if container already installed
-    ServerCredentials serverCredentials = m_serversModel->getCurrentlyProcessedServerCredentials();
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials serverCredentials = qvariant_cast<ServerCredentials>(
+        m_serversModel->data(serverIndex, ServersModel::ServersModelRoles::CredentialsRole));
 
     ServerController serverController(m_settings);
     ErrorCode errorCode = serverController.setupContainer(serverCredentials, container, config);

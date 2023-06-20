@@ -86,7 +86,7 @@ PageType {
 
                             text: name
                             descriptionText: hostName
-                            buttonImage: "qrc:/images/controls/chevron-right.svg"
+                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
                                 ServersModel.setCurrentlyProcessedServerIndex(index)

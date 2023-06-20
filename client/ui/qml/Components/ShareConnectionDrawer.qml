@@ -16,11 +16,12 @@ DrawerType {
     id: root
 
     property alias headerText: header.headerText
+    property alias configContentHeaderText: configContentHeader.headerText
 
     width: parent.width
     height: parent.height * 0.9
 
-    Item{
+    Item {
         anchors.fill: parent
 
         FlickableType {
@@ -86,46 +87,77 @@ DrawerType {
                     disabledColor: "#878B91"
                     textColor: "#D7D8DB"
 
-                    text: showContent ? qsTr("Collapse content") : qsTr("Show content")
+                    text: qsTr("Show content")
 
                     onClicked: {
-                        showContent = !showContent
+                        configContentDrawer.visible = true
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
+                DrawerType {
+                    id: configContentDrawer
 
-                    radius: 10
-                    color: "#2C2D30"
+                    width: parent.width
+                    height: parent.height * 0.9
 
-                    visible: showContent
+                    BackButtonType {
+                        id: backButton
 
-                    height: 24
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.rightMargin: 16
+                        anchors.leftMargin: 16
+                        anchors.topMargin: 16
 
-                    TextField {
-                        id: configContent
+                        backButtonFunction: function() {
+                            configContentDrawer.visible = false
+                        }
+                    }
 
-                        anchors.fill: parent
-                        anchors.margins: 16
+                    FlickableType {
+                        anchors.top: backButton.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
 
-                        height: 24
+                        ColumnLayout {
+                            id: configContent
 
-                        color: "#D7D8DB"
-
-                        font.pixelSize: 16
-                        font.weight: Font.Medium
-                        font.family: "PT Root UI VF"
-
-                        text: ExportController.amneziaCode
-
-                        wrapMode: Text.Wrap
-
-                        enabled: false
-                        background: Rectangle {
                             anchors.fill: parent
-                            color: "transparent"
+                            anchors.rightMargin: 16
+                            anchors.leftMargin: 16
+
+                            Header2Type {
+                                id: configContentHeader
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                            }
+
+                            TextField {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                Layout.bottomMargin: 16
+
+                                padding: 0
+                                height: 24
+
+                                color: "#D7D8DB"
+
+                                font.pixelSize: 16
+                                font.weight: Font.Medium
+                                font.family: "PT Root UI VF"
+
+                                text: ExportController.amneziaCode
+
+                                wrapMode: Text.Wrap
+
+                                readOnly: true
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
                         }
                     }
                 }
@@ -143,17 +175,19 @@ DrawerType {
                         anchors.fill: parent
                         smooth: false
 
+                        source: ExportController.qrCodesCount ? ExportController.qrCodes[0] : ""
+
                         Timer {
-                            property int idx: 0
+                            property int index: 0
                             interval: 1000
                             running: ExportController.qrCodesCount > 0
                             repeat: true
                             onTriggered: {
-                                idx++
-                                if (idx >= ExportController.qrCodesCount) {
-                                    idx = 0
+                                index++
+                                if (index >= ExportController.qrCodesCount) {
+                                    index = 0
                                 }
-                                parent.source = ExportController.qrCodes[idx]
+                                parent.source = ExportController.qrCodes[index]
                             }
                         }
 

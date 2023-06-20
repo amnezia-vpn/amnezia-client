@@ -19,6 +19,7 @@ public:
         NameRole = Qt::UserRole + 1,
         HostNameRole,
         CredentialsRole,
+        CredentialsLoginRole,
         IsDefaultRole,
         IsCurrentlyProcessedRole
     };
@@ -29,6 +30,7 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(const int index, int role = Qt::DisplayRole) const;
 
 public slots:
     const int getDefaultServerIndex();
@@ -38,7 +40,6 @@ public slots:
 
     void setCurrentlyProcessedServerIndex(int index);
     int getCurrentlyProcessedServerIndex();
-    ServerCredentials getCurrentlyProcessedServerCredentials();
 
     void addServer(const QJsonObject &server);
     void removeServer();

@@ -12,8 +12,8 @@ Item {
 
     property var clickedFunction
 
-    property alias buttonImage: button.image
-    property string iconImage
+    property string rightImageSource
+    property string leftImageSource
 
     property string textColor: "#d7d8db"
 
@@ -26,17 +26,34 @@ Item {
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        Image {
-            id: icon
-            source: iconImage
-            visible: iconImage ? true : false
-            Layout.rightMargin: visible ? 16 : 0
+        Rectangle {
+            id: leftImageBackground
+
+            visible: leftImageSource ? true : false
+
+            Layout.preferredHeight: rightImageSource ? leftImage.implicitHeight : 56
+            Layout.preferredWidth: rightImageSource ? leftImage.implicitWidth : 56
+            Layout.rightMargin: rightImageSource ? 16 : 0
+
+            radius: 12
+            color: "transparent"
+
+            Behavior on color {
+                PropertyAnimation { duration: 200 }
+            }
+
+            Image {
+                id: leftImage
+
+                anchors.centerIn: parent
+                source: leftImageSource
+            }
         }
 
         ColumnLayout {
             ListItemTitleType {
                 text: root.text
-                color: textColor
+                color: root.textColor
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -63,24 +80,19 @@ Item {
         }
 
         ImageButtonType {
-            id: button
+            id: rightImage
 
             hoverEnabled: false
-            image: buttonImage
-            onClicked: {
-                if (clickedFunction && typeof clickedFunction === "function") {
-                    clickedFunction()
-                }
-            }
+            image: rightImageSource
+            visible: rightImageSource ? true : false
 
             Layout.alignment: Qt.AlignRight
 
             Rectangle {
-                id: imageBackground
-                anchors.fill: button
+                id: rightImageBackground
+                anchors.fill: parent
                 radius: 12
                 color: "transparent"
-
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -106,31 +118,39 @@ Item {
         hoverEnabled: true
 
         onEntered: {
-            if (buttonImage) {
-                imageBackground.color = button.hoveredColor
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.hoveredColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.hoveredColor
             } else {
-                background.color = button.hoveredColor
+                background.color = rightImage.hoveredColor
             }
         }
 
         onExited: {
-            if (buttonImage) {
-                imageBackground.color = button.defaultColor
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.defaultColor
             } else {
-                background.color = button.defaultColor
+                background.color = rightImage.defaultColor
             }
         }
 
         onPressedChanged: {
-            if (buttonImage) {
-                imageBackground.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+            if (rightImageSource) {
+                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
             } else {
-                background.color = pressed ? button.pressedColor : entered ? button.hoveredColor : button.defaultColor
+                background.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
             }
         }
 
         onClicked: {
-            button.clicked()
+            if (clickedFunction && typeof clickedFunction === "function") {
+                clickedFunction()
+            }
         }
     }
 }

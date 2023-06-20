@@ -15,8 +15,8 @@ PageType {
 
     FlickableType {
         id: fl
-        anchors.top: root.top
-        anchors.bottom: root.bottom
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -58,8 +58,8 @@ PageType {
                 Layout.topMargin: 16
 
                 text: "Файл с настройками подключения"
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/folder-open.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
                     onClicked: fileDialog.open()
@@ -81,8 +81,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: "QR-код"
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/qr-code.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/qr-code.svg"
 
                 clickedFunction: function() {
                 }
@@ -94,8 +94,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: "Ключ в виде текста"
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/text-cursor.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/text-cursor.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSetupWizardTextKey)

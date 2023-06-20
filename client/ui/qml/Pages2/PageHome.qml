@@ -51,7 +51,6 @@ PageType {
     Rectangle {
         id: buttonBackground
         anchors.fill: buttonContent
-        anchors.bottomMargin: -radius
 
         radius: 16
         color: root.defaultColor
@@ -59,11 +58,12 @@ PageType {
         border.width: 1
 
         Rectangle {
-            width: parent.width
-            height: 1
-            y: parent.height - height - parent.radius
-
-            color: root.borderColor
+            width: parent.radius
+            height: parent.radius
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.left: parent.left
+            color: parent.color
         }
     }
 

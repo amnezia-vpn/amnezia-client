@@ -56,8 +56,8 @@ PageType {
     }
 
     FlickableType {
-        anchors.top: root.top
-        anchors.bottom: root.bottom
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -121,6 +121,7 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.topMargin: 24
 
                 text: accessTypeSelector.currentIndex === 0 ? qsTr("VPN access without the ability to manage the server") :
                                                               qsTr("Full access to server")
@@ -222,7 +223,6 @@ PageType {
                                             roleName: "isInstalled"
                                             value: true
                                         }
-
                                     ]
                                 }
 
@@ -231,6 +231,7 @@ PageType {
                                 clickedFunction: function () {
                                     serverSelector.text += ", " + selectedText
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+                                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
                                     ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                                     protocolSelector.visible = false
@@ -242,6 +243,7 @@ PageType {
                                 Component.onCompleted: {
                                     serverSelector.text += ", " + selectedText
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+                                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
                                     ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                                     fillConnectionTypeModel()

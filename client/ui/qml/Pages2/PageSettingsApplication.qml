@@ -26,7 +26,7 @@ PageType {
     FlickableType {
         id: fl
         anchors.top: backButton.bottom
-        anchors.bottom: root.bottom
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -35,22 +35,21 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
-            spacing: 16
 
             HeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("Application")
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
 
                 text: qsTr("Language")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
                 }
@@ -62,7 +61,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reset settings and remove all data from the application")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
                 }

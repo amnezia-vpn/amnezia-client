@@ -32,8 +32,8 @@ PageType {
 
     FlickableType {
         id: fl
-        anchors.top: root.top
-        anchors.bottom: root.bottom
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         Column {
@@ -87,7 +87,7 @@ PageType {
 
                             text: name
                             descriptionText: description
-                            buttonImage: "qrc:/images/controls/chevron-right.svg"
+                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
                                 ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))

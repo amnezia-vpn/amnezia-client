@@ -25,7 +25,7 @@ PageType {
     FlickableType {
         id: fl
         anchors.top: backButton.bottom
-        anchors.bottom: root.bottom
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -34,8 +34,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            spacing: 16
 
             HeaderType {
                 Layout.fillWidth: true
@@ -47,6 +45,8 @@ PageType {
 
             SwitcherType {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -68,7 +68,7 @@ PageType {
 
                 text: qsTr("DNS servers")
                 descriptionText: qsTr("If AmneziaDNS is not used or installed")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsDns)
@@ -82,7 +82,7 @@ PageType {
 
                 text: qsTr("Split site tunneling")
                 descriptionText: qsTr("Allows you to connect to some sites through a secure connection, and to others bypassing it")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
                 }
@@ -95,7 +95,7 @@ PageType {
 
                 text: qsTr("Separate application tunneling")
                 descriptionText: qsTr("Allows you to use the VPN only for certain applications")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
                 }

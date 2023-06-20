@@ -59,11 +59,13 @@ PageType {
         anchors.bottom: parent.bottom
 
         topPadding: 8
-        bottomPadding: 34
+        bottomPadding: 8//34
         leftPadding: 96
         rightPadding: 96
 
         background: Rectangle {
+            border.width: 1
+            border.color: "#2C2D30"
             color: "#1C1D21"
         }
 

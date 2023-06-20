@@ -27,7 +27,7 @@ PageType {
     FlickableType {
         id: fl
         anchors.top: backButton.bottom
-        anchors.bottom: root.bottom
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -102,8 +102,7 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Show other methods on Github")
 
-                onClicked: {
-                }
+                onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
             }
 
             ParagraphTextType {
@@ -121,11 +120,10 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Telegram group")
                 descriptionText: qsTr("To discuss features")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/telegram.svg"
+                leftImageSource: "qrc:/images/controls/telegram.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsAbout)
+                    Qt.openUrlExternally("https://t.me/amnezia_vpn_dev")
                 }
             }
 
@@ -136,11 +134,9 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Mail")
                 descriptionText: qsTr("For reviews and bug reports")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/mail.svg"
+                leftImageSource: "qrc:/images/controls/mail.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsAbout)
                 }
             }
 
@@ -150,11 +146,10 @@ And if you don't like the app, all the more support it - the donation will be us
                 Layout.fillWidth: true
 
                 text: qsTr("Github")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/github.svg"
+                leftImageSource: "qrc:/images/controls/github.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsAbout)
+                    Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
                 }
             }
 
@@ -164,11 +159,9 @@ And if you don't like the app, all the more support it - the donation will be us
                 Layout.fillWidth: true
 
                 text: qsTr("Website")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/amnezia.svg"
+                leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsAbout)
                 }
             }
 

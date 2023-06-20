@@ -36,7 +36,7 @@ DrawerType {
             Layout.topMargin: 16
 
             text: "IP, логин и пароль от сервера"
-            buttonImage: "qrc:/images/controls/chevron-right.svg"
+            rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
                 goToPage(PageEnum.PageSetupWizardCredentials)
@@ -50,7 +50,7 @@ DrawerType {
             Layout.fillWidth: true
 
             text: "QR-код, ключ или файл настроек"
-            buttonImage: "qrc:/images/controls/chevron-right.svg"
+            rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
                 goToPage(PageEnum.PageSetupWizardConfigSource)

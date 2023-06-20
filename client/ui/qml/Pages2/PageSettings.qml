@@ -15,8 +15,8 @@ PageType {
 
     FlickableType {
         id: fl
-        anchors.top: root.top
-        anchors.bottom: root.bottom
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
@@ -40,8 +40,8 @@ PageType {
                 Layout.topMargin: 16
 
                 text: qsTr("Servers")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/server.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/server.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsServersList)
@@ -54,8 +54,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Connection")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/radio.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/radio.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsConnection)
@@ -68,8 +68,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Application")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/app.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/app.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsApplication)
@@ -82,8 +82,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Backup")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/save.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/save.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsBackup)
@@ -96,8 +96,8 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("About AmneziaVPN")
-                buttonImage: "qrc:/images/controls/chevron-right.svg"
-                iconImage: "qrc:/images/controls/amnezia.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
                     goToPage(PageEnum.PageSettingsAbout)

@@ -31,7 +31,6 @@ ListView {
             id: content
 
             anchors.fill: parent
-            spacing: 16
 
             RadioButton {
                 id: radioButton
@@ -92,7 +91,7 @@ ListView {
 
             DividerType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 4
 
                 visible: dividerVisible
             }
