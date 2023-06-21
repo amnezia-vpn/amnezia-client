@@ -20,6 +20,11 @@ PageType {
             tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageHome))
         }
 
+        function onGoToPageSettings() {
+            tabBar.currentIndex = 2
+            tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageSettings))
+        }
+
         function onShowErrorMessage(errorMessage) {
             popupErrorMessage.popupErrorMessageText = errorMessage
             popupErrorMessage.open()

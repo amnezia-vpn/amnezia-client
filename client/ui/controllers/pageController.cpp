@@ -10,7 +10,7 @@ QString PageController::getInitialPage()
     if (m_serversModel->getServersCount()) {
         if (m_serversModel->getDefaultServerIndex() < 0) {
             auto defaultServerIndex = m_serversModel->index(0);
-            m_serversModel->setData(defaultServerIndex, true, ServersModel::ServersModelRoles::IsDefaultRole);
+            m_serversModel->setData(defaultServerIndex, true, ServersModel::Roles::IsDefaultRole);
         }
         return getPagePath(PageLoader::PageEnum::PageStart);
     } else {

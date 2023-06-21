@@ -40,14 +40,9 @@ namespace PageLoader
     };
     Q_ENUM_NS(PageEnum)
 
-    static void declareQmlPageEnum() {
-        qmlRegisterUncreatableMetaObject(
-            PageLoader::staticMetaObject,
-            "PageEnum",
-            1, 0,
-            "PageEnum",
-            "Error: only enums"
-            );
+    static void declareQmlPageEnum()
+    {
+        qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
     }
 }
 
@@ -55,8 +50,7 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(const QSharedPointer<ServersModel> &serversModel,
-                            QObject *parent = nullptr);
+    explicit PageController(const QSharedPointer<ServersModel> &serversModel, QObject *parent = nullptr);
 
 public slots:
     QString getInitialPage();
@@ -64,9 +58,11 @@ public slots:
 
 signals:
     void goToPageHome();
+    void goToPageSettings();
     void restorePageHomeState(bool isContainerInstalled = false);
     void replaceStartPage();
     void showErrorMessage(QString errorMessage);
+    void showInfoMessage(QString message);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

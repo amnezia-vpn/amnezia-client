@@ -44,7 +44,7 @@ void ExportController::generateConnectionConfig()
 {
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     ServerCredentials credentials = qvariant_cast<ServerCredentials>(
-        m_serversModel->data(serverIndex, ServersModel::ServersModelRoles::CredentialsRole));
+        m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
     DockerContainer container = static_cast<DockerContainer>(
         m_containersModel->getCurrentlyProcessedContainerIndex());

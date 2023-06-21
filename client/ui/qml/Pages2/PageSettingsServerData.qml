@@ -14,6 +14,21 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: InstallController
+
+        function onScanServerFinished(isInstalledContainerFound) {
+            var message = ""
+            if (isInstalledContainerFound) {
+                message = qsTr("All installed containers have been added to the application")
+            } else {
+                message = qsTr("Не найдено установленных контейнеров")
+            }
+
+            PageController.showErrorMessage(message)
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -30,8 +45,8 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: "Clear Amnezia cache"
-                descriptionText: "May be needed when changing other settings"
+                text: qsTr("Clear Amnezia cache")
+                descriptionText: qsTr("May be needed when changing other settings")
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Clear cached profiles?")
@@ -47,6 +62,19 @@ PageType {
                         questionDrawer.visible = false
                     }
                     questionDrawer.visible = true
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Проверить сервер на наличие ранее установленных сервисов Amnezia")
+                descriptionText: qsTr("Добавим их в приложение, если они не отображались")
+
+                clickedFunction: function() {
+                    InstallController.scanServerForInstalledContainers()
                 }
             }
 

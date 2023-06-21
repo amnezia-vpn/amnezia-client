@@ -24,7 +24,7 @@ PageType {
             PageController.showErrorMessage(errorMessage)
         }
 
-        function onInstallContainerFinished() {
+        function onInstallContainerFinished(isInstalledContainerFound) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
@@ -34,9 +34,15 @@ PageType {
             } else {
                 goToPage(PageEnum.PageHome)
             }
+
+            if (isInstalledContainerFound) {
+                //todo change to info message
+                PageController.showErrorMessage(qsTr("The container you are trying to install is already installed on the server. " +
+                                                     "All installed containers have been added to the application"))
+            }
         }
 
-        function onInstallServerFinished() {
+        function onInstallServerFinished(isInstalledContainerFound) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState()
@@ -46,6 +52,19 @@ PageType {
                 var pagePath = PageController.getPagePath(PageEnum.PageStart)
                 stackView.replace(pagePath, { "objectName" : pagePath })
             }
+
+            if (isInstalledContainerFound) {
+                PageController.showErrorMessage(qsTr("The container you are trying to install is already installed on the server. " +
+                                                     "All installed containers have been added to the application"))
+            }
+        }
+
+        function onServerAlreadyExists(serverIndex) {
+            goToStartPage()
+            ServersModel.setCurrentlyProcessedServerIndex(serverIndex)
+            goToPage(PageEnum.PageSettingsServerInfo, false)
+
+            PageController.showErrorMessage(qsTr("The server has already been added to the application"))
         }
     }
 

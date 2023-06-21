@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "TextTypes"
+
 Item {
     id: root
 
@@ -34,15 +36,10 @@ Item {
         anchors.fill: backgroud
         ColumnLayout {
 
-            Text {
+            LabelTextType {
                 text: root.headerText
                 color: "#878b91"
-                font.pixelSize: 13
-                font.weight: 400
-                font.family: "PT Root UI VF"
-                font.letterSpacing: 0.02
 
-                height: 16
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16

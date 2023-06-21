@@ -5,7 +5,8 @@
 
 #include "settings.h"
 
-struct ServerModelContent {
+struct ServerModelContent
+{
     QString desc;
     QString address;
     bool isDefault;
@@ -15,7 +16,7 @@ class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    enum ServersModelRoles {
+    enum Roles {
         NameRole = Qt::UserRole + 1,
         HostNameRole,
         CredentialsRole,
@@ -35,6 +36,7 @@ public:
 public slots:
     const int getDefaultServerIndex();
     bool isDefaultServerCurrentlyProcessed();
+    bool isCurrentlyProcessedServerHasWriteAccess();
 
     const int getServersCount();
 
@@ -47,7 +49,12 @@ public slots:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+signals:
+    void currentlyProcessedServerIndexChanged();
+
 private:
+    void setDefaultServerIndex(const int index);
+
     QJsonArray m_servers;
 
     std::shared_ptr<Settings> m_settings;

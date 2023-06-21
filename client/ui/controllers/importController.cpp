@@ -89,7 +89,7 @@ void ImportController::importConfig()
 
         if (!m_config.value(config_key::containers).toArray().isEmpty()) {
             auto newServerIndex = m_serversModel->index(m_serversModel->getServersCount() - 1);
-            m_serversModel->setData(newServerIndex, true, ServersModel::ServersModelRoles::IsDefaultRole);
+            m_serversModel->setData(newServerIndex, true, ServersModel::Roles::IsDefaultRole);
         }
 
         emit importFinished();

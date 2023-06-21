@@ -21,8 +21,8 @@ PageType {
 
     property string borderColor: "#2C2D30"
 
-    property string currentServerName: serversMenuContent.currentItem.delegateData.name
-    property string currentServerHostName: serversMenuContent.currentItem.delegateData.hostName
+    property string currentServerName
+    property string currentServerHostName
     property string currentContainerName
 
     ConnectButton {
@@ -93,7 +93,15 @@ PageType {
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            text: root.currentContainerName + " | " + root.currentServerHostName
+            text: {
+                var string = ""
+                if (SettingsController.isAmneziaDnsEnabled()) {
+                    string += "Amnezia DNS | "
+                }
+
+                string += root.currentContainerName + " | " + root.currentServerHostName
+                return string
+            }
         }
     }
 
@@ -153,6 +161,8 @@ PageType {
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                     rootButtonClickedFunction: function() {
+                        // todo check if server index changed before set Currently processed
+                        // todo make signal slot for change server index in containersModel
                         ServersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
                         ContainersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
                         containersDropDown.menuVisible = true
@@ -161,20 +171,45 @@ PageType {
                     listView: HomeContainersListView {
                         rootWidth: root.width
 
+                        Connections {
+                            target: ServersModel
+
+                            function onCurrentlyProcessedServerIndexChanged() {
+                                updateContainersModelFilters()
+                            }
+
+                            function updateContainersModelFilters() {
+                                if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                                    proxyContainersModel.filters = [serviceTypeFilter, supportedFilter]
+                                } else {
+                                    proxyContainersModel.filters = installedFilter
+                                }
+                            }
+                        }
+
+                        ValueFilter {
+                            id: serviceTypeFilter
+                            roleName: "serviceType"
+                            value: ProtocolEnum.Vpn
+                        }
+                        ValueFilter {
+                            id: supportedFilter
+                            roleName: "isSupported"
+                            value: true
+                        }
+                        ValueFilter {
+                            id: installedFilter
+                            roleName: "isInstalled"
+                            value: true
+                        }
+
                         model: SortFilterProxyModel {
                             id: proxyContainersModel
                             sourceModel: ContainersModel
-                            filters: [
-                                ValueFilter {
-                                    roleName: "serviceType"
-                                    value: ProtocolEnum.Vpn
-                                },
-                                ValueFilter {
-                                    roleName: "isSupported"
-                                    value: true
-                                }
-                            ]
+
+                            Component.onCompleted: updateContainersModelFilters()
                         }
+
                         currentIndex: ContainersModel.getDefaultContainer()
                     }
                 }
@@ -272,6 +307,9 @@ PageType {
 
                                         isDefault = true
                                         ContainersModel.setCurrentlyProcessedServerIndex(index)
+
+                                        root.currentServerName = name
+                                        root.currentServerHostName = hostName
                                     }
 
                                     MouseArea {
@@ -300,6 +338,13 @@ PageType {
 
                             DividerType {
                                 Layout.fillWidth: true
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            if (serversMenuContent.currentIndex === index) {
+                                root.currentServerName = name
+                                root.currentServerHostName = hostName
                             }
                         }
                     }

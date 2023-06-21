@@ -11,28 +11,30 @@ class ConnectionController : public QObject
     Q_OBJECT
 
 public:
-    Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
+    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
+    Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
+    Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<VpnConnection> &vpnConnection,
                                   QObject *parent = nullptr);
 
-    bool isConnected();
-    void setIsConnected(bool isConnected); //todo take state from vpnconnection?
+    bool isConnected() const;
+    bool isConnectionInProgress() const;
+    QString connectionStateText() const;
 
 public slots:
     void openConnection();
     void closeConnection();
 
     QString getLastConnectionError();
-    Vpn::ConnectionState connectionState(){return {};}; //todo update ConnectButton text on page change
+    void onConnectionStateChanged(Vpn::ConnectionState state);
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
     void disconnectFromVpn();
-    void connectionStateChanged(Vpn::ConnectionState state);
-    void isConnectedChanged();
+    void connectionStateChanged();
 
     void connectionErrorOccurred(QString errorMessage);
 
@@ -43,6 +45,8 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
 
     bool m_isConnected = false;
+    bool m_isConnectionInProgress = false;
+    QString m_connectionStateText = tr("Connect");
 };
 
 #endif // CONNECTIONCONTROLLER_H

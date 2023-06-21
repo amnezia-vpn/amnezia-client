@@ -7,6 +7,7 @@ import PageEnum 1.0
 import "./"
 import "../Controls2"
 import "../Config"
+import "../Controls2/TextTypes"
 
 PageType {
     id: root
@@ -42,28 +43,32 @@ PageType {
             HeaderType {
                 Layout.fillWidth: true
 
-                headerText: "Подключение к серверу"
+                headerText: qsTr("Server connection")
             }
 
             TextFieldWithHeaderType {
                 id: hostname
 
                 Layout.fillWidth: true
-                headerText: "Server IP address [:port]"
+                headerText: qsTr("Server IP address [:port]")
+                textFieldPlaceholderText: qsTr("Enter the address in the format 255.255.255.255:88")
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: InstallController.ipAddressPortRegExp()
+                }
             }
 
             TextFieldWithHeaderType {
                 id: username
 
                 Layout.fillWidth: true
-                headerText: "Login to connect via SSH"
+                headerText: qsTr("Login to connect via SSH")
             }
 
             TextFieldWithHeaderType {
                 id: secretData
 
                 Layout.fillWidth: true
-                headerText: "Password / Private key"
+                headerText: qsTr("Password / Private key")
                 textField.echoMode: TextInput.Password
             }
 
@@ -71,7 +76,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
-                text: qsTr("Настроить сервер простым образом")
+                text: qsTr("Set up a server the easy way")
 
                 onClicked: function() {
                     InstallController.setShouldCreateServer(true)
@@ -92,7 +97,7 @@ PageType {
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
-                text: qsTr("Выбрать протокол для установки")
+                text: qsTr("Select protocol to install")
 
                 onClicked: function() {
                     InstallController.setShouldCreateServer(true)

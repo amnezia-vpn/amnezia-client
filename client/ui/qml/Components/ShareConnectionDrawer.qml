@@ -141,6 +141,7 @@ DrawerType {
                                 Layout.bottomMargin: 16
 
                                 padding: 0
+                                leftPadding: 0
                                 height: 24
 
                                 color: "#D7D8DB"

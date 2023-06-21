@@ -1,6 +1,7 @@
 #include "servers_model.h"
 
-ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
+ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
+    : m_settings(settings), QAbstractListModel(parent)
 {
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
@@ -14,8 +15,7 @@ int ServersModel::rowCount(const QModelIndex &parent) const
 
 bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0
-        || index.row() >= static_cast<int>(m_servers.size())) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_servers.size())) {
         return false;
     }
 
@@ -29,8 +29,7 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         break;
     }
     case IsDefaultRole: {
-        m_settings->setDefaultServer(index.row());
-        m_defaultServerIndex = m_settings->defaultServerIndex();
+        setDefaultServerIndex(index.row());
         break;
     }
     default: {
@@ -58,16 +57,11 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         }
         return description;
     }
-    case HostNameRole:
-        return server.value(config_key::hostName).toString();
-    case CredentialsRole:
-        return QVariant::fromValue(m_settings->serverCredentials(index.row()));
-    case CredentialsLoginRole:
-        return m_settings->serverCredentials(index.row()).userName;
-    case IsDefaultRole:
-        return index.row() == m_defaultServerIndex;
-    case IsCurrentlyProcessedRole:
-        return index.row() == m_currenlyProcessedServerIndex;
+    case HostNameRole: return server.value(config_key::hostName).toString();
+    case CredentialsRole: return QVariant::fromValue(m_settings->serverCredentials(index.row()));
+    case CredentialsLoginRole: return m_settings->serverCredentials(index.row()).userName;
+    case IsDefaultRole: return index.row() == m_defaultServerIndex;
+    case IsCurrentlyProcessedRole: return index.row() == m_currenlyProcessedServerIndex;
     }
 
     return QVariant();
@@ -92,6 +86,7 @@ const int ServersModel::getServersCount()
 void ServersModel::setCurrentlyProcessedServerIndex(int index)
 {
     m_currenlyProcessedServerIndex = index;
+    emit currentlyProcessedServerIndexChanged();
 }
 
 int ServersModel::getCurrentlyProcessedServerIndex()
@@ -102,6 +97,12 @@ int ServersModel::getCurrentlyProcessedServerIndex()
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currenlyProcessedServerIndex;
+}
+
+bool ServersModel::isCurrentlyProcessedServerHasWriteAccess()
+{
+    auto credentials = m_settings->serverCredentials(m_currenlyProcessedServerIndex);
+    return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
 }
 
 void ServersModel::addServer(const QJsonObject &server)
@@ -119,18 +120,19 @@ void ServersModel::removeServer()
     m_servers = m_settings->serversArray();
 
     if (m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex) {
-        m_settings->setDefaultServer(0);
+        setDefaultServerIndex(0);
     } else if (m_settings->defaultServerIndex() > m_currenlyProcessedServerIndex) {
-        m_settings->setDefaultServer(m_settings->defaultServerIndex() - 1);
+        setDefaultServerIndex(m_settings->defaultServerIndex() - 1);
     }
 
     if (m_settings->serversCount() == 0) {
-        m_settings->setDefaultServer(-1);
+        setDefaultServerIndex(-1);
     }
     endResetModel();
 }
 
-QHash<int, QByteArray> ServersModel::roleNames() const {
+QHash<int, QByteArray> ServersModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
     roles[HostNameRole] = "hostName";
@@ -139,4 +141,10 @@ QHash<int, QByteArray> ServersModel::roleNames() const {
     roles[IsDefaultRole] = "isDefault";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     return roles;
+}
+
+void ServersModel::setDefaultServerIndex(const int index)
+{
+    m_settings->setDefaultServer(index);
+    m_defaultServerIndex = m_settings->defaultServerIndex();
 }
