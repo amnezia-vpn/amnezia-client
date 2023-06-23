@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import ContainersModelFilters 1.0
 
 import "./"
 import "../Controls2"
@@ -161,10 +162,7 @@ PageType {
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                     rootButtonClickedFunction: function() {
-                        // todo check if server index changed before set Currently processed
-                        // todo make signal slot for change server index in containersModel
-                        ServersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
-                        ContainersModel.setCurrentlyProcessedServerIndex(serversMenuContent.currentIndex)
+                        ServersModel.currentlyProcessedIndex = serversMenuContent.currentIndex
                         containersDropDown.menuVisible = true
                     }
 
@@ -177,39 +175,22 @@ PageType {
                             function onCurrentlyProcessedServerIndexChanged() {
                                 updateContainersModelFilters()
                             }
+                        }
 
-                            function updateContainersModelFilters() {
-                                if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
-                                    proxyContainersModel.filters = [serviceTypeFilter, supportedFilter]
-                                } else {
-                                    proxyContainersModel.filters = installedFilter
-                                }
+                        function updateContainersModelFilters() {
+                            if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                                proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
+                            } else {
+                                proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
                             }
-                        }
-
-                        ValueFilter {
-                            id: serviceTypeFilter
-                            roleName: "serviceType"
-                            value: ProtocolEnum.Vpn
-                        }
-                        ValueFilter {
-                            id: supportedFilter
-                            roleName: "isSupported"
-                            value: true
-                        }
-                        ValueFilter {
-                            id: installedFilter
-                            roleName: "isInstalled"
-                            value: true
                         }
 
                         model: SortFilterProxyModel {
                             id: proxyContainersModel
                             sourceModel: ContainersModel
-
-                            Component.onCompleted: updateContainersModelFilters()
                         }
 
+                        Component.onCompleted: updateContainersModelFilters()
                         currentIndex: ContainersModel.getDefaultContainer()
                     }
                 }
@@ -267,7 +248,7 @@ PageType {
                     height: serversMenuContent.contentItem.height
 
                     model: ServersModel
-                    currentIndex: ServersModel.getDefaultServerIndex()
+                    currentIndex: ServersModel.defaultIndex
 
                     clip: true
                     interactive: false
@@ -305,8 +286,8 @@ PageType {
                                     onClicked: {
                                         serversMenuContent.currentIndex = index
 
-                                        isDefault = true
-                                        ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                        ServersModel.currentlyProcessedIndex = index
+                                        ServersModel.defaultIndex = index
 
                                         root.currentServerName = name
                                         root.currentServerHostName = hostName
@@ -328,8 +309,7 @@ PageType {
                                     z: 1
 
                                     onClicked: function() {
-                                        ServersModel.setCurrentlyProcessedServerIndex(index)
-                                        ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                        ServersModel.currentlyProcessedIndex = index
                                         goToPage(PageEnum.PageSettingsServerInfo)
                                         menu.visible = false
                                     }

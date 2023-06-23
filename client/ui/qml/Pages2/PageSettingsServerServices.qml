@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import ContainersModelFilters 1.0
 
 import "./"
 import "../Controls2"
@@ -17,22 +18,31 @@ import "../Components"
 PageType {
     id: root
 
-    SortFilterProxyModel {
-        id: containersProxyModel
-        sourceModel: ContainersModel
-        filters: [
-            ValueFilter {
-                roleName: "serviceType"
-                value: ProtocolEnum.Other
-            },
-            ValueFilter {
-                roleName: "isSupported"
-                value: true
-            }
-        ]
-    }
+    property var installedServicesCount
 
     SettingsContainersListView {
-        model: containersProxyModel
+        Connections {
+            target: ServersModel
+
+            function onCurrentlyProcessedServerIndexChanged() {
+                updateContainersModelFilters()
+            }
+        }
+
+        function updateContainersModelFilters() {
+            if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
+            } else {
+                proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
+            }
+            root.installedServicesCount = proxyContainersModel.count
+        }
+
+        model: SortFilterProxyModel {
+            id: proxyContainersModel
+            sourceModel: ContainersModel
+        }
+
+        Component.onCompleted: updateContainersModelFilters()
     }
 }

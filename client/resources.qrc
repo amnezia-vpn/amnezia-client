@@ -269,5 +269,6 @@
         <file>images/controls/mail.svg</file>
         <file>images/controls/telegram.svg</file>
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
+        <file>ui/qml/Filters/ContainersModelFilters.qml</file>
     </qresource>
 </RCC>

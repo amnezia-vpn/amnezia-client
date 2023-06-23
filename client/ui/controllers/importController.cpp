@@ -5,40 +5,42 @@
 
 #include "core/errorstrings.h"
 
-namespace {
-enum class ConfigTypes { Amnezia, OpenVpn, WireGuard };
-
-ConfigTypes checkConfigFormat(const QString &config)
+namespace
 {
-    const QString openVpnConfigPatternCli = "client";
-    const QString openVpnConfigPatternProto1 = "proto tcp";
-    const QString openVpnConfigPatternProto2 = "proto udp";
-    const QString openVpnConfigPatternDriver1 = "dev tun";
-    const QString openVpnConfigPatternDriver2 = "dev tap";
+    enum class ConfigTypes {
+        Amnezia,
+        OpenVpn,
+        WireGuard
+    };
 
-    const QString wireguardConfigPatternSectionInterface = "[Interface]";
-    const QString wireguardConfigPatternSectionPeer = "[Peer]";
+    ConfigTypes checkConfigFormat(const QString &config)
+    {
+        const QString openVpnConfigPatternCli = "client";
+        const QString openVpnConfigPatternProto1 = "proto tcp";
+        const QString openVpnConfigPatternProto2 = "proto udp";
+        const QString openVpnConfigPatternDriver1 = "dev tun";
+        const QString openVpnConfigPatternDriver2 = "dev tap";
 
-    if (config.contains(openVpnConfigPatternCli)
-        && (config.contains(openVpnConfigPatternProto1)
-            || config.contains(openVpnConfigPatternProto2))
-        && (config.contains(openVpnConfigPatternDriver1)
-            || config.contains(openVpnConfigPatternDriver2))) {
-        return ConfigTypes::OpenVpn;
-    } else if (config.contains(wireguardConfigPatternSectionInterface)
-               && config.contains(wireguardConfigPatternSectionPeer)) {
-        return ConfigTypes::WireGuard;
+        const QString wireguardConfigPatternSectionInterface = "[Interface]";
+        const QString wireguardConfigPatternSectionPeer = "[Peer]";
+
+        if (config.contains(openVpnConfigPatternCli)
+            && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
+            && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+            return ConfigTypes::OpenVpn;
+        } else if (config.contains(wireguardConfigPatternSectionInterface)
+                   && config.contains(wireguardConfigPatternSectionPeer)) {
+            return ConfigTypes::WireGuard;
+        }
+        return ConfigTypes::Amnezia;
     }
-    return ConfigTypes::Amnezia;
-}
 } // namespace
 
 ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
-                                   const std::shared_ptr<Settings> &settings,
-                                   QObject *parent) : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel),  m_settings(settings)
+                                   const std::shared_ptr<Settings> &settings, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
-
 }
 
 void ImportController::extractConfigFromFile(const QUrl &fileUrl)
@@ -88,8 +90,7 @@ void ImportController::importConfig()
         m_serversModel->addServer(m_config);
 
         if (!m_config.value(config_key::containers).toArray().isEmpty()) {
-            auto newServerIndex = m_serversModel->index(m_serversModel->getServersCount() - 1);
-            m_serversModel->setData(newServerIndex, true, ServersModel::Roles::IsDefaultRole);
+            m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
         }
 
         emit importFinished();
@@ -116,12 +117,12 @@ QJsonObject ImportController::extractAmneziaConfig(QString &data)
     return QJsonDocument::fromJson(ba).object();
 }
 
-//bool ImportController::importConnectionFromQr(const QByteArray &data)
+// bool ImportController::importConnectionFromQr(const QByteArray &data)
 //{
-//    QJsonObject dataObj = QJsonDocument::fromJson(data).object();
-//    if (!dataObj.isEmpty()) {
-//        return importConnection(dataObj);
-//    }
+//     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
+//     if (!dataObj.isEmpty()) {
+//         return importConnection(dataObj);
+//     }
 
 //    QByteArray ba_uncompressed = qUncompress(data);
 //    if (!ba_uncompressed.isEmpty()) {
@@ -158,7 +159,6 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
     config[config_key::containers] = arr;
     config[config_key::defaultContainer] = "amnezia-openvpn";
     config[config_key::description] = m_settings->nextAvailableServerName();
-
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
@@ -206,7 +206,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     config[config_key::defaultContainer] = "amnezia-wireguard";
     config[config_key::description] = m_settings->nextAvailableServerName();
 
-    const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
+    const static QRegularExpression dnsRegExp(
+            "DNS = "
+            "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(data);
     if (dnsMatch.hasMatch()) {
         config[config_key::dns1] = dnsMatch.captured(1);

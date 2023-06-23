@@ -79,6 +79,10 @@ PageType {
                 text: qsTr("Set up a server the easy way")
 
                 onClicked: function() {
+                    if (!isCredentialsFilled()) {
+                        return
+                    }
+
                     InstallController.setShouldCreateServer(true)
                     InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
@@ -100,6 +104,10 @@ PageType {
                 text: qsTr("Select protocol to install")
 
                 onClicked: function() {
+                    if (!isCredentialsFilled()) {
+                        return
+                    }
+
                     InstallController.setShouldCreateServer(true)
                     InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
@@ -107,5 +115,26 @@ PageType {
                 }
             }
         }
+    }
+
+    function isCredentialsFilled() {
+        var hasEmptyField = false
+
+        if (hostname.textFieldText === "") {
+            hostname.errorText = qsTr("ip address cannot be empty")
+            hasEmptyField = true
+        } else if (!hostname.textField.acceptableInput) {
+            hostname.errorText = qsTr("Enter the address in the format 255.255.255.255:88")
+        }
+
+        if (username.textFieldText === "") {
+            username.errorText = qsTr("login cannot be empty")
+            hasEmptyField = true
+        }
+        if (secretData.textFieldText === "") {
+            secretData.errorText = qsTr("password/private key cannot be empty")
+            hasEmptyField = true
+        }
+        return !hasEmptyField
     }
 }

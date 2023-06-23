@@ -5,6 +5,7 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
 {
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
+    m_currenlyProcessedServerIndex = m_defaultServerIndex;
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -26,10 +27,6 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         server.insert(config_key::description, value.toString());
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
-        break;
-    }
-    case IsDefaultRole: {
-        setDefaultServerIndex(index.row());
         break;
     }
     default: {
@@ -62,6 +59,10 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case CredentialsLoginRole: return m_settings->serverCredentials(index.row()).userName;
     case IsDefaultRole: return index.row() == m_defaultServerIndex;
     case IsCurrentlyProcessedRole: return index.row() == m_currenlyProcessedServerIndex;
+    case HasWriteAccess: {
+        auto credentials = m_settings->serverCredentials(index.row());
+        return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
+    }
     }
 
     return QVariant();
@@ -71,6 +72,13 @@ QVariant ServersModel::data(const int index, int role) const
 {
     QModelIndex modelIndex = this->index(index);
     return data(modelIndex, role);
+}
+
+void ServersModel::setDefaultServerIndex(const int index)
+{
+    m_settings->setDefaultServer(index);
+    m_defaultServerIndex = m_settings->defaultServerIndex();
+    emit defaultServerIndexChanged();
 }
 
 const int ServersModel::getDefaultServerIndex()
@@ -83,10 +91,10 @@ const int ServersModel::getServersCount()
     return m_servers.count();
 }
 
-void ServersModel::setCurrentlyProcessedServerIndex(int index)
+void ServersModel::setCurrentlyProcessedServerIndex(const int index)
 {
     m_currenlyProcessedServerIndex = index;
-    emit currentlyProcessedServerIndexChanged();
+    emit currentlyProcessedServerIndexChanged(m_currenlyProcessedServerIndex);
 }
 
 int ServersModel::getCurrentlyProcessedServerIndex()
@@ -101,8 +109,7 @@ bool ServersModel::isDefaultServerCurrentlyProcessed()
 
 bool ServersModel::isCurrentlyProcessedServerHasWriteAccess()
 {
-    auto credentials = m_settings->serverCredentials(m_currenlyProcessedServerIndex);
-    return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
+    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccess));
 }
 
 void ServersModel::addServer(const QJsonObject &server)
@@ -140,11 +147,6 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[CredentialsLoginRole] = "credentialsLogin";
     roles[IsDefaultRole] = "isDefault";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
+    roles[HasWriteAccess] = "hasWriteAccess";
     return roles;
-}
-
-void ServersModel::setDefaultServerIndex(const int index)
-{
-    m_settings->setDefaultServer(index);
-    m_defaultServerIndex = m_settings->defaultServerIndex();
 }

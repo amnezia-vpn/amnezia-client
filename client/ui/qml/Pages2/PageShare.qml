@@ -147,18 +147,28 @@ PageType {
 
                     imageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    model: ServersModel
-                    currentIndex: ServersModel.getDefaultServerIndex()
+                    model: SortFilterProxyModel {
+                        id: proxyServersModel
+                        sourceModel: ServersModel
+                        filters: [
+                            ValueFilter {
+                                roleName: "hasWriteAccess"
+                                value: true
+                            }
+                        ]
+                    }
+
+                    currentIndex: 0
 
                     clickedFunction: function() {
                         serverSelector.text = selectedText
-                        ContainersModel.setCurrentlyProcessedServerIndex(currentIndex)
+                        ServersModel.currentlyProcessedIndex = currentIndex
                         protocolSelector.visible = true
                     }
 
                     Component.onCompleted: {
                         serverSelector.text = selectedText
-                        ContainersModel.setCurrentlyProcessedServerIndex(currentIndex)
+                        ServersModel.currentlyProcessedIndex = currentIndex
                     }
                 }
 
@@ -169,7 +179,7 @@ PageType {
                     height: parent.height * 0.5
 
                     ColumnLayout {
-                        id: header
+                        id: protocolSelectorHeader
 
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -187,12 +197,12 @@ PageType {
                     }
 
                     FlickableType {
-                        anchors.top: header.bottom
+                        anchors.top: protocolSelectorHeader.bottom
                         anchors.topMargin: 16
-                        contentHeight: col.implicitHeight
+                        contentHeight: protocolSelectorContent.implicitHeight
 
                         Column {
-                            id: col
+                            id: protocolSelectorContent
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -265,7 +275,7 @@ PageType {
             }
 
             DropDownType {
-                id: connectionTypeSelector
+                id: exportTypeSelector
 
                 property int currentIndex
 
@@ -283,8 +293,6 @@ PageType {
                 headerText: qsTr("Connection format")
 
                 listView: ListViewType {
-                    id: connectionTypeSelectorListView
-
                     rootWidth: root.width
                     dividerVisible: true
 
@@ -294,14 +302,14 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
-                        connectionTypeSelector.text = selectedText
-                        connectionTypeSelector.currentIndex = currentIndex
-                        connectionTypeSelector.menuVisible = false
+                        exportTypeSelector.text = selectedText
+                        exportTypeSelector.currentIndex = currentIndex
+                        exportTypeSelector.menuVisible = false
                     }
 
                     Component.onCompleted: {
-                        connectionTypeSelector.text = selectedText
-                        connectionTypeSelector.currentIndex = currentIndex
+                        exportTypeSelector.text = selectedText
+                        exportTypeSelector.currentIndex = currentIndex
                     }
                 }
             }

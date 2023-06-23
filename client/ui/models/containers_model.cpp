@@ -78,7 +78,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ContainersModel::setCurrentlyProcessedServerIndex(int index)
+void ContainersModel::setCurrentlyProcessedServerIndex(const int index)
 {
     beginResetModel();
     m_currentlyProcessedServerIndex = index;

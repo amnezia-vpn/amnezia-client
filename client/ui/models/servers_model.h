@@ -5,13 +5,6 @@
 
 #include "settings.h"
 
-struct ServerModelContent
-{
-    QString desc;
-    QString address;
-    bool isDefault;
-};
-
 class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -22,7 +15,8 @@ public:
         CredentialsRole,
         CredentialsLoginRole,
         IsDefaultRole,
-        IsCurrentlyProcessedRole
+        IsCurrentlyProcessedRole,
+        HasWriteAccess
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -33,14 +27,20 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant data(const int index, int role = Qt::DisplayRole) const;
 
+    Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(int currentlyProcessedIndex READ getCurrentlyProcessedServerIndex WRITE setCurrentlyProcessedServerIndex
+                       NOTIFY currentlyProcessedServerIndexChanged)
+
 public slots:
+    void setDefaultServerIndex(const int index);
     const int getDefaultServerIndex();
     bool isDefaultServerCurrentlyProcessed();
+
     bool isCurrentlyProcessedServerHasWriteAccess();
 
     const int getServersCount();
 
-    void setCurrentlyProcessedServerIndex(int index);
+    void setCurrentlyProcessedServerIndex(const int index);
     int getCurrentlyProcessedServerIndex();
 
     void addServer(const QJsonObject &server);
@@ -50,11 +50,10 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 signals:
-    void currentlyProcessedServerIndexChanged();
+    void currentlyProcessedServerIndexChanged(const int index);
+    void defaultServerIndexChanged();
 
 private:
-    void setDefaultServerIndex(const int index);
-
     QJsonArray m_servers;
 
     std::shared_ptr<Settings> m_settings;

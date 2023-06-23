@@ -54,7 +54,13 @@ PageType {
                     actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
                     headerText: name
-                    descriptionText: credentialsLogin + " · " + hostName
+                    descriptionText: {
+                        if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                            return credentialsLogin + " · " + hostName
+                        } else {
+                            return hostName
+                        }
+                    }
 
                     actionButtonFunction: function() {
                         serverNameEditDrawer.visible = true
@@ -123,10 +129,14 @@ PageType {
             }
 
             TabButtonType {
+                visible: protocolsPage.installedProtocolsCount
+                width: protocolsPage.installedProtocolsCount ? undefined : 0
                 isSelected: tabBar.currentIndex === 0
                 text: qsTr("Protocols")
             }
             TabButtonType {
+                visible: servicesPage.installedServicesCount
+                width: servicesPage.installedServicesCount ? undefined : 0
                 isSelected: tabBar.currentIndex === 1
                 text: qsTr("Services")
             }
@@ -143,9 +153,11 @@ PageType {
             currentIndex: tabBar.currentIndex
 
             PageSettingsServerProtocols {
+                id: protocolsPage
                 stackView: root.stackView
             }
             PageSettingsServerServices {
+                id: servicesPage
                 stackView: root.stackView
             }
             PageSettingsServerData {

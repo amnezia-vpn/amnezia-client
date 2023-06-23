@@ -1,29 +1,28 @@
 #include "amnezia_application.h"
 
 #include <QFontDatabase>
+#include <QQuickStyle>
 #include <QStandardPaths>
 #include <QTimer>
 #include <QTranslator>
-#include <QQuickStyle>
 
-#include "logger.h"
 #include "defines.h"
+#include "logger.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 
 #include "ui/pages.h"
 
 #if defined(Q_OS_IOS)
-#include "platforms/ios/QtAppDelegate-C-Interface.h"
+    #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    AmneziaApplication::AmneziaApplication(int &argc, char *argv[]):
-        AMNEZIA_BASE_CLASS(argc, argv)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
 #else
-    AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary,
-        SingleApplication::Options options, int timeout, const QString &userData):
-    SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options,
+                                       int timeout, const QString &userData)
+    : SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
 #endif
 {
     setQuitOnLastWindowClosed(false);
@@ -51,12 +50,14 @@
 AmneziaApplication::~AmneziaApplication()
 {
     if (m_engine) {
-        QObject::disconnect(m_engine, 0,0,0);
+        QObject::disconnect(m_engine, 0, 0, 0);
         delete m_engine;
     }
 
-    if (m_protocolProps) delete m_protocolProps;
-    if (m_containerProps) delete m_containerProps;
+    if (m_protocolProps)
+        delete m_protocolProps;
+    if (m_containerProps)
+        delete m_containerProps;
 }
 
 void AmneziaApplication::init()
@@ -64,11 +65,13 @@ void AmneziaApplication::init()
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
-    QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated,
-                     this, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+    QObject::connect(
+            m_engine, &QQmlApplicationEngine::objectCreated, this,
+            [url](QObject *obj, const QUrl &objUrl) {
+                if (!obj && url == objUrl)
+                    QCoreApplication::exit(-1);
+            },
+            Qt::QueuedConnection);
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
@@ -78,6 +81,8 @@ void AmneziaApplication::init()
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
+    connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
+            &ContainersModel::setCurrentlyProcessedServerIndex);
 
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
@@ -94,21 +99,19 @@ void AmneziaApplication::init()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(
-        new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
-    m_settingsController.reset(
-        new SettingsController(m_serversModel, m_containersModel, m_settings));
+    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     //
 
     m_engine->load(url);
 
-//    if (m_engine->rootObjects().size() > 0) {
-//        m_uiLogic->setQmlRoot(m_engine->rootObjects().at(0));
-//    }
+    //    if (m_engine->rootObjects().size() > 0) {
+    //        m_uiLogic->setQmlRoot(m_engine->rootObjects().at(0));
+    //    }
 
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
@@ -116,24 +119,23 @@ void AmneziaApplication::init()
         }
     }
 
-//#ifdef Q_OS_WIN
-//    if (m_parser.isSet("a")) m_uiLogic->showOnStartup();
-//    else emit m_uiLogic->show();
-//#else
-//    m_uiLogic->showOnStartup();
-//#endif
+    // #ifdef Q_OS_WIN
+    //     if (m_parser.isSet("a")) m_uiLogic->showOnStartup();
+    //     else emit m_uiLogic->show();
+    // #else
+    //     m_uiLogic->showOnStartup();
+    // #endif
 
-//    // TODO - fix
-//#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-//    if (isPrimary()) {
-//        QObject::connect(this, &SingleApplication::instanceStarted, m_uiLogic, [this](){
-//            qDebug() << "Secondary instance started, showing this window instead";
-//            emit m_uiLogic->show();
-//            emit m_uiLogic->raise();
-//        });
-//    }
-//#endif
-
+    //    // TODO - fix
+    // #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    //    if (isPrimary()) {
+    //        QObject::connect(this, &SingleApplication::instanceStarted, m_uiLogic, [this](){
+    //            qDebug() << "Secondary instance started, showing this window instead";
+    //            emit m_uiLogic->show();
+    //            emit m_uiLogic->raise();
+    //        });
+    //    }
+    // #endif
 }
 
 void AmneziaApplication::registerTypes()
@@ -155,6 +157,9 @@ void AmneziaApplication::registerTypes()
 
     m_protocolProps = new ProtocolProps;
     qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", m_protocolProps);
+
+    qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
+                             "ContainersModelFilters");
 
     //
     Vpn::declareQmlVpnConnectionStateEnum();
@@ -182,19 +187,17 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    QCommandLineOption c_autostart {{"a", "autostart"}, "System autostart"};
+    QCommandLineOption c_autostart { { "a", "autostart" }, "System autostart" };
     m_parser.addOption(c_autostart);
 
-    QCommandLineOption c_cleanup {{"c", "cleanup"}, "Cleanup logs"};
+    QCommandLineOption c_cleanup { { "c", "cleanup" }, "Cleanup logs" };
     m_parser.addOption(c_cleanup);
 
     m_parser.process(*this);
 
     if (m_parser.isSet(c_cleanup)) {
         Logger::cleanUp();
-        QTimer::singleShot(100, this, [this]{
-            quit();
-        });
+        QTimer::singleShot(100, this, [this] { quit(); });
         exec();
         return false;
     }
@@ -205,4 +208,3 @@ QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {
     return m_engine;
 }
-

@@ -50,8 +50,7 @@ PageType {
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
-            ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
+            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
     }
@@ -65,8 +64,8 @@ PageType {
 
         topPadding: 8
         bottomPadding: 8//34
-        leftPadding: 96
-        rightPadding: 96
+        leftPadding: shareTabButton.visible ? 96 : 128
+        rightPadding: shareTabButton.visible ? 96 : 128
 
         background: Rectangle {
             border.width: 1
@@ -78,11 +77,25 @@ PageType {
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
-                ContainersModel.setCurrentlyProcessedServerIndex(ServersModel.getDefaultServerIndex())
+                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             }
         }
         TabImageButtonType {
+            id: shareTabButton
+
+            Connections {
+                target: ServersModel
+
+                function onDefaultServerIndexChanged() {
+                    shareTabButton.visible = ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+                    shareTabButton.width = ServersModel.isCurrentlyProcessedServerHasWriteAccess() ? undefined : 0
+                }
+            }
+
+            visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            width: visible ? undefined : 0
+
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
             onClicked: {
@@ -100,8 +113,8 @@ PageType {
 
     MouseArea {
         anchors.fill: tabBar
-        anchors.leftMargin: 96
-        anchors.rightMargin: 96
+        anchors.leftMargin: shareTabButton.visible ? 96 : 128
+        anchors.rightMargin: shareTabButton.visible ? 96 : 128
         cursorShape: Qt.PointingHandCursor
         enabled: false
     }

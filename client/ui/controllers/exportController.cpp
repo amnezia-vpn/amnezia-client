@@ -16,14 +16,14 @@
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
                                    const std::shared_ptr<Settings> &settings,
-                                   const std::shared_ptr<VpnConfigurator> &configurator,
-                                   QObject *parent)
-    : QObject(parent)
-    , m_serversModel(serversModel)
-    , m_containersModel(containersModel)
-    , m_settings(settings)
-    , m_configurator(configurator)
-{}
+                                   const std::shared_ptr<VpnConfigurator> &configurator, QObject *parent)
+    : QObject(parent),
+      m_serversModel(serversModel),
+      m_containersModel(containersModel),
+      m_settings(settings),
+      m_configurator(configurator)
+{
+}
 
 void ExportController::generateFullAccessConfig()
 {
@@ -33,8 +33,8 @@ void ExportController::generateFullAccessConfig()
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     m_amneziaCode = QString("vpn://%1")
-                        .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                               | QByteArray::OmitTrailingEquals)));
+                            .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                                   | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
@@ -43,25 +43,21 @@ void ExportController::generateFullAccessConfig()
 void ExportController::generateConnectionConfig()
 {
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials = qvariant_cast<ServerCredentials>(
-        m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
-    DockerContainer container = static_cast<DockerContainer>(
-        m_containersModel->getCurrentlyProcessedContainerIndex());
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
     QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig = qvariant_cast<QJsonObject>(
-        m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig =
+            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
         QJsonObject protocolConfig = m_settings->protocolConfig(serverIndex, container, protocol);
 
-        QString vpnConfig = m_configurator->genVpnProtocolConfig(credentials,
-                                                                 container,
-                                                                 containerConfig,
-                                                                 protocol,
-                                                                 &errorCode);
+        QString vpnConfig =
+                m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, protocol, &errorCode);
         if (errorCode) {
             emit exportErrorOccurred(errorString(errorCode));
             return;
@@ -75,7 +71,7 @@ void ExportController::generateConnectionConfig()
         config.remove(config_key::userName);
         config.remove(config_key::password);
         config.remove(config_key::port);
-        config.insert(config_key::containers, QJsonArray{containerConfig});
+        config.insert(config_key::containers, QJsonArray { containerConfig });
         config.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
         auto dns = m_configurator->getDnsForConfig(serverIndex);
@@ -86,8 +82,8 @@ void ExportController::generateConnectionConfig()
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     m_amneziaCode = QString("vpn://%1")
-                        .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                               | QByteArray::OmitTrailingEquals)));
+                            .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                                   | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
@@ -108,10 +104,8 @@ void ExportController::saveFile()
     QString fileExtension = ".vpn";
     QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QUrl fileName;
-    fileName = QFileDialog::getSaveFileUrl(nullptr,
-                                           tr("Save AmneziaVPN config"),
-                                           QUrl::fromLocalFile(docDir + "/" + "amnezia_config"),
-                                           "*" + fileExtension);
+    fileName = QFileDialog::getSaveFileUrl(nullptr, tr("Save AmneziaVPN config"),
+                                           QUrl::fromLocalFile(docDir + "/" + "amnezia_config"), "*" + fileExtension);
     if (fileName.isEmpty())
         return;
     if (!fileName.toString().endsWith(fileExtension)) {
@@ -139,10 +133,9 @@ QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &dat
     for (int i = 0; i < data.size(); i = i + k) {
         QByteArray chunk;
         QDataStream s(&chunk, QIODevice::WriteOnly);
-        s << amnezia::qrMagicCode << chunksCount << (quint8) std::round(i / k) << data.mid(i, k);
+        s << amnezia::qrMagicCode << chunksCount << (quint8)std::round(i / k) << data.mid(i, k);
 
-        QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding
-                                       | QByteArray::OmitTrailingEquals);
+        QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
         qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(ba, qrcodegen::QrCode::Ecc::LOW);
         QString svg = QString::fromStdString(toSvgString(qr, 0));

@@ -89,8 +89,7 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                ServersModel.setCurrentlyProcessedServerIndex(index)
-                                ContainersModel.setCurrentlyProcessedServerIndex(index)
+                                ServersModel.currentlyProcessedIndex = index
                                 goToPage(PageEnum.PageSettingsServerInfo)
                             }
                         }

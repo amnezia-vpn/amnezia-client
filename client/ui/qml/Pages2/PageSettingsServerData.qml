@@ -29,6 +29,14 @@ PageType {
         }
     }
 
+    Connections {
+        target: ServersModel
+
+        function onCurrentlyProcessedServerIndexChanged() {
+            content.isServerWithWriteAccess = ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -42,7 +50,10 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            property bool isServerWithWriteAccess: ServersModel.isCurrentlyProcessedServerHasWriteAccess() //todo make it property?
+
             LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
                 text: qsTr("Clear Amnezia cache")
@@ -65,9 +76,12 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
 
             LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
                 text: qsTr("Проверить сервер на наличие ранее установленных сервисов Amnezia")
@@ -78,12 +92,14 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: "Remove server from application"
+                text: qsTr("Remove server from application")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
@@ -115,9 +131,10 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: "Clear server from Amnezia software"
+                text: qsTr("Clear server from Amnezia software")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
@@ -142,7 +159,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
 
             QuestionDrawer {
                 id: questionDrawer

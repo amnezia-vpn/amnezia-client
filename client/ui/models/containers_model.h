@@ -3,11 +3,11 @@
 
 #include <QAbstractListModel>
 #include <QJsonObject>
-#include <vector>
 #include <utility>
+#include <vector>
 
-#include "settings.h"
 #include "containers/containers_defs.h"
+#include "settings.h"
 
 class ContainersModel : public QAbstractListModel
 {
@@ -44,7 +44,7 @@ public slots:
     DockerContainer getDefaultContainer();
     QString getDefaultContainerName();
 
-    void setCurrentlyProcessedServerIndex(int index);
+    void setCurrentlyProcessedServerIndex(const int index);
     void setCurrentlyProcessedContainerIndex(int index);
     int getCurrentlyProcessedContainerIndex();
 
@@ -56,7 +56,6 @@ protected:
 
 private:
     QMap<DockerContainer, QJsonObject> m_containers;
-
 
     int m_currentlyProcessedServerIndex;
     int m_currentlyProcessedContainerIndex;
