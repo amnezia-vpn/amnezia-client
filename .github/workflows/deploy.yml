@@ -257,10 +257,6 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
 
-    strategy:
-      matrix:
-        arch: ['android_x86_64'] #, 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
-
     env:
       QT_VERSION: 6.5.0
 
@@ -284,7 +280,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'android'
-        arch: ${{ matrix.arch }}
+        arch: 'android_x86_64'
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
@@ -318,12 +314,12 @@ jobs:
         export ANDROID_NDK_PLATFORM=android-23
         export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
         export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-        export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
+        export ANDROID_CURRENT_ARCH=android_x86_64
 
         if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
           wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
           unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
         fi
 
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin
         bash deploy/build_android.sh

@@ -173,18 +173,6 @@ android {
        }
    }
 
-//   externalNativeBuild {
-//       cmake {
-//           path 'wireguard/CMakeLists.txt'
-//       }
-//   }
-
-//    externalNativeBuild {
-//        cmake {
-//            version cmakeMinVersion
-//            path "${projectDir}/cpp/CMakeLists.txt"
-//        }
-//    }
 }
 
 
