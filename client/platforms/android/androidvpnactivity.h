@@ -76,7 +76,6 @@ public:
     static void connectService();
     static void startQrCodeReader();
     static void saveFileAs(QString fileContent, QString suggestedFilename);
-    static void copyTextToClipboard(QString text);
 
 signals:
     void serviceConnected();

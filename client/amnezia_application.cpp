@@ -1,7 +1,10 @@
 #include "amnezia_application.h"
 
+#include <QClipboard>
 #include <QFontDatabase>
+#include <QMimeData>
 #include <QStandardPaths>
+#include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
 
@@ -51,7 +54,7 @@
     setQuitOnLastWindowClosed(false);
 
     // Fix config file permissions
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX && !defined(Q_OS_ANDROID)
     {
         QSettings s(ORGANIZATION_NAME, APPLICATION_NAME);
         s.setValue("permFixed", true);
@@ -64,7 +67,6 @@
     QString configLoc2 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/"
             + ORGANIZATION_NAME + "/" + APPLICATION_NAME + "/" + APPLICATION_NAME + ".conf";
     QFile::setPermissions(configLoc2, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
-
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
@@ -135,6 +137,19 @@ void AmneziaApplication::init()
     }
 #endif
 
+// Android TextField clipboard workaround
+// https://bugreports.qt.io/browse/QTBUG-113461
+#ifdef Q_OS_ANDROID
+    QObject::connect(qApp, &QApplication::applicationStateChanged, [](Qt::ApplicationState state) {
+        if (state == Qt::ApplicationActive) {
+            if (qApp->clipboard()->mimeData()->formats().contains("text/html")) {
+                QTextDocument doc;
+                doc.setHtml(qApp->clipboard()->mimeData()->html());
+                qApp->clipboard()->setText(doc.toPlainText());
+            }
+        }
+    });
+#endif
 }
 
 void AmneziaApplication::registerTypes()

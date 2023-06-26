@@ -137,7 +137,7 @@ android {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 34
-        versionCode 21 // Change to a higher number
+        versionCode 22 // Change to a higher number
         versionName "3.0.7" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
