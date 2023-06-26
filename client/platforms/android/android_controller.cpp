@@ -267,11 +267,6 @@ void AndroidController::startQrReaderActivity()
     AndroidVPNActivity::instance()->startQrCodeReader();
 }
 
-void AndroidController::copyTextToClipboard(QString text)
-{
-    AndroidVPNActivity::instance()->copyTextToClipboard(text);
-}
-
 void AndroidController::scheduleStatusCheckSlot()
 {
     QTimer::singleShot(1000, [this]() {

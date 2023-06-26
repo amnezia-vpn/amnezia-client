@@ -1,6 +1,4 @@
-#include <QLoggingCategory>
 #include <QDebug>
-#include <QTimer>
 
 #include "amnezia_application.h"
 #include "version.h"
@@ -20,7 +18,6 @@ int main(int argc, char *argv[])
     Migrations migrationsManager;
     migrationsManager.doMigrations();
 
-    QLoggingCategory::setFilterRules(QStringLiteral("qtc.ssh=false"));
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 
 #ifdef Q_OS_WIN

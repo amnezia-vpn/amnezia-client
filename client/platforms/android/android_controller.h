@@ -43,7 +43,6 @@ public:
     void setVpnConfig(const QJsonObject &newVpnConfig);
 
     void startQrReaderActivity();
-    void copyTextToClipboard(QString text);
 
 signals:
     void connectionStateChanged(VpnProtocol::VpnConnectionState state);
