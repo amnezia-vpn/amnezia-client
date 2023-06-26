@@ -5,8 +5,6 @@
 package org.amnezia.vpn.qt;
 
 import android.Manifest
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
@@ -73,10 +71,6 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
             VPNActivity.getInstance().saveFile(fileContent, suggestedName)
         }
-
-        @JvmStatic fun putTextToClipboard(text: String) {
-            VPNActivity.getInstance().putToClipboard(text)
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,18 +101,6 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         }
 
         startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
-    }
-
-    override fun getSystemService(name: String): Any? {
-        return if (Build.VERSION.SDK_INT >= 29 && name == "clipboard") {
-            // QT will always attempt to read the clipboard if content is there.
-            // since we have no use of the clipboard in android 10+
-            // we _can_  return null
-            // And we definitely should since android 12 displays clipboard access.
-            null
-        } else {
-            super.getSystemService(name)
-        }
     }
 
     external fun handleBackButton(): Boolean
@@ -316,16 +298,5 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         }
 
         tmpFileContentToSave = ""
-    }
-
-    private fun putToClipboard(text: String) {
-        this.runOnUiThread {
-            val clipboard = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
-
-            if (clipboard != null) {
-                val clip: ClipData = ClipData.newPlainText("", text)
-                clipboard.setPrimaryClip(clip)
-            }
-        }
     }
 }
