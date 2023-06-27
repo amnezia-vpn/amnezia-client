@@ -353,7 +353,7 @@ Window  {
                 }
                 textArea.wrapMode: cbLogWrap.checked ? TextEdit.WordWrap: TextEdit.NoWrap
 
-                Keys.onPressed: {
+                Keys.onPressed: function(event) {
                     UiLogic.keyPressEvent(event.key)
                     event.accepted = true
                 }

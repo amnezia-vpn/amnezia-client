@@ -18,10 +18,7 @@ OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
 {
     qDebug() << "OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol";
     OpenVpnOverCloakProtocol::stop();
-    QThread::msleep(200);
-#ifndef Q_OS_IOS
     m_ckProcess.close();
-#endif
 }
 
 ErrorCode OpenVpnOverCloakProtocol::start()
@@ -30,9 +27,15 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         setLastError(ErrorCode::CloakExecutableMissing);
         return lastError();
     }
-#ifndef Q_OS_IOS
+
     if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
         Utils::killProcessByName(Utils::executable("ck-client", false));
+    }
+
+    // workaround for desktop releases >= 3.0.7
+    if (!m_cloakConfig.contains("RemoteHost") && m_cloakConfig.contains(config_key::remote)) {
+        m_cloakConfig["RemoteHost"] = m_cloakConfig.value(config_key::remote);
+        m_cloakConfig["RemotePort"] = m_cloakConfig.value(config_key::port);
     }
 
 #ifdef QT_DEBUG
@@ -43,14 +46,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_cloakCfgFile.close();
 
     QStringList args = QStringList() << "-c" << m_cloakCfgFile.fileName()
-                                     << "-s" << m_cloakConfig.value(config_key::remote).toString()
-                                     << "-p" << m_cloakConfig.value(config_key::port).toString(amnezia::protocols::cloak::defaultPort)
                                      << "-l" << amnezia::protocols::openvpn::defaultPort;
-
-    ProtocolEnumNS::TransportProto tp = ProtocolProps::transportProtoFromString(m_cloakConfig.value(config_key::transport_proto).toString());
-    if (tp == ProtocolEnumNS::TransportProto::Udp) {
-        args << "-u";
-    }
 
     qDebug().noquote() << "OpenVpnOverCloakProtocol::start()"
                        << cloakExecPath() << args.join(" ");
@@ -86,7 +82,6 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         return OpenVpnProtocol::start();
     }
     else return ErrorCode::CloakExecutableMissing;
-#endif
 }
 
 void OpenVpnOverCloakProtocol::stop()
@@ -100,9 +95,12 @@ void OpenVpnOverCloakProtocol::stop()
     Utils::signalCtrl(m_ckProcess.processId(), CTRL_C_EVENT);
 #endif
 
-#ifndef Q_OS_IOS
     m_ckProcess.terminate();
-#endif
+
+    if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
+        QThread::msleep(1000);
+        Utils::killProcessByName(Utils::executable("ck-client", false));
+    }
 }
 
 QString OpenVpnOverCloakProtocol::cloakExecPath()

@@ -65,14 +65,6 @@ void AndroidVPNActivity::saveFileAs(QString fileContent, QString suggestedFilena
                 QJniObject::fromString(suggestedFilename).object<jstring>());
 }
 
-void AndroidVPNActivity::copyTextToClipboard(QString text)
-{
-    QJniObject::callStaticMethod<void>(
-                CLASSNAME,
-                "putTextToClipboard", "(Ljava/lang/String;)V",
-                QJniObject::fromString(text).object<jstring>());
-}
-
 // static
 AndroidVPNActivity* AndroidVPNActivity::instance() {
     if (s_instance == nullptr) {

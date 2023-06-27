@@ -34,7 +34,7 @@
 #include "ui/qautostart.h"
 
 #include "logger.h"
-#include "defines.h"
+#include "version.h"
 #include "uilogic.h"
 #include "utilities.h"
 #include "vpnconnection.h"
@@ -132,13 +132,13 @@ void UiLogic::initializeUiLogic()
     connect(AndroidController::instance(), &AndroidController::initialized, [this](bool status, bool connected, const QDateTime& connectionDate) {
         if (connected) {
             pageLogic<VpnLogic>()->onConnectionStateChanged(Vpn::ConnectionState::Connected);
-            m_vpnConnection->restoreConnection();
+            if (m_vpnConnection) m_vpnConnection->restoreConnection();
         }
     });
     if (!AndroidController::instance()->initialize(pageLogic<StartPageLogic>())) {
-         qCritical() << QString("Init failed") ;
-         emit Vpn::ConnectionState::Error;
-         return;
+        qCritical() << QString("Init failed");
+        if (m_vpnConnection) m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
+        return;
     }
 #endif
 
@@ -475,11 +475,7 @@ void UiLogic::saveBinaryFile(const QString &desc, QString ext, const QString &da
 
 void UiLogic::copyToClipboard(const QString &text)
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->copyTextToClipboard(text);
-#else
     qApp->clipboard()->setText(text);
-#endif
 }
 
 void UiLogic::shareTempFile(const QString &suggestedName, QString ext, const QString& data) {

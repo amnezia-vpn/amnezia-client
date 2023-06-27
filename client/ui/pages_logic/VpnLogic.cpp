@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <functional>
 #include "../uilogic.h"
-#include "defines.h"
+#include "version.h"
 #include <configurators/vpn_configurator.h>
 
 
@@ -79,7 +79,6 @@ void VpnLogic::onUpdatePage()
     else {
         set_labelCurrentDns(dns.first + ", " + dns.second);
     }
-
 
     set_isContainerSupportedByCurrentPlatform(ContainerProps::isSupportedByCurrentPlatform(selectedContainer));
     if (!isContainerSupportedByCurrentPlatform()) {

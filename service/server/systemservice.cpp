@@ -1,4 +1,4 @@
-#include "defines.h"
+#include "version.h"
 #include "localserver.h"
 #include "systemservice.h"
 

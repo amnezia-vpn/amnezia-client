@@ -249,7 +249,7 @@ void AndroidController::cleanupBackendLogs() {
 }
 
 void AndroidController::importConfig(const QString& data){
-    m_startPageLogic->selectConfigFormat(data);
+    m_startPageLogic->importAnyFile(data);
 }
 
 const QJsonObject &AndroidController::vpnConfig() const
@@ -265,11 +265,6 @@ void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
 void AndroidController::startQrReaderActivity()
 {
     AndroidVPNActivity::instance()->startQrCodeReader();
-}
-
-void AndroidController::copyTextToClipboard(QString text)
-{
-    AndroidVPNActivity::instance()->copyTextToClipboard(text);
 }
 
 void AndroidController::scheduleStatusCheckSlot()
