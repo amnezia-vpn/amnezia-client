@@ -29,7 +29,6 @@ PageType {
     }
 
     FlickableType {
-        id: fl
         anchors.fill: parent
         contentHeight: content.height
 
@@ -41,18 +40,17 @@ PageType {
             anchors.right: parent.right
 
             ListView {
-                // todo change id naming
-                id: containers
+                id: processedContainerListView
                 width: parent.width
-                height: containers.contentItem.height
+                height: contentItem.height
                 currentIndex: -1
                 clip: true
                 interactive: false
                 model: proxyContainersModel
 
                 delegate: Item {
-                    implicitWidth: containers.width
-                    implicitHeight: delegateContent.implicitHeight
+                    implicitWidth: processedContainerListView.width
+                    implicitHeight: (delegateContent.implicitHeight > root.height) ? delegateContent.implicitHeight : root.height
 
                     ColumnLayout {
                         id: delegateContent
@@ -72,8 +70,122 @@ PageType {
 
                             Layout.fillWidth: true
 
-                            headerText: "Установка " + name
-                            descriptionText: "Эти настройки можно будет изменить позже"
+                            headerText: qsTr("Installing ") + name
+                            descriptionText: qsTr("protocol description")
+                        }
+
+                        BasicButtonType {
+                            id: showDetailsButton
+
+                            Layout.topMargin: 16
+                            Layout.leftMargin: -8
+
+                            implicitHeight: 32
+
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            disabledColor: "#878B91"
+                            textColor: "#FBB26A"
+
+                            text: qsTr("More detailed")
+
+                            onClicked: {
+                                showDetailsDrawer.open()
+                            }
+                        }
+
+                        DrawerType {
+                            id: showDetailsDrawer
+
+                            width: parent.width
+                            height: parent.height * 0.9
+
+                            BackButtonType {
+                                id: showDetailsBackButton
+
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.rightMargin: 16
+                                anchors.leftMargin: 16
+                                anchors.topMargin: 16
+
+                                backButtonFunction: function() {
+                                    showDetailsDrawer.close()
+                                }
+                            }
+
+                            FlickableType {
+                                anchors.top: showDetailsBackButton.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                contentHeight: {
+                                    var emptySpaceHeight = parent.height - showDetailsBackButton.implicitHeight - showDetailsBackButton.anchors.topMargin
+
+                                    return (showDetailsDrawerContent.implicitHeight > emptySpaceHeight) ?
+                                                showDetailsDrawerContent.implicitHeight : emptySpaceHeight
+                                }
+
+                                ColumnLayout {
+                                    id: showDetailsDrawerContent
+
+                                    anchors.fill: parent
+                                    anchors.rightMargin: 16
+                                    anchors.leftMargin: 16
+
+                                    Header2Type {
+                                        id: showDetailsDrawerHeader
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 16
+
+                                        headerText: name
+                                    }
+
+                                    TextField {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 16
+                                        Layout.bottomMargin: 16
+
+                                        padding: 0
+                                        leftPadding: 0
+                                        height: 24
+
+                                        color: "#D7D8DB"
+
+                                        font.pixelSize: 16
+                                        font.weight: Font.Medium
+                                        font.family: "PT Root UI VF"
+
+                                        text: qsTr("detailed protocol description")
+
+                                        wrapMode: Text.WordWrap
+
+                                        readOnly: true
+                                        background: Rectangle {
+                                            anchors.fill: parent
+                                            color: "transparent"
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillHeight: true
+                                        color: "transparent"
+                                    }
+
+                                    BasicButtonType {
+                                        Layout.fillWidth: true
+                                        Layout.bottomMargin: 32
+
+                                        text: qsTr("Close")
+
+                                        onClicked: function() {
+                                            showDetailsDrawer.close()
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         ParagraphTextType {
@@ -96,15 +208,12 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
                             headerText: "Port"
                         }
 
                         Rectangle {
-                            // todo make it dynamic
-                            implicitHeight: root.height - port.implicitHeight -
-                                            transportProtoSelector.implicitHeight - transportProtoHeader.implicitHeight -
-                                            header.implicitHeight - backButton.implicitHeight - installButton.implicitHeight - 116
-
+                            Layout.fillHeight: true
                             color: "transparent"
                         }
 
@@ -134,7 +243,9 @@ PageType {
                             transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
 
                             port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
-                            transportProtoSelector.mouseArea.enabled = !ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                            var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                            transportProtoSelector.visible = protocolSelectorVisible
+                            transportProtoHeader.visible = protocolSelectorVisible
                         }
                     }
                 }

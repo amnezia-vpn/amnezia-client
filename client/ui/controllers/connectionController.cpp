@@ -83,11 +83,13 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Error: {
         m_isConnectionInProgress = false;
+        m_connectionStateText = tr("Connect");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }
     case Vpn::ConnectionState::Unknown: {
         m_isConnectionInProgress = false;
+        m_connectionStateText = tr("Connect");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }

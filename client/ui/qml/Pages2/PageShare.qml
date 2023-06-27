@@ -260,12 +260,12 @@ PageType {
                                 }
 
                                 function fillConnectionTypeModel() {
-                                    connectionTypesModel = [amneziaConnectionFormat]
+                                    root.connectionTypesModel = [amneziaConnectionFormat]
 
                                     if (currentIndex === ContainerProps.containerFromString("OpenVpn")) {
-                                        connectionTypesModel.push(openVpnConnectionFormat)
+                                        root.connectionTypesModel.push(openVpnConnectionFormat)
                                     } else if (currentIndex === ContainerProps.containerFromString("wireGuardConnectionType")) {
-                                        connectionTypesModel.push(amneziaConnectionFormat)
+                                        root.connectionTypesModel.push(amneziaConnectionFormat)
                                     }
                                 }
                             }
@@ -287,7 +287,7 @@ PageType {
                 drawerHeight: 0.4375
 
                 visible: accessTypeSelector.currentIndex === 0
-                enabled: connectionTypesModel.length > 1
+                enabled: root.connectionTypesModel.length > 1
 
                 descriptionText: qsTr("Connection format")
                 headerText: qsTr("Connection format")
@@ -298,7 +298,7 @@ PageType {
 
                     imageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    model: connectionTypesModel
+                    model: root.connectionTypesModel
                     currentIndex: 0
 
                     clickedFunction: function() {
@@ -326,7 +326,7 @@ PageType {
 
                 onClicked: {
                     if (accessTypeSelector.currentIndex === 0) {
-                        connectionTypesModel[connectionTypeSelector.currentIndex].func()
+                        root.connectionTypesModel[accessTypeSelector.currentIndex].func()
                     } else {
                         ExportController.generateConfig(true)
                     }

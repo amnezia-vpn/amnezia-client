@@ -270,5 +270,6 @@
         <file>images/controls/telegram.svg</file>
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
         <file>ui/qml/Filters/ContainersModelFilters.qml</file>
+        <file>ui/qml/Components/ShowDetailsDrawer.qml</file>
     </qresource>
 </RCC>

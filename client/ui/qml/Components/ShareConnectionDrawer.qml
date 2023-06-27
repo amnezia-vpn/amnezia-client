@@ -76,7 +76,6 @@ DrawerType {
                     }
                 }
 
-
                 BasicButtonType {
                     Layout.fillWidth: true
                     Layout.topMargin: 8

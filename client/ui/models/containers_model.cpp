@@ -132,6 +132,17 @@ void ContainersModel::clearCachedProfiles()
     }
 }
 
+bool ContainersModel::isAmneziaDnsContainerInstalled()
+{
+    return m_containers.contains(DockerContainer::Dns);
+}
+
+bool ContainersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
+{
+    QMap<DockerContainer, QJsonObject> containers = m_settings->containers(serverIndex);
+    return containers.contains(DockerContainer::Dns);
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

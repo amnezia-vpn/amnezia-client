@@ -17,6 +17,8 @@ Button {
 
     text: ConnectionController.connectionStateText
 
+    enabled: !ConnectionController.isConnectionInProgress
+
     background: Item {
         clip: true
 

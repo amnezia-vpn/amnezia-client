@@ -21,11 +21,12 @@ PageType {
     property var installedProtocolsCount
 
     SettingsContainersListView {
+        id: settingsContainersListView
         Connections {
             target: ServersModel
 
             function onCurrentlyProcessedServerIndexChanged() {
-                updateContainersModelFilters()
+                settingsContainersListView.updateContainersModelFilters()
             }
         }
 

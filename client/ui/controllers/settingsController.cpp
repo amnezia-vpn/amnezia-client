@@ -8,15 +8,10 @@
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
-                                       const std::shared_ptr<Settings> &settings,
-                                       QObject *parent)
-    : QObject(parent)
-    , m_serversModel(serversModel)
-    , m_containersModel(containersModel)
-    , m_settings(settings)
+                                       const std::shared_ptr<Settings> &settings, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
-    m_appVersion = QString("%1: %2 (%3)")
-                       .arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
+    m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
 }
 
 void SettingsController::setAmneziaDns(bool enable)
@@ -79,21 +74,16 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig()
 {
-    Utils::saveFile(".backup",
-                    tr("Backup application config"),
-                    "AmneziaVPN",
-                    m_settings->backupAppConfig());
+    Utils::saveFile(".backup", tr("Backup application config"), "AmneziaVPN", m_settings->backupAppConfig());
 }
 
 void SettingsController::restoreAppConfig()
 {
-    QString fileName = Utils::getFileName(Q_NULLPTR,
-                                          tr("Open backup"),
-                                          QStandardPaths::writableLocation(
-                                              QStandardPaths::DocumentsLocation),
-                                          "*.backup");
+    QString fileName =
+            Utils::getFileName(Q_NULLPTR, tr("Open backup"),
+                               QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
-    //todo error processing
+    // todo error processing
     if (fileName.isEmpty())
         return;
 

@@ -51,6 +51,9 @@ public slots:
     void removeAllContainers();
     void clearCachedProfiles();
 
+    bool isAmneziaDnsContainerInstalled();
+    bool isAmneziaDnsContainerInstalled(const int serverIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

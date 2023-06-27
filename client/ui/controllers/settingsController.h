@@ -12,12 +12,10 @@ class SettingsController : public QObject
 public:
     explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                 const QSharedPointer<ContainersModel> &containersModel,
-                                const std::shared_ptr<Settings> &settings,
-                                QObject *parent = nullptr);
+                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
-    Q_PROPERTY(
-        QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
+    Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
 
 public slots:
     void setAmneziaDns(bool enable);

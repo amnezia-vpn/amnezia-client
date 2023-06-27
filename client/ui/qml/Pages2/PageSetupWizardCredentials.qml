@@ -121,18 +121,18 @@ PageType {
         var hasEmptyField = false
 
         if (hostname.textFieldText === "") {
-            hostname.errorText = qsTr("ip address cannot be empty")
+            hostname.errorText = qsTr("Ip address cannot be empty")
             hasEmptyField = true
         } else if (!hostname.textField.acceptableInput) {
             hostname.errorText = qsTr("Enter the address in the format 255.255.255.255:88")
         }
 
         if (username.textFieldText === "") {
-            username.errorText = qsTr("login cannot be empty")
+            username.errorText = qsTr("Login cannot be empty")
             hasEmptyField = true
         }
         if (secretData.textFieldText === "") {
-            secretData.errorText = qsTr("password/private key cannot be empty")
+            secretData.errorText = qsTr("Password/private key cannot be empty")
             hasEmptyField = true
         }
         return !hasEmptyField

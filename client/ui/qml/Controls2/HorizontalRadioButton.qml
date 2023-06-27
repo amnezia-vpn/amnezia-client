@@ -88,4 +88,10 @@ RadioButton {
             horizontalAlignment: Qt.AlignHCenter
         }
     }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        enabled: false
+    }
 }

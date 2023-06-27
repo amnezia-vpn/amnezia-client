@@ -8,10 +8,8 @@ import "../Controls2/TextTypes"
 Rectangle {
     id: root
 
-    property var rootWidth: root.width
+    property real rootWidth: root.width
     property int currentIndex
-
-    property alias mouseArea: transportProtoButtonMouseArea
 
     implicitWidth: transportProtoButtonGroup.implicitWidth
     implicitHeight: transportProtoButtonGroup.implicitHeight
@@ -30,8 +28,6 @@ Rectangle {
             implicitWidth: (rootWidth - 32) / 2
             text: "UDP"
 
-            hoverEnabled: !transportProtoButtonMouseArea.enabled
-
             onClicked: {
                 root.currentIndex = 0
             }
@@ -43,17 +39,9 @@ Rectangle {
             implicitWidth: (rootWidth - 32) / 2
             text: "TCP"
 
-            hoverEnabled: !transportProtoButtonMouseArea.enabled
-
             onClicked: {
                 root.currentIndex = 1
             }
         }
-    }
-
-    MouseArea {
-        id: transportProtoButtonMouseArea
-
-        anchors.fill: parent
     }
 }

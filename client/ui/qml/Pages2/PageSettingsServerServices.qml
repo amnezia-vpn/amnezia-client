@@ -21,11 +21,12 @@ PageType {
     property var installedServicesCount
 
     SettingsContainersListView {
+        id: settingsContainersListView
         Connections {
             target: ServersModel
 
             function onCurrentlyProcessedServerIndexChanged() {
-                updateContainersModelFilters()
+                settingsContainersListView.updateContainersModelFilters()
             }
         }
 

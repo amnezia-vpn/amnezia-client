@@ -59,9 +59,13 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case CredentialsLoginRole: return m_settings->serverCredentials(index.row()).userName;
     case IsDefaultRole: return index.row() == m_defaultServerIndex;
     case IsCurrentlyProcessedRole: return index.row() == m_currenlyProcessedServerIndex;
-    case HasWriteAccess: {
+    case HasWriteAccessRole: {
         auto credentials = m_settings->serverCredentials(index.row());
         return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
+    }
+    case ContainsAmneziaDnsRole: {
+        QString primaryDns = server.value(config_key::dns1).toString();
+        return primaryDns == protocols::dns::amneziaDnsIp;
     }
     }
 
@@ -109,7 +113,12 @@ bool ServersModel::isDefaultServerCurrentlyProcessed()
 
 bool ServersModel::isCurrentlyProcessedServerHasWriteAccess()
 {
-    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccess));
+    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccessRole));
+}
+
+bool ServersModel::isDefaultServerHasWriteAccess()
+{
+    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccessRole));
 }
 
 void ServersModel::addServer(const QJsonObject &server)
@@ -138,6 +147,13 @@ void ServersModel::removeServer()
     endResetModel();
 }
 
+bool ServersModel::isDefaultServerConfigContainsAmneziaDns()
+{
+    const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
+    QString primaryDns = server.value(config_key::dns1).toString();
+    return primaryDns == protocols::dns::amneziaDnsIp;
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -147,6 +163,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[CredentialsLoginRole] = "credentialsLogin";
     roles[IsDefaultRole] = "isDefault";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
-    roles[HasWriteAccess] = "hasWriteAccess";
+    roles[HasWriteAccessRole] = "hasWriteAccess";
+    roles[ContainsAmneziaDnsRole] = "containsAmneziaDns";
     return roles;
 }

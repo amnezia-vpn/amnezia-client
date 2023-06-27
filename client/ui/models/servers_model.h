@@ -16,7 +16,8 @@ public:
         CredentialsLoginRole,
         IsDefaultRole,
         IsCurrentlyProcessedRole,
-        HasWriteAccess
+        HasWriteAccessRole,
+        ContainsAmneziaDnsRole
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -37,6 +38,7 @@ public slots:
     bool isDefaultServerCurrentlyProcessed();
 
     bool isCurrentlyProcessedServerHasWriteAccess();
+    bool isDefaultServerHasWriteAccess();
 
     const int getServersCount();
 
@@ -45,6 +47,8 @@ public slots:
 
     void addServer(const QJsonObject &server);
     void removeServer();
+
+    bool isDefaultServerConfigContainsAmneziaDns();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

@@ -77,8 +77,8 @@ PageType {
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
+                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             }
         }
         TabImageButtonType {
@@ -94,7 +94,7 @@ PageType {
             }
 
             visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
-            width: visible ? undefined : 0
+            width: ServersModel.isCurrentlyProcessedServerHasWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"

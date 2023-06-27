@@ -19,7 +19,6 @@ Item {
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
     property string rootButtonImageColor: "#D7D8DB"
     property string rootButtonBackgroundColor: "#1C1D21"
-    property int rootButtonMaximumWidth: 0
 
     property string rootButtonHoveredBorderColor: "#494B50"
     property string rootButtonDefaultBorderColor: "transparent"
@@ -87,8 +86,6 @@ Item {
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
-
-                Layout.maximumWidth: rootButtonMaximumWidth ? rootButtonMaximumWidth : implicitWidth
 
                 color: root.textColor
                 text: root.text

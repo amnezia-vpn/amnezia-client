@@ -95,13 +95,20 @@ PageType {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             text: {
-                var string = ""
-                if (SettingsController.isAmneziaDnsEnabled()) {
-                    string += "Amnezia DNS | "
+                var description = ""
+                if (ServersModel.isDefaultServerHasWriteAccess()) {
+                    if (SettingsController.isAmneziaDnsEnabled()
+                            && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
+                        description += "Amnezia DNS | "
+                    }
+                } else {
+                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns) {
+                        description += "Amnezia DNS | "
+                    }
                 }
 
-                string += root.currentContainerName + " | " + root.currentServerHostName
-                return string
+                description += root.currentContainerName + " | " + root.currentServerHostName
+                return description
             }
         }
     }
@@ -153,7 +160,6 @@ PageType {
 
                     rootButtonBorderWidth: 0
                     rootButtonImageColor: "#0E0E11"
-                    rootButtonMaximumWidth: 150 //todo make it dynamic
                     rootButtonBackgroundColor: "#D7D8DB"
 
                     text: root.currentContainerName
@@ -193,14 +199,6 @@ PageType {
                         Component.onCompleted: updateContainersModelFilters()
                         currentIndex: ContainersModel.getDefaultContainer()
                     }
-                }
-
-                BasicButtonType {
-                    id: dnsButton
-
-                    implicitHeight: 40
-
-                    text: "Amnezia DNS"
                 }
             }
 
@@ -277,7 +275,21 @@ PageType {
                                     Layout.fillWidth: true
 
                                     text: name
-                                    descriptionText: hostName
+                                    descriptionText: {
+                                        var description = ""
+                                        if (hasWriteAccess) {
+                                            if (SettingsController.isAmneziaDnsEnabled()
+                                                    && ContainersModel.isAmneziaDnsContainerInstalled(index)) {
+                                                description += "AmneziaDNS | "
+                                            }
+                                        } else {
+                                            if (containsAmneziaDns) {
+                                                description += "AmneziaDNS | "
+                                            }
+                                        }
+
+                                        return description += hostName
+                                    }
 
                                     checked: index === serversMenuContent.currentIndex
 
