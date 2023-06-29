@@ -147,7 +147,10 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/leakdetector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mozilla/localsocketcontroller.cpp
 )
-target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+endif()
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}

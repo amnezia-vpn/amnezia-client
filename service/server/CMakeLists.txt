@@ -178,7 +178,10 @@ include_directories(
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
-target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+endif()
 
 if(APPLE)
     if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")

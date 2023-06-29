@@ -101,11 +101,13 @@ void WireguardProtocol::stop()
 ErrorCode WireguardProtocol::startMzImpl()
 {
     m_impl->activate(m_rawConfig);
+    return ErrorCode::NoError;
 }
 
 ErrorCode WireguardProtocol::stopMzImpl()
 {
     m_impl->deactivate();
+    return ErrorCode::NoError;
 }
 
 void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configuration)

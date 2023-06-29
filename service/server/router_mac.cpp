@@ -13,7 +13,6 @@ RouterMac &RouterMac::Instance()
 
 bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
 {
-    return true;
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 

@@ -7,36 +7,10 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnetworkwatcher.h
-
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosstatusicon.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosnetworkwatcher.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macospingsender.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosutils.h
-
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/dnsutilsmacos.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/iputilsmacos.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosdaemon.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosdaemonserver.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosroutemonitor.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/wireguardutilsmacos.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnetworkwatcher.mm
-
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosstatusicon.mm
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosnetworkwatcher.mm
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macospingsender.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosutils.mm
-
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/dnsutilsmacos.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/iputilsmacos.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosdaemon.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosdaemonserver.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/macosroutemonitor.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/daemon/wireguardutilsmacos.cpp
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
