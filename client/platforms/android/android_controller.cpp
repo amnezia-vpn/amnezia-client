@@ -91,7 +91,6 @@ AndroidController::AndroidController() : QObject()
 
     connect(activity, &AndroidVPNActivity::eventStatisticUpdate, this,
         [this](const QString& parcelBody) {
-            qDebug() << "Transact: update";
             auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
 
             QString rx = doc.object()["rx_bytes"].toString();
@@ -229,8 +228,6 @@ void AndroidController::setFallbackConnectedNotification() {
 }
 
 void AndroidController::checkStatus() {
-    qDebug() << "check status";
-
     AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_STATISTIC, QString());
 }
 
