@@ -17,6 +17,7 @@ Item {
         id: content
 
         anchors.fill: parent
+        anchors.leftMargin: 8
 
         ImageButtonType {
             image: backButtonImage

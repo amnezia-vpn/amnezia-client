@@ -8,6 +8,7 @@ import "./"
 import "../Controls2"
 import "../Config"
 import "../Controls2/TextTypes"
+import "../Components"
 
 PageType {
     id: root
@@ -18,8 +19,6 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
         anchors.topMargin: 20
     }
 
@@ -52,10 +51,14 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    selectLanguageDrawer.open()
                 }
             }
 
-            DividerType {}
+            SelectLanguageDrawer {
+                id: selectLanguageDrawer
+            }
+
 
             LabelWithButtonType {
                 Layout.fillWidth: true

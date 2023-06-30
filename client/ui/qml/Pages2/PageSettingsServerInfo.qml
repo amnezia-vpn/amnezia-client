@@ -42,14 +42,14 @@ PageType {
                 id: content
 
                 Layout.topMargin: 20
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 BackButtonType {
                 }
 
                 HeaderType {
                     Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     actionButtonImage: "qrc:/images/controls/edit-3.svg"
 

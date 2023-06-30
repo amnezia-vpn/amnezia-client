@@ -185,8 +185,6 @@ PageType {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
 
                         BackButtonType {
                             backButtonImage: "qrc:/images/controls/arrow-left.svg"

@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import "TextTypes"
+
 Button {
     id: root
 
@@ -46,12 +48,8 @@ Button {
         cursorShape: Qt.PointingHandCursor
     }
 
-    contentItem: Text {
+    contentItem: ButtonTextType {
         anchors.fill: background
-        font.family: "PT Root UI VF"
-        font.styleName: "normal"
-        font.weight: 400
-        font.pixelSize: 16
         color: textColor
         text: root.text
         horizontalAlignment: Text.AlignHCenter

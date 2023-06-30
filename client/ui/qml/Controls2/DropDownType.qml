@@ -146,8 +146,6 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 16
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
 
             BackButtonType {
                 backButtonImage: root.headerBackButtonImage

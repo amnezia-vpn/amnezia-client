@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>translations/amneziavpn_ru.qm</file>
         <file>images/close.png</file>
         <file>images/settings.png</file>
         <file>images/favorites_disabled.png</file>
@@ -270,6 +269,6 @@
         <file>images/controls/telegram.svg</file>
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
         <file>ui/qml/Filters/ContainersModelFilters.qml</file>
-        <file>ui/qml/Components/ShowDetailsDrawer.qml</file>
+        <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
     </qresource>
 </RCC>

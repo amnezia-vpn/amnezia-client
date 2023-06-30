@@ -2,9 +2,9 @@
 
 #include <QStandardPaths>
 
-#include "defines.h"
 #include "logger.h"
 #include "utilities.h"
+#include "version.h"
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,

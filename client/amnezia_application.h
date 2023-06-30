@@ -20,17 +20,17 @@
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
 #include "ui/models/containers_model.h"
+#include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
-
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-  #define AMNEZIA_BASE_CLASS QApplication
+    #define AMNEZIA_BASE_CLASS QApplication
 #else
-  #define AMNEZIA_BASE_CLASS SingleApplication
-  #define QAPPLICATION_CLASS QApplication
-  #include "singleapplication.h"
+    #define AMNEZIA_BASE_CLASS SingleApplication
+    #define QAPPLICATION_CLASS QApplication
+    #include "singleapplication.h"
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS
@@ -41,7 +41,8 @@ public:
     AmneziaApplication(int &argc, char *argv[]);
 #else
     AmneziaApplication(int &argc, char *argv[], bool allowSecondary = false,
-        SingleApplication::Options options = SingleApplication::User, int timeout = 1000, const QString &userData = {} );
+                       SingleApplication::Options options = SingleApplication::User, int timeout = 1000,
+                       const QString &userData = {});
 #endif
     virtual ~AmneziaApplication();
 
@@ -49,6 +50,7 @@ public:
     void registerTypes();
     void loadFonts();
     void loadTranslator();
+    void updateTranslator(const QLocale &locale);
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
@@ -58,14 +60,15 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
-    ContainerProps* m_containerProps {};
-    ProtocolProps* m_protocolProps {};
+    ContainerProps *m_containerProps {};
+    ProtocolProps *m_protocolProps {};
 
-    QTranslator* m_translator;
+    QTranslator *m_translator;
     QCommandLineParser m_parser;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ServersModel> m_serversModel;
+    QScopedPointer<LanguageModel> m_languageModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
 

@@ -26,18 +26,17 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            spacing: 0
+
             BackButtonType {
                 Layout.topMargin: 20
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
             }
 
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 8
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-
 
                 headerText: "Подключение к серверу"
                 descriptionText: "Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.\n
@@ -46,7 +45,7 @@ PageType {
 
             Header2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 48
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 

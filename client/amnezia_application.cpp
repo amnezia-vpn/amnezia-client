@@ -3,12 +3,11 @@
 #include <QClipboard>
 #include <QFontDatabase>
 #include <QMimeData>
+#include <QQuickStyle>
 #include <QStandardPaths>
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-#include <QQuickStyle>
-
 
 #include "core/servercontroller.h"
 #include "logger.h"
@@ -88,6 +87,10 @@ void AmneziaApplication::init()
     connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
             &ContainersModel::setCurrentlyProcessedServerIndex);
 
+    m_languageModel.reset(new LanguageModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
+    connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &AmneziaApplication::updateTranslator);
+
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
 
@@ -130,18 +133,16 @@ void AmneziaApplication::init()
     //     m_uiLogic->showOnStartup();
     // #endif
 
-#endif
-
-    // TODO - fix
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (isPrimary()) {
-        QObject::connect(this, &SingleApplication::instanceStarted, m_uiLogic, [this](){
-            qDebug() << "Secondary instance started, showing this window instead";
-            emit m_uiLogic->show();
-            emit m_uiLogic->raise();
-        });
-    }
-#endif
+//    // TODO - fix
+// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+//    if (isPrimary()) {
+//        QObject::connect(this, &SingleApplication::instanceStarted, m_uiLogic, [this](){
+//            qDebug() << "Secondary instance started, showing this window instead";
+//            emit m_uiLogic->show();
+//            emit m_uiLogic->raise();
+//        });
+//    }
+// #endif
 
 // Android TextField clipboard workaround
 // https://bugreports.qt.io/browse/QTBUG-113461
@@ -195,9 +196,24 @@ void AmneziaApplication::loadFonts()
 
 void AmneziaApplication::loadTranslator()
 {
+    auto locale = m_settings->getAppLanguage();
     m_translator = new QTranslator;
-    if (m_translator->load(QLocale(), QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/translations"))) {
+    if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
         installTranslator(m_translator);
+    }
+}
+
+void AmneziaApplication::updateTranslator(const QLocale &locale)
+{
+    QResource::registerResource(":/translations.qrc");
+    if (!m_translator->isEmpty())
+        QCoreApplication::removeTranslator(m_translator);
+    if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
+        if (QCoreApplication::installTranslator(m_translator)) {
+            m_settings->setAppLanguage(locale);
+        }
+
+        m_engine->retranslate();
     }
 }
 

@@ -19,15 +19,12 @@ set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 set(PACKAGES
-	Widgets Core Gui Network Xml
-	RemoteObjects Quick Svg QuickControls2
-	Core5Compat Concurrent
+    Widgets Core Gui Network Xml
+    RemoteObjects Quick Svg QuickControls2
+    Core5Compat Concurrent LinguistTools
 )
 if(IOS)
-	set(PACKAGES
-		${PACKAGES}
-		Multimedia
-	)
+    set(PACKAGES ${PACKAGES} Multimedia)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
@@ -38,11 +35,9 @@ set(LIBS ${LIBS}
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
+
 if(IOS)
-	set(LIBS
-		${LIBS}
-		Qt6::Multimedia
-	)
+    set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
 
 qt_standard_project_setup()
@@ -349,6 +344,7 @@ if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
 endif()
 
 qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+
 qt_add_translations(${PROJECT} TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
 

@@ -42,8 +42,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
             anchors.topMargin: 20
 
             spacing: 16
@@ -52,11 +50,23 @@ PageType {
                 width: parent.width
             }
 
-            HeaderType {
+            Item {
                 width: parent.width
+                height: header.implicitHeight
 
-                headerText: "Протокол подключения"
-                descriptionText: "Выберите более приоритетный для вас. Позже можно будет установить остальные протоколы и доп сервисы, вроде DNS-прокси и SFTP."
+                HeaderType {
+                    id: header
+
+                    anchors.fill: parent
+
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+
+                    width: parent.width
+
+                    headerText: "Протокол подключения"
+                    descriptionText: "Выберите более приоритетный для вас. Позже можно будет установить остальные протоколы и доп сервисы, вроде DNS-прокси и SFTP."
+                }
             }
 
             ListView {
@@ -78,8 +88,6 @@ PageType {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.rightMargin: -16
-                        anchors.leftMargin: -16
 
                         LabelWithButtonType {
                             id: container

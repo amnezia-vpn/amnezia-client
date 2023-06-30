@@ -63,6 +63,8 @@ PageType {
                             id: backButton
 
                             Layout.topMargin: 20
+                            Layout.rightMargin: -16
+                            Layout.leftMargin: -16
                         }
 
                         HeaderType {
@@ -107,8 +109,6 @@ PageType {
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
                                 anchors.topMargin: 16
 
                                 backButtonFunction: function() {

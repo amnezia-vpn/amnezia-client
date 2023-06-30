@@ -24,8 +24,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
 
             spacing: 16
 
@@ -35,6 +33,8 @@ PageType {
 
             HeaderType {
                 Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 headerText: qsTr("Connection key")
                 descriptionText: qsTr("A line that starts with vpn://...")
@@ -45,6 +45,8 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 headerText: qsTr("Key")
                 textFieldPlaceholderText: "vpn://"

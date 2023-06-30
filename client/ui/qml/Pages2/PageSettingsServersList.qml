@@ -25,14 +25,14 @@ PageType {
         anchors.right: parent.right
 
         anchors.topMargin: 20
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
 
         BackButtonType {
         }
 
         HeaderType {
             Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             actionButtonImage: "qrc:/images/controls/plus.svg"
 

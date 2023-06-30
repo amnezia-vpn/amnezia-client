@@ -18,12 +18,14 @@ DrawerType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        spacing: 0
 
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 24
             Layout.rightMargin: 16
             Layout.leftMargin: 16
+            Layout.bottomMargin: 32
             Layout.alignment: Qt.AlignHCenter
 
             text: "Данные для подключения"
