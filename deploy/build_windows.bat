@@ -23,7 +23,7 @@ set APP_FILENAME=%APP_NAME:"=%.exe
 set APP_DOMAIN=org.amneziavpn.package
 set RELEASE_DIR=%WORK_DIR:"=%
 set OUT_APP_DIR=%RELEASE_DIR:"=%\client\release
-set PREBILT_DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\deploy-prebuilt\windows\x%BUILD_ARCH:"
+set PREBILT_DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
