@@ -20,30 +20,45 @@ PageType {
 
     property var installedServicesCount
 
-    SettingsContainersListView {
-        id: settingsContainersListView
-        Connections {
-            target: ServersModel
+    FlickableType {
+        id: fl
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        contentHeight: content.implicitHeight
 
-            function onCurrentlyProcessedServerIndexChanged() {
-                settingsContainersListView.updateContainersModelFilters()
+        Column {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            SettingsContainersListView {
+                id: settingsContainersListView
+                Connections {
+                    target: ServersModel
+
+                    function onCurrentlyProcessedServerIndexChanged() {
+                        settingsContainersListView.updateContainersModelFilters()
+                    }
+                }
+
+                function updateContainersModelFilters() {
+                    if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                        proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
+                    } else {
+                        proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
+                    }
+                    root.installedServicesCount = proxyContainersModel.count
+                }
+
+                model: SortFilterProxyModel {
+                    id: proxyContainersModel
+                    sourceModel: ContainersModel
+                }
+
+                Component.onCompleted: updateContainersModelFilters()
             }
         }
-
-        function updateContainersModelFilters() {
-            if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
-                proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
-            } else {
-                proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
-            }
-            root.installedServicesCount = proxyContainersModel.count
-        }
-
-        model: SortFilterProxyModel {
-            id: proxyContainersModel
-            sourceModel: ContainersModel
-        }
-
-        Component.onCompleted: updateContainersModelFilters()
     }
 }

@@ -3114,22 +3114,22 @@ AmneziaVPN detected this profile may contain malicious scripts. Please, carefull
 <context>
     <name>main</name>
     <message>
-        <location filename="../ui/qml/main.qml" line="267"/>
+        <location filename="../ui/qml/main.qml" line="271"/>
         <source>It&apos;s public key. Private key required</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/main.qml" line="308"/>
+        <location filename="../ui/qml/main.qml" line="312"/>
         <source>Ssh log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/main.qml" line="318"/>
+        <location filename="../ui/qml/main.qml" line="322"/>
         <source>App log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/main.qml" line="322"/>
+        <location filename="../ui/qml/main.qml" line="326"/>
         <source>Wrap words</source>
         <translation type="unfinished"></translation>
     </message>
