@@ -50,7 +50,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            property bool isServerWithWriteAccess: ServersModel.isCurrentlyProcessedServerHasWriteAccess() //todo make it property?
+            property bool isServerWithWriteAccess: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
                 visible: content.isServerWithWriteAccess

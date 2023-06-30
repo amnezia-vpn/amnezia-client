@@ -26,15 +26,27 @@ PageType {
                 roleName: "isSupported"
                 value: true
             }
-
         ]
+    }
+
+    ColumnLayout {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        anchors.topMargin: 20
+
+        BackButtonType {
+        }
     }
 
     FlickableType {
         id: fl
-        anchors.top: parent.top
+        anchors.top: backButton.top
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
 
         Column {
             id: content
@@ -42,13 +54,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 20
-
-            spacing: 16
-
-            BackButtonType {
-                width: parent.width
-            }
+            anchors.bottomMargin: 20
 
             Item {
                 width: parent.width

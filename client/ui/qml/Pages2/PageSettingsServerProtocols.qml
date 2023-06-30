@@ -20,30 +20,45 @@ PageType {
 
     property var installedProtocolsCount
 
-    SettingsContainersListView {
-        id: settingsContainersListView
-        Connections {
-            target: ServersModel
+    FlickableType {
+        id: fl
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        contentHeight: content.implicitHeight
 
-            function onCurrentlyProcessedServerIndexChanged() {
-                settingsContainersListView.updateContainersModelFilters()
+        Column {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            SettingsContainersListView {
+                id: settingsContainersListView
+                Connections {
+                    target: ServersModel
+
+                    function onCurrentlyProcessedServerIndexChanged() {
+                        settingsContainersListView.updateContainersModelFilters()
+                    }
+                }
+
+                function updateContainersModelFilters() {
+                    if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                        proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
+                    } else {
+                        proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
+                    }
+                    root.installedProtocolsCount = proxyContainersModel.count
+                }
+
+                model: SortFilterProxyModel {
+                    id: proxyContainersModel
+                    sourceModel: ContainersModel
+                }
+
+                Component.onCompleted: updateContainersModelFilters()
             }
         }
-
-        function updateContainersModelFilters() {
-            if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
-                proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
-            } else {
-                proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
-            }
-            root.installedProtocolsCount = proxyContainersModel.count
-        }
-
-        model: SortFilterProxyModel {
-            id: proxyContainersModel
-            sourceModel: ContainersModel
-        }
-
-        Component.onCompleted: updateContainersModelFilters()
     }
 }
