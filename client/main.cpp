@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QTimer>
 
 #include "amnezia_application.h"
 #include "version.h"
