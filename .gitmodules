@@ -60,4 +60,4 @@
 	url = https://github.com/Mbed-TLS/mbedtls.git
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
-	url = git@github.com:amnezia-vpn/3rd-prebuilt.git
+	url = https://github.com/amnezia-vpn/3rd-prebuilt
