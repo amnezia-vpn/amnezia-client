@@ -168,11 +168,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onCreate() {
-        super.onCreate()
-//        Log.v(tag, "Aman: onCreate....................")
-//        Log.v(tag, "Aman: onCreate....................")
-//        Log.v(tag, "Aman: onCreate....................")
-//        NotificationUtil.show(this) // Go foreground
+        super.onCreate()        
+        NotificationUtil.show(this) // Go foreground
     }
 
     override fun onUnbind(intent: Intent?): Boolean {

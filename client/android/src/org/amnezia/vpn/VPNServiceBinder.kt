@@ -196,6 +196,7 @@ class VPNServiceBinder(service: VPNService) : Binder() {
 
     /**
     *  The codes we Are Using in case of [dispatchEvent]
+    *  Qt codes in the androidvpnactivity.h
     */
     object EVENTS {
         const val init = 0
