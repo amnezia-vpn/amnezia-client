@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      QT_VERSION: 6.5.0
-      QIF_VERSION: 4.5
+      QT_VERSION: 6.5.1
+      QIF_VERSION: 4.6
 
     steps:
     - name: 'Install Qt'
@@ -63,8 +63,8 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.5.0
-      QIF_VERSION: 4.5
+      QT_VERSION: 6.5.1
+      QIF_VERSION: 4.6
       BUILD_ARCH: 64
 
     steps:
@@ -124,7 +124,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.5.0
+      QT_VERSION: 6.5.1
 
     steps:
     - name: 'Setup xcode'
@@ -199,8 +199,8 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.5.0
-      QIF_VERSION: 4.5
+      QT_VERSION: 6.5.1
+      QIF_VERSION: 4.6
 
     steps:
     - name: 'Setup xcode'
@@ -258,7 +258,7 @@ jobs:
     continue-on-error: true
 
     env:
-      QT_VERSION: 6.5.0
+      QT_VERSION: 6.5.1
 
     steps:
     - name: 'Install desktop Qt'

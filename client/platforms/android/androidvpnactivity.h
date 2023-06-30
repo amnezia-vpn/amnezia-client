@@ -39,6 +39,7 @@ enum ServiceAction {
 typedef enum ServiceAction ServiceAction;
 
 // Event Types that will be Dispatched after registration
+// Kotlin codes in the VPNServiceBinder.kt
 enum ServiceEvents {
     // The Service has Accepted our Binder
     // Responds with the current status of the vpn.
