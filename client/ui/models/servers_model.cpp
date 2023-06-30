@@ -5,7 +5,7 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
 {
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
-    m_currenlyProcessedServerIndex = m_defaultServerIndex;
+    m_currentlyProcessedServerIndex = m_defaultServerIndex;
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -44,6 +44,8 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
+    qDebug() << "d";
+
     const QJsonObject server = m_servers.at(index.row()).toObject();
 
     switch (role) {
@@ -55,12 +57,12 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return description;
     }
     case HostNameRole: return server.value(config_key::hostName).toString();
-    case CredentialsRole: return QVariant::fromValue(m_settings->serverCredentials(index.row()));
-    case CredentialsLoginRole: return m_settings->serverCredentials(index.row()).userName;
+    case CredentialsRole: return QVariant::fromValue(serverCredentials(index.row()));
+    case CredentialsLoginRole: return serverCredentials(index.row()).userName;
     case IsDefaultRole: return index.row() == m_defaultServerIndex;
-    case IsCurrentlyProcessedRole: return index.row() == m_currenlyProcessedServerIndex;
+    case IsCurrentlyProcessedRole: return index.row() == m_currentlyProcessedServerIndex;
     case HasWriteAccessRole: {
-        auto credentials = m_settings->serverCredentials(index.row());
+        auto credentials = serverCredentials(index.row());
         return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
     }
     case ContainsAmneziaDnsRole: {
@@ -97,28 +99,28 @@ const int ServersModel::getServersCount()
 
 void ServersModel::setCurrentlyProcessedServerIndex(const int index)
 {
-    m_currenlyProcessedServerIndex = index;
-    emit currentlyProcessedServerIndexChanged(m_currenlyProcessedServerIndex);
+    m_currentlyProcessedServerIndex = index;
+    emit currentlyProcessedServerIndexChanged(m_currentlyProcessedServerIndex);
 }
 
 int ServersModel::getCurrentlyProcessedServerIndex()
 {
-    return m_currenlyProcessedServerIndex;
+    return m_currentlyProcessedServerIndex;
 }
 
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
-    return m_defaultServerIndex == m_currenlyProcessedServerIndex;
+    return m_defaultServerIndex == m_currentlyProcessedServerIndex;
 }
 
 bool ServersModel::isCurrentlyProcessedServerHasWriteAccess()
 {
-    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccessRole));
+    return qvariant_cast<bool>(data(m_currentlyProcessedServerIndex, HasWriteAccessRole));
 }
 
 bool ServersModel::isDefaultServerHasWriteAccess()
 {
-    return qvariant_cast<bool>(data(m_currenlyProcessedServerIndex, HasWriteAccessRole));
+    return qvariant_cast<bool>(data(m_currentlyProcessedServerIndex, HasWriteAccessRole));
 }
 
 void ServersModel::addServer(const QJsonObject &server)
@@ -132,12 +134,12 @@ void ServersModel::addServer(const QJsonObject &server)
 void ServersModel::removeServer()
 {
     beginResetModel();
-    m_settings->removeServer(m_currenlyProcessedServerIndex);
+    m_settings->removeServer(m_currentlyProcessedServerIndex);
     m_servers = m_settings->serversArray();
 
-    if (m_settings->defaultServerIndex() == m_currenlyProcessedServerIndex) {
+    if (m_settings->defaultServerIndex() == m_currentlyProcessedServerIndex) {
         setDefaultServerIndex(0);
-    } else if (m_settings->defaultServerIndex() > m_currenlyProcessedServerIndex) {
+    } else if (m_settings->defaultServerIndex() > m_currentlyProcessedServerIndex) {
         setDefaultServerIndex(m_settings->defaultServerIndex() - 1);
     }
 
@@ -166,4 +168,17 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[HasWriteAccessRole] = "hasWriteAccess";
     roles[ContainsAmneziaDnsRole] = "containsAmneziaDns";
     return roles;
+}
+
+ServerCredentials ServersModel::serverCredentials(int index) const
+{
+    const QJsonObject &s = m_servers.at(index).toObject();
+
+    ServerCredentials credentials;
+    credentials.hostName = s.value(config_key::hostName).toString();
+    credentials.userName = s.value(config_key::userName).toString();
+    credentials.secretData = s.value(config_key::password).toString();
+    credentials.port = s.value(config_key::port).toInt();
+
+    return credentials;
 }

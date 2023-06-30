@@ -58,12 +58,14 @@ signals:
     void defaultServerIndexChanged();
 
 private:
+    ServerCredentials serverCredentials(int index) const;
+
     QJsonArray m_servers;
 
     std::shared_ptr<Settings> m_settings;
 
     int m_defaultServerIndex;
-    int m_currenlyProcessedServerIndex;
+    int m_currentlyProcessedServerIndex;
 };
 
 #endif // SERVERSMODEL_H

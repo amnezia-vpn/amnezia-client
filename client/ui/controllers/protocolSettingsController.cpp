@@ -16,4 +16,5 @@ QByteArray ProtocolSettingsController::getOpenVpnConfig()
     auto containerIndex = m_containersModel->index(
         m_containersModel->getCurrentlyProcessedContainerIndex());
     auto config = m_containersModel->data(containerIndex, ContainersModel::Roles::ConfigRole);
+    return QByteArray();
 }
