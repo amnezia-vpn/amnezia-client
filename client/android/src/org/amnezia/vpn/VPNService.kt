@@ -49,6 +49,7 @@ import android.net.VpnService as BaseVpnService
 class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     override val data = BaseService.Data(this)
+    
     override val tag: String get() = "VPNService"
 //    override fun createNotification(profileName: String): ServiceNotification =
 //        ServiceNotification(this, profileName, "service-vpn")
@@ -57,6 +58,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private var worker: ProtectWorker? = null
     private var active = false
     private var metered = false
+    private var mNetworkState = NetworkState(this)
     private var underlyingNetwork: Network? = null
         set(value) {
             field = value
@@ -364,6 +366,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             "cloak",
             "openvpn" -> {
                 startOpenVpn()
+                mNetworkState.bindNetworkListener()
             }
             "wireguard" -> {
                 startWireGuard()
@@ -412,6 +415,14 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             mbuilder.addRoute(ip, 32)
         }
     }
+    
+    fun networkChange() {
+        Log.i(tag, "mProtocol $mProtocol")
+        if (isUp){
+           mbuilder = Builder()
+           mOpenVPNThreadv3?.reconnect(2)
+        }
+    }
 
     fun setSessionName(name: String) {
         Log.v(tag, "mbuilder.setSession($name)")
@@ -441,6 +452,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             "cloak",
             "openvpn" -> {
                 ovpnTurnOff()
+                mNetworkState.unBindNetworkListener()
             }
             "shadowsocks" -> {
                 stopRunner(false)
