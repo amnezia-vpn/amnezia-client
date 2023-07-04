@@ -270,5 +270,6 @@
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
         <file>ui/qml/Filters/ContainersModelFilters.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
+        <file>ui/qml/Controls2/BusyIndicatorType.qml</file>
     </qresource>
 </RCC>

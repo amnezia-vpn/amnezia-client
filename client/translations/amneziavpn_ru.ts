@@ -1275,17 +1275,17 @@ And if you don&apos;t like the app, all the more support it - the donation will 
 <context>
     <name>PageSettingsApplication</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="43"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="44"/>
         <source>Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="51"/>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="67"/>
         <source>Reset settings and remove all data from the application</source>
         <translation type="unfinished"></translation>
     </message>

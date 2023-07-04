@@ -88,7 +88,9 @@ PageType {
                 descriptionText: qsTr("Добавим их в приложение, если они не отображались")
 
                 clickedFunction: function() {
+                    PageController.showBusyIndicator(true)
                     InstallController.scanServerForInstalledContainers()
+                    PageController.showBusyIndicator(false)
                 }
             }
 

@@ -17,6 +17,7 @@ DrawerType {
 
     property alias headerText: header.headerText
     property alias configContentHeaderText: configContentHeader.headerText
+    property alias contentVisible: content.visible
 
     width: parent.width
     height: parent.height * 0.9
@@ -24,8 +25,18 @@ DrawerType {
     Item {
         anchors.fill: parent
 
-        FlickableType {
+        Header2Type {
+            id: header
             anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 20
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+        }
+
+        FlickableType {
+            anchors.top: header.bottom
             anchors.bottom: parent.bottom
             contentHeight: content.height + 32
 
@@ -36,14 +47,8 @@ DrawerType {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                anchors.topMargin: 20
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
-
-                Header2Type {
-                    id: header
-                    Layout.fillWidth: true
-                }
 
                 BasicButtonType {
                     Layout.fillWidth: true

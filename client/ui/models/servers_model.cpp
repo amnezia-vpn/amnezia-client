@@ -44,8 +44,6 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    qDebug() << "d";
-
     const QJsonObject server = m_servers.at(index.row()).toObject();
 
     switch (role) {

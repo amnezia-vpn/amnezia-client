@@ -20,11 +20,21 @@ PageType {
         target: ExportController
 
         function onGenerateConfig(isFullAccess) {
+            shareConnectionDrawer.open()
+            shareConnectionDrawer.contentVisible = false
+            PageController.showBusyIndicator(true)
             if (isFullAccess) {
                 ExportController.generateFullAccessConfig()
             } else {
                 ExportController.generateConnectionConfig()
             }
+            PageController.showBusyIndicator(false)
+            shareConnectionDrawer.contentVisible = true
+        }
+
+        function onExportErrorOccurred(errorMessage) {
+            shareConnectionDrawer.close()
+            PageController.showErrorMessage(errorMessage)
         }
     }
 
@@ -328,7 +338,6 @@ PageType {
                     } else {
                         ExportController.generateConfig(true)
                     }
-                    shareConnectionDrawer.visible = true
                 }
             }
         }

@@ -29,6 +29,12 @@ PageType {
             popupErrorMessage.popupErrorMessageText = errorMessage
             popupErrorMessage.open()
         }
+
+        function onShowBusyIndicator(visible) {
+            busyIndicator.visible = visible
+            tabBarStackView.enabled = !visible
+            tabBar.enabled = !visible
+        }
     }
 
     StackViewType {
@@ -129,5 +135,11 @@ PageType {
         PopupType {
             id: popupErrorMessage
         }
+    }
+
+    BusyIndicatorType {
+        id: busyIndicator
+        anchors.centerIn: parent
+        z: 1
     }
 }

@@ -63,6 +63,7 @@ signals:
     void replaceStartPage();
     void showErrorMessage(QString errorMessage);
     void showInfoMessage(QString message);
+    void showBusyIndicator(bool visible);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
