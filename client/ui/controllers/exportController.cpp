@@ -9,6 +9,8 @@
 #include <QImage>
 #include <QStandardPaths>
 
+#include "configurators/openvpn_configurator.h"
+#include "configurators/wireguard_configurator.h"
 #include "qrcodegen.hpp"
 
 #include "core/errorstrings.h"
@@ -27,14 +29,17 @@ ExportController::ExportController(const QSharedPointer<ServersModel> &serversMo
 
 void ExportController::generateFullAccessConfig()
 {
+    clearPreviousConfig();
+
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     QJsonObject config = m_settings->server(serverIndex);
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
-    m_amneziaCode = QString("vpn://%1")
-                            .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                                   | QByteArray::OmitTrailingEquals)));
+    m_rawConfig = QString("vpn://%1")
+                          .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                                 | QByteArray::OmitTrailingEquals)));
+    m_formattedConfig = m_rawConfig;
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
@@ -42,6 +47,8 @@ void ExportController::generateFullAccessConfig()
 
 void ExportController::generateConnectionConfig()
 {
+    clearPreviousConfig();
+
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     ServerCredentials credentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
@@ -81,17 +88,86 @@ void ExportController::generateConnectionConfig()
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
-    m_amneziaCode = QString("vpn://%1")
-                            .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                                   | QByteArray::OmitTrailingEquals)));
+    m_rawConfig = QString("vpn://%1")
+                          .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                                 | QByteArray::OmitTrailingEquals)));
+    m_formattedConfig = m_rawConfig;
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
 }
 
-QString ExportController::getAmneziaCode()
+void ExportController::generateOpenVpnConfig()
 {
-    return m_amneziaCode;
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials credentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QModelIndex containerModelIndex = m_containersModel->index(container);
+    QJsonObject containerConfig =
+            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString config =
+            m_configurator->openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, &errorCode);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::OpenVpn, config);
+
+    m_rawConfig = config;
+
+    auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+    QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_formattedConfig.append(line + "\n");
+    }
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateWireGuardConfig()
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials credentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QModelIndex containerModelIndex = m_containersModel->index(container);
+    QJsonObject containerConfig =
+            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString config = m_configurator->wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig,
+                                                                               &errorCode);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::WireGuard, config);
+
+    m_rawConfig = config;
+
+    auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+    QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_formattedConfig.append(line + "\n");
+    }
+
+    emit exportConfigChanged();
+}
+
+QString ExportController::getFormattedConfig()
+{
+    return m_formattedConfig;
 }
 
 QList<QString> ExportController::getQrCodes()
@@ -117,7 +193,7 @@ void ExportController::saveFile()
     QFile save(fileName.toLocalFile());
 
     save.open(QIODevice::WriteOnly);
-    save.write(m_amneziaCode.toUtf8());
+    save.write(m_rawConfig.toUtf8());
     save.close();
 
     QFileInfo fi(fileName.toLocalFile());
@@ -153,4 +229,11 @@ QString ExportController::svgToBase64(const QString &image)
 int ExportController::getQrCodesCount()
 {
     return m_qrCodes.size();
+}
+
+void ExportController::clearPreviousConfig()
+{
+    m_rawConfig.clear();
+    m_formattedConfig.clear();
+    m_qrCodes.clear();
 }

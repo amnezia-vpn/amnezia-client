@@ -16,18 +16,30 @@ import "../Components"
 PageType {
     id: root
 
+    enum ConfigType {
+        AmneziaConnection,
+        AmenziaFullAccess,
+        OpenVpn,
+        WireGuard
+    }
+
     Connections {
         target: ExportController
 
-        function onGenerateConfig(isFullAccess) {
+        function onGenerateConfig(type) {
             shareConnectionDrawer.open()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
-            if (isFullAccess) {
-                ExportController.generateFullAccessConfig()
-            } else {
-                ExportController.generateConnectionConfig()
+
+            console.log(type)
+
+            switch (type) {
+            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(); break;
+            case PageShare.ConfigType.AmenziaFullAccess: ExportController.generateFullAccessConfig(); break;
+            case PageShare.ConfigType.OpenVpn: ExportController.generateOpenVpnConfig(); break;
+            case PageShare.ConfigType.WireGuard: ExportController.generateWireGuardConfig(); break;
             }
+
             PageController.showBusyIndicator(false)
             shareConnectionDrawer.contentVisible = true
         }
@@ -46,23 +58,17 @@ PageType {
     QtObject {
         id: amneziaConnectionFormat
         property string name: qsTr("For the AmnesiaVPN app")
-        property var func: function() {
-            ExportController.generateConfig(false)
-        }
+        property var type: PageShare.ConfigType.AmneziaConnection
     }
     QtObject {
         id: openVpnConnectionFormat
         property string name: qsTr("OpenVpn native format")
-        property var func: function() {
-            console.log("Item 3 clicked")
-        }
+        property var type: PageShare.ConfigType.OpenVpn
     }
     QtObject {
         id: wireGuardConnectionFormat
         property string name: qsTr("WireGuard native format")
-        property var func: function() {
-            console.log("Item 3 clicked")
-        }
+        property var type: PageShare.ConfigType.WireGuard
     }
 
     FlickableType {
@@ -334,9 +340,9 @@ PageType {
 
                 onClicked: {
                     if (accessTypeSelector.currentIndex === 0) {
-                        root.connectionTypesModel[accessTypeSelector.currentIndex].func()
+                        ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     } else {
-                        ExportController.generateConfig(true)
+                        ExportController.generateConfig(PageShare.ConfigType.AmneziaFullAccess)
                     }
                 }
             }

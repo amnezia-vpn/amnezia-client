@@ -55,7 +55,7 @@ Button {
                 fillColor: "transparent"
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return Qt.rgba(251/255, 178/255, 106/255, 1)
+                        return "#261E1A"
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
                     } else {

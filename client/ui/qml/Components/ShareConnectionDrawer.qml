@@ -137,7 +137,7 @@ DrawerType {
                                 Layout.topMargin: 16
                             }
 
-                            TextField {
+                            TextArea {
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 Layout.bottomMargin: 16
@@ -147,16 +147,17 @@ DrawerType {
                                 height: 24
 
                                 color: "#D7D8DB"
+                                selectionColor:  "#412102"
+                                selectedTextColor: "#D7D8DB"
 
                                 font.pixelSize: 16
                                 font.weight: Font.Medium
                                 font.family: "PT Root UI VF"
 
-                                text: ExportController.amneziaCode
+                                text: ExportController.formattedConfig
 
                                 wrapMode: Text.Wrap
 
-                                readOnly: true
                                 background: Rectangle {
                                     color: "transparent"
                                 }
@@ -186,11 +187,13 @@ DrawerType {
                             running: ExportController.qrCodesCount > 0
                             repeat: true
                             onTriggered: {
-                                index++
-                                if (index >= ExportController.qrCodesCount) {
-                                    index = 0
+                                if (ExportController.qrCodesCount > 0) {
+                                    index++
+                                    if (index >= ExportController.qrCodesCount) {
+                                        index = 0
+                                    }
+                                    parent.source = ExportController.qrCodes[index]
                                 }
-                                parent.source = ExportController.qrCodes[index]
                             }
                         }
 
@@ -204,6 +207,8 @@ DrawerType {
                     Layout.fillWidth: true
                     Layout.topMargin: 24
                     Layout.bottomMargin: 32
+
+                    visible: ExportController.qrCodesCount > 0
 
                     horizontalAlignment: Text.AlignHCenter
                     text: qsTr("To read the QR code in the Amnezia app, select \"Add Server\" → \"I have connection details\"")

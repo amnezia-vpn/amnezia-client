@@ -14,24 +14,25 @@ public:
     explicit ExportController(const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
                               const std::shared_ptr<Settings> &settings,
-                              const std::shared_ptr<VpnConfigurator> &configurator,
-                              QObject *parent = nullptr);
+                              const std::shared_ptr<VpnConfigurator> &configurator, QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
-    Q_PROPERTY(QString amneziaCode READ getAmneziaCode NOTIFY exportConfigChanged)
+    Q_PROPERTY(QString formattedConfig READ getFormattedConfig NOTIFY exportConfigChanged)
 
 public slots:
     void generateFullAccessConfig();
     void generateConnectionConfig();
+    void generateOpenVpnConfig();
+    void generateWireGuardConfig();
 
-    QString getAmneziaCode();
+    QString getFormattedConfig();
     QList<QString> getQrCodes();
 
     void saveFile();
 
 signals:
-    void generateConfig(bool isFullAccess);
+    void generateConfig(int type);
     void exportErrorOccurred(QString errorMessage);
 
     void exportConfigChanged();
@@ -42,12 +43,15 @@ private:
 
     int getQrCodesCount();
 
+    void clearPreviousConfig();
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
-    QString m_amneziaCode;
+    QString m_rawConfig;
+    QString m_formattedConfig;
     QList<QString> m_qrCodes;
 };
 
