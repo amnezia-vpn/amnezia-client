@@ -33,8 +33,10 @@ public:
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
 
+#ifdef Q_OS_MAC
     MacOSDaemon daemon;
     DaemonLocalServer server{qApp};
+#endif
 };
 
 #endif // LOCALSERVER_H

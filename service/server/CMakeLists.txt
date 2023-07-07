@@ -49,7 +49,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/loglevel.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.h
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/models/server.h
 
@@ -81,7 +80,7 @@ set(SOURCES ${SOURCES}
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.cpp
+
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/dnspingsender.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/localsocketcontroller.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/networkwatcher.cpp
@@ -90,6 +89,15 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsenderfactory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/wgquickprocess.cpp
 )
+
+if(UNIX)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.cpp
+    )
+endif()
 
 if(WIN32)
     set(HEADERS ${HEADERS}
