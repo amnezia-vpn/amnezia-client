@@ -38,9 +38,6 @@ set(SOURCES
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/dnsutils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/iputils.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardutils.h
 
@@ -70,10 +67,6 @@ include_directories(../../client/platforms/)
 
 # Mozilla sources
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.cpp
-
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/models/server.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.cpp
@@ -96,6 +89,19 @@ if(UNIX)
     )
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.cpp
+    )
+endif()
+
+if (WIN32 OR APPLE)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.cpp
     )
 endif()
 
