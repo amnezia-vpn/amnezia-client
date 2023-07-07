@@ -58,13 +58,27 @@ class IKEv2Thread(
         mAppDir = filesDirAbsolutePath
     }
 
+    fun setNextProfile(profile: VpnProfile) {
+
+        // TODO: take a look at "vpnprofileimportactivity" in starongswan repo 
+        //       to understand how to pass the profile object before starting of ikev2 tunnel
+
+        synchronized(this) {
+            mNextProfile = profile
+            mProfileUpdated = true
+            notifyAll()
+        }
+    }
+
     override fun run() {
         while (true) {
             synchronized(this) {
                 try {
                     while (!mProfileUpdated) {
+                        Log.i(TAG, "charon contunue")
                         continue
                     }
+
                     mProfileUpdated = false
                     stopCurrentConnection()
 

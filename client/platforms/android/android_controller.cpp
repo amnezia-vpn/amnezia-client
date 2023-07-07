@@ -176,6 +176,21 @@ ErrorCode AndroidController::start()
                 appContext.object());
 
     QJsonDocument doc(m_vpnConfig);
+
+    /*** The following code snippet needs to correct displaying of config in debug console
+     * (Android's stdout limits length of output message)
+     * 
+     * QString string(doc.toJson(QJsonDocument::Compact));
+     * 
+     * qDebug() << "*** config: ";
+     * for (int i = 0; i <= string.length()/100; i++) {
+     *  int start = i*100;
+     *  qDebug() << string.mid(start, 100);
+     * }
+     * 
+     * qDebug() << "*** config: " << m_vpnConfig;
+     ***/
+
     AndroidVPNActivity::sendToService(ServiceAction::ACTION_ACTIVATE, doc.toJson());
 
     return NoError;

@@ -150,6 +150,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private var mOpenVPNThreadv3: OpenVPNThreadv3? = null
     var currentTunnelHandle = -1
 
+    private var ikev2VpnThread: IKEv2Thread? = null
+
     private var intent: Intent? = null
     private var flags = 0
     private var startId = 0
@@ -165,6 +167,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         Log.e(tag, "Wireguard Version ${wgVersion()}")
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
         mAlreadyInitialised = true
+        ikev2VpnThread = IKEv2Thread(mbuilder, getFilesDir().getAbsolutePath())
     }
 
     override fun onCreate() {
@@ -384,13 +387,28 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 startShadowsocks()
                 startTest()
             }
+            "ikev2" -> {
+                startIPSEC()
+            }
             else -> {
-                Log.e(tag, "No protocol")
+                Log.e(tag, "Unknown protocol ($mProtocol)")
                 return 0
             }
         }
         NotificationUtil.show(this)
         return 1
+    }
+
+    private fun startIPSEC() {
+        Log.v(tag, "start ipsec")
+        ikev2VpnThread = IKEv2Thread(mbuilder, getFilesDir().getAbsolutePath())
+        
+        // TODO: pass the "vpnprofile" instance as a parameter
+        // ikev2VpnThread.setNextProfile() 
+
+        Thread({
+            ikev2VpnThread?.run()
+        }).start()
     }
 
     fun establish(): ParcelFileDescriptor? {
