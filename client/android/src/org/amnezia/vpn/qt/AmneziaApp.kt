@@ -7,7 +7,7 @@ import org.qtproject.qt.android.bindings.QtActivity
 import org.qtproject.qt.android.bindings.QtApplication
 import android.app.Application
 
-class AmneziaApp: Application() {
+class AmneziaApp: org.qtproject.qt.android.bindings.QtApplication() {
 
     override fun onCreate() {
         super.onCreate()
