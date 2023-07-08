@@ -227,6 +227,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
         mProtocol = mConfig!!.getString("protocol")
         Log.e(tag, "mProtocol: $mProtocol")
+        if (mProtocol.equals("cloak", true) || (mProtocol.equals("openvpn", true))) {
+            startOpenVpn()
+            mNetworkState.bindNetworkListener()
+        }
         if (mProtocol.equals("shadowsocks", true)) {
             if (DataStore.serviceMode == modeVpn) {
                 if (prepare(this) != null) {
@@ -365,7 +369,14 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         when (mProtocol) {
             "cloak",
             "openvpn" -> {
-                startOpenVpn()
+                startOpenVpn()                
+                // Store the config in case the service gets
+                // asked boot vpn from the OS
+                val prefs = Prefs.get(this)
+                prefs.edit()
+                    .putString("lastConf", mConfig.toString())
+                    .apply()
+
                 mNetworkState.bindNetworkListener()
             }
             "wireguard" -> {
