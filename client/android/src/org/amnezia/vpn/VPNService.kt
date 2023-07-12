@@ -166,7 +166,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onDestroy() {
-        turnOff()
+        //turnOff()
 
         super.onDestroy()
     }
@@ -249,7 +249,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     // Invoked when the application is revoked.
     // At this moment, the VPN interface is already deactivated by the system.
     override fun onRevoke() {
-        Log.v(tag, "Aman: onRevoke....................")
         this.turnOff()
         super.onRevoke()
     }
@@ -348,7 +347,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     fun turnOn(json: JSONObject?): Int {
-        Log.v(tag, "Aman: turnOn....................")
         if (!checkPermissions()) {
             Log.e(tag, "turn on was called without no permissions present!")
             isUp = false
@@ -382,7 +380,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     fun establish(): ParcelFileDescriptor? {
-        Log.v(tag, "Aman: establish....................")
         mbuilder.allowFamily(OsConstants.AF_INET)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mbuilder.setMetered(false)
@@ -433,7 +430,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     fun turnOff() {
-        Log.v(tag, "Aman: turnOff....................")
         when (mProtocol) {
             "wireguard" -> {
                 GoBackend.wgTurnOff(currentTunnelHandle)
