@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import ContainerEnum 1.0
 import ContainerProps 1.0
 
 import "./"
@@ -13,15 +14,37 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
-import "../Components/Protocols"
 
 PageType {
     id: root
 
+    ColumnLayout {
+        id: header
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        anchors.topMargin: 20
+
+        BackButtonType {
+        }
+
+        HeaderType {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            headerText: ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" settings")
+        }
+    }
+
     FlickableType {
         id: fl
-        anchors.fill: parent
-        contentHeight: content.height + openVpnSettings.implicitHeight
+        anchors.top: header.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        contentHeight: content.height
 
         Column {
             id: content
@@ -29,8 +52,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            spacing: 16
+            anchors.topMargin: 32
 
             ListView {
                 // todo change id naming
@@ -39,16 +61,7 @@ PageType {
                 height: container.contentItem.height
                 clip: true
                 interactive: false
-                model: SortFilterProxyModel {
-                    id: proxyContainersModel
-                    sourceModel: ContainersModel
-                    filters: [
-                        ValueFilter {
-                            roleName: "isCurrentlyProcessed"
-                            value: true
-                        }
-                    ]
-                }
+                model: ProtocolsModel
 
                 delegate: Item {
                     implicitWidth: container.width
@@ -58,24 +71,60 @@ PageType {
                         id: delegateContent
 
                         anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
 
-                        HeaderType {
+                        LabelWithButtonType {
+                            id: button
+
                             Layout.fillWidth: true
-                            Layout.topMargin: 20
 
-                            headerText: name
+                            text: protocolName
+                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                            clickedFunction: function() {
+                                var containerIndex = ContainersModel.getCurrentlyProcessedContainerIndex()
+                                switch (containerIndex) {
+                                case ContainerEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ContainerEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ContainerEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ContainerEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ContainerEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                }
+                                goToPage(protocolPage);
+                            }
+
+                            MouseArea {
+                                anchors.fill: button
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: false
+                            }
                         }
+
+                        DividerType {}
                     }
                 }
             }
 
-            OpenVpnSettings {
-                id: openVpnSettings
+            LabelWithButtonType {
+                id: removeButton
 
                 width: parent.width
+
+                text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    ContainersModel.removeCurrentlyProcessedContainer()
+                    closePage()
+                }
+
+                MouseArea {
+                    anchors.fill: removeButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
             }
+
+            DividerType {}
         }
     }
 }

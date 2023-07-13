@@ -24,11 +24,15 @@ public slots:
 
     void scanServerForInstalledContainers();
 
+    void updateContainer(QJsonObject config);
+
     QRegularExpression ipAddressPortRegExp();
 
 signals:
     void installContainerFinished(bool isInstalledContainerFound);
     void installServerFinished(bool isInstalledContainerFound);
+
+    void updateContainerFinished();
 
     void scanServerFinished(bool isInstalledContainerFound);
 

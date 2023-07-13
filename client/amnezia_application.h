@@ -21,6 +21,14 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
+#include "ui/models/protocols/cloakConfigModel.h"
+#ifdef Q_OS_WINDOWS
+    #include "ui/models/protocols/ikev2ConfigModel.h"
+#endif
+#include "ui/models/protocols/openvpnConfigModel.h"
+#include "ui/models/protocols/shadowsocksConfigModel.h"
+#include "ui/models/protocols/wireguardConfigModel.h"
+#include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
@@ -56,6 +64,9 @@ public:
     QQmlApplicationEngine *qmlEngine() const;
 
 private:
+    void initModels();
+    void initControllers();
+
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
@@ -69,6 +80,15 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ServersModel> m_serversModel;
     QScopedPointer<LanguageModel> m_languageModel;
+    QScopedPointer<ProtocolsModel> m_protocolsModel;
+
+    QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
+    QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
+    QScopedPointer<CloakConfigModel> m_cloakConfigModel;
+    QScopedPointer<WireGuardConfigModel> m_wireguardConfigModel;
+#ifdef Q_OS_WINDOWS
+    QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
+#endif
 
     QSharedPointer<VpnConnection> m_vpnConnection;
 

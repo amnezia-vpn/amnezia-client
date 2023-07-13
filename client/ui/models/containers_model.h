@@ -45,10 +45,14 @@ public slots:
     QString getDefaultContainerName();
 
     void setCurrentlyProcessedServerIndex(const int index);
+
     void setCurrentlyProcessedContainerIndex(int index);
     int getCurrentlyProcessedContainerIndex();
 
+    QString getCurrentlyProcessedContainerName();
+
     void removeAllContainers();
+    void removeCurrentlyProcessedContainer();
     void clearCachedProfiles();
 
     bool isAmneziaDnsContainerInstalled();

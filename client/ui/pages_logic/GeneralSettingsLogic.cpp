@@ -1,13 +1,11 @@
 #include "GeneralSettingsLogic.h"
 #include "ShareConnectionLogic.h"
 
-#include "../uilogic.h"
 #include "../models/protocols_model.h"
+#include "../uilogic.h"
 
-GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent)
+GeneralSettingsLogic::GeneralSettingsLogic(UiLogic *logic, QObject *parent) : PageLogicBase(logic, parent)
 {
-
 }
 
 void GeneralSettingsLogic::onUpdatePage()
@@ -32,9 +30,11 @@ void GeneralSettingsLogic::onPushButtonGeneralSettingsShareConnectionClicked()
     uiLogic()->m_selectedServerIndex = m_settings->defaultServerIndex();
     uiLogic()->m_selectedDockerContainer = m_settings->defaultContainer(uiLogic()->m_selectedServerIndex);
 
-    qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel())->setSelectedServerIndex(uiLogic()->m_selectedServerIndex);
-    qobject_cast<ProtocolsModel *>(uiLogic()->protocolsModel())->setSelectedDockerContainer(uiLogic()->m_selectedDockerContainer);
+    //    qobject_cast<ProtocolsModel
+    //    *>(uiLogic()->protocolsModel())->setSelectedServerIndex(uiLogic()->m_selectedServerIndex); qobject_cast<ProtocolsModel
+    //    *>(uiLogic()->protocolsModel())->setSelectedDockerContainer(uiLogic()->m_selectedDockerContainer);
 
-    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, uiLogic()->m_selectedDockerContainer);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex,
+                                                                    uiLogic()->m_selectedDockerContainer);
     emit uiLogic()->goToPage(Page::ShareConnection);
 }

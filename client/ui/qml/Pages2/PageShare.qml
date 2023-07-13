@@ -31,8 +31,6 @@ PageType {
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
 
-            console.log(type)
-
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(); break;
             case PageShare.ConfigType.AmenziaFullAccess: ExportController.generateFullAccessConfig(); break;
@@ -51,6 +49,7 @@ PageType {
     }
 
     property bool showContent: false
+    property bool shareButtonEnabled: false
     property list<QtObject> connectionTypesModel: [
         amneziaConnectionFormat
     ]
@@ -180,6 +179,7 @@ PageType {
                         serverSelector.text = selectedText
                         ServersModel.currentlyProcessedIndex = currentIndex
                         protocolSelector.visible = true
+                        root.shareButtonEnabled = false
                     }
 
                     Component.onCompleted: {
@@ -253,18 +253,24 @@ PageType {
                                 currentIndex: 0
 
                                 clickedFunction: function () {
-                                    serverSelector.text += ", " + selectedText
-                                    shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-                                    ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
+                                    handler()
 
                                     protocolSelector.visible = false
                                     serverSelector.menuVisible = false
-
-                                    fillConnectionTypeModel()
                                 }
 
                                 Component.onCompleted: {
+                                    handler()
+                                }
+
+                                function handler() {
+                                    if (!proxyContainersModel.count) {
+                                        root.shareButtonEnabled = false
+                                        return
+                                    } else {
+                                        root.shareButtonEnabled = true
+                                    }
+
                                     serverSelector.text += ", " + selectedText
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
@@ -335,6 +341,8 @@ PageType {
             BasicButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 32
+
+                enabled: shareButtonEnabled
 
                 text: qsTr("Share")
 

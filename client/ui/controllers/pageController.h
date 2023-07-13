@@ -36,7 +36,13 @@ namespace PageLoader
         PageSetupWizardInstalling,
         PageSetupWizardConfigSource,
         PageSetupWizardTextKey,
-        PageSetupWizardViewConfig
+        PageSetupWizardViewConfig,
+
+        PageProtocolOpenVpnSettings,
+        PageProtocolShadowSocksSettings,
+        PageProtocolCloakSettings,
+        PageProtocolWireGuardSettings,
+        PageProtocolIKev2Settings
     };
     Q_ENUM_NS(PageEnum)
 

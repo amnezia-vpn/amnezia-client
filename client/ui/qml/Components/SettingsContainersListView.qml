@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import ContainerEnum 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -88,8 +89,32 @@ ListView {
 
             onClicked: {
                 if (isInstalled) {
-                    ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
-                    goToPage(PageEnum.PageSettingsServerProtocol)
+                    var containerIndex = root.model.mapToSource(index)
+                    ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
+                    switch (containerIndex) {
+                    case ContainerEnum.OpenVpn: {
+                        OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig())
+                        goToPage(PageEnum.PageProtocolOpenVpnSettings)
+                        break
+                    }
+                    case ContainerEnum.WireGuard: {
+                        WireGuardConfigModel.updateModel(ProtocolsModel.getConfig())
+                        goToPage(PageEnum.PageProtocolWireGuardSettings)
+                        break
+                    }
+                    case ContainerEnum.Ipsec: {
+                        Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig())
+                        goToPage(PageEnum.PageProtocolIKev2Settings)
+                        break
+                    }
+                    default: {
+                        if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
+                            ProtocolsModel.updateModel(config)
+                            goToPage(PageEnum.PageSettingsServerProtocol)
+                        }
+                    }
+                    }
+
                 } else {
                     ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
                     InstallController.setShouldCreateServer(false)

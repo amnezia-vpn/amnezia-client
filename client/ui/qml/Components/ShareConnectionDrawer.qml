@@ -75,9 +75,9 @@ DrawerType {
                     text: qsTr("Copy")
 
                     onClicked: {
-                        configContent.selectAll()
-                        configContent.copy()
-                        configContent.select(0, 0)
+                        configText.selectAll()
+                        configText.copy()
+                        configText.select(0, 0)
                     }
                 }
 
@@ -138,6 +138,8 @@ DrawerType {
                             }
 
                             TextArea {
+                                id: configText
+
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 Layout.bottomMargin: 16

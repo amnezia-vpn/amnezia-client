@@ -250,7 +250,6 @@
         <file>ui/qml/Pages2/PageDeinstalling.qml</file>
         <file>ui/qml/Controls2/BackButtonType.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerProtocol.qml</file>
-        <file>ui/qml/Components/Protocols/OpenVpnSettings.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Controls2/ListViewType.qml</file>
         <file>images/controls/radio-button.svg</file>
@@ -271,5 +270,8 @@
         <file>ui/qml/Filters/ContainersModelFilters.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
         <file>ui/qml/Controls2/BusyIndicatorType.qml</file>
+        <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
     </qresource>
 </RCC>

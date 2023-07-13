@@ -79,38 +79,12 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
     //
-    m_containersModel.reset(new ContainersModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
-
-    m_serversModel.reset(new ServersModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
-    connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
-            &ContainersModel::setCurrentlyProcessedServerIndex);
-
-    m_languageModel.reset(new LanguageModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
-    connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &AmneziaApplication::updateTranslator);
 
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
 
-    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
-    m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
-
-    m_pageController.reset(new PageController(m_serversModel));
-    m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
-
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_settings));
-    m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
-
-    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
-    m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
-
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
-    m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
-
-    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_settings));
-    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+    initModels();
+    initControllers();
 
     //
 
@@ -243,4 +217,60 @@ bool AmneziaApplication::parseCommands()
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {
     return m_engine;
+}
+
+void AmneziaApplication::initModels()
+{
+    m_containersModel.reset(new ContainersModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
+
+    m_serversModel.reset(new ServersModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
+    connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
+            &ContainersModel::setCurrentlyProcessedServerIndex);
+
+    m_languageModel.reset(new LanguageModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
+    connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &AmneziaApplication::updateTranslator);
+
+    m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
+
+    m_openVpnConfigModel.reset(new OpenVpnConfigModel(this));
+    m_engine->rootContext()->setContextProperty("OpenVpnConfigModel", m_openVpnConfigModel.get());
+
+    m_shadowSocksConfigModel.reset(new ShadowSocksConfigModel(this));
+    m_engine->rootContext()->setContextProperty("ShadowSocksConfigModel", m_shadowSocksConfigModel.get());
+
+    m_cloakConfigModel.reset(new CloakConfigModel(this));
+    m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel.get());
+
+    m_wireguardConfigModel.reset(new WireGuardConfigModel(this));
+    m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireguardConfigModel.get());
+
+#ifdef Q_OS_WINDOWS
+    m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));
+    m_engine->rootContext()->setContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel.get());
+#endif
+}
+
+void AmneziaApplication::initControllers()
+{
+    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
+    m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
+
+    m_pageController.reset(new PageController(m_serversModel));
+    m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
+
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_settings));
+    m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
+
+    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
+    m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
+
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
+    m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
+
+    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_settings));
+    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 }

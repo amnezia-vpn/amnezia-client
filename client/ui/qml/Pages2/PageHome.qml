@@ -158,7 +158,6 @@ PageType {
 
                     implicitHeight: 40
 
-                    rootButtonBorderWidth: 0
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
 

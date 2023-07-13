@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import "TextTypes"
+
 CheckBox {
     id: root
 
@@ -25,6 +27,8 @@ CheckBox {
 
     indicator: Rectangle {
         id: checkBoxBackground
+
+        anchors.verticalCenter: parent.verticalCenter
 
         implicitWidth: 56
         implicitHeight: 56
@@ -57,43 +61,41 @@ CheckBox {
                 anchors.centerIn: parent
 
                 source: root.pressed ? imageSource : root.checked ? imageSource : ""
-
-                ColorOverlay {
-                    id: imageColor
-                    anchors.fill: indicator
-                    source: indicator
-
-                    color: root.pressed ? pressedImageColor : root.checked ? checkedImageColor : defaultImageColor
+                layer {
+                    enabled: true
+                    effect: ColorOverlay {
+                        color: root.pressed ? pressedImageColor : root.checked ? checkedImageColor : defaultImageColor
+                    }
                 }
             }
         }
     }
 
     contentItem: ColumnLayout {
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 8 + checkBoxBackground.width
 
-        Text {
-            text: root.text
-            color: "#D7D8DB"
-            font.pixelSize: 18
-            font.weight: 400
-            font.family: "PT Root UI VF"
+        spacing: 4
 
-            height: 22
+        ListItemTitleType {
             Layout.fillWidth: true
+//            Layout.topMargin: 16
+//            Layout.bottomMargin: description.visible ? 0 : 16
+
+            text: root.text
         }
 
-        Text {
+        CaptionTextType {
+            id: description
+
+            Layout.fillWidth: true
+            Layout.bottomMargin: 16
+
             text: root.descriptionText
             color: "#878b91"
-            font.pixelSize: 13
-            font.weight: 400
-            font.family: "PT Root UI VF"
-            font.letterSpacing: 0.02
 
-            height: 16
-            Layout.fillWidth: true
+            visible: root.descriptionText !== ""
         }
     }
 

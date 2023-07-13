@@ -9,8 +9,11 @@ Item {
 
     property string text
     property string textColor: "#d7d8db"
+    property string textDisabledColor: "#878B91"
 
     property string descriptionText
+    property string descriptionTextColor: "#878B91"
+    property string descriptionTextDisabledColor: "#494B50"
 
     property string headerText
     property string headerBackButtonImage
@@ -23,7 +26,6 @@ Item {
     property string rootButtonHoveredBorderColor: "#494B50"
     property string rootButtonDefaultBorderColor: "transparent"
     property string rootButtonPressedBorderColor: "#D7D8DB"
-    property int rootButtonBorderWidth: 1
 
     property real drawerHeight: 0.9
     property Component listView
@@ -36,10 +38,18 @@ Item {
     onMenuVisibleChanged: {
         if (menuVisible) {
             rootButtonBackground.border.color = rootButtonPressedBorderColor
-            rootButtonBackground.border.width = rootButtonBorderWidth
         } else {
             rootButtonBackground.border.color = rootButtonDefaultBorderColor
-            rootButtonBackground.border.width = 0
+        }
+    }
+
+    onEnabledChanged: {
+        if (enabled) {
+            rootButtonBackground.color = rootButtonBackgroundColor
+            rootButtonBackground.border.color = rootButtonDefaultBorderColor
+        } else {
+            rootButtonBackground.color = "transparent"
+            rootButtonBackground.border.color = rootButtonHoveredBorderColor
         }
     }
 
@@ -48,13 +58,10 @@ Item {
         anchors.fill: rootButtonContent
 
         radius: 16
-        color: rootButtonBackgroundColor
-        border.color: rootButtonDefaultBorderColor
-        border.width: 0
+        color: root.enabled ? rootButtonBackgroundColor : "transparent"
+        border.color: root.enabled ? rootButtonDefaultBorderColor : rootButtonHoveredBorderColor
+        border.width: 1
 
-        Behavior on border.width {
-            PropertyAnimation { duration: 200 }
-        }
         Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
@@ -77,7 +84,7 @@ Item {
 
                 visible: root.descriptionText !== ""
 
-                color: "#878B91"
+                color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
                 text: root.descriptionText
             }
 
@@ -87,7 +94,7 @@ Item {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
 
-                color: root.textColor
+                color: root.enabled ? root.textColor : root.textDisabledColor
                 text: root.text
 
                 wrapMode: Text.NoWrap
@@ -108,18 +115,16 @@ Item {
     MouseArea {
         anchors.fill: rootButtonContent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
+        hoverEnabled: root.enabled ? true : false
 
         onEntered: {
             if (menu.visible === false) {
-                rootButtonBackground.border.width = rootButtonBorderWidth
                 rootButtonBackground.border.color = rootButtonHoveredBorderColor
             }
         }
 
         onExited: {
             if (menu.visible === false) {
-                rootButtonBackground.border.width = 0
                 rootButtonBackground.border.color = rootButtonDefaultBorderColor
             }
         }

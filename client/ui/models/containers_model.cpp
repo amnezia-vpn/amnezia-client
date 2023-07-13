@@ -29,6 +29,11 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
     case ConfigRole: {
         m_settings->setContainerConfig(m_currentlyProcessedServerIndex, container, value.toJsonObject());
         m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+        if (m_defaultContainerIndex != DockerContainer::None) {
+            break;
+        } else if (ContainerProps::containerService(container) == ServiceType::Other) {
+            break;
+        }
     }
     case ServiceTypeRole:
     //        return ContainerProps::containerService(container);
@@ -108,6 +113,11 @@ int ContainersModel::getCurrentlyProcessedContainerIndex()
     return m_currentlyProcessedContainerIndex;
 }
 
+QString ContainersModel::getCurrentlyProcessedContainerName()
+{
+    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_currentlyProcessedContainerIndex));
+}
+
 void ContainersModel::removeAllContainers()
 {
 
@@ -116,12 +126,37 @@ void ContainersModel::removeAllContainers()
 
     if (errorCode == ErrorCode::NoError) {
         beginResetModel();
+
         m_settings->setContainers(m_currentlyProcessedServerIndex, {});
-        m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, DockerContainer::None);
+        m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+
+        setData(index(DockerContainer::None, 0), true, IsDefaultRole);
         endResetModel();
     }
 
     // todo process errors
+}
+
+void ContainersModel::removeCurrentlyProcessedContainer()
+{
+    ServerController serverController(m_settings);
+    auto credentials = m_settings->serverCredentials(m_currentlyProcessedServerIndex);
+    auto dockerContainer = static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
+
+    ErrorCode e = serverController.removeContainer(credentials, dockerContainer);
+
+    beginResetModel(); // todo change to begin remove rows?
+    m_settings->removeContainerConfig(m_currentlyProcessedServerIndex, dockerContainer);
+    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+
+    if (m_defaultContainerIndex == m_currentlyProcessedContainerIndex) {
+        if (m_containers.isEmpty()) {
+            setData(index(DockerContainer::None, 0), true, IsDefaultRole);
+        } else {
+            setData(index(m_containers.begin().key(), 0), true, IsDefaultRole);
+        }
+    }
+    endResetModel();
 }
 
 void ContainersModel::clearCachedProfiles()
@@ -150,6 +185,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[DescRole] = "description";
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
+    roles[ConfigRole] = "config";
 
     roles[IsEasySetupContainerRole] = "isEasySetupContainer";
     roles[EasySetupHeaderRole] = "easySetupHeader";

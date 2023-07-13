@@ -44,7 +44,7 @@ PageType {
 
     FlickableType {
         id: fl
-        anchors.top: backButton.top
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
 

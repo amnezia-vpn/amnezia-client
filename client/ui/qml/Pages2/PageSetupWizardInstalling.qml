@@ -14,8 +14,6 @@ import "../Config"
 PageType {
     id: root
 
-    property real progressBarValue: 0
-
     Connections {
         target: InstallController
 
@@ -127,8 +125,6 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 32
-
-//                            value: progressBarValue
 
                             Timer {
                                 id: timer

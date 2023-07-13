@@ -3,38 +3,40 @@
 
 #include <QAbstractListModel>
 #include <QJsonObject>
-#include <vector>
-#include <utility>
 
+#include "../controllers/pageController.h"
 #include "settings.h"
-#include "containers/containers_defs.h"
 
 class ProtocolsModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
-public:
-    enum SiteRoles {
-        NameRole = Qt::UserRole + 1,
-        DescRole,
-        ServiceTypeRole,
-        IsInstalledRole
+    enum Roles {
+        ProtocolNameRole = Qt::UserRole + 1,
+        ProtocolPageRole
     };
+
+    ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    Q_INVOKABLE void setSelectedServerIndex(int index);
-    Q_INVOKABLE void setSelectedDockerContainer(DockerContainer c);
+
+public slots:
+    void updateModel(const QJsonObject &content);
+
+    QJsonObject getConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    int m_selectedServerIndex;
-    DockerContainer m_selectedDockerContainer;
+    PageLoader::PageEnum protocolPage(Proto protocol) const;
+
     std::shared_ptr<Settings> m_settings;
+
+    DockerContainer m_container;
+    QJsonObject m_content;
 };
 
 #endif // PROTOCOLS_MODEL_H

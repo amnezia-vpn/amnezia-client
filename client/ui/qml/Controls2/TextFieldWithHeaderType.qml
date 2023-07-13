@@ -8,6 +8,9 @@ Item {
     id: root
 
     property string headerText
+    property string headerTextDisabledColor: "#494B50"
+    property string headerTextColor: "#878b91"
+
     property alias errorText: errorField.text
 
     property string buttonText
@@ -15,8 +18,17 @@ Item {
 
     property alias textField: textField
     property alias textFieldText: textField.text
+    property string textFieldTextColor: "#d7d8db"
+    property string textFieldTextDisabledColor: "#878B91"
+
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
+
+    property string borderColor: "#2C2D30"
+    property string borderFocusedColor: "#d7d8db"
+
+    property string backgroundColor: "#1c1d21"
+    property string backgroundDisabledColor: "transparent"
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -29,9 +41,9 @@ Item {
             id: backgroud
             Layout.fillWidth: true
             Layout.preferredHeight: 74
-            color: "#1c1d21"
+            color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
             radius: 16
-            border.color: textField.focus ? "#d7d8db" : "#2C2D30"
+            border.color: textField.focus ? root.borderFocusedColor : root.borderColor
             border.width: 1
 
             Behavior on border.color {
@@ -43,7 +55,7 @@ Item {
                 ColumnLayout {
                     LabelTextType {
                         text: root.headerText
-                        color: "#878b91"
+                        color: root.enabled ? root.headerTextColor : root.headerTextDisabledColor
 
                         Layout.fillWidth: true
                         Layout.rightMargin: 16
@@ -55,9 +67,9 @@ Item {
                         id: textField
 
                         enabled: root.textFieldEditable
-                        color: "#d7d8db"
+                        color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
 
-                        placeholderText: textFieldPlaceholderText
+                        placeholderText: root.textFieldPlaceholderText
                         placeholderTextColor: "#494B50"
 
                         selectionColor:  "#412102"
@@ -79,7 +91,7 @@ Item {
 
                         background: Rectangle {
                             anchors.fill: parent
-                            color: "#1c1d21"
+                            color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
                         }
 
                         onTextChanged: {
@@ -98,13 +110,13 @@ Item {
                     textColor: "#D7D8DB"
                     borderWidth: 0
 
-                    text: buttonText
+                    text: root.buttonText
 
                     Layout.rightMargin: 24
 
                     onClicked: {
-                        if (clickedFunc && typeof clickedFunc === "function") {
-                            clickedFunc()
+                        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+                            root.clickedFunc()
                         }
                     }
                 }

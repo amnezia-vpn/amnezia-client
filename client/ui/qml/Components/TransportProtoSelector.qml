@@ -25,6 +25,8 @@ Rectangle {
         HorizontalRadioButton {
             checked: root.currentIndex === 0
 
+            hoverEnabled: root.enabled
+
             implicitWidth: (rootWidth - 32) / 2
             text: "UDP"
 
@@ -35,6 +37,8 @@ Rectangle {
 
         HorizontalRadioButton {
             checked: root.currentIndex === 1
+
+            hoverEnabled: root.enabled
 
             implicitWidth: (rootWidth - 32) / 2
             text: "TCP"

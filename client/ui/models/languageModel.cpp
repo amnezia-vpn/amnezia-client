@@ -22,14 +22,8 @@ QVariant LanguageModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case NameRole: {
-        return m_availableLanguages[index.row()].name;
-        break;
-    }
-    case IndexRole: {
-        return static_cast<int>(m_availableLanguages[index.row()].index);
-        break;
-    }
+    case NameRole: return m_availableLanguages[index.row()].name;
+    case IndexRole: return static_cast<int>(m_availableLanguages[index.row()].index);
     }
     return QVariant();
 }

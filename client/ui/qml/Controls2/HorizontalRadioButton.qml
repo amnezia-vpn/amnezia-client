@@ -22,45 +22,44 @@ RadioButton {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
-    hoverEnabled: true
-
     indicator: Rectangle {
         anchors.fill: parent
         radius: 16
 
         color: {
-            if (root.enabled) {
+//            if (root.enabled) {
                 if (root.hovered) {
                     return hoveredColor
                 } else if (root.checked) {
                     return selectedColor
                 }
                 return defaultColor
-            } else {
-                return disabledColor
-            }
+//            } else {
+//                return disabledColor
+//            }
         }
 
         border.color: {
-            if (root.enabled) {
+//            if (root.enabled) {
                 if (root.pressed) {
                     return pressedBorderColor
                 } else if (root.checked) {
                     return selectedBorderColor
                 }
-            }
-            return defaultBodredColor
+                return defaultBodredColor
+//            }
+//            return defaultBodredColor
         }
 
         border.width: {
-            if (root.enabled) {
+//            if (root.enabled) {
                 if(root.checked) {
                     return 1
                 }
                 return root.pressed ? 1 : 0
-            } else {
-                return 0
-            }
+//            } else {
+//                return 0
+//            }
         }
 
         Behavior on color {

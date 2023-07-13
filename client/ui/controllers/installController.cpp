@@ -69,7 +69,7 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
         m_serversModel->addServer(server);
         m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
-        emit installServerFinished(isInstalledContainerFound);
+        emit installServerFinished(false); // todo incorrect notification about found containers
         return;
     }
 
@@ -108,7 +108,7 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
             }
         }
 
-        emit installContainerFinished(isInstalledContainerFound);
+        emit installContainerFinished(false); // todo incorrect notification about found containers
         return;
     }
 
@@ -156,6 +156,29 @@ void InstallController::scanServerForInstalledContainers()
         }
 
         emit scanServerFinished(isInstalledContainerAddedToGui);
+        return;
+    }
+
+    emit installationErrorOccurred(errorString(errorCode));
+}
+
+void InstallController::updateContainer(QJsonObject config)
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials serverCredentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+
+    const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    auto modelIndex = m_containersModel->index(container);
+    QJsonObject oldContainerConfig =
+            qvariant_cast<QJsonObject>(m_containersModel->data(modelIndex, ContainersModel::Roles::ConfigRole));
+
+    ServerController serverController(m_settings);
+
+    auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
+    if (errorCode == ErrorCode::NoError) {
+        m_containersModel->setData(modelIndex, config, ContainersModel::Roles::ConfigRole);
+        emit updateContainerFinished();
         return;
     }
 
