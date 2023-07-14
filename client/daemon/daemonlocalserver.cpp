@@ -17,8 +17,8 @@
 #  include <sys/types.h>
 #  include <unistd.h>
 
-constexpr const char* TMP_PATH = "/tmp/mozillavpn.socket";
-constexpr const char* VAR_PATH = "/var/run/mozillavpn/daemon.socket";
+constexpr const char* TMP_PATH = "/tmp/amneziavpn.socket";
+constexpr const char* VAR_PATH = "/var/run/amneziavpn/daemon.socket";
 #endif
 
 namespace {
@@ -67,7 +67,7 @@ bool DaemonLocalServer::initialize() {
 
 QString DaemonLocalServer::daemonPath() const {
 #if defined(MZ_WINDOWS)
-  return "\\\\.\\pipe\\mozillavpn";
+  return "\\\\.\\pipe\\amneziavpn";
 #elif defined(MZ_MACOS)
   QDir dir("/var/run");
   if (!dir.exists()) {
@@ -75,19 +75,19 @@ QString DaemonLocalServer::daemonPath() const {
     return TMP_PATH;
   }
 
-  if (dir.exists("mozillavpn")) {
-    logger.debug() << "/var/run/mozillavpn seems to be usable";
+  if (dir.exists("amneziavpn")) {
+    logger.debug() << "/var/run/amneziavpn seems to be usable";
     return VAR_PATH;
   }
 
-  if (!dir.mkdir("mozillavpn")) {
-    logger.warning() << "Failed to create /var/run/mozillavpn";
+  if (!dir.mkdir("amneziavpn")) {
+    logger.warning() << "Failed to create /var/run/amneziavpn";
     return TMP_PATH;
   }
 
-  if (chmod("/var/run/mozillavpn", S_IRWXU | S_IRWXG | S_IRWXO) < 0) {
+  if (chmod("/var/run/amneziavpn", S_IRWXU | S_IRWXG | S_IRWXO) < 0) {
     logger.warning()
-        << "Failed to set the right permissions to /var/run/mozillavpn";
+        << "Failed to set the right permissions to /var/run/amneziavpn";
     return TMP_PATH;
   }
 

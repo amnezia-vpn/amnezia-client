@@ -185,8 +185,6 @@ set(SOURCES ${SOURCES}
 )
 
 if(WIN32)
-    add_compile_definitions(MVPN_WINDOWS)
-
     configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
@@ -240,8 +238,6 @@ if(APPLE)
 endif()
 
 if(LINUX AND NOT ANDROID)
-    add_compile_definitions(MVPN_LINUX)
-
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
@@ -275,8 +271,6 @@ if(ANDROID)
     # We need to include qtprivate api's
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
-
-    add_compile_definitions(MVPN_ANDROID)
 
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/android)
 

@@ -21,7 +21,7 @@ NSString* MacOSUtils::appId() {
   if (!appId) {
     // Fallback. When an unsigned/un-notarized app is executed in
     // command-line mode, it could fail the fetching of its own bundle id.
-    appId = @"org.mozilla.macos.FirefoxVPN";
+    appId = @"org.amnezia.AmneziaVPN";
   }
 
   return appId;

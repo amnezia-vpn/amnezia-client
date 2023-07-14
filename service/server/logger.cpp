@@ -111,7 +111,7 @@ Logger::Log::Log(Logger* logger, LogLevel logLevel)
     : m_logger(logger), m_logLevel(logLevel), m_data(new Data()) {}
 
 Logger::Log::~Log() {
-    qDebug() << "Mozilla" << m_logger->className() << m_data->m_buffer.trimmed();
+    qDebug() << "Amnezia" << m_logger->className() << m_data->m_buffer.trimmed();
     delete m_data;
 }
 
