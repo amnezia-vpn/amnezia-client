@@ -168,7 +168,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onDestroy() {
-        turnOff()
+      //  turnOff()
 
         super.onDestroy()
     }
@@ -256,7 +256,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     // At this moment, the VPN interface is already deactivated by the system.
     override fun onRevoke() {
         Log.v(tag, "Aman: onRevoke....................")
-        this.turnOff()
+        //this.turnOff()
         super.onRevoke()
     }
 
@@ -431,7 +431,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         Log.i(tag, "mProtocol $mProtocol")
         if (isUp){
            mbuilder = Builder()
-           mOpenVPNThreadv3?.reconnect(2)
+           mOpenVPNThreadv3?.reconnect(0)
         }
     }
 
