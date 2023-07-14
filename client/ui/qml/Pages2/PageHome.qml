@@ -102,7 +102,7 @@ PageType {
                         description += "Amnezia DNS | "
                     }
                 } else {
-                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns) {
+                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
                         description += "Amnezia DNS | "
                     }
                 }

@@ -156,7 +156,7 @@ DrawerType {
                                 font.weight: Font.Medium
                                 font.family: "PT Root UI VF"
 
-                                text: ExportController.formattedConfig
+                                text: ExportController.config
 
                                 wrapMode: Text.Wrap
 

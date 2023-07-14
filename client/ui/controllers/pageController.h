@@ -42,7 +42,8 @@ namespace PageLoader
         PageProtocolShadowSocksSettings,
         PageProtocolCloakSettings,
         PageProtocolWireGuardSettings,
-        PageProtocolIKev2Settings
+        PageProtocolIKev2Settings,
+        PageProtocolRaw
     };
     Q_ENUM_NS(PageEnum)
 
@@ -70,6 +71,7 @@ signals:
     void showErrorMessage(QString errorMessage);
     void showInfoMessage(QString message);
     void showBusyIndicator(bool visible);
+    void raise();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

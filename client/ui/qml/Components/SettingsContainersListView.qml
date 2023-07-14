@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerEnum 1.0
+import ContainerProps 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -91,19 +92,25 @@ ListView {
                 if (isInstalled) {
                     var containerIndex = root.model.mapToSource(index)
                     ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
+                    if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
+                        ProtocolsModel.updateModel(config)
+                        goToPage(PageEnum.PageProtocolRaw)
+                        return
+                    }
+
                     switch (containerIndex) {
                     case ContainerEnum.OpenVpn: {
-                        OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig())
+                        OpenVpnConfigModel.updateModel(config)
                         goToPage(PageEnum.PageProtocolOpenVpnSettings)
                         break
                     }
                     case ContainerEnum.WireGuard: {
-                        WireGuardConfigModel.updateModel(ProtocolsModel.getConfig())
+                        WireGuardConfigModel.updateModel(config)
                         goToPage(PageEnum.PageProtocolWireGuardSettings)
                         break
                     }
                     case ContainerEnum.Ipsec: {
-                        Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig())
+                        Ikev2ConfigModel.updateModel(config)
                         goToPage(PageEnum.PageProtocolIKev2Settings)
                         break
                     }

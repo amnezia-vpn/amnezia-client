@@ -36,10 +36,9 @@ void ExportController::generateFullAccessConfig()
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
-    m_rawConfig = QString("vpn://%1")
-                          .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                                 | QByteArray::OmitTrailingEquals)));
-    m_formattedConfig = m_rawConfig;
+    m_config = QString("vpn://%1")
+                       .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                              | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
@@ -88,10 +87,9 @@ void ExportController::generateConnectionConfig()
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
-    m_rawConfig = QString("vpn://%1")
-                          .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
-                                                                 | QByteArray::OmitTrailingEquals)));
-    m_formattedConfig = m_rawConfig;
+    m_config = QString("vpn://%1")
+                       .arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding
+                                                              | QByteArray::OmitTrailingEquals)));
 
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
@@ -120,12 +118,10 @@ void ExportController::generateOpenVpnConfig()
     }
     config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::OpenVpn, config);
 
-    m_rawConfig = config;
-
     auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
     QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
     for (const QString &line : lines) {
-        m_formattedConfig.append(line + "\n");
+        m_config.append(line + "\n");
     }
 
     emit exportConfigChanged();
@@ -154,20 +150,18 @@ void ExportController::generateWireGuardConfig()
     }
     config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::WireGuard, config);
 
-    m_rawConfig = config;
-
     auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
     QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
     for (const QString &line : lines) {
-        m_formattedConfig.append(line + "\n");
+        m_config.append(line + "\n");
     }
 
     emit exportConfigChanged();
 }
 
-QString ExportController::getFormattedConfig()
+QString ExportController::getConfig()
 {
-    return m_formattedConfig;
+    return m_config;
 }
 
 QList<QString> ExportController::getQrCodes()
@@ -193,7 +187,7 @@ void ExportController::saveFile()
     QFile save(fileName.toLocalFile());
 
     save.open(QIODevice::WriteOnly);
-    save.write(m_rawConfig.toUtf8());
+    save.write(m_config.toUtf8());
     save.close();
 
     QFileInfo fi(fileName.toLocalFile());
@@ -233,7 +227,6 @@ int ExportController::getQrCodesCount()
 
 void ExportController::clearPreviousConfig()
 {
-    m_rawConfig.clear();
-    m_formattedConfig.clear();
+    m_config.clear();
     m_qrCodes.clear();
 }

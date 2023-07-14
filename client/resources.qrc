@@ -273,5 +273,6 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
     </qresource>
 </RCC>

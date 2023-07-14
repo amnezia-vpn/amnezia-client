@@ -48,5 +48,11 @@ Window  {
             }
             rootStackView.replace(pagePath, { "objectName" : pagePath })
         }
+
+        function onRaise() {
+            root.show()
+            root.raise()
+            root.requestActivate()
+        }
     }
 }

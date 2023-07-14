@@ -22,6 +22,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
+#include "ui/notificationhandler.h"
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -91,6 +92,7 @@ private:
 #endif
 
     QSharedPointer<VpnConnection> m_vpnConnection;
+    QScopedPointer<NotificationHandler> m_notificationHandler;
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;

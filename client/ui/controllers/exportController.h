@@ -18,7 +18,7 @@ public:
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
-    Q_PROPERTY(QString formattedConfig READ getFormattedConfig NOTIFY exportConfigChanged)
+    Q_PROPERTY(QString config READ getConfig NOTIFY exportConfigChanged)
 
 public slots:
     void generateFullAccessConfig();
@@ -26,7 +26,7 @@ public slots:
     void generateOpenVpnConfig();
     void generateWireGuardConfig();
 
-    QString getFormattedConfig();
+    QString getConfig();
     QList<QString> getQrCodes();
 
     void saveFile();
@@ -50,8 +50,7 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
-    QString m_rawConfig;
-    QString m_formattedConfig;
+    QString m_config;
     QList<QString> m_qrCodes;
 };
 

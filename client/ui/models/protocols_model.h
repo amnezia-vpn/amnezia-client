@@ -13,7 +13,8 @@ class ProtocolsModel : public QAbstractListModel
 public:
     enum Roles {
         ProtocolNameRole = Qt::UserRole + 1,
-        ProtocolPageRole
+        ProtocolPageRole,
+        RawConfigRole
     };
 
     ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);

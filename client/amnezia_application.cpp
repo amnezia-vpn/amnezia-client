@@ -86,6 +86,21 @@ void AmneziaApplication::init()
     initModels();
     initControllers();
 
+    m_notificationHandler.reset(NotificationHandler::create(nullptr));
+
+    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
+            &NotificationHandler::setConnectionState);
+
+    void openConnection();
+    void closeConnection();
+
+    connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(),
+            &PageController::raise);
+    connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
+            &ConnectionController::openConnection);
+    connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
+            &ConnectionController::closeConnection);
+
     //
 
     m_engine->load(url);

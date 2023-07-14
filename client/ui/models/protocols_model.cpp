@@ -17,6 +17,7 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
 
     roles[ProtocolNameRole] = "protocolName";
     roles[ProtocolPageRole] = "protocolPage";
+    roles[RawConfigRole] = "rawConfig";
 
     return roles;
 }
@@ -34,6 +35,19 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     }
     case ProtocolPageRole:
         return static_cast<int>(protocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
+    case RawConfigRole: {
+        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
+        auto lastConfigJsonDoc =
+                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
+        auto lastConfigJson = lastConfigJsonDoc.object();
+
+        QString rawConfig;
+        QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+        for (const QString &l : lines) {
+            rawConfig.append(l + "\n");
+        }
+        return rawConfig;
+    }
     }
 
     return QVariant();

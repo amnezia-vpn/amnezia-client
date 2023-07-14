@@ -54,6 +54,8 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+
             ListView {
                 id: listview
 
