@@ -46,6 +46,7 @@ public:
 public slots:
     void changeLanguage(const LanguageSettings::AvailableLanguageEnum language);
     int getCurrentLanguageIndex();
+    QString getCurrentLanuageName();
 
 signals:
     void updateTranslations(const QLocale &locale);

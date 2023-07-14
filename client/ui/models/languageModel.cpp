@@ -54,3 +54,8 @@ int LanguageModel::getCurrentLanguageIndex()
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
+
+QString LanguageModel::getCurrentLanuageName()
+{
+    return m_availableLanguages[getCurrentLanguageIndex()].name;
+}

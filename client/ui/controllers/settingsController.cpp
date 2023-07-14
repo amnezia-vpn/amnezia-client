@@ -46,14 +46,15 @@ void SettingsController::setSecondaryDns(const QString &dns)
     emit secondaryDnsChanged();
 }
 
-bool SettingsController::isSaveLogsEnabled()
+bool SettingsController::isLoggingEnable()
 {
     return m_settings->isSaveLogs();
 }
 
-void SettingsController::setSaveLogs(bool enable)
+void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
+    emit loggingStateChanged();
 }
 
 void SettingsController::openLogsFolder()
@@ -100,4 +101,9 @@ void SettingsController::restoreAppConfig()
 QString SettingsController::getAppVersion()
 {
     return m_appVersion;
+}
+
+void SettingsController::clearSettings()
+{
+    m_settings->clearSettings();
 }

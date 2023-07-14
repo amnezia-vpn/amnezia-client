@@ -274,5 +274,6 @@
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
+        <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
     </qresource>
 </RCC>

@@ -16,12 +16,19 @@ InstallController::InstallController(const QSharedPointer<ServersModel> &servers
 void InstallController::install(DockerContainer container, int port, TransportProto transportProto)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
+    QJsonObject containerConfig;
 
-    QJsonObject containerConfig { { config_key::port, QString::number(port) },
-                                  { config_key::transport_proto,
-                                    ProtocolProps::transportProtoToString(transportProto, mainProto) } };
-    QJsonObject config { { config_key::container, ContainerProps::containerToString(container) },
-                         { ProtocolProps::protoToString(mainProto), containerConfig } };
+    containerConfig.insert(config_key::port, QString::number(port));
+    containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, mainProto));
+
+    if (container == DockerContainer::Sftp) {
+        containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
+        containerConfig.insert(config_key::password, Utils::getRandomString(10));
+    }
+
+    QJsonObject config;
+    config.insert(config_key::container, ContainerProps::containerToString(container));
+    config.insert(ProtocolProps::protoToString(mainProto), containerConfig);
 
     if (m_shouldCreateServer) {
         if (isServerAlreadyExists()) {

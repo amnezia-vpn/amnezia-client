@@ -27,6 +27,7 @@ namespace PageLoader
         PageSettingsApplication,
         PageSettingsBackup,
         PageSettingsAbout,
+        PageSettingsLogging,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

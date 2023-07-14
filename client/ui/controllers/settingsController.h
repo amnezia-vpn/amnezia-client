@@ -16,6 +16,7 @@ public:
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
+    Q_PROPERTY(bool isLoggingEnable READ isLoggingEnable WRITE toggleLogging NOTIFY loggingStateChanged)
 
 public slots:
     void setAmneziaDns(bool enable);
@@ -27,8 +28,8 @@ public slots:
     QString getSecondaryDns();
     void setSecondaryDns(const QString &dns);
 
-    bool isSaveLogsEnabled();
-    void setSaveLogs(bool enable);
+    bool isLoggingEnable();
+    void toggleLogging(bool enable);
 
     void openLogsFolder();
     void exportLogsFile();
@@ -39,9 +40,12 @@ public slots:
 
     QString getAppVersion();
 
+    void clearSettings();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
+    void loggingStateChanged();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

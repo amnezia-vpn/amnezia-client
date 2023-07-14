@@ -48,6 +48,7 @@ PageType {
                 Layout.topMargin: 16
 
                 text: qsTr("Language")
+                descriptionText: LanguageModel.getCurrentLanuageName()
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -60,6 +61,22 @@ PageType {
             }
 
 
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Logging")
+                descriptionText: SettingsController.isLoggingEnable ? qsTr("Enabled") : qsTr("Disabled")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsLogging)
+                }
+            }
+
+            DividerType {}
+
             LabelWithButtonType {
                 Layout.fillWidth: true
 
@@ -67,10 +84,27 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    questionDrawer.headerText = qsTr("Reset settings and remove all data from the application?")
+                    questionDrawer.descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        SettingsController.clearSettings()
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
                 }
             }
 
             DividerType {}
+
+            QuestionDrawer {
+                id: questionDrawer
+            }
         }
     }
 }

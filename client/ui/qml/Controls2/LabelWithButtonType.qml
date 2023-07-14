@@ -17,14 +17,16 @@ Item {
 
     property string textColor: "#d7d8db"
 
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
+    implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
+    implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
     RowLayout {
         id: content
         anchors.fill: parent
         anchors.leftMargin: 16
         anchors.rightMargin: 16
+        anchors.topMargin: 16
+        anchors.bottomMargin: 16
 
         Rectangle {
             id: leftImageBackground
@@ -56,8 +58,6 @@ Item {
                 color: root.textColor
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: description.visible ? 0 : 16
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
@@ -72,7 +72,6 @@ Item {
                 visible: root.descriptionText !== ""
 
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter

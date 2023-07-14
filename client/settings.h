@@ -183,6 +183,8 @@ public:
         m_settings.setValue("Conf/appLanguage", locale);
     };
 
+    void clearSettings();
+
 signals:
     void saveLogsChanged();
 

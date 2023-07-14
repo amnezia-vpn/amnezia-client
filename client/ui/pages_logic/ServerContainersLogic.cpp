@@ -89,7 +89,7 @@ void ServerContainersLogic::onPushButtonRemoveClicked(DockerContainer container)
 void ServerContainersLogic::onPushButtonContinueClicked(DockerContainer c, int port, TransportProto tp)
 {
     ServerController serverController(m_settings);
-    QJsonObject config = serverController.createContainerInitialConfig(c, port, tp);
+    QJsonObject config; // = serverController.createContainerInitialConfig(c, port, tp);
 
     emit uiLogic()->goToPage(Page::ServerConfiguringProgress);
     qApp->processEvents();
