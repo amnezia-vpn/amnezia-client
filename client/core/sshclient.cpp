@@ -143,8 +143,6 @@ namespace libssh {
                     {
                         output = std::string(buffer, bytesRead);
                         if (!output.empty()) {
-                            qDebug().noquote() << (isStdErr ? "stdErr" : "stdOut") << QString(output.c_str());
-
                             if (cbReadStdOut && !isStdErr){
                                 auto error = cbReadStdOut(output.c_str(), *this);
                                 if (error != ErrorCode::NoError) {

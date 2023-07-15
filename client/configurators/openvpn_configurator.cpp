@@ -95,7 +95,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
         config.replace("</tls-auth>", "");
     }
 
-#if defined Q_OS_MAC || defined(Q_OS_LINUX)
+#ifndef MZ_WINDOWS
     config.replace("block-outside-dns", "");
 #endif
 
@@ -123,8 +123,11 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
     config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
     config.append("redirect-gateway ipv6\n");
 
-#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
+#ifndef MZ_WINDOWS
     config.replace("block-outside-dns", "");
+#endif
+
+#if (defined (MZ_MACOS) || defined(MZ_LINUX))
     QString dnsConf = QString(
                 "\nscript-security 2\n"
                 "up %1/update-resolv-conf.sh\n"
@@ -147,9 +150,8 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
         config.append("redirect-gateway def1 bypass-dhcp\n");
     }
 
-#if (defined Q_OS_MAC || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
+    // remove block-outside-dns for all exported configs
     config.replace("block-outside-dns", "");
-#endif
 
     json[config_key::config] = config;
     return QJsonDocument(json).toJson();

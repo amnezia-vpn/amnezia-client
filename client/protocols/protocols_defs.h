@@ -1,9 +1,10 @@
 #ifndef PROTOCOLS_DEFS_H
 #define PROTOCOLS_DEFS_H
 
+#include <QMetaEnum>
 #include <QObject>
 #include <QDebug>
-#include <QQmlEngine>
+
 
 namespace amnezia {
 namespace config_key {
@@ -198,32 +199,6 @@ public:
     Q_INVOKABLE static QString key_proto_config_path(Proto p);
 
 };
-
-static void declareQmlProtocolEnum() {
-    qmlRegisterUncreatableMetaObject(
-                ProtocolEnumNS::staticMetaObject,
-                "ProtocolEnum",
-                1, 0,
-                "ProtocolEnum",
-                "Error: only enums"
-                );
-
-    qmlRegisterUncreatableMetaObject(
-                ProtocolEnumNS::staticMetaObject,
-                "ProtocolEnum",
-                1, 0,
-                "TransportProto",
-                "Error: only enums"
-                );
-
-    qmlRegisterUncreatableMetaObject(
-                ProtocolEnumNS::staticMetaObject,
-                "ProtocolEnum",
-                1, 0,
-                "ServiceType",
-                "Error: only enums"
-                );
-}
 
 } // namespace amnezia
 
