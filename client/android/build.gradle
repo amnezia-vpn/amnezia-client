@@ -137,8 +137,8 @@ android {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 34
-        versionCode 22 // Change to a higher number
-        versionName "3.0.7" // Change to a higher number
+        versionCode 25 // Change to a higher number
+        versionName "3.0.8" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
             "room.schemaLocation": "${qtAndroidDir}/schemas".toString()

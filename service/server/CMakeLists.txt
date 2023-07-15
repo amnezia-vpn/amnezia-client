@@ -57,7 +57,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pinghelper.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsender.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsenderfactory.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/wgquickprocess.h
 )
 
 include_directories(../../client/mozilla)
@@ -80,7 +79,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pinghelper.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsender.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsenderfactory.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/wgquickprocess.cpp
 )
 
 if(UNIX)
