@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(ANDROID)
     # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
@@ -19,14 +16,14 @@ set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 set(PACKAGES
-	Widgets Core Gui Network Xml
-	RemoteObjects Quick Svg QuickControls2
-	Core5Compat Concurrent
+    Widgets Core Gui Network Xml
+    RemoteObjects Quick Svg QuickControls2
+    Core5Compat Concurrent LinguistTools
 )
 if(IOS)
-	set(PACKAGES
-		${PACKAGES}
-		Multimedia
+    set(PACKAGES
+        ${PACKAGES}
+        Multimedia
 	)
 endif()
 
@@ -39,13 +36,25 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 if(IOS)
-	set(LIBS
-		${LIBS}
-		Qt6::Multimedia
-	)
+    set(LIBS
+        ${LIBS}
+        Qt6::Multimedia
+    )
 endif()
 
 qt_standard_project_setup()
+qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
+    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
+endif()
+
+qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+
+qt6_add_translations(${PROJECT} TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
+)
 
 if(IOS)
     #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
@@ -61,6 +70,7 @@ if(IS_CI)
         set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE}")
     endif()
 endif()
+
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 
@@ -82,8 +92,8 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
+    ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/property_helper.h
@@ -93,6 +103,19 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
 )
+
+# Mozilla headres
+set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/models/server.h
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/ipaddress.h
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/leakdetector.h
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/controllerimpl.h
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/localsocketcontroller.h
+)
+
+include_directories(mozilla)
+include_directories(mozilla/shared)
+include_directories(mozilla/models)
 
 if(NOT IOS)
     set(HEADERS ${HEADERS}
@@ -109,7 +132,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/linux/leakdetector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
@@ -117,6 +139,18 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
 )
+
+# Mozilla sources
+set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/models/server.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/ipaddress.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/leakdetector.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/mozilla/localsocketcontroller.cpp
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+endif()
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}
@@ -150,11 +184,7 @@ set(SOURCES ${SOURCES}
     ${UI_MODELS_CPP}
 )
 
-qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-
 if(WIN32)
-    add_compile_definitions(MVPN_WINDOWS)
-
     configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
@@ -205,40 +235,9 @@ if(APPLE)
     set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${BUILD_VPN_DEVELOPMENT_TEAM})
     set(CMAKE_XCODE_ATTRIBUTE_GROUP_ID_IOS ${BUILD_IOS_GROUP_IDENTIFIER})
 
-    if(NOT IOS)
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
-
-        message("MAC build")
-        set(HEADERS ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.h)
-        set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/ui/macos_util.mm)
-
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
-        add_compile_definitions(MVPN_MACOS)
-
-        set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
-        set(MACOSX_BUNDLE_ICON_FILE app.icns)
-        set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-        set(SOURCES ${SOURCES} ${ICON_FILE})
-
-        find_library(FW_COCOA Cocoa)
-        find_library(FW_APPLICATIONSERVICES ApplicationServices)
-        find_library(FW_CORESERVICES CoreServices)
-        find_library(FW_FOUNDATION Foundation)
-        find_library(FW_APPKIT AppKit)
-        find_library(FW_SECURITY Security)
-
-        set(LIBS ${LIBS}
-            ${FW_COCOA} ${FW_APPLICATIONSERVICES}
-            ${FW_FOUNDATION} ${FW_APPKIT}
-            ${FW_SECURITY} ${FW_CORESERVICES}
-            ${LIB_LIBCRYPTO}
-        )
-    endif()
 endif()
 
 if(LINUX AND NOT ANDROID)
-    add_compile_definitions(MVPN_LINUX)
-
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
@@ -273,8 +272,6 @@ if(ANDROID)
     # As QAndroidBinder is not yet implemented with a public api
     set(LIBS ${LIBS} Qt6::CorePrivate)
 
-    add_compile_definitions(MVPN_ANDROID)
-
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/android)
 
     set(HEADERS ${HEADERS}
@@ -295,179 +292,12 @@ if(ANDROID)
 endif()
 
 if(IOS)
-    message("Client iOS build")
-
-    find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
-    set(LIBS ${LIBS} Qt6::ShaderTools)
-
-    find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
-    find_library(FW_UIKIT UIKit)
-    find_library(FW_AVFOUNDATION AVFoundation)
-    find_library(FW_FOUNDATION Foundation)
-    find_library(FW_STOREKIT StoreKit)
-    find_library(FW_USERNOTIFICATIONS UserNotifications)
-
-    set(LIBS ${LIBS} 
-        ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT} 
-        ${FW_AVFOUNDATION} ${FW_FOUNDATION} ${FW_STOREKIT}
-        ${FW_USERNOTIFICATIONS}
-    )
-
-    add_compile_definitions(MVPN_IOS)
-
-    set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigint.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/bigintipv6addr.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.h
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ios_vpnprotocol.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosnotificationhandler.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosglue.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddress.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ipaddressrange.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QtAppDelegate.mm
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.mm
-    )
-endif()
-
-if(CMAKE_OSX_SYSROOT STREQUAL "iphoneos")
-    message("Building for iPhone OS")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-endif()
-
-qt_add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
-qt_add_translations(${PROJECT} TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts)
-
-if(APPLE AND NOT IOS)
-    set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
-endif()
-
-if(IOS)
-    enable_language(OBJC)
-    enable_language(OBJCXX)
-    enable_language(Swift)
-
+    include(cmake/ios.cmake)
+    include(cmake/ios-arch-fixup.cmake)
+elseif(APPLE AND NOT IOS)
+    include(cmake/golang.cmake)
     include(cmake/osxtools.cmake)
-
-    set(LIBS ${LIBS}
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/ios/iphone/libssl.a
-    )
-
-    target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
-
-    set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
-
-    set_target_properties(${PROJECT} PROPERTIES
-        XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/ios/app/Info.plist.in
-        MACOSX_BUNDLE_ICON_FILE "AppIcon"
-        MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
-        MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
-        MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
-        MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
-
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
-        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_LIST_DIR}/ios/app/main.entitlements"
-        XCODE_ATTRIBUTE_MARKETING_VERSION "${APPLE_PROJECT_VERSION}"
-        XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
-        XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPN"
-        XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "AmneziaVPN"
-
-        XCODE_GENERATE_SCHEME TRUE
-        XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
-        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
-        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
-
-        XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
-        XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-
-        XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-
-        XCODE_EMBED_APP_EXTENSIONS networkextension
-
-        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
-        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
-
-        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN"
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN"
-    )
-
-    set_target_properties(${PROJECT} PROPERTIES
-        XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
-        XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
-        XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
-        XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "AmneziaVPN-Swift.h"
-    )
-
-    set_target_properties(${PROJECT} PROPERTIES
-        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
-    )
-
-    target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-
-    target_compile_options(${PROJECT} PRIVATE
-        -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\"
-        -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
-    )
-
-    target_sources(${PROJECT} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/iosvpnprotocol.swift
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/ioslogger.swift
-
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/NETunnelProviderProtocol+Extension.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/TunnelConfiguration.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/Endpoint.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/Model/String+ArrayConversion.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PeerConfiguration.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/DNSServer.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardApp/LocalizationHelper.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/Shared/FileManager+Extension.swift
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKitC/x25519.c
-        ${CMAKE_CURRENT_LIST_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
-    )
-
-    target_sources(${PROJECT} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
-        ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
-    )
-    set_source_files_properties(
-        ${CMAKE_CURRENT_LIST_DIR}/ios/app/launch.png
-        ${CMAKE_CURRENT_LIST_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-        ${CMAKE_CURRENT_LIST_DIR}/ios/Media.xcassets
-        PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
-    )
-
-
-    add_subdirectory(ios/networkextension)
-    add_dependencies(${PROJECT} networkextension)
-
-    set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-        "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
-    )
-
-    set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
-    target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_LIST_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
-
+    include(cmake/macos.cmake)
 endif()
 
 if(ANDROID)
@@ -522,11 +352,7 @@ if(ANDROID)
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
-
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
-    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
-endif()
+target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
@@ -560,6 +386,7 @@ if(WIN32)
         COMMAND_EXPAND_LISTS
     )
 endif()
-if(IOS)
-    include(cmake/ios-arch-fixup.cmake)
-endif()
+
+
+target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+qt_finalize_target(${PROJECT})

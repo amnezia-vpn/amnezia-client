@@ -3,9 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "macosdaemon.h"
-#include "leakdetector.h"
-#include "logger.h"
-#include "wgquickprocess.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -18,13 +15,16 @@
 #include <QTextStream>
 #include <QtGlobal>
 
+#include "leakdetector.h"
+#include "logger.h"
+
 namespace {
-Logger logger(LOG_MACOS, "MacOSDaemon");
+Logger logger("MacOSDaemon");
 MacOSDaemon* s_daemon = nullptr;
 }  // namespace
 
 MacOSDaemon::MacOSDaemon() : Daemon(nullptr) {
-  MVPN_COUNT_CTOR(MacOSDaemon);
+  MZ_COUNT_CTOR(MacOSDaemon);
 
   logger.debug() << "Daemon created";
 
@@ -37,7 +37,7 @@ MacOSDaemon::MacOSDaemon() : Daemon(nullptr) {
 }
 
 MacOSDaemon::~MacOSDaemon() {
-  MVPN_COUNT_DTOR(MacOSDaemon);
+  MZ_COUNT_DTOR(MacOSDaemon);
 
   logger.debug() << "Daemon released";
 
@@ -49,26 +49,4 @@ MacOSDaemon::~MacOSDaemon() {
 MacOSDaemon* MacOSDaemon::instance() {
   Q_ASSERT(s_daemon);
   return s_daemon;
-}
-
-QByteArray MacOSDaemon::getStatus() {
-  logger.debug() << "Status request";
-
-  bool connected = m_connections.contains(0);
-  QJsonObject obj;
-  obj.insert("type", "status");
-  obj.insert("connected", connected);
-
-  if (connected) {
-    const ConnectionState& state = m_connections.value(0).m_config;
-    WireguardUtils::peerStatus status =
-        m_wgutils->getPeerStatus(state.m_config.m_serverPublicKey);
-    obj.insert("serverIpv4Gateway", state.m_config.m_serverIpv4Gateway);
-    obj.insert("deviceIpv4Address", state.m_config.m_deviceIpv4Address);
-    obj.insert("date", state.m_date.toString());
-    obj.insert("txBytes", QJsonValue(status.txBytes));
-    obj.insert("rxBytes", QJsonValue(status.rxBytes));
-  }
-
-  return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }

@@ -5,12 +5,13 @@
 #ifndef MACOSROUTEMONITOR_H
 #define MACOSROUTEMONITOR_H
 
-#include "ipaddressrange.h"
-
 #include <QByteArray>
+#include <QHostAddress>
 #include <QList>
 #include <QObject>
 #include <QSocketNotifier>
+
+#include "ipaddress.h"
 
 struct if_msghdr;
 struct rt_msghdr;
@@ -23,16 +24,21 @@ class MacosRouteMonitor final : public QObject {
   MacosRouteMonitor(const QString& ifname, QObject* parent = nullptr);
   ~MacosRouteMonitor();
 
-  bool insertRoute(const IPAddressRange& prefix);
-  bool deleteRoute(const IPAddressRange& prefix);
+  bool insertRoute(const IPAddress& prefix);
+  bool deleteRoute(const IPAddress& prefix);
   int interfaceFlags() { return m_ifflags; }
 
+  bool addExclusionRoute(const QHostAddress& address);
+  bool deleteExclusionRoute(const QHostAddress& address);
+  void flushExclusionRoutes();
+
  private:
-  void handleRtmAdd(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleRtmDelete(const struct rt_msghdr* msg, const QByteArray& payload);
-  void handleRtmChange(const struct rt_msghdr* msg, const QByteArray& payload);
+  void handleRtmUpdate(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleIfaceInfo(const struct if_msghdr* msg, const QByteArray& payload);
-  bool rtmSendRoute(int action, const IPAddressRange& prefix);
+  bool rtmSendRoute(int action, const QHostAddress& prefix, unsigned int plen,
+                    unsigned int ifindex, const void* gateway);
+  bool rtmFetchRoutes(int family);
   static void rtmAppendAddr(struct rt_msghdr* rtm, size_t maxlen, int rtaddr,
                             const void* sa);
   static QList<QByteArray> parseAddrList(const QByteArray& data);
@@ -44,7 +50,14 @@ class MacosRouteMonitor final : public QObject {
   static QString addrToString(const struct sockaddr* sa);
   static QString addrToString(const QByteArray& data);
 
+  QList<QHostAddress> m_exclusionRoutes;
+  QByteArray m_defaultGatewayIpv4;
+  QByteArray m_defaultGatewayIpv6;
+  unsigned int m_defaultIfindexIpv4 = 0;
+  unsigned int m_defaultIfindexIpv6 = 0;
+
   QString m_ifname;
+  unsigned int m_ifindex = 0;
   int m_ifflags = 0;
   int m_rtsock = -1;
   int m_rtseq = 0;

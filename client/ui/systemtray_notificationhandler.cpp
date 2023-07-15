@@ -6,7 +6,7 @@
 #include "systemtray_notificationhandler.h"
 
 
-#ifdef Q_OS_MACOS
+#ifdef Q_OS_MAC
 #  include "platforms/macos/macosutils.h"
 #endif
 

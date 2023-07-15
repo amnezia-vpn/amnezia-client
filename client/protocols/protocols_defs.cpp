@@ -53,16 +53,6 @@ QString ProtocolProps::transportProtoToString(TransportProto proto, Proto p)
     QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
     QString protoKey = metaEnum.valueToKey(static_cast<int>(proto));
     return protoKey.toLower();
-
-//    if (p == Protocol::OpenVpn){
-//        return protoKey.toLower();
-//    }
-//    else if (p == Protocol::ShadowSocks) {
-//        return protoKey.toUpper();
-//    }
-//    else {
-//        return protoKey.toLower();
-//    }
 }
 
 
