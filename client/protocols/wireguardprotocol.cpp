@@ -98,6 +98,7 @@ void WireguardProtocol::stop()
     setConnectionState(VpnProtocol::Disconnected);
 }
 
+#ifdef Q_OS_MAC
 ErrorCode WireguardProtocol::startMzImpl()
 {
     m_impl->activate(m_rawConfig);
@@ -109,6 +110,7 @@ ErrorCode WireguardProtocol::stopMzImpl()
     m_impl->deactivate();
     return ErrorCode::NoError;
 }
+#endif
 
 void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configuration)
 {
@@ -166,8 +168,6 @@ ErrorCode WireguardProtocol::start()
         setLastError(ErrorCode::ConfigMissing);
         return lastError();
     }
-
-    WireguardProtocol::stop();
 
 #ifdef Q_OS_MAC
     return startMzImpl();
@@ -250,20 +250,7 @@ ErrorCode WireguardProtocol::start()
 
 void WireguardProtocol::updateVpnGateway(const QString &line)
 {
-//    // line looks like
-//    // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
 
-//    QStringList params = line.split(",");
-//    for (const QString &l : params) {
-//        if (l.contains("ifconfig")) {
-//            if (l.split(" ").size() == 3) {
-//                m_vpnLocalAddress = l.split(" ").at(1);
-//                m_vpnGateway = l.split(" ").at(2);
-
-//                qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
-//            }
-//        }
-//    }
 }
 
 QString WireguardProtocol::serviceName() const
@@ -278,7 +265,7 @@ QStringList WireguardProtocol::stopArgs()
 #elif defined Q_OS_LINUX
     return {"down", "wg99"};
 #else
-    return {"--remove", configPath()};
+    return {};
 #endif
 }
 
@@ -289,7 +276,7 @@ QStringList WireguardProtocol::startArgs()
 #elif defined Q_OS_LINUX
     return {"up", "wg99"};
 #else
-    return {"--add", configPath()};
+    return {};
 #endif
 }
 

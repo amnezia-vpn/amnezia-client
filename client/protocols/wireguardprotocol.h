@@ -23,8 +23,10 @@ public:
     ErrorCode start() override;
     void stop() override;
 
+#ifdef Q_OS_MAC
     ErrorCode startMzImpl();
     ErrorCode stopMzImpl();
+#endif
 
 private:
     QString configPath() const;
@@ -45,7 +47,9 @@ private:
 
     bool m_isConfigLoaded = false;
 
+#ifdef Q_OS_MAC
     QScopedPointer<ControllerImpl> m_impl;
+#endif
 };
 
 #endif // WIREGUARDPROTOCOL_H

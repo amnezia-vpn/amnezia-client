@@ -126,7 +126,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
 //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
-  json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toString().toInt());
+  json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
 
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
 //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
@@ -135,8 +135,8 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray jsAllowedIPAddesses;
 
   QJsonObject range_ipv4;
-  range_ipv4.insert("address", "8.8.8.8");
-  range_ipv4.insert("range", 32);
+  range_ipv4.insert("address", "0.0.0.0");
+  range_ipv4.insert("range", 0);
   range_ipv4.insert("isIpv6", false);
   jsAllowedIPAddesses.append(range_ipv4);
 
@@ -146,22 +146,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   range_ipv6.insert("isIpv6", true);
   jsAllowedIPAddesses.append(range_ipv6);
 
-
-//  for (const IPAddress& i : hop.m_allowedIPAddressRanges) {
-//    QJsonObject range;
-//    range.insert("address", QJsonValue(i.address().toString()));
-//    range.insert("range", QJsonValue((double)i.prefixLength()));
-//    range.insert("isIpv6",
-//                 QJsonValue(i.type() == QAbstractSocket::IPv6Protocol));
-//    jsAllowedIPAddesses.append(range);
-//  };
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
-//  QJsonArray jsExcludedAddresses;
-//  for (const auto& address : hop.m_excludedAddresses) {
-//    jsExcludedAddresses.append(QJsonValue(address));
-//  }
-//  json.insert("excludedAddresses", jsExcludedAddresses);
+
+    QJsonArray jsExcludedAddresses;
+    jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
+    json.insert("excludedAddresses", jsExcludedAddresses);
+
 
 //  QJsonArray splitTunnelApps;
 //  for (const auto& uri : hop.m_vpnDisabledApps) {
