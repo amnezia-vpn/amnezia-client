@@ -38,6 +38,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="launch.png" width="1024" height="1024"/>
+        <image name="Media.xcassets/AppIcon.appiconset/1024.png" width="1024" height="1024"/>
     </resources>
 </document>
