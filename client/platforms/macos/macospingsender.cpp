@@ -3,10 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "macospingsender.h"
-#include "leakdetector.h"
-#include "logger.h"
-
-#include <QSocketNotifier>
 
 #include <arpa/inet.h>
 #include <net/if.h>
@@ -14,19 +10,26 @@
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
+#include <sys/errno.h>
 #include <unistd.h>
+
+#include <QSocketNotifier>
+#include <QtEndian>
+
+#include "leakdetector.h"
+#include "logger.h"
 
 namespace {
 
-Logger logger({LOG_MACOS, LOG_NETWORKING}, "MacOSPingSender");
+Logger logger("MacOSPingSender");
 
 int identifier() { return (getpid() & 0xFFFF); }
 
 };  // namespace
 
-MacOSPingSender::MacOSPingSender(const QString& source, QObject* parent)
+MacOSPingSender::MacOSPingSender(const QHostAddress& source, QObject* parent)
     : PingSender(parent) {
-  MVPN_COUNT_CTOR(MacOSPingSender);
+  MZ_COUNT_CTOR(MacOSPingSender);
 
   if (getuid()) {
     m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
@@ -38,15 +41,15 @@ MacOSPingSender::MacOSPingSender(const QString& source, QObject* parent)
     return;
   }
 
+  quint32 ipv4addr = INADDR_ANY;
+  if (!source.isNull()) {
+    ipv4addr = source.toIPv4Address();
+  }
   struct sockaddr_in addr;
   bzero(&addr, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_len = sizeof(addr);
-
-  if (inet_aton(source.toLocal8Bit().constData(), &addr.sin_addr) == 0) {
-    logger.error() << "source address error";
-    return;
-  }
+  addr.sin_addr.s_addr = qToBigEndian<quint32>(ipv4addr);
 
   if (bind(m_socket, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
     logger.error() << "bind error:" << strerror(errno);
@@ -59,22 +62,19 @@ MacOSPingSender::MacOSPingSender(const QString& source, QObject* parent)
 }
 
 MacOSPingSender::~MacOSPingSender() {
-  MVPN_COUNT_DTOR(MacOSPingSender);
+  MZ_COUNT_DTOR(MacOSPingSender);
   if (m_socket >= 0) {
     close(m_socket);
   }
 }
 
-void MacOSPingSender::sendPing(const QString& dest, quint16 sequence) {
+void MacOSPingSender::sendPing(const QHostAddress& dest, quint16 sequence) {
+  quint32 ipv4dest = dest.toIPv4Address();
   struct sockaddr_in addr;
   bzero(&addr, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_len = sizeof(addr);
-
-  if (inet_aton(dest.toLocal8Bit().constData(), &addr.sin_addr) == 0) {
-    logger.error() << "DNS lookup failed";
-    return;
-  }
+  addr.sin_addr.s_addr = qToBigEndian<quint32>(ipv4dest);
 
   struct icmp packet;
   bzero(&packet, sizeof packet);
@@ -86,6 +86,7 @@ void MacOSPingSender::sendPing(const QString& dest, quint16 sequence) {
   if (sendto(m_socket, (char*)&packet, sizeof(packet), 0,
              (struct sockaddr*)&addr, sizeof(addr)) != sizeof(packet)) {
     logger.error() << "ping sending failed:" << strerror(errno);
+    emit criticalPingError();
     return;
   }
 }

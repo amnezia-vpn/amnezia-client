@@ -58,3 +58,6 @@
 [submodule "client/3rd/mbedtls"]
 	path = client/3rd/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "client/3rd/wireguard-go"]
+	path = client/3rd/wireguard-go
+	url = https://github.com/WireGuard/wireguard-go/

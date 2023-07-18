@@ -53,7 +53,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
     script.replace("\r", "");
 
-    qDebug() << "Run script";
+    qDebug() << "ServerController::Run script";
 
     QString totalLine;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
@@ -78,7 +78,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
             continue;
         }
 
-        qDebug().noquote() << "EXEC" << lineToExec;
+        qDebug().noquote() << lineToExec;
         Logger::appendSshLog("Run command:" + lineToExec);
 
         error = m_sshClient.executeCommand(lineToExec, cbReadStdOut, cbReadStdErr);
@@ -87,7 +87,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
     }
 
-    qDebug() << "ServerController::runScript finished\n";
+    qDebug().noquote() << "ServerController::runScript finished\n";
     return ErrorCode::NoError;
 }
 
@@ -194,11 +194,6 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
     };
 
     *errorCode = runScript(credentials, script, cbReadStdOut);
-
-    qDebug().noquote() << "Copy file from container stdout : \n" << stdOut;
-
-    qDebug().noquote() << "Copy file from container END : \n";
-
     return QByteArray::fromHex(stdOut.toUtf8());
 }
 
@@ -215,10 +210,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-    qDebug() << "remotePath" << remotePath;
-
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
-                                     "non_desc");
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -241,7 +233,6 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
                                            QJsonObject &config, bool isUpdate)
 {
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
-    // qDebug().noquote() << QJsonDocument(config).toJson();
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, container);
@@ -425,11 +416,6 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
                                         genVarsForScript(credentials, container, config)),
                             cbReadStdOut);
 
-    qDebug() << "cbReadStdOut: " << stdOut;
-
-    if (stdOut.contains("docker: Error response from daemon"))
-        return ErrorCode::ServerDockerFailedError;
-
     if (stdOut.contains("address already in use"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("is already in use by container"))
@@ -492,7 +478,6 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
-    //
 
     Vars vars;
 
@@ -635,10 +620,8 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
 {
     QString s = script;
     for (const QPair<QString, QString> &var : vars) {
-        // qDebug() << "Replacing" << var.first << var.second;
         s.replace(var.first, var.second);
     }
-    // qDebug().noquote() << script;
     return s;
 }
 

@@ -5,11 +5,11 @@
 #ifndef WIREGUARDUTILSMACOS_H
 #define WIREGUARDUTILSMACOS_H
 
-#include "daemon/wireguardutils.h"
-#include "macosroutemonitor.h"
-
 #include <QObject>
 #include <QProcess>
+
+#include "daemon/wireguardutils.h"
+#include "macosroutemonitor.h"
 
 class WireguardUtilsMacos final : public WireguardUtils {
   Q_OBJECT
@@ -26,11 +26,14 @@ class WireguardUtilsMacos final : public WireguardUtils {
   bool deleteInterface() override;
 
   bool updatePeer(const InterfaceConfig& config) override;
-  bool deletePeer(const QString& pubkey) override;
-  peerStatus getPeerStatus(const QString& pubkey) override;
+  bool deletePeer(const InterfaceConfig& config) override;
+  QList<PeerStatus> getPeerStatus() override;
 
-  bool updateRoutePrefix(const IPAddressRange& prefix, int hopindex) override;
-  bool deleteRoutePrefix(const IPAddressRange& prefix, int hopindex) override;
+  bool updateRoutePrefix(const IPAddress& prefix, int hopindex) override;
+  bool deleteRoutePrefix(const IPAddress& prefix, int hopindex) override;
+
+  bool addExclusionRoute(const QHostAddress& address) override;
+  bool deleteExclusionRoute(const QHostAddress& address) override;
 
  signals:
   void backendFailure();

@@ -161,7 +161,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     }
 #elif defined (Q_OS_MAC)
     switch (c) {
-    case DockerContainer::WireGuard: return false;
+    case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
     default: return true;
     }
@@ -176,7 +176,11 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     }
 
 #elif defined (Q_OS_LINUX)
-    return true;
+    switch (c) {
+    case DockerContainer::WireGuard: return true;
+    case DockerContainer::Ipsec: return false;
+    default: return true;
+    }
 
 #else
 return false;

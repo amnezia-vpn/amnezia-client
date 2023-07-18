@@ -8,10 +8,15 @@
 #include "utilities.h"
 
 #include "router.h"
+#include "logger.h"
 
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #endif
+
+namespace {
+Logger logger("MacOSDaemonServer");
+}
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_ipcServer(this)
@@ -34,6 +39,18 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
             m_serverNode.enableRemoting(&m_ipcServer);
         }
     });
+
+    // Init Mozilla Wireguard Daemon
+#ifdef Q_OS_MAC
+    if (!server.initialize()) {
+        logger.error() << "Failed to initialize the server";
+        return;
+    }
+
+    // Signal handling for a proper shutdown.
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
+                     []() { MacOSDaemon::instance()->deactivate(); });
+#endif
 }
 
 LocalServer::~LocalServer()

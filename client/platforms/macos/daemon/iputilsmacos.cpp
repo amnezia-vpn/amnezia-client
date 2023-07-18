@@ -3,13 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "iputilsmacos.h"
-#include "leakdetector.h"
-#include "logger.h"
-#include "macosdaemon.h"
-#include "daemon/wireguardutils.h"
-
-#include <QHostAddress>
-#include <QScopeGuard>
 
 #include <arpa/inet.h>
 #include <net/if.h>
@@ -19,33 +12,33 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <QHostAddress>
+#include <QScopeGuard>
+
+#include "daemon/wireguardutils.h"
+#include "leakdetector.h"
+#include "logger.h"
+#include "macosdaemon.h"
+
 constexpr uint32_t ETH_MTU = 1500;
 constexpr uint32_t WG_MTU_OVERHEAD = 80;
 
 namespace {
-Logger logger(LOG_MACOS, "IPUtilsMacos");
+Logger logger("IPUtilsMacos");
 }
 
 IPUtilsMacos::IPUtilsMacos(QObject* parent) : IPUtils(parent) {
-  MVPN_COUNT_CTOR(IPUtilsMacos);
+  MZ_COUNT_CTOR(IPUtilsMacos);
   logger.debug() << "IPUtilsMacos created.";
 }
 
 IPUtilsMacos::~IPUtilsMacos() {
-  MVPN_COUNT_DTOR(IPUtilsMacos);
+  MZ_COUNT_DTOR(IPUtilsMacos);
   logger.debug() << "IPUtilsMacos destroyed.";
 }
 
 bool IPUtilsMacos::addInterfaceIPs(const InterfaceConfig& config) {
-  if (!addIP4AddressToDevice(config)) {
-    return false;
-  }
-  if (config.m_ipv6Enabled) {
-    if (!addIP6AddressToDevice(config)) {
-      return false;
-    }
-  }
-  return true;
+  return addIP4AddressToDevice(config) && addIP6AddressToDevice(config);
 }
 
 bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
@@ -132,7 +125,7 @@ bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
   // Set ifr to interface
   int ret = ioctl(sockfd, SIOCAIFADDR, &ifr);
   if (ret) {
-    logger.error() << "Failed to set IPv4: " << deviceAddr
+    logger.error() << "Failed to set IPv4: " << logger.sensitive(deviceAddr)
                    << "error:" << strerror(errno);
     return false;
   }
@@ -172,7 +165,7 @@ bool IPUtilsMacos::addIP6AddressToDevice(const InterfaceConfig& config) {
   // Set ifr to interface
   int ret = ioctl(sockfd, SIOCAIFADDR_IN6, &ifr6);
   if (ret) {
-    logger.error() << "Failed to set IPv6: " << deviceAddr
+    logger.error() << "Failed to set IPv6: " << logger.sensitive(deviceAddr)
                    << "error:" << strerror(errno);
     return false;
   }

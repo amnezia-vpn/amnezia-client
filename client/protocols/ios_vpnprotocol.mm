@@ -547,7 +547,8 @@ void IOSVpnProtocol::launchWireguardTunnel(const QJsonObject &rawConfig)
 
 
 void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
-{   
+{
+    //TODO move to OpenVpnConfigurator
     QJsonObject ovpn = rawConfig["openvpn_config_data"].toObject();
 
     QString ovpnConfig = ovpn["config"].toString();
@@ -555,12 +556,17 @@ void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
     if(rawConfig["protocol"].toString() == "cloak"){
         QJsonObject cloak = rawConfig["cloak_config_data"].toObject();
         cloak["NumConn"] = 1;
-        cloak["RemoteHost"] = cloak["remote"].toString();
-        cloak["RemotePort"] = cloak["port"].toString();
+        if (cloak.contains("remote")) {
+            cloak["RemoteHost"] = cloak["remote"].toString();
+        }
+        if (cloak.contains("port")) {
+            cloak["RemotePort"] = cloak["port"].toString();
+        }
         
         cloak.remove("remote");
         cloak.remove("port");
-        
+        cloak.remove("transport_proto");
+
         // Convert JSONObject to JSONDocument
         QJsonObject jsonObject {};
         foreach(const QString& key, cloak.keys()) {

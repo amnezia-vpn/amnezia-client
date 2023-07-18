@@ -16,6 +16,7 @@
 #include "platforms/ios/QRCodeReaderBase.h"
 
 #include "ui/pages.h"
+#include "protocols/qml_register_protocols.h"
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
