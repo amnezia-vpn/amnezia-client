@@ -134,3 +134,8 @@ Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
 payeer.com: P2561305  
 ko-fi.com: [https://ko-fi.com/amnezia_vpn](https://ko-fi.com/amnezia_vpn)  
+
+
+## etc
+This project is tested with BrowserStack.
+We express our gratitude to [BrowserStack](https://www.browserstack.com) for supporting our project.
