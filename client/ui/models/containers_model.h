@@ -50,6 +50,7 @@ public slots:
     int getCurrentlyProcessedContainerIndex();
 
     QString getCurrentlyProcessedContainerName();
+    QJsonObject getCurrentlyProcessedContainerConfig();
 
     void removeAllContainers();
     void removeCurrentlyProcessedContainer();

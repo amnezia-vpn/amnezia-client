@@ -1,0 +1,280 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+import SortFilterProxyModel 0.2
+
+import PageEnum 1.0
+
+import "./"
+import "../Controls2"
+import "../Controls2/TextTypes"
+import "../Config"
+import "../Components"
+
+PageType {
+    id: root
+
+    //todo move to main?
+    Connections {
+        target: InstallController
+
+        function onInstallationErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+
+        function onUpdateContainerFinished() {
+            //todo change to notification
+            PageController.showErrorMessage(qsTr("Settings updated successfully"))
+        }
+    }
+
+    ColumnLayout {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        anchors.topMargin: 20
+
+        BackButtonType {
+        }
+    }
+
+    FlickableType {
+        id: fl
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        contentHeight: content.implicitHeight
+
+        Column {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+
+            ListView {
+                id: listview
+
+                width: parent.width
+                height: listview.contentItem.height
+
+                clip: true
+                interactive: false
+
+                model: SftpConfigModel
+
+                delegate: Item {
+                    implicitWidth: listview.width
+                    implicitHeight: col.implicitHeight
+
+                    ColumnLayout {
+                        id: col
+
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+
+                        spacing: 0
+
+                        HeaderType {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 16
+                            Layout.rightMargin: 16
+
+                            headerText: qsTr("SFTP settings")
+                        }
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 32
+
+                            text: qsTr("Host")
+                            descriptionText: ServersModel.getCurrentlyProcessedServerHostName()
+
+                            descriptionOnTop: true
+
+                            rightImageSource: "qrc:/images/controls/copy.svg"
+                            rightImageColor: "#D7D8DB"
+
+                            clickedFunction: function() {
+                                col.copyToClipBoard(descriptionText)
+                            }
+                        }
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("Port")
+                            descriptionText: port
+
+                            descriptionOnTop: true
+
+                            rightImageSource: "qrc:/images/controls/copy.svg"
+                            rightImageColor: "#D7D8DB"
+
+                            clickedFunction: function() {
+                                col.copyToClipBoard(descriptionText)
+                            }
+                        }
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("Login")
+                            descriptionText: username
+
+                            descriptionOnTop: true
+
+                            rightImageSource: "qrc:/images/controls/copy.svg"
+                            rightImageColor: "#D7D8DB"
+
+                            clickedFunction: function() {
+                                col.copyToClipBoard(descriptionText)
+                            }
+                        }
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("Password")
+                            descriptionText: password
+
+                            descriptionOnTop: true
+
+                            rightImageSource: "qrc:/images/controls/copy.svg"
+                            rightImageColor: "#D7D8DB"
+
+                            clickedFunction: function() {
+                                col.copyToClipBoard(descriptionText)
+                            }
+                        }
+
+                        TextEdit{
+                            id: clipboard
+                            visible: false
+                        }
+
+                        function copyToClipBoard(text) {
+                            clipboard.text = text
+                            clipboard.selectAll()
+                            clipboard.copy()
+                            clipboard.select(0, 0)
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 24
+                            Layout.bottomMargin: 24
+                            Layout.leftMargin: 16
+                            Layout.rightMargin: 16
+
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            disabledColor: "#878B91"
+                            textColor: "#D7D8DB"
+                            borderWidth: 1
+
+                            text: qsTr("Mount folder on device")
+
+                            onClicked: {
+                                PageController.showBusyIndicator(true)
+                                InstallController.mountSftpDrive(port, password, username)
+                                PageController.showBusyIndicator(false)
+                            }
+                        }
+
+                        ParagraphTextType {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 16
+                            Layout.rightMargin: 16
+
+                            readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
+                            readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
+
+                            readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
+                            readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
+
+                            onLinkActivated: Qt.openUrlExternally(link)
+                            textFormat: Text.RichText
+                            text: {
+                                var str = qsTr("In order to mount remote SFTP folder as local drive, perform following steps: <br>")
+                                if (Qt.platform.os === "windows") {
+                                    str += qsTr("<br>1. Install the latest version of ") + windowsFirstLink + "\n"
+                                    str += qsTr("<br>2. Install the latest version of ") + windowsSecondLink + "\n"
+                                } else if (Qt.platform.os === "osx") {
+                                    str += qsTr("<br>1. Install the latest version of ") + macosFirstLink + "\n"
+                                    str += qsTr("<br>2. Install the latest version of ") + macosSecondLink + "\n"
+                                } else if (Qt.platform.os === "linux") {
+                                    return ""
+                                } else return ""
+
+                                return str
+                            }
+                        }
+
+                        BasicButtonType {
+                            Layout.topMargin: 16
+                            Layout.bottomMargin: 16
+                            Layout.leftMargin: 8
+                            implicitHeight: 32
+
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            disabledColor: "#878B91"
+                            textColor: "#FBB26A"
+
+                            text: qsTr("Detailed instructions")
+
+                            onClicked: {
+//                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                            }
+                        }
+
+                        BasicButtonType {
+                            Layout.topMargin: 24
+                            Layout.bottomMargin: 16
+                            Layout.leftMargin: 8
+                            implicitHeight: 32
+
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            textColor: "#EB5757"
+
+                            text: qsTr("Remove SFTP and all data stored there")
+
+                            onClicked: {
+                                questionDrawer.headerText = qsTr("Some description")
+                                questionDrawer.yesButtonText = qsTr("Continue")
+                                questionDrawer.noButtonText = qsTr("Cancel")
+
+                                questionDrawer.yesButtonFunction = function() {
+                                    questionDrawer.visible = false
+                                    goToPage(PageEnum.PageDeinstalling)
+                                    ContainersModel.removeCurrentlyProcessedContainer()
+                                    closePage()
+                                    closePage() //todo auto close to deinstall page?
+                                }
+                                questionDrawer.noButtonFunction = function() {
+                                    questionDrawer.visible = false
+                                }
+                                questionDrawer.visible = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        QuestionDrawer {
+            id: questionDrawer
+        }
+    }
+}

@@ -2,6 +2,7 @@
 #define INSTALLCONTROLLER_H
 
 #include <QObject>
+#include <QProcess>
 
 #include "containers/containers_defs.h"
 #include "core/defs.h"
@@ -28,6 +29,8 @@ public slots:
 
     QRegularExpression ipAddressPortRegExp();
 
+    void mountSftpDrive(const QString &port, const QString &password, const QString &username);
+
 signals:
     void installContainerFinished(bool isInstalledContainerFound);
     void installServerFinished(bool isInstalledContainerFound);
@@ -52,6 +55,8 @@ private:
     ServerCredentials m_currentlyInstalledServerCredentials;
 
     bool m_shouldCreateServer;
+
+    QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
 };
 
 #endif // INSTALLCONTROLLER_H

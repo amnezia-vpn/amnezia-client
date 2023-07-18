@@ -9,5 +9,5 @@ Text {
     font.weight: 400
     font.family: "PT Root UI VF"
 
-    wrapMode: Text.WordWrap
+    wrapMode: Text.Wrap
 }

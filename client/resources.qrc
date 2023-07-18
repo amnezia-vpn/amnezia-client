@@ -275,5 +275,8 @@
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
+        <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
+        <file>images/controls/copy.svg</file>
+        <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
     </qresource>
 </RCC>

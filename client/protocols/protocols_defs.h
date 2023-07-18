@@ -65,6 +65,7 @@ namespace amnezia
         constexpr char wireguard[] = "wireguard";
         constexpr char shadowsocks[] = "shadowsocks";
         constexpr char cloak[] = "cloak";
+        constexpr char sftp[] = "sftp";
 
     }
 

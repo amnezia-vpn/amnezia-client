@@ -10,5 +10,5 @@ Text {
     font.family: "PT Root UI VF"
     font.letterSpacing: 0.02
 
-    wrapMode: Text.WordWrap
+    wrapMode: Text.Wrap
 }

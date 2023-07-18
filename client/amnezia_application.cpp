@@ -267,6 +267,9 @@ void AmneziaApplication::initModels()
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));
     m_engine->rootContext()->setContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel.get());
 #endif
+
+    m_sftpConfigModel.reset(new SftpConfigModel(this));
+    m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
 }
 
 void AmneziaApplication::initControllers()

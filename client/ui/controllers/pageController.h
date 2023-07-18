@@ -29,6 +29,9 @@ namespace PageLoader
         PageSettingsAbout,
         PageSettingsLogging,
 
+        PageServiceSftpSettings,
+        PageServiceTorWebsiteSettings,
+
         PageSetupWizardStart,
         PageSetupWizardCredentials,
         PageSetupWizardProtocols,

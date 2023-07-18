@@ -16,6 +16,10 @@ Item {
     property string leftImageSource
 
     property string textColor: "#d7d8db"
+    property string descriptionColor: "#878B91"
+    property string rightImageColor: "#878B91"
+
+    property bool descriptionOnTop: false
 
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
@@ -53,25 +57,40 @@ Item {
         }
 
         ColumnLayout {
+            property real textLineHeight: 21.6
+            property real descriptionTextLineHeight: 16
+
+            property int textPixelSize: 18
+            property int descriptionTextSize: 13
+
             ListItemTitleType {
                 text: root.text
-                color: root.textColor
+                color: root.descriptionOnTop ? root.descriptionColor : root.textColor
 
                 Layout.fillWidth: true
+
+                lineHeight: root.descriptionOnTop ? parent.descriptionTextLineHeight : parent.textLineHeight
+                font.pixelSize: root.descriptionOnTop ? parent.descriptionTextSize : parent.textPixelSize
+                font.letterSpacing: root.descriptionOnTop ? 0.02 : 0
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
             }
 
+
             CaptionTextType {
                 id: description
 
-                color: "#878B91"
+                color: root.descriptionOnTop ? root.textColor : root.descriptionColor
                 text: root.descriptionText
 
                 visible: root.descriptionText !== ""
 
                 Layout.fillWidth: true
+
+                lineHeight: root.descriptionOnTop ? parent.textLineHeight : parent.descriptionTextLineHeight
+                font.pixelSize: root.descriptionOnTop ? parent.textPixelSize : parent.descriptionTextSize
+                font.letterSpacing: root.descriptionOnTop ? 0 : 0.02
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
@@ -83,6 +102,7 @@ Item {
 
             hoverEnabled: false
             image: rightImageSource
+            imageColor: rightImageColor
             visible: rightImageSource ? true : false
 
             Layout.alignment: Qt.AlignRight

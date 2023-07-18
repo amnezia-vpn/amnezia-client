@@ -106,6 +106,11 @@ int ServersModel::getCurrentlyProcessedServerIndex()
     return m_currentlyProcessedServerIndex;
 }
 
+QString ServersModel::getCurrentlyProcessedServerHostName()
+{
+    return qvariant_cast<QString>(data(m_currentlyProcessedServerIndex, HostNameRole));
+}
+
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currentlyProcessedServerIndex;

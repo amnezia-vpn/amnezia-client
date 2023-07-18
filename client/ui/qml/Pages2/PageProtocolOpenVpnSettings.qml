@@ -413,6 +413,8 @@ PageType {
 
                         BasicButtonType {
                             Layout.topMargin: 24
+                            Layout.leftMargin: -8
+                            implicitHeight: 32
 
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)

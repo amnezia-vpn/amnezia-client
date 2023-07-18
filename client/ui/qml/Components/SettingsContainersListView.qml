@@ -92,6 +92,7 @@ ListView {
                 if (isInstalled) {
                     var containerIndex = root.model.mapToSource(index)
                     ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
+
                     if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
                         ProtocolsModel.updateModel(config)
                         goToPage(PageEnum.PageProtocolRaw)
@@ -114,6 +115,16 @@ ListView {
                         goToPage(PageEnum.PageProtocolIKev2Settings)
                         break
                     }
+                    case ContainerEnum.Sftp: {
+                        SftpConfigModel.updateModel(config)
+                        goToPage(PageEnum.PageServiceSftpSettings)
+                        break
+                    }
+                    case ContainerEnum.TorWebSite: {
+                        goToPage(PageEnum.PageServiceTorWebsiteSettings)
+                        break
+                    }
+
                     default: {
                         if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
                             ProtocolsModel.updateModel(config)

@@ -1,6 +1,8 @@
 #include "installController.h"
 
+#include <QDesktopServices>
 #include <QJsonObject>
+#include <QStandardPaths>
 
 #include "core/errorstrings.h"
 #include "core/servercontroller.h"
@@ -213,4 +215,81 @@ void InstallController::setCurrentlyInstalledServerCredentials(const QString &ho
 void InstallController::setShouldCreateServer(bool shouldCreateServer)
 {
     m_shouldCreateServer = shouldCreateServer;
+}
+
+void InstallController::mountSftpDrive(const QString &port, const QString &password, const QString &username)
+{
+    QString mountPath;
+    QString cmd;
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials serverCredentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    QString hostname = serverCredentials.hostName;
+
+#ifdef Q_OS_WINDOWS
+    mountPath = getNextDriverLetter() + ":";
+    //    QString cmd = QString("net use \\\\sshfs\\%1@x.x.x.x!%2 /USER:%1 %3")
+    //            .arg(labelTftpUserNameText())
+    //            .arg(labelTftpPortText())
+    //            .arg(labelTftpPasswordText());
+
+    cmd = "C:\\Program Files\\SSHFS-Win\\bin\\sshfs.exe";
+#elif defined AMNEZIA_DESKTOP
+    mountPath =
+            QString("%1/sftp:%2:%3").arg(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), hostname, port);
+    QDir dir(mountPath);
+    if (!dir.exists()) {
+        dir.mkpath(mountPath);
+    }
+
+    cmd = "/usr/local/bin/sshfs";
+#endif
+
+#ifdef AMNEZIA_DESKTOP
+    QSharedPointer<QProcess> process;
+    process.reset(new QProcess());
+    m_sftpMountProcesses.append(process);
+    process->setProcessChannelMode(QProcess::MergedChannels);
+
+    connect(process.get(), &QProcess::readyRead, this, [this, process, mountPath]() {
+        QString s = process->readAll();
+        if (s.contains("The service sshfs has been started")) {
+            QDesktopServices::openUrl(QUrl("file:///" + mountPath));
+        }
+        qDebug() << s;
+    });
+
+    process->setProgram(cmd);
+
+    QString args = QString("%1@%2:/ %3 "
+                           "-o port=%4 "
+                           "-f "
+                           "-o reconnect "
+                           "-o rellinks "
+                           "-o fstypename=SSHFS "
+                           "-o ssh_command=/usr/bin/ssh.exe "
+                           "-o UserKnownHostsFile=/dev/null "
+                           "-o StrictHostKeyChecking=no "
+                           "-o password_stdin")
+                           .arg(username, hostname, mountPath, port);
+
+    //    args.replace("\n", " ");
+    //    args.replace("\r", " ");
+    // #ifndef Q_OS_WIN
+    //    args.replace("reconnect-orellinks", "");
+    // #endif
+    process->setArguments(args.split(" ", Qt::SkipEmptyParts));
+    process->start();
+    process->waitForStarted(50);
+    if (process->state() != QProcess::Running) {
+        qDebug() << "onPushButtonSftpMountDriveClicked process not started";
+        qDebug() << args;
+    } else {
+        process->write((password + "\n").toUtf8());
+    }
+
+    // qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
+
+#endif
 }

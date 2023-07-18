@@ -31,6 +31,7 @@
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/services/sftpConfigModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -90,6 +91,8 @@ private:
 #ifdef Q_OS_WINDOWS
     QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
 #endif
+
+    QScopedPointer<SftpConfigModel> m_sftpConfigModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QScopedPointer<NotificationHandler> m_notificationHandler;

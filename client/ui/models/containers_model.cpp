@@ -118,6 +118,11 @@ QString ContainersModel::getCurrentlyProcessedContainerName()
     return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_currentlyProcessedContainerIndex));
 }
 
+QJsonObject ContainersModel::getCurrentlyProcessedContainerConfig()
+{
+    return qvariant_cast<QJsonObject>(data(index(m_currentlyProcessedContainerIndex), ConfigRole));
+}
+
 void ContainersModel::removeAllContainers()
 {
 

@@ -45,6 +45,8 @@ public slots:
     void setCurrentlyProcessedServerIndex(const int index);
     int getCurrentlyProcessedServerIndex();
 
+    QString getCurrentlyProcessedServerHostName();
+
     void addServer(const QJsonObject &server);
     void removeServer();
 
