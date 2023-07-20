@@ -40,12 +40,6 @@
 [submodule "client/android/cpp/lz4"]
 	path = client/android/cpp/lz4
 	url = https://github.com/lz4/lz4.git
-[submodule "client/android/cpp/mbedtls"]
-	path = client/android/cpp/mbedtls
-	url = https://github.com/ARMmbed/mbedtls.git
-[submodule "client/android/cpp/openvpn"]
-	path = client/android/cpp/openvpn
-	url = https://github.com/schwabe/openvpn.git
 [submodule "client/android/cpp/openssl"]
 	path = client/android/cpp/openssl
 	url = https://github.com/schwabe/platform_external_openssl.git
