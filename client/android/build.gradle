@@ -134,25 +134,11 @@ android {
         noCompress 'rcc'
     }
 
-	signingConfigs {
-
-	   release {
-	       storeFile file(RELEASE_STORE_FILE)
-	       storePassword RELEASE_STORE_PASSWORD
-	       keyAlias RELEASE_KEY_ALIAS
-	       keyPassword RELEASE_KEY_PASSWORD
-
-	       // Optional, specify signing versions used
-	       v1SigningEnabled true
-	       v2SigningEnabled true
-	   }
-	}
-
     defaultConfig {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 34
-        versionCode 25 // Change to a higher number
+        versionCode 26 // Change to a higher number
         versionName "3.0.8" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
@@ -160,33 +146,6 @@ android {
         ]
     }
 
-   buildTypes {
-       release {
-           // That would enable treeshaking and remove java code that is just called from qt
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   version cmakeMinVersion
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
-                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
-                                "-DANDROID_PLATFORM=${minSdkVer}"
-               }
-           }
-       }
-       debug {
-           //applicationIdSuffix ".debug"
-           //versionNameSuffix "-debug"
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   version cmakeMinVersion
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
-                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
-                                "-DANDROID_PLATFORM=${minSdkVer}"
-               }
-           }
-       }
-   }
 
 }
 
