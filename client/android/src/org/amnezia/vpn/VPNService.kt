@@ -168,7 +168,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onDestroy() {
-      //  turnOff()
+        turnOff()
 
         super.onDestroy()
     }
