@@ -85,9 +85,6 @@ else(IOS)
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libcrypto.a")
     endif()
 
-    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-         DESTINATION ${OPENSSL_LIBRARIES_DIR})
-
     set(OPENSSL_USE_STATIC_LIBS TRUE)
     find_package(OpenSSL REQUIRED)
     set(LIBS ${LIBS}
