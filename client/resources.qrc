@@ -194,7 +194,6 @@
         <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
         <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
         <file>ui/qml/Controls2/SwitcherType.qml</file>
-        <file>ui/qml/Pages2/PageTest.qml</file>
         <file>ui/qml/Controls2/TabButtonType.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardProtocolSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardInstalling.qml</file>
@@ -278,5 +277,6 @@
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
         <file>images/controls/copy.svg</file>
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
     </qresource>
 </RCC>

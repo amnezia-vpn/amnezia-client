@@ -293,6 +293,7 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.h
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/authResultReceiver.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.h
     )
 
@@ -301,6 +302,7 @@ if(ANDROID)
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/android_notificationhandler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidutils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/android/androidvpnactivity.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/android/authResultReceiver.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/android_vpnprotocol.cpp
     )
 endif()

@@ -18,10 +18,9 @@ Window  {
 
     color: "#0E0E11"
 
-    // todo
     onClosing: function() {
         console.debug("QML onClosing signal")
-        UiLogic.onCloseWindow()
+        PageController.closeWindow()
     }
 
     title: "AmneziaVPN"
@@ -36,6 +35,11 @@ Window  {
             var pagePath = PageController.getInitialPage()
             rootStackView.push(pagePath, { "objectName" : pagePath })
         }
+
+        Keys.onPressed: function(event) {
+            PageController.keyPressEvent(event.key)
+            event.accepted = true
+        }
     }
 
     Connections {
@@ -49,10 +53,14 @@ Window  {
             rootStackView.replace(pagePath, { "objectName" : pagePath })
         }
 
-        function onRaise() {
+        function onRaiseMainWindow() {
             root.show()
             root.raise()
             root.requestActivate()
+        }
+
+        function onHideMainWindow() {
+            root.hide()
         }
     }
 }

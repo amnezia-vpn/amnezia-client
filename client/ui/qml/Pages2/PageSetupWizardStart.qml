@@ -20,6 +20,10 @@ PageType {
             popupErrorMessage.popupErrorMessageText = errorMessage
             popupErrorMessage.open()
         }
+
+        function onGoToPageViewConfig() {
+            goToPage(PageEnum.PageSetupWizardViewConfig)
+        }
     }
 
     FlickableType {

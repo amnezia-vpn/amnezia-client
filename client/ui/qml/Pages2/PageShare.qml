@@ -18,7 +18,7 @@ PageType {
 
     enum ConfigType {
         AmneziaConnection,
-        AmenziaFullAccess,
+        AmneziaFullAccess,
         OpenVpn,
         WireGuard
     }
@@ -33,7 +33,14 @@ PageType {
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(); break;
-            case PageShare.ConfigType.AmenziaFullAccess: ExportController.generateFullAccessConfig(); break;
+            case PageShare.ConfigType.AmneziaFullAccess: {
+                if (Qt.platform.os === "android") {
+                    ExportController.generateFullAccessConfigAndroid();
+                } else {
+                    ExportController.generateFullAccessConfig();
+                }
+                break;
+            }
             case PageShare.ConfigType.OpenVpn: ExportController.generateOpenVpnConfig(); break;
             case PageShare.ConfigType.WireGuard: ExportController.generateWireGuardConfig(); break;
             }
@@ -48,6 +55,8 @@ PageType {
         }
     }
 
+    property string fullConfigServerSelectorText
+    property string connectionServerSelectorText
     property bool showContent: false
     property bool shareButtonEnabled: false
     property list<QtObject> connectionTypesModel: [
@@ -118,6 +127,7 @@ PageType {
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
+                            serverSelector.text = root.connectionServerSelectorText
                         }
                     }
 
@@ -129,6 +139,7 @@ PageType {
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
+                            serverSelector.text = root.fullConfigServerSelectorText
                         }
                     }
                 }
@@ -176,14 +187,24 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
-                        serverSelector.text = selectedText
-                        ServersModel.currentlyProcessedIndex = currentIndex
-                        protocolSelector.visible = true
-                        root.shareButtonEnabled = false
+                        handler()
+
+                        if (accessTypeSelector.currentIndex === 0) {
+                            protocolSelector.visible = true
+                            root.shareButtonEnabled = false
+                        } else {
+                            serverSelector.menuVisible = false
+                        }
                     }
 
                     Component.onCompleted: {
+                        handler()
+                    }
+
+                    function handler() {
                         serverSelector.text = selectedText
+                        root.fullConfigServerSelectorText = selectedText
+                        root.connectionServerSelectorText = selectedText
                         ServersModel.currentlyProcessedIndex = currentIndex
                     }
                 }
@@ -260,7 +281,9 @@ PageType {
                                 }
 
                                 Component.onCompleted: {
-                                    handler()
+                                    if (accessTypeSelector.currentIndex === 0) {
+                                        handler()
+                                    }
                                 }
 
                                 function handler() {
@@ -272,6 +295,8 @@ PageType {
                                     }
 
                                     serverSelector.text += ", " + selectedText
+                                    root.connectionServerSelectorText = serverSelector.text
+
                                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
                                     ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))

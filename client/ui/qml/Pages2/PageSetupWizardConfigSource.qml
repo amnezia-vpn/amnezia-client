@@ -61,16 +61,18 @@ PageType {
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
-                    onClicked: fileDialog.open()
+//                    onClicked: fileDialog.open()
+                    ImportController.extractConfigFromFile()
+                    goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
 
-                FileDialog {
-                    id: fileDialog
-                    onAccepted: {
-                        ImportController.extractConfigFromFile(selectedFile)
-                        goToPage(PageEnum.PageSetupWizardViewConfig)
-                    }
-                }
+//                FileDialog {
+//                    id: fileDialog
+//                    onAccepted: {
+//                        ImportController.extractConfigFromFile(selectedFile)
+//                        goToPage(PageEnum.PageSetupWizardViewConfig)
+//                    }
+//                }
             }
 
             DividerType {}
@@ -84,6 +86,8 @@ PageType {
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
 
                 clickedFunction: function() {
+                    ImportController.extractConfigFromQr()
+//                    goToPage(PageEnum.PageSetupWizardQrReader)
                 }
             }
 

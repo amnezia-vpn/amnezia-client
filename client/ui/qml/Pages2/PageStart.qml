@@ -25,6 +25,11 @@ PageType {
             tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageSettings))
         }
 
+        function onGoToPageViewConfig() {
+            var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
+            tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+        }
+
         function onShowErrorMessage(errorMessage) {
             popupErrorMessage.popupErrorMessageText = errorMessage
             popupErrorMessage.open()
@@ -34,6 +39,13 @@ PageType {
             busyIndicator.visible = visible
             tabBarStackView.enabled = !visible
             tabBar.enabled = !visible
+        }
+
+        function onClosePage() {
+            if (tabBarStackView.depth <= 1) {
+                return
+            }
+            tabBarStackView.pop()
         }
     }
 

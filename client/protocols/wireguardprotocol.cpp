@@ -5,27 +5,28 @@
 #include <QThread>
 
 #include "logger.h"
-#include "wireguardprotocol.h"
 #include "utilities.h"
+#include "wireguardprotocol.h"
 
 #include "mozilla/localsocketcontroller.h"
 
-WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* parent) : VpnProtocol(configuration, parent)
+WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *parent)
+    : VpnProtocol(configuration, parent)
 {
     m_configFile.setFileName(QDir::tempPath() + QDir::separator() + serviceName() + ".conf");
     writeWireguardConfiguration(configuration);
 
     // MZ
 #if defined(MZ_LINUX)
-    //m_impl.reset(new LinuxController());
+    // m_impl.reset(new LinuxController());
 #elif defined(MZ_MACOS) // || defined(MZ_WINDOWS)
     m_impl.reset(new LocalSocketController());
-    connect(m_impl.get(), &ControllerImpl::connected, this, [this](const QString& pubkey, const QDateTime& connectionTimestamp) {
-        emit connectionStateChanged(VpnProtocol::Connected);
-    });
-    connect(m_impl.get(), &ControllerImpl::disconnected, this, [this](){
-        emit connectionStateChanged(VpnProtocol::Disconnected);
-    });
+    connect(m_impl.get(), &ControllerImpl::connected, this,
+            [this](const QString &pubkey, const QDateTime &connectionTimestamp) {
+                emit connectionStateChanged(Vpn::ConnectionState::Connected);
+            });
+    connect(m_impl.get(), &ControllerImpl::disconnected, this,
+            [this]() { emit connectionStateChanged(Vpn::ConnectionState::Disconnected); });
     m_impl->initialize(nullptr, nullptr);
 #endif
 }
@@ -74,9 +75,10 @@ void WireguardProtocol::stop()
         setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
-    connect(m_wireguardStopProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
-        qDebug() << "WireguardProtocol::WireguardProtocol Stop stateChanged" << newState;
-    });
+    connect(m_wireguardStopProcess.data(), &PrivilegedProcess::stateChanged, this,
+            [this](QProcess::ProcessState newState) {
+                qDebug() << "WireguardProtocol::WireguardProtocol Stop stateChanged" << newState;
+            });
 
 #ifdef Q_OS_LINUX
     if (IpcClient::Interface()) {
@@ -143,8 +145,8 @@ void WireguardProtocol::writeWireguardConfiguration(const QJsonObject &configura
     m_isConfigLoaded = true;
 
     qDebug().noquote() << QString("Set config data") << configPath();
-    qDebug().noquote() << QString("Set config data") << configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toString().toUtf8();
-
+    qDebug().noquote() << QString("Set config data")
+                       << configuration.value(ProtocolProps::key_proto_config_data(Proto::WireGuard)).toString().toUtf8();
 }
 
 QString WireguardProtocol::configPath() const
@@ -156,7 +158,8 @@ void WireguardProtocol::updateRouteGateway(QString line)
 {
     // TODO: fix for macos
     line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
-    if (!line.contains("/")) return;
+    if (!line.contains("/"))
+        return;
     m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
     m_routeGateway.replace(" ", "");
     qDebug() << "Set VPN route gateway" << m_routeGateway;
@@ -216,13 +219,13 @@ ErrorCode WireguardProtocol::start()
         setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
-    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::stateChanged, this, [this](QProcess::ProcessState newState) {
-        qDebug() << "WireguardProtocol::WireguardProtocol stateChanged" << newState;
-    });
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::stateChanged, this,
+            [this](QProcess::ProcessState newState) {
+                qDebug() << "WireguardProtocol::WireguardProtocol stateChanged" << newState;
+            });
 
-    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this, [this]() {
-        setConnectionState(Vpn::ConnectionState::Connected);
-    });
+    connect(m_wireguardStartProcess.data(), &PrivilegedProcess::finished, this,
+            [this]() { setConnectionState(Vpn::ConnectionState::Connected); });
 
     connect(m_wireguardStartProcess.data(), &PrivilegedProcess::readyRead, this, [this]() {
         QRemoteObjectPendingReply<QByteArray> reply = m_wireguardStartProcess->readAll();
@@ -250,7 +253,6 @@ ErrorCode WireguardProtocol::start()
 
 void WireguardProtocol::updateVpnGateway(const QString &line)
 {
-
 }
 
 QString WireguardProtocol::serviceName() const
@@ -261,9 +263,9 @@ QString WireguardProtocol::serviceName() const
 QStringList WireguardProtocol::stopArgs()
 {
 #ifdef Q_OS_WIN
-    return {"--remove", configPath()};
+    return { "--remove", configPath() };
 #elif defined Q_OS_LINUX
-    return {"down", "wg99"};
+    return { "down", "wg99" };
 #else
     return {};
 #endif
@@ -272,11 +274,10 @@ QStringList WireguardProtocol::stopArgs()
 QStringList WireguardProtocol::startArgs()
 {
 #ifdef Q_OS_WIN
-    return {"--add", configPath()};
+    return { "--add", configPath() };
 #elif defined Q_OS_LINUX
-    return {"up", "wg99"};
+    return { "up", "wg99" };
 #else
     return {};
 #endif
 }
-

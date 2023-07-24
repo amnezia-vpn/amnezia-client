@@ -2,8 +2,15 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QStandardPaths>
 
 #include "core/errorstrings.h"
+#ifdef Q_OS_ANDROID
+    #include "../../platforms/android/android_controller.h"
+    #include "../../platforms/android/androidutils.h"
+    #include <QJniObject>
+#endif
+#include "utilities.h"
 
 namespace
 {
@@ -41,24 +48,42 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
+#ifdef Q_OS_ANDROID
+    // Set security screen for Android app
+    AndroidUtils::runOnAndroidThreadSync([]() {
+        QJniObject activity = AndroidUtils::getActivity();
+        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (window.isValid()) {
+            const int FLAG_SECURE = 8192;
+            window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
+        }
+    });
+#endif
 }
 
-void ImportController::extractConfigFromFile(const QUrl &fileUrl)
+void ImportController::extractConfigFromFile()
 {
-    QFile file(fileUrl.toLocalFile());
+    QString fileName = Utils::getFileName(Q_NULLPTR, tr("Open config file"),
+                                          QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                          "*.vpn *.ovpn *.conf");
+    QFile file(fileName);
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();
 
-        auto configFormat = checkConfigFormat(data);
-        if (configFormat == ConfigTypes::OpenVpn) {
-            m_config = extractOpenVpnConfig(data);
-        } else if (configFormat == ConfigTypes::WireGuard) {
-            m_config = extractWireGuardConfig(data);
-        } else {
-            m_config = extractAmneziaConfig(data);
-        }
-
+        extractConfigFromData(data);
         m_configFileName = QFileInfo(file.fileName()).fileName();
+    }
+}
+
+void ImportController::extractConfigFromData(QString &data)
+{
+    auto configFormat = checkConfigFormat(data);
+    if (configFormat == ConfigTypes::OpenVpn) {
+        m_config = extractOpenVpnConfig(data);
+    } else if (configFormat == ConfigTypes::WireGuard) {
+        m_config = extractWireGuardConfig(data);
+    } else {
+        m_config = extractAmneziaConfig(data);
     }
 }
 
@@ -66,6 +91,13 @@ void ImportController::extractConfigFromCode(QString code)
 {
     m_config = extractAmneziaConfig(code);
     m_configFileName = "";
+}
+
+void ImportController::extractConfigFromQr()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->startQrReaderActivity();
+#endif
 }
 
 QString ImportController::getConfig()

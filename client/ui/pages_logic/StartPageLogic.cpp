@@ -1,68 +1,69 @@
 #include "StartPageLogic.h"
 #include "ViewConfigLogic.h"
 
-#include "core/errorstrings.h"
+#include "../uilogic.h"
 #include "configurators/ssh_configurator.h"
 #include "configurators/vpn_configurator.h"
-#include "../uilogic.h"
-#include "utilities.h"
+#include "core/errorstrings.h"
 #include "core/servercontroller.h"
+#include "utilities.h"
 
+#include <QEventLoop>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QEventLoop>
 
 #ifdef Q_OS_ANDROID
-#include <QJniObject>
-#include "../../platforms/android/androidutils.h"
-#include "../../platforms/android/android_controller.h"
+    #include "../../platforms/android/android_controller.h"
+    #include "../../platforms/android/androidutils.h"
+    #include <QJniObject>
 #endif
 
-namespace {
-enum class ConfigTypes {
-    Amnezia,
-    OpenVpn,
-    WireGuard
-};
-
-ConfigTypes checkConfigFormat(const QString &config)
+namespace
 {
-    const QString openVpnConfigPatternCli = "client";
-    const QString openVpnConfigPatternProto1 = "proto tcp";
-    const QString openVpnConfigPatternProto2 = "proto udp";
-    const QString openVpnConfigPatternDriver1 = "dev tun";
-    const QString openVpnConfigPatternDriver2 = "dev tap";
+    enum class ConfigTypes {
+        Amnezia,
+        OpenVpn,
+        WireGuard
+    };
 
-    const QString wireguardConfigPatternSectionInterface = "[Interface]";
-    const QString wireguardConfigPatternSectionPeer = "[Peer]";
+    ConfigTypes checkConfigFormat(const QString &config)
+    {
+        const QString openVpnConfigPatternCli = "client";
+        const QString openVpnConfigPatternProto1 = "proto tcp";
+        const QString openVpnConfigPatternProto2 = "proto udp";
+        const QString openVpnConfigPatternDriver1 = "dev tun";
+        const QString openVpnConfigPatternDriver2 = "dev tap";
 
-    if (config.contains(openVpnConfigPatternCli) &&
-            (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2)) &&
-            (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
-        return ConfigTypes::OpenVpn;
-    } else if (config.contains(wireguardConfigPatternSectionInterface) &&
-               config.contains(wireguardConfigPatternSectionPeer))
-        return ConfigTypes::WireGuard;
-    return ConfigTypes::Amnezia;
+        const QString wireguardConfigPatternSectionInterface = "[Interface]";
+        const QString wireguardConfigPatternSectionPeer = "[Peer]";
+
+        if (config.contains(openVpnConfigPatternCli)
+            && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
+            && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+            return ConfigTypes::OpenVpn;
+        } else if (config.contains(wireguardConfigPatternSectionInterface)
+                   && config.contains(wireguardConfigPatternSectionPeer))
+            return ConfigTypes::WireGuard;
+        return ConfigTypes::Amnezia;
+    }
+
 }
 
-}
-
-StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
-    m_pushButtonConnectEnabled{true},
-    m_pushButtonConnectText{tr("Connect")},
-    m_pushButtonConnectKeyChecked{false},
-    m_labelWaitInfoVisible{true},
-    m_pushButtonBackFromStartVisible{true},
-    m_ipAddressPortRegex{Utils::ipAddressPortRegExp()}
+StartPageLogic::StartPageLogic(UiLogic *logic, QObject *parent)
+    : PageLogicBase(logic, parent),
+      m_pushButtonConnectEnabled { true },
+      m_pushButtonConnectText { tr("Connect") },
+      m_pushButtonConnectKeyChecked { false },
+      m_labelWaitInfoVisible { true },
+      m_pushButtonBackFromStartVisible { true },
+      m_ipAddressPortRegex { Utils::ipAddressPortRegExp() }
 {
 #ifdef Q_OS_ANDROID
     // Set security screen for Android app
     AndroidUtils::runOnAndroidThreadSync([]() {
         QJniObject activity = AndroidUtils::getActivity();
         QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        if (window.isValid()){
+        if (window.isValid()) {
             const int FLAG_SECURE = 8192;
             window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
         }
@@ -89,17 +90,13 @@ void StartPageLogic::onUpdatePage()
 
 void StartPageLogic::onPushButtonConnect()
 {
-    if (pushButtonConnectKeyChecked()){
-        if (lineEditIpText().isEmpty() ||
-                lineEditLoginText().isEmpty() ||
-                textEditSshKeyText().isEmpty() ) {
+    if (pushButtonConnectKeyChecked()) {
+        if (lineEditIpText().isEmpty() || lineEditLoginText().isEmpty() || textEditSshKeyText().isEmpty()) {
             set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
     } else {
-        if (lineEditIpText().isEmpty() ||
-                lineEditLoginText().isEmpty() ||
-                lineEditPasswordText().isEmpty() ) {
+        if (lineEditIpText().isEmpty() || lineEditLoginText().isEmpty() || lineEditPasswordText().isEmpty()) {
             set_labelWaitInfoText(tr("Please fill in all fields"));
             return;
         }
@@ -174,7 +171,8 @@ void StartPageLogic::onPushButtonConnect()
     set_pushButtonConnectText(tr("Connect"));
 
     uiLogic()->m_installCredentials = serverCredentials;
-    if (ok) emit uiLogic()->goToPage(Page::NewServer);
+    if (ok)
+        emit uiLogic()->goToPage(Page::NewServer);
 }
 
 void StartPageLogic::onPushButtonImport()
@@ -185,8 +183,10 @@ void StartPageLogic::onPushButtonImport()
 void StartPageLogic::onPushButtonImportOpenFile()
 {
     QString fileName = UiLogic::getOpenFileName(Q_NULLPTR, tr("Open config file"),
-        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.vpn *.ovpn *.conf");
-    if (fileName.isEmpty()) return;
+                                                QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                                "*.vpn *.ovpn *.conf");
+    if (fileName.isEmpty())
+        return;
 
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);
@@ -226,8 +226,7 @@ bool StartPageLogic::importConnection(const QJsonObject &profile)
         // check config
         uiLogic()->pageLogic<ViewConfigLogic>()->set_configJson(profile);
         emit uiLogic()->goToPage(Page::ViewConfig);
-    }
-    else {
+    } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(profile).toJson();
         return false;
@@ -298,7 +297,6 @@ bool StartPageLogic::importConnectionFromOpenVpnConfig(const QString &config)
     o[config_key::defaultContainer] = "amnezia-openvpn";
     o[config_key::description] = m_settings->nextAvailableServerName();
 
-
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(config);
     if (dnsMatch.hasNext()) {
@@ -345,7 +343,9 @@ bool StartPageLogic::importConnectionFromWireguardConfig(const QString &config)
     o[config_key::defaultContainer] = "amnezia-wireguard";
     o[config_key::description] = m_settings->nextAvailableServerName();
 
-    const static QRegularExpression dnsRegExp("DNS = (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
+    const static QRegularExpression dnsRegExp(
+            "DNS = "
+            "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(config);
     if (dnsMatch.hasMatch()) {
         o[config_key::dns1] = dnsMatch.captured(1);

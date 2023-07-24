@@ -26,7 +26,7 @@ CheckBox {
     hoverEnabled: true
 
     indicator: Rectangle {
-        id: checkBoxBackground
+        id: background
 
         anchors.verticalCenter: parent.verticalCenter
 
@@ -57,7 +57,6 @@ CheckBox {
             radius: 4
 
             Image {
-                id: indicator
                 anchors.centerIn: parent
 
                 source: root.pressed ? imageSource : root.checked ? imageSource : ""
@@ -71,31 +70,38 @@ CheckBox {
         }
     }
 
-    contentItem: ColumnLayout {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: 8 + checkBoxBackground.width
+    contentItem: Item {
+        implicitWidth: content.implicitWidth
+        implicitHeight: content.implicitHeight
 
-        spacing: 4
+        anchors.fill: parent
+        anchors.leftMargin: 8 + background.width
 
-        ListItemTitleType {
-            Layout.fillWidth: true
-//            Layout.topMargin: 16
-//            Layout.bottomMargin: description.visible ? 0 : 16
+        ColumnLayout {
+            id: content
 
-            text: root.text
-        }
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
 
-        CaptionTextType {
-            id: description
+            spacing: 4
 
-            Layout.fillWidth: true
-            Layout.bottomMargin: 16
+            ListItemTitleType {
+                Layout.fillWidth: true
 
-            text: root.descriptionText
-            color: "#878b91"
+                text: root.text
+            }
 
-            visible: root.descriptionText !== ""
+            CaptionTextType {
+                id: description
+
+                Layout.fillWidth: true
+
+                text: root.descriptionText
+                color: "#878b91"
+
+                visible: root.descriptionText !== ""
+            }
         }
     }
 

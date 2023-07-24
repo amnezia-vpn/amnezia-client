@@ -6,20 +6,21 @@
 #include "VpnLogic.h"
 
 #include "core/errorstrings.h"
-#include <core/servercontroller.h>
 #include <QTimer>
+#include <core/servercontroller.h>
 
 #if defined(Q_OS_ANDROID)
-#include "../../platforms/android/androidutils.h"
+    #include "../../platforms/android/androidutils.h"
 #endif
 
-ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
-    m_labelWaitInfoVisible{true},
-    m_pushButtonClearClientCacheVisible{true},
-    m_pushButtonShareFullVisible{true},
-    m_pushButtonClearClientCacheText{tr("Clear client cached profile")}
-{ }
+ServerSettingsLogic::ServerSettingsLogic(UiLogic *logic, QObject *parent)
+    : PageLogicBase(logic, parent),
+      m_labelWaitInfoVisible { true },
+      m_pushButtonClearClientCacheVisible { true },
+      m_pushButtonShareFullVisible { true },
+      m_pushButtonClearClientCacheText { tr("Clear client cached profile") }
+{
+}
 
 void ServerSettingsLogic::onUpdatePage()
 {
@@ -33,11 +34,11 @@ void ServerSettingsLogic::onUpdatePage()
     const QString &userName = server.value(config_key::userName).toString();
     const QString &hostName = server.value(config_key::hostName).toString();
     QString name = QString("%1%2%3%4%5")
-        .arg(userName)
-        .arg(userName.isEmpty() ? "" : "@")
-        .arg(hostName)
-        .arg(port.isEmpty() ? "" : ":")
-        .arg(port);
+                           .arg(userName)
+                           .arg(userName.isEmpty() ? "" : "@")
+                           .arg(hostName)
+                           .arg(port.isEmpty() ? "" : ":")
+                           .arg(port);
 
     set_labelServerText(name);
     set_lineEditDescriptionText(server.value(config_key::description).toString());
@@ -49,15 +50,15 @@ void ServerSettingsLogic::onUpdatePage()
 
 void ServerSettingsLogic::onPushButtonForgetServer()
 {
-    if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex && uiLogic()->m_vpnConnection->isConnected()) {
+    if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex
+        && uiLogic()->m_vpnConnection->isConnected()) {
         uiLogic()->pageLogic<VpnLogic>()->onDisconnect();
     }
     m_settings->removeServer(uiLogic()->m_selectedServerIndex);
 
     if (m_settings->defaultServerIndex() == uiLogic()->m_selectedServerIndex) {
         m_settings->setDefaultServer(0);
-    }
-    else if (m_settings->defaultServerIndex() > uiLogic()->m_selectedServerIndex) {
+    } else if (m_settings->defaultServerIndex() > uiLogic()->m_selectedServerIndex) {
         m_settings->setDefaultServer(m_settings->defaultServerIndex() - 1);
     }
 
@@ -65,14 +66,12 @@ void ServerSettingsLogic::onPushButtonForgetServer()
         m_settings->setDefaultServer(-1);
     }
 
-
     uiLogic()->m_selectedServerIndex = -1;
     uiLogic()->onUpdateAllPages();
 
     if (m_settings->serversCount() == 0) {
         uiLogic()->setStartPage(Page::Start);
-    }
-    else {
+    } else {
         uiLogic()->closePage();
     }
 }
@@ -86,9 +85,7 @@ void ServerSettingsLogic::onPushButtonClearClientCacheClicked()
         m_settings->clearLastConnectionConfig(uiLogic()->m_selectedServerIndex, container);
     }
 
-    QTimer::singleShot(3000, this, [this]() {
-        set_pushButtonClearClientCacheText(tr("Clear client cached profile"));
-    });
+    QTimer::singleShot(3000, this, [this]() { set_pushButtonClearClientCacheText(tr("Clear client cached profile")); });
 }
 
 void ServerSettingsLogic::onLineEditDescriptionEditingFinished()
@@ -111,7 +108,7 @@ void authResultReceiver::handleActivityResult(int receiverRequestCode, int resul
 {
     qDebug() << "receiverRequestCode" << receiverRequestCode << "resultCode" << resultCode;
 
-    if (resultCode == -1) { //ResultOK
+    if (resultCode == -1) { // ResultOK
         uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(m_serverIndex, DockerContainer::None);
         emit uiLogic()->goToShareProtocolPage(Proto::Any);
     }
@@ -121,26 +118,27 @@ void authResultReceiver::handleActivityResult(int receiverRequestCode, int resul
 void ServerSettingsLogic::onPushButtonShareFullClicked()
 {
 #if defined(Q_OS_ANDROID)
-/* We use builtin keyguard for ssh key export protection on Android */
+    /* We use builtin keyguard for ssh key export protection on Android */
     QJniObject activity = AndroidUtils::getActivity();
-    auto appContext = activity.callObjectMethod(
-        "getApplicationContext", "()Landroid/content/Context;");
+    auto appContext = activity.callObjectMethod("getApplicationContext", "()Landroid/content/Context;");
     if (appContext.isValid()) {
         QAndroidActivityResultReceiver *receiver = new authResultReceiver(uiLogic(), uiLogic()->m_selectedServerIndex);
-        auto intent = QJniObject::callStaticObjectMethod(
-               "org/amnezia/vpn/AuthHelper", "getAuthIntent",
-               "(Landroid/content/Context;)Landroid/content/Intent;", appContext.object());
+        auto intent = QJniObject::callStaticObjectMethod("org/amnezia/vpn/AuthHelper", "getAuthIntent",
+                                                         "(Landroid/content/Context;)Landroid/content/Intent;",
+                                                         appContext.object());
         if (intent.isValid()) {
             if (intent.object<jobject>() != nullptr) {
-                    QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, receiver);
-                }
-            } else {
-            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, DockerContainer::None);
+                QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, receiver);
+            }
+        } else {
+            uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex,
+                                                                            DockerContainer::None);
             emit uiLogic()->goToShareProtocolPage(Proto::Any);
         }
     }
 #else
-    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex, DockerContainer::None);
+    uiLogic()->pageLogic<ShareConnectionLogic>()->updateSharingPage(uiLogic()->m_selectedServerIndex,
+                                                                    DockerContainer::None);
     emit uiLogic()->goToShareProtocolPage(Proto::Any);
 #endif
 }

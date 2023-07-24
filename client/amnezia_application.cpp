@@ -4,6 +4,7 @@
 #include <QFontDatabase>
 #include <QMimeData>
 #include <QQuickStyle>
+#include <QResource>
 #include <QStandardPaths>
 #include <QTextDocument>
 #include <QTimer>
@@ -14,9 +15,12 @@
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
+#if defined(Q_OS_ANDROID)
+    #include "platforms/android/android_controller.h"
+#endif
 
-#include "ui/pages.h"
 #include "protocols/qml_register_protocols.h"
+#include "ui/pages.h"
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
@@ -33,7 +37,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
     setQuitOnLastWindowClosed(false);
 
     // Fix config file permissions
-#ifdef Q_OS_LINUX && !defined(Q_OS_ANDROID)
+#if defined Q_OS_LINUX && !defined(Q_OS_ANDROID)
     {
         QSettings s(ORGANIZATION_NAME, APPLICATION_NAME);
         s.setValue("permFixed", true);
@@ -87,16 +91,35 @@ void AmneziaApplication::init()
     initModels();
     initControllers();
 
+#ifdef Q_OS_ANDROID
+    connect(AndroidController::instance(), &AndroidController::initialized, this,
+            [this](bool status, bool connected, const QDateTime &connectionDate) {
+                if (connected) {
+                    m_connectionController->onConnectionStateChanged(Vpn::ConnectionState::Connected);
+                    if (m_vpnConnection)
+                        m_vpnConnection->restoreConnection();
+                }
+            });
+    if (!AndroidController::instance()->initialize()) {
+        qCritical() << QString("Init failed");
+        if (m_vpnConnection)
+            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
+        return;
+    }
+
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_importController.get(),
+            &ImportController::extractConfigFromData);
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_pageController.get(),
+            &PageController::goToPageViewConfig);
+#endif
+
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
             &NotificationHandler::setConnectionState);
 
-    void openConnection();
-    void closeConnection();
-
     connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(),
-            &PageController::raise);
+            &PageController::raiseMainWindow);
     connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
             &ConnectionController::openConnection);
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),

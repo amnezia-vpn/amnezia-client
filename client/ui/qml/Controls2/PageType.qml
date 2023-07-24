@@ -20,7 +20,6 @@ Item {
         if (root.stackView.depth <= 1) {
             return
         }
-
         root.stackView.pop()
     }
 

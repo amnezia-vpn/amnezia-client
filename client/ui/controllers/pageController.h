@@ -41,6 +41,7 @@ namespace PageLoader
         PageSetupWizardConfigSource,
         PageSetupWizardTextKey,
         PageSetupWizardViewConfig,
+        PageSetupWizardQrReader,
 
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
@@ -67,15 +68,25 @@ public slots:
     QString getInitialPage();
     QString getPagePath(PageLoader::PageEnum page);
 
+    void closeWindow();
+    void keyPressEvent(Qt::Key key);
+
 signals:
     void goToPageHome();
     void goToPageSettings();
+    void goToPageViewConfig();
+    void closePage();
+
     void restorePageHomeState(bool isContainerInstalled = false);
     void replaceStartPage();
+
     void showErrorMessage(QString errorMessage);
     void showInfoMessage(QString message);
+
     void showBusyIndicator(bool visible);
-    void raise();
+
+    void hideMainWindow();
+    void raiseMainWindow();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

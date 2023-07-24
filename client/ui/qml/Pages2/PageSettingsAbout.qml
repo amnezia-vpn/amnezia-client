@@ -43,8 +43,8 @@ PageType {
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.preferredWidth: 344
-                Layout.preferredHeight: 279
+                Layout.preferredWidth: 291
+                Layout.preferredHeight: 224
             }
 
             Header2TextType {
@@ -100,7 +100,7 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Show other methods on Github")
 
-                onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
+                onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client#donate")
             }
 
             ParagraphTextType {

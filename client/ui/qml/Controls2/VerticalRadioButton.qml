@@ -85,43 +85,49 @@ RadioButton {
         }
     }
 
-    contentItem: ColumnLayout {
-        id: content
-        anchors.left: parent.left
-        anchors.right: parent.right
+    contentItem: Item {
+        implicitWidth: content.implicitWidth
+        implicitHeight: content.implicitHeight
+
+        anchors.fill: parent
         anchors.leftMargin: 8 + background.width
 
-        spacing: 4
+        ColumnLayout {
+            id: content
 
-        ListItemTitleType {
-            text: root.text
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
 
-            color: {
-                if (root.checked) {
-                    return selectedTextColor
+            spacing: 4
+
+            ListItemTitleType {
+                text: root.text
+
+                color: {
+                    if (root.checked) {
+                        return selectedTextColor
+                    }
+                    return textColor
                 }
-                return textColor
+
+                Layout.fillWidth: true
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
             }
 
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-            Layout.bottomMargin: description.visible ? 0 : 16
+            CaptionTextType {
+                id: description
 
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
+                color: "#878B91"
+                text: root.descriptionText
+
+                visible: root.descriptionText !== ""
+
+                Layout.fillWidth: true
             }
-        }
-
-        CaptionTextType {
-            id: description
-
-            color: "#878B91"
-            text: root.descriptionText
-
-            visible: root.descriptionText !== ""
-
-            Layout.fillWidth: true
-            Layout.bottomMargin: 16
         }
     }
 

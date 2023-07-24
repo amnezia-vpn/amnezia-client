@@ -3,10 +3,10 @@
 
 #include <QObject>
 
-#include "core/defs.h"
 #include "containers/containers_defs.h"
-#include "ui/models/servers_model.h"
+#include "core/defs.h"
 #include "ui/models/containers_model.h"
+#include "ui/models/servers_model.h"
 
 class ImportController : public QObject
 {
@@ -14,13 +14,14 @@ class ImportController : public QObject
 public:
     explicit ImportController(const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
-                              const std::shared_ptr<Settings> &settings,
-                              QObject *parent = nullptr);
+                              const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
 public slots:
     void importConfig();
-    void extractConfigFromFile(const QUrl &fileUrl);
+    void extractConfigFromFile();
+    void extractConfigFromData(QString &data);
     void extractConfigFromCode(QString code);
+    void extractConfigFromQr();
     QString getConfig();
     QString getConfigFileName();
 
@@ -39,7 +40,6 @@ private:
 
     QJsonObject m_config;
     QString m_configFileName;
-
 };
 
 #endif // IMPORTCONTROLLER_H

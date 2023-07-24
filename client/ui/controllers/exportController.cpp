@@ -11,9 +11,12 @@
 
 #include "configurators/openvpn_configurator.h"
 #include "configurators/wireguard_configurator.h"
-#include "qrcodegen.hpp"
-
 #include "core/errorstrings.h"
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+    #include "platforms/android/androidutils.h"
+#endif
+#include "qrcodegen.hpp"
 
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
@@ -25,6 +28,14 @@ ExportController::ExportController(const QSharedPointer<ServersModel> &serversMo
       m_settings(settings),
       m_configurator(configurator)
 {
+#ifdef Q_OS_ANDROID
+    m_authResultNotifier.reset(new AuthResultNotifier);
+    m_authResultReceiver.reset(new AuthResultReceiver(m_authResultNotifier));
+    connect(m_authResultNotifier.get(), &AuthResultNotifier::authFailed, this,
+            [this]() { emit exportErrorOccurred(tr("Access error!")); });
+    connect(m_authResultNotifier.get(), &AuthResultNotifier::authSuccessful, this,
+            &ExportController::generateFullAccessConfig);
+#endif
 }
 
 void ExportController::generateFullAccessConfig()
@@ -43,6 +54,27 @@ void ExportController::generateFullAccessConfig()
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
 }
+
+#if defined(Q_OS_ANDROID)
+void ExportController::generateFullAccessConfigAndroid()
+{
+    /* We use builtin keyguard for ssh key export protection on Android */
+    QJniObject activity = AndroidUtils::getActivity();
+    auto appContext = activity.callObjectMethod("getApplicationContext", "()Landroid/content/Context;");
+    if (appContext.isValid()) {
+        auto intent = QJniObject::callStaticObjectMethod("org/amnezia/vpn/AuthHelper", "getAuthIntent",
+                                                         "(Landroid/content/Context;)Landroid/content/Intent;",
+                                                         appContext.object());
+        if (intent.isValid()) {
+            if (intent.object<jobject>() != nullptr) {
+                QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, m_authResultReceiver.get());
+            }
+        } else {
+            generateFullAccessConfig();
+        }
+    }
+}
+#endif
 
 void ExportController::generateConnectionConfig()
 {
@@ -192,6 +224,35 @@ void ExportController::saveFile()
 
     QFileInfo fi(fileName.toLocalFile());
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+}
+
+void ExportController::shareFile()
+{
+#if defined Q_OS_IOS
+    ext.replace("*", "");
+    QString fileName = QDir::tempPath() + "/" + suggestedName;
+
+    if (fileName.isEmpty())
+        return;
+    if (!fileName.endsWith(ext))
+        fileName.append(ext);
+
+    QFile::remove(fileName);
+
+    QFile save(fileName);
+    save.open(QIODevice::WriteOnly);
+    save.write(data.toUtf8());
+    save.close();
+
+    QStringList filesToSend;
+    filesToSend.append(fileName);
+    MobileUtils::shareText(filesToSend);
+    return;
+#endif
+#if defined Q_OS_ANDROID
+    AndroidController::instance()->shareConfig(m_config, "amnezia_config");
+    return;
+#endif
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)

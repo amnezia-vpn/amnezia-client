@@ -8,11 +8,50 @@
 #include "core/servercontroller.h"
 #include "utilities.h"
 
+namespace
+{
+#ifdef Q_OS_WINDOWS
+    QString getNextDriverLetter()
+    {
+        QProcess drivesProc;
+        drivesProc.start("wmic logicaldisk get caption");
+        drivesProc.waitForFinished();
+        QString drives = drivesProc.readAll();
+        qDebug() << drives;
+
+        QString letters = "CFGHIJKLMNOPQRSTUVWXYZ";
+        QString letter;
+        for (int i = letters.size() - 1; i > 0; i--) {
+            letter = letters.at(i);
+            if (!drives.contains(letter + ":"))
+                break;
+        }
+        if (letter == "C:") {
+            // set err info
+            qDebug() << "Can't find free drive letter";
+            return "";
+        }
+        return letter;
+    }
+#endif
+}
+
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel,
                                      const QSharedPointer<ContainersModel> &containersModel,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
+}
+
+InstallController::~InstallController()
+{
+#ifdef Q_OS_WINDOWS
+    for (QSharedPointer<QProcess> process : m_sftpMountProcesses) {
+        Utils::signalCtrl(process->processId(), CTRL_C_EVENT);
+        process->kill();
+        process->waitForFinished();
+    }
+#endif
 }
 
 void InstallController::install(DockerContainer container, int port, TransportProto transportProto)

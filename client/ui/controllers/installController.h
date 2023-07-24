@@ -16,6 +16,7 @@ public:
     explicit InstallController(const QSharedPointer<ServersModel> &serversModel,
                                const QSharedPointer<ContainersModel> &containersModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+    ~InstallController();
 
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto);
