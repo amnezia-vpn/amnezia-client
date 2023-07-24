@@ -48,6 +48,7 @@ if(IOS)
 else(IOS)
     set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
     set(OPENSSL_LIBRARIES "ssl" "crypto")
+    set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
     if(WIN32)
         set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
@@ -84,6 +85,9 @@ else(IOS)
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libssl.a")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libcrypto.a")
     endif()
+    
+    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+            DESTINATION ${OPENSSL_LIBRARIES_DIR})
 
     set(OPENSSL_USE_STATIC_LIBS TRUE)
     find_package(OpenSSL REQUIRED)
