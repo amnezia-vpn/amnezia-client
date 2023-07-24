@@ -45,6 +45,8 @@ if(IOS)
     set(WITH_SYMBOL_VERSIONING OFF CACHE BOOL "" FORCE)
 
     include_directories(${CLIENT_ROOT_DIR}/3rd/mbedtls/include)
+    set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
 else(IOS)
     set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
     set(OPENSSL_LIBRARIES "ssl" "crypto")
@@ -107,6 +109,13 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
+
+if(IOS)
+    set(LIBS ${LIBS}
+            ${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a
+            ${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a
+    )
+endif()
 
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
