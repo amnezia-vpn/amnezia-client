@@ -193,7 +193,7 @@ PageType {
 
                             Layout.topMargin: 16
 
-                            text: "Network protocol"
+                            text: qsTr("Network protocol")
                         }
 
                         TransportProtoSelector {
@@ -209,7 +209,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "Port"
+                            headerText: qsTr("Port")
                         }
 
                         Rectangle {
@@ -223,7 +223,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.bottomMargin: 32
 
-                            text: qsTr("Установить")
+                            text: qsTr("Install")
 
                             onClicked: function() {
                                 goToPage(PageEnum.PageSetupWizardInstalling);

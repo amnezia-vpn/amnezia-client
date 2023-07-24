@@ -22,7 +22,7 @@ PageType {
             if (isInstalledContainerFound) {
                 message = qsTr("All installed containers have been added to the application")
             } else {
-                message = qsTr("Не найдено установленных контейнеров")
+                message = qsTr("No installed containers found")
             }
 
             PageController.showErrorMessage(message)
@@ -84,8 +84,8 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Проверить сервер на наличие ранее установленных сервисов Amnezia")
-                descriptionText: qsTr("Добавим их в приложение, если они не отображались")
+                text: qsTr("Check the server for previously installed Amnesia services")
+                descriptionText: qsTr("Add them to the application if they were not displayed")
 
                 clickedFunction: function() {
                     PageController.showBusyIndicator(true)

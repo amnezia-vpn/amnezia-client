@@ -58,7 +58,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: "Бесплатный сервис для создания личного VPN на вашем сервере. Помогаем получать доступ к заблокированному контенту, не раскрывая конфиденциальность даже провайдерам VPN."
+                text: qsTr("A free service to create a personal VPN on your server. We help you access blocked content without exposing your privacy even to VPN providers.")
             }
 
             BasicButtonType {
@@ -67,7 +67,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("У меня есть данные для подключения")
+                text: qsTr("I have the data to connect")
 
                 onClicked: {
                     connectionTypeSelection.visible = true
@@ -87,10 +87,9 @@ PageType {
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
-                text: qsTr("У меня ничего нет")
+                text: qsTr("I have nothing")
 
                 onClicked: {
-                    goToPage(PageEnum.PageTest)
                 }
             }
         }

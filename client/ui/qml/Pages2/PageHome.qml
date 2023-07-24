@@ -163,7 +163,7 @@ PageType {
 
                     text: root.currentContainerName
                     textColor: "#0E0E11"
-                    headerText: qsTr("Протокол подключения")
+                    headerText: qsTr("Connection protocol")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                     rootButtonClickedFunction: function() {

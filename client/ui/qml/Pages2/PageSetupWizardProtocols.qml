@@ -70,8 +70,8 @@ PageType {
 
                     width: parent.width
 
-                    headerText: "Протокол подключения"
-                    descriptionText: "Выберите более приоритетный для вас. Позже можно будет установить остальные протоколы и доп сервисы, вроде DNS-прокси и SFTP."
+                    headerText: qsTr("Connection protocol")
+                    descriptionText: qsTr("Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.")
                 }
             }
 

@@ -28,7 +28,7 @@ DrawerType {
             Layout.bottomMargin: 32
             Layout.alignment: Qt.AlignHCenter
 
-            text: "Данные для подключения"
+            text: qsTr("Connection data")
             wrapMode: Text.WordWrap
         }
 
@@ -37,7 +37,7 @@ DrawerType {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: "IP, логин и пароль от сервера"
+            text: qsTr("Server IP, login and password")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -51,7 +51,7 @@ DrawerType {
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: "QR-код, ключ или файл настроек"
+            text: qsTr("QR code, key or configuration file")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

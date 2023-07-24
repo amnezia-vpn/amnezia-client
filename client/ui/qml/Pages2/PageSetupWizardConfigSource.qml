@@ -38,9 +38,9 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: "Подключение к серверу"
-                descriptionText: "Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.\n
-Всё в порядке, если код передал друг."
+                headerText: qsTr("Server connection")
+                descriptionText: qsTr("Do not use connection code from public sources. It may have been created to intercept your data.\n
+It's okay if a friend passed the code.")
             }
 
             Header2TextType {
@@ -49,30 +49,21 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: "Что у вас есть?"
+                text: qsTr("What do you have?")
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                text: "Файл с настройками подключения"
+                text: qsTr("File with connection settings")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
-//                    onClicked: fileDialog.open()
                     ImportController.extractConfigFromFile()
                     goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
-
-//                FileDialog {
-//                    id: fileDialog
-//                    onAccepted: {
-//                        ImportController.extractConfigFromFile(selectedFile)
-//                        goToPage(PageEnum.PageSetupWizardViewConfig)
-//                    }
-//                }
             }
 
             DividerType {}
@@ -81,7 +72,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: "QR-код"
+                text: qsTr("QR-code")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
 
@@ -96,7 +87,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: "Ключ в виде текста"
+                text: qsTr("Key as text")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/text-cursor.svg"
 

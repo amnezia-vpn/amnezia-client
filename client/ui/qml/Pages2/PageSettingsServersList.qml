@@ -36,7 +36,7 @@ PageType {
 
             actionButtonImage: "qrc:/images/controls/plus.svg"
 
-            headerText: "Серверы"
+            headerText: qsTr("Servers")
 
             actionButtonFunction: function() {
                 connectionTypeSelection.visible = true

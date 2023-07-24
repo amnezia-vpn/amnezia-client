@@ -116,7 +116,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
-                            headerText: "Установка"
+                            headerText: qsTr("Installing")
                             descriptionText: name
                         }
 
@@ -142,7 +142,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 8
 
-                            text: "Обычно это занимает не больше 5 минут"
+                            text: qsTr("Usually it takes no more than 5 minutes")
                         }
                     }
                 }
