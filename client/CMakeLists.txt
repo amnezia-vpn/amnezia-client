@@ -337,8 +337,8 @@ if(ANDROID)
     foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
         if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
             set(LIBS ${LIBS}
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
+                ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libcrypto.a
+                ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libssl.a
             )
         endif()
 
