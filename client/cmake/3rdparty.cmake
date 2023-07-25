@@ -117,6 +117,17 @@ if(IOS)
     )
 endif()
 
+if(ANDROID)
+    foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
+        if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
+            set(LIBS ${LIBS}
+                ${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a
+                ${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a
+            )
+        endif()
+    endforeach()
+endif()        
+
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
