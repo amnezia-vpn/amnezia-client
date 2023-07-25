@@ -71,6 +71,9 @@ public slots:
     void closeWindow();
     void keyPressEvent(Qt::Key key);
 
+    unsigned int getInitialPageNavigationBarColor();
+    void updateNavigationBarColor(const int color);
+
 signals:
     void goToPageHome();
     void goToPageSettings();

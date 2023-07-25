@@ -203,31 +203,6 @@ QList<QString> ExportController::getQrCodes()
 
 void ExportController::saveFile()
 {
-    QString fileExtension = ".vpn";
-    QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    QUrl fileName;
-    fileName = QFileDialog::getSaveFileUrl(nullptr, tr("Save AmneziaVPN config"),
-                                           QUrl::fromLocalFile(docDir + "/" + "amnezia_config"), "*" + fileExtension);
-    if (fileName.isEmpty())
-        return;
-    if (!fileName.toString().endsWith(fileExtension)) {
-        fileName = QUrl(fileName.toString() + fileExtension);
-    }
-    if (fileName.isEmpty())
-        return;
-
-    QFile save(fileName.toLocalFile());
-
-    save.open(QIODevice::WriteOnly);
-    save.write(m_config.toUtf8());
-    save.close();
-
-    QFileInfo fi(fileName.toLocalFile());
-    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
-}
-
-void ExportController::shareFile()
-{
 #if defined Q_OS_IOS
     ext.replace("*", "");
     QString fileName = QDir::tempPath() + "/" + suggestedName;
@@ -253,6 +228,28 @@ void ExportController::shareFile()
     AndroidController::instance()->shareConfig(m_config, "amnezia_config");
     return;
 #endif
+
+    QString fileExtension = ".vpn";
+    QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QUrl fileName;
+    fileName = QFileDialog::getSaveFileUrl(nullptr, tr("Save AmneziaVPN config"),
+                                           QUrl::fromLocalFile(docDir + "/" + "amnezia_config"), "*" + fileExtension);
+    if (fileName.isEmpty())
+        return;
+    if (!fileName.toString().endsWith(fileExtension)) {
+        fileName = QUrl(fileName.toString() + fileExtension);
+    }
+    if (fileName.isEmpty())
+        return;
+
+    QFile save(fileName.toLocalFile());
+
+    save.open(QIODevice::WriteOnly);
+    save.write(m_config.toUtf8());
+    save.close();
+
+    QFileInfo fi(fileName.toLocalFile());
+    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)

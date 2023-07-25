@@ -12,6 +12,7 @@ Drawer {
             velocity: 4
         }
     }
+
     exit: Transition {
         SmoothedAnimation {
             velocity: 4
@@ -30,5 +31,18 @@ Drawer {
 
     Overlay.modal: Rectangle {
         color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
+    }
+
+    onAboutToShow: {
+        if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
+            PageController.updateNavigationBarColor(0xFF1C1D21)
+        }
+    }
+
+    onClosed: {
+        var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
+        if (initialPageNavigationBarColor !== 0xFF1C1D21) {
+            PageController.updateNavigationBarColor(initialPageNavigationBarColor)
+        }
     }
 }

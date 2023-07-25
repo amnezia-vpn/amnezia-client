@@ -41,6 +41,11 @@ namespace
         }
         return ConfigTypes::Amnezia;
     }
+
+#ifdef Q_OS_ANDROID
+    ImportController *mInstance = nullptr;
+    constexpr auto AndroidCameraActivity = "org.amnezia.vpn.qt.CameraActivity";
+#endif
 } // namespace
 
 ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
@@ -49,6 +54,7 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
+    mInstance = this;
     // Set security screen for Android app
     AndroidUtils::runOnAndroidThreadSync([]() {
         QJniObject activity = AndroidUtils::getActivity();
@@ -57,6 +63,18 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
             const int FLAG_SECURE = 8192;
             window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
         }
+    });
+
+    AndroidUtils::runOnAndroidThreadAsync([]() {
+        JNINativeMethod methods[] {
+            { "passDataToDecoder", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onNewQrCodeDataChunk) },
+        };
+
+        QJniObject javaClass(AndroidCameraActivity);
+        QJniEnvironment env;
+        jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
+        env->RegisterNatives(objectClass, methods, sizeof(methods) / sizeof(methods[0]));
+        env->DeleteLocalRef(objectClass);
     });
 #endif
 }
@@ -93,11 +111,21 @@ void ImportController::extractConfigFromCode(QString code)
     m_configFileName = "";
 }
 
-void ImportController::extractConfigFromQr()
+bool ImportController::extractConfigFromQr(const QByteArray &data)
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->startQrReaderActivity();
-#endif
+    QJsonObject dataObj = QJsonDocument::fromJson(data).object();
+    if (!dataObj.isEmpty()) {
+        m_config = dataObj;
+        return true;
+    }
+
+    QByteArray ba_uncompressed = qUncompress(data);
+    if (!ba_uncompressed.isEmpty()) {
+        m_config = QJsonDocument::fromJson(ba_uncompressed).object();
+        return true;
+    }
+
+    return false;
 }
 
 QString ImportController::getConfig()
@@ -148,21 +176,6 @@ QJsonObject ImportController::extractAmneziaConfig(QString &data)
 
     return QJsonDocument::fromJson(ba).object();
 }
-
-// bool ImportController::importConnectionFromQr(const QByteArray &data)
-//{
-//     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
-//     if (!dataObj.isEmpty()) {
-//         return importConnection(dataObj);
-//     }
-
-//    QByteArray ba_uncompressed = qUncompress(data);
-//    if (!ba_uncompressed.isEmpty()) {
-//        return importConnection(QJsonDocument::fromJson(ba_uncompressed).object());
-//    }
-
-//    return false;
-//}
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
 {
@@ -251,3 +264,90 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 
     return config;
 }
+
+#ifdef Q_OS_ANDROID
+void ImportController::startDecodingQr()
+{
+    AndroidController::instance()->startQrReaderActivity();
+}
+
+void ImportController::stopDecodingQr()
+{
+    QJniObject::callStaticMethod<void>(AndroidCameraActivity, "stopQrCodeReader", "()V");
+    emit qrDecodingFinished();
+}
+
+void ImportController::onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring data)
+{
+    Q_UNUSED(thiz);
+    const char *buffer = env->GetStringUTFChars(data, nullptr);
+    if (!buffer) {
+        return;
+    }
+
+    QString parcelBody(buffer);
+    env->ReleaseStringUTFChars(data, buffer);
+
+    if (mInstance != nullptr) {
+        if (!mInstance->m_isQrCodeProcessed) {
+            mInstance->m_qrCodeChunks.clear();
+            mInstance->m_isQrCodeProcessed = true;
+            mInstance->m_totalQrCodeChunksCount = 0;
+            mInstance->m_receivedQrCodeChunksCount = 0;
+        }
+        mInstance->parseQrCodeChunk(parcelBody);
+    }
+}
+
+void ImportController::parseQrCodeChunk(const QString &code)
+{
+    // qDebug() << code;
+    if (!m_isQrCodeProcessed)
+        return;
+
+    // check if chunk received
+    QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QDataStream s(&ba, QIODevice::ReadOnly);
+    qint16 magic;
+    s >> magic;
+
+    if (magic == amnezia::qrMagicCode) {
+        quint8 chunksCount;
+        s >> chunksCount;
+        if (m_totalQrCodeChunksCount != chunksCount) {
+            m_qrCodeChunks.clear();
+        }
+
+        m_totalQrCodeChunksCount = chunksCount;
+
+        quint8 chunkId;
+        s >> chunkId;
+        s >> m_qrCodeChunks[chunkId];
+        m_receivedQrCodeChunksCount = m_qrCodeChunks.size();
+
+        if (m_qrCodeChunks.size() == m_totalQrCodeChunksCount) {
+            QByteArray data;
+
+            for (int i = 0; i < m_totalQrCodeChunksCount; ++i) {
+                data.append(m_qrCodeChunks.value(i));
+            }
+
+            bool ok = extractConfigFromQr(data);
+            if (ok) {
+                m_isQrCodeProcessed = false;
+                stopDecodingQr();
+            } else {
+                m_qrCodeChunks.clear();
+                m_totalQrCodeChunksCount = 0;
+                m_receivedQrCodeChunksCount = 0;
+            }
+        }
+    } else {
+        bool ok = extractConfigFromQr(ba);
+        if (ok) {
+            m_isQrCodeProcessed = false;
+            stopDecodingQr();
+        }
+    }
+}
+#endif

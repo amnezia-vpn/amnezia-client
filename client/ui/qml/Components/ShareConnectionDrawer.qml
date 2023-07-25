@@ -54,10 +54,10 @@ DrawerType {
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
-                    text: Qt.platform.os === "android" ? qsTr("Share") : qsTr("Save connection code")
+                    text: qsTr("Share")
 
                     onClicked: {
-                        Qt.platform.os === "android" ? ExportController.shareFile() : ExportController.saveFile()
+                        ExportController.saveFile()
                     }
                 }
 

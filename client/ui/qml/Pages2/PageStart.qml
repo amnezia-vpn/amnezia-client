@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 import PageEnum 1.0
 
@@ -81,14 +82,27 @@ PageType {
         anchors.bottom: parent.bottom
 
         topPadding: 8
-        bottomPadding: 8//34
+        bottomPadding: 8
         leftPadding: shareTabButton.visible ? 96 : 128
         rightPadding: shareTabButton.visible ? 96 : 128
 
-        background: Rectangle {
-            border.width: 1
-            border.color: "#2C2D30"
-            color: "#1C1D21"
+        background: Shape {
+            width: parent.width
+            height: parent.height
+
+            ShapePath {
+                startX: 0
+                startY: 0
+
+                PathLine { x: width; y: 0 }
+                PathLine { x: width; y: height - 1 }
+                PathLine { x: 0; y: height - 1 }
+                PathLine { x: 0; y: 0 }
+
+                strokeWidth: 1
+                strokeColor: "#2C2D30"
+                fillColor: "#1C1D21"
+            }
         }
 
         TabImageButtonType {

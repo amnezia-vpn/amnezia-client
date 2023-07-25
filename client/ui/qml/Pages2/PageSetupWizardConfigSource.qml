@@ -13,6 +13,14 @@ import "../Config"
 PageType {
     id: root
 
+    Connections {
+        target: ImportController
+
+        function onQrDecodingFinished() {
+            goToPage(PageEnum.PageSetupWizardViewConfig)
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -77,7 +85,7 @@ It's okay if a friend passed the code.")
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
 
                 clickedFunction: function() {
-                    ImportController.extractConfigFromQr()
+                    ImportController.startDecodingQr()
 //                    goToPage(PageEnum.PageSetupWizardQrReader)
                 }
             }

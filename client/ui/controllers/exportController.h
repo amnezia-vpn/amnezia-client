@@ -36,7 +36,6 @@ public slots:
     QList<QString> getQrCodes();
 
     void saveFile();
-    void shareFile();
 
 signals:
     void generateConfig(int type);

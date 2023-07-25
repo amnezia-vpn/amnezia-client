@@ -50,6 +50,7 @@ Window  {
             while (rootStackView.depth > 1) {
                 rootStackView.pop()
             }
+            PageController.updateNavigationBarColor(PageController.getInitialPageNavigationBarColor())
             rootStackView.replace(pagePath, { "objectName" : pagePath })
         }
 
