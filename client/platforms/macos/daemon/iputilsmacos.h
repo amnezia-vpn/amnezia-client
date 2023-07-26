@@ -5,9 +5,9 @@
 #ifndef IPUTILSMACOS_H
 #define IPUTILSMACOS_H
 
-#include "daemon/iputils.h"
-
 #include <arpa/inet.h>
+
+#include "daemon/iputils.h"
 
 class IPUtilsMacos final : public IPUtils {
  public:

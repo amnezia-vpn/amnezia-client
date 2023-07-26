@@ -63,6 +63,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
+    connData.port = containerConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
         if (errorCode) *errorCode = ErrorCode::InternalError;
@@ -181,6 +182,7 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     jConfig[config_key::config] = config;
 
     jConfig[config_key::hostName] = connData.host;
+    jConfig[config_key::port] = connData.port.toInt();
     jConfig[config_key::client_priv_key] = connData.clientPrivKey;
     jConfig[config_key::client_ip] = connData.clientIP;
     jConfig[config_key::client_pub_key] = connData.clientPubKey;

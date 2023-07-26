@@ -31,9 +31,6 @@ BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
-
-PRO_FILE_PATH=$PROJECT_DIR/$APP_NAME.pro
-QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Search Qt
@@ -145,7 +142,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -volname Amnezia -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."

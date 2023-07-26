@@ -14,10 +14,10 @@ class MacOSPingSender final : public PingSender {
   Q_DISABLE_COPY_MOVE(MacOSPingSender)
 
  public:
-  MacOSPingSender(const QString& source, QObject* parent = nullptr);
+  MacOSPingSender(const QHostAddress& source, QObject* parent = nullptr);
   ~MacOSPingSender();
 
-  void sendPing(const QString& dest, quint16 sequence) override;
+  void sendPing(const QHostAddress& dest, quint16 sequence) override;
 
  private slots:
   void socketReady();

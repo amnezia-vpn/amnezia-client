@@ -7,9 +7,10 @@
 #include "logger.h"
 
 #import <CoreWLAN/CoreWLAN.h>
+#import <Network/Network.h>
 
 namespace {
-Logger logger(LOG_MACOS, "MacOSNetworkWatcher");
+Logger logger("MacOSNetworkWatcher");
 }
 
 @interface MacOSNetworkWatcherDelegate : NSObject <CWEventDelegate> {
@@ -37,13 +38,12 @@ Logger logger(LOG_MACOS, "MacOSNetworkWatcher");
 
 @end
 
-MacOSNetworkWatcher::MacOSNetworkWatcher(QObject* parent) : NetworkWatcherImpl(parent) {
-  MVPN_COUNT_CTOR(MacOSNetworkWatcher);
+MacOSNetworkWatcher::MacOSNetworkWatcher(QObject* parent) : IOSNetworkWatcher(parent) {
+  MZ_COUNT_CTOR(MacOSNetworkWatcher);
 }
 
 MacOSNetworkWatcher::~MacOSNetworkWatcher() {
-  MVPN_COUNT_DTOR(MacOSNetworkWatcher);
-
+  MZ_COUNT_DTOR(MacOSNetworkWatcher);
   if (m_delegate) {
     CWWiFiClient* client = CWWiFiClient.sharedWiFiClient;
     if (!client) {
@@ -55,10 +55,6 @@ MacOSNetworkWatcher::~MacOSNetworkWatcher() {
     [static_cast<MacOSNetworkWatcherDelegate*>(m_delegate) dealloc];
     m_delegate = nullptr;
   }
-}
-
-void MacOSNetworkWatcher::initialize() {
-  // Nothing to do here
 }
 
 void MacOSNetworkWatcher::start() {
@@ -129,3 +125,4 @@ void MacOSNetworkWatcher::checkInterface() {
 
   logger.debug() << "Secure WiFi interface";
 }
+
