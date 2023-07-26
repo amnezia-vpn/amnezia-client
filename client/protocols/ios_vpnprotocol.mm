@@ -256,9 +256,6 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
                                                      privateKey:key.toNSData()
                                               deviceIpv4Address:addr.toNSString()
                                               deviceIpv6Address:@"::/0"
-                                                       endpoint:endpoint.toNSString()
-                                                          proto:@"Wireguard"
-                                                
     closure:^(ConnectionState state, NSDate* date) {
         creating = false;
         
