@@ -40,6 +40,7 @@ echo "HOST Qt: $QT_HOST_PATH"
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR \
    -DQT_NO_GLOBAL_APK_TARGET_PART_OF_ALL="ON" \
    -DQT_HOST_PATH=$QT_HOST_PATH \
+   -DANDROID_NATIVE_API_LEVEL=28 \
    -DCMAKE_BUILD_TYPE="Release"
 
 cmake --build . --config release
