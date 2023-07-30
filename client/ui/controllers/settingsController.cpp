@@ -84,9 +84,10 @@ void SettingsController::restoreAppConfig()
             Utils::getFileName(Q_NULLPTR, tr("Open backup"),
                                QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
-    // todo error processing
-    if (fileName.isEmpty())
+    if (fileName.isEmpty()) {
+        emit changeSettingsErrorOccurred(tr("Backup file is empty"));
         return;
+    }
 
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);
@@ -94,7 +95,10 @@ void SettingsController::restoreAppConfig()
 
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
-        //        emit uiLogic()->showWarningMessage(tr("Can't import config, file is corrupted."));
+        m_serversModel->resetModel();
+        emit restoreBackupFinished();
+    } else {
+        emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
     }
 }
 
@@ -106,4 +110,5 @@ QString SettingsController::getAppVersion()
 void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
+    m_serversModel->resetModel();
 }

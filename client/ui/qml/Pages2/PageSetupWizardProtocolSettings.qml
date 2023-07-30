@@ -123,15 +123,16 @@ PageType {
                                 anchors.bottom: parent.bottom
                                 contentHeight: {
                                     var emptySpaceHeight = parent.height - showDetailsBackButton.implicitHeight - showDetailsBackButton.anchors.topMargin
-
-                                    return (showDetailsDrawerContent.implicitHeight > emptySpaceHeight) ?
-                                                showDetailsDrawerContent.implicitHeight : emptySpaceHeight
+                                    return (showDetailsDrawerContent.height > emptySpaceHeight) ?
+                                                showDetailsDrawerContent.height : emptySpaceHeight
                                 }
 
                                 ColumnLayout {
                                     id: showDetailsDrawerContent
 
-                                    anchors.fill: parent
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
                                     anchors.rightMargin: 16
                                     anchors.leftMargin: 16
 

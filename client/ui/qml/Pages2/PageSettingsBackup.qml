@@ -12,6 +12,20 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    Connections {
+        target: SettingsController
+
+        function onChangeSettingsErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+
+        function onRestoreBackupFinished() {
+            PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
+            goToStartPage()
+            PageController.goToPageHome()
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -66,7 +80,9 @@ PageType {
                 text: qsTr("Make a backup")
 
                 onClicked: {
+                    PageController.showBusyIndicator(true)
                     SettingsController.backupAppConfig()
+                    PageController.showBusyIndicator(false)
                 }
             }
 
@@ -84,7 +100,9 @@ PageType {
                 text: qsTr("Restore from backup")
 
                 onClicked: {
+                    PageController.showBusyIndicator(true)
                     SettingsController.restoreAppConfig()
+                    PageController.showBusyIndicator(false)
                 }
             }
         }

@@ -14,6 +14,7 @@ public:
     enum Roles {
         ProtocolNameRole = Qt::UserRole + 1,
         ProtocolPageRole,
+        ProtocolIndexRole,
         RawConfigRole
     };
 

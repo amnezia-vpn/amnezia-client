@@ -204,25 +204,25 @@ QList<QString> ExportController::getQrCodes()
 void ExportController::saveFile()
 {
 #if defined Q_OS_IOS
-    ext.replace("*", "");
-    QString fileName = QDir::tempPath() + "/" + suggestedName;
-
-    if (fileName.isEmpty())
-        return;
-    if (!fileName.endsWith(ext))
-        fileName.append(ext);
-
-    QFile::remove(fileName);
-
-    QFile save(fileName);
-    save.open(QIODevice::WriteOnly);
-    save.write(data.toUtf8());
-    save.close();
-
-    QStringList filesToSend;
-    filesToSend.append(fileName);
-    MobileUtils::shareText(filesToSend);
-    return;
+//    ext.replace("*", "");
+//    QString fileName = QDir::tempPath() + "/" + suggestedName;
+//
+//    if (fileName.isEmpty())
+//        return;
+//    if (!fileName.endsWith(ext))
+//        fileName.append(ext);
+//
+//    QFile::remove(fileName);
+//
+//    QFile save(fileName);
+//    save.open(QIODevice::WriteOnly);
+//    save.write(data.toUtf8());
+//    save.close();
+//
+//    QStringList filesToSend;
+//    filesToSend.append(fileName);
+//    MobileUtils::shareText(filesToSend);
+//    return;
 #endif
 #if defined Q_OS_ANDROID
     AndroidController::instance()->shareConfig(m_config, "amnezia_config");

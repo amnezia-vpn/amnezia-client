@@ -63,5 +63,52 @@ Window  {
         function onHideMainWindow() {
             root.hide()
         }
+
+        function onShowErrorMessage(errorMessage) {
+            popupErrorMessage.text = errorMessage
+            popupErrorMessage.open()
+        }
+
+        function onShowNotificationMessage(message) {
+            popupNotificationMessage.text = message
+            popupNotificationMessage.closeButtonVisible = false
+            popupNotificationMessage.open()
+            popupNotificationTimer.start()
+        }
+    }
+
+    Item {
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        implicitHeight: popupNotificationMessage.height
+
+        PopupType {
+            id: popupNotificationMessage
+        }
+
+        Timer {
+            id: popupNotificationTimer
+
+            interval: 3000
+            repeat: false
+            running: false
+            onTriggered: {
+                popupNotificationMessage.close()
+            }
+        }
+    }
+
+    Item {
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        implicitHeight: popupErrorMessage.height
+
+        PopupType {
+            id: popupErrorMessage
+        }
     }
 }

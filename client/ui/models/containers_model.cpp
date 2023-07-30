@@ -83,6 +83,12 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+QVariant ContainersModel::data(const int index, int role) const
+{
+    QModelIndex modelIndex = this->index(index);
+    return data(modelIndex, role);
+}
+
 void ContainersModel::setCurrentlyProcessedServerIndex(const int index)
 {
     beginResetModel();
@@ -123,11 +129,12 @@ QJsonObject ContainersModel::getCurrentlyProcessedContainerConfig()
     return qvariant_cast<QJsonObject>(data(index(m_currentlyProcessedContainerIndex), ConfigRole));
 }
 
-void ContainersModel::removeAllContainers()
+ErrorCode ContainersModel::removeAllContainers()
 {
 
     ServerController serverController(m_settings);
-    auto errorCode = serverController.removeAllContainers(m_settings->serverCredentials(m_currentlyProcessedServerIndex));
+    ErrorCode errorCode =
+            serverController.removeAllContainers(m_settings->serverCredentials(m_currentlyProcessedServerIndex));
 
     if (errorCode == ErrorCode::NoError) {
         beginResetModel();
@@ -138,30 +145,32 @@ void ContainersModel::removeAllContainers()
         setData(index(DockerContainer::None, 0), true, IsDefaultRole);
         endResetModel();
     }
-
-    // todo process errors
+    return errorCode;
 }
 
-void ContainersModel::removeCurrentlyProcessedContainer()
+ErrorCode ContainersModel::removeCurrentlyProcessedContainer()
 {
     ServerController serverController(m_settings);
     auto credentials = m_settings->serverCredentials(m_currentlyProcessedServerIndex);
     auto dockerContainer = static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
 
-    ErrorCode e = serverController.removeContainer(credentials, dockerContainer);
+    ErrorCode errorCode = serverController.removeContainer(credentials, dockerContainer);
 
-    beginResetModel(); // todo change to begin remove rows?
-    m_settings->removeContainerConfig(m_currentlyProcessedServerIndex, dockerContainer);
-    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+    if (errorCode == ErrorCode::NoError) {
+        beginResetModel(); // todo change to begin remove rows?
+        m_settings->removeContainerConfig(m_currentlyProcessedServerIndex, dockerContainer);
+        m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
 
-    if (m_defaultContainerIndex == m_currentlyProcessedContainerIndex) {
-        if (m_containers.isEmpty()) {
-            setData(index(DockerContainer::None, 0), true, IsDefaultRole);
-        } else {
-            setData(index(m_containers.begin().key(), 0), true, IsDefaultRole);
+        if (m_defaultContainerIndex == m_currentlyProcessedContainerIndex) {
+            if (m_containers.isEmpty()) {
+                setData(index(DockerContainer::None, 0), true, IsDefaultRole);
+            } else {
+                setData(index(m_containers.begin().key(), 0), true, IsDefaultRole);
+            }
         }
+        endResetModel();
     }
-    endResetModel();
+    return errorCode;
 }
 
 void ContainersModel::clearCachedProfiles()

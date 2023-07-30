@@ -78,11 +78,5 @@ ListView {
                 Layout.fillWidth: true
             }
         }
-
-        Component.onCompleted: {
-            if (isDefault) {
-                root.currentContainerName = name
-            }
-        }
     }
 }

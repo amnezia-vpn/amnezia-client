@@ -78,6 +78,15 @@ QVariant ServersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
+void ServersModel::resetModel()
+{
+    beginResetModel();
+    m_servers = m_settings->serversArray();
+    m_defaultServerIndex = m_settings->defaultServerIndex();
+    m_currentlyProcessedServerIndex = m_defaultServerIndex;
+    endResetModel();
+}
+
 void ServersModel::setDefaultServerIndex(const int index)
 {
     m_settings->setDefaultServer(index);
@@ -90,9 +99,29 @@ const int ServersModel::getDefaultServerIndex()
     return m_defaultServerIndex;
 }
 
+const QString ServersModel::getDefaultServerName()
+{
+    return qvariant_cast<QString>(data(m_defaultServerIndex, NameRole));
+}
+
+const QString ServersModel::getDefaultServerHostName()
+{
+    return qvariant_cast<QString>(data(m_defaultServerIndex, HostNameRole));
+}
+
 const int ServersModel::getServersCount()
 {
     return m_servers.count();
+}
+
+bool ServersModel::hasServerWithWriteAccess()
+{
+    for (size_t i = 0; i < getServersCount(); i++) {
+        if (qvariant_cast<bool>(data(i, HasWriteAccessRole))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void ServersModel::setCurrentlyProcessedServerIndex(const int index)
@@ -123,7 +152,7 @@ bool ServersModel::isCurrentlyProcessedServerHasWriteAccess()
 
 bool ServersModel::isDefaultServerHasWriteAccess()
 {
-    return qvariant_cast<bool>(data(m_currentlyProcessedServerIndex, HasWriteAccessRole));
+    return qvariant_cast<bool>(data(m_defaultServerIndex, HasWriteAccessRole));
 }
 
 void ServersModel::addServer(const QJsonObject &server)

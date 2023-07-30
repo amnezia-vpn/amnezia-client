@@ -22,20 +22,12 @@ PageType {
 
     property string borderColor: "#2C2D30"
 
-    property string currentServerName
-    property string currentServerHostName
-    property string currentContainerName
+    property string defaultServerName: ServersModel.defaultServerName
+    property string defaultServerHostName: ServersModel.defaultServerHostName
+    property string defaultContainerName: ContainersModel.defaultContainerName
 
     ConnectButton {
         anchors.centerIn: parent
-    }
-
-    Connections {
-        target: ContainersModel
-
-        function onDefaultContainerChanged() {
-            root.currentContainerName = ContainersModel.getDefaultContainerName()
-        }
     }
 
     Connections {
@@ -79,7 +71,7 @@ PageType {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             Header1TextType {
-                text: root.currentServerName
+                text: root.defaultServerName
             }
 
             Image {
@@ -107,7 +99,7 @@ PageType {
                     }
                 }
 
-                description += root.currentContainerName + " | " + root.currentServerHostName
+                description += root.defaultContainerName + " | " + root.defaultServerHostName
                 return description
             }
         }
@@ -139,14 +131,14 @@ PageType {
                 Layout.topMargin: 24
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                text: root.currentServerName
+                text: root.defaultServerName
             }
 
             LabelTextType {
                 Layout.bottomMargin: 24
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                text: root.currentServerHostName
+                text: root.defaultServerHostName
             }
 
             RowLayout {
@@ -161,7 +153,7 @@ PageType {
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
 
-                    text: root.currentContainerName
+                    text: root.defaultContainerName
                     textColor: "#0E0E11"
                     headerText: qsTr("Connection protocol")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
@@ -299,9 +291,6 @@ PageType {
 
                                         ServersModel.currentlyProcessedIndex = index
                                         ServersModel.defaultIndex = index
-
-                                        root.currentServerName = name
-                                        root.currentServerHostName = hostName
                                     }
 
                                     MouseArea {
@@ -329,13 +318,6 @@ PageType {
 
                             DividerType {
                                 Layout.fillWidth: true
-                            }
-                        }
-
-                        Component.onCompleted: {
-                            if (serversMenuContent.currentIndex === index) {
-                                root.currentServerName = name
-                                root.currentServerHostName = hostName
                             }
                         }
                     }

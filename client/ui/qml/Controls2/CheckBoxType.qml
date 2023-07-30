@@ -9,6 +9,11 @@ CheckBox {
     id: root
 
     property string descriptionText
+    property string descriptionTextColor: "#878B91"
+    property string descriptionTextDisabledColor: "#494B50"
+
+    property string textColor:  "#D7D8DB"
+    property string textDisabledColor: "#878B91"
 
     property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
     property string defaultColor: "transparent"
@@ -16,14 +21,16 @@ CheckBox {
 
     property string defaultBorderColor: "#D7D8DB"
     property string checkedBorderColor: "#FBB26A"
+    property string checkedBorderDisabledColor: "#5A330C"
 
     property string checkedImageColor: "#FBB26A"
     property string pressedImageColor: "#A85809"
     property string defaultImageColor: "transparent"
+    property string checkedDisabledImageColor: "#84603D"
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
-    hoverEnabled: true
+    hoverEnabled: enabled ? true : false
 
     indicator: Rectangle {
         id: background
@@ -52,7 +59,7 @@ CheckBox {
             width: 24
             height: 24
             color: "transparent"
-            border.color: root.checked ? checkedBorderColor : defaultBorderColor
+            border.color: root.checked ? (root.enabled ? checkedBorderColor : checkedBorderDisabledColor) : defaultBorderColor
             border.width: 1
             radius: 4
 
@@ -63,7 +70,19 @@ CheckBox {
                 layer {
                     enabled: true
                     effect: ColorOverlay {
-                        color: root.pressed ? pressedImageColor : root.checked ? checkedImageColor : defaultImageColor
+                        color: {
+                            if (root.pressed) {
+                                return root.pressedImageColor
+                            } else if (root.checked) {
+                                if (root.enabled) {
+                                    return root.checkedImageColor
+                                } else {
+                                    return root.checkedDisabledImageColor
+                                }
+                            } else {
+                                return root.defaultImageColor
+                            }
+                        }
                     }
                 }
             }
@@ -90,6 +109,7 @@ CheckBox {
                 Layout.fillWidth: true
 
                 text: root.text
+                color: root.enabled ? root.textColor : root.textDisabledColor
             }
 
             CaptionTextType {
@@ -98,7 +118,7 @@ CheckBox {
                 Layout.fillWidth: true
 
                 text: root.descriptionText
-                color: "#878b91"
+                color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
 
                 visible: root.descriptionText !== ""
             }

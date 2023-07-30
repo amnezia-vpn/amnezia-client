@@ -31,11 +31,6 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
-        function onShowErrorMessage(errorMessage) {
-            popupErrorMessage.popupErrorMessageText = errorMessage
-            popupErrorMessage.open()
-        }
-
         function onShowBusyIndicator(visible) {
             busyIndicator.visible = visible
             tabBarStackView.enabled = !visible
@@ -119,14 +114,15 @@ PageType {
             Connections {
                 target: ServersModel
 
-                function onDefaultServerIndexChanged() {
-                    shareTabButton.visible = ServersModel.isCurrentlyProcessedServerHasWriteAccess()
-                    shareTabButton.width = ServersModel.isCurrentlyProcessedServerHasWriteAccess() ? undefined : 0
+                function onModelReset() {
+                    var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                    shareTabButton.visible = hasServerWithWriteAccess
+                    shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                 }
             }
 
-            visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
-            width: ServersModel.isCurrentlyProcessedServerHasWriteAccess() ? undefined : 0
+            visible: ServersModel.hasServerWithWriteAccess()
+            width: ServersModel.hasServerWithWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
@@ -149,18 +145,6 @@ PageType {
         anchors.rightMargin: shareTabButton.visible ? 96 : 128
         cursorShape: Qt.PointingHandCursor
         enabled: false
-    }
-
-    Item {
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-
-        implicitHeight: popupErrorMessage.height
-
-        PopupType {
-            id: popupErrorMessage
-        }
     }
 
     BusyIndicatorType {

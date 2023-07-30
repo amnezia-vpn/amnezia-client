@@ -258,9 +258,7 @@ PageType {
                                 questionDrawer.yesButtonFunction = function() {
                                     questionDrawer.visible = false
                                     goToPage(PageEnum.PageDeinstalling)
-                                    ContainersModel.removeCurrentlyProcessedContainer()
-                                    closePage()
-                                    closePage() //todo auto close to deinstall page?
+                                    InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 questionDrawer.noButtonFunction = function() {
                                     questionDrawer.visible = false

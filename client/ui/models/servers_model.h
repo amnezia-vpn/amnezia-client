@@ -28,17 +28,24 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant data(const int index, int role = Qt::DisplayRole) const;
 
+    void resetModel();
+
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString defaultServerHostName READ getDefaultServerHostName NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(int currentlyProcessedIndex READ getCurrentlyProcessedServerIndex WRITE setCurrentlyProcessedServerIndex
                        NOTIFY currentlyProcessedServerIndexChanged)
 
 public slots:
     void setDefaultServerIndex(const int index);
     const int getDefaultServerIndex();
+    const QString getDefaultServerName();
+    const QString getDefaultServerHostName();
     bool isDefaultServerCurrentlyProcessed();
 
     bool isCurrentlyProcessedServerHasWriteAccess();
     bool isDefaultServerHasWriteAccess();
+    bool hasServerWithWriteAccess();
 
     const int getServersCount();
 

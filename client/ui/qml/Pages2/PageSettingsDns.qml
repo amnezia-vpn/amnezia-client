@@ -55,6 +55,9 @@ PageType {
                 headerText: "Primary DNS"
 
                 textFieldText: SettingsController.primaryDns
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: InstallController.ipAddressRegExp()
+                }
             }
 
             TextFieldWithHeaderType {
@@ -64,6 +67,9 @@ PageType {
                 headerText: "Secondary DNS"
 
                 textFieldText: SettingsController.secondaryDns
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: InstallController.ipAddressRegExp()
+                }
             }
 
             BasicButtonType {

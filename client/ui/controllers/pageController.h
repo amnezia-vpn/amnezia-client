@@ -84,7 +84,7 @@ signals:
     void replaceStartPage();
 
     void showErrorMessage(QString errorMessage);
-    void showInfoMessage(QString message);
+    void showNotificationMessage(QString message);
 
     void showBusyIndicator(bool visible);
 

@@ -28,17 +28,26 @@ public slots:
 
     void updateContainer(QJsonObject config);
 
+    void removeCurrentlyProcessedServer();
+    void removeAllContainers();
+    void removeCurrentlyProcessedContainer();
+
     QRegularExpression ipAddressPortRegExp();
+    QRegularExpression ipAddressRegExp();
 
     void mountSftpDrive(const QString &port, const QString &password, const QString &username);
 
 signals:
-    void installContainerFinished(bool isInstalledContainerFound);
-    void installServerFinished(bool isInstalledContainerFound);
+    void installContainerFinished(QString finishMessage);
+    void installServerFinished(QString finishMessage);
 
     void updateContainerFinished();
 
     void scanServerFinished(bool isInstalledContainerFound);
+
+    void removeCurrentlyProcessedServerFinished(QString finishedMessage);
+    void removeAllContainersFinished(QString finishedMessage);
+    void removeCurrentlyProcessedContainerFinished(QString finishedMessage);
 
     void installationErrorOccurred(QString errorMessage);
 
@@ -57,7 +66,9 @@ private:
 
     bool m_shouldCreateServer;
 
+#ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
+#endif
 };
 
 #endif // INSTALLCONTROLLER_H

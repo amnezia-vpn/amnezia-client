@@ -9,14 +9,16 @@ RadioButton {
 
     property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
     property string defaultColor: Qt.rgba(1, 1, 1, 0)
-    property string disabledColor: Qt.rgba(1, 1, 1, 0)
-    property string selectedColor: Qt.rgba(1, 1, 1, 0)
+    property string checkedColor: Qt.rgba(1, 1, 1, 0)
+    property string disabledColor: "transparent"
 
-    property string textColor: "#0E0E11"
+    property string textColor:  "#D7D8DB"
+    property string textDisabledColor: "#878B91"
 
     property string pressedBorderColor: "#494B50"
-    property string selectedBorderColor: "#FBB26A"
+    property string checkedBorderColor: "#FBB26A"
     property string defaultBodredColor: "transparent"
+    property string checkedDisabledBorderColor: "#84603D"
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
@@ -27,39 +29,39 @@ RadioButton {
         radius: 16
 
         color: {
-//            if (root.enabled) {
+            if (root.enabled) {
                 if (root.hovered) {
-                    return hoveredColor
+                    return root.hoveredColor
                 } else if (root.checked) {
-                    return selectedColor
+                    return root.checkedColor
                 }
-                return defaultColor
-//            } else {
-//                return disabledColor
-//            }
+                return root.defaultColor
+            } else {
+                return root.disabledColor
+            }
         }
 
         border.color: {
-//            if (root.enabled) {
+            if (root.enabled) {
                 if (root.pressed) {
-                    return pressedBorderColor
+                    return root.pressedBorderColor
                 } else if (root.checked) {
-                    return selectedBorderColor
+                    return root.checkedBorderColor
                 }
-                return defaultBodredColor
-//            }
-//            return defaultBodredColor
+                return root.defaultBodredColor
+            } else {
+                if (root.checked) {
+                    return root.checkedDisabledBorderColor
+                }
+                return root.defaultBodredColor
+            }
         }
 
         border.width: {
-//            if (root.enabled) {
-                if(root.checked) {
-                    return 1
-                }
-                return root.pressed ? 1 : 0
-//            } else {
-//                return 0
-//            }
+            if(root.checked) {
+                return 1
+            }
+            return root.pressed ? 1 : 0
         }
 
         Behavior on color {
@@ -77,6 +79,7 @@ RadioButton {
 
         ButtonTextType {
             text: root.text
+            color: root.enabled ? root.textColor : root.textDisabledColor
 
             Layout.fillWidth: true
             Layout.rightMargin: 16

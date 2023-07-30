@@ -36,9 +36,9 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(const int index, int role) const;
 
-signals:
-    void defaultContainerChanged();
+    Q_PROPERTY(QString defaultContainerName READ getDefaultContainerName NOTIFY defaultContainerChanged)
 
 public slots:
     DockerContainer getDefaultContainer();
@@ -52,8 +52,8 @@ public slots:
     QString getCurrentlyProcessedContainerName();
     QJsonObject getCurrentlyProcessedContainerConfig();
 
-    void removeAllContainers();
-    void removeCurrentlyProcessedContainer();
+    ErrorCode removeAllContainers();
+    ErrorCode removeCurrentlyProcessedContainer();
     void clearCachedProfiles();
 
     bool isAmneziaDnsContainerInstalled();
@@ -61,6 +61,9 @@ public slots:
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
+
+signals:
+    void defaultContainerChanged();
 
 private:
     QMap<DockerContainer, QJsonObject> m_containers;

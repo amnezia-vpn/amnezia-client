@@ -92,6 +92,7 @@ PageType {
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
                         SettingsController.clearSettings()
+                        PageController.replaceStartPage()
                     }
                     questionDrawer.noButtonFunction = function() {
                         questionDrawer.visible = false

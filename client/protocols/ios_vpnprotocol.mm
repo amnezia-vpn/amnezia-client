@@ -136,7 +136,7 @@ void IOSVpnProtocol::stop()
     
     [m_controller disconnect];
     
-    emit connectionStateChanged(Disconnected);
+    emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
     
     [m_controller dealloc];
     m_controller = nullptr;
@@ -264,7 +264,7 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
                 [m_controller dealloc];
                 m_controller = nullptr;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Error);
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
                     m_isChangingState = false;
                 });
                 return;
@@ -272,7 +272,7 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Connected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     m_isChangingState = false;
                 });
                 return;
@@ -280,7 +280,7 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
             case ConnectionStateDisconnected:
                 [m_controller disconnect];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
                 return;
@@ -294,13 +294,13 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
         qDebug() << "State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                emit connectionStateChanged(Connected);
+                emit connectionStateChanged(Vpn::ConnectionState::Connected);
                 m_isChangingState = false;
             });
             return;
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -325,7 +325,7 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
                 [m_controller dealloc];
                 m_controller = nullptr;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Error);
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
                     m_isChangingState = false;
                 });
                 return;
@@ -333,7 +333,7 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Connected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     m_isChangingState = false;
                 });
                 return;
@@ -341,7 +341,7 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
                 return;
@@ -355,13 +355,13 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
         qDebug() << "VPN State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                emit connectionStateChanged(Connected);
+                emit connectionStateChanged(Vpn::ConnectionState::Connected);
                 m_isChangingState = false;
             });
             return;
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -388,7 +388,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
                 [m_controller dealloc];
                 m_controller = nullptr;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Error);
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
                     m_isChangingState = false;
                 });
                 return;
@@ -396,7 +396,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Connected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     m_isChangingState = false;
                 });
                 return;
@@ -404,7 +404,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
                 return;
@@ -418,13 +418,13 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
         qDebug() << "VPN State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                emit connectionStateChanged(Connected);
+                emit connectionStateChanged(Vpn::ConnectionState::Connected);
                 m_isChangingState = false;
             });
             return;
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -452,7 +452,7 @@ void IOSVpnProtocol::setupShadowSocksProtocol(const QJsonObject &rawConfig)
                 [m_controller dealloc];
                 m_controller = nullptr;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Error);
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
                     m_isChangingState = false;
                 });
                 return;
@@ -460,7 +460,7 @@ void IOSVpnProtocol::setupShadowSocksProtocol(const QJsonObject &rawConfig)
             case ConnectionStateConnected: {
                 Q_ASSERT(date);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Connected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     m_isChangingState = false;
                 });
                 return;
@@ -468,7 +468,7 @@ void IOSVpnProtocol::setupShadowSocksProtocol(const QJsonObject &rawConfig)
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                    emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
                 return;
@@ -482,13 +482,13 @@ void IOSVpnProtocol::setupShadowSocksProtocol(const QJsonObject &rawConfig)
         qDebug() << "SS State changed: " << a_connected;
         if (a_connected) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                emit connectionStateChanged(Connected);
+                emit connectionStateChanged(Vpn::ConnectionState::Connected);
                 m_isChangingState = false;
             });
             return;
         }
             dispatch_async(dispatch_get_main_queue(), ^{
-                emit connectionStateChanged(Disconnected);
+                emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
                 m_isChangingState = false;
             });
     }];
@@ -539,7 +539,7 @@ void IOSVpnProtocol::launchWireguardTunnel(const QJsonObject &rawConfig)
                        failureCallback:^() {
         qDebug() << "Wireguard Protocol - connection failed";
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -590,7 +590,7 @@ void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
                         failureCallback:^{
         qDebug() << "IOSVPNProtocol (OpenVPN Cloak) - connection failed";
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -607,7 +607,7 @@ void IOSVpnProtocol::launchOpenVPNTunnel(const QJsonObject &rawConfig)
                         failureCallback:^{
         qDebug() << "IOSVPNProtocol (OpenVPN) - connection failed";
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];
@@ -624,7 +624,7 @@ void IOSVpnProtocol::launchShadowSocksTunnel(const QJsonObject &rawConfig) {
                       failureCallback:^{
         qDebug() << "IOSVPNProtocol (ShadowSocks) - connection failed";
         dispatch_async(dispatch_get_main_queue(), ^{
-            emit connectionStateChanged(Disconnected);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
             m_isChangingState = false;
         });
     }];

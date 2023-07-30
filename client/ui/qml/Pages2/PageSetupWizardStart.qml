@@ -16,11 +16,6 @@ PageType {
     Connections {
         target: PageController
 
-        function onShowErrorMessage(errorMessage) {
-            popupErrorMessage.popupErrorMessageText = errorMessage
-            popupErrorMessage.open()
-        }
-
         function onGoToPageViewConfig() {
             goToPage(PageEnum.PageSetupWizardViewConfig)
         }
@@ -96,18 +91,6 @@ PageType {
 
         ConnectionTypeSelectionDrawer {
             id: connectionTypeSelection
-        }
-    }
-
-    Item {
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-
-        implicitHeight: popupErrorMessage.height
-
-        PopupType {
-            id: popupErrorMessage
         }
     }
 }

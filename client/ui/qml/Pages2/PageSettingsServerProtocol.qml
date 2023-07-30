@@ -81,13 +81,12 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                var containerIndex = ContainersModel.getCurrentlyProcessedContainerIndex()
-                                switch (containerIndex) {
-                                case ContainerEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                case ContainerEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                case ContainerEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                case ContainerEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                case ContainerEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                switch (protocolIndex) {
+                                case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 }
                                 goToPage(protocolPage);
                             }
@@ -113,8 +112,19 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    ContainersModel.removeCurrentlyProcessedContainer()
-                    closePage()
+                    questionDrawer.headerText = qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" from server?")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        goToPage(PageEnum.PageDeinstalling)
+                        InstallController.removeCurrentlyProcessedContainer()
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
                 }
 
                 MouseArea {
@@ -125,6 +135,10 @@ PageType {
             }
 
             DividerType {}
+        }
+
+        QuestionDrawer {
+            id: questionDrawer
         }
     }
 }

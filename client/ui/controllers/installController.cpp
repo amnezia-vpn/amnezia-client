@@ -88,14 +88,20 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode =
             serverController.getAlreadyInstalledContainers(m_currentlyInstalledServerCredentials, installedContainers);
+
+    QString finishMessage = "";
+
     if (!installedContainers.contains(container)) {
         errorCode = serverController.setupContainer(m_currentlyInstalledServerCredentials, container, config);
         installedContainers.insert(container, config);
+        finishMessage = ContainerProps::containerHumanNames().value(container) + tr(" installed successfully. ");
+    } else {
+        finishMessage =
+                ContainerProps::containerHumanNames().value(container) + tr(" is already installed on the server. ");
     }
-
-    bool isInstalledContainerFound = false;
-    if (!installedContainers.isEmpty()) {
-        isInstalledContainerFound = true;
+    if (installedContainers.size() > 1) {
+        finishMessage += tr("\nAlready installed containers were found on the server. "
+                            "All installed containers have been added to the application");
     }
 
     if (errorCode == ErrorCode::NoError) {
@@ -117,7 +123,7 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
         m_serversModel->addServer(server);
         m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
-        emit installServerFinished(false); // todo incorrect notification about found containers
+        emit installServerFinished(finishMessage);
         return;
     }
 
@@ -135,15 +141,18 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode = serverController.getAlreadyInstalledContainers(serverCredentials, installedContainers);
 
-    bool isInstalledContainerFound = false;
-    if (!installedContainers.isEmpty()) {
-        isInstalledContainerFound = true;
-    }
+    QString finishMessage = "";
 
     if (!installedContainers.contains(container)) {
         errorCode = serverController.setupContainer(serverCredentials, container, config);
         installedContainers.insert(container, config);
+        finishMessage = ContainerProps::containerHumanNames().value(container) + tr(" installed successfully. ");
+    } else {
+        finishMessage =
+                ContainerProps::containerHumanNames().value(container) + tr(" is already installed on the server. ");
     }
+
+    bool isInstalledContainerAddedToGui = false;
 
     if (errorCode == ErrorCode::NoError) {
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
@@ -153,10 +162,17 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
             if (containerConfig.isEmpty()) {
                 m_containersModel->setData(m_containersModel->index(iterator.key()), iterator.value(),
                                            ContainersModel::Roles::ConfigRole);
+                if (container != iterator.key()) { // skip the newly installed container
+                    isInstalledContainerAddedToGui = true;
+                }
             }
         }
+        if (isInstalledContainerAddedToGui) {
+            finishMessage += tr("\nAlready installed containers were found on the server. "
+                                "All installed containers have been added to the application");
+        }
 
-        emit installContainerFinished(false); // todo incorrect notification about found containers
+        emit installContainerFinished(finishMessage);
         return;
     }
 
@@ -233,9 +249,53 @@ void InstallController::updateContainer(QJsonObject config)
     emit installationErrorOccurred(errorString(errorCode));
 }
 
+void InstallController::removeCurrentlyProcessedServer()
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+
+    m_serversModel->removeServer();
+    emit removeCurrentlyProcessedServerFinished(tr("Server '") + serverName + tr("' was removed"));
+}
+
+void InstallController::removeAllContainers()
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+
+    ErrorCode errorCode = m_containersModel->removeAllContainers();
+    if (errorCode == ErrorCode::NoError) {
+        emit removeAllContainersFinished(tr("All containers from server '") + serverName + ("' have been removed"));
+        return;
+    }
+    emit installationErrorOccurred(errorString(errorCode));
+}
+
+void InstallController::removeCurrentlyProcessedContainer()
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+
+    int container = m_containersModel->getCurrentlyProcessedContainerIndex();
+    QString containerName = m_containersModel->data(container, ContainersModel::Roles::NameRole).toString();
+
+    ErrorCode errorCode = m_containersModel->removeCurrentlyProcessedContainer();
+    if (errorCode == ErrorCode::NoError) {
+        emit removeCurrentlyProcessedContainerFinished(containerName + tr(" has been removed from the server '")
+                                                       + serverName + "'");
+        return;
+    }
+    emit installationErrorOccurred(errorString(errorCode));
+}
+
 QRegularExpression InstallController::ipAddressPortRegExp()
 {
     return Utils::ipAddressPortRegExp();
+}
+
+QRegularExpression InstallController::ipAddressRegExp()
+{
+    return Utils::ipAddressRegExp();
 }
 
 void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName,

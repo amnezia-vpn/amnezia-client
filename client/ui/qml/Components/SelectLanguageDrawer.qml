@@ -67,7 +67,7 @@ DrawerType {
 
                 delegate: Item {
                     implicitWidth: root.width
-                    implicitHeight: content.implicitHeight
+                    implicitHeight: delegateContent.implicitHeight
 
                     ColumnLayout {
                         id: delegateContent

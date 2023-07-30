@@ -58,7 +58,7 @@ PageType {
     property string fullConfigServerSelectorText
     property string connectionServerSelectorText
     property bool showContent: false
-    property bool shareButtonEnabled: false
+    property bool shareButtonEnabled: true
     property list<QtObject> connectionTypesModel: [
         amneziaConnectionFormat
     ]
@@ -140,6 +140,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             serverSelector.text = root.fullConfigServerSelectorText
+                            root.shareButtonEnabled = true
                         }
                     }
                 }

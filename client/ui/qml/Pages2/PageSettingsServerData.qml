@@ -27,6 +27,32 @@ PageType {
 
             PageController.showErrorMessage(message)
         }
+
+        function onInstallationErrorOccurred(errorMessage) {
+            closePage() // close deInstalling page
+            PageController.showErrorMessage(errorMessage)
+        }
+
+        function onRemoveCurrentlyProcessedServerFinished(finishedMessage) {
+            if (!ServersModel.getServersCount()) {
+                PageController.replaceStartPage()
+            } else {
+                goToStartPage()
+                goToPage(PageEnum.PageSettingsServersList)
+            }
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
+        function onRemoveAllContainersFinished(finishedMessage) {
+            closePage() // close deInstalling page
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
+        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+            closePage() // close deInstalling page
+            closePage() // close page with remove button
+            PageController.showNotificationMessage(finishedMessage)
+        }
     }
 
     Connections {
@@ -112,16 +138,12 @@ PageType {
 
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
+                        PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
                         }
-                        ServersModel.removeServer()
-                        if (!ServersModel.getServersCount()) {
-                            PageController.replaceStartPage()
-                        } else {
-                            goToStartPage()
-                            goToPage(PageEnum.PageSettingsServersList)
-                        }
+                        InstallController.removeCurrentlyProcessedServer()
+                        PageController.showBusyIndicator(false)
                     }
                     questionDrawer.noButtonFunction = function() {
                         questionDrawer.visible = false
@@ -151,8 +173,7 @@ PageType {
                         if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected) {
                             ConnectionController.closeVpnConnection()
                         }
-                        ContainersModel.removeAllContainers()
-                        closePage()
+                        InstallController.removeAllContainers()
                     }
                     questionDrawer.noButtonFunction = function() {
                         questionDrawer.visible = false

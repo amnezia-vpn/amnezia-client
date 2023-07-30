@@ -22,7 +22,7 @@ PageType {
             PageController.showErrorMessage(errorMessage)
         }
 
-        function onInstallContainerFinished(isInstalledContainerFound) {
+        function onInstallContainerFinished(finishedMessage) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
@@ -33,14 +33,10 @@ PageType {
                 goToPage(PageEnum.PageHome)
             }
 
-            if (isInstalledContainerFound) {
-                //todo change to info message
-                PageController.showErrorMessage(qsTr("The container you are trying to install is already installed on the server. " +
-                                                     "All installed containers have been added to the application"))
-            }
+            PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onInstallServerFinished(isInstalledContainerFound) {
+        function onInstallServerFinished(finishedMessage) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState()
@@ -50,10 +46,7 @@ PageType {
                 PageController.replaceStartPage()
             }
 
-            if (isInstalledContainerFound) {
-                PageController.showErrorMessage(qsTr("The container you are trying to install is already installed on the server. " +
-                                                     "All installed containers have been added to the application"))
-            }
+            PageController.showNotificationMessage(finishedMessage)
         }
 
         function onServerAlreadyExists(serverIndex) {

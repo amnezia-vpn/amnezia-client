@@ -47,6 +47,9 @@ signals:
     void secondaryDnsChanged();
     void loggingStateChanged();
 
+    void restoreBackupFinished();
+    void changeSettingsErrorOccurred(QString errorMessage);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
