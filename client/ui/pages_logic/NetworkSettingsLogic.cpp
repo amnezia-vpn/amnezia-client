@@ -1,6 +1,6 @@
 #include "NetworkSettingsLogic.h"
 
-#include "defines.h"
+#include "version.h"
 #include "utilities.h"
 #include "settings.h"
 

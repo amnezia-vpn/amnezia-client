@@ -48,7 +48,7 @@ func wg_log(_ type: OSLogType, staticMessage msg: StaticString) {
 }
 
 func wg_log(_ type: OSLogType, message msg: String) {
-    os_log("%{public}s", log: OSLog.default, type: type, msg)
+    os_log("%{AMNEZIA}s", log: OSLog.default, type: type, msg)
     Logger.global?.log(message: msg)
     NSLog("AMNEZIA: \(msg)")
 }

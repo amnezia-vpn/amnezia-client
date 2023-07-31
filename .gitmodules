@@ -6,7 +6,7 @@
 	url = https://github.com/WireGuard/wireguard-apple
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
-	url = https://github.com/ss-abramchuk/OpenVPNAdapter.git
+	url = https://github.com/amnezia-vpn/OpenVPNAdapter.git
 [submodule "client/3rd/ShadowPath"]
 	path = client/3rd/ShadowPath
 	url = https://github.com/qman9501/ShadowPath
@@ -22,18 +22,30 @@
 [submodule "client/3rd/qtkeychain"]
 	path = client/3rd/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain.git
-[submodule "client/3rd/libssh"]
-	path = client/3rd/libssh
-	url = https://git.libssh.org/projects/libssh.git/
-[submodule "client/3rd/zlib"]
-	path = client/3rd/zlib
-	url = https://github.com/madler/zlib.git
-[submodule "deploy/amnezia-ios-certificates"]
-	path = deploy/amnezia-ios-certificates
-	url = https://github.com/amnezia-vpn/amnezia-ios-certificates.git
 [submodule "client/3rd/SortFilterProxyModel"]
 	path = client/3rd/SortFilterProxyModel
 	url = https://github.com/mitchcurtis/SortFilterProxyModel.git
-[submodule "client/3rd/mbedtls"]
-	path = client/3rd/mbedtls
-	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "client/android/cpp/openvpn3"]
+	path = client/android/cpp/openvpn3
+	url = https://github.com/amnezia-vpn/openvpn3.git
+[submodule "client/android/cpp/asio"]
+	path = client/android/cpp/asio
+	url = https://github.com/chriskohlhoff/asio
+[submodule "client/android/cpp/lz4"]
+	path = client/android/cpp/lz4
+	url = https://github.com/lz4/lz4.git
+[submodule "client/android/cpp/openssl"]
+	path = client/android/cpp/openssl
+	url = https://github.com/schwabe/platform_external_openssl.git
+[submodule "client/android/cpp/cloak"]
+	path = client/android/cpp/cloak
+	url = https://github.com/amnezia-vpn/Cloak
+[submodule "client/android/cpp/lzo"]
+	path = client/android/cpp/lzo
+	url = https://github.com/amnezia-vpn/lzo.git
+[submodule "client/3rd-prebuilt"]
+	path = client/3rd-prebuilt
+	url = https://github.com/amnezia-vpn/3rd-prebuilt
+[submodule "client/3rd/wireguard-go"]
+	path = client/3rd/wireguard-go
+	url = https://github.com/WireGuard/wireguard-go

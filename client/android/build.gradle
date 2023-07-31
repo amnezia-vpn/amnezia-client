@@ -11,12 +11,15 @@ buildscript {
        streamsupportVersion = '1.7.0'
        threetenabpVersion = '1.1.1'
        groupName = 'org.amnezia.vpn'
+       minSdkVer = '24'
+       cmakeMinVersion = "3.25.0+"
    }
 
     repositories {
         google()
         jcenter()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 
     dependencies {
@@ -36,9 +39,8 @@ apply plugin: 'kotlin-kapt'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-
+    implementation group: 'org.json', name: 'json', version: '20220924'
     implementation 'androidx.core:core-ktx:1.7.0'
-
     implementation 'androidx.appcompat:appcompat:1.4.1'
 
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
@@ -135,48 +137,16 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = 24
-        targetSdkVersion = 31
-        versionCode 10 // Change to a higher number
-        versionName "2.0.10" // Change to a higher number
+        targetSdkVersion = 34
+        versionCode 26 // Change to a higher number
+        versionName "3.0.8" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
             "room.schemaLocation": "${qtAndroidDir}/schemas".toString()
         ]
     }
 
-   buildTypes {
-       release {
-           // That would enable treeshaking and remove java code that is just called from qt
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
-               }
-           }
-       }
-       debug {
-           //applicationIdSuffix ".debug"
-           //versionNameSuffix "-debug"
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}", "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}"
-               }
-           }
-       }
-   }
 
-//   externalNativeBuild {
-//       cmake {
-//           path 'wireguard/CMakeLists.txt'
-//       }
-//   }
-
-//   externalNativeBuild {
-//       cmake {
-//           path 'openvpn/src/main/cpp/CMakeLists.txt'
-//       }
-//   }
 }
 
 

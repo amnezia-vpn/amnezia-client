@@ -688,23 +688,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 */
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
-        wg_log(.info, message: "Inside setupAndlaunchOpenVPN()")
         let str = String(decoding: ovpnConfiguration, as: UTF8.self)
-        wg_log(.info, message: "OPENVPN config: \(str)")
-        
+
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = ovpnConfiguration
-        if viaSS {
-//            configuration.settings = [
-//                "remote": "137.74.6.148 1194",
-//                "proto": "tcp",
-//                "link-mtu": "1480",
-//                "tun-mtu": "1460",
-//            ]
+        if(str.contains("cloak")){
+            configuration.setPTCloak();
         }
+
         let evaluation: OpenVPNConfigurationEvaluation
         do {
             evaluation = try ovpnAdapter.apply(configuration: configuration)
+            
         } catch {
             completionHandler(error)
             return

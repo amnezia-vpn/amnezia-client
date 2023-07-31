@@ -93,7 +93,7 @@ object NotificationUtil {
         val prefs = Prefs.get(service)
         val message =
             "" + prefs.getString("fallbackNotificationMessage", "Running in the Background")
-        val header = "" + prefs.getString("fallbackNotificationHeader", "Mozilla VPN")
+        val header = "" + prefs.getString("fallbackNotificationHeader", "Amnezia VPN")
 
         // Create the Intent that Should be Fired if the User Clicks the notification
         val mainActivityName = "org.amnezia.vpn.qt.VPNActivity"

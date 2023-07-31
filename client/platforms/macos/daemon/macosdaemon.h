@@ -5,7 +5,7 @@
 #ifndef MACOSDAEMON_H
 #define MACOSDAEMON_H
 
-#include "daemon.h"
+#include "daemon/daemon.h"
 #include "dnsutilsmacos.h"
 #include "iputilsmacos.h"
 #include "wireguardutilsmacos.h"
@@ -18,8 +18,6 @@ class MacOSDaemon final : public Daemon {
   ~MacOSDaemon();
 
   static MacOSDaemon* instance();
-
-  QByteArray getStatus() override;
 
  protected:
   WireguardUtils* wgutils() const override { return m_wgutils; }

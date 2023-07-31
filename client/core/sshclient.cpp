@@ -143,8 +143,6 @@ namespace libssh {
                     {
                         output = std::string(buffer, bytesRead);
                         if (!output.empty()) {
-                            qDebug().noquote() << (isStdErr ? "stdErr" : "stdOut") << QString(output.c_str());
-
                             if (cbReadStdOut && !isStdErr){
                                 auto error = cbReadStdOut(output.c_str(), *this);
                                 if (error != ErrorCode::NoError) {
@@ -257,7 +255,6 @@ namespace libssh {
                     int bytesWritten = sftp_write(file, buffer, bufferSize);
 
                     std::string chunk(buffer, bufferSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     if (bytesWritten != bufferSize) {
                         fin.close();
@@ -272,7 +269,6 @@ namespace libssh {
                     fin.read(buffer, lastChunkSize);
 
                     std::string chunk(buffer, lastChunkSize);
-                    qDebug() << "sftp write: " << QString(chunk.c_str());
 
                     int bytesWritten = sftp_write(file, buffer, lastChunkSize);
 

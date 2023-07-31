@@ -23,7 +23,7 @@ class StartPageLogic : public PageLogicBase
     AUTO_PROPERTY(QString, labelWaitInfoText)
     AUTO_PROPERTY(bool, pushButtonBackFromStartVisible)
 
-    AUTO_PROPERTY(QString, privateKeyPassphrase);
+    AUTO_PROPERTY(QString, privateKeyPassphrase)
 
     READONLY_PROPERTY(QRegularExpression, ipAddressPortRegex)
 public:
@@ -37,7 +37,7 @@ public:
     Q_INVOKABLE void startQrDecoder();
 #endif
 
-    void selectConfigFormat(QString configData);
+    void importAnyFile(const QString &configData);
 
     bool importConnection(const QJsonObject &profile);
     bool importConnectionFromCode(QString code);

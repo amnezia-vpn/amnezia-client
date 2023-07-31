@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Build script started ..."
 
 set -o errexit -o nounset

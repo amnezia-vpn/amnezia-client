@@ -91,7 +91,6 @@ AndroidController::AndroidController() : QObject()
 
     connect(activity, &AndroidVPNActivity::eventStatisticUpdate, this,
         [this](const QString& parcelBody) {
-            qDebug() << "Transact: update";
             auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
 
             QString rx = doc.object()["rx_bytes"].toString();
@@ -229,8 +228,6 @@ void AndroidController::setFallbackConnectedNotification() {
 }
 
 void AndroidController::checkStatus() {
-    qDebug() << "check status";
-
     AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_STATISTIC, QString());
 }
 
@@ -249,7 +246,7 @@ void AndroidController::cleanupBackendLogs() {
 }
 
 void AndroidController::importConfig(const QString& data){
-    m_startPageLogic->selectConfigFormat(data);
+    m_startPageLogic->importAnyFile(data);
 }
 
 const QJsonObject &AndroidController::vpnConfig() const
@@ -265,11 +262,6 @@ void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
 void AndroidController::startQrReaderActivity()
 {
     AndroidVPNActivity::instance()->startQrCodeReader();
-}
-
-void AndroidController::copyTextToClipboard(QString text)
-{
-    AndroidVPNActivity::instance()->copyTextToClipboard(text);
 }
 
 void AndroidController::scheduleStatusCheckSlot()

@@ -20,6 +20,7 @@ public:
         QString serverPubKey; // tls-auth key
         QString pskKey; // preshared key
         QString host; // host ip
+        QString port;
     };
 
     QString genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,

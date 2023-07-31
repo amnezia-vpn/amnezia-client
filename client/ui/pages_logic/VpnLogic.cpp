@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <functional>
 #include "../uilogic.h"
-#include "defines.h"
+#include "version.h"
 #include <configurators/vpn_configurator.h>
 
 
@@ -80,7 +80,6 @@ void VpnLogic::onUpdatePage()
         set_labelCurrentDns(dns.first + ", " + dns.second);
     }
 
-
     set_isContainerSupportedByCurrentPlatform(ContainerProps::isSupportedByCurrentPlatform(selectedContainer));
     if (!isContainerSupportedByCurrentPlatform()) {
         set_labelErrorText(tr("AmneziaVPN not supporting selected protocol on this device. Select another protocol."));
@@ -149,7 +148,7 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
         break;
     case VpnProtocol::Connecting:
         pbConnectChecked = true;
-        pbConnectEnabled = false;
+        pbConnectEnabled = true;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;

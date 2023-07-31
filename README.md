@@ -1,16 +1,24 @@
 # Amnezia VPN
 ## _The best client for self-hosted VPN_
 
-[![Build Status](https://github.com/amnezia-vpn/desktop-client/actions/workflows/deploy.yml/badge.svg?branch=dev)]
+[![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
-Amnezia is a VPN client with the key feature of deploying your own VPN server on you virtual server.
+Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
 ## Features
-- Very easy to use - enter your ip address, ssh login and password, and Amnezia client will automatically install VPN docker containers to your server and connect to VPN.
-- OpenVPN and OpenVPN over ShadowSocks protocols support. 
-- Custom VPN routing mode support - add any sites to client to enable VPN only for them.
-- Windows and MacOS support.
-- Unsecure sharing connection profile for family use.
+- Very easy to use - enter your ip address, ssh login and password, and Amnezia will automatically install VPN docker containers to your server and connect to VPN.
+- OpenVPN, ShadowSocks, WireGuard, IKEv2 protocols support.
+- Masking VPN with OpenVPN over Cloak plugin
+- Split tunneling support - add any sites to client to enable VPN only for them (only for desktops)
+- Windows, MacOS, Linux, Android, iOS releases.
+
+## Links
+[https://amnezia.org](https://amnezia.org) - project website  
+[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
+[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
+[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
 
 ## Tech
 
@@ -20,7 +28,7 @@ AmneziaVPN uses a number of open source projects to work:
 - [OpenVPN](https://openvpn.net/)
 - [ShadowSocks](https://shadowsocks.org/)
 - [Qt](https://www.qt.io/)
-- [QtSsh](https://github.com/jaredtao/QtSsh) - forked form Qt Creator
+- [LibSsh](https://libssh.org) - forked form Qt Creator
 - and more...
 
 ## Checking out the source code
@@ -36,39 +44,35 @@ git submodule update --init
 Want to contribute? Welcome!
 
 ### Building sources and deployment
-Easiest way to build your own executables - is to fork project and configure [Travis CI](https://travis-ci.com/)  
-Or you can build sources manually using Qt Creator. Qt >= 14.2 supported.  
-Look to the `build_macos.sh` and `build_windows.bat` scripts in `deploy` folder for details.
+Look deploy folder for build scripts. 
 
 ### How to build iOS app from source code on MacOS
 
-1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, 
-at least version 12 or higher.
+1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, at least version 14 or higher.
 
-2. We use `qmake` to generate the XCode project and then we "patch" it to add
-extra components such as the wireguard, the browser bridge and so on. We patch
-the XCode project using [xcodeproj](https://github.com/CocoaPods/Xcodeproj). To
-install it:
-```bash
-gem install xcodeproj # probably you want to run this command with `sudo`
-```
-3. You also need to install go >= v1.16. If you don't have it done already,
+2. We use QT to generate the XCode project. we need QT version 6.4. Install QT for macos in [here](https://doc.qt.io/qt-6/macos.html)
+
+3. Install cmake is require. We recommend cmake version 3.25. You can install cmake in [here](https://cmake.org/download/)
+
+4. You also need to install go >= v1.16. If you don't have it done already,
 download go from the [official website](https://golang.org/dl/) or use Homebrew. 
-Latest version is recommended.
-
-4. Navigate inside client folder and generate the XCode project using our script:
+Latest version is recommended. Install gomobile
 ```bash
-cd client
-./scripts/apple_compile.sh ios
+export PATH=$PATH:~/go/bin
+go install golang.org/x/mobile/cmd/gomobile@latest
+gomobile init
 ```
 
-If you have more than one version of Qt installed, you'll most likely get
-a "`qmake` cannot be found in your `$PATH`" error. In this case run this script 
-using QT\IOS\_BIN env to set the path for the Qt5 macos build bin folder.
-For example, the path could look like this:
+5. Build project
 ```bash
-QT_IOS_BIN="/Users/username/Qt/6.4.1/ios/bin" ./scripts/apple_compile.sh ios
+export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
+export QT_IOS_BIN=$QT_BIN_DIR
+export PATH=$PATH:~/go/bin
+mkdir build-ios
+$QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_BIN_DIR
 ```
+Replace PATH-TO-QT-FOLDER and QT-VERSION to your environment
+
 
 If you get `gomobile: command not found` make sure to set PATH to the location 
 of the bin folder where gomobile was installed. Usually, it's in `GOPATH`.
@@ -76,7 +80,7 @@ of the bin folder where gomobile was installed. Usually, it's in `GOPATH`.
 export PATH=$(PATH):/path/to/GOPATH/bin
 ```
 
-5. Xcode should automatically open. You can then run/test/archive/ship the app.
+5. Open XCode project. You can then run/test/archive/ship the app.
 
 If build fails with the following error
 ```
@@ -124,12 +128,6 @@ You may face compiling issues in QT Creator after you've worked in Android Studi
 
 ## License
 GPL v.3
-
-## Contacts
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
-[https://signal.group/...](https://signal.group/#CjQKIB2gUf8QH_IXnOJMGQWMDjYz9cNfmRQipGWLFiIgc4MwEhAKBONrSiWHvoUFbbD0xwdh) - Signal channel  
-[https://amnezia.org](https://amnezia.org) - project website  
 
 ## Donate
 Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u  

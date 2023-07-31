@@ -9,27 +9,99 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat)
 qt_standard_project_setup()
 
+configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+
 set(HEADERS
-        ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
-        ${CMAKE_CURRENT_LIST_DIR}/localserver.h
-        ${CMAKE_CURRENT_LIST_DIR}/logger.h
-        ${CMAKE_CURRENT_LIST_DIR}/router.h
-        ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
+    ${CMAKE_CURRENT_LIST_DIR}/localserver.h
+    ${CMAKE_CURRENT_LIST_DIR}/logger.h
+    ${CMAKE_CURRENT_LIST_DIR}/router.h
+    ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
 set(SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/logger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/router.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/logger.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/router.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
 )
+
+# Mozilla headres
+set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/dnsutils.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/iputils.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardutils.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/loglevel.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/models/server.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/controllerimpl.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/dnspingsender.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/localsocketcontroller.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/networkwatcher.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/networkwatcherimpl.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pinghelper.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsender.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsenderfactory.h
+)
+
+include_directories(../../client/mozilla)
+include_directories(../../client/mozilla/shared)
+include_directories(../../client/mozilla/models)
+include_directories(../../client/platforms/)
+
+# Mozilla sources
+set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/models/server.cpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.cpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.cpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/dnspingsender.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/localsocketcontroller.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/networkwatcher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pinghelper.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsender.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/pingsenderfactory.cpp
+)
+
+if(UNIX)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/signalhandler.cpp
+    )
+endif()
+
+if (WIN32 OR APPLE)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.cpp
+    )
+endif()
 
 if(WIN32)
     set(HEADERS ${HEADERS}
@@ -67,6 +139,33 @@ if(APPLE)
         ${CMAKE_CURRENT_LIST_DIR}/helper_route_mac.c
         ${CMAKE_CURRENT_LIST_DIR}/router_mac.cpp
     )
+
+    #Mozilla
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/ios/iosnetworkwatcher.h
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/macosnetworkwatcher.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/macospingsender.h
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/dnsutilsmacos.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/iputilsmacos.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosdaemon.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosroutemonitor.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/wireguardutilsmacos.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/ios/iosnetworkwatcher.mm
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/macosnetworkwatcher.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/macospingsender.cpp
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/dnsutilsmacos.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/iputilsmacos.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosdaemon.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosroutemonitor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/wireguardutilsmacos.cpp
+    )
 endif()
 
 if(LINUX)
@@ -90,31 +189,66 @@ include_directories(
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
+target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
+endif()
+
+if(APPLE)
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set_target_properties(${PROJECT} PROPERTIES
+            INSTALL_RPATH "@executable_path/../Frameworks"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    endif()
+
+    find_library(FW_COREFOUNDATION CoreFoundation)
+    find_library(FW_SYSTEMCONFIG SystemConfiguration)
+    find_library(FW_SERVICEMGMT ServiceManagement)
+    find_library(FW_SECURITY Security)
+    find_library(FW_COREWLAN CoreWLAN)
+    find_library(FW_NETWORK Network)
+    find_library(FW_USER_NOTIFICATIONS UserNotifications)
+
+    target_link_libraries(${PROJECT} PRIVATE ${FW_COREFOUNDATION})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_SYSTEMCONFIG})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_SERVICEMGMT})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_SECURITY})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_COREWLAN})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_NETWORK})
+    target_link_libraries(${PROJECT} PRIVATE ${FW_USER_NOTIFICATIONS})
+
+
+endif()
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
-if(NOT IOS)
-    qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
-endif()
+qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DEPLOY_ARTIFACT_PATH "windows/x64")
+        set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
-        set(DEPLOY_ARTIFACT_PATH "windows/x32")
+        set(DEPLOY_PLATFORM_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/service")
+    set(DEPLOY_PLATFORM_PATH "linux/service")
 elseif(APPLE AND NOT IOS)
-    set(DEPLOY_ARTIFACT_PATH "macos")
+    set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMAND_EXPAND_LISTS
-    )
-endif()
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)

@@ -10,14 +10,19 @@
 
 class MacOSUtils final {
  public:
+  static NSString* appId();
+
   static QString computerName();
 
   static void enableLoginItem(bool startAtBoot);
 
   static void setDockClickHandler();
+  static void setStatusBarTextColor();
 
   static void hideDockIcon();
   static void showDockIcon();
+
+  static void patchNSStatusBarSetImageForBigSur();
 };
 
 #endif  // MACOSUTILS_H

@@ -1,13 +1,17 @@
+import QtCore
 import QtQuick
-import QtQuick.Window
 import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
 import QtQuick.Layouts
+import QtQuick.Window
+
+import Qt.labs.platform as LabsPlatform
+import Qt.labs.folderlistmodel as LabsFolderlistmodel
+
 import PageEnum 1.0
 import PageType 1.0
-import Qt.labs.platform
-import Qt.labs.folderlistmodel
-import QtQuick.Dialogs
-import QtQuick.Controls.Basic
+
 import "Controls"
 import "Pages"
 import "Pages/Protocols"
@@ -117,13 +121,13 @@ Window  {
         }
     }
 
-    FolderListModel {
+    LabsFolderlistmodel.FolderListModel {
         id: folderModelPages
         folder: "qrc:/ui/qml/Pages/"
         nameFilters: ["*.qml"]
         showDirs: false
 
-        onStatusChanged: if (status == FolderListModel.Ready) {
+        onStatusChanged: if (status == LabsFolderlistmodel.FolderListModel.Ready) {
                              for (var i=0; i<folderModelPages.count; i++) {
                                  createPagesObjects(folderModelPages.get(i, "filePath"), PageType.Basic);
                              }
@@ -131,39 +135,39 @@ Window  {
                          }
     }
 
-    FolderListModel {
+    LabsFolderlistmodel.FolderListModel {
         id: folderModelProtocols
         folder: "qrc:/ui/qml/Pages/Protocols/"
         nameFilters: ["*.qml"]
         showDirs: false
 
-        onStatusChanged: if (status == FolderListModel.Ready) {
+        onStatusChanged: if (status == LabsFolderlistmodel.FolderListModel.Ready) {
                              for (var i=0; i<folderModelProtocols.count; i++) {
                                  createPagesObjects(folderModelProtocols.get(i, "filePath"), PageType.Proto);
                              }
         }
     }
 
-    FolderListModel {
+    LabsFolderlistmodel.FolderListModel {
         id: folderModelShareProtocols
         folder: "qrc:/ui/qml/Pages/Share/"
         nameFilters: ["*.qml"]
         showDirs: false
 
-        onStatusChanged: if (status == FolderListModel.Ready) {
+        onStatusChanged: if (status == LabsFolderlistmodel.FolderListModel.Ready) {
                              for (var i=0; i<folderModelShareProtocols.count; i++) {
                                  createPagesObjects(folderModelShareProtocols.get(i, "filePath"), PageType.ShareProto);
                              }
         }
     }
 
-    FolderListModel {
+    LabsFolderlistmodel.FolderListModel {
         id: folderModelClientInfo
         folder: "qrc:/ui/qml/Pages/ClientInfo/"
         nameFilters: ["*.qml"]
         showDirs: false
 
-        onStatusChanged: if (status == FolderListModel.Ready) {
+        onStatusChanged: if (status == LabsFolderlistmodel.FolderListModel.Ready) {
                              for (var i=0; i<folderModelClientInfo.count; i++) {
                                  createPagesObjects(folderModelClientInfo.get(i, "filePath"), PageType.ClientInfo);
                              }
@@ -354,7 +358,7 @@ Window  {
                 }
                 textArea.wrapMode: cbLogWrap.checked ? TextEdit.WordWrap: TextEdit.NoWrap
 
-                Keys.onPressed: {
+                Keys.onPressed: function(event) {
                     UiLogic.keyPressEvent(event.key)
                     event.accepted = true
                 }

@@ -111,7 +111,7 @@ public class PackageManagerHelper {
 
   // Returns List of all Packages that can classify themselves as browsers
   private static List<String> getBrowserIDs(PackageManager pm) {
-    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.mozilla.org/"));
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.amnezia.org/"));
     intent.addCategory(Intent.CATEGORY_BROWSABLE);
     // We've tried using PackageManager.MATCH_DEFAULT_ONLY flag and found that browsers that
     // are not set as the default browser won't be matched even if they had CATEGORY_DEFAULT set

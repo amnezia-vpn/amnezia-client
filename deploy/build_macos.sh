@@ -28,7 +28,9 @@ PLIST_NAME=$APP_NAME.plist
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
+PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/deploy-prebuilt/macos
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
+
 INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 
@@ -38,8 +40,8 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.4.1;
-QIF_VERSION=4.1
+QT_VERSION=6.5.1;
+QIF_VERSION=4.6
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
 fi
@@ -66,10 +68,8 @@ echo "____________________________________"
 echo "............Deploy.................."
 echo "____________________________________"
 
-# Package 
+# Package
 echo "Packaging ..."
-
-#cd $DEPLOY_DIR
 
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
 cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
@@ -116,6 +116,7 @@ fi
 echo "Packaging installer..."
 mkdir -p $INSTALLER_DATA_DIR
 cp -av $PROJECT_DIR/deploy/installer $BUILD_DIR
+cp -r $PREBUILT_DEPLOY_DATA_DIR/* $DEPLOY_DATA_DIR
 cp -av $DEPLOY_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_install.sh
 cp -av $DEPLOY_DATA_DIR/post_uninstall.sh $INSTALLER_DATA_DIR/post_uninstall.sh
 cp -av $DEPLOY_DATA_DIR/$PLIST_NAME $INSTALLER_DATA_DIR/$PLIST_NAME
@@ -147,7 +148,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -volname $APP_NAME -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -volname Amnezia -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."
