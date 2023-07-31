@@ -6,7 +6,7 @@ set -o errexit -o nounset
 # Hold on to current directory
 PROJECT_DIR=$(pwd)
 
-BUILD_DIR=$PROJECT_DIR/client/build-ios
+BUILD_DIR=$PROJECT_DIR/build-ios
 mkdir -p $BUILD_DIR
 
 echo "Project dir: ${PROJECT_DIR}"
@@ -20,9 +20,8 @@ PLIST_NAME=$APP_NAME.plist
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.4.1;
-QIF_VERSION=4.1
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
+  QT_VERSION=6.5.2;
+  QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
@@ -33,7 +32,7 @@ cmake --version
 clang -v
 
 # Generate XCodeProj
-$QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
+$QT_BIN_DIR/qt-cmake . -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
 KEYCHAIN=amnezia.build.keychain
 KEYCHAIN_FILE=/Users/runner/Library/Keychains/${KEYCHAIN}-db
