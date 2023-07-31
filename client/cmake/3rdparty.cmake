@@ -54,8 +54,7 @@ else(IOS)
     elseif(ANDROID)
         set(abi ${CMAKE_ANDROID_ARCH_ABI})
         set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/android/${abi}")
-        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/android/${abi}/libssh.a")
-        set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/android/${abi}/libz.a")
+        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/android/${abi}/libssh.so")
         set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/android/include")
         set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a")
         set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a")
@@ -110,8 +109,7 @@ if(ANDROID)
             set(LIBS ${LIBS}
                 ${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a
                 ${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a
-                ${LIBSSH_ROOT_DIR}/android/${abi}/libssh.a
-                ${LIBSSH_ROOT_DIR}/android/${abi}/libz.a
+                ${LIBSSH_ROOT_DIR}/android/${abi}/libssh.so
             )
         endif()
     endforeach()

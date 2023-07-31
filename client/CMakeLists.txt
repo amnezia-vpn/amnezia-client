@@ -340,7 +340,8 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnutil.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/librsapss.so  
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/librsapss.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so  
         )
         
     endforeach()
