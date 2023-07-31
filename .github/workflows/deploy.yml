@@ -6,7 +6,7 @@ on: [push]
 jobs:
   Build-Linux-Ubuntu:
     name: 'Build-Linux-Ubuntu'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     env:
       QT_VERSION: 6.5.1

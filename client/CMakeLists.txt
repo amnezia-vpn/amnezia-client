@@ -4,12 +4,6 @@ set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
 
-if(ANDROID)
-    # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
-    # We have to do this manually for building of libssh.
-    add_definitions(-D_BSD_SOURCE)
-endif()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -238,6 +232,7 @@ if(APPLE)
 endif()
 
 if(LINUX AND NOT ANDROID)
+    set(LIBS ${LIBS} -static-libstdc++ -static-libgcc)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
