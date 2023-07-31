@@ -55,7 +55,7 @@ if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
 
   security import $CERTIFICATE_P12 -k $KEYCHAIN -P $IOS_DIST_SIGNING_KEY_PASSWORD -T /usr/bin/codesign || true
 
-  security set-key-partition-list -S "apple-tool:, apple:, codesign:" -s -k $TEMP_PASS $KEYCHAIN
+  security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k $TEMP_PASS $KEYCHAIN
   security find-identity -p codesigning
   security set-keychain-settings $KEYCHAIN_FILE
   security set-keychain-settings -t 3600 $KEYCHAIN_FILE
