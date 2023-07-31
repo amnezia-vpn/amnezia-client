@@ -35,6 +35,8 @@ clang -v
 # Generate XCodeProj
 $QT_BIN_DIR/qt-cmake ./client -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
+KEYCHAIN=amnezia.build.keychain
+KEYCHAIN_FILE=/Users/runner/Library/Keychains/${KEYCHAIN}-db
 
 # Setup keychain
 if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
@@ -42,7 +44,6 @@ if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
   echo $IOS_DIST_SIGNING_KEY | base64 --decode > $BUILD_DIR/signing-cert.p12
 
   CERTIFICATE_P12=$BUILD_DIR/signing-cert.p12
-  KEYCHAIN=amnezia.build.keychain
   TEMP_PASS=$IOS_DIST_SIGNING_KEY_PASSWORD
 
   security create-keychain -p $TEMP_PASS $KEYCHAIN || true
@@ -56,24 +57,28 @@ if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
 
   security set-key-partition-list -S "apple-tool:, apple:, codesign:" -s -k $TEMP_PASS $KEYCHAIN
   security find-identity -p codesigning
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+  security set-keychain-settings $KEYCHAIN_FILE
+  security unlock-keychain -p $TEMP_PASS $KEYCHAIN_FILE
 
-# Copy provisioning prifiles
-mkdir -p  "$HOME/Library/MobileDevice/Provisioning Profiles/"
+  # Copy provisioning prifiles
+  mkdir -p  "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
-echo $IOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
-echo $IOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
+  echo $IOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+  echo $IOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
 
-profile_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
-profile_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+  profile_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+  profile_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
 
-mv ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_uuid.mobileprovision
-mv ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_ne_uuid.mobileprovision
+  mv ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_uuid.mobileprovision
+  mv ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$profile_ne_uuid.mobileprovision
+else
+  echo "Failed to import certificate, aborting..."
+  exit 1
 fi
 
 # Build project
 xcodebuild \
-"OTHER_CODE_SIGN_FLAGS=--keychain '$HOME/Library/Keychains/amnezia.build.keychain-db'" \
+"OTHER_CODE_SIGN_FLAGS=--keychain '$KEYCHAIN_FILE'" \
 -configuration Release \
 -scheme AmneziaVPN \
 -destination "generic/platform=iOS,name=Any iOS'" \
