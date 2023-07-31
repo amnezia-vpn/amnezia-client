@@ -54,7 +54,11 @@ Button {
 
     contentItem: Item {
         anchors.fill: background
+
+        implicitWidth: content.implicitWidth
+        implicitHeight: content.implicitHeight
         RowLayout {
+            id: content
             anchors.centerIn: parent
 
             Image {
@@ -72,6 +76,7 @@ Button {
             ButtonTextType {
                 color: textColor
                 text: root.text
+                visible: root.text === "" ? false : true
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter

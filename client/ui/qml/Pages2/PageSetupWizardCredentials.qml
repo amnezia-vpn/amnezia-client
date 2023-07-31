@@ -53,6 +53,12 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
+                buttonText: qsTr("Insert")
+
+                clickedFunc: function() {
+                    textField.text = ""
+                    textField.paste()
+                }
             }
 
             TextFieldWithHeaderType {
@@ -61,14 +67,27 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
+                buttonText: qsTr("Insert")
+
+                clickedFunc: function() {
+                    textField.text = ""
+                    textField.paste()
+                }
             }
 
             TextFieldWithHeaderType {
                 id: secretData
 
+                property bool hidePassword: true
+
                 Layout.fillWidth: true
                 headerText: qsTr("Password / SSH private key")
-                textField.echoMode: TextInput.Password
+                textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+
+                clickedFunc: function() {
+                    hidePassword = !hidePassword
+                }
             }
 
             BasicButtonType {

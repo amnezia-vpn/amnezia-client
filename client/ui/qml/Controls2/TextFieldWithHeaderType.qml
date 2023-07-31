@@ -14,6 +14,7 @@ Item {
     property alias errorText: errorField.text
 
     property string buttonText
+    property string buttonImageSource
     property var clickedFunc
 
     property alias textField: textField
@@ -101,7 +102,7 @@ Item {
                 }
 
                 BasicButtonType {
-                    visible: root.buttonText !== ""
+                    visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
 
                     defaultColor: "transparent"
                     hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -111,8 +112,10 @@ Item {
                     borderWidth: 0
 
                     text: root.buttonText
+                    imageSource: root.buttonImageSource
 
                     Layout.rightMargin: 24
+                    Layout.preferredHeight: 32
 
                     onClicked: {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {

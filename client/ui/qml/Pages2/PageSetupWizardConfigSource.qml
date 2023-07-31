@@ -76,9 +76,9 @@ It's okay if a friend passed the code.")
 
             DividerType {}
 
-            //todo ifdef mobile platforms
             LabelWithButtonType {
                 Layout.fillWidth: true
+                visible: GC.isMobile()
 
                 text: qsTr("QR-code")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -90,7 +90,9 @@ It's okay if a friend passed the code.")
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: GC.isMobile()
+            }
 
             LabelWithButtonType {
                 Layout.fillWidth: true

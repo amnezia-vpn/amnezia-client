@@ -278,5 +278,7 @@
         <file>images/controls/copy.svg</file>
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
+        <file>images/controls/eye.svg</file>
+        <file>images/controls/eye-off.svg</file>
     </qresource>
 </RCC>
