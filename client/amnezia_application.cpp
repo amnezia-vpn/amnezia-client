@@ -221,6 +221,12 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
     QResource::registerResource(":/translations.qrc");
     if (!m_translator->isEmpty())
         QCoreApplication::removeTranslator(m_translator);
+
+    if (locale == QLocale::English) {
+        m_settings->setAppLanguage(locale);
+        m_engine->retranslate();
+    }
+
     if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
         if (QCoreApplication::installTranslator(m_translator)) {
             m_settings->setAppLanguage(locale);
@@ -228,6 +234,8 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
 
         m_engine->retranslate();
     }
+
+    emit translationsUpdated();
 }
 
 bool AmneziaApplication::parseCommands()
@@ -271,6 +279,7 @@ void AmneziaApplication::initModels()
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
     connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &AmneziaApplication::updateTranslator);
+    connect(this, &AmneziaApplication::translationsUpdated, m_languageModel.get(), &LanguageModel::translationsUpdated);
 
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());

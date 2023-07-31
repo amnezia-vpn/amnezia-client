@@ -55,6 +55,8 @@ Popup {
             BasicButtonType {
                 visible: closeButtonVisible
 
+                implicitHeight: 32
+
                 defaultColor: "white"
                 hoveredColor: "#C1C2C5"
                 pressedColor: "#AEB0B7"

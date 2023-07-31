@@ -392,3 +392,24 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
 
 #endif
 }
+
+bool InstallController::checkSshConnection()
+{
+    ServerController serverController(m_settings);
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString output;
+    output = serverController.checkSshConnection(m_currentlyInstalledServerCredentials, &errorCode);
+
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorString(errorCode));
+        return false;
+    } else {
+        if (output.contains(tr("Please login as the user"))) {
+            output.replace("\n", "");
+            emit installationErrorOccurred(output);
+            return false;
+        }
+    }
+    return true;
+}

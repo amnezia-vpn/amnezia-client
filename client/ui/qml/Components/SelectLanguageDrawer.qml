@@ -59,7 +59,7 @@ DrawerType {
                 interactive: false
 
                 model: LanguageModel
-                currentIndex: LanguageModel.getCurrentLanguageIndex()
+                currentIndex: LanguageModel.currentLanguageIndex
 
                 ButtonGroup {
                     id: buttonGroup
@@ -127,6 +127,7 @@ DrawerType {
                             onClicked: {
                                 listView.currentIndex = index
                                 LanguageModel.changeLanguage(languageIndex)
+                                root.close()
                             }
                         }
                     }

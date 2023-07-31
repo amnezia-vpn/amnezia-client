@@ -85,8 +85,7 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: {
-                }
+                onClicked: Qt.openUrlExternally("https://ru-docs.amnezia.org/guides/hosting-instructions")
             }
         }
 

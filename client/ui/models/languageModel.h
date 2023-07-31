@@ -43,13 +43,17 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+    Q_PROPERTY(QString currentLanguageName READ getCurrentLanguageName NOTIFY translationsUpdated)
+    Q_PROPERTY(int currentLanguageIndex READ getCurrentLanguageIndex NOTIFY translationsUpdated)
+
 public slots:
     void changeLanguage(const LanguageSettings::AvailableLanguageEnum language);
     int getCurrentLanguageIndex();
-    QString getCurrentLanuageName();
+    QString getCurrentLanguageName();
 
 signals:
     void updateTranslations(const QLocale &locale);
+    void translationsUpdated();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

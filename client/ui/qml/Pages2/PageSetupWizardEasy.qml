@@ -15,6 +15,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isEasySetup: true
+
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -64,6 +66,10 @@ PageType {
                 headerText: qsTr("What is the level of internet control in your region?")
             }
 
+            ButtonGroup {
+                id: buttonGroup
+            }
+
             ListView {
                 id: containers
                 width: parent.width
@@ -101,6 +107,7 @@ PageType {
                             ButtonGroup.group: buttonGroup
 
                             onClicked: function() {
+                                isEasySetup = true
                                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                                 containers.dockerContainer = dockerContainer
@@ -117,9 +124,18 @@ PageType {
                         }
                     }
                 }
+            }
 
-                ButtonGroup {
-                    id: buttonGroup
+            CardType {
+                implicitWidth: parent.width
+
+                headerText: qsTr("Set up a VPN yourself")
+                bodyText: qsTr("I want to choose a VPN protocol")
+
+                ButtonGroup.group: buttonGroup
+
+                onClicked: function() {
+                    isEasySetup = false
                 }
             }
 
@@ -132,11 +148,15 @@ PageType {
                 text: qsTr("Continue")
 
                 onClicked: function() {
-                    ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
-                    goToPage(PageEnum.PageSetupWizardInstalling);
-                    InstallController.install(containers.dockerContainer,
-                                              containers.containerDefaultPort,
-                                              containers.containerDefaultTransportProto)
+                    if (root.isEasySetup) {
+                        ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
+                        goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.install(containers.dockerContainer,
+                                                  containers.containerDefaultPort,
+                                                  containers.containerDefaultTransportProto)
+                    } else {
+                        goToPage(PageEnum.PageSetupWizardProtocols)
+                    }
                 }
             }
         }

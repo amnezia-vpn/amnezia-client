@@ -37,6 +37,8 @@ public slots:
 
     void mountSftpDrive(const QString &port, const QString &password, const QString &username);
 
+    bool checkSshConnection();
+
 signals:
     void installContainerFinished(QString finishMessage);
     void installServerFinished(QString finishMessage);

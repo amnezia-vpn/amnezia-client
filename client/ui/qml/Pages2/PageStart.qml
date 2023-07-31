@@ -45,6 +45,26 @@ PageType {
         }
     }
 
+    Connections {
+        target: InstallController
+
+        function onInstallationErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+
+            var needCloseCurrentPage = false
+            var currentPageName = stackView.currentItem.objectName
+
+            if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
+                needCloseCurrentPage = true
+            } else if (currentPageName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                needCloseCurrentPage = true
+            }
+            if (needCloseCurrentPage) {
+                PageController.closePage()
+            }
+        }
+    }
+
     StackViewType {
         id: tabBarStackView
 

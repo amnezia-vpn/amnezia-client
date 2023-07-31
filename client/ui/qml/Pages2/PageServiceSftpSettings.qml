@@ -19,13 +19,9 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
-        }
-
         function onUpdateContainerFinished() {
             //todo change to notification
-            PageController.showErrorMessage(qsTr("Settings updated successfully"))
+            PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
     }
 

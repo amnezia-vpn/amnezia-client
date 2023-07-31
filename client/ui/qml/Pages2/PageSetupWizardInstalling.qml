@@ -17,11 +17,6 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
-            closePage()
-            PageController.showErrorMessage(errorMessage)
-        }
-
         function onInstallContainerFinished(finishedMessage) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {

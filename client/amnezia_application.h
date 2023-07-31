@@ -65,6 +65,9 @@ public:
 
     QQmlApplicationEngine *qmlEngine() const;
 
+signals:
+    void translationsUpdated();
+
 private:
     void initModels();
     void initControllers();

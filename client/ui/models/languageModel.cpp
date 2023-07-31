@@ -55,7 +55,7 @@ int LanguageModel::getCurrentLanguageIndex()
     }
 }
 
-QString LanguageModel::getCurrentLanuageName()
+QString LanguageModel::getCurrentLanguageName()
 {
     return m_availableLanguages[getCurrentLanguageIndex()].name;
 }

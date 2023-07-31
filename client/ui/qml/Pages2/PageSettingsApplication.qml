@@ -48,7 +48,7 @@ PageType {
                 Layout.topMargin: 16
 
                 text: qsTr("Language")
-                descriptionText: LanguageModel.getCurrentLanuageName()
+                descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

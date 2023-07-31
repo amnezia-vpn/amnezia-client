@@ -28,11 +28,6 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onInstallationErrorOccurred(errorMessage) {
-            closePage() // close deInstalling page
-            PageController.showErrorMessage(errorMessage)
-        }
-
         function onRemoveCurrentlyProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.replaceStartPage()

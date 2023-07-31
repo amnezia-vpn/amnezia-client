@@ -94,7 +94,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
-                text: qsTr("Set up a server the easy way")
+                text: qsTr("Continue")
 
                 onClicked: function() {
                     if (!isCredentialsFilled()) {
@@ -103,35 +103,42 @@ PageType {
 
                     InstallController.setShouldCreateServer(true)
                     InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+
+                    PageController.showBusyIndicator(true)
+                    var isConnectionOpened = InstallController.checkSshConnection()
+                    PageController.showBusyIndicator(false)
+                    if (!isConnectionOpened) {
+                        return
+                    }
 
                     goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
 
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: -8
+//            BasicButtonType {
+//                Layout.fillWidth: true
+//                Layout.topMargin: -8
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
-                borderWidth: 1
+//                defaultColor: "transparent"
+//                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+//                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+//                disabledColor: "#878B91"
+//                textColor: "#D7D8DB"
+//                borderWidth: 1
 
-                text: qsTr("Select protocol to install")
+//                text: qsTr("Select protocol to install")
 
-                onClicked: function() {
-                    if (!isCredentialsFilled()) {
-                        return
-                    }
+//                onClicked: function() {
+//                    if (!isCredentialsFilled()) {
+//                        return
+//                    }
 
-                    InstallController.setShouldCreateServer(true)
-                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+//                    InstallController.setShouldCreateServer(true)
+//                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
-                    goToPage(PageEnum.PageSetupWizardProtocols)
-                }
-            }
+//                    goToPage(PageEnum.PageSetupWizardProtocols)
+//                }
+//            }
         }
     }
 
