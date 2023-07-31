@@ -147,7 +147,7 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            text: qsTr("Save and Restart Amnesia")
+                            text: qsTr("Save and Restart Amnezia")
 
                             onClicked: {
                                 forceActiveFocus()

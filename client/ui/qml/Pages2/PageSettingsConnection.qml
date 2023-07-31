@@ -48,7 +48,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Use AmnesiaDNS if installed on the server")
+                text: qsTr("Use AmneziaDNS if installed on the server")
                 descriptionText: qsTr("Internal IP address 172.29.172.254")
 
                 checked: SettingsController.isAmneziaDnsEnabled()

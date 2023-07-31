@@ -110,7 +110,7 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Check the server for previously installed Amnesia services")
+                text: qsTr("Check the server for previously installed Amnezia services")
                 descriptionText: qsTr("Add them to the application if they were not displayed")
 
                 clickedFunction: function() {

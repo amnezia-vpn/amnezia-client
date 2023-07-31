@@ -53,7 +53,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("A free service to create a personal VPN on your server. We help you access blocked content without exposing your privacy even to VPN providers.")
+                text: qsTr("Free service for creating a personal VPN on your server.") +
+                      qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
             }
 
             BasicButtonType {

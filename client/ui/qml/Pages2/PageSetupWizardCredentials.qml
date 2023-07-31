@@ -49,7 +49,7 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("Enter the address in the format 255.255.255.255:88")
+                textFieldPlaceholderText: qsTr("255.255.255.255:88")
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
@@ -60,13 +60,14 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
+                textFieldPlaceholderText: "root"
             }
 
             TextFieldWithHeaderType {
                 id: secretData
 
                 Layout.fillWidth: true
-                headerText: qsTr("Password / Private key")
+                headerText: qsTr("Password / SSH private key")
                 textField.echoMode: TextInput.Password
             }
 

@@ -70,7 +70,7 @@ PageType {
 
                     width: parent.width
 
-                    headerText: qsTr("Connection protocol")
+                    headerText: qsTr("VPN protocol")
                     descriptionText: qsTr("Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.")
                 }
             }

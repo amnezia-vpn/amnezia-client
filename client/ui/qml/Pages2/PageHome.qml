@@ -155,7 +155,7 @@ PageType {
 
                     text: root.defaultContainerName
                     textColor: "#0E0E11"
-                    headerText: qsTr("Connection protocol")
+                    headerText: qsTr("VPN protocol")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                     rootButtonClickedFunction: function() {

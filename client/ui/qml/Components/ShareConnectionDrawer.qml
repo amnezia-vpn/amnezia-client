@@ -55,6 +55,7 @@ DrawerType {
                     Layout.topMargin: 16
 
                     text: qsTr("Share")
+                    imageSource: "qrc:/images/controls/share-2.svg"
 
                     onClicked: {
                         ExportController.saveFile()
@@ -73,6 +74,7 @@ DrawerType {
                     borderWidth: 1
 
                     text: qsTr("Copy")
+                    imageSource: "qrc:/images/controls/copy.svg"
 
                     onClicked: {
                         configText.selectAll()

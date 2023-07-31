@@ -65,7 +65,7 @@ PageType {
 
     QtObject {
         id: amneziaConnectionFormat
-        property string name: qsTr("For the AmnesiaVPN app")
+        property string name: qsTr("For the AmneziaVPN app")
         property var type: PageShare.ConfigType.AmneziaConnection
     }
     QtObject {
@@ -135,7 +135,7 @@ PageType {
                         checked: root.currentIndex === 1
 
                         implicitWidth: (root.width - 32) / 2
-                        text: qsTr("Full")
+                        text: qsTr("Full access")
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
@@ -194,6 +194,8 @@ PageType {
                             protocolSelector.visible = true
                             root.shareButtonEnabled = false
                         } else {
+                            shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
+                            shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
                             serverSelector.menuVisible = false
                         }
                     }

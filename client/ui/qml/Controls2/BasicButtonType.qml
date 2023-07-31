@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import "TextTypes"
 
@@ -15,6 +17,8 @@ Button {
 
     property string borderColor: "#D7D8DB"
     property int borderWidth: 0
+
+    property string imageSource
 
     implicitHeight: 56
 
@@ -48,11 +52,30 @@ Button {
         cursorShape: Qt.PointingHandCursor
     }
 
-    contentItem: ButtonTextType {
+    contentItem: Item {
         anchors.fill: background
-        color: textColor
-        text: root.text
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        RowLayout {
+            anchors.centerIn: parent
+
+            Image {
+                source: root.imageSource
+                visible: root.imageSource === "" ? false : true
+
+                layer {
+                    enabled: true
+                    effect: ColorOverlay {
+                        color: textColor
+                    }
+                }
+            }
+
+            ButtonTextType {
+                color: textColor
+                text: root.text
+
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
     }
 }
