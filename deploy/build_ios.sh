@@ -58,6 +58,7 @@ if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
   security set-key-partition-list -S "apple-tool:, apple:, codesign:" -s -k $TEMP_PASS $KEYCHAIN
   security find-identity -p codesigning
   security set-keychain-settings $KEYCHAIN_FILE
+  security set-keychain-settings -t 3600 $KEYCHAIN_FILE
   security unlock-keychain -p $TEMP_PASS $KEYCHAIN_FILE
 
   # Copy provisioning prifiles
