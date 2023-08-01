@@ -51,6 +51,7 @@ public slots:
 
     QString getCurrentlyProcessedContainerName();
     QJsonObject getCurrentlyProcessedContainerConfig();
+    QStringList getAllInstalledServicesName(const int serverIndex);
 
     ErrorCode removeAllContainers();
     ErrorCode removeCurrentlyProcessedContainer();

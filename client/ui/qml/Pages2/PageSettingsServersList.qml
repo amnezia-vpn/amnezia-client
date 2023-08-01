@@ -85,7 +85,15 @@ PageType {
                             Layout.fillWidth: true
 
                             text: name
-                            descriptionText: hostName
+                            descriptionText: {
+                                var servicesNameString = ""
+                                var servicesName = ContainersModel.getAllInstalledServicesName(index)
+                                for (var i = 0; i < servicesName.length; i++) {
+                                    servicesNameString += servicesName[i] + " · "
+                                }
+
+                                return servicesNameString + hostName
+                            }
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {

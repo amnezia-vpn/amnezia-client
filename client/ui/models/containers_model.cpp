@@ -129,6 +129,25 @@ QJsonObject ContainersModel::getCurrentlyProcessedContainerConfig()
     return qvariant_cast<QJsonObject>(data(index(m_currentlyProcessedContainerIndex), ConfigRole));
 }
 
+QStringList ContainersModel::getAllInstalledServicesName(const int serverIndex)
+{
+    QStringList servicesName;
+    const auto &containers = m_settings->containers(serverIndex);
+    for (const DockerContainer &container : containers.keys()) {
+        if (ContainerProps::containerService(container) == ServiceType::Other && m_containers.contains(container)) {
+            if (container == DockerContainer::Dns) {
+                servicesName.append("DNS");
+            } else if (container == DockerContainer::Sftp) {
+                servicesName.append("SFTP");
+            } else if (container == DockerContainer::TorWebSite) {
+                servicesName.append("TOR");
+            }
+        }
+    }
+    servicesName.sort();
+    return servicesName;
+}
+
 ErrorCode ContainersModel::removeAllContainers()
 {
 

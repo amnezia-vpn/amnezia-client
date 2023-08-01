@@ -91,11 +91,15 @@ PageType {
             }
 
             BasicButtonType {
+                Layout.topMargin: 16
+                Layout.leftMargin: -8
+                implicitHeight: 32
+
                 defaultColor: "transparent"
                 hoveredColor: Qt.rgba(1, 1, 1, 0.08)
                 pressedColor: Qt.rgba(1, 1, 1, 0.12)
                 disabledColor: "#878B91"
-                textColor: "#D7D8DB"
+                textColor: "#FBB26A"
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
 
