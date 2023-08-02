@@ -40,11 +40,15 @@ KEYCHAIN_FILE=$HOME/Library/Keychains/${KEYCHAIN}-db
 # Setup keychain
 if [ "${IOS_SIGNING_CERT_BASE64+x}" ]; then
   echo "Import certificate"
+
+  TRUST_CERT_P12=$BUILD_DIR/trust-cert.p12
+  SIGNING_CERT_P12=$BUILD_DIR/signing-cert.p12
+
   echo $IOS_TRUST_CERT_BASE64 | base64 --decode > $BUILD_DIR/trust-cert.p12
   echo $IOS_SIGNING_CERT_BASE64 | base64 --decode > $BUILD_DIR/signing-cert.p12
 
-  TRUST_CERT_P12=$BUILD_DIR/trust-cert.p12
-  CERTIFICATE_P12=$BUILD_DIR/signing-cert.p12
+  sha256sum $TRUST_CERT_P12
+  sha256sum $SIGNING_CERT_P12
 
   KEYCHAIN_PASS=$IOS_SIGNING_CERT_PASSWORD
 
@@ -55,8 +59,8 @@ if [ "${IOS_SIGNING_CERT_BASE64+x}" ]; then
   security default-keychain
   security list-keychains
 
-  security import $TRUST_CERT_P12 -k $KEYCHAIN -P "" -T /usr/bin/codesign || true
-  security import $CERTIFICATE_P12 -k $KEYCHAIN -P $IOS_SIGNING_CERT_PASSWORD -T /usr/bin/codesign || true
+  security import $TRUST_CERT_P12 -k $KEYCHAIN -P "" -T /usr/bin/codesign
+  security import $SIGNING_CERT_P12 -k $KEYCHAIN -P $IOS_SIGNING_CERT_PASSWORD -T /usr/bin/codesign
 
   security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k $KEYCHAIN_PASS $KEYCHAIN
   security find-identity -p codesigning
@@ -69,6 +73,9 @@ if [ "${IOS_SIGNING_CERT_BASE64+x}" ]; then
 
   echo $IOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
   echo $IOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
+
+  sha256sum ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+  sha256sum ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
 
   profile_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
   profile_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
