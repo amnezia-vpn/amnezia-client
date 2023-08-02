@@ -60,6 +60,8 @@ public slots:
     bool isAmneziaDnsContainerInstalled();
     bool isAmneziaDnsContainerInstalled(const int serverIndex);
 
+    //    bool isOnlyServicesInstalled(const int serverIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

@@ -106,13 +106,17 @@ ListView {
                         break
                     }
                     case ContainerEnum.WireGuard: {
-                        WireGuardConfigModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolWireGuardSettings)
+                        ProtocolsModel.updateModel(config)
+                        goToPage(PageEnum.PageProtocolRaw)
+//                        WireGuardConfigModel.updateModel(config)
+//                        goToPage(PageEnum.PageProtocolWireGuardSettings)
                         break
                     }
                     case ContainerEnum.Ipsec: {
-                        Ikev2ConfigModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolIKev2Settings)
+                        ProtocolsModel.updateModel(config)
+                        goToPage(PageEnum.PageProtocolRaw)
+//                        Ikev2ConfigModel.updateModel(config)
+//                        goToPage(PageEnum.PageProtocolIKev2Settings)
                         break
                     }
                     case ContainerEnum.Sftp: {

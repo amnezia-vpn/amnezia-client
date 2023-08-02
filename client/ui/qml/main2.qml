@@ -75,6 +75,10 @@ Window  {
             popupNotificationMessage.open()
             popupNotificationTimer.start()
         }
+
+        function onShowPassphraseRequestDrawer() {
+            privateKeyPassphraseDrawer.open()
+        }
     }
 
     Item {
@@ -109,6 +113,76 @@ Window  {
 
         PopupType {
             id: popupErrorMessage
+        }
+    }
+
+    Item {
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        implicitHeight: popupErrorMessage.height
+
+        DrawerType {
+            id: privateKeyPassphraseDrawer
+
+            width: root.width
+            height: root.height * 0.35
+
+            onVisibleChanged: {
+                if (privateKeyPassphraseDrawer.visible) {
+                    passphrase.textFieldText = ""
+                    passphrase.textField.forceActiveFocus()
+                }
+            }
+            onAboutToHide: {
+                PageController.showBusyIndicator(true)
+            }
+            onAboutToShow: {
+                PageController.showBusyIndicator(false)
+            }
+
+            ColumnLayout {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.topMargin: 16
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                TextFieldWithHeaderType {
+                    id: passphrase
+
+                    property bool hidePassword: true
+
+                    Layout.fillWidth: true
+                    headerText: qsTr("Private key passphrase")
+                    textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                    buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+
+                    clickedFunc: function() {
+                        hidePassword = !hidePassword
+                    }
+                }
+
+                BasicButtonType {
+                    Layout.fillWidth: true
+
+                    defaultColor: "transparent"
+                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                    disabledColor: "#878B91"
+                    textColor: "#D7D8DB"
+                    borderWidth: 1
+
+                    text: qsTr("Save")
+
+                    onClicked: {
+                        privateKeyPassphraseDrawer.close()
+                        PageController.passphraseRequestDrawerClosed(passphrase.textFieldText)
+                    }
+                }
+            }
         }
     }
 }

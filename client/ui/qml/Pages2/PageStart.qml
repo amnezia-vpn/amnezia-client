@@ -52,7 +52,7 @@ PageType {
             PageController.showErrorMessage(errorMessage)
 
             var needCloseCurrentPage = false
-            var currentPageName = stackView.currentItem.objectName
+            var currentPageName = tabBarStackView.currentItem.objectName
 
             if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
                 needCloseCurrentPage = true

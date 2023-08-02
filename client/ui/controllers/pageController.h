@@ -91,6 +91,9 @@ signals:
     void hideMainWindow();
     void raiseMainWindow();
 
+    void showPassphraseRequestDrawer();
+    void passphraseRequestDrawerClosed(QString passphrase);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
 };

@@ -39,6 +39,8 @@ public slots:
 
     bool checkSshConnection();
 
+    void setEncryptedPassphrase(QString passphrase);
+
 signals:
     void installContainerFinished(QString finishMessage);
     void installServerFinished(QString finishMessage);
@@ -55,6 +57,9 @@ signals:
 
     void serverAlreadyExists(int serverIndex);
 
+    void passphraseRequestStarted();
+    void passphraseRequestFinished();
+
 private:
     void installServer(DockerContainer container, QJsonObject &config);
     void installContainer(DockerContainer container, QJsonObject &config);
@@ -67,6 +72,8 @@ private:
     ServerCredentials m_currentlyInstalledServerCredentials;
 
     bool m_shouldCreateServer;
+
+    QString m_privateKeyPassphrase;
 
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;

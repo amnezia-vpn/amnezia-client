@@ -1,6 +1,7 @@
 #include "installController.h"
 
 #include <QDesktopServices>
+#include <QEventLoop>
 #include <QJsonObject>
 #include <QStandardPaths>
 
@@ -396,8 +397,31 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
 bool InstallController::checkSshConnection()
 {
     ServerController serverController(m_settings);
-
     ErrorCode errorCode = ErrorCode::NoError;
+    m_privateKeyPassphrase = "";
+
+    if (m_currentlyInstalledServerCredentials.secretData.contains("BEGIN")
+        && m_currentlyInstalledServerCredentials.secretData.contains("PRIVATE KEY")) {
+        auto passphraseCallback = [this]() {
+            emit passphraseRequestStarted();
+            QEventLoop loop;
+            QObject::connect(this, &InstallController::passphraseRequestFinished, &loop, &QEventLoop::quit);
+            loop.exec();
+
+            return m_privateKeyPassphrase;
+        };
+
+        QString decryptedPrivateKey;
+        errorCode = serverController.getDecryptedPrivateKey(m_currentlyInstalledServerCredentials, decryptedPrivateKey,
+                                                            passphraseCallback);
+        if (errorCode == ErrorCode::NoError) {
+            m_currentlyInstalledServerCredentials.secretData = decryptedPrivateKey;
+        } else {
+            emit installationErrorOccurred(errorString(errorCode));
+            return false;
+        }
+    }
+
     QString output;
     output = serverController.checkSshConnection(m_currentlyInstalledServerCredentials, &errorCode);
 
@@ -412,4 +436,10 @@ bool InstallController::checkSshConnection()
         }
     }
     return true;
+}
+
+void InstallController::setEncryptedPassphrase(QString passphrase)
+{
+    m_privateKeyPassphrase = passphrase;
+    emit passphraseRequestFinished();
 }

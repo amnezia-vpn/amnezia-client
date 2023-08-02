@@ -211,6 +211,11 @@ bool ContainersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
     return containers.contains(DockerContainer::Dns);
 }
 
+// bool ContainersModel::isOnlyServicesInstalled(const int serverIndex)
+//{
+
+//}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

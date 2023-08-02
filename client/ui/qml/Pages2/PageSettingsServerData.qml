@@ -134,7 +134,7 @@ PageType {
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
                         PageController.showBusyIndicator(true)
-                        if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected) {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
                         }
                         InstallController.removeCurrentlyProcessedServer()
@@ -165,7 +165,7 @@ PageType {
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
                         goToPage(PageEnum.PageDeinstalling)
-                        if (ServersModel.isDefaultServerCurrentlyProcessed && ConnectionController.isConnected) {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeVpnConnection()
                         }
                         InstallController.removeAllContainers()
