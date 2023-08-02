@@ -53,11 +53,9 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
-                buttonText: qsTr("Insert")
 
-                clickedFunc: function() {
-                    textField.text = ""
-                    textField.paste()
+                onTextFieldTextChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
             }
 
@@ -67,12 +65,6 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
-                buttonText: qsTr("Insert")
-
-                clickedFunc: function() {
-                    textField.text = ""
-                    textField.paste()
-                }
             }
 
             TextFieldWithHeaderType {
@@ -83,7 +75,8 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Password / SSH private key")
                 textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
+                                                        : ""
 
                 clickedFunc: function() {
                     hidePassword = !hidePassword

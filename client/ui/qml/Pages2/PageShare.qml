@@ -208,7 +208,7 @@ PageType {
                         serverSelector.text = selectedText
                         root.fullConfigServerSelectorText = selectedText
                         root.connectionServerSelectorText = selectedText
-                        ServersModel.currentlyProcessedIndex = currentIndex
+                        ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
 

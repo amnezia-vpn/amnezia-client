@@ -85,7 +85,6 @@ void SettingsController::restoreAppConfig()
                                QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
     if (fileName.isEmpty()) {
-        emit changeSettingsErrorOccurred(tr("Backup file is empty"));
         return;
     }
 
