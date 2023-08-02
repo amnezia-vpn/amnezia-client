@@ -121,16 +121,17 @@ jobs:
 
   Build-IOS:
     name: 'Build-IOS'
-    runs-on: macos-latest
+    runs-on: macos-12
 
     env:
       QT_VERSION: 6.5.2
 
     steps:
+    # Just select XCode
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '14.2' # needs to be the latest possible
+        xcode-version: '14.2'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -183,11 +184,12 @@ jobs:
         export PATH=$PATH:~/go/bin
         sh deploy/build_ios.sh
       env:
-        IOS_DIST_SIGNING_KEY: ${{ secrets.IOS_DIST_SIGNING_KEY }}
+        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
+        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-        IOS_DIST_SIGNING_KEY_PASSWORD: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
         IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
         IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
       

@@ -35,36 +35,47 @@ clang -v
 $QT_BIN_DIR/qt-cmake . -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
 KEYCHAIN=amnezia.build.keychain
-KEYCHAIN_FILE=/Users/runner/Library/Keychains/${KEYCHAIN}-db
+KEYCHAIN_FILE=$HOME/Library/Keychains/${KEYCHAIN}-db
 
 # Setup keychain
-if [ "${IOS_DIST_SIGNING_KEY+x}" ]; then
+if [ "${IOS_SIGNING_CERT_BASE64+x}" ]; then
   echo "Import certificate"
-  echo $IOS_DIST_SIGNING_KEY | base64 --decode > $BUILD_DIR/signing-cert.p12
 
-  CERTIFICATE_P12=$BUILD_DIR/signing-cert.p12
-  TEMP_PASS=$IOS_DIST_SIGNING_KEY_PASSWORD
+  TRUST_CERT_CER=$BUILD_DIR/trust-cert.cer
+  SIGNING_CERT_P12=$BUILD_DIR/signing-cert.p12
 
-  security create-keychain -p $TEMP_PASS $KEYCHAIN || true
+  echo $IOS_TRUST_CERT_BASE64 | base64 --decode > $TRUST_CERT_CER
+  echo $IOS_SIGNING_CERT_BASE64 | base64 --decode > $SIGNING_CERT_P12
+
+  shasum -a 256 $TRUST_CERT_CER
+  shasum -a 256 $SIGNING_CERT_P12
+
+  KEYCHAIN_PASS=$IOS_SIGNING_CERT_PASSWORD
+
+  security create-keychain -p $KEYCHAIN_PASS $KEYCHAIN || true
   security default-keychain -s $KEYCHAIN
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
+  security unlock-keychain -p $KEYCHAIN_PASS $KEYCHAIN
 
   security default-keychain
   security list-keychains
 
-  security import $CERTIFICATE_P12 -k $KEYCHAIN -P $IOS_DIST_SIGNING_KEY_PASSWORD -T /usr/bin/codesign || true
+  security import $TRUST_CERT_CER -k $KEYCHAIN -P "" -T /usr/bin/codesign
+  security import $SIGNING_CERT_P12 -k $KEYCHAIN -P $IOS_SIGNING_CERT_PASSWORD -T /usr/bin/codesign
 
-  security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k $TEMP_PASS $KEYCHAIN
+  security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k $KEYCHAIN_PASS $KEYCHAIN
   security find-identity -p codesigning
   security set-keychain-settings $KEYCHAIN_FILE
   security set-keychain-settings -t 3600 $KEYCHAIN_FILE
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN_FILE
+  security unlock-keychain -p $KEYCHAIN_PASS $KEYCHAIN_FILE
 
   # Copy provisioning prifiles
   mkdir -p  "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
   echo $IOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
   echo $IOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
+
+  shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+  shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision
 
   profile_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
   profile_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
