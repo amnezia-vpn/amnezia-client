@@ -63,7 +63,7 @@ cmake --build . --config release
 #echo "............Deploy.................."
 
 cp -r $DEPLOY_DATA_DIR/* $APP_DIR
-cp -r $PREBUILT_DEPLOY_DATA_DIR $APP_DIR
+cp -r $PREBUILT_DEPLOY_DATA_DIR $APP_DIR/client
 
 if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
   wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
