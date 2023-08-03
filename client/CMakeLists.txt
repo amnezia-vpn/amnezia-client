@@ -336,9 +336,7 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libck-ovpn-plugin.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libopenvpn.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnexec.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnutil.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/librsapss.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so  
