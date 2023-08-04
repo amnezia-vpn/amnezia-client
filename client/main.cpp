@@ -5,6 +5,8 @@
 #include "version.h"
 #include "migrations.h"
 
+#include <QTimer>
+
 #ifdef Q_OS_WIN
 #include "Windows.h"
 #endif

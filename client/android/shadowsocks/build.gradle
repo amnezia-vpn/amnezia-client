@@ -59,11 +59,11 @@ dependencies {
     implementation "com.google.code.gson:gson:2.8.5"
 
     implementation "dnsjava:dnsjava:2.1.9"
-    implementation "org.connectbot.jsocks:jsocks:1.0.0"
+    implementation "com.github.kruton:jsocks:1.0.0"
     implementation "com.afollestad.material-dialogs:core:2.6.0"
 //    api "com.takisoft.preferencex:preferencex:1.0.0"
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
-    api 'org.connectbot.jsocks:jsocks:1.0.0'
+    api 'com.github.kruton:jsocks:1.0.0'
 
     kapt "androidx.room:room-compiler:$roomVersion"
     kapt "androidx.lifecycle:lifecycle-compiler:2.4.0"

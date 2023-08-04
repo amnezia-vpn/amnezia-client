@@ -63,10 +63,6 @@ set(SOURCES ${SOURCES}
 #    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
 #)
 
-set(LIBS ${LIBS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/libcrypto.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenSSL/lib/ios/iphone/libssl.a
-)
 
 target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
