@@ -635,7 +635,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
-    QString script = QString("sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
+    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
