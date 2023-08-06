@@ -825,11 +825,13 @@ enum TunnelType: String {
 
 extension String {
     var toTunnelType: TunnelType {
-        switch self {
-        case "Amnezia Wireguard": return .wireguard
-        case "Amnezia OpenVPN": return .openvpn
-        case "Amnezia ShadowSocks": return .shadowsocks
-        default:
+        if(self.contains("Wireguard")){
+            return .wireguard
+        }else if(self.contains("OpenVPN")){
+            return .openvpn
+        }else if(self.contains("ShadowSocks")){
+            return .shadowsocks
+        }else{
             return .empty
         }
     }
