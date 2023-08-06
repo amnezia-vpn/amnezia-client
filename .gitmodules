@@ -28,6 +28,3 @@
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
 	url = https://github.com/amnezia-vpn/3rd-prebuilt
-[submodule "client/3rd/wireguard-go"]
-	path = client/3rd/wireguard-go
-	url = https://github.com/WireGuard/wireguard-go
