@@ -320,6 +320,7 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
     
     m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
                                                          config:ovpnConfig.toNSString()
+                                                          proto:@"Cloak"
     closure:^(ConnectionState state, NSDate* date) {
         creating = false;
         
@@ -382,6 +383,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
     
     m_controller = [[IOSVpnProtocolImpl alloc] initWithBundleID:@VPN_NE_BUNDLEID
                                                          config:ovpnConfig.toNSString()
+                                                          proto:@"OpenVPN"
     closure:^(ConnectionState state, NSDate* date) {
         qDebug() << "OVPN Creation completed with connection state:" << state;
         creating = false;

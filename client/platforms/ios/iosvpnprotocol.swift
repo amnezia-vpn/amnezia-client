@@ -33,15 +33,67 @@ public class IOSVpnProtocolImpl : NSObject {
     private var openVPNConfig: String? = nil
     private var shadowSocksConfig: String? = nil
 
+    private var serverIP: String? = nil
     @objc enum ConnectionState: Int { case Error, Connected, Disconnected }
+    
+    func extractRemoteValue(from configString: String) -> String? {
+        let pattern = "remote\\s+([^\\s]+)\\s+(\\d+)"
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+
+        guard let match = regex.firstMatch(in: configString, options: [], range: NSRange(location: 0, length: configString.utf16.count)) else {
+            return nil
+        }
+
+        let remoteHostRange = Range(match.range(at: 1), in: configString)
+        let remotePortRange = Range(match.range(at: 2), in: configString)
+
+        let remoteHost = String(configString[remoteHostRange!])
+        let remotePort = String(configString[remotePortRange!])
+
+        return "\(remoteHost)"
+    }
+    func extractFirstRouteIP(from configString: String) -> String? {
+        let pattern = "route\\s+([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)"
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+
+        guard let match = regex.firstMatch(in: configString, options: [], range: NSRange(location: 0, length: configString.utf16.count)) else {
+            return nil
+        }
+
+        let ipRange = Range(match.range(at: 1), in: configString)
+        let ipAddress = String(configString[ipRange!])
+
+        return ipAddress
+    }
+
+
     
     @objc init(bundleID: String,
                config: String,
+               proto: String,
                closure: @escaping (ConnectionState, Date?) -> Void,
                callback: @escaping (Bool) -> Void) {
         super.init()
         Logger.configureGlobal(tagged: "APP", withFilePath: "")
         
+        if let remoteValue = extractRemoteValue(from: config) {
+            if(remoteValue == "127.0.0.1"){
+                if let routeip = extractFirstRouteIP(from: config){
+                    serverIP = routeip;
+                    print("Route ip is:\(routeip)")
+                }else{
+                    print("Route ip not found")
+                }
+            }else{
+                serverIP = remoteValue;
+                print("Remote value: \(remoteValue)")
+            }
+           
+        } else {
+            print("Remote value not found.")
+        }
+
+    
         vpnBundleID = bundleID;
         precondition(!vpnBundleID.isEmpty)
         
@@ -71,7 +123,17 @@ public class IOSVpnProtocolImpl : NSObject {
             Logger.global?.log(message: "We have received \(nsManagers.count) managers.")
             print("We have received \(nsManagers.count) managers.")
 
-            let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
+            var tunnel : NETunnelProviderManager? = nil;
+            var tunnelLocalizedDescription = "\(proto) \(self!.serverIP)"
+
+            if(!nsManagers.isEmpty){
+                for manager in nsManagers{
+                    if (manager.localizedDescription == tunnelLocalizedDescription){
+                        tunnel = manager;
+                        break;
+                    }
+                }
+            }
             
 //            if let name = tunnel?.localizedDescription, name == vpnName {
 //                tunnel?.removeFromPreferences(completionHandler: { removeError in
@@ -159,6 +221,7 @@ public class IOSVpnProtocolImpl : NSObject {
                     }
                 }
             }
+            
             
             
           //  let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
@@ -342,6 +405,7 @@ public class IOSVpnProtocolImpl : NSObject {
         print("server: \(addr)")
         
         // Let's remove the previous config if it exists.
+        // Fixme: check this
         (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
         
         self.configureOpenVPNTunnel(serverAddress: addr, config: ovpnConfig, failureCallback: failureCallback)
@@ -388,14 +452,27 @@ public class IOSVpnProtocolImpl : NSObject {
             }
         }
     }
-    
+ 
+   
     func configureOpenVPNTunnel(serverAddress: String, config: String, failureCallback: @escaping () -> Void) {
         let tunnelProtocol = NETunnelProviderProtocol()
         tunnelProtocol.serverAddress = serverAddress
         tunnelProtocol.providerBundleIdentifier = vpnBundleID
         tunnelProtocol.providerConfiguration = ["ovpn": Data(config.utf8)]
         tunnel?.protocolConfiguration = tunnelProtocol
-        tunnel?.localizedDescription = "Amnezia OpenVPN"
+        
+        
+        
+        if(serverAddress == "127.0.0.1"){
+            if let routeip = extractFirstRouteIP(from: config){
+                print("Route ip is:\(routeip)")
+                tunnel?.localizedDescription = "Cloak \(routeip)"
+            }else{
+                print("Route ip not found")
+            }
+        }else{
+            tunnel?.localizedDescription = "OpenVPN \(serverAddress)"
+        }
         tunnel?.isEnabled = true
 
         tunnel?.saveToPreferences { [unowned self] saveError in
