@@ -15,75 +15,67 @@ include(${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/QSimpleCrypto.cmake)
 set(LIBSSH_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/")
 set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
 
-if(IOS)
-    set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
-    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
-else(IOS)
-    set(OPENSSL_LIBRARIES "ssl" "crypto")
-    set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
-    if(WIN32)
-        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-        if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-            set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86_64/ssh.lib")
-            set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86_64")
-            set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
-            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
-        else()
-            set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86/ssh.lib")
-            set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86")
-            set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
-            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
-        endif()
-    elseif(APPLE AND NOT IOS)
-        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libssh.a")
-        set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libz.a")
-        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/macos/x86_64")
-        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
-        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libssl.a")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
-    elseif(IOS)
-        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
-        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
-        set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libz.a")
-        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
-        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a")
-        set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a")
-        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a")
-    elseif(ANDROID)
-        set(abi ${CMAKE_ANDROID_ARCH_ABI})
-        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/android/${abi}")
-        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/android/${abi}/libssh.so")
-        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/android/include")
-        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a")
-        set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a")
-        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a")
-
-        set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/android/${abi}")
-    elseif(LINUX)
-        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/linux/x86_64")
-        set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/linux/x86_64/libz.a")
-        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/linux/x86_64/libssh.a")
-        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
-        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libcrypto.a")
-        set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libssl.a")
-        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libssl.a")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/${CMAKE_SYSTEM_PROCESSOR}/libcrypto.a")
+if(WIN32)
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86_64/ssh.lib")
+        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86_64")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+    else()
+        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86/ssh.lib")
+        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
     endif()
-    
-    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-            DESTINATION ${OPENSSL_LIBRARIES_DIR})
+elseif(APPLE AND NOT IOS)
+      set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libssh.a")
+      set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libz.a")
+      set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/macos/x86_64")
+      set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
+      set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libssl.a")
+      set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
+  elseif(IOS)
+      set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
+      set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
+      set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libz.a")
+      set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
+      set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a")
+      set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a")
+  elseif(ANDROID)
+      set(abi ${CMAKE_ANDROID_ARCH_ABI})
+      set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/android/${abi}")
+      set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/android/${abi}/libssh.so")
+      set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/android/include")
+      set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a")
+      set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a")
 
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
-    set(LIBS ${LIBS}
-        ${OPENSSL_LIB_SSL_PATH}
-        ${OPENSSL_LIB_CRYPTO_PATH}
-    )
-    set(LIBS ${LIBS} ${LIBSSH_LIB_PATH} ${ZLIB_LIB_PATH})
+      set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/android/${abi}")
+  elseif(LINUX)
+      set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/linux/x86_64")
+      set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/linux/x86_64/libz.a")
+      set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/linux/x86_64/libssh.a")
+      set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
+      set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libssl.a")
+      set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
+  endif()
     
-endif(IOS)
+  file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+          DESTINATION ${OPENSSL_LIBRARIES_DIR})
+
+  set(OPENSSL_USE_STATIC_LIBS TRUE)
+  set(LIBS ${LIBS}
+      ${OPENSSL_LIB_SSL_PATH}
+      ${OPENSSL_LIB_CRYPTO_PATH}
+  )
+  
+  set(LIBS ${LIBS} 
+      ${LIBSSH_LIB_PATH} 
+      ${ZLIB_LIB_PATH}
+  )
+    
 
 add_compile_definitions(_WINSOCKAPI_)
 
@@ -92,27 +84,6 @@ set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 set(LIBS ${LIBS} qt6keychain)
 
-
-if(IOS)
-    set(LIBS ${LIBS}
-            ${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a
-            ${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a
-            ${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a
-            ${LIBSSH_ROOT_DIR}/ios/arm64/libz.a
-    )
-endif()
-
-if(ANDROID)
-    foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-        if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
-            set(LIBS ${LIBS}
-                ${OPENSSL_ROOT_DIR}/android/${abi}/libcrypto.a
-                ${OPENSSL_ROOT_DIR}/android/${abi}/libssl.a
-                ${LIBSSH_ROOT_DIR}/android/${abi}/libssh.so
-            )
-        endif()
-    endforeach()
-endif()
 
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
