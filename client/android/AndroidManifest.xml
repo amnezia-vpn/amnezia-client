@@ -12,6 +12,7 @@
    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" /> 
 
    <!-- Enable when VPN-per-app mode will be implemented -->
    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/> -->
@@ -133,6 +134,7 @@
             android:name=".VPNService"
             android:process=":QtOnlyProcess"
             android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="connectedDevice"
             android:exported="true">
                 <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
     
@@ -144,6 +146,7 @@
         <service
             android:name=".qt.VPNPermissionHelper"
             android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="connectedDevice"
             android:exported="true">
                 <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
         </service>

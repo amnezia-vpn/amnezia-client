@@ -228,20 +228,27 @@ qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_i
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DEPLOY_ARTIFACT_PATH "windows/x64")
+        set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
-        set(DEPLOY_ARTIFACT_PATH "windows/x32")
+        set(DEPLOY_PLATFORM_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/service")
+    set(DEPLOY_PLATFORM_PATH "linux/service")
 elseif(APPLE AND NOT IOS)
-    set(DEPLOY_ARTIFACT_PATH "macos")
+    set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
 add_custom_command(
     TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
+    $<TARGET_FILE_DIR:${PROJECT}>
+    COMMAND_EXPAND_LISTS
+)
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+    ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )

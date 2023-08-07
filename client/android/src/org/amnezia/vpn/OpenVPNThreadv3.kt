@@ -26,6 +26,8 @@ import net.openvpn.ovpn3.ClientAPI_OpenVPNClient
 import net.openvpn.ovpn3.ClientAPI_ProvideCreds
 import net.openvpn.ovpn3.ClientAPI_Status
 import net.openvpn.ovpn3.ClientAPI_TransportStats
+
+
 import java.lang.StringBuilder
 
 class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runnable {
@@ -57,6 +59,12 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
     fun getTotalTxBytes(): Long {
         return stats_value(bytesOutIndex)
     }
+
+    override fun reconnect(seconds :Int) {
+         Log.v(tag, "reconnect")
+         super.reconnect(seconds)
+    }
+
 
     override fun run() {
 
