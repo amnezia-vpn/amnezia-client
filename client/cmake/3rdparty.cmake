@@ -77,10 +77,9 @@ else(IOS)
             DESTINATION ${OPENSSL_LIBRARIES_DIR})
 
     set(OPENSSL_USE_STATIC_LIBS TRUE)
-    find_package(OpenSSL REQUIRED)
     set(LIBS ${LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
+        ${OPENSSL_LIB_SSL_PATH}
+        ${OPENSSL_LIB_CRYPTO_PATH}
     )
     set(LIBS ${LIBS} ${LIBSSH_LIB_PATH} ${ZLIB_LIB_PATH})
     
@@ -113,7 +112,7 @@ if(ANDROID)
             )
         endif()
     endforeach()
-endif()        
+endif()
 
 include_directories(
     ${OPENSSL_INCLUDE_DIR}
