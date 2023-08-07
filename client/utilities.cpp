@@ -230,7 +230,7 @@ QString Utils::wireguardExecPath()
 #ifdef Q_OS_WIN
     return Utils::executable("wireguard/wireguard-service", true);
 #elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg-quick", true);
+    return Utils::usrExecutable("wg-quick");
 #elif defined Q_OS_MAC
     return Utils::executable("/wireguard", true);
 #else
