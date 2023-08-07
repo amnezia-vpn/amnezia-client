@@ -66,16 +66,16 @@ elseif(APPLE AND NOT IOS)
           DESTINATION ${OPENSSL_LIBRARIES_DIR})
 
   set(OPENSSL_USE_STATIC_LIBS TRUE)
-  set(LIBS ${LIBS}
-      ${OPENSSL_LIB_SSL_PATH}
-      ${OPENSSL_LIB_CRYPTO_PATH}
-  )
   
   set(LIBS ${LIBS} 
       ${LIBSSH_LIB_PATH} 
       ${ZLIB_LIB_PATH}
   )
-    
+  
+  set(LIBS ${LIBS}
+      ${OPENSSL_LIB_SSL_PATH}
+      ${OPENSSL_LIB_CRYPTO_PATH}
+  )
 
 add_compile_definitions(_WINSOCKAPI_)
 
