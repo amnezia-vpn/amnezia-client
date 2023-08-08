@@ -84,6 +84,7 @@ bool RouterLinux::clearSavedRoutes()
     }
     bool ret = (cnt == m_addedRoutes.count());
     m_addedRoutes.clear();
+    close(temp_sock);
     return ret;
 }
 
