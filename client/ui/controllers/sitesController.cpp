@@ -1,6 +1,7 @@
 #include "sitesController.h"
 
 #include <QHostInfo>
+#include <QStandardPaths>
 
 #include "utilities.h"
 
