@@ -110,18 +110,24 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
     QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
-    if (m_settings->routeMode() != Settings::VpnAllSites) {
-        config.replace("redirect-gateway def1 bypass-dhcp", "");
+    QRegularExpression regex("redirect-gateway.*");
+    config.replace(regex, "");
+
+    if (m_settings->routeMode() == Settings::VpnAllSites) {
+        config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+        // Prevent ipv6 leak
+        config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+        config.append("block-ipv6\n");
     }
-    else {
-        if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
-            config.append("redirect-gateway def1 bypass-dhcp\n");
-        }
+    if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        // no redirect-gateway
     }
-    
-    // Prevent ipv6 leak
-    config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
-    config.append("redirect-gateway ipv6\n");
+    if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+        config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
+        // Prevent ipv6 leak
+        config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+        config.append("block-ipv6\n");
+    }
 
 #ifndef MZ_WINDOWS
     config.replace("block-outside-dns", "");
@@ -146,9 +152,14 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
     QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
-    if(!config.contains("redirect-gateway def1 bypass-dhcp")) {
-        config.append("redirect-gateway def1 bypass-dhcp\n");
-    }
+    QRegularExpression regex("redirect-gateway.*");
+    config.replace(regex, "");
+
+    config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+
+    // Prevent ipv6 leak
+    config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+    config.append("block-ipv6\n");
 
     // remove block-outside-dns for all exported configs
     config.replace("block-outside-dns", "");

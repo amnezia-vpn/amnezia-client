@@ -439,7 +439,11 @@ void VpnConnection::disconnectFromVpn()
 #endif
         return;
     }
-    m_vpnProtocol.data()->stop();
+
+    if (m_vpnProtocol) {
+        m_vpnProtocol->deleteLater();
+    }
+    m_vpnProtocol = nullptr;
 }
 
 VpnProtocol::VpnConnectionState VpnConnection::connectionState()
@@ -450,10 +454,6 @@ VpnProtocol::VpnConnectionState VpnConnection::connectionState()
 
 bool VpnConnection::isConnected() const
 {
-#ifdef Q_OS_IOS
-
-#endif
-
     if (!m_vpnProtocol.data()) {
         return false;
     }

@@ -18,6 +18,10 @@ IpcServer::IpcServer(QObject *parent):
 
 int IpcServer::createPrivilegedProcess()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::createPrivilegedProcess";
+#endif
+
     m_localpid++;
 
     ProcessDescriptor pd(this);
@@ -68,31 +72,55 @@ int IpcServer::createPrivilegedProcess()
 
 int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::routeAddList";
+#endif
+
     return Router::routeAddList(gw, ips);
 }
 
 bool IpcServer::clearSavedRoutes()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::clearSavedRoutes";
+#endif
+
     return Router::clearSavedRoutes();
 }
 
 bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::routeDeleteList";
+#endif
+
     return Router::routeDeleteList(gw ,ips);
 }
 
 void IpcServer::flushDns()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::flushDns";
+#endif
+
     return Router::flushDns();
 }
 
 void IpcServer::resetIpStack()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::resetIpStack";
+#endif
+
     Router::resetIpStack();
 }
 
 bool IpcServer::checkAndInstallDriver()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::checkAndInstallDriver";
+#endif
+
 #ifdef Q_OS_WIN
     return TapController::checkAndSetup();
 #else
@@ -102,6 +130,10 @@ bool IpcServer::checkAndInstallDriver()
 
 QStringList IpcServer::getTapList()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::getTapList";
+#endif
+
 #ifdef Q_OS_WIN
     return TapController::getTapList();
 #else
@@ -111,13 +143,20 @@ QStringList IpcServer::getTapList()
 
 void IpcServer::cleanUp()
 {
+#ifdef MZ_DEBUG
     qDebug() << "IpcServer::cleanUp";
+#endif
+
     Logger::deinit();
     Logger::cleanUp();
 }
 
 void IpcServer::setLogsEnabled(bool enabled)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::setLogsEnabled";
+#endif
+
     if (enabled) {
         Logger::init();
     }
@@ -128,6 +167,10 @@ void IpcServer::setLogsEnabled(bool enabled)
 
 bool IpcServer::copyWireguardConfig(const QString &sourcePath)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::copyWireguardConfig";
+#endif
+
 #ifdef Q_OS_LINUX
     const QString wireguardConfigPath = "/etc/wireguard/wg99.conf";
     if (QFile::exists(wireguardConfigPath))
@@ -147,6 +190,10 @@ bool IpcServer::copyWireguardConfig(const QString &sourcePath)
 
 bool IpcServer::isWireguardRunning()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::isWireguardRunning";
+#endif
+
 #ifdef Q_OS_LINUX
     QProcess checkWireguardStatusProcess;
 
@@ -170,5 +217,9 @@ bool IpcServer::isWireguardRunning()
 
 bool IpcServer::isWireguardConfigExists(const QString &configPath)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::isWireguardConfigExists";
+#endif
+
     return QFileInfo::exists(configPath);
 }
