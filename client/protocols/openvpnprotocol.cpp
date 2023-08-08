@@ -42,6 +42,7 @@ QString OpenVpnProtocol::defaultConfigPath()
 void OpenVpnProtocol::stop()
 {
     qDebug() << "OpenVpnProtocol::stop()";
+    setConnectionState(VpnProtocol::Disconnecting);
 
     // TODO: need refactoring
     // sendTermSignal() will even return true while server connected ???
@@ -52,10 +53,10 @@ void OpenVpnProtocol::stop()
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
+        QThread::msleep(10);
         m_managementServer.stop();
-        qApp->processEvents();
-        setConnectionState(VpnProtocol::Disconnecting);
     }
+    setConnectionState(VpnProtocol::Disconnected);
 }
 
 ErrorCode OpenVpnProtocol::prepare()
@@ -78,11 +79,9 @@ ErrorCode OpenVpnProtocol::prepare()
 
 void OpenVpnProtocol::killOpenVpnProcess()
 {
-#ifndef Q_OS_IOS
     if (m_openVpnProcess){
         m_openVpnProcess->close();
     }
-#endif
 }
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
@@ -150,7 +149,6 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
 
 ErrorCode OpenVpnProtocol::start()
 {
-#ifndef Q_OS_IOS
     //qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
@@ -163,6 +161,27 @@ ErrorCode OpenVpnProtocol::start()
         setLastError(ErrorCode::OpenVpnConfigMissing);
         return lastError();
     }
+
+    // Detect default gateway
+#ifdef Q_OS_MAC
+    QProcess p;
+    p.setProcessChannelMode(QProcess::MergedChannels);
+
+    p.start("route", QStringList() << "-n" << "get" << "default");
+    p.waitForFinished();
+    QString s =  p.readAll();
+
+    QRegularExpression rx(R"(gateway:\s*(\d+\.\d+\.\d+\.\d+))");
+    QRegularExpressionMatch match = rx.match(s);
+    if (match.hasMatch()) {
+        m_routeGateway = match.captured(1);
+        qDebug() << "Set VPN route gateway" << m_routeGateway;
+    }
+    else {
+        qWarning() << "Unable to set VPN route gateway, output:\n" << s;
+    }
+#endif
+
 
 //    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
 //    Utils::createEmptyFile(vpnLogFileNamePath);
@@ -216,9 +235,6 @@ ErrorCode OpenVpnProtocol::start()
     //startTimeoutTimer();
 
     return ErrorCode::NoError;
-#else
-    return ErrorCode::NotImplementedError;
-#endif
 }
 
 bool OpenVpnProtocol::sendTermSignal()

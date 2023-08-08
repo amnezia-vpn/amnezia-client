@@ -50,16 +50,11 @@ public:
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
 
-
     bool isConnected() const;
     bool isDisconnected() const;
 
     VpnProtocol::VpnConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
-
-    void addRoutes(const QStringList &ips);
-    void deleteRoutes(const QStringList &ips);
-    void flushDns();
 
     const QString &remoteAddress() const;
     void addSitesRoutes(const QString &gw, Settings::RouteMode mode);
@@ -73,6 +68,11 @@ public slots:
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
 
     void disconnectFromVpn();
+
+
+    void addRoutes(const QStringList &ips);
+    void deleteRoutes(const QStringList &ips);
+    void flushDns();
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

@@ -50,7 +50,6 @@ bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const
 
     route.rt_flags = RTF_UP | RTF_GATEWAY;
     route.rt_metric = 0;
-    //route.rt_dev = "ens33";
 
     if (int err = ioctl(sock, SIOCADDRT, &route) < 0)
     {
@@ -60,6 +59,8 @@ bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const
         << " mask " << ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr << " " << err;
         return false;
     }
+
+    m_addedRoutes.append({ipWithSubnet, gw});
     return true;
 }
 
@@ -76,18 +77,22 @@ int RouterLinux::routeAddList(const QString &gw, const QStringList &ips)
 
 bool RouterLinux::clearSavedRoutes()
 {
-    // No need to delete routes after iface down
-    return true;
-
-//    int cnt = 0;
-//    for (const QString &ip: m_addedRoutes) {
-//        if (routeDelete(ip)) cnt++;
-//    }
-    //    return (cnt == m_addedRoutes.count());
+    int temp_sock = socket(AF_INET, SOCK_DGRAM,  IPPROTO_IP);
+    int cnt = 0;
+    for (const Route &r: m_addedRoutes) {
+        if (routeDelete(r.dst, r.gw, temp_sock)) cnt++;
+    }
+    bool ret = (cnt == m_addedRoutes.count());
+    m_addedRoutes.clear();
+    return ret;
 }
 
 bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, const int &sock)
 {
+#ifdef MZ_DEBUG
+    qDebug().noquote() << "RouterMac::routeDelete: " << ipWithSubnet << gw;
+#endif
+
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 

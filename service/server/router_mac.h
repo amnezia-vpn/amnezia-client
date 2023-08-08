@@ -18,6 +18,11 @@ class RouterMac : public QObject
 public:    
     static RouterMac& Instance();
 
+    struct Route {
+        QString dst;
+        QString gw;
+    };
+
     bool routeAdd(const QString &ip, const QString &gw);
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
@@ -32,7 +37,7 @@ private:
     RouterMac(RouterMac const &) = delete;
     RouterMac& operator= (RouterMac const&) = delete;
 
-    QList<QString> m_addedRoutes;
+    QList<Route> m_addedRoutes;
 };
 
 #endif // ROUTERMAC_H
