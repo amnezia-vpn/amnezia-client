@@ -6,7 +6,7 @@ on: [push]
 jobs:
   Build-Linux-Ubuntu:
     name: 'Build-Linux-Ubuntu'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     env:
       QT_VERSION: 6.5.1
@@ -121,16 +121,17 @@ jobs:
 
   Build-IOS:
     name: 'Build-IOS'
-    runs-on: macos-latest
+    runs-on: macos-12
 
     env:
-      QT_VERSION: 6.5.1
+      QT_VERSION: 6.5.2
 
     steps:
+    # Just select XCode
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.4'
+        xcode-version: '14.2'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -172,25 +173,35 @@ jobs:
 
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
-
+      
+    - name: Install dependencies
+      run: pip install jsonschema jinja2
+        
     - name: 'Build project'
       run: |
+        git submodule update --init --recursive
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
         export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export QT_IOS_BIN=$QT_BIN_DIR
         export PATH=$PATH:~/go/bin
-        mkdir build-ios
-        $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-
-#    - name: iOS Build/Release With Multiple Targets Action
-#      uses: kumarsunil0007/build-ios-action@latest
+        sh deploy/build_ios.sh
+      env:
+        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
+        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+      
+#    - name: 'Upload appstore .ipa and dSYMs to artifacts'
+#      uses: actions/upload-artifact@v3
 #      with:
-#        project-path: build-ios/AmneziaVPN.xcodeproj
-#        p12-base64: ~/amnezia-vpn/amnezia-ios-certificates/certs/distribution/443886Q5PL.p12
-#        mobileprovision-base64: ~/amnezia-vpn/amnezia-ios-certificates/testprofilez.mobileprovision
-#        code-signing-identity:  'iOS Distribution'
-#        team-id: 'X7UJ388FXK'
-#        configuration: Release
+#        name: app-store ipa & dsyms
+#        path: |
+#          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
+#          ${{ github.workspace }}/*.app.dSYM.zip
+#        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -257,10 +268,6 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
 
-    strategy:
-      matrix:
-        arch: ['android_x86_64', 'android_x86'] #, 'android_armv7', 'android_arm64_v8a']
-
     env:
       QT_VERSION: 6.5.1
 
@@ -284,7 +291,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'android'
-        arch: ${{ matrix.arch }}
+        arch: 'android_x86_64'
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
@@ -318,12 +325,12 @@ jobs:
         export ANDROID_NDK_PLATFORM=android-23
         export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
         export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-        export ANDROID_CURRENT_ARCH=${{ matrix.arch }}
+        export ANDROID_CURRENT_ARCH=android_x86_64
 
         if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
           wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
           unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
         fi
 
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.arch }}/bin
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin
         bash deploy/build_android.sh

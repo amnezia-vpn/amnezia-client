@@ -4,12 +4,6 @@ set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
 
-if(ANDROID)
-    # For a some reason cmake do not applying GNU_SOURCE/BSD_SOURCE flags on Android platform.
-    # We have to do this manually for building of libssh.
-    add_definitions(-D_BSD_SOURCE)
-endif()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -252,6 +246,7 @@ if(APPLE)
 endif()
 
 if(LINUX AND NOT ANDROID)
+    set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
@@ -351,18 +346,18 @@ if(ANDROID)
     )
 
     foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-        if(CMAKE_ANDROID_ARCH_ABI STREQUAL ${abi})
-            set(LIBS ${LIBS}
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libcrypto.a
-                ${CMAKE_CURRENT_LIST_DIR}/3rd/OpenSSL/lib/android/${abi}/libssl.a
-            )
-        endif()
 
         set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
             ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libck-ovpn-plugin.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnutil.so
+            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/librsapss.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so  
         )
+        
     endforeach()
 
 endif()
@@ -373,24 +368,32 @@ target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAM
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DEPLOY_ARTIFACT_PATH "windows/x64")
+        set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
-        set(DEPLOY_ARTIFACT_PATH "windows/x32")
+        set(DEPLOY_PLATFORM_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_ARTIFACT_PATH "linux/client")
+    set(DEPLOY_PLATFORM_PATH "linux/client")
 elseif(APPLE AND NOT IOS)
-    set(DEPLOY_ARTIFACT_PATH "macos")
+    set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
 if(NOT IOS AND NOT ANDROID)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_ARTIFACT_PATH}
+        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
     )
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
+        $<TARGET_FILE_DIR:${PROJECT}>
+        COMMAND_EXPAND_LISTS
+    )
+
 endif()
 
 if(WIN32)
