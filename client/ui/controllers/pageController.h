@@ -28,6 +28,7 @@ namespace PageLoader
         PageSettingsBackup,
         PageSettingsAbout,
         PageSettingsLogging,
+        PageSettingsSplitTunneling,
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
@@ -83,8 +84,8 @@ signals:
     void restorePageHomeState(bool isContainerInstalled = false);
     void replaceStartPage();
 
-    void showErrorMessage(QString errorMessage);
-    void showNotificationMessage(QString message);
+    void showErrorMessage(const QString &errorMessage);
+    void showNotificationMessage(const QString &message);
 
     void showBusyIndicator(bool visible);
 

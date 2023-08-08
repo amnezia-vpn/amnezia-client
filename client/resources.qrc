@@ -280,5 +280,10 @@
         <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
         <file>images/controls/eye.svg</file>
         <file>images/controls/eye-off.svg</file>
+        <file>ui/qml/Pages2/PageSettingsSplitTunneling.qml</file>
+        <file>ui/qml/Controls2/ContextMenuType.qml</file>
+        <file>ui/qml/Controls2/TextAreaType.qml</file>
+        <file>images/controls/trash.svg</file>
+        <file>images/controls/more-vertical.svg</file>
     </qresource>
 </RCC>

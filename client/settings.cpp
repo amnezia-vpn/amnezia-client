@@ -231,14 +231,15 @@ QString Settings::routeModeString(RouteMode mode) const
     }
 }
 
-void Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
+bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
 {
     QVariantMap sites = vpnSites(mode);
     if (sites.contains(site) && ip.isEmpty())
-        return;
+        return false;
 
     sites.insert(site, ip);
     setVpnSites(mode, sites);
+    return true;
 }
 
 void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
@@ -306,6 +307,11 @@ void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
     }
 
     setVpnSites(mode, sitesMap);
+}
+
+void Settings::removeAllVpnSites(RouteMode mode)
+{
+    setVpnSites(mode, QVariantMap());
 }
 
 QString Settings::primaryDns() const

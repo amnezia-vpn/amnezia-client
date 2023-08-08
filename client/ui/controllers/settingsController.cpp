@@ -14,7 +14,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
 }
 
-void SettingsController::setAmneziaDns(bool enable)
+void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_settings->setUseAmneziaDns(enable);
 }
@@ -46,7 +46,7 @@ void SettingsController::setSecondaryDns(const QString &dns)
     emit secondaryDnsChanged();
 }
 
-bool SettingsController::isLoggingEnable()
+bool SettingsController::isLoggingEnabled()
 {
     return m_settings->isSaveLogs();
 }
@@ -110,4 +110,14 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->resetModel();
+}
+
+bool SettingsController::isAutoConnectEnabled()
+{
+    return m_settings->isAutoConnect();
+}
+
+void SettingsController::toggleAutoConnect(bool enable)
+{
+    m_settings->setAutoConnect(enable);
 }

@@ -42,18 +42,18 @@ public slots:
     void setEncryptedPassphrase(QString passphrase);
 
 signals:
-    void installContainerFinished(QString finishMessage);
-    void installServerFinished(QString finishMessage);
+    void installContainerFinished(const QString &finishMessage);
+    void installServerFinished(const QString &finishMessage);
 
     void updateContainerFinished();
 
     void scanServerFinished(bool isInstalledContainerFound);
 
-    void removeCurrentlyProcessedServerFinished(QString finishedMessage);
-    void removeAllContainersFinished(QString finishedMessage);
-    void removeCurrentlyProcessedContainerFinished(QString finishedMessage);
+    void removeCurrentlyProcessedServerFinished(const QString &finishedMessage);
+    void removeAllContainersFinished(const QString &finishedMessage);
+    void removeCurrentlyProcessedContainerFinished(const QString &finishedMessage);
 
-    void installationErrorOccurred(QString errorMessage);
+    void installationErrorOccurred(const QString &errorMessage);
 
     void serverAlreadyExists(int serverIndex);
 

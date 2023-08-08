@@ -1,9 +1,9 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
-#include "ui/models/servers_model.h"
-#include "ui/models/containers_model.h"
 #include "protocols/vpnprotocol.h"
+#include "ui/models/containers_model.h"
+#include "ui/models/servers_model.h"
 #include "vpnconnection.h"
 
 class ConnectionController : public QObject
@@ -17,8 +17,7 @@ public:
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection,
-                                  QObject *parent = nullptr);
+                                  const QSharedPointer<VpnConnection> &vpnConnection, QObject *parent = nullptr);
 
     bool isConnected() const;
     bool isConnectionInProgress() const;
@@ -32,11 +31,12 @@ public slots:
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
 signals:
-    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                      const QJsonObject &containerConfig);
     void disconnectFromVpn();
     void connectionStateChanged();
 
-    void connectionErrorOccurred(QString errorMessage);
+    void connectionErrorOccurred(const QString &errorMessage);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

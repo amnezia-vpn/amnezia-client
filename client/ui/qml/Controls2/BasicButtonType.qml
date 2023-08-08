@@ -20,6 +20,8 @@ Button {
 
     property string imageSource
 
+    property bool squareLeftSide: false
+
     implicitHeight: 56
 
     hoverEnabled: true
@@ -43,6 +45,32 @@ Button {
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
+        }
+
+        Rectangle {
+            visible: root.squareLeftSide
+
+            z: 1
+
+            width: parent.radius
+            height: parent.radius
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            color: {
+                if (root.enabled) {
+                    if (root.pressed) {
+                        return pressedColor
+                    }
+                    return root.hovered ? hoveredColor : defaultColor
+                } else {
+                    return disabledColor
+                }
+            }
+
+            Behavior on color {
+                PropertyAnimation { duration: 200 }
+            }
         }
     }
 

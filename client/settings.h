@@ -127,13 +127,14 @@ public:
         m_settings.setValue("Conf/" + routeModeString(mode), sites);
         m_settings.sync();
     }
-    void addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
+    bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
     void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites); // map <site, ip>
     QStringList getVpnIps(RouteMode mode) const;
     void removeVpnSite(RouteMode mode, const QString &site);
 
     void addVpnIps(RouteMode mode, const QStringList &ip);
     void removeVpnSites(RouteMode mode, const QStringList &sites);
+    void removeAllVpnSites(RouteMode mode);
 
     bool useAmneziaDns() const
     {

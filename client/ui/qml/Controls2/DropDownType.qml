@@ -24,8 +24,10 @@ Item {
     property string rootButtonBackgroundColor: "#1C1D21"
 
     property string rootButtonHoveredBorderColor: "#494B50"
-    property string rootButtonDefaultBorderColor: "transparent"
+    property string rootButtonDefaultBorderColor: "#2C2D30"
     property string rootButtonPressedBorderColor: "#D7D8DB"
+
+    property int rootButtonTextMargins: 16
 
     property real drawerHeight: 0.9
     property Component listView
@@ -74,7 +76,9 @@ Item {
         spacing: 0
 
         ColumnLayout {
-            Layout.leftMargin: 16
+            Layout.leftMargin: rootButtonTextMargins
+            Layout.topMargin: rootButtonTextMargins
+            Layout.bottomMargin: rootButtonTextMargins
 
             LabelTextType {
                 Layout.fillWidth: true
@@ -96,16 +100,10 @@ Item {
 
                 color: root.enabled ? root.textColor : root.textDisabledColor
                 text: root.text
-
-                wrapMode: Text.NoWrap
-                elide: Text.ElideRight
             }
         }
 
         ImageButtonType {
-            Layout.leftMargin: 4
-            Layout.rightMargin: 16
-
             hoverEnabled: false
             image: rootButtonImage
             imageColor: rootButtonImageColor

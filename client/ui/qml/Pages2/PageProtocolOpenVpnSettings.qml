@@ -301,50 +301,18 @@ PageType {
                             text: qsTr("Additional client configuration commands")
                         }
 
-                        Rectangle {
+                        TextAreaType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            height: 148
-                            color: "#1C1D21"
-                            border.width: 1
-                            border.color: "#2C2D30"
-                            radius: 16
                             visible: additionalClientCommandsSwitcher.checked
 
-                            FlickableType {
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                contentHeight: additionalClientCommandsTextArea.implicitHeight
-                                TextArea {
-                                    id: additionalClientCommandsTextArea
+                            text: additionalClientCommands
+                            placeholderText: qsTr("Commands:")
 
-                                    width: parent.width
-                                    anchors.topMargin: 16
-                                    anchors.bottomMargin: 16
-
-                                    topPadding: 16
-                                    leftPadding: 16
-
-                                    color: "#D7D8DB"
-                                    selectionColor:  "#412102"
-                                    selectedTextColor: "#D7D8DB"
-                                    placeholderTextColor: "#878B91"
-
-                                    font.pixelSize: 16
-                                    font.weight: Font.Medium
-                                    font.family: "PT Root UI VF"
-
-                                    placeholderText: qsTr("Commands:")
-                                    text: additionalClientCommands
-
-                                    wrapMode: Text.Wrap
-
-                                    onEditingFinished: {
-                                        if (additionalClientCommands !== text) {
-                                            additionalClientCommands = text
-                                        }
-                                    }
+                            onEditingFinished: {
+                                if (additionalClientCommands !== text) {
+                                    additionalClientCommands = text
                                 }
                             }
                         }
@@ -359,50 +327,18 @@ PageType {
                             text: qsTr("Additional server configuration commands")
                         }
 
-                        Rectangle {
+                        TextAreaType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            height: 148
-                            color: "#1C1D21"
-                            border.width: 1
-                            border.color: "#2C2D30"
-                            radius: 16
                             visible: additionalServerCommandsSwitcher.checked
 
-                            FlickableType {
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                contentHeight: additionalServerCommandsTextArea.implicitHeight
-                                TextArea {
-                                    id: additionalServerCommandsTextArea
+                            text: additionalServerCommands
+                            placeholderText: qsTr("Commands:")
 
-                                    width: parent.width
-                                    anchors.topMargin: 16
-                                    anchors.bottomMargin: 16
-
-                                    topPadding: 16
-                                    leftPadding: 16
-
-                                    color: "#D7D8DB"
-                                    selectionColor:  "#412102"
-                                    selectedTextColor: "#D7D8DB"
-                                    placeholderTextColor: "#878B91"
-
-                                    font.pixelSize: 16
-                                    font.weight: Font.Medium
-                                    font.family: "PT Root UI VF"
-
-                                    placeholderText: qsTr("Commands:")
-                                    text: additionalServerCommands
-
-                                    wrapMode: Text.Wrap
-
-                                    onEditingFinished: {
-                                        if (additionalServerCommands !== text) {
-                                            additionalServerCommands = text
-                                        }
-                                    }
+                            onEditingFinished: {
+                                if (additionalServerCommands !== text) {
+                                    additionalServerCommands = text
                                 }
                             }
                         }

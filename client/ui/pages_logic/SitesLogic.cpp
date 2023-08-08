@@ -9,23 +9,24 @@
 #include "vpnconnection.h"
 #include <functional>
 
-#include "../uilogic.h"
 #include "../models/sites_model.h"
+#include "../uilogic.h"
 
-SitesLogic::SitesLogic(UiLogic *logic, QObject *parent):
-    PageLogicBase(logic, parent),
-    m_labelSitesAddCustomText{},
-    m_tableViewSitesModel{nullptr},
-    m_lineEditSitesAddCustomText{}
+SitesLogic::SitesLogic(UiLogic *logic, QObject *parent)
+    : PageLogicBase(logic, parent),
+      m_labelSitesAddCustomText {},
+      m_tableViewSitesModel { nullptr },
+      m_lineEditSitesAddCustomText {}
 {
-    sitesModels.insert(Settings::VpnOnlyForwardSites, new SitesModel(m_settings, Settings::VpnOnlyForwardSites));
-    sitesModels.insert(Settings::VpnAllExceptSites, new SitesModel(m_settings, Settings::VpnAllExceptSites));
+    //    sitesModels.insert(Settings::VpnOnlyForwardSites, new SitesModel(m_settings, Settings::VpnOnlyForwardSites));
+    //    sitesModels.insert(Settings::VpnAllExceptSites, new SitesModel(m_settings, Settings::VpnAllExceptSites));
 }
 
 void SitesLogic::onUpdatePage()
 {
     Settings::RouteMode m = m_settings->routeMode();
-    if (m == Settings::VpnAllSites) return;
+    if (m == Settings::VpnAllSites)
+        return;
 
     if (m == Settings::VpnOnlyForwardSites) {
         set_labelSitesAddCustomText(tr("These sites will be opened using VPN"));
@@ -35,7 +36,7 @@ void SitesLogic::onUpdatePage()
     }
 
     set_tableViewSitesModel(sitesModels.value(m));
-    sitesModels.value(m)->resetCache();
+    //    sitesModels.value(m)->resetCache();
 }
 
 void SitesLogic::onPushButtonAddCustomSitesClicked()
@@ -47,8 +48,10 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
 
     QString newSite = lineEditSitesAddCustomText();
 
-    if (newSite.isEmpty()) return;
-    if (!newSite.contains(".")) return;
+    if (newSite.isEmpty())
+        return;
+    if (!newSite.contains("."))
+        return;
 
     if (!Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
         // get domain name if it present
@@ -65,8 +68,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         if (!ip.isEmpty()) {
             uiLogic()->m_vpnConnection->addRoutes(QStringList() << ip);
             uiLogic()->m_vpnConnection->flushDns();
-        }
-        else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
+        } else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
             uiLogic()->m_vpnConnection->addRoutes(QStringList() << newSite);
             uiLogic()->m_vpnConnection->flushDns();
         }
@@ -74,10 +76,10 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         onUpdatePage();
     };
 
-    const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo){
+    const auto &cbResolv = [this, cbProcess](const QHostInfo &hostInfo) {
         const QList<QHostAddress> &addresses = hostInfo.addresses();
         QString ipv4Addr;
-        for (const QHostAddress &addr: hostInfo.addresses()) {
+        for (const QHostAddress &addr : hostInfo.addresses()) {
             if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
                 cbProcess(hostInfo.hostName(), addr.toString());
                 break;
@@ -90,8 +92,7 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
     if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
         cbProcess(newSite, "");
         return;
-    }
-    else {
+    } else {
         cbProcess(newSite, "");
         onUpdatePage();
         QHostInfo::lookupHost(newSite, this, cbResolv);
@@ -102,7 +103,7 @@ void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
 {
     Settings::RouteMode mode = m_settings->routeMode();
 
-    auto siteModel = qobject_cast<SitesModel*> (tableViewSitesModel());
+    auto siteModel = qobject_cast<SitesModel *>(tableViewSitesModel());
     if (!siteModel || items.isEmpty()) {
         return;
     }
@@ -110,14 +111,15 @@ void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
     QStringList sites;
     QStringList ips;
 
-    for (const QString &s: items) {
+    for (const QString &s : items) {
         bool ok;
         int row = s.toInt(&ok);
-        if (!ok || row < 0 || row >= siteModel->rowCount()) return;
-        sites.append(siteModel->data(row, 0).toString());
+        if (!ok || row < 0 || row >= siteModel->rowCount())
+            return;
+        //        sites.append(siteModel->data(row, 0).toString());
 
         if (uiLogic()->m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected) {
-            ips.append(siteModel->data(row, 1).toString());
+            //            ips.append(siteModel->data(row, 1).toString());
         }
     }
 
@@ -131,11 +133,11 @@ void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
     onUpdatePage();
 }
 
-void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
+void SitesLogic::onPushButtonSitesImportClicked(const QString &fileName)
 {
-    QFile file(QUrl{fileName}.toLocalFile());
+    QFile file(QUrl { fileName }.toLocalFile());
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Can't open file " << QUrl{fileName}.toLocalFile();
+        qDebug() << "Can't open file " << QUrl { fileName }.toLocalFile();
         return;
     }
 
@@ -164,27 +166,24 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString& fileName)
         }
 
         // domain regex cover ip regex, so remove ips from sites
-        for (const QString& ip: line_ips) {
+        for (const QString &ip : line_ips) {
             line_sites.removeAll(ip);
         }
 
         if (line_sites.size() == 1 && line_ips.size() == 1) {
             sites.insert(line_sites.at(0), line_ips.at(0));
-        }
-        else if (line_sites.size() > 0 && line_ips.size() == 0) {
-            for (const QString& site: line_sites) {
+        } else if (line_sites.size() > 0 && line_ips.size() == 0) {
+            for (const QString &site : line_sites) {
                 sites.insert(site, "");
             }
-        }
-        else {
-            for (const QString& site: line_sites) {
+        } else {
+            for (const QString &site : line_sites) {
                 sites.insert(site, "");
             }
-            for (const QString& ip: line_ips) {
+            for (const QString &ip : line_ips) {
                 ips.append(ip);
             }
         }
-
     }
 
     m_settings->addVpnIps(mode, ips);
@@ -208,4 +207,3 @@ void SitesLogic::onPushButtonSitesExportClicked()
     }
     uiLogic()->saveTextFile("Export Sites", "sites.txt", ".txt", data);
 }
-

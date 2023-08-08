@@ -146,16 +146,15 @@ void AmneziaApplication::init()
     //     m_uiLogic->showOnStartup();
     // #endif
 
-//    // TODO - fix
-// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-//    if (isPrimary()) {
-//        QObject::connect(this, &SingleApplication::instanceStarted, m_uiLogic, [this](){
-//            qDebug() << "Secondary instance started, showing this window instead";
-//            emit m_uiLogic->show();
-//            emit m_uiLogic->raise();
-//        });
-//    }
-// #endif
+    // TODO - fix
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (isPrimary()) {
+        QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
+            qDebug() << "Secondary instance started, showing this window instead";
+            emit m_pageController->raiseMainWindow();
+        });
+    }
+#endif
 
 // Android TextField clipboard workaround
 // https://bugreports.qt.io/browse/QTBUG-113461
@@ -281,6 +280,9 @@ void AmneziaApplication::initModels()
     connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &AmneziaApplication::updateTranslator);
     connect(this, &AmneziaApplication::translationsUpdated, m_languageModel.get(), &LanguageModel::translationsUpdated);
 
+    m_sitesModel.reset(new SitesModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
+
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
@@ -328,4 +330,7 @@ void AmneziaApplication::initControllers()
 
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+
+    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
+    m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 }

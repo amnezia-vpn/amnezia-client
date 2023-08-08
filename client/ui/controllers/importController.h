@@ -34,7 +34,7 @@ public slots:
 
 signals:
     void importFinished();
-    void importErrorOccurred(QString errorMessage);
+    void importErrorOccurred(const QString &errorMessage);
 
     void qrDecodingFinished();
 

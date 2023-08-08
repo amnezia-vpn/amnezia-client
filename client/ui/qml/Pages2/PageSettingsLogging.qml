@@ -50,10 +50,10 @@ PageType {
 
                 text: qsTr("Save logs")
 
-                checked: SettingsController.isLoggingEnable
+                checked: SettingsController.isLoggingEnabled
                 onCheckedChanged: {
-                    if (checked !== SettingsController.isLoggingEnable) {
-                        SettingsController.isLoggingEnable = checked
+                    if (checked !== SettingsController.isLoggingEnabled) {
+                        SettingsController.isLoggingEnabled = checked
                     }
                 }
             }

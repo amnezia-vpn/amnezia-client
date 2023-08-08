@@ -67,7 +67,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Logging")
-                descriptionText: SettingsController.isLoggingEnable ? qsTr("Enabled") : qsTr("Disabled")
+                descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

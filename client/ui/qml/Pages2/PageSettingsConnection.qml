@@ -48,13 +48,31 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                text: qsTr("Auto connect")
+                descriptionText: qsTr("Connect to VPN on app start")
+
+                checked: SettingsController.isAutoConnectEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isAutoConnectEnabled()) {
+                        SettingsController.toggleAutoConnect(checked)
+                    }
+                }
+            }
+
+            SwitcherType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Use AmneziaDNS if installed on the server")
                 descriptionText: qsTr("Internal IP address 172.29.172.254")
 
                 checked: SettingsController.isAmneziaDnsEnabled()
                 onCheckedChanged: {
                     if (checked !== SettingsController.isAmneziaDnsEnabled()) {
-                        SettingsController.setAmneziaDns(checked)
+                        SettingsController.toggleAmneziaDns(checked)
                     }
                 }
             }
@@ -83,6 +101,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
             }
 

@@ -41,7 +41,7 @@ Item {
         Rectangle {
             id: backgroud
             Layout.fillWidth: true
-            Layout.preferredHeight: 74
+            Layout.preferredHeight: input.implicitHeight
             color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
             radius: 16
             border.color: textField.focus ? root.borderFocusedColor : root.borderColor
@@ -52,16 +52,17 @@ Item {
             }
 
             RowLayout {
+                id: input
                 anchors.fill: backgroud
                 ColumnLayout {
+                    Layout.margins: 16
                     LabelTextType {
                         text: root.headerText
                         color: root.enabled ? root.headerTextColor : root.headerTextDisabledColor
 
+                        visible: text !== ""
+
                         Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.leftMargin: 16
-                        Layout.topMargin: 16
                     }
 
                     TextField {
@@ -82,9 +83,7 @@ Item {
 
                         height: 24
                         Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.leftMargin: 16
-                        Layout.bottomMargin: 16
+
                         topPadding: 0
                         rightPadding: 0
                         leftPadding: 0
@@ -98,24 +97,37 @@ Item {
                         onTextChanged: {
                             root.errorText = ""
                         }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onClicked: contextMenu.open()
+                        }
+
+                        ContextMenuType {
+                            id: contextMenu
+                            textObj: textField
+                        }
                     }
                 }
 
                 BasicButtonType {
                     visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
-                    borderWidth: 0
+//                    defaultColor: "transparent"
+//                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+//                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
+//                    disabledColor: "#878B91"
+//                    textColor: "#D7D8DB"
+//                    borderWidth: 0
 
                     text: root.buttonText
                     imageSource: root.buttonImageSource
 
-                    Layout.rightMargin: 24
-                    Layout.preferredHeight: 32
+//                        Layout.rightMargin: 24
+                    Layout.preferredHeight: content.implicitHeight
+                    Layout.preferredWidth: content.implicitHeight
+                    squareLeftSide: true
 
                     onClicked: {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {

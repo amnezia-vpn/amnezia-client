@@ -148,10 +148,11 @@ PageType {
                 DropDownType {
                     id: containersDropDown
 
-                    implicitHeight: 40
-
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
+                    rootButtonHoveredBorderColor: "transparent"
+                    rootButtonPressedBorderColor: "transparent"
+                    rootButtonTextMargins: 8
 
                     text: root.defaultContainerName
                     textColor: "#0E0E11"
