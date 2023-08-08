@@ -232,7 +232,7 @@ if(APPLE)
 endif()
 
 if(LINUX AND NOT ANDROID)
-    set(LIBS ${LIBS} -static-libstdc++ -static-libgcc)
+    set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
