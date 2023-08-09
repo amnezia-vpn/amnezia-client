@@ -18,12 +18,12 @@ PageType {
 
         function onGoToPageHome() {
             tabBar.currentIndex = 0
-            tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageHome))
+            tabBarStackView.goToTabBarPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.currentIndex = 2
-            tabBarStackView.goToTabBarPage(PageController.getPagePath(PageEnum.PageSettings))
+            tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
@@ -35,6 +35,10 @@ PageType {
             busyIndicator.visible = visible
             tabBarStackView.enabled = !visible
             tabBar.enabled = !visible
+        }
+
+        function onEnableTabBar(enabled) {
+            tabBar.enabled = enabled
         }
 
         function onClosePage() {

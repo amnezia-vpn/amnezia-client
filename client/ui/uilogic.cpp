@@ -157,9 +157,6 @@ void UiLogic::initializeUiLogic()
     //    }
 
     m_selectedServerIndex = m_settings->defaultServerIndex();
-
-    qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME).arg(APP_VERSION);
-    qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture());
 }
 
 void UiLogic::showOnStartup()

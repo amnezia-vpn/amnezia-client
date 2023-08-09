@@ -14,6 +14,9 @@ import "../Config"
 PageType {
     id: root
 
+    Component.onCompleted: PageController.enableTabBar(false)
+    Component.onDestruction: PageController.enableTabBar(true)
+
     Connections {
         target: InstallController
 

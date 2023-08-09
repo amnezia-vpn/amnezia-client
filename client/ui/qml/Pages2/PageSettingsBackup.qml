@@ -21,7 +21,7 @@ PageType {
 
         function onRestoreBackupFinished() {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
-            goToStartPage()
+            //goToStartPage()
             PageController.goToPageHome()
         }
     }

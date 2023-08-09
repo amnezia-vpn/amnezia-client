@@ -2,19 +2,18 @@
 #include <QTimer>
 
 #include "amnezia_application.h"
-#include "version.h"
 #include "migrations.h"
+#include "version.h"
 
 #include <QTimer>
 
 #ifdef Q_OS_WIN
-#include "Windows.h"
+    #include "Windows.h"
 #endif
 
 #if defined(Q_OS_IOS)
-#include "platforms/ios/QtAppDelegate-C-Interface.h"
+    #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
-
 
 int main(int argc, char *argv[])
 {
@@ -27,16 +26,14 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
-
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication app(argc, argv);
 #else
-    AmneziaApplication app(argc, argv, true, SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
+    AmneziaApplication app(argc, argv, true,
+                           SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
 
     if (!app.isPrimary()) {
-        QTimer::singleShot(1000, &app, [&](){
-            app.quit();
-        });
+        QTimer::singleShot(1000, &app, [&]() { app.quit(); });
         return app.exec();
     }
 #endif
@@ -63,6 +60,10 @@ int main(int argc, char *argv[])
 
     if (doExec) {
         app.init();
+
+        qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME, APP_VERSION);
+        qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
+
         return app.exec();
     }
     return 0;

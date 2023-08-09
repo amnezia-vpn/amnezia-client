@@ -57,6 +57,27 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
 
 AmneziaApplication::~AmneziaApplication()
 {
+    //    emit hide();
+
+    // #ifdef AMNEZIA_DESKTOP
+    //     if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Disconnected) {
+    //         m_vpnConnection->disconnectFromVpn();
+    //         for (int i = 0; i < 50; i++) {
+    //             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    //             QThread::msleep(100);
+    //             if (m_vpnConnection->isDisconnected()) {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // #endif
+
+    //    m_vpnConnection->deleteLater();
+    //    m_vpnConnectionThread.quit();
+    //    m_vpnConnectionThread.wait(3000);
+
+    //    qDebug() << "Application closed";
+
     if (m_engine) {
         QObject::disconnect(m_engine, 0, 0, 0);
         delete m_engine;
@@ -87,6 +108,8 @@ void AmneziaApplication::init()
 
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
+    m_vpnConnection->moveToThread(&m_vpnConnectionThread);
+    m_vpnConnectionThread.start();
 
     initModels();
     initControllers();

@@ -66,18 +66,14 @@ void SitesLogic::onPushButtonAddCustomSitesClicked()
         m_settings->addVpnSite(mode, newSite, ip);
 
         if (!ip.isEmpty()) {
-            QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes",
-                                      Qt::QueuedConnection,
+            QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << ip));
-        }
-        else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
-            QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes",
-                                      Qt::QueuedConnection,
+        } else if (Utils::ipAddressWithSubnetRegExp().exactMatch(newSite)) {
+            QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << newSite));
         }
 
-        QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns",
-                                  Qt::QueuedConnection);
+        QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns", Qt::QueuedConnection);
 
         onUpdatePage();
     };
@@ -124,19 +120,16 @@ void SitesLogic::onPushButtonSitesDeleteClicked(QStringList items)
             return;
         //        sites.append(siteModel->data(row, 0).toString());
 
-        if (uiLogic()->m_vpnConnection && uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
-            ips.append(siteModel->data(row, 1).toString());
-        }
+        //        if (uiLogic()->m_vpnConnection && uiLogic()->m_vpnConnection->connectionState() == VpnProtocol::Connected) {
+        //            ips.append(siteModel->data(row, 1).toString());
+        //    }
     }
 
     m_settings->removeVpnSites(mode, sites);
 
-    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "deleteRoutes",
-                              Qt::QueuedConnection,
-                              Q_ARG(QStringList, ips));
+    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "deleteRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
 
-    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns",
-                              Qt::QueuedConnection);
+    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns", Qt::QueuedConnection);
 
     onUpdatePage();
 }
@@ -197,12 +190,9 @@ void SitesLogic::onPushButtonSitesImportClicked(const QString &fileName)
     m_settings->addVpnIps(mode, ips);
     m_settings->addVpnSites(mode, sites);
 
-    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes",
-                              Qt::QueuedConnection,
-                              Q_ARG(QStringList, ips));
+    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
 
-    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns",
-                              Qt::QueuedConnection);
+    QMetaObject::invokeMethod(uiLogic()->m_vpnConnection, "flushDns", Qt::QueuedConnection);
 
     onUpdatePage();
 }

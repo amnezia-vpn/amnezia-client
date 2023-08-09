@@ -166,7 +166,7 @@ PageType {
                         questionDrawer.visible = false
                         goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeVpnConnection()
+                            ConnectionController.closeConnection()
                         }
                         InstallController.removeAllContainers()
                     }

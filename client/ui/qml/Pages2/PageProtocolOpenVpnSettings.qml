@@ -299,6 +299,12 @@ PageType {
                             checked: additionalClientCommands !== ""
 
                             text: qsTr("Additional client configuration commands")
+
+                            onCheckedChanged: {
+                                if (!checked) {
+                                    additionalClientCommands = ""
+                                }
+                            }
                         }
 
                         TextAreaType {

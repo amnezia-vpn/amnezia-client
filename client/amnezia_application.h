@@ -101,6 +101,7 @@ private:
     QScopedPointer<SftpConfigModel> m_sftpConfigModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
+    QThread m_vpnConnectionThread;
     QScopedPointer<NotificationHandler> m_notificationHandler;
 
     QScopedPointer<ConnectionController> m_connectionController;
