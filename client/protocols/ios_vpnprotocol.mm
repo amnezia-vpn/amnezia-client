@@ -30,6 +30,12 @@ IOSVpnProtocol::IOSVpnProtocol(Proto proto, const QJsonObject &configuration, QO
     connect(this, &IOSVpnProtocol::newTransmittedDataCount, this, &IOSVpnProtocol::setBytesChanged);
 }
 
+IOSVpnProtocol::~IOSVpnProtocol()
+{
+    qDebug() << "IOSVpnProtocol::~IOSVpnProtocol()";
+    IOSVpnProtocol::stop();
+}
+
 IOSVpnProtocol* IOSVpnProtocol::instance() {
     return s_instance;
 }
