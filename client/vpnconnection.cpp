@@ -32,9 +32,9 @@
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     std::shared_ptr<VpnConfigurator> configurator, QObject* parent) : QObject(parent),
     m_settings(settings),
-    m_configurator(configurator),
-    m_isIOSConnected(false)
+    m_configurator(configurator)
 {
+    m_checkTimer.setInterval(1000);
 }
 
 VpnConnection::~VpnConnection()
@@ -96,30 +96,15 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #endif
 
 #ifdef Q_OS_IOS
-    if (state == Vpn::ConnectionState::Connected){
-        m_isIOSConnected = true;
-        checkIOSStatus();
+    if (state == VpnProtocol::Connected) {
+        m_checkTimer.start();
     }
     else {
-        m_isIOSConnected = false;
-//        m_receivedBytes = 0;
-//        m_sentBytes = 0;
+        m_checkTimer.stop();
     }
 #endif
     emit connectionStateChanged(state);
 }
-
-#ifdef Q_OS_IOS
-void VpnConnection::checkIOSStatus()
-{
-    QTimer::singleShot(1000, [this]() {
-        if(m_isIOSConnected){
-            iosVpnProtocol->checkStatus();
-            checkIOSStatus();
-        }
-    } );
-}
-#endif
 
 const QString &VpnConnection::remoteAddress() const
 {
@@ -236,7 +221,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
     ErrorCode *errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
     QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
 
     QString configData;
@@ -246,18 +230,15 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     }
     else {
         configData = m_configurator->genVpnProtocolConfig(credentials,
-            container, containerConfig, proto, &e);
+            container, containerConfig, proto, errorCode);
+
+        if (errorCode && *errorCode) {
+            return "";
+        }
 
         QString configDataBeforeLocalProcessing = configData;
 
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
-
-
-        if (errorCode && e) {
-            *errorCode = e;
-            return "";
-        }
-
 
         if (serverIndex >= 0) {
             qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container << proto;
@@ -267,7 +248,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
         }
     }
 
-    if (errorCode) *errorCode = e;
     return configData;
 }
 
@@ -275,18 +255,15 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
     QJsonObject vpnConfiguration;
-
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         QJsonObject vpnConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
-                serverIndex, credentials, container, containerConfig, proto, &e).toUtf8()).
+                serverIndex, credentials, container, containerConfig, proto, errorCode).toUtf8()).
                     object();
 
-        if (e) {
-            if (errorCode) *errorCode = e;
+        if (errorCode && *errorCode) {
             return {};
         }
 
@@ -356,16 +333,18 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-    //if (iosVpnProtocol==NULL) {
-        iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
-    //}
-  //  IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+    auto iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+
     if (!iosVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
-         emit Vpn::ConnectionState::Error;
+         emit VpnProtocol::Error;
+         iosVpnProtocol->deleteLater();
          return;
     }
+
+    connect(&m_checkTimer, &QTimer::timeout, iosVpnProtocol, &IOSVpnProtocol::checkStatus);
     m_vpnProtocol.reset(iosVpnProtocol);
+
 #endif
 
     createProtocolConnections();
@@ -439,7 +418,11 @@ void VpnConnection::disconnectFromVpn()
 #endif
         return;
     }
-    m_vpnProtocol.data()->stop();
+
+    if (m_vpnProtocol) {
+        m_vpnProtocol->deleteLater();
+    }
+    m_vpnProtocol = nullptr;
 }
 
 Vpn::ConnectionState VpnConnection::connectionState()
@@ -450,10 +433,6 @@ Vpn::ConnectionState VpnConnection::connectionState()
 
 bool VpnConnection::isConnected() const
 {
-#ifdef Q_OS_IOS
-
-#endif
-
     if (!m_vpnProtocol.data()) {
         return false;
     }

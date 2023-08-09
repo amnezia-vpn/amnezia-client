@@ -5,6 +5,7 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QTimer>
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
@@ -50,16 +51,11 @@ public:
         const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
 
-
     bool isConnected() const;
     bool isDisconnected() const;
 
     Vpn::ConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
-
-    void addRoutes(const QStringList &ips);
-    void deleteRoutes(const QStringList &ips);
-    void flushDns();
 
     const QString &remoteAddress() const;
     void addSitesRoutes(const QString &gw, Settings::RouteMode mode);
@@ -74,6 +70,11 @@ public slots:
 
     void disconnectFromVpn();
 
+
+    void addRoutes(const QStringList &ips);
+    void deleteRoutes(const QStringList &ips);
+    void flushDns();
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -85,10 +86,6 @@ protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
-#ifdef Q_OS_IOS
-    void checkIOSStatus();
-#endif
-
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
@@ -99,14 +96,14 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
-    bool m_isIOSConnected;  //remove later move to isConnected,
+
+    // Only for iOS for now, check counters
+    QTimer m_checkTimer;
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient *m_IpcClient {nullptr};
 #endif
-#ifdef Q_OS_IOS
-    IOSVpnProtocol * iosVpnProtocol{nullptr};
-#endif
+
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
 
