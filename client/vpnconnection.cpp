@@ -113,7 +113,7 @@ void VpnConnection::onConnectionStateChanged(VpnProtocol::VpnConnectionState sta
 void VpnConnection::checkIOSStatus()
 {
     QTimer::singleShot(1000, [this]() {
-        if(m_isIOSConnected){
+        if(iosVpnProtocol && m_isIOSConnected){
             iosVpnProtocol->checkStatus();
             checkIOSStatus();
         }
@@ -236,7 +236,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
     ErrorCode *errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
     QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
 
     QString configData;
@@ -246,18 +245,15 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
     }
     else {
         configData = m_configurator->genVpnProtocolConfig(credentials,
-            container, containerConfig, proto, &e);
+            container, containerConfig, proto, errorCode);
+
+        if (errorCode && *errorCode) {
+            return "";
+        }
 
         QString configDataBeforeLocalProcessing = configData;
 
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
-
-
-        if (errorCode && e) {
-            *errorCode = e;
-            return "";
-        }
-
 
         if (serverIndex >= 0) {
             qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container << proto;
@@ -267,7 +263,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex,
         }
     }
 
-    if (errorCode) *errorCode = e;
     return configData;
 }
 
@@ -275,18 +270,15 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container,
     const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
     QJsonObject vpnConfiguration;
-
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         QJsonObject vpnConfigData = QJsonDocument::fromJson(
             createVpnConfigurationForProto(
-                serverIndex, credentials, container, containerConfig, proto, &e).toUtf8()).
+                serverIndex, credentials, container, containerConfig, proto, errorCode).toUtf8()).
                     object();
 
-        if (e) {
-            if (errorCode) *errorCode = e;
+        if (errorCode && *errorCode) {
             return {};
         }
 
@@ -336,7 +328,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     ErrorCode e = ErrorCode::NoError;
 
-    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig);
+    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
     if (e) {
         emit connectionStateChanged(VpnProtocol::Error);
         return;
@@ -356,10 +348,8 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-    //if (iosVpnProtocol==NULL) {
-        iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
-    //}
-  //  IOSVpnProtocol *iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+    iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
+
     if (!iosVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
          emit VpnProtocol::Error;
