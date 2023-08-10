@@ -41,6 +41,7 @@ Button {
             anchors.right: parent.right
             layer.enabled: true
             layer.samples: 4
+            layer.smooth: true
             layer.effect: DropShadow {
                 anchors.fill: backgroundCircle
                 horizontalOffset: 0

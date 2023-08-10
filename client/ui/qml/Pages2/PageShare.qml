@@ -310,10 +310,12 @@ PageType {
                                 function fillConnectionTypeModel() {
                                     root.connectionTypesModel = [amneziaConnectionFormat]
 
-                                    if (currentIndex === ContainerProps.containerFromString("OpenVpn")) {
+                                    var index = proxyContainersModel.mapToSource(currentIndex)
+
+                                    if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
                                         root.connectionTypesModel.push(openVpnConnectionFormat)
-                                    } else if (currentIndex === ContainerProps.containerFromString("wireGuardConnectionType")) {
-                                        root.connectionTypesModel.push(amneziaConnectionFormat)
+                                    } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
+                                        root.connectionTypesModel.push(wireGuardConnectionFormat)
                                     }
                                 }
                             }
