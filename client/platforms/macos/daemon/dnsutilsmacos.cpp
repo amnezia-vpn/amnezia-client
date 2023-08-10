@@ -3,23 +3,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "dnsutilsmacos.h"
-#include "leakdetector.h"
-#include "logger.h"
+
+#include <systemconfiguration/scdynamicstore.h>
+#include <systemconfiguration/scpreferences.h>
 
 #include <QScopeGuard>
 
-#include <systemconfiguration/scpreferences.h>
-#include <systemconfiguration/scdynamicstore.h>
+#include "leakdetector.h"
+#include "logger.h"
 
 namespace {
-Logger logger(LOG_MACOS, "DnsUtilsMacos");
+Logger logger("DnsUtilsMacos");
 }
 
 DnsUtilsMacos::DnsUtilsMacos(QObject* parent) : DnsUtils(parent) {
-  MVPN_COUNT_CTOR(DnsUtilsMacos);
+  MZ_COUNT_CTOR(DnsUtilsMacos);
 
   m_scStore = SCDynamicStoreCreate(kCFAllocatorSystemDefault,
-                                   CFSTR("mozillavpn"), nullptr, nullptr);
+                                   CFSTR("amneziavpn"), nullptr, nullptr);
   if (m_scStore == nullptr) {
     logger.error() << "Failed to create system configuration store ref";
   }
@@ -28,7 +29,7 @@ DnsUtilsMacos::DnsUtilsMacos(QObject* parent) : DnsUtils(parent) {
 }
 
 DnsUtilsMacos::~DnsUtilsMacos() {
-  MVPN_COUNT_DTOR(DnsUtilsMacos);
+  MZ_COUNT_DTOR(DnsUtilsMacos);
   restoreResolvers();
   logger.debug() << "DnsUtilsMacos destroyed.";
 }

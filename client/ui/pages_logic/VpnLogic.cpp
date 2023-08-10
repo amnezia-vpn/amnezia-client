@@ -148,7 +148,7 @@ void VpnLogic::onConnectionStateChanged(VpnProtocol::VpnConnectionState state)
         break;
     case VpnProtocol::Connecting:
         pbConnectChecked = true;
-        pbConnectEnabled = false;
+        pbConnectEnabled = true;
         pbConnectVisible = false;
         rbModeEnabled = false;
         break;
