@@ -335,6 +335,9 @@ if(ANDROID)
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg-go.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg-quick.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libredsocks.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libsslocal.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libtun2socks.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpnutil.so
