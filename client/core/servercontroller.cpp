@@ -238,17 +238,17 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     e = isUserInSudo(credentials, container);
     if (e) return e;
 
-    if (!isUpdate) {
-        e = isServerPortBusy(credentials, container, config);
-        if (e) return e;
-    }
-
     e = isServerDpkgBusy(credentials, container);
     if (e) return e;
 
     e = installDockerWorker(credentials, container);
     if (e) return e;
     qDebug().noquote() << "ServerController::setupContainer installDockerWorker finished";
+
+    if (!isUpdate) {
+        e = isServerPortBusy(credentials, container, config);
+        if (e) return e;
+    }
 
     e = prepareHostWorker(credentials, container, config);
     if (e) return e;
@@ -368,6 +368,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                                 replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
                                             genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
+    qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
     if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
     return error;
