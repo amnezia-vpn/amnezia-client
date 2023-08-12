@@ -16,6 +16,10 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
 
+#ifdef MZ_DEBUG
+    qDebug().noquote() << "RouterMac::routeAdd: " << ipWithSubnet << gw;
+#endif
+
     if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to add invalid route: " << ip << gw;
         return false;
@@ -39,7 +43,9 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
         strcpy(argv[i], parts.at(i).toStdString().c_str());
     }
 
+    // TODO refactor
     mainRouteIface(argc, argv);
+    m_addedRoutes.append({ipWithSubnet, gw});
 
     for (int i = 0; i < argc; i++) {
         delete [] argv[i];
@@ -59,20 +65,23 @@ int RouterMac::routeAddList(const QString &gw, const QStringList &ips)
 
 bool RouterMac::clearSavedRoutes()
 {
-    // No need to delete routes after iface down
-    return true;
-
-//    int cnt = 0;
-//    for (const QString &ip: m_addedRoutes) {
-//        if (routeDelete(ip)) cnt++;
-//    }
-    //    return (cnt == m_addedRoutes.count());
+    int cnt = 0;
+    for (const Route &r: m_addedRoutes) {
+        if (routeDelete(r.dst, r.gw)) cnt++;
+    }
+    bool ret = (cnt == m_addedRoutes.count());
+    m_addedRoutes.clear();
+    return ret;
 }
 
 bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
 {
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
     QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+
+#ifdef MZ_DEBUG
+    qDebug().noquote() << "RouterMac::routeDelete: " << ipWithSubnet << gw;
+#endif
 
     if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to remove invalid route: " << ip << gw;
