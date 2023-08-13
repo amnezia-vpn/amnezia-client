@@ -14,39 +14,76 @@ import "../Config"
 PageType {
     id: root
 
-    ColumnLayout {
-        anchors.fill: parent
+    BackButtonType {
+        id: backButton
+        anchors.left: parent.left
+        anchors.top: parent.top
 
-        spacing: 0
+        anchors.topMargin: 20
+    }
 
-        BackButtonType {
-            Layout.topMargin: 20
-        }
+    ParagraphTextType {
+        id: header
 
-        ParagraphTextType {
-            Layout.fillWidth: true
+        property string progressString
 
-            text: qsTr("Point the camera at the QR code and hold for a couple of seconds.")
-        }
+        anchors.left: parent.left
+        anchors.top: backButton.bottom
+        anchors.right: parent.right
 
-        ProgressBarType {
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
 
-        }
+        text: qsTr("Point the camera at the QR code and hold for a couple of seconds. ") + progressString
+    }
 
-        Item {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
+    ProgressBarType {
+        id: progressBar
 
-            QRCodeReader {
-               id: qrCodeReader
-               Component.onCompleted: {
-                   qrCodeReader.setCameraSize(Qt.rect(parent.x,
-                                                      parent.y,
-                                                      parent.width,
-                                                      parent.height))
-                   qrCodeReader.startReading()
-               }
-            }
+        anchors.left: parent.left
+        anchors.top: header.bottom
+        anchors.right: parent.right
+
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+    }
+
+    Rectangle {
+        id: qrCodeRectange
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.top: progressBar.bottom
+
+        anchors.topMargin: 34
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 34
+
+        color: "transparent"
+        //radius: 16
+
+        QRCodeReader {
+           id: qrCodeReader
+
+           onCodeReaded: function(code) {
+               ImportController.parseQrCodeChunk(code)
+               progressBar.value = ImportController.getQrCodeScanProgressBarValue()
+               header.progressString = ImportController.getQrCodeScanProgressString()
+           }
+
+           Component.onCompleted: {
+               console.log(qrCodeRectange.x)
+               console.log(qrCodeRectange.y)
+               console.log(qrCodeRectange.width)
+
+               qrCodeReader.setCameraSize(Qt.rect(qrCodeRectange.x,
+                                                  qrCodeRectange.y,
+                                                  qrCodeRectange.width,
+                                                  qrCodeRectange.height))
+               qrCodeReader.startReading()
+           }
+           Component.onDestruction: qrCodeReader.stopReading()
         }
     }
 }

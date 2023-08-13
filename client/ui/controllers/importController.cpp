@@ -42,8 +42,11 @@ namespace
         return ConfigTypes::Amnezia;
     }
 
-#ifdef Q_OS_ANDROID
+#if defined Q_OS_ANDROID
     ImportController *mInstance = nullptr;
+#endif
+
+#ifdef Q_OS_ANDROID
     constexpr auto AndroidCameraActivity = "org.amnezia.vpn.qt.CameraActivity";
 #endif
 } // namespace
@@ -264,17 +267,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 }
 
 #ifdef Q_OS_ANDROID
-void ImportController::startDecodingQr()
-{
-    AndroidController::instance()->startQrReaderActivity();
-}
-
-void ImportController::stopDecodingQr()
-{
-    QJniObject::callStaticMethod<void>(AndroidCameraActivity, "stopQrCodeReader", "()V");
-    emit qrDecodingFinished();
-}
-
 void ImportController::onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
@@ -295,6 +287,30 @@ void ImportController::onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring d
         }
         mInstance->parseQrCodeChunk(parcelBody);
     }
+}
+#endif
+
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
+void ImportController::startDecodingQr()
+{
+    m_qrCodeChunks.clear();
+    m_totalQrCodeChunksCount = 0;
+    m_receivedQrCodeChunksCount = 0;
+
+    #if defined Q_OS_IOS
+    m_isQrCodeProcessed = true;
+    #endif
+    #if defined Q_OS_ANDROID
+    AndroidController::instance()->startQrReaderActivity();
+    #endif
+}
+
+void ImportController::stopDecodingQr()
+{
+    #if defined Q_OS_ANDROID
+    QJniObject::callStaticMethod<void>(AndroidCameraActivity, "stopQrCodeReader", "()V");
+    #endif
+    emit qrDecodingFinished();
 }
 
 void ImportController::parseQrCodeChunk(const QString &code)
@@ -333,8 +349,10 @@ void ImportController::parseQrCodeChunk(const QString &code)
             bool ok = extractConfigFromQr(data);
             if (ok) {
                 m_isQrCodeProcessed = false;
+                qDebug() << "stopDecodingQr";
                 stopDecodingQr();
             } else {
+                qDebug() << "error while extracting data from qr";
                 m_qrCodeChunks.clear();
                 m_totalQrCodeChunksCount = 0;
                 m_receivedQrCodeChunksCount = 0;
@@ -344,8 +362,19 @@ void ImportController::parseQrCodeChunk(const QString &code)
         bool ok = extractConfigFromQr(ba);
         if (ok) {
             m_isQrCodeProcessed = false;
+            qDebug() << "stopDecodingQr";
             stopDecodingQr();
         }
     }
+}
+
+double ImportController::getQrCodeScanProgressBarValue()
+{
+    return (1.0 / m_totalQrCodeChunksCount) * m_receivedQrCodeChunksCount;
+}
+
+QString ImportController::getQrCodeScanProgressString()
+{
+    return tr("Scanned %1 of %2.").arg(m_receivedQrCodeChunksCount).arg(m_totalQrCodeChunksCount);
 }
 #endif

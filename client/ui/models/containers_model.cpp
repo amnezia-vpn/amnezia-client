@@ -176,7 +176,7 @@ ErrorCode ContainersModel::removeCurrentlyProcessedContainer()
     ErrorCode errorCode = serverController.removeContainer(credentials, dockerContainer);
 
     if (errorCode == ErrorCode::NoError) {
-        beginResetModel(); // todo change to begin remove rows?
+        beginResetModel();
         m_settings->removeContainerConfig(m_currentlyProcessedServerIndex, dockerContainer);
         m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
 

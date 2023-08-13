@@ -7,6 +7,7 @@
 #include <QCommandLineParser>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QThread>
 
 #include "settings.h"
 #include "vpnconnection.h"

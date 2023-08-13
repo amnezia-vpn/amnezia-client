@@ -55,16 +55,15 @@ PageType {
             anchors.topMargin: 32
 
             ListView {
-                // todo change id naming
-                id: container
+                id: protocols
                 width: parent.width
-                height: container.contentItem.height
+                height: protocols.contentItem.height
                 clip: true
                 interactive: false
                 model: ProtocolsModel
 
                 delegate: Item {
-                    implicitWidth: container.width
+                    implicitWidth: protocols.width
                     implicitHeight: delegateContent.implicitHeight
 
                     ColumnLayout {

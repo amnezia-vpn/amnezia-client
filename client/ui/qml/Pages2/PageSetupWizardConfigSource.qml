@@ -17,6 +17,7 @@ PageType {
         target: ImportController
 
         function onQrDecodingFinished() {
+            closePage()
             goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
@@ -86,7 +87,7 @@ It's okay if a friend passed the code.")
 
                 clickedFunction: function() {
                     ImportController.startDecodingQr()
-//                    goToPage(PageEnum.PageSetupWizardQrReader)
+                    goToPage(PageEnum.PageSetupWizardQrReader)
                 }
             }
 

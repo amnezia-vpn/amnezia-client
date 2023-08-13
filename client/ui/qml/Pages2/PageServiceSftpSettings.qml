@@ -15,12 +15,10 @@ import "../Components"
 PageType {
     id: root
 
-    //todo move to main?
     Connections {
         target: InstallController
 
         function onUpdateContainerFinished() {
-            //todo change to notification
             PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
     }

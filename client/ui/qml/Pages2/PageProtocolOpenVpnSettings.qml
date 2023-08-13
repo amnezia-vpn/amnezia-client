@@ -19,7 +19,6 @@ PageType {
         target: InstallController
 
         function onUpdateContainerFinished() {
-            //todo change to notification
             PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
     }

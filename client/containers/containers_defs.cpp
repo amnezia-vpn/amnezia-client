@@ -217,8 +217,8 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return tr("I just want to increase the level of privacy");
-    case DockerContainer::Cloak: return tr("Some foreign sites are blocked, but VPN providers are not blocked");
-    case DockerContainer::ShadowSocks: return tr("Many foreign websites and VPN providers are blocked");
+    case DockerContainer::Cloak: return tr("Many foreign websites and VPN providers are blocked");
+    case DockerContainer::ShadowSocks: return tr("Some foreign sites are blocked, but VPN providers are not blocked");
     default: return "";
     }
 }

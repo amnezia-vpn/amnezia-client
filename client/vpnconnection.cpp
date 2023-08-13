@@ -96,7 +96,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #endif
 
 #ifdef Q_OS_IOS
-    if (state == VpnProtocol::Connected) {
+    if (state == Vpn::ConnectionState::Connected) {
         m_checkTimer.start();
     }
     else {
@@ -337,7 +337,7 @@ void VpnConnection::connectToVpn(int serverIndex,
 
     if (!iosVpnProtocol->initialize()) {
          qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
+         emit Vpn::ConnectionState::Error;
          iosVpnProtocol->deleteLater();
          return;
     }

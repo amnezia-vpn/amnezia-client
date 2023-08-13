@@ -28,8 +28,12 @@ public slots:
     QString getConfig();
     QString getConfigFileName();
 
-#if defined Q_OS_ANDROID
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
     void startDecodingQr();
+    void parseQrCodeChunk(const QString &code);
+
+    double getQrCodeScanProgressBarValue();
+    QString getQrCodeScanProgressString();
 #endif
 
 signals:
@@ -43,10 +47,11 @@ private:
     QJsonObject extractOpenVpnConfig(const QString &data);
     QJsonObject extractWireGuardConfig(const QString &data);
 
-#if defined Q_OS_ANDROID
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
+#endif
+#if defined Q_OS_ANDROID
     static void onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring data);
-    void parseQrCodeChunk(const QString &code);
 #endif
 
     QSharedPointer<ServersModel> m_serversModel;
@@ -56,7 +61,7 @@ private:
     QJsonObject m_config;
     QString m_configFileName;
 
-#if defined Q_OS_ANDROID
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
     QMap<int, QByteArray> m_qrCodeChunks;
     bool m_isQrCodeProcessed;
     int m_totalQrCodeChunksCount;

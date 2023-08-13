@@ -157,7 +157,6 @@ bool ServersModel::isDefaultServerHasWriteAccess()
 
 void ServersModel::addServer(const QJsonObject &server)
 {
-    // todo  beginInsertRows()?
     beginResetModel();
     m_settings->addServer(server);
     m_servers = m_settings->serversArray();

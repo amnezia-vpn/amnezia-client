@@ -79,8 +79,7 @@ QVariant OpenVpnConfigModel::data(const QModelIndex &index, int role) const
 void OpenVpnConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container =
-            ContainerProps::containerFromString(config.value(config_key::container).toString()); // todo maybe unused
+    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::openvpn).toObject();

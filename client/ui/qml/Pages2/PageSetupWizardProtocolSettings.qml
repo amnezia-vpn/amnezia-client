@@ -233,7 +233,6 @@ PageType {
                         }
 
                         Component.onCompleted: {
-                            //todo move to protocols model?
                             var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                             if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
