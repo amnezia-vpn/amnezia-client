@@ -8,8 +8,13 @@
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
+                                       const QSharedPointer<LanguageModel> &languageModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
+    : QObject(parent),
+      m_serversModel(serversModel),
+      m_containersModel(containersModel),
+      m_languageModel(languageModel),
+      m_settings(settings)
 {
     m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
 }
@@ -95,6 +100,8 @@ void SettingsController::restoreAppConfig()
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
         m_serversModel->resetModel();
+        m_languageModel->changeLanguage(
+                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
         emit restoreBackupFinished();
     } else {
         emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
@@ -110,6 +117,15 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->resetModel();
+    m_languageModel->changeLanguage(
+            static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    emit changeSettingsFinished(tr("All settings have been reset to default values"));
+}
+
+void SettingsController::clearCachedProfiles()
+{
+    m_containersModel->clearCachedProfiles();
+    emit changeSettingsFinished(tr("Cached profiles cleared"));
 }
 
 bool SettingsController::isAutoConnectEnabled()

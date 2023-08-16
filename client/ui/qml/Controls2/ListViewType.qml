@@ -8,10 +8,16 @@ ListView {
     id: menuContent
 
     property var rootWidth
+
     property var selectedText
+
     property string imageSource
+
     property var clickedFunction
+
     property bool dividerVisible: false
+
+    currentIndex: 0
 
     width: rootWidth
     height: menuContent.contentItem.height

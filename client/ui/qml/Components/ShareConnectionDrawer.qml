@@ -80,6 +80,7 @@ DrawerType {
                         configText.selectAll()
                         configText.copy()
                         configText.select(0, 0)
+                        PageController.showNotificationMessage(qsTr("Copied"))
                     }
                 }
 
@@ -92,6 +93,7 @@ DrawerType {
                     pressedColor: Qt.rgba(1, 1, 1, 0.12)
                     disabledColor: "#878B91"
                     textColor: "#D7D8DB"
+                    borderWidth: 1
 
                     text: qsTr("Show content")
 

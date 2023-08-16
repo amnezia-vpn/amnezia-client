@@ -133,6 +133,7 @@ PageType {
 
                             headerText: qsTr("Port")
                             textFieldText: port
+                            textField.maximumLength: 5
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {
@@ -161,7 +162,6 @@ PageType {
                             id: hashDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 20
-                            implicitHeight: 74
 
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 
@@ -208,7 +208,6 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 16
-                            implicitHeight: 74
 
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 
@@ -393,7 +392,7 @@ PageType {
                         }
                     }
                 }
-            }
+            }  
         }
 
         QuestionDrawer {

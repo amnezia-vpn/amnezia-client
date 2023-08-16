@@ -6,6 +6,8 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_currentlyProcessedServerIndex = m_defaultServerIndex;
+
+    connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -27,6 +29,9 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         server.insert(config_key::description, value.toString());
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
+        if (index.row() == m_defaultServerIndex) {
+            emit defaultServerNameChanged();
+        }
         break;
     }
     default: {

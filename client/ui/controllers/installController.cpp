@@ -173,7 +173,7 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
                                 "All installed containers have been added to the application");
         }
 
-        emit installContainerFinished(finishMessage);
+        emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
         return;
     }
 

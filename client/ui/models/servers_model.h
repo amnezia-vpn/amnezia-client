@@ -31,7 +31,7 @@ public:
     void resetModel();
 
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
-    Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
     Q_PROPERTY(QString defaultServerHostName READ getDefaultServerHostName NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(int currentlyProcessedIndex READ getCurrentlyProcessedServerIndex WRITE setCurrentlyProcessedServerIndex
                        NOTIFY currentlyProcessedServerIndexChanged)
@@ -65,6 +65,7 @@ protected:
 signals:
     void currentlyProcessedServerIndexChanged(const int index);
     void defaultServerIndexChanged();
+    void defaultServerNameChanged();
 
 private:
     ServerCredentials serverCredentials(int index) const;

@@ -79,15 +79,15 @@ private:
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<VpnConfigurator> m_configurator;
 
-    ContainerProps *m_containerProps {};
-    ProtocolProps *m_protocolProps {};
+    QSharedPointer<ContainerProps> m_containerProps;
+    QSharedPointer<ProtocolProps> m_protocolProps;
 
-    QTranslator *m_translator;
+    QSharedPointer<QTranslator> m_translator;
     QCommandLineParser m_parser;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ServersModel> m_serversModel;
-    QScopedPointer<LanguageModel> m_languageModel;
+    QSharedPointer<LanguageModel> m_languageModel;
     QScopedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
 

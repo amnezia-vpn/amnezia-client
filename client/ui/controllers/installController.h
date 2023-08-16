@@ -42,7 +42,7 @@ public slots:
     void setEncryptedPassphrase(QString passphrase);
 
 signals:
-    void installContainerFinished(const QString &finishMessage);
+    void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
 
     void updateContainerFinished();

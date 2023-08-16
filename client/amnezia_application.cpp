@@ -57,36 +57,13 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
 
 AmneziaApplication::~AmneziaApplication()
 {
-    //    emit hide();
-
-    // #ifdef AMNEZIA_DESKTOP
-    //     if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Disconnected) {
-    //         m_vpnConnection->disconnectFromVpn();
-    //         for (int i = 0; i < 50; i++) {
-    //             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    //             QThread::msleep(100);
-    //             if (m_vpnConnection->isDisconnected()) {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // #endif
-
-    //    m_vpnConnection->deleteLater();
-    //    m_vpnConnectionThread.quit();
-    //    m_vpnConnectionThread.wait(3000);
-
-    //    qDebug() << "Application closed";
+    m_vpnConnectionThread.quit();
+    m_vpnConnectionThread.wait(3000);
 
     if (m_engine) {
         QObject::disconnect(m_engine, 0, 0, 0);
         delete m_engine;
     }
-
-    if (m_protocolProps)
-        delete m_protocolProps;
-    if (m_containerProps)
-        delete m_containerProps;
 }
 
 void AmneziaApplication::init()
@@ -208,11 +185,11 @@ void AmneziaApplication::registerTypes()
 
     qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
 
-    m_containerProps = new ContainerProps;
-    qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", m_containerProps);
+    m_containerProps.reset(new ContainerProps());
+    qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", m_containerProps.get());
 
-    m_protocolProps = new ProtocolProps;
-    qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", m_protocolProps);
+    m_protocolProps.reset(new ProtocolProps());
+    qmlRegisterSingletonInstance("ProtocolProps", 1, 0, "ProtocolProps", m_protocolProps.get());
 
     qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
                              "ContainersModelFilters");
@@ -232,9 +209,13 @@ void AmneziaApplication::loadFonts()
 void AmneziaApplication::loadTranslator()
 {
     auto locale = m_settings->getAppLanguage();
-    m_translator = new QTranslator;
-    if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
-        installTranslator(m_translator);
+    if (locale != QLocale::English) {
+        m_translator.reset(new QTranslator());
+        if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
+            if (QCoreApplication::installTranslator(m_translator.get())) {
+                m_settings->setAppLanguage(locale);
+            }
+        }
     }
 }
 
@@ -242,7 +223,7 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
 {
     QResource::registerResource(":/translations.qrc");
     if (!m_translator->isEmpty())
-        QCoreApplication::removeTranslator(m_translator);
+        QCoreApplication::removeTranslator(m_translator.get());
 
     if (locale == QLocale::English) {
         m_settings->setAppLanguage(locale);
@@ -250,7 +231,7 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
     }
 
     if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
-        if (QCoreApplication::installTranslator(m_translator)) {
+        if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }
 
@@ -351,7 +332,7 @@ void AmneziaApplication::initControllers()
     m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
-    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_settings));
+    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));

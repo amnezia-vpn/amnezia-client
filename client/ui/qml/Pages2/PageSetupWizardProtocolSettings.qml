@@ -211,6 +211,7 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("Port")
+                            textField.maximumLength: 5
                         }
 
                         Rectangle {

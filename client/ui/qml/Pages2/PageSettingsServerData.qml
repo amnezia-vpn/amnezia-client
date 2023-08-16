@@ -51,6 +51,13 @@ PageType {
     }
 
     Connections {
+        target: SettingsController
+        function onChangeSettingsFinished(finishedMessage) {
+            PageController.showNotificationMessage(finishedMessage)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
         function onCurrentlyProcessedServerIndexChanged() {

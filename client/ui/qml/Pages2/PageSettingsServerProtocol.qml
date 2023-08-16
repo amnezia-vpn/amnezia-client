@@ -107,6 +107,8 @@ PageType {
 
                 width: parent.width
 
+                visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 

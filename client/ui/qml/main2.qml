@@ -81,6 +81,13 @@ Window  {
         }
     }
 
+    Connections {
+        target: SettingsController
+        function onChangeSettingsFinished(finishedMessage) {
+            PageController.showNotificationMessage(finishedMessage)
+        }
+    }
+
     Item {
         anchors.right: parent.right
         anchors.left: parent.left

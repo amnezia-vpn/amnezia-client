@@ -79,6 +79,8 @@ signals:
     void goToPageHome();
     void goToPageSettings();
     void goToPageViewConfig();
+    void goToPageSettingsServerServices();
+
     void closePage();
 
     void restorePageHomeState(bool isContainerInstalled = false);

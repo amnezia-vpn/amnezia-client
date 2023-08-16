@@ -79,6 +79,7 @@ PageType {
                     Layout.fillWidth: true
 
                     text: ImportController.getConfigFileName()
+                    wrapMode: Text.Wrap
                 }
             }
 

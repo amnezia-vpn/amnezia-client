@@ -88,6 +88,7 @@ PageType {
 
                             headerText: qsTr("Port")
                             textFieldText: port
+                            textField.maximumLength: 5
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {
@@ -100,7 +101,6 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 20
-                            implicitHeight: 74
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")

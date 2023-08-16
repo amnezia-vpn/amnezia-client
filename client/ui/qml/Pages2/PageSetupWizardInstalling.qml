@@ -20,13 +20,16 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallContainerFinished(finishedMessage) {
+        function onInstallContainerFinished(finishedMessage, isServiceInstall) {
             goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
             } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
                 goToPage(PageEnum.PageSettingsServersList, false)
                 goToPage(PageEnum.PageSettingsServerInfo, false)
+                if (isServiceInstall) {
+                    PageController.goToPageSettingsServerServices()
+                }
             } else {
                 goToPage(PageEnum.PageHome)
             }

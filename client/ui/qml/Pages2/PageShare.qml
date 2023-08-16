@@ -161,11 +161,9 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
-                implicitHeight: 74
-
                 drawerHeight: 0.4375
 
-                descriptionText: qsTr("Server and service")
+                descriptionText: accessTypeSelector.currentIndex === 0 ? qsTr("Server and service") : qsTr("Server")
                 headerText: qsTr("Server")
 
                 listView: ListViewType {
@@ -261,7 +259,7 @@ PageType {
                                 rootWidth: root.width
                                 dividerVisible: true
 
-                                imageSource: "qrc:/images/controls/chevron-right.svg"
+                                imageSource: "qrc:/images/controls/check.svg"
 
                                 model: SortFilterProxyModel {
                                     id: proxyContainersModel
@@ -327,12 +325,10 @@ PageType {
             DropDownType {
                 id: exportTypeSelector
 
-                property int currentIndex
+                property int currentIndex: 0
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-
-                implicitHeight: 74
 
                 drawerHeight: 0.4375
 
@@ -343,13 +339,15 @@ PageType {
                 headerText: qsTr("Connection format")
 
                 listView: ListViewType {
+                    id: exportTypeListView
+
                     rootWidth: root.width
                     dividerVisible: true
 
                     imageSource: "qrc:/images/controls/chevron-right.svg"
 
                     model: root.connectionTypesModel
-                    currentIndex: 0
+                    currentIndex: exportTypeSelector.currentIndex
 
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
@@ -375,6 +373,7 @@ PageType {
                 enabled: shareButtonEnabled
 
                 text: qsTr("Share")
+                imageSource: "qrc:/images/controls/share-2.svg"
 
                 onClicked: {
                     if (accessTypeSelector.currentIndex === 0) {

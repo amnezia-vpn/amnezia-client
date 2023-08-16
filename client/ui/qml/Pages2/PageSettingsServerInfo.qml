@@ -18,6 +18,14 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: PageController
+
+        function onGoToPageSettingsServerServices() {
+            tabBar.currentIndex = 1
+        }
+    }
+
     SortFilterProxyModel {
         id: proxyServersModel
         sourceModel: ServersModel
@@ -98,13 +106,6 @@ PageType {
 
                         BasicButtonType {
                             Layout.fillWidth: true
-
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#D7D8DB"
-                            borderWidth: 1
 
                             text: qsTr("Save")
 
