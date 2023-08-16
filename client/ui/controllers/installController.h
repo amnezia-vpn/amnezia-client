@@ -60,6 +60,8 @@ signals:
     void passphraseRequestStarted();
     void passphraseRequestFinished();
 
+    void serverIsBusy(const bool isBusy);
+
 private:
     void installServer(DockerContainer container, QJsonObject &config);
     void installContainer(DockerContainer container, QJsonObject &config);

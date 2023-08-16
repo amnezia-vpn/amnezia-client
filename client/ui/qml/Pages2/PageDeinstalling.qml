@@ -75,7 +75,7 @@ PageType {
                                 repeat: true
                                 running: true
                                 onTriggered: {
-                                    progressBar.value += 0.001
+                                    progressBar.value += 0.003
                                 }
                             }
                         }

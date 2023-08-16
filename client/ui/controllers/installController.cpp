@@ -85,6 +85,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 void InstallController::installServer(DockerContainer container, QJsonObject &config)
 {
     ServerController serverController(m_settings);
+    connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode =
@@ -138,6 +139,7 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
     ServerController serverController(m_settings);
+    connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode = serverController.getAlreadyInstalledContainers(serverCredentials, installedContainers);
@@ -239,6 +241,7 @@ void InstallController::updateContainer(QJsonObject config)
             qvariant_cast<QJsonObject>(m_containersModel->data(modelIndex, ContainersModel::Roles::ConfigRole));
 
     ServerController serverController(m_settings);
+    connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
 
     auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
     if (errorCode == ErrorCode::NoError) {

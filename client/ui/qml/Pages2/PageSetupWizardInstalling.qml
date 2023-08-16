@@ -17,6 +17,9 @@ PageType {
     Component.onCompleted: PageController.enableTabBar(false)
     Component.onDestruction: PageController.enableTabBar(true)
 
+    property bool isTimerRunning: true
+    property string progressBarText: qsTr("Usually it takes no more than 5 minutes")
+
     Connections {
         target: InstallController
 
@@ -56,6 +59,18 @@ PageType {
             goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))
+        }
+
+        function onServerIsBusy(isBusy) {
+            if (isBusy) {
+                root.progressBarText = qsTr("Amnesia has detected that your server is currently ") +
+                                       qsTr("busy installing other software. Amnesia installation ") +
+                                       qsTr("will pause until the server finishes installing other software")
+                root.isTimerRunning = false
+            } else {
+                root.progressBarText = qsTr("Usually it takes no more than 5 minutes")
+                root.isTimerRunning = true
+            }
         }
     }
 
@@ -122,18 +137,20 @@ PageType {
 
                                 interval: 300
                                 repeat: true
-                                running: true
+                                running: root.isTimerRunning
                                 onTriggered: {
-                                    progressBar.value += 0.001
+                                    progressBar.value += 0.003
                                 }
                             }
                         }
 
                         ParagraphTextType {
+                            id: progressText
+
                             Layout.fillWidth: true
                             Layout.topMargin: 8
 
-                            text: qsTr("Usually it takes no more than 5 minutes")
+                            text: root.progressBarText
                         }
                     }
                 }
