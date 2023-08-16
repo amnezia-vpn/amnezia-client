@@ -369,15 +369,17 @@ namespace libssh {
         m_passphraseCallback = passphraseCallback;
         authResult = ssh_pki_import_privkey_base64(credentials.secretData.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
         if (authResult == SSH_OK) {
-            char* key = new char[65535];
+            char *b64 = nullptr;
 
-            authResult = ssh_pki_export_privkey_base64(privateKey, nullptr, nullptr, nullptr, &key);
-            decryptedPrivateKey = key;
-            delete[] key;
+            authResult = ssh_pki_export_privkey_base64(privateKey, nullptr, nullptr, nullptr, &b64);
+            decryptedPrivateKey = QString(b64);
 
             if (authResult != SSH_OK) {
                 qDebug() << "failed to export private key";
                 errorCode = ErrorCode::InternalError;
+            }
+            else {
+                ssh_string_free_char(b64);
             }
         } else {
             errorCode = ErrorCode::SshPrivateKeyError;

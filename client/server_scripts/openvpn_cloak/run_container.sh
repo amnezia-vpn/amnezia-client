@@ -1,5 +1,6 @@
 # Run container
 sudo docker run -d \
+--privileged \
 --log-driver none \
 --restart always \
 --cap-add=NET_ADMIN \

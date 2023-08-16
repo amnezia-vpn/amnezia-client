@@ -236,14 +236,7 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, container);
-    if (e)
-        return e;
-
-    if (!isUpdate) {
-        e = isServerPortBusy(credentials, container, config);
-        if (e)
-            return e;
-    }
+    if (e) return e;
 
     e = isServerDpkgBusy(credentials, container);
     if (e)
@@ -253,6 +246,16 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     if (e)
         return e;
     qDebug().noquote() << "ServerController::setupContainer installDockerWorker finished";
+
+    if (!isUpdate) {
+        e = isServerPortBusy(credentials, container, config);
+        if (e) return e;
+    }
+
+    if (!isUpdate) {
+        e = isServerPortBusy(credentials, container, config);
+        if (e) return e;
+    }
 
     e = prepareHostWorker(credentials, container, config);
     if (e)
@@ -356,8 +359,8 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                       replaceVars(amnezia::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
-    if (stdOut.contains("command not found"))
-        return ErrorCode::ServerDockerFailedError;
+    qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
+    if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
     return error;
 }
@@ -655,7 +658,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
             ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
-    QString script = QString("sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
+    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }

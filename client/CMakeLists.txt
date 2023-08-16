@@ -348,13 +348,16 @@ if(ANDROID)
     foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
 
         set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-go.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/wireguard/${abi}/libwg-quick.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libck-ovpn-plugin.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpn3.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/libovpnutil.so
-            ${CMAKE_CURRENT_LIST_DIR}/android/lib/openvpn/${abi}/librsapss.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg-go.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/android/${abi}/libwg-quick.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libredsocks.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libsslocal.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/shadowsocks/android/${abi}/libtun2socks.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpnutil.so
+            ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/librsapss.so
             ${CMAKE_CURRENT_LIST_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so  
         )
         
