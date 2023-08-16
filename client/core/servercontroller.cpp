@@ -369,6 +369,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                                             genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
+    if (stdOut.contains("lock")) return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
 
     return error;
@@ -697,7 +698,8 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     QFutureWatcher<ErrorCode> watcher;
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
-        do {
+        // max 100 attempts
+        for (int i = 0; i < 100; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
@@ -705,12 +707,22 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                   genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
-            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
-                emit serverIsBusy(true);
-                QThread::msleep(1000);
+
+            // if 'fuser' is not installed, skip check
+            if (stdOut.contains("Not installed")) return ErrorCode::NoError;
+
+            if (stdOut.isEmpty()) {
+                return ErrorCode::NoError;
             }
-        } while (!stdOut.isEmpty());
-        return ErrorCode::NoError;
+            else {
+                #ifdef MZ_DEBUG
+                qDebug().noquote() << stdOut;
+                #endif
+                emit serverIsBusy(true);
+                QThread::msleep(5000);
+            }
+        }
+        return ErrorCode::ServerPacketManagerError;
     });
 
     QEventLoop wait;

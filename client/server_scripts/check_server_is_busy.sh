@@ -1,4 +1,5 @@
-pm_apt="/usr/bin/apt-get";\
-if [[ -f "$pm_apt" ]]; then pm=$pm_apt; else exit; fi;\
-if [[ ! -f "/usr/bin/sudo" ]]; then $pm update -y -q; $pm install -y -q sudo; fi;\
-sudo fuser /var/lib/dpkg/lock-frontend
+if which apt-get > /dev/null 2>&1; then LOCK_FILE="/var/lib/dpkg/lock-frontend";\
+elif which dnf > /dev/null 2>&1; then LOCK_FILE="/var/run/dnf.pid";\
+elif which yum > /dev/null 2>&1; then LOCK_FILE="/var/run/yum.pid";\
+else echo "Packet manager not found"; echo "Internal error"; exit 1; fi;\
+if command -v fuser > /dev/null 2>&1; then sudo fuser $LOCK_FILE; else  echo "Not installed"; fi
