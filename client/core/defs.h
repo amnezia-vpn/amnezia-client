@@ -33,6 +33,7 @@ enum ErrorCode
     ServerDockerFailedError,
     ServerCancelInstallation,
     ServerUserNotInSudo,
+    ServerPacketManagerError,
 
     // Ssh connection errors
     SshRequsetDeniedError, SshInterruptedError, SshInternalError,

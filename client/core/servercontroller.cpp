@@ -210,7 +210,8 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(), "non_desc");
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
+                                     "non_desc");
     if (error != ErrorCode::NoError) {
         return error;
     }
@@ -236,7 +237,8 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, container);
-    if (e) return e;
+    if (e)
+        return e;
 
     e = isServerDpkgBusy(credentials, container);
     if (e)
@@ -249,12 +251,14 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
 
     if (!isUpdate) {
         e = isServerPortBusy(credentials, container, config);
-        if (e) return e;
+        if (e)
+            return e;
     }
 
     if (!isUpdate) {
         e = isServerPortBusy(credentials, container, config);
-        if (e) return e;
+        if (e)
+            return e;
     }
 
     e = prepareHostWorker(credentials, container, config);
@@ -360,7 +364,10 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                       cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
-    if (stdOut.contains("command not found")) return ErrorCode::ServerDockerFailedError;
+    if (stdOut.contains("lock"))
+        return ErrorCode::ServerPacketManagerError;
+    if (stdOut.contains("command not found"))
+        return ErrorCode::ServerDockerFailedError;
 
     return error;
 }
@@ -721,7 +728,8 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     QFutureWatcher<ErrorCode> watcher;
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
-        do {
+        // max 100 attempts
+        for (int i = 0; i < 100; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
@@ -730,12 +738,22 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                       replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                   genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
-            if (!stdOut.isEmpty() || stdOut.contains("Unable to acquire the dpkg frontend lock")) {
+
+            // if 'fuser' is not installed, skip check
+            if (stdOut.contains("Not installed"))
+                return ErrorCode::NoError;
+
+            if (stdOut.isEmpty()) {
+                return ErrorCode::NoError;
+            } else {
+#ifdef MZ_DEBUG
+                qDebug().noquote() << stdOut;
+#endif
                 emit serverIsBusy(true);
-                QThread::msleep(1000);
+                QThread::msleep(5000);
             }
-        } while (!stdOut.isEmpty());
-        return ErrorCode::NoError;
+        }
+        return ErrorCode::ServerPacketManagerError;
     });
 
     QEventLoop wait;

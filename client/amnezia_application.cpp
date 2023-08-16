@@ -37,7 +37,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
     setQuitOnLastWindowClosed(false);
 
     // Fix config file permissions
-#if defined Q_OS_LINUX && !defined(Q_OS_ANDROID)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     {
         QSettings s(ORGANIZATION_NAME, APPLICATION_NAME);
         s.setValue("permFixed", true);
