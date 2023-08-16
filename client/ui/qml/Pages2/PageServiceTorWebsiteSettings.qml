@@ -79,6 +79,7 @@ PageType {
 
                 clickedFunction: function() {
                     content.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 

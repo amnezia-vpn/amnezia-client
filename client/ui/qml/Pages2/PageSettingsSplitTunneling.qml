@@ -116,7 +116,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            listView: ListViewType {
+            listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
 
                 model: root.routeModesModel

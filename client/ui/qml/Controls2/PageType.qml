@@ -28,4 +28,14 @@ Item {
             root.stackView.pop()
         }
     }
+
+    MouseArea {
+        z: -1
+        anchors.fill: parent
+
+        onClicked: {
+            console.log("base mouse area pressed")
+            focus = true
+        }
+    }
 }

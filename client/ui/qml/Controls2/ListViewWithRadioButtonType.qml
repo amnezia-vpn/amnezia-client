@@ -11,11 +11,9 @@ ListView {
 
     property var selectedText
 
-    property string imageSource
+    property string imageSource: "qrc:/images/controls/check.svg"
 
     property var clickedFunction
-
-    property bool dividerVisible: false
 
     currentIndex: 0
 
@@ -53,6 +51,12 @@ ListView {
                     Behavior on color {
                         PropertyAnimation { duration: 200 }
                     }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: false
+                    }
                 }
 
                 RowLayout {
@@ -73,8 +77,8 @@ ListView {
                     }
 
                     Image {
-                        source: imageSource ? imageSource : "qrc:/images/controls/check.svg"
-                        visible: imageSource ? true : radioButton.checked
+                        source: imageSource
+                        visible: radioButton.checked
 
                         width: 24
                         height: 24
@@ -93,13 +97,6 @@ ListView {
                         clickedFunction()
                     }
                 }
-            }
-
-            DividerType {
-                Layout.fillWidth: true
-                Layout.bottomMargin: 4
-
-                visible: dividerVisible
             }
         }
 

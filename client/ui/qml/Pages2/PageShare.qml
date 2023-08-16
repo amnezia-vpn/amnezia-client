@@ -166,7 +166,7 @@ PageType {
                 descriptionText: accessTypeSelector.currentIndex === 0 ? qsTr("Server and service") : qsTr("Server")
                 headerText: qsTr("Server")
 
-                listView: ListViewType {
+                listView: ListViewWithLabelsType {
                     rootWidth: root.width
                     dividerVisible: true
 
@@ -255,9 +255,8 @@ PageType {
                                 wrapMode: Text.WordWrap
                             }
 
-                            ListViewType {
+                            ListViewWithRadioButtonType {
                                 rootWidth: root.width
-                                dividerVisible: true
 
                                 imageSource: "qrc:/images/controls/check.svg"
 
@@ -274,7 +273,7 @@ PageType {
 
                                 currentIndex: 0
 
-                                clickedFunction: function () {
+                                clickedFunction: function() {
                                     handler()
 
                                     protocolSelector.visible = false
@@ -338,11 +337,10 @@ PageType {
                 descriptionText: qsTr("Connection format")
                 headerText: qsTr("Connection format")
 
-                listView: ListViewType {
+                listView: ListViewWithRadioButtonType {
                     id: exportTypeListView
 
                     rootWidth: root.width
-                    dividerVisible: true
 
                     imageSource: "qrc:/images/controls/chevron-right.svg"
 

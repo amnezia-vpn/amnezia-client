@@ -22,133 +22,86 @@ ListView {
     clip: true
     interactive: false
 
-    ButtonGroup {
-        id: containersRadioButtonGroup
-    }
-
     delegate: Item {
         implicitWidth: root.width
-        implicitHeight: containerRadioButton.implicitHeight
+        implicitHeight: delegateContent.implicitHeight
 
-        RadioButton {
-            id: containerRadioButton
+        ColumnLayout {
+            id: delegateContent
 
-            implicitWidth: parent.width
-            implicitHeight: containerRadioButtonContent.implicitHeight
+            anchors.fill: parent
 
-            hoverEnabled: true
+            LabelWithButtonType {
+                implicitWidth: parent.width
 
-            ButtonGroup.group: containersRadioButtonGroup
+                text: name
+                descriptionText: description
+                rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
-            indicator: Rectangle {
-                anchors.fill: parent
-                color: containerRadioButton.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                clickedFunction: function() {
+                    if (isInstalled) {
+                        var containerIndex = root.model.mapToSource(index)
+                        ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
 
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-
-            checkable: isInstalled
-
-            RowLayout {
-                id: containerRadioButtonContent
-                anchors.fill: parent
-
-                anchors.rightMargin: 16
-                anchors.leftMargin: 16
-
-                z: 1
-
-                ColumnLayout {
-                    Layout.topMargin: 20
-                    Layout.bottomMargin: 20
-
-                    ListItemTitleType {
-                        Layout.fillWidth: true
-
-                        text: name
-                    }
-
-                    CaptionTextType {
-                        Layout.fillWidth: true
-
-                        text: description
-                        color: "#878B91"
-                    }
-                }
-
-                Image {
-                    source: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
-
-                    width: 24
-                    height: 24
-
-                    Layout.rightMargin: 8
-                }
-            }
-
-            onClicked: {
-                if (isInstalled) {
-                    var containerIndex = root.model.mapToSource(index)
-                    ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
-
-                    if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                        ProtocolsModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolRaw)
-                        return
-                    }
-
-                    switch (containerIndex) {
-                    case ContainerEnum.OpenVpn: {
-                        OpenVpnConfigModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolOpenVpnSettings)
-                        break
-                    }
-                    case ContainerEnum.WireGuard: {
-                        ProtocolsModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolRaw)
-//                        WireGuardConfigModel.updateModel(config)
-//                        goToPage(PageEnum.PageProtocolWireGuardSettings)
-                        break
-                    }
-                    case ContainerEnum.Ipsec: {
-                        ProtocolsModel.updateModel(config)
-                        goToPage(PageEnum.PageProtocolRaw)
-//                        Ikev2ConfigModel.updateModel(config)
-//                        goToPage(PageEnum.PageProtocolIKev2Settings)
-                        break
-                    }
-                    case ContainerEnum.Sftp: {
-                        SftpConfigModel.updateModel(config)
-                        goToPage(PageEnum.PageServiceSftpSettings)
-                        break
-                    }
-                    case ContainerEnum.TorWebSite: {
-                        goToPage(PageEnum.PageServiceTorWebsiteSettings)
-                        break
-                    }
-
-                    default: {
-                        if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
+                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
                             ProtocolsModel.updateModel(config)
-                            goToPage(PageEnum.PageSettingsServerProtocol)
+                            goToPage(PageEnum.PageProtocolRaw)
+                            return
                         }
-                    }
-                    }
 
-                } else {
-                    ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
-                    InstallController.setShouldCreateServer(false)
-                    goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                        switch (containerIndex) {
+                        case ContainerEnum.OpenVpn: {
+                            OpenVpnConfigModel.updateModel(config)
+                            goToPage(PageEnum.PageProtocolOpenVpnSettings)
+                            break
+                        }
+                        case ContainerEnum.WireGuard: {
+                            ProtocolsModel.updateModel(config)
+                            goToPage(PageEnum.PageProtocolRaw)
+    //                        WireGuardConfigModel.updateModel(config)
+    //                        goToPage(PageEnum.PageProtocolWireGuardSettings)
+                            break
+                        }
+                        case ContainerEnum.Ipsec: {
+                            ProtocolsModel.updateModel(config)
+                            goToPage(PageEnum.PageProtocolRaw)
+    //                        Ikev2ConfigModel.updateModel(config)
+    //                        goToPage(PageEnum.PageProtocolIKev2Settings)
+                            break
+                        }
+                        case ContainerEnum.Sftp: {
+                            SftpConfigModel.updateModel(config)
+                            goToPage(PageEnum.PageServiceSftpSettings)
+                            break
+                        }
+                        case ContainerEnum.TorWebSite: {
+                            goToPage(PageEnum.PageServiceTorWebsiteSettings)
+                            break
+                        }
+
+                        default: {
+                            if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
+                                ProtocolsModel.updateModel(config)
+                                goToPage(PageEnum.PageSettingsServerProtocol)
+                            }
+                        }
+                        }
+
+                    } else {
+                        ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
+                        InstallController.setShouldCreateServer(false)
+                        goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
                 }
             }
 
-            MouseArea {
-                anchors.fill: containerRadioButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
-            }
+            DividerType {}
         }
     }
 }

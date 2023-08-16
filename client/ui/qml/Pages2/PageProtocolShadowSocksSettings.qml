@@ -105,7 +105,7 @@ PageType {
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
 
-                            listView: ListViewType {
+                            listView: ListViewWithRadioButtonType {
                                 id: cipherListView
 
                                 rootWidth: root.width

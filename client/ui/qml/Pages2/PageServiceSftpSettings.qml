@@ -97,6 +97,7 @@ PageType {
 
                             clickedFunction: function() {
                                 col.copyToClipBoard(descriptionText)
+                                PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
 
@@ -113,6 +114,7 @@ PageType {
 
                             clickedFunction: function() {
                                 col.copyToClipBoard(descriptionText)
+                                PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
 
@@ -129,6 +131,7 @@ PageType {
 
                             clickedFunction: function() {
                                 col.copyToClipBoard(descriptionText)
+                                PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
 
@@ -145,6 +148,7 @@ PageType {
 
                             clickedFunction: function() {
                                 col.copyToClipBoard(descriptionText)
+                                PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
 
@@ -194,7 +198,9 @@ PageType {
                             readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
                             readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
 
-                            onLinkActivated: Qt.openUrlExternally(link)
+                            onLinkActivated: function(link) {
+                                Qt.openUrlExternally(link)
+                            }
                             textFormat: Text.RichText
                             text: {
                                 var str = qsTr("In order to mount remote SFTP folder as local drive, perform following steps: <br>")
@@ -210,6 +216,8 @@ PageType {
 
                                 return str
                             }
+
+
                         }
 
                         BasicButtonType {
