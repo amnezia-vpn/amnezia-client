@@ -30,6 +30,12 @@ IOSVpnProtocol::IOSVpnProtocol(Proto proto, const QJsonObject &configuration, QO
     connect(this, &IOSVpnProtocol::newTransmittedDataCount, this, &IOSVpnProtocol::setBytesChanged);
 }
 
+IOSVpnProtocol::~IOSVpnProtocol()
+{
+    qDebug() << "IOSVpnProtocol::~IOSVpnProtocol()";
+    IOSVpnProtocol::stop();
+}
+
 IOSVpnProtocol* IOSVpnProtocol::instance() {
     return s_instance;
 }
@@ -158,9 +164,12 @@ void IOSVpnProtocol::checkStatus()
     }
     
     m_checkingStatus = true;
+
+    QPointer<IOSVpnProtocol> weakSelf = this;
     
     [m_controller checkStatusWithCallback:^(NSString* serverIpv4Gateway, NSString* deviceIpv4Address,
                                             NSString* configString) {
+        if (!weakSelf) return;
         QString config = QString::fromNSString(configString);
         
         m_checkingStatus = false;
@@ -185,7 +194,7 @@ void IOSVpnProtocol::checkStatus()
             }
         }
         
-        emit newTransmittedDataCount(rxBytes, txBytes);
+        emit weakSelf->newTransmittedDataCount(rxBytes, txBytes);
     }];
 }
 

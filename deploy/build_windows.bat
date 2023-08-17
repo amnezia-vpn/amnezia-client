@@ -23,6 +23,7 @@ set APP_FILENAME=%APP_NAME:"=%.exe
 set APP_DOMAIN=org.amneziavpn.package
 set RELEASE_DIR=%WORK_DIR:"=%
 set OUT_APP_DIR=%RELEASE_DIR:"=%\client\release
+set PREBILT_DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%RELEASE_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
@@ -76,6 +77,7 @@ signtool sign /v /sm /s My /n "Privacy Technologies OU" /fd sha256 /tr http://ti
 
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
+xcopy %PREBILT_DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 copy "%WORK_DIR:"=%\service\wireguard-service\release\wireguard-service.exe"	%OUT_APP_DIR%\wireguard\
 
 cd %SCRIPT_DIR%

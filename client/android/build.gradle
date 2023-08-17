@@ -19,6 +19,7 @@ buildscript {
         google()
         jcenter()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 
     dependencies {
@@ -137,54 +138,15 @@ android {
         resConfig "en"
         minSdkVersion = 24
         targetSdkVersion = 34
-        versionCode 25 // Change to a higher number
-        versionName "3.0.8" // Change to a higher number
+        versionCode 32 // Change to a higher number
+        versionName "3.0.9" // Change to a higher number
 
         javaCompileOptions.annotationProcessorOptions.arguments = [
             "room.schemaLocation": "${qtAndroidDir}/schemas".toString()
         ]
     }
 
-   buildTypes {
-       release {
-           // That would enable treeshaking and remove java code that is just called from qt
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   version cmakeMinVersion
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
-                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
-                                "-DANDROID_PLATFORM=${minSdkVer}"
-               }
-           }
-       }
-       debug {
-           //applicationIdSuffix ".debug"
-           //versionNameSuffix "-debug"
-           minifyEnabled false
-           externalNativeBuild {
-               cmake {
-                   version cmakeMinVersion
-                   arguments "-DANDROID_PACKAGE_NAME=${groupName}",
-                                "-DGRADLE_USER_HOME=${project.gradle.gradleUserHomeDir}",
-                                "-DANDROID_PLATFORM=${minSdkVer}"
-               }
-           }
-       }
-   }
 
-//   externalNativeBuild {
-//       cmake {
-//           path 'wireguard/CMakeLists.txt'
-//       }
-//   }
-
-    externalNativeBuild {
-        cmake {
-            version cmakeMinVersion
-            path "${projectDir}/cpp/CMakeLists.txt"
-        }
-    }
 }
 
 

@@ -15,6 +15,11 @@ class RouterLinux : public QObject
 {
     Q_OBJECT
 public:
+    struct Route {
+        QString dst;
+        QString gw;
+    };
+
     static RouterLinux& Instance();
 
     bool routeAdd(const QString &ip, const QString &gw, const int &sock);
@@ -31,7 +36,7 @@ private:
     RouterLinux(RouterLinux const &) = delete;
     RouterLinux& operator= (RouterLinux const&) = delete;
 
-    QList<QString> m_addedRoutes;
+    QList<Route> m_addedRoutes;
 };
 
 #endif // ROUTERLINUX_H

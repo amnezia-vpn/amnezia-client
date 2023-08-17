@@ -20,6 +20,7 @@ import androidx.core.content.FileProvider
 import com.wireguard.android.util.SharedLibraryLoader
 import com.wireguard.config.*
 import com.wireguard.crypto.Key
+import com.wireguard.android.backend.GoBackend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,6 +49,7 @@ import android.net.VpnService as BaseVpnService
 class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     override val data = BaseService.Data(this)
+    
     override val tag: String get() = "VPNService"
 //    override fun createNotification(profileName: String): ServiceNotification =
 //        ServiceNotification(this, profileName, "service-vpn")
@@ -56,6 +58,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private var worker: ProtectWorker? = null
     private var active = false
     private var metered = false
+    private var mNetworkState = NetworkState(this)
     private var underlyingNetwork: Network? = null
         set(value) {
             field = value
@@ -121,23 +124,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 })
         }
 
-        @JvmStatic
-        private external fun wgGetConfig(handle: Int): String?
-
-        @JvmStatic
-        private external fun wgGetSocketV4(handle: Int): Int
-
-        @JvmStatic
-        private external fun wgGetSocketV6(handle: Int): Int
-
-        @JvmStatic
-        private external fun wgTurnOff(handle: Int)
-
-        @JvmStatic
-        private external fun wgTurnOn(ifName: String, tunFd: Int, settings: String): Int
-
-        @JvmStatic
-        private external fun wgVersion(): String?
     }
 
     private var mBinder: VPNServiceBinder = VPNServiceBinder(this)
@@ -162,7 +148,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         SharedLibraryLoader.loadSharedLibrary(this, "wg-go")
         SharedLibraryLoader.loadSharedLibrary(this, "ovpn3")
         Log.i(tag, "Loaded libs")
-        Log.e(tag, "Wireguard Version ${wgVersion()}")
+        Log.e(tag, "Wireguard Version ${GoBackend.wgVersion()}")
         mOpenVPNThreadv3 = OpenVPNThreadv3(this)
         mAlreadyInitialised = true
     }
@@ -241,6 +227,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
         mProtocol = mConfig!!.getString("protocol")
         Log.e(tag, "mProtocol: $mProtocol")
+        if (mProtocol.equals("cloak", true) || (mProtocol.equals("openvpn", true))) {
+            startOpenVpn()
+            mNetworkState.bindNetworkListener()
+        }
         if (mProtocol.equals("shadowsocks", true)) {
             if (DataStore.serviceMode == modeVpn) {
                 if (prepare(this) != null) {
@@ -266,7 +256,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     // At this moment, the VPN interface is already deactivated by the system.
     override fun onRevoke() {
         Log.v(tag, "Aman: onRevoke....................")
-        this.turnOff()
+        //this.turnOff()
         super.onRevoke()
     }
 
@@ -379,7 +369,15 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         when (mProtocol) {
             "cloak",
             "openvpn" -> {
-                startOpenVpn()
+                startOpenVpn()                
+                // Store the config in case the service gets
+                // asked boot vpn from the OS
+                val prefs = Prefs.get(this)
+                prefs.edit()
+                    .putString("lastConf", mConfig.toString())
+                    .apply()
+
+                mNetworkState.bindNetworkListener()
             }
             "wireguard" -> {
                 startWireGuard()
@@ -428,6 +426,14 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             mbuilder.addRoute(ip, 32)
         }
     }
+    
+    fun networkChange() {
+        Log.i(tag, "mProtocol $mProtocol")
+        if (isUp){
+           mbuilder = Builder()
+           mOpenVPNThreadv3?.reconnect(0)
+        }
+    }
 
     fun setSessionName(name: String) {
         Log.v(tag, "mbuilder.setSession($name)")
@@ -452,11 +458,12 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         Log.v(tag, "Aman: turnOff....................")
         when (mProtocol) {
             "wireguard" -> {
-                wgTurnOff(currentTunnelHandle)
+                GoBackend.wgTurnOff(currentTunnelHandle)
             }
             "cloak",
             "openvpn" -> {
                 ovpnTurnOff()
+                mNetworkState.unBindNetworkListener()
             }
             "shadowsocks" -> {
                 stopRunner(false)
@@ -517,7 +524,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         if (!isUp) {
             return null
         }
-        val config = wgGetConfig(currentTunnelHandle) ?: return null
+        val config = GoBackend.wgGetConfig(currentTunnelHandle) ?: return null
         val lines = config.split("\n")
         for (line in lines) {
             val parts = line.split("=")
@@ -715,7 +722,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")
             // Turn the tunnel down because this might be a switch
-            wgTurnOff(currentTunnelHandle)
+            GoBackend.wgTurnOff(currentTunnelHandle)
         }
         val wgConfig: String = wireguard_conf.toWgUserspaceString()
         val builder = Builder()
@@ -723,16 +730,15 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         builder.setSession("Amnezia")
         builder.establish().use { tun ->
             if (tun == null) return
-            Log.i(tag, "Go backend " + wgVersion())
-            currentTunnelHandle = wgTurnOn("Amnezia", tun.detachFd(), wgConfig)
+            currentTunnelHandle = GoBackend.wgTurnOn("Amnezia", tun.detachFd(), wgConfig)
         }
         if (currentTunnelHandle < 0) {
             Log.e(tag, "Activation Error Code -> $currentTunnelHandle")
             isUp = false
             return
         }
-        protect(wgGetSocketV4(currentTunnelHandle))
-        protect(wgGetSocketV6(currentTunnelHandle))
+        protect(GoBackend.wgGetSocketV4(currentTunnelHandle))
+        protect(GoBackend.wgGetSocketV6(currentTunnelHandle))
         isUp = true
 
         // Store the config in case the service gets

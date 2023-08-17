@@ -219,7 +219,9 @@ QString Utils::openVpnExecPath()
 #ifdef Q_OS_WIN
     return Utils::executable("openvpn/openvpn", true);
 #elif defined Q_OS_LINUX
-    return Utils::usrExecutable("openvpn");
+    // We have service that runs OpenVPN on Linux. We need to make same
+    // path for client and service.
+    return Utils::executable("../../client/bin/openvpn", true);
 #else
     return Utils::executable("/openvpn", true);
 #endif
