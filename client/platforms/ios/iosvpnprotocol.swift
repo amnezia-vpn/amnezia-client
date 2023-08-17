@@ -22,6 +22,7 @@ var vpnBundleID = "";
     }
 }
 
+
 public class IOSVpnProtocolImpl : NSObject {
 
     private var tunnel: NETunnelProviderManager? = nil
@@ -123,7 +124,7 @@ public class IOSVpnProtocolImpl : NSObject {
             print("We have received \(nsManagers.count) managers.")
 
             var tunnel : NETunnelProviderManager? = nil;
-            var tunnelLocalizedDescription = "\(proto) \(self!.serverIP)"
+            let tunnelLocalizedDescription = "\(proto) \(self!.serverIP!)"
 
             if(!nsManagers.isEmpty){
                 for manager in nsManagers{
@@ -164,10 +165,13 @@ public class IOSVpnProtocolImpl : NSObject {
         }
     }
 
+    //wireguard
     @objc init(bundleID: String,
                privateKey: Data,
                deviceIpv4Address: String,
                deviceIpv6Address: String,
+               endpoint: String,
+               proto: String,
                closure: @escaping (ConnectionState, Date?) -> Void,
                callback: @escaping (Bool) -> Void) {
         super.init()
@@ -221,7 +225,6 @@ public class IOSVpnProtocolImpl : NSObject {
             
             
           //  let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
-            //let tunnel = nsManagers.first(where: IOSVpnProtocolImpl.isOurManager(_:))
             
 //            if let name = tunnel?.localizedDescription, name != vpnName {
 //                tunnel?.removeFromPreferences(completionHandler: { removeError in
@@ -237,6 +240,7 @@ public class IOSVpnProtocolImpl : NSObject {
                 Logger.global?.log(message: "Creating the tunnel")
                 print("Creating the tunnel")
                 self!.tunnel = NETunnelProviderManager()
+                
                 closure(ConnectionState.Disconnected, nil)
                 return
             }
@@ -408,113 +412,7 @@ public class IOSVpnProtocolImpl : NSObject {
         self.configureOpenVPNTunnel(serverAddress: addr, config: ovpnConfig, failureCallback: failureCallback)
     }
 
-    @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
-        Logger.global?.log(message: "Logger Connecting")
-//        assert(tunnel != nil)
-
-        // Let's remove the previous config if it exists.
-        (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
-
-        let keyData = PublicKey(base64Key: serverPublicKey)!
-        let dnsServerIP = IPv4Address(dnsServer)
-        let ipv6GatewayIP = IPv6Address(serverIpv6Gateway)
-
-        var peerConfiguration = PeerConfiguration(publicKey: keyData)
-        peerConfiguration.preSharedKey = PreSharedKey(base64Key: presharedKey)
-        peerConfiguration.endpoint = Endpoint(from: serverIpv4AddrIn + ":\(serverPort )")
-        peerConfiguration.allowedIPs = []
-
-        allowedIPAddressRanges.forEach {
-            if (!$0.isIpv6) {
-                peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv4Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
-            } else if (ipv6Enabled) {
-                peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv6Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
-            }
-        }
-
-        var peerConfigurations: [PeerConfiguration] = []
-        peerConfigurations.append(peerConfiguration)
-
-        var interface = InterfaceConfiguration(privateKey: privateKey!)
-
-        if let ipv4Address = IPAddressRange(from: deviceIpv4Address!),
-           let ipv6Address = IPAddressRange(from: deviceIpv6Address!) {
-            interface.addresses = [ipv4Address]
-            if (ipv6Enabled) {
-                interface.addresses.append(ipv6Address)
-            }
-        }
-        interface.dns = [ DNSServer(address: dnsServerIP!)]
-        interface.mtu = 1412 // 1280
-
-        if (ipv6Enabled) {
-            interface.dns.append(DNSServer(address: ipv6GatewayIP!))
-        }
-
-        let config = TunnelConfiguration(name: vpnName, interface: interface, peers: peerConfigurations)
-
-        self.configureTunnel(config: config, reason: reason, failureCallback: failureCallback)
-    }
-
-    func configureTunnel(config: TunnelConfiguration, reason: Int, failureCallback: @escaping () -> Void) {
-        guard let proto = NETunnelProviderProtocol(tunnelConfiguration: config) else {
-            failureCallback()
-            return
-        }
-        
-        guard tunnel != nil else { failureCallback(); return }
-        proto.providerBundleIdentifier = vpnBundleID
-
-        tunnel!.protocolConfiguration = proto
-        tunnel!.localizedDescription = "Amnezia Wireguard"
-        tunnel!.isEnabled = true
-
-        tunnel!.saveToPreferences { [unowned self] saveError in
-            if let error = saveError {
-                Logger.global?.log(message: "Connect Tunnel Save Error: \(error)")
-                failureCallback()
-                return
-            }
-
-            Logger.global?.log(message: "Saving the tunnel succeeded")
-
-            self.tunnel!.loadFromPreferences { error in
-                if let error = error {
-                    Logger.global?.log(message: "Connect Tunnel Load Error: \(error)")
-                    failureCallback()
-                    return
-                }
-
-                Logger.global?.log(message: "Loading the tunnel succeeded")
-                print("Loading the tunnel succeeded")
-
-                do {
-                    if (reason == 1 /* ReasonSwitching */) {
-                        let settings = config.asWgQuickConfig()
-                        let settingsData = settings.data(using: .utf8)!
-                        try (self.tunnel!.connection as? NETunnelProviderSession)?
-                                .sendProviderMessage(settingsData) { data in
-                            guard let data = data,
-                                let configString = String(data: data, encoding: .utf8)
-                            else {
-                                Logger.global?.log(message: "Failed to convert response to string")
-                                return
-                            }
-                            print("Config sent to NE: \(configString)")
-                        }
-                    } else {
-                        print("starting tunnel")
-                        try (self.tunnel!.connection as? NETunnelProviderSession)?.startTunnel()
-                    }
-                } catch let error {
-                    Logger.global?.log(message: "Something went wrong: \(error)")
-                    failureCallback()
-                    return
-                }
-            }
-        }
-    }
-    
+   
     func configureTunnel(withShadowSocks ssConfig: String?, serverAddress: String, config: String?, failureCallback: @escaping () -> Void) {
         guard let ss = ssConfig, let ovpn = config else { failureCallback(); return }
         let tunnelProtocol = NETunnelProviderProtocol()
@@ -562,20 +460,22 @@ public class IOSVpnProtocolImpl : NSObject {
         tunnelProtocol.serverAddress = serverAddress
         tunnelProtocol.providerBundleIdentifier = vpnBundleID
         tunnelProtocol.providerConfiguration = ["ovpn": Data(config.utf8)]
-        tunnel?.protocolConfiguration = tunnelProtocol
+        tunnel!.protocolConfiguration = tunnelProtocol
         
         
         
         if(serverAddress == "127.0.0.1"){
             if let routeip = extractFirstRouteIP(from: config){
                 print("Route ip is:\(routeip)")
-                tunnel?.localizedDescription = "Cloak \(routeip)"
+                tunnel!.localizedDescription = "Cloak \(routeip)"
             }else{
                 print("Route ip not found")
             }
         }else{
-            tunnel?.localizedDescription = "OpenVPN \(serverAddress)"
+            tunnel!.localizedDescription = "OpenVPN \(serverAddress)"
         }
+        
+        
         tunnel?.isEnabled = true
 
         tunnel?.saveToPreferences { [unowned self] saveError in
@@ -807,6 +707,126 @@ public class IOSVpnProtocolImpl : NSObject {
     
 }
 
+//wireguard
+extension IOSVpnProtocolImpl{
+    @objc func connect(dnsServer: String, serverIpv6Gateway: String, serverPublicKey: String, presharedKey: String, serverIpv4AddrIn: String, serverPort: Int,  allowedIPAddressRanges: Array<VPNIPAddressRange>, ipv6Enabled: Bool, reason: Int, failureCallback: @escaping () -> Void) {
+        Logger.global?.log(message: "Logger Connecting")
+//        assert(tunnel != nil)
+
+        // Let's remove the previous config if it exists.
+        (tunnel?.protocolConfiguration as? NETunnelProviderProtocol)?.destroyConfigurationReference()
+
+        let keyData = PublicKey(base64Key: serverPublicKey)!
+        let dnsServerIP = IPv4Address(dnsServer)
+        let ipv6GatewayIP = IPv6Address(serverIpv6Gateway)
+
+        var peerConfiguration = PeerConfiguration(publicKey: keyData)
+        peerConfiguration.preSharedKey = PreSharedKey(base64Key: presharedKey)
+        peerConfiguration.endpoint = Endpoint(from: serverIpv4AddrIn + ":\(serverPort )")
+        peerConfiguration.allowedIPs = []
+
+        allowedIPAddressRanges.forEach {
+            if (!$0.isIpv6) {
+                peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv4Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
+            } else if (ipv6Enabled) {
+                peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv6Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
+            }
+        }
+
+        var peerConfigurations: [PeerConfiguration] = []
+        peerConfigurations.append(peerConfiguration)
+
+        var interface = InterfaceConfiguration(privateKey: privateKey!)
+
+        if let ipv4Address = IPAddressRange(from: deviceIpv4Address!),
+           let ipv6Address = IPAddressRange(from: deviceIpv6Address!) {
+            interface.addresses = [ipv4Address]
+            if (ipv6Enabled) {
+                interface.addresses.append(ipv6Address)
+            }
+        }
+        interface.dns = [ DNSServer(address: dnsServerIP!)]
+        interface.mtu = 1412 // 1280
+
+        if (ipv6Enabled) {
+            interface.dns.append(DNSServer(address: ipv6GatewayIP!))
+        }
+
+        let config = TunnelConfiguration(name: vpnName, interface: interface, peers: peerConfigurations)
+
+        self.configureTunnel(config: config, reason: reason, failureCallback: failureCallback)
+    }
+
+    func configureTunnel(config: TunnelConfiguration, reason: Int, failureCallback: @escaping () -> Void) {
+        guard let proto = NETunnelProviderProtocol(tunnelConfiguration: config) else {
+            failureCallback()
+            return
+        }
+     
+    
+        
+        guard tunnel != nil else { failureCallback(); return }
+        proto.providerBundleIdentifier = vpnBundleID
+
+        tunnel!.protocolConfiguration = proto
+        tunnel!.localizedDescription = "Wireguard \(config.peers[0].endpoint!.host)"
+        tunnel!.isEnabled = true
+        
+
+
+        tunnel!.saveToPreferences { [unowned self] saveError in
+            if let error = saveError {
+                Logger.global?.log(message: "Connect Tunnel Save Error: \(error)")
+                failureCallback()
+                return
+            }
+
+            Logger.global?.log(message: "Saving the tunnel succeeded")
+            
+          
+
+            self.tunnel!.loadFromPreferences { error in
+                if let error = error {
+                    Logger.global?.log(message: "Connect Tunnel Load Error: \(error)")
+                    failureCallback()
+                    return
+                }
+
+                Logger.global?.log(message: "Loading the tunnel succeeded")
+                print("Loading the tunnel succeeded")
+
+                do {
+                    if (reason == 1 /* ReasonSwitching */) {
+                        let settings = config.asWgQuickConfig()
+                        let settingsData = settings.data(using: .utf8)!
+                        try (self.tunnel!.connection as? NETunnelProviderSession)?
+                                .sendProviderMessage(settingsData) { data in
+                            guard let data = data,
+                                let configString = String(data: data, encoding: .utf8)
+                            else {
+                                Logger.global?.log(message: "Failed to convert response to string")
+                                return
+                            }
+                            print("Config sent to NE: \(configString)")
+                        }
+                    } else {
+                        print("starting tunnel")
+                        guard let session = self.tunnel!.connection as? NETunnelProviderSession else {
+                            print("connection is invalid")
+                            fatalError("tunnelManager.connection is invalid")
+                        }
+                        try session.startTunnel()
+                    }
+                } catch let error {
+                    Logger.global?.log(message: "Something went wrong: \(error)")
+                    failureCallback()
+                    return
+                }
+            }
+        }
+    }
+    
+}
 
 enum TunnelType: String {
     case wireguard, openvpn, shadowsocks, empty

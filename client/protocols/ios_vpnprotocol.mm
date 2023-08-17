@@ -35,8 +35,8 @@ IOSVpnProtocol* IOSVpnProtocol::instance() {
 }
 
 bool IOSVpnProtocol::initialize()
-{   
-    if (!m_controller) {       
+{
+    if (!m_controller) {
         QString protoName = m_rawConfig["protocol"].toString();
 
         if (protoName == "wireguard") {
@@ -60,7 +60,7 @@ bool IOSVpnProtocol::initialize()
 
 
 ErrorCode IOSVpnProtocol::start()
-{   
+{
     if (m_isChangingState)
         return NoError;
         
@@ -74,12 +74,12 @@ ErrorCode IOSVpnProtocol::start()
                     stop();
                     initialize();
                 }
-                launchCloakTunnel(m_rawConfig);
+                //launchCloakTunnel(m_rawConfig);
                 currentProto = amnezia::Proto::OpenVpn;
                 return NoError;
             }
             initialize();
-            launchCloakTunnel(m_rawConfig);
+           // launchCloakTunnel(m_rawConfig);
             break;
         case amnezia::Proto::OpenVpn:
             if (currentProto != m_protocol) {
@@ -87,12 +87,12 @@ ErrorCode IOSVpnProtocol::start()
                     stop();
                     initialize();
                 }
-                launchOpenVPNTunnel(m_rawConfig);
+               // launchOpenVPNTunnel(m_rawConfig);
                 currentProto = amnezia::Proto::OpenVpn;
                 return NoError;
             }
             initialize();
-            launchOpenVPNTunnel(m_rawConfig);
+            //launchOpenVPNTunnel(m_rawConfig);
             break;
         case amnezia::Proto::WireGuard:
             if (currentProto != m_protocol) {
@@ -100,12 +100,12 @@ ErrorCode IOSVpnProtocol::start()
                     stop();
                     initialize();
                 }
-                launchWireguardTunnel(m_rawConfig);
-                currentProto = amnezia::Proto::WireGuard;
+               // launchWireguardTunnel(m_rawConfig);
                 return NoError;
             }
+            currentProto = amnezia::Proto::WireGuard;
             initialize();
-            launchWireguardTunnel(m_rawConfig);
+            //launchWireguardTunnel(m_rawConfig);
             break;
         case amnezia::Proto::ShadowSocks:
             if (currentProto != m_protocol) {
@@ -148,7 +148,7 @@ void IOSVpnProtocol::resume_start()
 }
 
 void IOSVpnProtocol::checkStatus()
-{   
+{
     if (m_checkingStatus) {
         return;
     }
@@ -256,6 +256,9 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
                                                      privateKey:key.toNSData()
                                               deviceIpv4Address:addr.toNSString()
                                               deviceIpv6Address:@"::/0"
+                                                       endpoint:endpoint.toNSString()
+                                                          proto:@"Wireguard"
+                                                
     closure:^(ConnectionState state, NSDate* date) {
         creating = false;
         
@@ -283,6 +286,9 @@ void IOSVpnProtocol::setupWireguardProtocol(const QJsonObject& rawConfig)
                     emit connectionStateChanged(VpnConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
+                
+                launchWireguardTunnel(m_rawConfig);
+                
                 return;
         }
     }
@@ -341,10 +347,13 @@ void IOSVpnProtocol::setupCloakProtocol(const QJsonObject &rawConfig)
             }
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
+                [m_controller disconnect];
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     emit connectionStateChanged(VpnConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
+                launchCloakTunnel(m_rawConfig);
                 return;
         }
     }
@@ -405,10 +414,12 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
             }
             case ConnectionStateDisconnected:
                 // Just in case we are connecting, let's call disconnect.
+                [m_controller disconnect];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     emit connectionStateChanged(VpnConnectionState::Disconnected);
                     m_isChangingState = false;
                 });
+                launchOpenVPNTunnel(m_rawConfig);
                 return;
         }
     }
@@ -550,7 +561,6 @@ void IOSVpnProtocol::launchWireguardTunnel(const QJsonObject &rawConfig)
 
 void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
 {
-    //TODO move to OpenVpnConfigurator
     QJsonObject ovpn = rawConfig["openvpn_config_data"].toObject();
 
     QString ovpnConfig = ovpn["config"].toString();
@@ -559,16 +569,16 @@ void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
         QJsonObject cloak = rawConfig["cloak_config_data"].toObject();
         cloak["NumConn"] = 1;
         if (cloak.contains("remote")) {
-            cloak["RemoteHost"] = cloak["remote"].toString();
-        }
+                    cloak["RemoteHost"] = cloak["remote"].toString();
+                }
         if (cloak.contains("port")) {
-            cloak["RemotePort"] = cloak["port"].toString();
-        }
+                    cloak["RemotePort"] = cloak["port"].toString();
+                }
         
-        cloak.remove("remote");
+        cloak.remove("remote	");
         cloak.remove("port");
         cloak.remove("transport_proto");
-
+        
         // Convert JSONObject to JSONDocument
         QJsonObject jsonObject {};
         foreach(const QString& key, cloak.keys()) {
@@ -576,7 +586,7 @@ void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
                 jsonObject.insert(key, cloak.value(key).toInt());
             }else{
                 jsonObject.insert(key, cloak.value(key).toString());
-            } 
+            }
         }
         QJsonDocument doc(jsonObject);
         QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -597,7 +607,6 @@ void IOSVpnProtocol::launchCloakTunnel(const QJsonObject &rawConfig)
         });
     }];
 }
-
 
 
 void IOSVpnProtocol::launchOpenVPNTunnel(const QJsonObject &rawConfig)
