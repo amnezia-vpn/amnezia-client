@@ -17,7 +17,9 @@ Item {
 
     property string textColor: "#d7d8db"
     property string descriptionColor: "#878B91"
-    property string rightImageColor: "#878B91"
+    property real textOpacity: 1.0
+
+    property string rightImageColor: "#d7d8db"
 
     property bool descriptionOnTop: false
 
@@ -67,6 +69,8 @@ Item {
                 text: root.text
                 color: root.descriptionOnTop ? root.descriptionColor : root.textColor
 
+                opacity: root.textOpacity
+
                 Layout.fillWidth: true
 
                 lineHeight: root.descriptionOnTop ? parent.descriptionTextLineHeight : parent.textLineHeight
@@ -75,14 +79,20 @@ Item {
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
+
+                Behavior on opacity {
+                    PropertyAnimation { duration: 200 }
+                }
             }
 
 
             CaptionTextType {
                 id: description
 
-                color: root.descriptionOnTop ? root.textColor : root.descriptionColor
                 text: root.descriptionText
+                color: root.descriptionOnTop ? root.textColor : root.descriptionColor
+
+                opacity: root.textOpacity
 
                 visible: root.descriptionText !== ""
 
@@ -94,6 +104,10 @@ Item {
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
+
+                Behavior on opacity {
+                    PropertyAnimation { duration: 200 }
+                }
             }
         }
 
@@ -141,9 +155,8 @@ Item {
                 rightImageBackground.color = rightImage.hoveredColor
             } else if (leftImageSource) {
                 leftImageBackground.color = rightImage.hoveredColor
-            } else {
-                background.color = rightImage.hoveredColor
             }
+            root.textOpacity = 0.8
         }
 
         onExited: {
@@ -151,9 +164,8 @@ Item {
                 rightImageBackground.color = rightImage.defaultColor
             } else if (leftImageSource) {
                 leftImageBackground.color = rightImage.defaultColor
-            } else {
-                background.color = rightImage.defaultColor
             }
+            root.textOpacity = 1
         }
 
         onPressedChanged: {
@@ -161,9 +173,8 @@ Item {
                 rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
             } else if (leftImageSource) {
                 leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            } else {
-                background.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
             }
+            root.textOpacity = 0.7
         }
 
         onClicked: {

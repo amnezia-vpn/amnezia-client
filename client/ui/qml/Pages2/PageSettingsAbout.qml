@@ -81,7 +81,8 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Card on Patreon")
 
-                onClicked: {
+                clickedFunction: function() {
+                    Qt.openUrlExternally(qsTr("https://www.patreon.com/amneziavpn"))
                 }
             }
 
@@ -121,7 +122,7 @@ And if you don't like the app, all the more support it - the donation will be us
                 leftImageSource: "qrc:/images/controls/telegram.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally("https://t.me/amnezia_vpn_dev")
+                    Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_dev"))
                 }
             }
 
@@ -147,7 +148,7 @@ And if you don't like the app, all the more support it - the donation will be us
                 leftImageSource: "qrc:/images/controls/github.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
+                    Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
                 }
             }
 
@@ -160,6 +161,7 @@ And if you don't like the app, all the more support it - the donation will be us
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
+                    Qt.openUrlExternally(qsTr("amnezia.org/"))
                 }
             }
 

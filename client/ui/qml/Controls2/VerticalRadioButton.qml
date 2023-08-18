@@ -67,6 +67,7 @@ RadioButton {
             width: 24
             height: 24
         }
+
         Image {
             source: {
                 if (showImage) {
