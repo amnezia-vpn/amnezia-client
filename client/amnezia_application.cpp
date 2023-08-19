@@ -56,7 +56,7 @@
     setQuitOnLastWindowClosed(false);
 
     // Fix config file permissions
-#ifdef Q_OS_LINUX && !defined(Q_OS_ANDROID)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     {
         QSettings s(ORGANIZATION_NAME, APPLICATION_NAME);
         s.setValue("permFixed", true);

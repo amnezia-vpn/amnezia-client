@@ -1,7 +1,8 @@
 # Run container
-sudo docker run \
+sudo docker run -d \
+--privileged \
 --log-driver none \
--d --restart always \
+--restart always \
 --cap-add=NET_ADMIN \
 -p $SHADOWSOCKS_SERVER_PORT:$SHADOWSOCKS_SERVER_PORT/tcp \
 --name $CONTAINER_NAME $CONTAINER_NAME
