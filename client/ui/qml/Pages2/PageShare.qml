@@ -338,14 +338,18 @@ PageType {
                 headerText: qsTr("Connection format")
 
                 listView: ListViewWithRadioButtonType {
-                    id: exportTypeListView
+                    onCurrentIndexChanged: {
+                        console.log(currentIndex)
+                        exportTypeSelector.currentIndex = currentIndex
+                        exportTypeSelector.text = selectedText
+                    }
 
                     rootWidth: root.width
 
-                    imageSource: "qrc:/images/controls/chevron-right.svg"
+                    imageSource: "qrc:/images/controls/check.svg"
 
                     model: root.connectionTypesModel
-                    currentIndex: exportTypeSelector.currentIndex
+                    currentIndex: 0
 
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
