@@ -10,6 +10,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidvpnactivity.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
 )
 
@@ -18,6 +19,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidvpnactivity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
 )
 
