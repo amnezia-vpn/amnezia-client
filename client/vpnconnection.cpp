@@ -39,10 +39,9 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
 
 VpnConnection::~VpnConnection()
 {
-    if (m_vpnProtocol != nullptr) {
-        m_vpnProtocol->deleteLater();
-        m_vpnProtocol.clear();
-    }
+#if defined AMNEZIA_DESKTOP
+    disconnectFromVpn();
+#endif
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -305,11 +304,13 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_remoteAddress = credentials.hostName;
     emit connectionStateChanged(VpnProtocol::Connecting);
 
+#ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
+#endif
 
     ErrorCode e = ErrorCode::NoError;
 
@@ -335,12 +336,12 @@ void VpnConnection::connectToVpn(int serverIndex,
     Proto proto = ContainerProps::defaultProtocol(container);
     auto iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
 
-    if (!iosVpnProtocol->initialize()) {
-         qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         iosVpnProtocol->deleteLater();
-         return;
-    }
+//    if (!iosVpnProtocol->initialize()) {
+//         qDebug() << QString("Init failed") ;
+//         emit VpnProtocol::Error;
+//         iosVpnProtocol->deleteLater();
+//         return;
+//    }
 
     connect(&m_checkTimer, &QTimer::timeout, iosVpnProtocol, &IOSVpnProtocol::checkStatus);
     m_vpnProtocol.reset(iosVpnProtocol);

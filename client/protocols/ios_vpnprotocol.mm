@@ -19,7 +19,6 @@
 
 namespace
 {
-IOSVpnProtocol* s_instance = nullptr;
 IOSVpnProtocolImpl* m_controller = nullptr;
 Proto currentProto = amnezia::Proto::Any;
 }
@@ -34,10 +33,6 @@ IOSVpnProtocol::~IOSVpnProtocol()
 {
     qDebug() << "IOSVpnProtocol::~IOSVpnProtocol()";
     IOSVpnProtocol::stop();
-}
-
-IOSVpnProtocol* IOSVpnProtocol::instance() {
-    return s_instance;
 }
 
 bool IOSVpnProtocol::initialize()
@@ -425,7 +420,7 @@ void IOSVpnProtocol::setupOpenVPNProtocol(const QJsonObject &rawConfig)
                 // Just in case we are connecting, let's call disconnect.
                 [m_controller disconnect];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    emit connectionStateChanged(VpnConnectionState::Disconnected);
+                    emit connectionStateChanged(VpnConnectionState::Connecting);
                     m_isChangingState = false;
                 });
                 launchOpenVPNTunnel(m_rawConfig);
