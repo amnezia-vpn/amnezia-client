@@ -24,7 +24,7 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
     switch (role) {
     case NameRole:
         //        return ContainerProps::containerHumanNames().value(container);
-    case DescRole:
+    case DescriptionRole:
         //        return ContainerProps::containerDescriptions().value(container);
     case ConfigRole: {
         m_settings->setContainerConfig(m_currentlyProcessedServerIndex, container, value.toJsonObject());
@@ -62,7 +62,8 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case NameRole: return ContainerProps::containerHumanNames().value(container);
-    case DescRole: return ContainerProps::containerDescriptions().value(container);
+    case DescriptionRole: return ContainerProps::containerDescriptions().value(container);
+    case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
     case ConfigRole: {
         if (container == DockerContainer::None) {
             return QJsonObject();
@@ -220,7 +221,8 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
-    roles[DescRole] = "description";
+    roles[DescriptionRole] = "description";
+    roles[DetailedDescriptionRole] = "detailedDescription";
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
     roles[ConfigRole] = "config";

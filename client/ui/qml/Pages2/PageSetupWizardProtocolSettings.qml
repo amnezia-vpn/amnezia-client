@@ -73,7 +73,7 @@ PageType {
                             Layout.fillWidth: true
 
                             headerText: qsTr("Installing ") + name
-                            descriptionText: qsTr("protocol description")
+                            descriptionText: description
                         }
 
                         BasicButtonType {
@@ -159,7 +159,7 @@ PageType {
                                         font.weight: Font.Medium
                                         font.family: "PT Root UI VF"
 
-                                        text: qsTr("detailed protocol description")
+                                        text: detailedDescription
 
                                         wrapMode: Text.WordWrap
 

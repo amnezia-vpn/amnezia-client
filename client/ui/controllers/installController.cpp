@@ -446,3 +446,18 @@ void InstallController::setEncryptedPassphrase(QString passphrase)
     m_privateKeyPassphrase = passphrase;
     emit passphraseRequestFinished();
 }
+
+void InstallController::addEmptyServer()
+{
+    QJsonObject server;
+    server.insert(config_key::hostName, m_currentlyInstalledServerCredentials.hostName);
+    server.insert(config_key::userName, m_currentlyInstalledServerCredentials.userName);
+    server.insert(config_key::password, m_currentlyInstalledServerCredentials.secretData);
+    server.insert(config_key::port, m_currentlyInstalledServerCredentials.port);
+    server.insert(config_key::description, m_settings->nextAvailableServerName());
+
+    m_serversModel->addServer(server);
+    m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
+
+    emit installServerFinished(tr("Server added successfully"));
+}

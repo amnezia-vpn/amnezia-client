@@ -138,7 +138,7 @@ PageType {
                 text: qsTr("Remove website")
 
                 onClicked: {
-                    questionDrawer.headerText = qsTr("Some description")
+                    questionDrawer.headerText = qsTr("The site with all data will be removed from the tor network.")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 

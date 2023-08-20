@@ -81,7 +81,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "OpenVPN over ShadowSocks" },
+             { DockerContainer::ShadowSocks, "ShadowSocks" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
@@ -93,6 +93,33 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
+{
+    return { { DockerContainer::OpenVpn,
+               QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
+                           "own security protocol with SSL/TLS for key exchange.") },
+             { DockerContainer::ShadowSocks,
+               QObject::tr("ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is "
+                           "recognised by analysis systems in some highly censored regions.") },
+             { DockerContainer::Cloak,
+               QObject::tr("OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against "
+                           "active-probbing detection. Ideal for bypassing blocking in regions with the highest levels "
+                           "of censorship.") },
+             { DockerContainer::WireGuard,
+               QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
+                           "consumption. Recommended for regions with low levels of censorship.") },
+             { DockerContainer::Ipsec,
+               QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
+                           "signal loss. It has native support on the latest versions of Android and iOS.") },
+
+             { DockerContainer::TorWebSite, QObject::tr("Deploy a WordPress site on the Tor network in two clicks.") },
+             { DockerContainer::Dns,
+               QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
+             //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
+             { DockerContainer::Sftp,
+               QObject::tr("Creates a file vault on your server to securely store and transfer files.") } };
+}
+
+QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
 {
     return { { DockerContainer::OpenVpn, QObject::tr("OpenVPN container") },
              { DockerContainer::ShadowSocks, QObject::tr("Container with OpenVpn and ShadowSocks") },

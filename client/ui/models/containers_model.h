@@ -17,7 +17,8 @@ public:
 
     enum Roles {
         NameRole = Qt::UserRole + 1,
-        DescRole,
+        DescriptionRole,
+        DetailedDescriptionRole,
         ServiceTypeRole,
         ConfigRole,
         DockerContainerRole,

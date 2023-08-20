@@ -81,7 +81,7 @@ And if you don't like the app, all the more support it - the donation will be us
 
                 text: qsTr("Card on Patreon")
 
-                clickedFunction: function() {
+                onClicked: function() {
                     Qt.openUrlExternally(qsTr("https://www.patreon.com/amneziavpn"))
                 }
             }

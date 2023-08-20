@@ -43,7 +43,7 @@ PageType {
 
     QtObject {
         id: onlyForwardSites
-        property string name: qsTr("Addresses from the list should always open via VPN")
+        property string name: qsTr("Only the addresses in the list must be opened via VPN")
         property int type: routeMode.onlyForwardSites
     }
     QtObject {

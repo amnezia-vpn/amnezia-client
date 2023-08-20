@@ -126,6 +126,8 @@ PageType {
                 }
             }
 
+            DividerType {}
+
             CardType {
                 implicitWidth: parent.width
 
@@ -143,20 +145,40 @@ PageType {
                 id: continueButton
 
                 implicitWidth: parent.width
-                anchors.bottomMargin: 24
+                anchors.topMargin: 24
 
                 text: qsTr("Continue")
 
                 onClicked: function() {
                     if (root.isEasySetup) {
                         ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
-                        goToPage(PageEnum.PageSetupWizardInstalling);
+                        goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(containers.dockerContainer,
                                                   containers.containerDefaultPort,
                                                   containers.containerDefaultTransportProto)
                     } else {
                         goToPage(PageEnum.PageSetupWizardProtocols)
                     }
+                }
+            }
+
+            BasicButtonType {
+                implicitWidth: parent.width
+                anchors.topMargin: 8
+                anchors.bottomMargin: 24
+
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#D7D8DB"
+                borderWidth: 1
+
+                text: qsTr("Set up later")
+
+                onClicked: function() {
+                    goToPage(PageEnum.PageSetupWizardInstalling)
+                    InstallController.addEmptyServer()
                 }
             }
         }
