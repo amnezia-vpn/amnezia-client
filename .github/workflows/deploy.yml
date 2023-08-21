@@ -94,7 +94,7 @@ jobs:
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
       with:
-          arch: 'x64'
+        arch: 'x64'
 
     - name: 'Build project'
       shell: cmd
@@ -173,10 +173,10 @@ jobs:
 
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
-      
+
     - name: Install dependencies
       run: pip install jsonschema jinja2
-        
+
     - name: 'Build project'
       run: |
         git submodule update --init --recursive
@@ -193,7 +193,7 @@ jobs:
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
         IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
         IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
-      
+
 #    - name: 'Upload appstore .ipa and dSYMs to artifacts'
 #      uses: actions/upload-artifact@v3
 #      with:
@@ -210,7 +210,8 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.5.1
+      # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
+      QT_VERSION: 6.4.3
       QIF_VERSION: 4.6
 
     steps:
@@ -266,10 +267,22 @@ jobs:
   Build-Android:
     name: 'Build-Android'
     runs-on: ubuntu-latest
-    continue-on-error: true
+
+    strategy:
+      matrix:
+        include:
+        - abi: 'x86_64'
+          qt_arch: 'android_x86_64'
+        - abi: 'x86'
+          qt_arch: 'android_x86'
+        - abi: 'armeabi-v7a'
+          qt_arch: 'android_armv7'
+        - abi: 'arm64-v8a'
+          qt_arch: 'android_arm64_v8a'
 
     env:
-      QT_VERSION: 6.5.1
+      QT_VERSION: 6.5.2
+      ANDROID_BUILD_PLATFORM: android-33
 
     steps:
     - name: 'Install desktop Qt'
@@ -291,23 +304,22 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'android'
-        arch: 'android_x86_64'
+        arch: ${{ matrix.qt_arch }}
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
         extra: '--external 7z'
 
-    - name: 'Install GO'
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
+    - name: 'Grant execute permission for qt-cmake'
+      shell: bash
+      run: |
+        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.qt_arch }}/bin/qt-cmake
 
     - name: 'Get sources'
       uses: actions/checkout@v3
       with:
         submodules: 'true'
-        fetch-depth: 10
 
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
@@ -317,20 +329,36 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '11'
+        cache: 'gradle'
+
+    - name: 'Setup Android NDK'
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: 'r25c'
+        local-cache: 'true'
+
+    - name: 'Decode keystore secret to file'
+      env:
+        KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      shell: bash
+      run: |
+        echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
 
     - name: 'Build project'
-      run: |
-        export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
-        export NDK_VERSION=23c
-        export ANDROID_NDK_PLATFORM=android-23
-        export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
-        export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-        export ANDROID_CURRENT_ARCH=android_x86_64
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        QT_ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+      shell: bash
+      run: ./deploy/build_android.sh --apk ${{ matrix.abi }} --platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
-        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
-          wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
-          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
-        fi
-
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin
-        bash deploy/build_android.sh
+    - name: 'Upload apk'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN-android-${{ matrix.abi }}
+        path: deploy/build/AmneziaVPN-${{ matrix.abi }}-release-signed.apk
+        retention-days: 7
