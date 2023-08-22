@@ -19,8 +19,18 @@ DrawerType {
     property alias configContentHeaderText: configContentHeader.headerText
     property alias contentVisible: content.visible
 
+    property string configExtension: ".vpn"
+    property string configCaption: qsTr("Save AmneziaVPN config")
+    property string configFileName: "amnezia_config.vpn"
+
     width: parent.width
     height: parent.height * 0.9
+
+    onClosed: {
+        configExtension = ".vpn"
+        configCaption = qsTr("Save AmneziaVPN config")
+        configFileName = "amnezia_config.vpn"
+    }
 
     Item {
         anchors.fill: parent
@@ -58,7 +68,7 @@ DrawerType {
                     imageSource: "qrc:/images/controls/share-2.svg"
 
                     onClicked: {
-                        ExportController.saveFile()
+                        ExportController.saveFile(configExtension, configCaption, configFileName)
                     }
                 }
 

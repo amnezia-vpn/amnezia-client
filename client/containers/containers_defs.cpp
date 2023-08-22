@@ -249,3 +249,13 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
     default: return "";
     }
 }
+
+bool ContainerProps::isShareable(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::TorWebSite: return false;
+    case DockerContainer::Dns: return false;
+    case DockerContainer::Sftp: return false;
+    default: return true;
+    }
+}

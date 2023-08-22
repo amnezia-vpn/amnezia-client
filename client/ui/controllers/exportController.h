@@ -35,7 +35,7 @@ public slots:
     QString getConfig();
     QList<QString> getQrCodes();
 
-    void saveFile();
+    void saveFile(const QString &fileExtension, const QString &caption, const QString &fileName);
 
 signals:
     void generateConfig(int type);

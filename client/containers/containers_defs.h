@@ -64,6 +64,8 @@ namespace amnezia
         static bool isEasySetupContainer(amnezia::DockerContainer container);
         static QString easySetupHeader(amnezia::DockerContainer container);
         static QString easySetupDescription(amnezia::DockerContainer container);
+
+        static bool isShareable(amnezia::DockerContainer container);
     };
 
     static void declareQmlContainerEnum()

@@ -73,10 +73,6 @@ PageType {
            }
 
            Component.onCompleted: {
-               console.log(qrCodeRectange.x)
-               console.log(qrCodeRectange.y)
-               console.log(qrCodeRectange.width)
-
                qrCodeReader.setCameraSize(Qt.rect(qrCodeRectange.x,
                                                   qrCodeRectange.y,
                                                   qrCodeRectange.width,

@@ -161,7 +161,7 @@ And if you don't like the app, all the more support it - the donation will be us
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("amnezia.org/"))
+                    Qt.openUrlExternally(qsTr("https://amnezia.org"))
                 }
             }
 

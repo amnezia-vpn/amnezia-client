@@ -41,8 +41,20 @@ PageType {
                 }
                 break;
             }
-            case PageShare.ConfigType.OpenVpn: ExportController.generateOpenVpnConfig(); break;
-            case PageShare.ConfigType.WireGuard: ExportController.generateWireGuardConfig(); break;
+            case PageShare.ConfigType.OpenVpn: {
+                ExportController.generateOpenVpnConfig();
+                shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
+                shareConnectionDrawer.configExtension = ".ovpn"
+                shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
+                break;
+            }
+            case PageShare.ConfigType.WireGuard: {
+                ExportController.generateWireGuardConfig();
+                shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
+                shareConnectionDrawer.configExtension = ".conf"
+                shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
+                break;
+            }
             }
 
             PageController.showBusyIndicator(false)
@@ -267,6 +279,10 @@ PageType {
                                         ValueFilter {
                                             roleName: "isInstalled"
                                             value: true
+                                        },
+                                        ValueFilter {
+                                            roleName: "isShareable"
+                                            value: true
                                         }
                                     ]
                                 }
@@ -339,7 +355,6 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     onCurrentIndexChanged: {
-                        console.log(currentIndex)
                         exportTypeSelector.currentIndex = currentIndex
                         exportTypeSelector.text = selectedText
                     }

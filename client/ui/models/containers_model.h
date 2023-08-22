@@ -30,7 +30,8 @@ public:
         IsInstalledRole,
         IsCurrentlyProcessedRole,
         IsDefaultRole,
-        IsSupportedRole
+        IsSupportedRole,
+        IsShareableRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
