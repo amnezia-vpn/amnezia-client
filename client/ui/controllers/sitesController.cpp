@@ -3,7 +3,7 @@
 #include <QHostInfo>
 #include <QStandardPaths>
 
-#include "utilities.h"
+#include "fileUtilites.h"
 
 SitesController::SitesController(const std::shared_ptr<Settings> &settings,
                                  const QSharedPointer<VpnConnection> &vpnConnection,
@@ -80,8 +80,9 @@ void SitesController::removeSite(int index)
 
 void SitesController::importSites(bool replaceExisting)
 {
-    QString fileName = Utils::getFileName(Q_NULLPTR, tr("Open sites file"),
-                                          QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.json");
+    QString fileName =
+            FileUtilites::getFileName(Q_NULLPTR, tr("Open sites file"),
+                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.json");
 
     if (fileName.isEmpty()) {
         return;
@@ -149,7 +150,7 @@ void SitesController::exportSites()
     QJsonDocument jsonDocument(jsonArray);
     QByteArray jsonData = jsonDocument.toJson();
 
-    Utils::saveFile(".json", tr("Export sites file"), "sites", jsonData);
+    FileUtilites::saveFile(".json", tr("Export sites file"), "sites", jsonData);
 
     emit finished(tr("Export completed"));
 }

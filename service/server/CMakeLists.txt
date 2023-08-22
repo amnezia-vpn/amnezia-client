@@ -6,7 +6,7 @@ project(${PROJECT})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Network RemoteObjects Core5Compat)
 qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
@@ -188,7 +188,7 @@ include_directories(
 )
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::Widgets ${LIBS})
+target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

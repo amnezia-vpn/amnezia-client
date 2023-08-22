@@ -2,8 +2,8 @@
 
 #include <QStandardPaths>
 
+#include "fileUtilites.h"
 #include "logger.h"
-#include "utilities.h"
 #include "version.h"
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
@@ -69,7 +69,7 @@ void SettingsController::openLogsFolder()
 
 void SettingsController::exportLogsFile()
 {
-    Utils::saveFile(".log", tr("Save log"), "AmneziaVPN", Logger::getLogFile());
+    FileUtilites::saveFile(".log", tr("Save log"), "AmneziaVPN", Logger::getLogFile());
 }
 
 void SettingsController::clearLogs()
@@ -80,14 +80,14 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig()
 {
-    Utils::saveFile(".backup", tr("Backup application config"), "AmneziaVPN", m_settings->backupAppConfig());
+    FileUtilites::saveFile(".backup", tr("Backup application config"), "AmneziaVPN", m_settings->backupAppConfig());
 }
 
 void SettingsController::restoreAppConfig()
 {
     QString fileName =
-            Utils::getFileName(Q_NULLPTR, tr("Open backup"),
-                               QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
+            FileUtilites::getFileName(Q_NULLPTR, tr("Open backup"),
+                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
 
     if (fileName.isEmpty()) {
         return;

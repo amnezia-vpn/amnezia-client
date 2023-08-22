@@ -4,7 +4,6 @@
 #include <QDataStream>
 #include <QDesktopServices>
 #include <QFile>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QImage>
 #include <QStandardPaths>
@@ -12,7 +11,7 @@
 #include "configurators/openvpn_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/errorstrings.h"
-#include "utilities.h"
+#include "fileUtilites.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
     #include "platforms/android/androidutils.h"
@@ -230,7 +229,7 @@ void ExportController::saveFile(const QString &fileExtension, const QString &cap
     return;
 #endif
 
-    Utils::saveFile(fileExtension, caption, fileName, m_config);
+    FileUtilites::saveFile(fileExtension, caption, fileName, m_config);
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)

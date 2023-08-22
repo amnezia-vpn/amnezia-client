@@ -10,7 +10,7 @@
     #include "../../platforms/android/androidutils.h"
     #include <QJniObject>
 #endif
-#include "utilities.h"
+#include "fileUtilites.h"
 
 namespace
 {
@@ -84,9 +84,9 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 
 void ImportController::extractConfigFromFile()
 {
-    QString fileName = Utils::getFileName(Q_NULLPTR, tr("Open config file"),
-                                          QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
-                                          "*.vpn *.ovpn *.conf");
+    QString fileName = FileUtilites::getFileName(Q_NULLPTR, tr("Open config file"),
+                                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                                 "*.vpn *.ovpn *.conf");
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();

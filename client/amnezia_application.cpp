@@ -10,7 +10,6 @@
 #include <QTimer>
 #include <QTranslator>
 
-#include "core/servercontroller.h"
 #include "logger.h"
 #include "version.h"
 
@@ -20,7 +19,6 @@
 #endif
 
 #include "protocols/qml_register_protocols.h"
-#include "ui/pages.h"
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
@@ -81,8 +79,6 @@ void AmneziaApplication::init()
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
-    //
-
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
@@ -125,13 +121,7 @@ void AmneziaApplication::init()
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
 
-    //
-
     m_engine->load(url);
-
-    //    if (m_engine->rootObjects().size() > 0) {
-    //        m_uiLogic->setQmlRoot(m_engine->rootObjects().at(0));
-    //    }
 
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
