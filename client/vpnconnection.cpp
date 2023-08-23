@@ -411,11 +411,12 @@ void VpnConnection::disconnectFromVpn()
     }
 #endif
 
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->stop();
+#endif
+
     if (!m_vpnProtocol.data()) {
         emit connectionStateChanged(VpnProtocol::Disconnected);
-#ifdef Q_OS_ANDROID
-        AndroidController::instance()->stop();
-#endif
         return;
     }
 
