@@ -4,6 +4,7 @@
 
 #include "fileUtilites.h"
 #include "logger.h"
+#include "ui/qautostart.h"
 #include "version.h"
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
@@ -136,4 +137,24 @@ bool SettingsController::isAutoConnectEnabled()
 void SettingsController::toggleAutoConnect(bool enable)
 {
     m_settings->setAutoConnect(enable);
+}
+
+bool SettingsController::isAutoStartEnabled()
+{
+    return Autostart::isAutostart();
+}
+
+void SettingsController::toggleAutoStart(bool enable)
+{
+    Autostart::setAutostart(enable);
+}
+
+bool SettingsController::isStartMinimizedEnabled()
+{
+    return m_settings->isStartMinimized();
+}
+
+void SettingsController::toggleStartMinimized(bool enable)
+{
+    m_settings->setStartMinimized(enable);
 }

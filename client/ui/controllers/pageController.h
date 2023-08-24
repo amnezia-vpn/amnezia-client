@@ -63,7 +63,8 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(const QSharedPointer<ServersModel> &serversModel, QObject *parent = nullptr);
+    explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
+                            QObject *parent = nullptr);
 
 public slots:
     QString getInitialPage();
@@ -74,6 +75,8 @@ public slots:
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);
+
+    void showOnStartup();
 
 signals:
     void goToPageHome();
@@ -100,6 +103,8 @@ signals:
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
+
+    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // PAGECONTROLLER_H

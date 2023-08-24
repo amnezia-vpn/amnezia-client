@@ -43,9 +43,50 @@ PageType {
                 headerText: qsTr("Application")
             }
 
+            SwitcherType {
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Auto start")
+                descriptionText: qsTr("Launch the application every time ") + Qt.platform.os + qsTr(" starts")
+
+                checked: SettingsController.isAutoStartEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isAutoStartEnabled()) {
+                        SettingsController.toggleAutoStart(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            SwitcherType {
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Start minimized")
+                descriptionText: qsTr("Launch application minimized")
+
+                checked: SettingsController.isStartMinimizedEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isStartMinimizedEnabled()) {
+                        SettingsController.toggleStartMinimized(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
 
                 text: qsTr("Language")
                 descriptionText: LanguageModel.currentLanguageName

@@ -5,9 +5,13 @@
     #include "../../platforms/android/androidutils.h"
     #include <QJniObject>
 #endif
+#if defined Q_OS_MAC
+    #include "ui/macos_util.h"
+#endif
 
-PageController::PageController(const QSharedPointer<ServersModel> &serversModel, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel)
+PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
+                               const std::shared_ptr<Settings> &settings, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
     // Change color of navigation and status bar's
@@ -23,6 +27,9 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
         }
     });
 #endif
+
+    connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
+    connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
 }
 
 QString PageController::getInitialPage()
@@ -87,4 +94,17 @@ void PageController::updateNavigationBarColor(const int color)
         }
     });
 #endif
+}
+
+void PageController::showOnStartup()
+{
+    if (!m_settings->isStartMinimized()) {
+        emit raiseMainWindow();
+    } else {
+#ifdef Q_OS_WIN
+        emit hideMainWindow();
+#elif defined Q_OS_MACX
+        setDockIconVisible(false);
+#endif
+    }
 }

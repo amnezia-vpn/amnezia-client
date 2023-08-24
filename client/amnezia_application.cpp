@@ -129,14 +129,16 @@ void AmneziaApplication::init()
         }
     }
 
-    // #ifdef Q_OS_WIN
-    //     if (m_parser.isSet("a")) m_uiLogic->showOnStartup();
-    //     else emit m_uiLogic->show();
-    // #else
-    //     m_uiLogic->showOnStartup();
-    // #endif
+#ifdef Q_OS_WIN
+    if (m_parser.isSet("a"))
+        m_pageController->showOnStartup();
+    else
+        emit m_pageController->raiseMainWindow();
+#else
+    m_pageController->showOnStartup();
+#endif
 
-    // TODO - fix
+        // TODO - fix
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (isPrimary()) {
         QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
@@ -276,6 +278,14 @@ void AmneziaApplication::initModels()
 
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
+    connect(m_containersModel.get(), &ContainersModel::defaultContainerChanged, this, [this]() {
+        if (m_containersModel->getDefaultContainer() == DockerContainer::WireGuard
+            && m_sitesModel->getRouteMode() != Settings::RouteMode::VpnAllSites) {
+            m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+            emit m_pageController->showNotificationMessage(
+                    tr("Split tunneling for WireGuard is not implemented, the option was disabled"));
+        }
+    });
 
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
@@ -306,7 +316,7 @@ void AmneziaApplication::initControllers()
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    m_pageController.reset(new PageController(m_serversModel));
+    m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
     m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_settings));

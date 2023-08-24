@@ -42,11 +42,10 @@ PageType {
             }
 
             SwitcherType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                Layout.margins: 16
 
                 text: qsTr("Auto connect")
                 descriptionText: qsTr("Connect to VPN on app start")
@@ -59,12 +58,13 @@ PageType {
                 }
             }
 
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
             SwitcherType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                Layout.margins: 16
 
                 text: qsTr("Use AmneziaDNS if installed on the server")
 

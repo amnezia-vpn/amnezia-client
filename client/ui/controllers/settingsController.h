@@ -48,6 +48,12 @@ public slots:
     bool isAutoConnectEnabled();
     void toggleAutoConnect(bool enable);
 
+    bool isAutoStartEnabled();
+    void toggleAutoStart(bool enable);
+
+    bool isStartMinimizedEnabled();
+    void toggleStartMinimized(bool enable);
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
