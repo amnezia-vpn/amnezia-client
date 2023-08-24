@@ -480,8 +480,9 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     NETunnelProviderSession *session = (NETunnelProviderSession *)m_currentTunnel.connection;
 
     NSError *sendError = nil;
-    if ([session respondsToSelector:@selector(sendProviderMessage:responseHandler:)]) {
-        [session sendProviderMessage:data responseHandler:completionHandler error:&sendError];
+    
+    if ([session respondsToSelector:@selector(sendProviderMessage:returnError:responseHandler:)]) {
+        [session sendProviderMessage:data returnError:&sendError responseHandler:completionHandler];
     } else {
         qDebug() << "Method sendProviderMessage:responseHandler:error: does not exist";
     }
