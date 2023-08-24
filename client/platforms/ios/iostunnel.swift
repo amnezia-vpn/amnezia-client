@@ -37,7 +37,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             wg_log(logLevel.osLogLevel, message: message)
         }
     }()
-    
+
     private lazy var ovpnAdapter: OpenVPNAdapter = {
         let adapter = OpenVPNAdapter()
         adapter.delegate = self
@@ -56,6 +56,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var protoType: TunnelProtoType = .none
     
     override init() {
+        Logger.configureGlobal(tagged: Constants.loggerTag, withFilePath: FileManager.logFileURL?.path)
         Logger.global?.log(message: "Init NEPacketTunnelProvider")
         super.init()
     }
@@ -119,7 +120,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
             let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
             
-            Logger.configureGlobal(tagged: Constants.loggerTag, withFilePath: FileManager.logFileURL?.path)
             Logger.global?.log(message: "PacketTunnelProvider startTunnel")
             
             if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol {
@@ -174,6 +174,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 self.protoType = .none
             }
             
+//            self.startEmptyTunnel(completionHandler: completionHandler)
+//            return
             
             
             switch self.protoType {
@@ -239,36 +241,36 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
             guard let adapterError = adapterError else {
                 let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
-                
+
                 wg_log(.info, message: "Tunnel interface is \(interfaceName)")
-                
+
                 completionHandler(nil)
                 return
             }
-            
+
             switch adapterError {
             case .cannotLocateTunnelFileDescriptor:
                 wg_log(.error, staticMessage: "Starting tunnel failed: could not determine file descriptor")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
                 completionHandler(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
-                
+
             case .dnsResolution(let dnsErrors):
                 let hostnamesWithDnsResolutionFailure = dnsErrors.map { $0.address }
                     .joined(separator: ", ")
                 wg_log(.error, message: "DNS resolution failed for the following hostnames: \(hostnamesWithDnsResolutionFailure)")
                 errorNotifier.notify(PacketTunnelProviderError.dnsResolutionFailure)
                 completionHandler(PacketTunnelProviderError.dnsResolutionFailure)
-                
+
             case .setNetworkSettings(let error):
                 wg_log(.error, message: "Starting tunnel failed with setTunnelNetworkSettings returning \(error.localizedDescription)")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotSetNetworkSettings)
                 completionHandler(PacketTunnelProviderError.couldNotSetNetworkSettings)
-                
+
             case .startWireGuardBackend(let errorCode):
                 wg_log(.error, message: "Starting tunnel failed with wgTurnOn returning \(errorCode)")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
                 completionHandler(PacketTunnelProviderError.couldNotStartBackend)
-                
+
             case .invalidState:
                 // Must never happen
                 fatalError()
@@ -293,12 +295,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         
         wgAdapter.stop { error in
             ErrorNotifier.removeLastErrorFile()
-            
+
             if let error = error {
                 wg_log(.error, message: "Failed to stop WireGuard adapter: \(error.localizedDescription)")
             }
             completionHandler()
-            
+
 #if os(macOS)
             // HACK: This is a filthy hack to work around Apple bug 32073323 (dup'd by us as 47526107).
             // Remove it when they finally fix this upstream and the fix has been rolled out to
@@ -334,7 +336,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 completionHandler(nil)
                 return
             }
-            
+
             do {
                 let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
                 wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
@@ -343,7 +345,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                         completionHandler(nil)
                         return
                     }
-                    
+
                     self.wgAdapter.getRuntimeConfiguration { settings in
                         var data: Data?
                         if let settings = settings {
@@ -359,24 +361,24 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler(nil)
         }
     }
-    
+
     private func handleOpenVPNAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
             let bytesin = ovpnAdapter.transportStatistics.bytesIn
             let strBytesin = "rx_bytes=" + String(bytesin);
-            
+
             let bytesout = ovpnAdapter.transportStatistics.bytesOut
             let strBytesout = "tx_bytes=" + String(bytesout);
-            
+
             let strData = strBytesin + "\n" + strBytesout;
             let data = Data(strData.utf8)
             completionHandler(data)
         }
     }
-    
 
 
+//
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "setupAndlaunchOpenVPN")
 
@@ -391,33 +393,33 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let evaluation: OpenVPNConfigurationEvaluation
         do {
             evaluation = try ovpnAdapter.apply(configuration: configuration)
-            
+
         } catch {
             completionHandler(error)
             return
         }
-        
+
         if !evaluation.autologin {
             wg_log(.info, message: "Implement login with user credentials")
         }
-        
+
         vpnReachability.startTracking { [weak self] status in
             guard status == .reachableViaWiFi else { return }
             self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
         }
-        
+
         startHandler = completionHandler
         ovpnAdapter.connect(using: packetFlow)
-    
+
 //        let ifaces = Interface.allInterfaces()
 //            .filter { $0.family == .ipv4 }
 //            .map { iface in iface.name }
-        
+
 //        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
     }
-    
+
     // MARK: -- Network observing methods
-       
+
     private func startListeningForNetworkChanges() {
         stopListeningForNetworkChanges()
         addObserver(self, forKeyPath: Constants.kDefaultPathKey, options: .old, context: nil)
@@ -451,16 +453,38 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wg_log(.info, message: "Tunnel restarted.")
         startTunnel(options: nil, completionHandler: completion)
     }
-}
 
-extension WireGuardLogLevel {
-    var osLogLevel: OSLogType {
-        switch self {
-        case .verbose:
-            return .debug
-        case .error:
-            return .error
+    private func startEmptyTunnel(completionHandler: @escaping (Error?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(dispatchQueue))
+
+        let emptyTunnelConfiguration = TunnelConfiguration(
+            name: nil,
+            interface: InterfaceConfiguration(privateKey: PrivateKey()),
+            peers: []
+        )
+
+        wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
+            self.dispatchQueue.async {
+                if let error {
+                    Logger.global?.log(message: "Failed to start an empty tunnel")
+                    completionHandler(error)
+                } else {
+                    Logger.global?.log(message: "Started an empty tunnel")
+                    self.tunnelAdapterDidStart()
+                }
+            }
         }
+
+        let settings = NETunnelNetworkSettings(tunnelRemoteAddress: "1.1.1.1")
+
+        self.setTunnelNetworkSettings(settings) { error in
+            completionHandler(error)
+        }
+    }
+    
+    private func tunnelAdapterDidStart() {
+        dispatchPrecondition(condition: .onQueue(dispatchQueue))
+        // ...
     }
 }
 
@@ -541,5 +565,19 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleLogMessage logMessage: String) {
         // Handle log messages
         wg_log(.info, message: logMessage)
+    }
+}
+    
+
+
+
+extension WireGuardLogLevel {
+    var osLogLevel: OSLogType {
+        switch self {
+        case .verbose:
+            return .debug
+        case .error:
+            return .error
+        }
     }
 }
