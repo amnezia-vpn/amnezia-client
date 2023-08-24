@@ -129,54 +129,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 }
                 else if let _: Data = providerConfiguration?[Constants.wireGuardConfigKey] as? Data {
                     self.protoType = .wireguard
-                    
-                    
-//                    let keyData = PublicKey(base64Key: serverPublicKey)!
-//                    let dnsServerIP = IPv4Address(dnsServer)
-//                    let ipv6GatewayIP = IPv6Address(serverIpv6Gateway)
-//
-//                    var peerConfiguration = PeerConfiguration(publicKey: keyData)
-//                    peerConfiguration.preSharedKey = PreSharedKey(base64Key: presharedKey)
-//                    peerConfiguration.endpoint = Endpoint(from: serverIpv4AddrIn + ":\(serverPort )")
-//                    peerConfiguration.allowedIPs = []
-//
-//                    allowedIPAddressRanges.forEach {
-//                        if (!$0.isIpv6) {
-//                            peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv4Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
-//                        } else if (ipv6Enabled) {
-//                            peerConfiguration.allowedIPs.append(IPAddressRange(address: IPv6Address($0.address as String)!, networkPrefixLength: $0.networkPrefixLength))
-//                        }
-//                    }
-//
-//                    var peerConfigurations: [PeerConfiguration] = []
-//                    peerConfigurations.append(peerConfiguration)
-//
-//                    var interface = InterfaceConfiguration(privateKey: privateKey!)
-//
-//                    if let ipv4Address = IPAddressRange(from: deviceIpv4Address!),
-//                       let ipv6Address = IPAddressRange(from: deviceIpv6Address!) {
-//                        interface.addresses = [ipv4Address]
-//                        if (ipv6Enabled) {
-//                            interface.addresses.append(ipv6Address)
-//                        }
-//                    }
-//                    interface.dns = [ DNSServer(address: dnsServerIP!)]
-//                    interface.mtu = 1412 // 1280
-//
-//                    if (ipv6Enabled) {
-//                        interface.dns.append(DNSServer(address: ipv6GatewayIP!))
-//                    }
-//
-//                    let config = TunnelConfiguration(name: vpnName, interface: interface, peers: peerConfigurations)
                 }
             }
             else {
                 self.protoType = .none
             }
-            
-//            self.startEmptyTunnel(completionHandler: completionHandler)
-//            return
-            
             
             switch self.protoType {
             case .wireguard:
@@ -229,21 +186,29 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private func startWireguard(activationAttemptId: String?,
                                 errorNotifier: ErrorNotifier,
                                 completionHandler: @escaping (Error?) -> Void) {
-        guard let tunnelProviderProtocol = self.protocolConfiguration as? NETunnelProviderProtocol,
-              let tunnelConfiguration = tunnelProviderProtocol.asTunnelConfiguration() else {
-                  errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
-                  completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
-                  return
-              }
+        guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
+           let providerConfiguration = protocolConfiguration.providerConfiguration,
+           let wgConfig: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
+               wg_log(.error, message: "Can't start WireGuard config missing")
+               completionHandler(nil)
+               return
+            }
+        
+        let wgConfigStr = String(data: wgConfig, encoding: .utf8)!
+        
+        guard let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr) else {
+            wg_log(.error, message: "Can't parse WireGuard config")
+            completionHandler(nil)
+            return
+        }
+                
         wg_log(.info, message: "Starting wireguard tunnel from the " + (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
         
         // Start the tunnel
         wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
             guard let adapterError = adapterError else {
                 let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
-
                 wg_log(.info, message: "Tunnel interface is \(interfaceName)")
-
                 completionHandler(nil)
                 return
             }

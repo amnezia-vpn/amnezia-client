@@ -295,8 +295,9 @@ bool IosController::setupWireGuard()
     qDebug() << "IosController::setupWireGuard";
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
 
-    qDebug().noquote() << "IosController::setupWireGuard cfg" << config;
-    return startWireGuard(QJsonDocument(config).toJson());
+    QString wgConfig = config[config_key::config].toString();
+    
+    return startWireGuard(wgConfig);
 }
 
 bool IosController::startOpenVPN(const QString &config)
@@ -313,13 +314,13 @@ bool IosController::startOpenVPN(const QString &config)
     startTunnel();
 }
 
-bool IosController::startWireGuard(const QString &jsonConfig)
+bool IosController::startWireGuard(const QString &config)
 {
     qDebug() << "IosController::startWireGuard";
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:jsonConfig.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
