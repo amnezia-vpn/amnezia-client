@@ -100,36 +100,4 @@ target_sources(networkextension PRIVATE
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-include(${CLIENT_ROOT_DIR}/cmake/golang.cmake)
-## Build the wireguard go library for iOS simulation.
-## TODO: Some special handling around GOARCH for
-execute_process(OUTPUT_VARIABLE SIM_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk iphonesimulator --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
-    GOOS ios
-    GOARCH amd64
-    CGO_CFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
-    CGO_LDFLAGS -arch x86_64 -isysroot ${SIM_SDKROOT}
-)
-
-## Build the wireguard go library for iOS devices.
-execute_process(OUTPUT_VARIABLE IOS_SDKROOT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path)
-build_go_archive(${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo/go.mod
-    GOOS ios
-    GOARCH arm64
-    CGO_CFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
-    CGO_LDFLAGS -arch arm64 -isysroot ${IOS_SDKROOT}
-)
-
-## Unify the wireguard go libraries.
-add_custom_target(libwg_builder
-    DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/libwg-dev.a
-        ${CMAKE_CURRENT_BINARY_DIR}/libwg-sim.a
-    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/libwg-unified.a
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND lipo -create -output libwg-unified.a libwg-dev.a libwg-sim.a
-)
-
-## Link and depend on the wireguard library.
-add_dependencies(networkextension libwg_builder)
-target_link_libraries(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/libwg-unified.a)
+target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
