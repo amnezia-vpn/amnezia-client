@@ -4,9 +4,9 @@ import QtQuick.Layouts
 
 import PageEnum 1.0
 
-import "./"
 import "../Controls2"
 import "../Config"
+import "../Components"
 import "../Controls2/TextTypes"
 
 PageType {
@@ -121,7 +121,23 @@ PageType {
 
                         image: "qrc:/images/controls/delete.svg"
 
-                        onClicked: SettingsController.clearLogs()
+                        onClicked: function() {
+                            questionDrawer.headerText = qsTr("Clear logs?")
+                            questionDrawer.yesButtonText = qsTr("Continue")
+                            questionDrawer.noButtonText = qsTr("Cancel")
+
+                            questionDrawer.yesButtonFunction = function() {
+                                questionDrawer.visible = false
+                                PageController.showBusyIndicator(true)
+                                SettingsController.clearLogs()
+                                PageController.showBusyIndicator(false)
+                                PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+                            }
+                            questionDrawer.noButtonFunction = function() {
+                                questionDrawer.visible = false
+                            }
+                            questionDrawer.visible = true
+                        }
                     }
 
                     CaptionTextType {
@@ -132,6 +148,10 @@ PageType {
                         color: "#D7D8DB"
                     }
                 }
+            }
+
+            QuestionDrawer {
+                id: questionDrawer
             }
         }
     }
