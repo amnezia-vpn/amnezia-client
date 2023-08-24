@@ -17,7 +17,15 @@ public class Logger {
     deinit {}
 
     func log(message: String) {
+        print(message)
         write_msg_to_log(tag, message.trimmingCharacters(in: .newlines))
+
+        let suiteName = "group.org.amnezia.AmneziaVPN"
+        let logKey = "logMessages"
+        let sharedDefaults = UserDefaults(suiteName: suiteName)
+        var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []
+        logs.append(message)
+        sharedDefaults?.set(logs, forKey: logKey)
     }
 
     func writeLog(to targetFile: String) -> Bool {

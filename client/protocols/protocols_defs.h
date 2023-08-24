@@ -63,6 +63,7 @@ constexpr char last_config[] = "last_config";
 constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
 
 constexpr char openvpn[] = "openvpn";
+constexpr char cloak[] = "cloak";
 constexpr char wireguard[] = "wireguard";
 
 }

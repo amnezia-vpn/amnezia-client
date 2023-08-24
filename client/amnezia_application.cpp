@@ -42,6 +42,7 @@
 
 #if defined(Q_OS_IOS)
 #include "platforms/ios/QtAppDelegate-C-Interface.h"
+#include "platforms/ios/ios_controller.h"
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -107,6 +108,7 @@ void AmneziaApplication::init()
 
 #if defined(Q_OS_IOS)
     setStartPageLogic(m_uiLogic->pageLogic<StartPageLogic>());
+    IosController::Instance()->initialize();
 #endif
 
     m_engine->load(url);

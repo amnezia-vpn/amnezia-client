@@ -23,7 +23,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-#include <protocols/ios_vpnprotocol.h>
+#include "platforms/ios/ios_controller.h"
 #endif
 
 #include "utilities.h"
@@ -35,6 +35,9 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     m_configurator(configurator)
 {
     m_checkTimer.setInterval(1000);
+#ifdef Q_OS_IOS
+    connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
+#endif
 }
 
 VpnConnection::~VpnConnection()
@@ -277,6 +280,13 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
+    const QJsonObject &server = m_settings->server(serverIndex);
+    vpnConfiguration[config_key::hostName] = server.value(config_key::hostName).toString();
+    vpnConfiguration[config_key::description] = server.value(config_key::description).toString();
+
+    // TODO: try to get hostName, port, description for 3rd party configs
+    // vpnConfiguration[config_key::port] = ...;
+
     return vpnConfiguration;
 }
 
@@ -284,8 +294,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
-                .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
-
+                    .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     if (!m_IpcClient) {
         m_IpcClient = new IpcClient(this);
@@ -334,17 +343,15 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-    auto iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
 
-//    if (!iosVpnProtocol->initialize()) {
-//         qDebug() << QString("Init failed") ;
-//         emit VpnProtocol::Error;
-//         iosVpnProtocol->deleteLater();
-//         return;
-//    }
+    bool ok = IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
 
-    connect(&m_checkTimer, &QTimer::timeout, iosVpnProtocol, &IOSVpnProtocol::checkStatus);
-    m_vpnProtocol.reset(iosVpnProtocol);
+    if (!ok) {
+        emit VpnProtocol::Error;
+        return;
+    }
+
+    return;
 
 #endif
 
@@ -410,6 +417,10 @@ void VpnConnection::disconnectFromVpn()
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
         response.waitForFinished(1000);
     }
+#endif
+
+#ifdef Q_OS_IOS
+    IosController::Instance()->disconnectVpn();
 #endif
 
     if (!m_vpnProtocol.data()) {
