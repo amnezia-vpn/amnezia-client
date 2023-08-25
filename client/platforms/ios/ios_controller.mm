@@ -20,6 +20,7 @@ const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";
 const char* Action::getTunnelId = "getTunnelId";
+const char* Action::getStatus = "status";
 
 const char* MessageKey::action = "action";
 const char* MessageKey::tunnelId = "tunnelId";
@@ -223,6 +224,25 @@ void IosController::disconnectVpn()
     }
 }
 
+
+void IosController::checkStatus()
+{
+    NSString *actionKey = [NSString stringWithUTF8String:MessageKey::action];
+    NSString *actionValue = [NSString stringWithUTF8String:Action::getStatus];
+    NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
+    NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
+
+    NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue};
+    sendVpnExtensionMessage(message, [&](NSDictionary* response){
+        uint64_t txBytes = [response[@"tx_bytes"] intValue];
+        uint64_t rxBytes = [response[@"rx_bytes"] intValue];
+        emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
+        m_rxBytes = rxBytes;
+        m_txBytes = txBytes;
+    });
+    
+}
+
 void IosController::vpnStatusDidChange(void *pNotification)
 {
     getBackendLogs([](QString s){
@@ -330,9 +350,11 @@ bool IosController::startWireGuard(const QString &config)
 
 void IosController::startTunnel()
 {
+    m_rxBytes = 0;
+    m_txBytes = 0;
     [m_currentTunnel setEnabled:YES];
 
-     [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+    [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             qDebug() << "IosController::saveToPreferencesWithCompletionHandler called from thread:" << QThread::currentThread();
 
@@ -467,7 +489,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
         NSDictionary *response = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&deserializeError];
 
         if (response && [response isKindOfClass:[NSDictionary class]]) {
-            qDebug() << "Received extension message:" << QString::fromNSString(response.description);;
+           // qDebug() << "Received extension message:" << QString::fromNSString(response.description);;
             callback(response);
             return;
         } else if (deserializeError) {

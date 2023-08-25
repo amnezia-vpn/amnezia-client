@@ -20,6 +20,7 @@ struct Constants {
     static let kActionRestart = "restart"
     static let kActionStop = "stop"
     static let kActionGetTunnelId = "getTunnelId"
+    static let kActionStatus = "status"
     static let kActionIsServerReachable = "isServerReachable"
     static let kMessageKeyAction = "action"
     static let kMessageKeyTunnelId = "tunnelId"
@@ -81,7 +82,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
 
         Logger.global?.log(message: "Received app message: \(action)")
-
+        
+        if action == Constants.kActionStatus {
+            handleStatusAppMessage(messageData, completionHandler: completionHandler)
+        }
+        
         let callbackWrapper: (NSNumber?) -> Void = { errorCode in
             //let tunnelId = self.tunnelConfig?.id ?? ""
             let response: [String: Any] = [
@@ -168,19 +173,20 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
     
-//    override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-//        switch protoType {
-//        case .wireguard:
-//            handleWireguardAppMessage(messageData, completionHandler: completionHandler)
-//        case .openvpn:
-//            handleOpenVPNAppMessage(messageData, completionHandler: completionHandler)
-//        case .shadowsocks:
-//            break
-////            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
-//        case .none:
-//            break
-//        }
-//    }
+    func handleStatusAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        switch protoType {
+        case .wireguard:
+            handleWireguardStatusMessage(messageData, completionHandler: completionHandler)
+        case .openvpn:
+            handleOpenVPNStatusMessage(messageData, completionHandler: completionHandler)
+        case .shadowsocks:
+            break
+//            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
+        case .none:
+            break
+            
+        }
+    }
     
     // MARK: Private methods
     private func startWireguard(activationAttemptId: String?,
@@ -283,6 +289,33 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         ovpnAdapter.disconnect()
     }
 
+    func handleWireguardStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        wgAdapter.getRuntimeConfiguration { settings in
+            var data: Data?
+            if let settings = settings {
+                data = settings.data(using: .utf8)!
+            }
+            
+            let components = settings!.components(separatedBy: "\n")
+            
+            var settingsDictionary: [String: String] = [:]
+            for component in components{
+                let pair = component.components(separatedBy: "=")
+                if pair.count == 2 {
+                   settingsDictionary[pair[0]] = pair[1]
+                 }
+            }
+            
+            let response: [String: Any] = [
+                "rx_bytes" : settingsDictionary["rx_bytes"] ?? "0",
+                "tx_bytes" : settingsDictionary["tx_bytes"] ?? "0"
+            ]
+            
+            completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
+        }
+    }
+    
     private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
@@ -327,19 +360,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
 
-    private func handleOpenVPNAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    private func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
-        if messageData.count == 1 && messageData[0] == 0 {
             let bytesin = ovpnAdapter.transportStatistics.bytesIn
-            let strBytesin = "rx_bytes=" + String(bytesin);
-
             let bytesout = ovpnAdapter.transportStatistics.bytesOut
-            let strBytesout = "tx_bytes=" + String(bytesout);
 
-            let strData = strBytesin + "\n" + strBytesout;
-            let data = Data(strData.utf8)
-            completionHandler(data)
-        }
+            let response: [String: Any] = [
+                "rx_bytes" : bytesin,
+                "tx_bytes" : bytesout
+            ]
+            
+            completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
     }
 
 

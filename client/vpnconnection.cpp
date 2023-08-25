@@ -32,11 +32,14 @@
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     std::shared_ptr<VpnConfigurator> configurator, QObject* parent) : QObject(parent),
     m_settings(settings),
-    m_configurator(configurator)
+    m_configurator(configurator),
+    m_checkTimer(new QTimer(this))
 {
     m_checkTimer.setInterval(1000);
 #ifdef Q_OS_IOS
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
+    connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
+    
 #endif
 }
 
@@ -343,16 +346,9 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-
-    bool ok = IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
-
-    if (!ok) {
-        emit VpnProtocol::Error;
-        return;
-    }
-
+    IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
+    connect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
     return;
-
 #endif
 
     createProtocolConnections();
@@ -421,6 +417,7 @@ void VpnConnection::disconnectFromVpn()
 
 #ifdef Q_OS_IOS
     IosController::Instance()->disconnectVpn();
+    disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
 #endif
 
     if (!m_vpnProtocol.data()) {

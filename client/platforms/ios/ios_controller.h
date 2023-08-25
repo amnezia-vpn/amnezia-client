@@ -15,6 +15,7 @@ struct Action {
     static const char* restart;
     static const char* stop;
     static const char* getTunnelId;
+    static const char* getStatus;
 };
 
 struct MessageKey {
@@ -44,10 +45,10 @@ public:
     void vpnConfigurationDidChange(void *pNotification);
 
     void getBackendLogs(std::function<void (const QString &)> &&callback);
-
+    void checkStatus();
 signals:
     void connectionStateChanged(VpnProtocol::VpnConnectionState state);
-
+    void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
 
 protected slots:
 
@@ -77,7 +78,8 @@ private:
     amnezia::Proto m_proto;
     QJsonObject m_rawConfig;
     QString m_tunnelId;
-
+    uint64_t m_txBytes;
+    uint64_t m_rxBytes;
     //std::function<void(const QString&)> m_logCallback;
 };
 
