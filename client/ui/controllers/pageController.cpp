@@ -28,8 +28,10 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     });
 #endif
 
+#if defined Q_OS_MACX
     connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
     connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
+#endif
 }
 
 QString PageController::getInitialPage()

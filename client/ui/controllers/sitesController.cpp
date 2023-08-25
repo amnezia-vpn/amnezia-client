@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 
 #include "fileUtilites.h"
+#include "utilities.h"
 
 SitesController::SitesController(const std::shared_ptr<Settings> &settings,
                                  const QSharedPointer<VpnConnection> &vpnConnection,

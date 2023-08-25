@@ -225,12 +225,17 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     QJsonObject lastConfig;
     lastConfig[config_key::config] = data;
 
-    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*):([0-9]*)");
+    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*)(?::([0-9]*))?");
     QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(data);
     QString hostName;
     QString port;
-    if (hostNameAndPortMatch.hasMatch()) {
+    if (hostNameAndPortMatch.hasCaptured(1)) {
         hostName = hostNameAndPortMatch.captured(1);
+    } /*else {
+        qDebug() << "send error?"
+    }*/
+
+    if (hostNameAndPortMatch.hasCaptured(2)) {
         port = hostNameAndPortMatch.captured(2);
     }
 
