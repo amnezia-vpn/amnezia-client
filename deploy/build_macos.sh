@@ -68,6 +68,8 @@ echo "____________________________________"
 # Package
 echo "Packaging ..."
 
+
+cp -Rv $PREBUILT_DEPLOY_DATA_DIR/* $BUNDLE_DIR/Contents/macOS
 $QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
 cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
 cp -Rv $PROJECT_DIR/deploy/data/macos/* $BUNDLE_DIR/Contents/macOS
@@ -113,7 +115,6 @@ fi
 echo "Packaging installer..."
 mkdir -p $INSTALLER_DATA_DIR
 cp -av $PROJECT_DIR/deploy/installer $BUILD_DIR
-cp -r $PREBUILT_DEPLOY_DATA_DIR/* $DEPLOY_DATA_DIR
 cp -av $DEPLOY_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_install.sh
 cp -av $DEPLOY_DATA_DIR/post_uninstall.sh $INSTALLER_DATA_DIR/post_uninstall.sh
 cp -av $DEPLOY_DATA_DIR/$PLIST_NAME $INSTALLER_DATA_DIR/$PLIST_NAME
