@@ -21,7 +21,7 @@ CheckBox {
 
     property string defaultBorderColor: "#D7D8DB"
     property string checkedBorderColor: "#FBB26A"
-    property string checkedBorderDisabledColor: "#5A330C"
+    property string checkedBorderDisabledColor: "#402102"
 
     property string checkedImageColor: "#FBB26A"
     property string pressedImageColor: "#A85809"

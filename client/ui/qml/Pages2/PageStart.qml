@@ -163,14 +163,6 @@ PageType {
         }
     }
 
-    MouseArea {
-        anchors.fill: tabBar
-        anchors.leftMargin: shareTabButton.visible ? 96 : 128
-        anchors.rightMargin: shareTabButton.visible ? 96 : 128
-        cursorShape: Qt.PointingHandCursor
-        enabled: false
-    }
-
     BusyIndicatorType {
         id: busyIndicator
         anchors.centerIn: parent

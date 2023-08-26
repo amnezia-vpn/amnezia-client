@@ -74,7 +74,7 @@ Item {
                         placeholderText: root.textFieldPlaceholderText
                         placeholderTextColor: "#494B50"
 
-                        selectionColor:  "#412102"
+                        selectionColor:  "#633303"
                         selectedTextColor: "#D7D8DB"
 
                         font.pixelSize: 16

@@ -70,6 +70,8 @@ PageType {
             Layout.topMargin: 24
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
+            spacing: 0
+
             Header1TextType {
                 text: root.defaultServerName
             }
@@ -77,6 +79,8 @@ PageType {
             Image {
                 Layout.preferredWidth: 18
                 Layout.preferredHeight: 18
+
+                Layout.leftMargin: 12
 
                 source: "qrc:/images/controls/chevron-down.svg"
             }
@@ -152,7 +156,8 @@ PageType {
                     rootButtonBackgroundColor: "#D7D8DB"
                     rootButtonHoveredBorderColor: "transparent"
                     rootButtonPressedBorderColor: "transparent"
-                    rootButtonTextMargins: 8
+                    rootButtonTextTopMargin: 8
+                    rootButtonTextBottomMargin: 8
 
                     text: root.defaultContainerName
                     textColor: "#0E0E11"
@@ -303,6 +308,7 @@ PageType {
 
                                 ImageButtonType {
                                     image: "qrc:/images/controls/settings.svg"
+                                    imageColor: "#D7D8DB"
 
                                     implicitWidth: 56
                                     implicitHeight: 56

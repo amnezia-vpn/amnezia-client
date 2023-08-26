@@ -4,7 +4,7 @@ import QtQuick.Controls
 TabButton {
     id: root
 
-    property string hoveredColor: "#412102"
+    property string hoveredColor: "#633303"
     property string defaultColor: "#D7D8DB"
     property string selectedColor: "#FBB26A"
 
@@ -18,7 +18,14 @@ TabButton {
     icon.color: isSelected ? selectedColor : defaultColor
 
     background: Rectangle {
+        id: background
         anchors.fill: parent
         color: "transparent"
+    }
+
+    MouseArea {
+        anchors.fill: background
+        cursorShape: Qt.PointingHandCursor
+        enabled: false
     }
 }

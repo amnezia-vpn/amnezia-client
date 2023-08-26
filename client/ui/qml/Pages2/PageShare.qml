@@ -106,9 +106,11 @@ PageType {
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
+            spacing: 0
+
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 24
 
                 headerText: qsTr("VPN Access")
             }
@@ -161,6 +163,7 @@ PageType {
             ParagraphTextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
+                Layout.bottomMargin: 24
 
                 text: accessTypeSelector.currentIndex === 0 ? qsTr("VPN access without the ability to manage the server") :
                                                               qsTr("Full access to server")
@@ -171,7 +174,7 @@ PageType {
                 id: serverSelector
 
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 16
 
                 drawerHeight: 0.4375
 
@@ -385,7 +388,7 @@ PageType {
 
             BasicButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 40
 
                 enabled: shareButtonEnabled
 

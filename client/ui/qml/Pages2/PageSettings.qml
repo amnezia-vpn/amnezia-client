@@ -26,9 +26,11 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            spacing: 0
+
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 

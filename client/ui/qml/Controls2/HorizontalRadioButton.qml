@@ -75,19 +75,20 @@ RadioButton {
     ColumnLayout {
         id: content
         anchors.fill: parent
-        spacing: 16
+        spacing: 0
 
         ButtonTextType {
             text: root.text
             color: root.enabled ? root.textColor : root.textDisabledColor
 
             Layout.fillWidth: true
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            Layout.topMargin: 16
-            Layout.bottomMargin: 16
+            Layout.rightMargin: 24
+            Layout.leftMargin: 24
+            Layout.topMargin: 12
+            Layout.bottomMargin: 12
 
             horizontalAlignment: Qt.AlignHCenter
+            verticalAlignment: Qt.AlignVCenter
         }
     }
 

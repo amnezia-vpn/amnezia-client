@@ -4,7 +4,7 @@ import QtQuick.Controls
 TabButton {
     id: root
 
-    property string hoveredColor: "#412102"
+    property string hoveredColor: "#633303"
     property string defaultColor: "#2C2D30"
     property string selectedColor: "#FBB26A"
 
@@ -37,6 +37,12 @@ TabButton {
                 PropertyAnimation { duration: 200 }
             }
         }
+    }
+
+    MouseArea {
+        anchors.fill: background
+        cursorShape: Qt.PointingHandCursor
+        enabled: false
     }
 
     contentItem: Text {

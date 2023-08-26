@@ -29,7 +29,7 @@ Rectangle {
             anchors.bottomMargin: 16
 
             color: "#D7D8DB"
-            selectionColor:  "#412102"
+            selectionColor:  "#633303"
             selectedTextColor: "#D7D8DB"
             placeholderTextColor: "#878B91"
 

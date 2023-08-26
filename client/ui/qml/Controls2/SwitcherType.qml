@@ -14,13 +14,13 @@ Switch {
     property string textColor:  "#D7D8DB"
     property string textDisabledColor: "#878B91"
 
-    property string checkedIndicatorColor: "#412102"
+    property string checkedIndicatorColor: "#633303"
     property string defaultIndicatorColor: "transparent"
-    property string checkedDisabledIndicatorColor: "#5A330C"
+    property string checkedDisabledIndicatorColor: "#402102"
 
-    property string checkedIndicatorBorderColor: "#412102"
+    property string checkedIndicatorBorderColor: "#633303"
     property string defaultIndicatorBorderColor: "#494B50"
-    property string checkedDisabledIndicatorBorderColor: "#5A330C"
+    property string checkedDisabledIndicatorBorderColor: "#402102"
 
     property string checkedInnerCircleColor: "#FBB26A"
     property string defaultInnerCircleColor: "#D7D8DB"
@@ -40,6 +40,7 @@ Switch {
 
         anchors.left: content.right
         anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 4
 
         implicitWidth: 52
         implicitHeight: 32
