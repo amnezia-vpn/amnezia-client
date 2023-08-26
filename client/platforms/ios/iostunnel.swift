@@ -63,7 +63,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-        Logger.global?.log(message: "Received message from app")
+        //Logger.global?.log(message: "Received message from app")
 
         guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
             Logger.global?.log(message: "Failed to serialize message from app")
@@ -81,7 +81,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
-        Logger.global?.log(message: "Received app message: \(action)")
+       // Logger.global?.log(message: "Received app message: \(action)")
         
         if action == Constants.kActionStatus {
             handleStatusAppMessage(messageData, completionHandler: completionHandler)

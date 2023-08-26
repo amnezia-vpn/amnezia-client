@@ -245,10 +245,6 @@ void IosController::checkStatus()
 
 void IosController::vpnStatusDidChange(void *pNotification)
 {
-    getBackendLogs([](QString s){
-        //qDebug().noquote() << s;
-    });
-
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
     if (session /* && session == TunnelManager.session */ ) {
@@ -424,43 +420,6 @@ bool IosController::isOurManager(NETunnelProviderManager* manager) {
     qDebug() << "Found the manager with the correct bundle identifier:" << QString::fromNSString(tunnelProto.providerBundleIdentifier);
 
     return true;
-}
-
-void IosController::getBackendLogs(std::function<void (const QString &)> &&callback)
-{
-    qDebug() << "IosController::getBackendLogs";
-
-    NSString *suiteName = @"group.org.amnezia.AmneziaVPN";
-    NSString *logKey = @"logMessages";
-
-    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:suiteName];
-    NSArray *logs = [sharedDefaults arrayForKey:logKey];
-
-    for (NSString *logMessage in logs) {
-        qDebug() << QString::fromNSString(logMessage);
-    }
-
-    [sharedDefaults removeObjectForKey:logKey];
-    [sharedDefaults synchronize];
-
-
-//    std::function<void(const QString&)> a_callback = std::move(callback);
-
-//    QString groupId(GROUP_ID);
-//    NSURL* groupPath = [[NSFileManager defaultManager]
-//        containerURLForSecurityApplicationGroupIdentifier:groupId.toNSString()];
-
-//    NSURL* path = [groupPath URLByAppendingPathComponent:@"networkextension.log"];
-
-//    QFile file(QString::fromNSString([path path]));
-//    if (!file.open(QIODevice::ReadOnly)) {
-//      a_callback("IosController::getBackendLogs : Network extension log file missing or unreadable.");
-//      return;
-//    }
-
-//    QByteArray content = file.readAll();
-//    qDebug() << "IosController::getBackendLogs" << content;
-//    a_callback(content);
 }
 
 void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function<void(NSDictionary*)> callback)
