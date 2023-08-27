@@ -181,7 +181,7 @@ void UiLogic::showOnStartup()
 void UiLogic::onUpdateAllPages()
 {
     for (auto logic : m_logicMap) {
-        if (dynamic_cast<ClientInfoLogic*>(logic) || dynamic_cast<ClientManagementLogic*>(logic)) {
+        if (dynamic_cast<ClientInfoLogic*>(logic) || dynamic_cast<ClientManagementLogic*>(logic) || dynamic_cast<QrDecoderLogic*>(logic)) {
             continue;
         }
         logic->onUpdatePage();
