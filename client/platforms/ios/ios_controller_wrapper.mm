@@ -15,7 +15,7 @@
 
     NETunnelProviderSession *session = (NETunnelProviderSession *)notification.object;
 
-    if (session /* && session == TunnelManager.session */ ) {
+    if (session ) {
         cppController->vpnStatusDidChange(session);
     }
 }

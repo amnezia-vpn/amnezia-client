@@ -448,7 +448,6 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
         NSDictionary *response = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&deserializeError];
 
         if (response && [response isKindOfClass:[NSDictionary class]]) {
-           // qDebug() << "Received extension message:" << QString::fromNSString(response.description);;
             callback(response);
             return;
         } else if (deserializeError) {
@@ -474,28 +473,3 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     }
 
 }
-
-void IosController::onStartVpnExtensionMessage(NSDictionary* message, void(^callback)(NSDictionary*))
-{
-    qDebug() << "IosController::onStartVpnExtensionMessage";
-//    if (!message) {
-//        NSDictionary* errorDict = @{ @"error" : @(ErrorCode::vpnStartFailure) };
-//        callback(errorDict);
-//        return;
-//    }
-
-//    NSNumber* rawErrorCodeObj = message[MessageKey::errorCode];
-//    int rawErrorCode = rawErrorCodeObj ? [rawErrorCodeObj intValue] : ErrorCode::undefined;
-
-//    if (rawErrorCode == ErrorCode::noError) {
-//        NSString* tunnelId = message[MessageKey::tunnelId];
-//        if (tunnelId) {
-//            self.activeTunnelId = std::string([tunnelId UTF8String]);
-//            this->setConnectVpnOnDemand(true);
-//        }
-//    }
-
-//    NSDictionary* responseDict = @{ @"errorCode" : @(rawErrorCode) };
-//    callback(responseDict);
-}
-

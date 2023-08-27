@@ -72,7 +72,6 @@ private:
     NSString *m_serverAddress{};
     bool isOurManager(NETunnelProviderManager* manager);
     void sendVpnExtensionMessage(NSDictionary* message, std::function<void(NSDictionary*)> callback);
-    void onStartVpnExtensionMessage(NSDictionary* message, void(^callback)(NSDictionary*));
 #endif
 
     amnezia::Proto m_proto;
@@ -80,7 +79,6 @@ private:
     QString m_tunnelId;
     uint64_t m_txBytes;
     uint64_t m_rxBytes;
-    //std::function<void(const QString&)> m_logCallback;
 };
 
 #endif // IOS_CONTROLLER_H

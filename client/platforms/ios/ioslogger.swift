@@ -17,7 +17,7 @@ public class Logger {
     deinit {}
 
     func log(message: String) {
-        let suiteName = "group.org.amnezia.AmneziaVPN"
+        let suiteName = [NSString stringWithUTF8String:GROUP_ID]
         let logKey = "logMessages"
         let sharedDefaults = UserDefaults(suiteName: suiteName)
         var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []

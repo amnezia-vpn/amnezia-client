@@ -63,8 +63,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-        //Logger.global?.log(message: "Received message from app")
-
         guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
             Logger.global?.log(message: "Failed to serialize message from app")
             return
@@ -81,8 +79,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
-       // Logger.global?.log(message: "Received app message: \(action)")
-        
         if action == Constants.kActionStatus {
             handleStatusAppMessage(messageData, completionHandler: completionHandler)
         }
@@ -97,27 +93,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
             completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
         }
-
-//        if action == Constants.kActionStart || action == Constants.kActionRestart {
-//            Logger.global?.log(message: "Start requested")
-//            self.startCompletion = callbackWrapper
-//
-//            if action == Constants.kActionRestart {
-//                if let tunnelId = message[kMessageKeyTunnelId] as? String,
-//                   let config = message[kMessageKeyConfig] {
-//                    self.tunnelConfig = OutlineTunnel(id: tunnelId, config: config)
-//                    self.reconnectTunnel(true)
-//                }
-//            }
-//        } else if action == Constants.kActionStop {
-//            self.stopCompletion = callbackWrapper
-//        } else if action == Constants.kActionGetTunnelId {
-//            var response: Data? = nil
-//            if let tunnelId = self.tunnelConfig?.id {
-//                response = try? JSONSerialization.data(withJSONObject: [kMessageKeyTunnelId: tunnelId], options: [])
-//            }
-//            completionHandler(response)
-//        }
     }
 
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
@@ -374,7 +349,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
 
-//
+    // TODO review
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "setupAndlaunchOpenVPN")
 
@@ -564,9 +539,6 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     }
 }
     
-
-
-
 extension WireGuardLogLevel {
     var osLogLevel: OSLogType {
         switch self {
