@@ -17,7 +17,12 @@ public class Logger {
     deinit {}
 
     func log(message: String) {
-        write_msg_to_log(tag, message.trimmingCharacters(in: .newlines))
+        let suiteName = [NSString stringWithUTF8String:GROUP_ID]
+        let logKey = "logMessages"
+        let sharedDefaults = UserDefaults(suiteName: suiteName)
+        var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []
+        logs.append(message)
+        sharedDefaults?.set(logs, forKey: logKey)
     }
 
     func writeLog(to targetFile: String) -> Bool {
@@ -37,8 +42,7 @@ public class Logger {
             appVersion += " (\(appBuild))"
         }
 
-        let goBackendVersion = "1"
-        Logger.global?.log(message: "App version: \(appVersion); Go backend version: \(goBackendVersion)")
+        Logger.global?.log(message: "App version: \(appVersion)")
     }
 }
 
@@ -50,5 +54,4 @@ func wg_log(_ type: OSLogType, staticMessage msg: StaticString) {
 func wg_log(_ type: OSLogType, message msg: String) {
     os_log("%{AMNEZIA}s", log: OSLog.default, type: type, msg)
     Logger.global?.log(message: msg)
-    NSLog("AMNEZIA: \(msg)")
 }

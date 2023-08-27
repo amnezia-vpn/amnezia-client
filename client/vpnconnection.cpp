@@ -23,7 +23,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-#include <protocols/ios_vpnprotocol.h>
+#include "platforms/ios/ios_controller.h"
 #endif
 
 #include "utilities.h"
@@ -32,17 +32,22 @@
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings,
     std::shared_ptr<VpnConfigurator> configurator, QObject* parent) : QObject(parent),
     m_settings(settings),
-    m_configurator(configurator)
+    m_configurator(configurator),
+    m_checkTimer(new QTimer(this))
 {
     m_checkTimer.setInterval(1000);
+#ifdef Q_OS_IOS
+    connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
+    connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
+    
+#endif
 }
 
 VpnConnection::~VpnConnection()
 {
-    if (m_vpnProtocol != nullptr) {
-        m_vpnProtocol->deleteLater();
-        m_vpnProtocol.clear();
-    }
+#if defined AMNEZIA_DESKTOP
+    disconnectFromVpn();
+#endif
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -278,6 +283,13 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex,
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
+    const QJsonObject &server = m_settings->server(serverIndex);
+    vpnConfiguration[config_key::hostName] = server.value(config_key::hostName).toString();
+    vpnConfiguration[config_key::description] = server.value(config_key::description).toString();
+
+    // TODO: try to get hostName, port, description for 3rd party configs
+    // vpnConfiguration[config_key::port] = ...;
+
     return vpnConfiguration;
 }
 
@@ -285,8 +297,7 @@ void VpnConnection::connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig)
 {
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
-                .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
-
+                    .arg(serverIndex).arg(ContainerProps::containerToString(container)) << m_settings->routeMode();
 #if !defined (Q_OS_ANDROID) && !defined (Q_OS_IOS)
     if (!m_IpcClient) {
         m_IpcClient = new IpcClient(this);
@@ -305,11 +316,13 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_remoteAddress = credentials.hostName;
     emit connectionStateChanged(VpnProtocol::Connecting);
 
+#ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
+#endif
 
     ErrorCode e = ErrorCode::NoError;
 
@@ -333,18 +346,9 @@ void VpnConnection::connectToVpn(int serverIndex,
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
     Proto proto = ContainerProps::defaultProtocol(container);
-    auto iosVpnProtocol = new IOSVpnProtocol(proto, m_vpnConfiguration);
-
-    if (!iosVpnProtocol->initialize()) {
-         qDebug() << QString("Init failed") ;
-         emit VpnProtocol::Error;
-         iosVpnProtocol->deleteLater();
-         return;
-    }
-
-    connect(&m_checkTimer, &QTimer::timeout, iosVpnProtocol, &IOSVpnProtocol::checkStatus);
-    m_vpnProtocol.reset(iosVpnProtocol);
-
+    IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
+    connect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
+    return;
 #endif
 
     createProtocolConnections();
@@ -413,6 +417,11 @@ void VpnConnection::disconnectFromVpn()
 
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->stop();
+#endif
+
+#ifdef Q_OS_IOS
+    IosController::Instance()->disconnectVpn();
+    disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
 #endif
 
     if (!m_vpnProtocol.data()) {
