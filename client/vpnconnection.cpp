@@ -415,6 +415,10 @@ void VpnConnection::disconnectFromVpn()
     }
 #endif
 
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->stop();
+#endif
+
 #ifdef Q_OS_IOS
     IosController::Instance()->disconnectVpn();
     disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
@@ -422,9 +426,6 @@ void VpnConnection::disconnectFromVpn()
 
     if (!m_vpnProtocol.data()) {
         emit connectionStateChanged(VpnProtocol::Disconnected);
-#ifdef Q_OS_ANDROID
-        AndroidController::instance()->stop();
-#endif
         return;
     }
 
