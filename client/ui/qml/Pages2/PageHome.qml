@@ -27,7 +27,10 @@ PageType {
     property string defaultContainerName: ContainersModel.defaultContainerName
 
     ConnectButton {
-        anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.bottom: buttonBackground.top
+        anchors.right: parent.right
+        anchors.left: parent.left
     }
 
     Connections {

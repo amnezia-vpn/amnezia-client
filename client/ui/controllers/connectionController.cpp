@@ -72,7 +72,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     case Vpn::ConnectionState::Connected: {
         m_isConnectionInProgress = false;
         m_isConnected = true;
-        m_connectionStateText = tr("Disconnect");
+        m_connectionStateText = tr("Connected");
         break;
     }
     case Vpn::ConnectionState::Connecting: {
