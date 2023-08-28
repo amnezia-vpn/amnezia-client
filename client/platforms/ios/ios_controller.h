@@ -47,7 +47,7 @@ public:
     void getBackendLogs(std::function<void (const QString &)> &&callback);
     void checkStatus();
 signals:
-    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
 
 protected slots:
