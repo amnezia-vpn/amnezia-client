@@ -10,6 +10,10 @@
 #include <QStandardPaths>
 #include <utilities.h>
 
+#ifdef Q_OS_IOS
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 using namespace amnezia;
 using namespace PageEnumNS;
 
@@ -89,6 +93,18 @@ void AppSettingsLogic::onPushButtonRestoreAppConfigClicked()
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
+    
+#ifdef Q_OS_IOS
+    CFURLRef url = CFURLCreateWithFileSystemPath(
+                kCFAllocatorDefault,   CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()),
+                                                                    fileName.length()),
+                kCFURLPOSIXPathStyle, 0);
+    
+    if (!CFURLStartAccessingSecurityScopedResource(url)) {
+        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
+    }
+#endif
+    
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 

@@ -11,9 +11,6 @@
 #include "core/defs.h"
 #include "settings.h"
 
-#ifdef Q_OS_IOS
-#include "protocols/ios_vpnprotocol.h"
-#endif
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/ipcclient.h"
