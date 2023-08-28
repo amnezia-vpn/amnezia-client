@@ -107,31 +107,6 @@ PageType {
                     goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
-
-//            BasicButtonType {
-//                Layout.fillWidth: true
-//                Layout.topMargin: -8
-
-//                defaultColor: "transparent"
-//                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-//                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-//                disabledColor: "#878B91"
-//                textColor: "#D7D8DB"
-//                borderWidth: 1
-
-//                text: qsTr("Select protocol to install")
-
-//                onClicked: function() {
-//                    if (!isCredentialsFilled()) {
-//                        return
-//                    }
-
-//                    InstallController.setShouldCreateServer(true)
-//                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
-
-//                    goToPage(PageEnum.PageSetupWizardProtocols)
-//                }
-//            }
         }
     }
 

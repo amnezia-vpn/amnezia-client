@@ -134,6 +134,7 @@ PageType {
                             headerText: qsTr("Port")
                             textFieldText: port
                             textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {

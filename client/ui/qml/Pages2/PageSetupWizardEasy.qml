@@ -45,7 +45,7 @@ PageType {
         id: fl
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + continueButton.anchors.bottomMargin
+        contentHeight: content.implicitHeight + setupLaterButton.anchors.bottomMargin
 
         Column {
             id: content
@@ -126,7 +126,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                implicitWidth: parent.width
+            }
 
             CardType {
                 implicitWidth: parent.width
@@ -139,6 +141,11 @@ PageType {
                 onClicked: function() {
                     isEasySetup = false
                 }
+            }
+
+            Item {
+                implicitWidth: 1
+                implicitHeight: 1
             }
 
             BasicButtonType {
@@ -163,6 +170,8 @@ PageType {
             }
 
             BasicButtonType {
+                id: setupLaterButton
+
                 implicitWidth: parent.width
                 anchors.topMargin: 8
                 anchors.bottomMargin: 24

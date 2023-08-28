@@ -227,7 +227,7 @@ DrawerType {
                     visible: ExportController.qrCodesCount > 0
 
                     horizontalAlignment: Text.AlignHCenter
-                    text: qsTr("To read the QR code in the Amnezia app, select \"Add Server\" → \"I have connection details\"")
+                    text: qsTr("To read the QR code in the Amnezia app, select \"Add server\" → \"I have data to connect\" → \"QR code, key or settings file\"")
                 }
             }
         }

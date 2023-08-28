@@ -89,13 +89,15 @@ PageType {
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Clear cached profiles?")
-                    questionDrawer.descriptionText = qsTr("some description")
+                    questionDrawer.descriptionText = qsTr("")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
-                        ContainersModel.clearCachedProfiles()
+                        PageController.showBusyIndicator(true)
+                        SettingsController.clearCachedProfiles()
+                        PageController.showBusyIndicator(false)
                     }
                     questionDrawer.noButtonFunction = function() {
                         questionDrawer.visible = false
@@ -165,7 +167,7 @@ PageType {
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Clear server from Amnezia software?")
-                    questionDrawer.descriptionText = qsTr(" All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
+                    questionDrawer.descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 

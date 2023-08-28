@@ -49,7 +49,7 @@ PageType {
 
                 headerText: qsTr("Server connection")
                 descriptionText: qsTr("Do not use connection code from public sources. It may have been created to intercept your data.\n
-It's okay if a friend passed the code.")
+It's okay as long as it's from someone you trust.")
             }
 
             Header2TextType {

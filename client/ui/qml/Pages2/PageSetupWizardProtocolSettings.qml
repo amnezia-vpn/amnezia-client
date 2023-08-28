@@ -212,6 +212,7 @@ PageType {
 
                             headerText: qsTr("Port")
                             textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
                         }
 
                         Rectangle {
