@@ -90,6 +90,18 @@ void SitesController::importSites(bool replaceExisting)
     }
 
     QFile file(fileName);
+
+#ifdef Q_OS_IOS
+    CFURLRef url = CFURLCreateWithFileSystemPath(
+            kCFAllocatorDefault,
+            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
+            kCFURLPOSIXPathStyle, 0);
+
+    if (!CFURLStartAccessingSecurityScopedResource(url)) {
+        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
+    }
+#endif
+
     if (!file.open(QIODevice::ReadOnly)) {
         emit errorOccurred(tr("Can't open file: ") + fileName);
         return;

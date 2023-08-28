@@ -21,8 +21,8 @@
 #include "protocols/qml_register_protocols.h"
 
 #if defined(Q_OS_IOS)
-#include "platforms/ios/QtAppDelegate-C-Interface.h"
-#include "platforms/ios/ios_controller.h"
+    #include "platforms/ios/QtAppDelegate-C-Interface.h"
+    #include "platforms/ios/ios_controller.h"
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -108,6 +108,9 @@ void AmneziaApplication::init()
             &ImportController::extractConfigFromData);
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_pageController.get(),
             &PageController::goToPageViewConfig);
+#endif
+
+#ifdef Q_OS_IOS
     IosController::Instance()->initialize();
 #endif
 

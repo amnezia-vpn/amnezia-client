@@ -10,6 +10,9 @@
     #include "../../platforms/android/androidutils.h"
     #include <QJniObject>
 #endif
+#ifdef Q_OS_IOS
+    #include <CoreFoundation/CoreFoundation.h>
+#endif
 #include "fileUtilites.h"
 
 namespace
@@ -88,6 +91,18 @@ void ImportController::extractConfigFromFile()
                                                  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
                                                  "*.vpn *.ovpn *.conf");
     QFile file(fileName);
+
+#ifdef Q_OS_IOS
+    CFURLRef url = CFURLCreateWithFileSystemPath(
+            kCFAllocatorDefault,
+            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
+            kCFURLPOSIXPathStyle, 0);
+
+    if (!CFURLStartAccessingSecurityScopedResource(url)) {
+        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
+    }
+#endif
+
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();
 

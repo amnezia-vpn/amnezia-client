@@ -19,17 +19,10 @@
 #endif
 
 #ifdef Q_OS_IOS
-#include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-namespace {
-enum class ConfigTypes {
-    Amnezia,
-    OpenVpn,
-    WireGuard
-};
-
-ConfigTypes checkConfigFormat(const QString &config)
+namespace
 {
     enum class ConfigTypes {
         Amnezia,
@@ -200,18 +193,18 @@ void StartPageLogic::onPushButtonImportOpenFile()
         return;
 
     QFile file(fileName);
-    
+
 #ifdef Q_OS_IOS
     CFURLRef url = CFURLCreateWithFileSystemPath(
-                kCFAllocatorDefault,   CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()),
-                                                                    fileName.length()),
-                kCFURLPOSIXPathStyle, 0);
-    
+            kCFAllocatorDefault,
+            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
+            kCFURLPOSIXPathStyle, 0);
+
     if (!CFURLStartAccessingSecurityScopedResource(url)) {
         qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
     }
 #endif
-    
+
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
 
