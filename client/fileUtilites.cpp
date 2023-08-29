@@ -1,4 +1,5 @@
 #include "fileUtilites.h"
+#include "platforms/ios/MobileUtils.h"
 
 #include <QDesktopServices>
 #include <QStandardPaths>
@@ -6,9 +7,15 @@
 void FileUtilites::saveFile(const QString &fileExtension, const QString &caption, const QString &fileName,
                             const QString &data)
 {
+
+#ifdef Q_OS_IOS
+    QUrl fileUrl = QDir::tempPath() + "/" + fileName;
+#else
     QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QUrl fileUrl = QFileDialog::getSaveFileUrl(nullptr, caption, QUrl::fromLocalFile(docDir + "/" + fileName),
                                                "*" + fileExtension);
+#endif
+    
     if (fileUrl.isEmpty())
         return;
     if (!fileUrl.toString().endsWith(fileExtension)) {
@@ -17,12 +24,23 @@ void FileUtilites::saveFile(const QString &fileExtension, const QString &caption
     if (fileUrl.isEmpty())
         return;
 
+#ifdef Q_OS_IOS
+    QFile save(fileUrl.toString());
+#else
     QFile save(fileUrl.toLocalFile());
+#endif
 
     // todo check if save successful
     save.open(QIODevice::WriteOnly);
     save.write(data.toUtf8());
     save.close();
+
+#ifdef Q_OS_IOS
+    QStringList filesToSend;
+    filesToSend.append(fileUrl.toString());
+    MobileUtils::shareText(filesToSend);
+    return;
+#endif
 
     QFileInfo fi(fileUrl.toLocalFile());
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
