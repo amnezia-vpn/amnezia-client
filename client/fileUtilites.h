@@ -1,19 +1,16 @@
 #ifndef FILEUTILITES_H
 #define FILEUTILITES_H
 
-#include <QFileDialog>
+#include <QObject>
+#include <QString>
 
 class FileUtilites : public QObject
 {
     Q_OBJECT
 
 public:
-    static void saveFile(const QString &fileExtension, const QString &caption, const QString &fileName,
-                         const QString &data);
-
-    static QString getFileName(QWidget *parent = nullptr, const QString &caption = QString(),
-                               const QString &dir = QString(), const QString &filter = QString(),
-                               QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options());
+    static void saveFile(QString fileName, const QString &data);
+    static QString getFileName(QString fileName);
 };
 
 #endif // FILEUTILITES_H

@@ -1,6 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
+
+import QtCore
 
 import PageEnum 1.0
 
@@ -74,14 +77,36 @@ PageType {
             }
 
             BasicButtonType {
+                id: makeBackupButton
                 Layout.fillWidth: true
                 Layout.topMargin: 14
 
                 text: qsTr("Make a backup")
 
                 onClicked: {
+                    if (GC.isMobile()) {
+                        backupAppConfig("AmneziaVPN.backup")
+                    } else {
+                        saveFileDialog.open()
+                    }
+                }
+
+                FileDialog {
+                    id: saveFileDialog
+                    acceptLabel: qsTr("Save backup file")
+                    nameFilters: [ "Backup files (*.backup)" ]
+                    fileMode: FileDialog.SaveFile
+
+                    currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN"
+                    defaultSuffix: ".backup"
+                    onAccepted: {
+                        makeBackupButton.backupAppConfig(saveFileDialog.currentFile.toString())
+                    }
+                }
+
+                function backupAppConfig(fileName) {
                     PageController.showBusyIndicator(true)
-                    SettingsController.backupAppConfig()
+                    SettingsController.backupAppConfig(fileName)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -100,9 +125,18 @@ PageType {
                 text: qsTr("Restore from backup")
 
                 onClicked: {
-                    PageController.showBusyIndicator(true)
-                    SettingsController.restoreAppConfig()
-                    PageController.showBusyIndicator(false)
+                    openFileDialog.open()
+                }
+
+                FileDialog {
+                    id: openFileDialog
+                    acceptLabel: qsTr("Open backup file")
+                    nameFilters: [ "Backup files (*.backup)" ]
+                    onAccepted: {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.restoreAppConfig(openFileDialog.selectedFile.toString())
+                        PageController.showBusyIndicator(false)
+                    }
                 }
             }
         }

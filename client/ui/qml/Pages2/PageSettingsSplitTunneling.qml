@@ -1,6 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
+
+import QtCore
 
 import SortFilterProxyModel 0.2
 
@@ -40,6 +43,8 @@ PageType {
         onlyForwardSites,
         allExceptSites
     ]
+
+    property bool replaceExistingSites
 
     QtObject {
         id: onlyForwardSites
@@ -295,8 +300,21 @@ PageType {
                     text: qsTr("Save site list")
 
                     clickedFunction: function() {
-                        SitesController.exportSites()
-                        moreActionsDrawer.close()
+                        saveFileDialog.open()
+                    }
+
+                    FileDialog {
+                        id: saveFileDialog
+                        acceptLabel: qsTr("Save sites")
+                        nameFilters: [ "Sites files (*.json)" ]
+                        fileMode: FileDialog.SaveFile
+
+                        currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/sites"
+                        defaultSuffix: ".json"
+                        onAccepted: {
+                            SitesController.exportSites(saveFileDialog.currentFile.toString())
+                            moreActionsDrawer.close()
+                        }
                     }
                 }
 
@@ -331,6 +349,7 @@ PageType {
             anchors.bottom: parent.bottom
 
             contentHeight: importSitesDrawerContent.height
+
             ColumnLayout {
                 id: importSitesDrawerContent
 
@@ -351,9 +370,8 @@ PageType {
                     text: qsTr("Replace site list")
 
                     clickedFunction: function() {
-                        SitesController.importSites(true)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
+                        root.replaceExistingSites = true
+                        openFileDialog.open()
                     }
                 }
 
@@ -364,13 +382,23 @@ PageType {
                     text: qsTr("Add imported sites to existing ones")
 
                     clickedFunction: function() {
-                        SitesController.importSites(false)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
+                        root.replaceExistingSites = false
+                        openFileDialog.open()
                     }
                 }
 
                 DividerType {}
+
+                FileDialog {
+                    id: openFileDialog
+                    acceptLabel: qsTr("Open sites file")
+                    nameFilters: [ "Sites files (*.json)" ]
+                    onAccepted: {
+                        SitesController.importSites(openFileDialog.selectedFile.toString(), replaceExistingSites)
+                        importSitesDrawer.close()
+                        moreActionsDrawer.close()
+                    }
+                }
             }
         }
     }

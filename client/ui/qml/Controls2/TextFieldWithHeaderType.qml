@@ -146,4 +146,14 @@ Item {
             color: "#EB5757"
         }
     }
+
+    MouseArea {
+        anchors.fill: root
+        cursorShape: Qt.PointingHandCursor
+
+        onPressed: function(mouse) {
+            textField.forceActiveFocus()
+            mouse.accepted = false
+        }
+    }
 }

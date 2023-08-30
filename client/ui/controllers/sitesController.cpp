@@ -79,28 +79,9 @@ void SitesController::removeSite(int index)
     emit finished(tr("Site removed: ") + hostname);
 }
 
-void SitesController::importSites(bool replaceExisting)
+void SitesController::importSites(const QString &fileName, bool replaceExisting)
 {
-    QString fileName =
-            FileUtilites::getFileName(Q_NULLPTR, tr("Open sites file"),
-                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.json");
-
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    QFile file(fileName);
-
-#ifdef Q_OS_IOS
-    CFURLRef url = CFURLCreateWithFileSystemPath(
-            kCFAllocatorDefault,
-            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
-            kCFURLPOSIXPathStyle, 0);
-
-    if (!CFURLStartAccessingSecurityScopedResource(url)) {
-        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
-    }
-#endif
+    QFile file(FileUtilites::getFileName(fileName));
 
     if (!file.open(QIODevice::ReadOnly)) {
         emit errorOccurred(tr("Can't open file: ") + fileName);
@@ -149,7 +130,7 @@ void SitesController::importSites(bool replaceExisting)
     emit finished(tr("Import completed"));
 }
 
-void SitesController::exportSites()
+void SitesController::exportSites(const QString &fileName)
 {
     auto sites = m_sitesModel->getCurrentSites();
 
@@ -163,7 +144,7 @@ void SitesController::exportSites()
     QJsonDocument jsonDocument(jsonArray);
     QByteArray jsonData = jsonDocument.toJson();
 
-    FileUtilites::saveFile(".json", tr("Export sites file"), "sites", jsonData);
+    FileUtilites::saveFile(fileName, jsonData);
 
     emit finished(tr("Export completed"));
 }

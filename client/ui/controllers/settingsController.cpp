@@ -68,9 +68,9 @@ void SettingsController::openLogsFolder()
     Logger::openLogsFolder();
 }
 
-void SettingsController::exportLogsFile()
+void SettingsController::exportLogsFile(const QString &fileName)
 {
-    FileUtilites::saveFile(".log", tr("Save log"), "AmneziaVPN", Logger::getLogFile());
+    FileUtilites::saveFile(fileName, Logger::getLogFile());
 }
 
 void SettingsController::clearLogs()
@@ -79,35 +79,17 @@ void SettingsController::clearLogs()
     Logger::clearServiceLogs();
 }
 
-void SettingsController::backupAppConfig()
+void SettingsController::backupAppConfig(const QString &fileName)
 {
-    FileUtilites::saveFile(".backup", tr("Backup application config"), "AmneziaVPN", m_settings->backupAppConfig());
+    FileUtilites::saveFile(fileName, m_settings->backupAppConfig());
 }
 
-void SettingsController::restoreAppConfig()
+void SettingsController::restoreAppConfig(const QString &fileName)
 {
-    QString fileName =
-            FileUtilites::getFileName(Q_NULLPTR, tr("Open backup"),
-                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.backup");
-
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    QFile file(fileName);
-
-#ifdef Q_OS_IOS
-    CFURLRef url = CFURLCreateWithFileSystemPath(
-            kCFAllocatorDefault,
-            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
-            kCFURLPOSIXPathStyle, 0);
-
-    if (!CFURLStartAccessingSecurityScopedResource(url)) {
-        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
-    }
-#endif
+    QFile file(FileUtilites::getFileName(fileName));
 
     file.open(QIODevice::ReadOnly);
+
     QByteArray data = file.readAll();
 
     bool ok = m_settings->restoreAppConfig(data);

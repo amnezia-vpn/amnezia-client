@@ -13,7 +13,6 @@
 #include "core/errorstrings.h"
 #include "fileUtilites.h"
 #ifdef Q_OS_ANDROID
-    #include "platforms/android/android_controller.h"
     #include "platforms/android/androidutils.h"
 #endif
 #include "qrcodegen.hpp"
@@ -201,35 +200,9 @@ QList<QString> ExportController::getQrCodes()
     return m_qrCodes;
 }
 
-void ExportController::saveFile(const QString &fileExtension, const QString &caption, const QString &fileName)
+void ExportController::saveFile(const QString &fileName)
 {
-#if defined Q_OS_IOS
-//    ext.replace("*", "");
-//    QString fileName = QDir::tempPath() + "/" + suggestedName;
-//
-//    if (fileName.isEmpty())
-//        return;
-//    if (!fileName.endsWith(ext))
-//        fileName.append(ext);
-//
-//    QFile::remove(fileName);
-//
-//    QFile save(fileName);
-//    save.open(QIODevice::WriteOnly);
-//    save.write(data.toUtf8());
-//    save.close();
-//
-//    QStringList filesToSend;
-//    filesToSend.append(fileName);
-//    MobileUtils::shareText(filesToSend);
-//    return;
-#endif
-#if defined Q_OS_ANDROID
-    AndroidController::instance()->shareConfig(m_config, "amnezia_config");
-    return;
-#endif
-
-    FileUtilites::saveFile(fileExtension, caption, fileName, m_config);
+    FileUtilites::saveFile(fileName, m_config);
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)

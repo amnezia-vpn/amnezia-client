@@ -10,31 +10,34 @@ set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 set(PACKAGES
-    Widgets Core Gui Network Xml
+    Core Gui Network Xml
     RemoteObjects Quick Svg QuickControls2
     Core5Compat Concurrent LinguistTools
 )
+
 if(IOS)
-    set(PACKAGES
-        ${PACKAGES}
-        Multimedia
-	)
+    set(PACKAGES ${PACKAGES} Multimedia)
+endif()
+
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+    set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS} 
-    Qt6::Widgets Qt6::Core Qt6::Gui
+    Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
 
 if(IOS)
-    set(LIBS
-        ${LIBS}
-        Qt6::Multimedia
-    )
+    set(LIBS ${LIBS} Qt6::Multimedia)
+endif()
+
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+    set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()

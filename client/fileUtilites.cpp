@@ -3,35 +3,59 @@
 #include <QDesktopServices>
 #include <QStandardPaths>
 
-void FileUtilites::saveFile(const QString &fileExtension, const QString &caption, const QString &fileName,
-                            const QString &data)
-{
-    QString docDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    QUrl fileUrl = QFileDialog::getSaveFileUrl(nullptr, caption, QUrl::fromLocalFile(docDir + "/" + fileName),
-                                               "*" + fileExtension);
-    if (fileUrl.isEmpty())
-        return;
-    if (!fileUrl.toString().endsWith(fileExtension)) {
-        fileUrl = QUrl(fileUrl.toString() + fileExtension);
-    }
-    if (fileUrl.isEmpty())
-        return;
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
 
-    QFile save(fileUrl.toLocalFile());
+#ifdef Q_OS_IOS
+    #include "platforms/ios/MobileUtils.h"
+    #include <CoreFoundation/CoreFoundation.h>
+#endif
+
+void FileUtilites::saveFile(QString fileName, const QString &data)
+{
+#if defined Q_OS_ANDROID
+    AndroidController::instance()->shareConfig(data, fileName);
+    return;
+#endif
+
+#ifdef Q_OS_IOS
+    QFile file(fileName);
+#else
+    QUrl fileUrl = QUrl(fileName);
+    QFile file(fileUrl.toLocalFile());
+#endif
 
     // todo check if save successful
-    save.open(QIODevice::WriteOnly);
-    save.write(data.toUtf8());
-    save.close();
+    file.open(QIODevice::WriteOnly);
+    file.write(data.toUtf8());
+    file.close();
+
+#ifdef Q_OS_IOS
+    QStringList filesToSend;
+    filesToSend.append(fileName);
+    MobileUtils::shareText(filesToSend);
+    return;
+#endif
 
     QFileInfo fi(fileUrl.toLocalFile());
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 }
 
-QString FileUtilites::getFileName(QWidget *parent, const QString &caption, const QString &dir, const QString &filter,
-                                  QString *selectedFilter, QFileDialog::Options options)
+QString FileUtilites::getFileName(QString fileName)
 {
-    QString fileName = QFileDialog::getOpenFileName(parent, caption, dir, filter, selectedFilter, options);
+#ifdef Q_OS_IOS
+    CFURLRef url = CFURLCreateWithFileSystemPath(
+            kCFAllocatorDefault,
+            CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
+            kCFURLPOSIXPathStyle, 0);
+
+    if (!CFURLStartAccessingSecurityScopedResource(url)) {
+        qDebug() << "Could not access path " << QUrl::fromLocalFile(fileName).toString();
+    }
+
+    return fileName;
+#endif
 
 #ifdef Q_OS_ANDROID
     // patch for files containing spaces etc
@@ -42,6 +66,9 @@ QString FileUtilites::getFileName(QWidget *parent, const QString &caption, const
         rawUrl.replace(" ", "%20");
         fileName = contentUrl + sep + rawUrl;
     }
-#endif
+
     return fileName;
+#endif
+
+    return QUrl(FileUtilites::getFileName(fileName)).toLocalFile();
 }

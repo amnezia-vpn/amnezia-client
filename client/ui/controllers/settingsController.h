@@ -34,11 +34,11 @@ public slots:
     void toggleLogging(bool enable);
 
     void openLogsFolder();
-    void exportLogsFile();
+    void exportLogsFile(const QString &fileName);
     void clearLogs();
 
-    void backupAppConfig();
-    void restoreAppConfig();
+    void backupAppConfig(const QString &fileName);
+    void restoreAppConfig(const QString &fileName);
 
     QString getAppVersion();
 

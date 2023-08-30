@@ -1,13 +1,15 @@
 #ifndef AMNEZIA_APPLICATION_H
 #define AMNEZIA_APPLICATION_H
 
-#include <QApplication>
-#include <QGuiApplication>
-
 #include <QCommandLineParser>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    #include <QGuiApplication>
+#else
+    #include <QApplication>
+#endif
 
 #include "settings.h"
 #include "vpnconnection.h"
@@ -39,7 +41,7 @@
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #define AMNEZIA_BASE_CLASS QApplication
+    #define AMNEZIA_BASE_CLASS QGuiApp
 #else
     #define AMNEZIA_BASE_CLASS SingleApplication
     #define QAPPLICATION_CLASS QApplication

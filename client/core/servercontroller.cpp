@@ -1,6 +1,5 @@
 #include "servercontroller.h"
 
-#include <QApplication>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QEventLoop>

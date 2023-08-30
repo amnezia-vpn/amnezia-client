@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import QtCore
+
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
@@ -67,8 +69,19 @@ DrawerType {
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
 
-                    onClicked: {
-                        ExportController.saveFile(configExtension, configCaption, configFileName)
+                    onClicked: fileDialog.open()
+
+                    FileDialog {
+                        id: fileDialog
+                        acceptLabel: configCaption
+                        nameFilters: [ "Config files (*" + configExtension + ")" ]
+                        fileMode: FileDialog.SaveFile
+
+                        currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + configFileName
+                        defaultSuffix: configExtension
+                        onAccepted: {
+                            ExportController.saveFile(fileDialog.currentFile.toString())
+                        }
                     }
                 }
 

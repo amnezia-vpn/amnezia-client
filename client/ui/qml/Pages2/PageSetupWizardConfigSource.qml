@@ -70,8 +70,17 @@ It's okay as long as it's from someone you trust.")
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
-                    ImportController.extractConfigFromFile()
-                    goToPage(PageEnum.PageSetupWizardViewConfig)
+                    fileDialog.open()
+                }
+
+                FileDialog {
+                    id: fileDialog
+                    acceptLabel: qsTr("Open config file")
+                    nameFilters: [ "Config files (*.vpn *.ovpn *.conf)" ]
+                    onAccepted: {
+                        ImportController.extractConfigFromFile(fileDialog.selectedFile.toString())
+                        goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
                 }
             }
 

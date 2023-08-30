@@ -1,6 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
+
+import QtCore
 
 import PageEnum 1.0
 
@@ -97,7 +100,20 @@ PageType {
 
                         image: "qrc:/images/controls/save.svg"
 
-                        onClicked: SettingsController.exportLogsFile()
+                        onClicked: fileDialog.open()
+
+                        FileDialog {
+                            id: fileDialog
+                            acceptLabel: qsTr("Save logs")
+                            nameFilters: [ "Logs files (*.log)" ]
+                            fileMode: FileDialog.SaveFile
+
+                            currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN"
+                            defaultSuffix: ".log"
+                            onAccepted: {
+                                ExportController.saveFile(fileDialog.currentFile.toString())
+                            }
+                        }
                     }
 
                     CaptionTextType {
