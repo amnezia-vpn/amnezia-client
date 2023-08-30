@@ -637,7 +637,8 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
-    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n | grep -E ':%1 ").arg(port);
+    // TODO reimplement with netstat
+    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
@@ -699,7 +700,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials]() {
         // max 100 attempts
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 30; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
@@ -708,8 +709,8 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                       replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                   genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
-            // if 'fuser' is not installed, skip check
-            if (stdOut.contains("Not installed")) return ErrorCode::NoError;
+            if (stdOut.contains("Packet manager not found")) return ErrorCode::ServerPacketManagerError;
+            if (stdOut.contains("fuser not installed")) return ErrorCode::NoError;
 
             if (stdOut.isEmpty()) {
                 return ErrorCode::NoError;
@@ -719,7 +720,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                 qDebug().noquote() << stdOut;
                 #endif
                 emit serverIsBusy(true);
-                QThread::msleep(5000);
+                QThread::msleep(10000);
             }
         }
         return ErrorCode::ServerPacketManagerError;
