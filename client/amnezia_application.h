@@ -41,7 +41,7 @@
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #define AMNEZIA_BASE_CLASS QGuiApp
+    #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
     #define AMNEZIA_BASE_CLASS SingleApplication
     #define QAPPLICATION_CLASS QApplication

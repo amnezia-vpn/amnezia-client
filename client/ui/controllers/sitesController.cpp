@@ -1,11 +1,8 @@
 #include "sitesController.h"
 
+#include <QFile>
 #include <QHostInfo>
 #include <QStandardPaths>
-
-#ifdef Q_OS_IOS
-    #include <CoreFoundation/CoreFoundation.h>
-#endif
 
 #include "fileUtilites.h"
 #include "utilities.h"

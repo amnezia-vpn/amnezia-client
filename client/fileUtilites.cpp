@@ -1,7 +1,9 @@
 #include "fileUtilites.h"
-#include "platforms/ios/MobileUtils.h"
 
 #include <QDesktopServices>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 #ifdef Q_OS_ANDROID

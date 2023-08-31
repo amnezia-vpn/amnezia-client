@@ -2,10 +2,6 @@
 
 #include <QStandardPaths>
 
-#ifdef Q_OS_IOS
-    #include <CoreFoundation/CoreFoundation.h>
-#endif
-
 #include "fileUtilites.h"
 #include "logger.h"
 #include "ui/qautostart.h"

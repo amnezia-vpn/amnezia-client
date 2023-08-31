@@ -1,6 +1,11 @@
 #include "pageController.h"
 
-#include <QApplication>
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    #include <QGuiApplication>
+#else
+    #include <QApplication>
+#endif
+
 #ifdef Q_OS_ANDROID
     #include "../../platforms/android/androidutils.h"
     #include <QJniObject>

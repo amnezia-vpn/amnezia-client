@@ -156,7 +156,7 @@ void AmneziaApplication::init()
 // Android TextField clipboard workaround
 // https://bugreports.qt.io/browse/QTBUG-113461
 #ifdef Q_OS_ANDROID
-    QObject::connect(qApp, &QApplication::applicationStateChanged, [](Qt::ApplicationState state) {
+    QObject::connect(qApp, &QGuiApplication::applicationStateChanged, [](Qt::ApplicationState state) {
         if (state == Qt::ApplicationActive) {
             if (qApp->clipboard()->mimeData()->formats().contains("text/html")) {
                 QTextDocument doc;
