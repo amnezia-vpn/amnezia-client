@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QUrl>
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"

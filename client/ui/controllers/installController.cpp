@@ -1,6 +1,7 @@
 #include "installController.h"
 
 #include <QDesktopServices>
+#include <QDir>
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QStandardPaths>

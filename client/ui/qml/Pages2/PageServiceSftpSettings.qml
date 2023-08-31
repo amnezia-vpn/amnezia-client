@@ -253,7 +253,7 @@ PageType {
                             text: qsTr("Remove SFTP and all data stored there")
 
                             onClicked: {
-                                questionDrawer.headerText = qsTr("Some description")
+                                questionDrawer.headerText = qsTr("Remove SFTP and all data stored there?")
                                 questionDrawer.yesButtonText = qsTr("Continue")
                                 questionDrawer.noButtonText = qsTr("Cancel")
 

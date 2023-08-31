@@ -7,6 +7,11 @@
 #include <QString>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    #include <QGuiApplication>
+#else
+    #include <QApplication>
+#endif
 
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
