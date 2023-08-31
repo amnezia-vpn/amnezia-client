@@ -691,7 +691,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
     ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
-    if (!stdOut.contains("sudo")) return ErrorCode::ServerUserNotInSudo;
+    if (!stdOut.contains("(ALL) NOPASSWD: ALL")) return ErrorCode::ServerUserNotInSudo;
 
     return error;
 }
