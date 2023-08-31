@@ -1,4 +1,5 @@
 #include "fileUtilites.h"
+#include "platforms/ios/MobileUtils.h"
 
 #include <QDesktopServices>
 #include <QStandardPaths>
@@ -34,6 +35,13 @@ void FileUtilites::saveFile(QString fileName, const QString &data)
 #ifdef Q_OS_IOS
     QStringList filesToSend;
     filesToSend.append(fileName);
+    MobileUtils::shareText(filesToSend);
+    return;
+#endif
+
+#ifdef Q_OS_IOS
+    QStringList filesToSend;
+    filesToSend.append(fileUrl.toString());
     MobileUtils::shareText(filesToSend);
     return;
 #endif

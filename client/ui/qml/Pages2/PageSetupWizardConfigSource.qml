@@ -96,7 +96,9 @@ It's okay as long as it's from someone you trust.")
 
                 clickedFunction: function() {
                     ImportController.startDecodingQr()
-                    goToPage(PageEnum.PageSetupWizardQrReader)
+                    if (Qt.platform.os === "ios") {
+                        goToPage(PageEnum.PageSetupWizardQrReader)
+                    }
                 }
             }
 
