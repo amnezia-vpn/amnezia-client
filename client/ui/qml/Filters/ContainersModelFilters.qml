@@ -39,7 +39,7 @@ Item {
     }
 
     function getWriteAccessServicesListFilters() {
-        return [serviceTypeFilter
+        return [serviceTypeFilter]
     }
     function getReadAccessServicesListFilters() {
         return [serviceTypeFilter, installedFilter]
