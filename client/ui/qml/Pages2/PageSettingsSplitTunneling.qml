@@ -241,8 +241,10 @@ PageType {
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
             clickedFunc: function() {
+                PageController.showBusyIndicator(true)
                 SitesController.addSite(textFieldText)
                 textFieldText = ""
+                PageController.showBusyIndicator(false)
             }
         }
 
@@ -312,8 +314,10 @@ PageType {
                         currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/sites"
                         defaultSuffix: ".json"
                         onAccepted: {
+                            PageController.showBusyIndicator(true)
                             SitesController.exportSites(saveFileDialog.currentFile.toString())
                             moreActionsDrawer.close()
+                            PageController.showBusyIndicator(false)
                         }
                     }
                 }
@@ -394,9 +398,11 @@ PageType {
                     acceptLabel: qsTr("Open sites file")
                     nameFilters: [ "Sites files (*.json)" ]
                     onAccepted: {
+                        PageController.showBusyIndicator(true)
                         SitesController.importSites(openFileDialog.selectedFile.toString(), replaceExistingSites)
                         importSitesDrawer.close()
                         moreActionsDrawer.close()
+                        PageController.showBusyIndicator(false)
                     }
                 }
             }

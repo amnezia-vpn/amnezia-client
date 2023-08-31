@@ -47,9 +47,7 @@ Window  {
 
         function onReplaceStartPage() {
             var pagePath = PageController.getInitialPage()
-            while (rootStackView.depth > 1) {
-                rootStackView.pop()
-            }
+            rootStackView.clear()
             PageController.updateNavigationBarColor(PageController.getInitialPageNavigationBarColor())
             rootStackView.replace(pagePath, { "objectName" : pagePath })
         }

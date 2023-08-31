@@ -22,7 +22,7 @@ PageType {
             if (isInstalledContainerFound) {
                 message = qsTr("All installed containers have been added to the application")
             } else {
-                message = qsTr("No installed containers found")
+                message = qsTr("No new installed containers found")
             }
 
             PageController.showErrorMessage(message)

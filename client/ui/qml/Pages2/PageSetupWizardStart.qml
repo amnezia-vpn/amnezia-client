@@ -19,6 +19,19 @@ PageType {
         function onGoToPageViewConfig() {
             goToPage(PageEnum.PageSetupWizardViewConfig)
         }
+
+        function onShowBusyIndicator(visible) {
+            busyIndicator.visible = visible
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        function onRestoreBackupFinished() {
+            PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
+            PageController.replaceStartPage()
+        }
     }
 
     FlickableType {
@@ -92,5 +105,11 @@ PageType {
         ConnectionTypeSelectionDrawer {
             id: connectionTypeSelection
         }
+    }
+
+    BusyIndicatorType {
+        id: busyIndicator
+        anchors.centerIn: parent
+        z: 1
     }
 }

@@ -65,7 +65,7 @@ It's okay as long as it's from someone you trust.")
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                text: qsTr("File with connection settings")
+                text: qsTr("File with connection settings or backup")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
@@ -76,10 +76,16 @@ It's okay as long as it's from someone you trust.")
                 FileDialog {
                     id: fileDialog
                     acceptLabel: qsTr("Open config file")
-                    nameFilters: [ "Config files (*.vpn *.ovpn *.conf)" ]
+                    nameFilters: [ "Config or backup files (*.vpn *.ovpn *.conf *.backup)" ]
                     onAccepted: {
-                        ImportController.extractConfigFromFile(fileDialog.selectedFile.toString())
-                        goToPage(PageEnum.PageSetupWizardViewConfig)
+                        if (fileDialog.selectedFile.toString().indexOf(".backup") != -1) {
+                            PageController.showBusyIndicator(true)
+                            SettingsController.restoreAppConfig(fileDialog.selectedFile.toString())
+                            PageController.showBusyIndicator(false)
+                        } else {
+                            ImportController.extractConfigFromFile(fileDialog.selectedFile.toString())
+                            goToPage(PageEnum.PageSetupWizardViewConfig)
+                        }
                     }
                 }
             }

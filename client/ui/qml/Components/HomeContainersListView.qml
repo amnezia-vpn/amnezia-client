@@ -53,6 +53,12 @@ ListView {
                 checkable: isInstalled
                 checked: isDefault
 
+                onPressed: function(mouse) {
+                    if (!isSupported) {
+                        PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
+                    }
+                }
+
                 onClicked: {
                     if (checked) {
                         isDefault = true

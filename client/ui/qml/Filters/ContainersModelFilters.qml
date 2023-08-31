@@ -32,16 +32,16 @@ Item {
     }
 
     function getWriteAccessProtocolsListFilters() {
-        return [vpnTypeFilter, supportedFilter]
+        return [vpnTypeFilter]
     }
     function getReadAccessProtocolsListFilters() {
-        return [vpnTypeFilter, supportedFilter, installedFilter]
+        return [vpnTypeFilter, installedFilter]
     }
 
     function getWriteAccessServicesListFilters() {
-        return [serviceTypeFilter, supportedFilter]
+        return [serviceTypeFilter
     }
     function getReadAccessServicesListFilters() {
-        return [serviceTypeFilter, supportedFilter, installedFilter]
+        return [serviceTypeFilter, installedFilter]
     }
 }

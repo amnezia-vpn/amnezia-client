@@ -81,5 +81,5 @@ QString FileUtilites::getFileName(QString fileName)
     return fileName;
 #endif
 
-    return QUrl(FileUtilites::getFileName(fileName)).toLocalFile();
+    return QUrl(fileName).toLocalFile();
 }
