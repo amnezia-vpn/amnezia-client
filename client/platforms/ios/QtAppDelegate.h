@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "QtAppDelegate-C-Interface.h"
 
-#include "ui/pages_logic/StartPageLogic.h"
+#include "ui/controllers/importController.h"
 
 @interface QtAppDelegate : UIResponder <UIApplicationDelegate>
 +(QtAppDelegate *)sharedQtAppDelegate;
-@property (nonatomic) StartPageLogic* startPageLogic;
+@property (nonatomic) ImportController* ImportController;
 @end

@@ -112,6 +112,7 @@ void AmneziaApplication::init()
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
+    setImportController(m_importController.get());
 #endif
 
     m_notificationHandler.reset(NotificationHandler::create(nullptr));

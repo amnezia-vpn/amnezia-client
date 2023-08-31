@@ -79,7 +79,7 @@
         bool isOpenFile = file.open(QIODevice::ReadOnly);
         QByteArray data = file.readAll();
         
-        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importAnyFile(QString(data));
+        [QtAppDelegate sharedQtAppDelegate].ImportController->extractConfigFromData(QString(data));
         return YES;
     }
     return NO;
@@ -92,8 +92,8 @@ void QtAppDelegateInitialize()
     NSLog(@"Created a new AppDelegate");
 }
 
-void setStartPageLogic(StartPageLogic* startPage) {
-    [QtAppDelegate sharedQtAppDelegate].startPageLogic = startPage;
+void setImportController(ImportController* controller) {
+    [QtAppDelegate sharedQtAppDelegate].ImportController = controller;
 }
 
 @end

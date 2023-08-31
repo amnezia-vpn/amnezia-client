@@ -1,9 +1,9 @@
 #ifndef QTAPPDELEGATECINTERFACE_H
 #define QTAPPDELEGATECINTERFACE_H
 
-#include "ui/pages_logic/StartPageLogic.h"
+#include "ui/controllers/importController.h"
 
 void QtAppDelegateInitialize();
-void setStartPageLogic(StartPageLogic*);
+void setImportController(ImportController*);
 
 #endif // QTAPPDELEGATECINTERFACE_H
