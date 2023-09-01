@@ -1,4 +1,5 @@
 #import "QtAppDelegate.h"
+#import "ios_controller.h"
 
 #include <QFile>
 
@@ -79,7 +80,7 @@
         bool isOpenFile = file.open(QIODevice::ReadOnly);
         QByteArray data = file.readAll();
         
-        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importAnyFile(QString(data));
+        IosController::Instance()->importConfigFromOutside(QString(data));
         return YES;
     }
     return NO;
@@ -90,10 +91,6 @@ void QtAppDelegateInitialize()
 {
     [[UIApplication sharedApplication] setDelegate: [QtAppDelegate sharedQtAppDelegate]];
     NSLog(@"Created a new AppDelegate");
-}
-
-void setStartPageLogic(StartPageLogic* startPage) {
-    [QtAppDelegate sharedQtAppDelegate].startPageLogic = startPage;
 }
 
 @end

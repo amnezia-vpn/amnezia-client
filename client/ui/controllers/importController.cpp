@@ -97,7 +97,7 @@ void ImportController::extractConfigFromFile(const QString &fileName)
     }
 }
 
-void ImportController::extractConfigFromData(QString &data)
+void ImportController::extractConfigFromData(QString data)
 {
     auto configFormat = checkConfigFormat(data);
     if (configFormat == ConfigTypes::OpenVpn) {

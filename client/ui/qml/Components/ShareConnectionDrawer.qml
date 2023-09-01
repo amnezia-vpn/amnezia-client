@@ -69,7 +69,13 @@ DrawerType {
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
 
-                    onClicked: fileDialog.open()
+                    onClicked: {
+                        if (Qt.platform.os === "ios") {
+                            ExportController.saveFile("amnezia_config.vpn")
+                        } else {
+                            fileDialog.open()
+                        }
+                    }
 
                     FileDialog {
                         id: fileDialog

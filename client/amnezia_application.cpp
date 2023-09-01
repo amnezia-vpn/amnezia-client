@@ -21,7 +21,6 @@
 #include "protocols/qml_register_protocols.h"
 
 #if defined(Q_OS_IOS)
-    #include "platforms/ios/QtAppDelegate-C-Interface.h"
     #include "platforms/ios/ios_controller.h"
 #endif
 
@@ -112,6 +111,10 @@ void AmneziaApplication::init()
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_importController.get(),
+            &ImportController::extractConfigFromData);
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_pageController.get(),
+            &PageController::goToPageViewConfig);
 #endif
 
     m_notificationHandler.reset(NotificationHandler::create(nullptr));

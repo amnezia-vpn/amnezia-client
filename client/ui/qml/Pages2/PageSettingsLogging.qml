@@ -100,7 +100,13 @@ PageType {
 
                         image: "qrc:/images/controls/save.svg"
 
-                        onClicked: fileDialog.open()
+                        onClicked: {
+                            if (Qt.platform.os === "ios") {
+                                SettingsController.exportLogsFile("AmneziaVPN.log")
+                            } else {
+                                fileDialog.open()
+                            }
+                        }
 
                         FileDialog {
                             id: fileDialog
