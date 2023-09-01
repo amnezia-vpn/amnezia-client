@@ -15,6 +15,8 @@ Window  {
     height: GC.screenHeight
     minimumWidth: GC.isDesktop() ? 360 : 0
     minimumHeight: GC.isDesktop() ? 640 : 0
+    maximumWidth: 600
+    maximumHeight: 800
 
     color: "#0E0E11"
 

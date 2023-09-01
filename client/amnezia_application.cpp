@@ -206,8 +206,8 @@ void AmneziaApplication::loadFonts()
 void AmneziaApplication::loadTranslator()
 {
     auto locale = m_settings->getAppLanguage();
+    m_translator.reset(new QTranslator());
     if (locale != QLocale::English) {
-        m_translator.reset(new QTranslator());
         if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
             if (QCoreApplication::installTranslator(m_translator.get())) {
                 m_settings->setAppLanguage(locale);

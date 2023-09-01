@@ -59,20 +59,25 @@ InstallController::~InstallController()
 
 void InstallController::install(DockerContainer container, int port, TransportProto transportProto)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
-    QJsonObject containerConfig;
-
-    containerConfig.insert(config_key::port, QString::number(port));
-    containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, mainProto));
-
-    if (container == DockerContainer::Sftp) {
-        containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
-        containerConfig.insert(config_key::password, Utils::getRandomString(10));
-    }
-
     QJsonObject config;
-    config.insert(config_key::container, ContainerProps::containerToString(container));
-    config.insert(ProtocolProps::protoToString(mainProto), containerConfig);
+    auto mainProto = ContainerProps::defaultProtocol(container);
+    for (auto protocol : ContainerProps::protocolsForContainer(container)) {
+        QJsonObject containerConfig;
+
+        if (protocol == mainProto) {
+            containerConfig.insert(config_key::port, QString::number(port));
+            containerConfig.insert(config_key::transport_proto,
+                                   ProtocolProps::transportProtoToString(transportProto, protocol));
+
+            if (container == DockerContainer::Sftp) {
+                containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
+                containerConfig.insert(config_key::password, Utils::getRandomString(10));
+            }
+
+            config.insert(config_key::container, ContainerProps::containerToString(container));
+        }
+        config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+    }
 
     if (m_shouldCreateServer) {
         if (isServerAlreadyExists()) {
