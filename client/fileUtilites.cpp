@@ -24,7 +24,8 @@ void FileUtilites::saveFile(QString fileName, const QString &data)
 #endif
 
 #ifdef Q_OS_IOS
-    QFile file(fileName);
+    QUrl fileUrl = QDir::tempPath() + "/" + fileName;
+    QFile file(fileUrl.toString());
 #else
     QUrl fileUrl = QUrl(fileName);
     QFile file(fileUrl.toLocalFile());
@@ -37,7 +38,7 @@ void FileUtilites::saveFile(QString fileName, const QString &data)
 
 #ifdef Q_OS_IOS
     QStringList filesToSend;
-    filesToSend.append(fileName);
+    filesToSend.append(fileUrl.toString());
     MobileUtils::shareText(filesToSend);
     return;
 #else
