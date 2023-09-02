@@ -107,19 +107,6 @@ UiLogic::~UiLogic()
 {
     emit hide();
 
-#ifdef AMNEZIA_DESKTOP
-    if (m_vpnConnection->connectionState() != VpnProtocol::VpnConnectionState::Disconnected) {
-        m_vpnConnection->disconnectFromVpn();
-        for (int i = 0; i < 50; i++) {
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(100);
-            if (m_vpnConnection->isDisconnected()) {
-                break;
-            }
-        }
-    }
-#endif
-
     m_vpnConnection->deleteLater();
     m_vpnConnectionThread.quit();
     m_vpnConnectionThread.wait(3000);
