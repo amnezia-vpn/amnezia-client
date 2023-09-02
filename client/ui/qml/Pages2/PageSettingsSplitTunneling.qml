@@ -302,7 +302,7 @@ PageType {
                     text: qsTr("Save site list")
 
                     clickedFunction: function() {
-                        if (Qt.platform.os === "ios") {
+                        if (GC.isMobile()) {
                             ExportController.saveFile("amezia_tunnel.json")
                         } else {
                             saveFileDialog.open()

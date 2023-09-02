@@ -13,6 +13,8 @@ import ContainerProps 1.0
 import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
+import "../Config"
+import "../Components"
 
 DrawerType {
     id: root
@@ -70,8 +72,8 @@ DrawerType {
                     imageSource: "qrc:/images/controls/share-2.svg"
 
                     onClicked: {
-                        if (Qt.platform.os === "ios") {
-                            ExportController.saveFile("amnezia_config.vpn")
+                        if (GC.isMobile()) {
+                            ExportController.saveFile(configFileName)
                         } else {
                             fileDialog.open()
                         }
