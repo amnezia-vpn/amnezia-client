@@ -248,6 +248,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   GETVALUE("privateKey", config.m_privateKey, String);
   GETVALUE("serverPublicKey", config.m_serverPublicKey, String);
+  GETVALUE("serverPskKey", config.m_serverPskKey, String);
   GETVALUE("serverPort", config.m_serverPort, Double);
 
   config.m_deviceIpv4Address = obj.value("deviceIpv4Address").toString();
