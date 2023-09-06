@@ -75,9 +75,6 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   m_tunnel.setProcessEnvironment(pe);
 
   QDir appPath(QCoreApplication::applicationDirPath());
-  appPath.cdUp();
-  appPath.cd("Resources");
-  appPath.cd("utils");
   QStringList wgArgs = {"-f", "utun"};
   m_tunnel.start(appPath.filePath("wireguard-go"), wgArgs);
   if (!m_tunnel.waitForStarted(WG_TUN_PROC_TIMEOUT)) {
@@ -138,7 +135,7 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
-  logger.debug() << "Configuring peer" << logger.keys(config.m_serverPublicKey)
+  logger.debug() << "Configuring peer" << config.m_serverPublicKey
                  << "via" << config.m_serverIpv4AddrIn;
 
   // Update/create the peer config
