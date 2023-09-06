@@ -10,13 +10,13 @@
 
 #include "ipcserver.h"
 
-#include "../../client/daemon/daemonlocalserver.h"
-
 #ifdef Q_OS_WIN
+#include "../../client/daemon/daemonlocalserver.h"
 #include "windows/daemon/windowsdaemon.h"
 #endif
 
 #ifdef Q_OS_MAC
+#include "../../client/daemon/daemonlocalserver.h"
 #include "macos/daemon/macosdaemon.h"
 #endif
 
@@ -38,13 +38,12 @@ public:
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
 
-
-    DaemonLocalServer server{qApp};
-
 #ifdef Q_OS_WIN
+    DaemonLocalServer server{qApp};
     WindowsDaemon daemon;
 #endif
 #ifdef Q_OS_MAC
+    DaemonLocalServer server{qApp};
     MacOSDaemon daemon;
 #endif
 };

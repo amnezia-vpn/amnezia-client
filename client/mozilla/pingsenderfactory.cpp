@@ -5,7 +5,7 @@
 #include "pingsenderfactory.h"
 
 #if defined(MZ_LINUX) || defined(MZ_ANDROID)
-#  include "platforms/linux/linuxpingsender.h"
+//#  include "platforms/linux/linuxpingsender.h"
 #elif defined(MZ_MACOS) || defined(MZ_IOS)
 #  include "platforms/macos/macospingsender.h"
 #elif defined(MZ_WINDOWS)
@@ -19,7 +19,8 @@
 PingSender* PingSenderFactory::create(const QHostAddress& source,
                                       QObject* parent) {
 #if defined(MZ_LINUX) || defined(MZ_ANDROID)
-  return new LinuxPingSender(source, parent);
+    return nullptr;
+    //  return new LinuxPingSender(source, parent);
 #elif defined(MZ_MACOS) || defined(MZ_IOS)
   return new MacOSPingSender(source, parent);
 #elif defined(MZ_WINDOWS)
