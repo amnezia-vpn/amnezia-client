@@ -44,8 +44,6 @@ PageType {
         allExceptSites
     ]
 
-    property bool replaceExistingSites
-
     QtObject {
         id: onlyForwardSites
         property string name: qsTr("Only the addresses in the list must be opened via VPN")
@@ -303,7 +301,7 @@ PageType {
 
                     clickedFunction: function() {
                         if (Qt.platform.os === "ios") {
-                            ExportController.saveFile("amezia_tunnel.json")
+                            SitesController.exportSites("amezia_tunnel.json")
                         } else {
                             saveFileDialog.open()
                         }
@@ -311,6 +309,7 @@ PageType {
 
                     FileDialog {
                         id: saveFileDialog
+                        objectName: saveFileDialog
                         acceptLabel: qsTr("Save sites")
                         nameFilters: [ "Sites files (*.json)" ]
                         fileMode: FileDialog.SaveFile
@@ -378,8 +377,8 @@ PageType {
                     text: qsTr("Replace site list")
 
                     clickedFunction: function() {
-                        root.replaceExistingSites = true
-                        openFileDialog.open()
+                        PageController.setupFileDialogForSites(true)
+                        SystemController.getFileName()
                     }
                 }
 
@@ -390,25 +389,14 @@ PageType {
                     text: qsTr("Add imported sites to existing ones")
 
                     clickedFunction: function() {
-                        root.replaceExistingSites = false
-                        openFileDialog.open()
+                        PageController.setupFileDialogForSites(false)
+                        SystemController.getFileName()
+                        importSitesDrawer.close()
+                        moreActionsDrawer.close()
                     }
                 }
 
                 DividerType {}
-
-                FileDialog {
-                    id: openFileDialog
-                    acceptLabel: qsTr("Open sites file")
-                    nameFilters: [ "Sites files (*.json)" ]
-                    onAccepted: {
-                        PageController.showBusyIndicator(true)
-                        SitesController.importSites(openFileDialog.selectedFile.toString(), replaceExistingSites)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
-                        PageController.showBusyIndicator(false)
-                    }
-                }
             }
         }
     }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 import PageEnum 1.0
 
@@ -10,6 +11,7 @@ import "Controls2"
 
 Window  {
     id: root
+    objectName: "mainWindow"
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -78,6 +80,42 @@ Window  {
 
         function onShowPassphraseRequestDrawer() {
             privateKeyPassphraseDrawer.open()
+        }
+
+        function onSetupFileDialogForConfig() {
+            mainFileDialog.acceptLabel = qsTr("Open config file")
+            mainFileDialog.nameFilters = !ServersModel.getServersCount() ? [ "Config or backup files (*.vpn *.ovpn *.conf *.backup)" ] :
+                                                                        [ "Config files (*.vpn *.ovpn *.conf)" ]
+            mainFileDialog.acceptFunction = function() {
+                if (mainFileDialog.selectedFile.toString().indexOf(".backup") !== -1 && !ServersModel.getServersCount()) {
+                    PageController.showBusyIndicator(true)
+                    SettingsController.restoreAppConfig(mainFileDialog.selectedFile.toString())
+                    PageController.showBusyIndicator(false)
+                } else {
+                    ImportController.extractConfigFromFile(mainFileDialog.selectedFile)
+                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                }
+            }
+        }
+
+        function onSetupFileDialogForSites(replaceExistingSites) {
+            mainFileDialog.acceptLabel = qsTr("Open sites file")
+            mainFileDialog.nameFilters = [ "Sites files (*.json)" ]
+            mainFileDialog.acceptFunction = function() {
+                PageController.showBusyIndicator(true)
+                SitesController.importSites(mainFileDialog.selectedFile.toString(), replaceExistingSites)
+                PageController.showBusyIndicator(false)
+            }
+        }
+
+        function onSetupFileDialogForBackup() {
+            mainFileDialog.acceptLabel = qsTr("Open backup file")
+            mainFileDialog.nameFilters = [ "Backup files (*.backup)" ]
+            mainFileDialog.acceptFunction = function() {
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(mainFileDialog.selectedFile.toString())
+                PageController.showBusyIndicator(false)
+            }
         }
     }
 
@@ -191,5 +229,15 @@ Window  {
                 }
             }
         }
+    }
+
+    FileDialog {
+        id: mainFileDialog
+
+        property var acceptFunction
+
+        objectName: "mainFileDialog"
+
+        onAccepted: acceptFunction()
     }
 }

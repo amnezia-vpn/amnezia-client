@@ -117,7 +117,7 @@ PageType {
                             currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN"
                             defaultSuffix: ".log"
                             onAccepted: {
-                                ExportController.saveFile(fileDialog.currentFile.toString())
+                                SettingsController.exportLogsFile(fileDialog.currentFile.toString())
                             }
                         }
                     }

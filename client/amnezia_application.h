@@ -23,6 +23,7 @@
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
+#include "ui/controllers/systemController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
@@ -114,6 +115,7 @@ private:
     QScopedPointer<ExportController> m_exportController;
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
+    QScopedPointer<SystemController> m_systemController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

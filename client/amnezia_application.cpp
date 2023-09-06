@@ -10,6 +10,8 @@
 #include <QTimer>
 #include <QTranslator>
 
+#include <QQuickItem>
+
 #include "logger.h"
 #include "version.h"
 
@@ -130,6 +132,7 @@ void AmneziaApplication::init()
             &ConnectionController::closeConnection);
 
     m_engine->load(url);
+    m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
@@ -345,4 +348,7 @@ void AmneziaApplication::initControllers()
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
+
+    m_systemController.reset(new SystemController(m_settings));
+    m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 }

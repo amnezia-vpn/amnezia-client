@@ -125,18 +125,8 @@ PageType {
                 text: qsTr("Restore from backup")
 
                 onClicked: {
-                    openFileDialog.open()
-                }
-
-                FileDialog {
-                    id: openFileDialog
-                    acceptLabel: qsTr("Open backup file")
-                    nameFilters: [ "Backup files (*.backup)" ]
-                    onAccepted: {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.restoreAppConfig(openFileDialog.selectedFile.toString())
-                        PageController.showBusyIndicator(false)
-                    }
+                    PageController.setupFileDialogForBackup()
+                    SystemController.getFileName()
                 }
             }
         }

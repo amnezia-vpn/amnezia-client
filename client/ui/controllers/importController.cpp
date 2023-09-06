@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QQuickItem>
 #include <QStandardPaths>
 
 #include "core/errorstrings.h"
@@ -87,7 +88,11 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 
 void ImportController::extractConfigFromFile(const QString &fileName)
 {
-    QFile file(FileUtilites::getFileName(fileName));
+    QQuickItem *obj = findChild<QQuickItem *>("saveFileDialog");
+
+    QUrl url(fileName);
+    QString path = url.toLocalFile();
+    QFile file(path);
 
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();

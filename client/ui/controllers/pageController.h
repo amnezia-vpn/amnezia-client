@@ -103,6 +103,10 @@ signals:
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
 
+    void setupFileDialogForConfig();
+    void setupFileDialogForSites(bool replaceExistingSites);
+    void setupFileDialogForBackup();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
 
