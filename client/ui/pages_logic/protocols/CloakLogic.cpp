@@ -47,7 +47,11 @@ void CloakLogic::updateProtocolPage(const QJsonObject &ckConfig, DockerContainer
 QJsonObject CloakLogic::getProtocolConfigFromPage(QJsonObject oldConfig)
 {
     oldConfig.insert(config_key::cipher, comboBoxCipherText());
-    oldConfig.insert(config_key::site, lineEditSiteText());
+
+    QString newSite = lineEditSiteText();
+    newSite.replace("https://", "");
+    oldConfig.insert(config_key::site, newSite);
+
     oldConfig.insert(config_key::port, lineEditPortText());
 
     return oldConfig;
