@@ -100,6 +100,8 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
       return;
     }
 
+    logger.error() << "config json " << config.toJson();
+
     if (!Daemon::instance()->activate(config)) {
       logger.error() << "Failed to activate the interface";
       emit disconnected();

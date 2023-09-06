@@ -14,7 +14,7 @@
 
 #include "interfaceconfig.h"
 
-constexpr const char* WG_INTERFACE = "moz0";
+constexpr const char* WG_INTERFACE = "amn0";
 
 constexpr uint16_t WG_KEEPALIVE_PERIOD = 60;
 

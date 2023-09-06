@@ -139,7 +139,7 @@ bool WindowsFirewall::init() {
   FWPM_SUBLAYER0 subLayer;
   memset(&subLayer, 0, sizeof(subLayer));
   subLayer.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
-  subLayer.displayData.name = (PWSTR)L"MozillaVPN-SplitTunnel-Sublayer";
+  subLayer.displayData.name = (PWSTR)L"Amnezia-SplitTunnel-Sublayer";
   subLayer.displayData.description =
       (PWSTR)L"Filters that enforce a good baseline";
   subLayer.weight = 0xFFFF;

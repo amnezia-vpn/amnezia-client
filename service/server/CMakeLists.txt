@@ -109,6 +109,7 @@ if(WIN32)
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.h
         ${CMAKE_CURRENT_LIST_DIR}/router_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewall.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowscommons.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsservicemanager.h
@@ -127,6 +128,7 @@ if(WIN32)
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.cpp
         ${CMAKE_CURRENT_LIST_DIR}/router_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewall.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowscommons.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsservicemanager.cpp

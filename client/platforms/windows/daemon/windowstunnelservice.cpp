@@ -102,6 +102,8 @@ void WindowsTunnelService::timeout() {
 bool WindowsTunnelService::start(const QString& configData) {
   logger.debug() << "Starting the tunnel service";
 
+  logger.debug() << "configData " << configData;
+
   m_logworker = new WindowsTunnelLogger(WindowsCommons::tunnelLogFile());
   m_logworker->moveToThread(&m_logthread);
   m_logthread.start();
@@ -138,7 +140,7 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   logger.debug() << "Service:" << qApp->applicationFilePath();
 
-  service = CreateService(scm, TUNNEL_SERVICE_NAME, L"Mozilla VPN (tunnel)",
+  service = CreateService(scm, TUNNEL_SERVICE_NAME, L"Amezia VPN (tunnel)",
                           SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
                           SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
                           (const wchar_t*)serviceCmdline.utf16(), nullptr, 0,
@@ -149,7 +151,7 @@ bool WindowsTunnelService::start(const QString& configData) {
   }
 
   SERVICE_DESCRIPTION sd = {
-      (wchar_t*)L"Manages the Mozilla VPN tunnel connection"};
+      (wchar_t*)L"Manages the Amnezia VPN tunnel connection"};
 
   if (!ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &sd)) {
     WindowsUtils::windowsLog(

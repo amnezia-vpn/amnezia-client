@@ -154,7 +154,7 @@ class WindowsSplitTunnel final : public QObject {
   HANDLE m_driver = INVALID_HANDLE_VALUE;
   constexpr static const auto DRIVER_SYMLINK = L"\\\\.\\MULLVADSPLITTUNNEL";
   constexpr static const auto DRIVER_FILENAME = "mullvad-split-tunnel.sys";
-  constexpr static const auto DRIVER_SERVICE_NAME = L"MozillaVPNSplitTunnel";
+  constexpr static const auto DRIVER_SERVICE_NAME = L"AmneziaVPNSplitTunnel";
   constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
   DRIVER_STATE getState();
 
