@@ -24,28 +24,28 @@ PageType {
         target: InstallController
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
-            goToStartPage()
+            PageController.goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
             } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                goToPage(PageEnum.PageSettingsServersList, false)
-                goToPage(PageEnum.PageSettingsServerInfo, false)
+                PageController.goToPage(PageEnum.PageSettingsServersList, false)
+                PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
                 if (isServiceInstall) {
                     PageController.goToPageSettingsServerServices()
                 }
             } else {
-                goToPage(PageEnum.PageHome)
+                PageController.goToPage(PageEnum.PageHome)
             }
 
             PageController.showNotificationMessage(finishedMessage)
         }
 
         function onInstallServerFinished(finishedMessage) {
-            goToStartPage()
+            PageController.goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState()
             } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                goToPage(PageEnum.PageSettingsServersList, false)
+                PageController.goToPage(PageEnum.PageSettingsServersList, false)
             } else {
                 PageController.replaceStartPage()
             }
@@ -54,9 +54,9 @@ PageType {
         }
 
         function onServerAlreadyExists(serverIndex) {
-            goToStartPage()
+            PageController.goToStartPage()
             ServersModel.currentlyProcessedIndex = serverIndex
-            goToPage(PageEnum.PageSettingsServerInfo, false)
+            PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))
         }

@@ -112,7 +112,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsLogging)
+                    PageController.goToPage(PageEnum.PageSettingsLogging)
                 }
             }
 

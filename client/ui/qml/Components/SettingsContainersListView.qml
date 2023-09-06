@@ -45,44 +45,44 @@ ListView {
 
                         if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
                             ProtocolsModel.updateModel(config)
-                            goToPage(PageEnum.PageProtocolRaw)
+                            PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
 
                         switch (containerIndex) {
                         case ContainerEnum.OpenVpn: {
                             OpenVpnConfigModel.updateModel(config)
-                            goToPage(PageEnum.PageProtocolOpenVpnSettings)
+                            PageController.goToPage(PageEnum.PageProtocolOpenVpnSettings)
                             break
                         }
                         case ContainerEnum.WireGuard: {
                             ProtocolsModel.updateModel(config)
-                            goToPage(PageEnum.PageProtocolRaw)
+                            PageController.goToPage(PageEnum.PageProtocolRaw)
     //                        WireGuardConfigModel.updateModel(config)
     //                        goToPage(PageEnum.PageProtocolWireGuardSettings)
                             break
                         }
                         case ContainerEnum.Ipsec: {
                             ProtocolsModel.updateModel(config)
-                            goToPage(PageEnum.PageProtocolRaw)
+                            PageController.goToPage(PageEnum.PageProtocolRaw)
     //                        Ikev2ConfigModel.updateModel(config)
     //                        goToPage(PageEnum.PageProtocolIKev2Settings)
                             break
                         }
                         case ContainerEnum.Sftp: {
                             SftpConfigModel.updateModel(config)
-                            goToPage(PageEnum.PageServiceSftpSettings)
+                            PageController.goToPage(PageEnum.PageServiceSftpSettings)
                             break
                         }
                         case ContainerEnum.TorWebSite: {
-                            goToPage(PageEnum.PageServiceTorWebsiteSettings)
+                            PageController.goToPage(PageEnum.PageServiceTorWebsiteSettings)
                             break
                         }
 
                         default: {
                             if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
                                 ProtocolsModel.updateModel(config)
-                                goToPage(PageEnum.PageSettingsServerProtocol)
+                                PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                             }
                         }
                         }
@@ -90,7 +90,7 @@ ListView {
                     } else {
                         ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
-                        goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                        PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                     }
                 }
 

@@ -98,7 +98,7 @@ PageType {
 
                             clickedFunction: function() {
                                 ServersModel.currentlyProcessedIndex = index
-                                goToPage(PageEnum.PageSettingsServerInfo)
+                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
                             }
                         }
 

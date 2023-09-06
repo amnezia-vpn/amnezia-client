@@ -17,8 +17,8 @@ PageType {
         target: ImportController
 
         function onQrDecodingFinished() {
-            closePage()
-            goToPage(PageEnum.PageSetupWizardViewConfig)
+            PageController.closePage()
+            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
 
@@ -84,7 +84,7 @@ It's okay as long as it's from someone you trust.")
                             PageController.showBusyIndicator(false)
                         } else {
                             ImportController.extractConfigFromFile(fileDialog.selectedFile.toString())
-                            goToPage(PageEnum.PageSetupWizardViewConfig)
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                         }
                     }
                 }
@@ -103,7 +103,7 @@ It's okay as long as it's from someone you trust.")
                 clickedFunction: function() {
                     ImportController.startDecodingQr()
                     if (Qt.platform.os === "ios") {
-                        goToPage(PageEnum.PageSetupWizardQrReader)
+                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
                     }
                 }
             }
@@ -120,7 +120,7 @@ It's okay as long as it's from someone you trust.")
                 leftImageSource: "qrc:/images/controls/text-cursor.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSetupWizardTextKey)
+                    PageController.goToPage(PageEnum.PageSetupWizardTextKey)
                 }
             }
 

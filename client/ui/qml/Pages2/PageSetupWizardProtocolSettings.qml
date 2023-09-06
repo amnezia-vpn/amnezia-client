@@ -229,7 +229,7 @@ PageType {
                             text: qsTr("Install")
 
                             onClicked: function() {
-                                goToPage(PageEnum.PageSetupWizardInstalling);
+                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
                         }

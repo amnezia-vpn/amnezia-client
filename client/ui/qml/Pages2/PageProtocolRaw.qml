@@ -180,7 +180,7 @@ PageType {
 
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
-                        goToPage(PageEnum.PageDeinstalling)
+                        PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     questionDrawer.noButtonFunction = function() {

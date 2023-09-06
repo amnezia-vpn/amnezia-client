@@ -46,7 +46,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/server.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsServersList)
+                    PageController.goToPage(PageEnum.PageSettingsServersList)
                 }
             }
 
@@ -60,7 +60,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/radio.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsConnection)
+                    PageController.goToPage(PageEnum.PageSettingsConnection)
                 }
             }
 
@@ -74,7 +74,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/app.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsApplication)
+                    PageController.goToPage(PageEnum.PageSettingsApplication)
                 }
             }
 
@@ -88,7 +88,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/save.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsBackup)
+                    PageController.goToPage(PageEnum.PageSettingsBackup)
                 }
             }
 
@@ -102,7 +102,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsAbout)
+                    PageController.goToPage(PageEnum.PageSettingsAbout)
                 }
             }
 

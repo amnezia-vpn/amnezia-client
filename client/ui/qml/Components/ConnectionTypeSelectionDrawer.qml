@@ -41,7 +41,7 @@ DrawerType {
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-                goToPage(PageEnum.PageSetupWizardCredentials)
+                PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                 root.visible = false
             }
         }
@@ -55,7 +55,7 @@ DrawerType {
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-                goToPage(PageEnum.PageSetupWizardConfigSource)
+                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                 root.visible = false
             }
         }

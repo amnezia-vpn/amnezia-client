@@ -7,35 +7,15 @@ Item {
 
     property StackView stackView: StackView.view
 
-    function goToPage(page, slide = true) {
-        var pagePath = PageController.getPagePath(page)
-        if (slide) {
-            root.stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-        } else {
-            root.stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-        }
-    }
-
-    function closePage() {
-        if (root.stackView.depth <= 1) {
-            return
-        }
-        root.stackView.pop()
-    }
-
-    function goToStartPage() {
-        while (root.stackView.depth > 1) {
-            root.stackView.pop()
-        }
-    }
-
     MouseArea {
-        z: -1
+        z: 99
         anchors.fill: parent
 
-        onClicked: {
-            console.log("base mouse area pressed")
-            focus = true
+        enabled: true
+
+        onPressed: function(mouse) {
+            forceActiveFocus()
+            mouse.accepted = false
         }
     }
 }

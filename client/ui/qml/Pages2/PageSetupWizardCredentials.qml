@@ -104,7 +104,7 @@ PageType {
                         return
                     }
 
-                    goToPage(PageEnum.PageSetupWizardEasy)
+                    PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }
         }

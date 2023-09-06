@@ -72,7 +72,7 @@ PageType {
 
         onClicked: function() {
             ImportController.extractConfigFromCode(textKey.textFieldText)
-            goToPage(PageEnum.PageSetupWizardViewConfig)
+            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
 }

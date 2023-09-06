@@ -87,7 +87,7 @@ PageType {
                                 case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 }
-                                goToPage(protocolPage);
+                                PageController.goToPage(protocolPage);
                             }
 
                             MouseArea {
@@ -120,7 +120,7 @@ PageType {
 
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
-                        goToPage(PageEnum.PageDeinstalling)
+                        PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     questionDrawer.noButtonFunction = function() {

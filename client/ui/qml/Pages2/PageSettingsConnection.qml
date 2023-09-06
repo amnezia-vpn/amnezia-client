@@ -86,7 +86,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsDns)
+                    PageController.goToPage(PageEnum.PageSettingsDns)
                 }
             }
 
@@ -100,7 +100,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    goToPage(PageEnum.PageSettingsSplitTunneling)
+                    PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
             }
 

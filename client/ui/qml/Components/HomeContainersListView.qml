@@ -67,7 +67,7 @@ ListView {
                     } else {
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
-                        goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                        PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.menuVisible = false
                         menu.visible = false
                     }

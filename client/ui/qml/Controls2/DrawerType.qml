@@ -6,6 +6,7 @@ Drawer {
 
     clip: true
     modal: true
+    dragMargin: -10
 
     enter: Transition {
         SmoothedAnimation {

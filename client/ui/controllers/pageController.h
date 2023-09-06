@@ -79,6 +79,8 @@ public slots:
     void showOnStartup();
 
 signals:
+    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToStartPage();
     void goToPageHome();
     void goToPageSettings();
     void goToPageViewConfig();

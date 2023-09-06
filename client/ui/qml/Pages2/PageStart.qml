@@ -47,6 +47,21 @@ PageType {
             }
             tabBarStackView.pop()
         }
+
+        function onGoToPage(page, slide) {
+            var pagePath = PageController.getPagePath(page)
+            if (slide) {
+                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+            } else {
+                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            }
+        }
+
+        function onGoToStartPage() {
+            while (tabBarStackView.depth > 1) {
+                tabBarStackView.pop()
+            }
+        }
     }
 
     Connections {

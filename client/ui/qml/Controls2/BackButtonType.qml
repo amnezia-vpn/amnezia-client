@@ -27,7 +27,7 @@ Item {
                 if (backButtonFunction && typeof backButtonFunction === "function") {
                     backButtonFunction()
                 } else {
-                    closePage()
+                    PageController.closePage()
                 }
             }
         }

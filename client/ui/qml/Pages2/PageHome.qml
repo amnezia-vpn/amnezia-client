@@ -26,11 +26,15 @@ PageType {
     property string defaultServerHostName: ServersModel.defaultServerHostName
     property string defaultContainerName: ContainersModel.defaultContainerName
 
-    ConnectButton {
+    Item {
         anchors.top: parent.top
         anchors.bottom: buttonBackground.top
         anchors.right: parent.right
         anchors.left: parent.left
+
+        ConnectButton {
+            anchors.centerIn: parent
+        }
     }
 
     Connections {
@@ -124,6 +128,9 @@ PageType {
 
     DrawerType {
         id: menu
+
+        interactive: true
+        dragMargin: buttonBackground.height + 56 // page start tabBar height
 
         width: parent.width
         height: parent.height * 0.9
@@ -320,7 +327,7 @@ PageType {
 
                                     onClicked: function() {
                                         ServersModel.currentlyProcessedIndex = index
-                                        goToPage(PageEnum.PageSettingsServerInfo)
+                                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
                                         menu.visible = false
                                     }
                                 }

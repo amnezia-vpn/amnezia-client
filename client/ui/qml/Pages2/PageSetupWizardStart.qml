@@ -17,7 +17,7 @@ PageType {
         target: PageController
 
         function onGoToPageViewConfig() {
-            goToPage(PageEnum.PageSetupWizardViewConfig)
+            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
 
         function onShowBusyIndicator(visible) {

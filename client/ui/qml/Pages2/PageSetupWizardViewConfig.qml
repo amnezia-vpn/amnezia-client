@@ -19,16 +19,16 @@ PageType {
         target: ImportController
 
         function onImportErrorOccurred(errorMessage) {
-            closePage()
+            PageController.closePage()
             PageController.showErrorMessage(errorMessage)
         }
 
         function onImportFinished() {
-            goToStartPage()
+            PageController.goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState()
             } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                goToPage(PageEnum.PageSettingsServersList, false)
+                PageController.goToPage(PageEnum.PageSettingsServersList, false)
             } else {
                 PageController.replaceStartPage()
             }

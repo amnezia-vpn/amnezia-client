@@ -159,12 +159,12 @@ PageType {
                 onClicked: function() {
                     if (root.isEasySetup) {
                         ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
-                        goToPage(PageEnum.PageSetupWizardInstalling)
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(containers.dockerContainer,
                                                   containers.containerDefaultPort,
                                                   containers.containerDefaultTransportProto)
                     } else {
-                        goToPage(PageEnum.PageSetupWizardProtocols)
+                        PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }
                 }
             }
@@ -186,7 +186,7 @@ PageType {
                 text: qsTr("Set up later")
 
                 onClicked: function() {
-                    goToPage(PageEnum.PageSetupWizardInstalling)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                     InstallController.addEmptyServer()
                 }
             }

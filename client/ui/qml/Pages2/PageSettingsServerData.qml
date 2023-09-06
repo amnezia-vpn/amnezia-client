@@ -32,20 +32,20 @@ PageType {
             if (!ServersModel.getServersCount()) {
                 PageController.replaceStartPage()
             } else {
-                goToStartPage()
-                goToPage(PageEnum.PageSettingsServersList)
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
             }
             PageController.showNotificationMessage(finishedMessage)
         }
 
         function onRemoveAllContainersFinished(finishedMessage) {
-            closePage() // close deInstalling page
+            PageController.closePage() // close deInstalling page
             PageController.showNotificationMessage(finishedMessage)
         }
 
         function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
-            closePage() // close deInstalling page
-            closePage() // close page with remove button
+            PageController.closePage() // close deInstalling page
+            PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
         }
     }
@@ -173,7 +173,7 @@ PageType {
 
                     questionDrawer.yesButtonFunction = function() {
                         questionDrawer.visible = false
-                        goToPage(PageEnum.PageDeinstalling)
+                        PageController.goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
                         }
