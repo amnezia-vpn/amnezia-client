@@ -5,6 +5,8 @@
 #ifndef WIREGUARDUTILS_H
 #define WIREGUARDUTILS_H
 
+#define _WINSOCKAPI_
+
 #include <QCoreApplication>
 #include <QHostAddress>
 #include <QObject>
@@ -41,11 +43,11 @@ class WireguardUtils : public QObject {
   virtual bool deletePeer(const InterfaceConfig& config) = 0;
   virtual QList<PeerStatus> getPeerStatus() = 0;
 
-  virtual bool updateRoutePrefix(const IPAddress& prefix, int hopindex) = 0;
-  virtual bool deleteRoutePrefix(const IPAddress& prefix, int hopindex) = 0;
+  virtual bool updateRoutePrefix(const IPAddress& prefix) = 0;
+  virtual bool deleteRoutePrefix(const IPAddress& prefix) = 0;
 
-  virtual bool addExclusionRoute(const QHostAddress& address) = 0;
-  virtual bool deleteExclusionRoute(const QHostAddress& address) = 0;
+  virtual bool addExclusionRoute(const IPAddress& prefix) = 0;
+  virtual bool deleteExclusionRoute(const IPAddress& prefix) = 0;
 };
 
 #endif  // WIREGUARDUTILS_H

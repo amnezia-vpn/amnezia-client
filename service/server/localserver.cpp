@@ -15,7 +15,7 @@
 #endif
 
 namespace {
-Logger logger("MacOSDaemonServer");
+Logger logger("WgDaemonServer");
 }
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
@@ -41,15 +41,20 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     });
 
     // Init Mozilla Wireguard Daemon
-#ifdef Q_OS_MAC
     if (!server.initialize()) {
         logger.error() << "Failed to initialize the server";
         return;
     }
-
+#ifdef Q_OS_MAC
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
                      []() { MacOSDaemon::instance()->deactivate(); });
+#endif
+
+#ifdef Q_OS_WIN
+    // Signal handling for a proper shutdown.
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
+                     []() { WindowsDaemon::instance()->deactivate(); });
 #endif
 }
 

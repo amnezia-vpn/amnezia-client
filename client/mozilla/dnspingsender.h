@@ -19,11 +19,15 @@ class DnsPingSender final : public PingSender {
 
   void sendPing(const QHostAddress& dest, quint16 sequence) override;
 
+  void start();
+  void stop() { m_socket.close(); }
+
  private:
   void readData();
 
  private:
   QUdpSocket m_socket;
+  QHostAddress m_source;
 };
 
 #endif  // DNSPINGSENDER_H
