@@ -98,6 +98,7 @@ bool IosController::initialize()
                 if (manager.connection.status == NEVPNStatusConnected) {
                     m_currentTunnel = manager;
                     qDebug() << "IosController::initialize : VPN already connected";
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     break;
 
                     // TODO: show connected state
