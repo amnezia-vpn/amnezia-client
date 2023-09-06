@@ -56,18 +56,6 @@ void SystemController::saveFile(QString fileName, const QString &data)
 
 QString SystemController::getFileName()
 {
-    auto mainFileDialog = m_qmlRoot->findChild<QObject>("mainFileDialog").parent();
-    if (!mainFileDialog) {
-        return "";
-    }
-    QMetaObject::invokeMethod(mainFileDialog, "open", Qt::DirectConnection);
-
-    QEventLoop wait;
-    QObject::connect(this, &SystemController::fileDialogAccepted, &wait, &QEventLoop::quit);
-    wait.exec();
-
-    auto fileName = mainFileDialog->property("selectedFile").toString();
-
 #ifdef Q_OS_IOS
     CFURLRef url = CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
@@ -80,6 +68,18 @@ QString SystemController::getFileName()
 
     return fileName;
 #endif
+
+    auto mainFileDialog = m_qmlRoot->findChild<QObject>("mainFileDialog").parent();
+    if (!mainFileDialog) {
+        return "";
+    }
+    QMetaObject::invokeMethod(mainFileDialog, "open", Qt::DirectConnection);
+
+    QEventLoop wait;
+    QObject::connect(this, &SystemController::fileDialogAccepted, &wait, &QEventLoop::quit);
+    wait.exec();
+
+    auto fileName = mainFileDialog->property("selectedFile").toString();
 
 #ifdef Q_OS_ANDROID
     // patch for files containing spaces etc
