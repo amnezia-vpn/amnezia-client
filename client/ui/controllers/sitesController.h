@@ -26,6 +26,8 @@ signals:
     void errorOccurred(const QString &errorMessage);
     void finished(const QString &message);
 
+    void saveFile(const QString &fileName, const QString &data);
+
 private:
     std::shared_ptr<Settings> m_settings;
 

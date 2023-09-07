@@ -34,8 +34,7 @@ void SystemController::saveFile(QString fileName, const QString &data)
     QUrl fileUrl = QDir::tempPath() + "/" + fileName;
     QFile file(fileUrl.toString());
 #else
-    QUrl fileUrl = QUrl(fileName);
-    QFile file(fileUrl.toLocalFile());
+    QFile file(fileName);
 #endif
 
     // todo check if save successful
@@ -49,14 +48,18 @@ void SystemController::saveFile(QString fileName, const QString &data)
     MobileUtils::shareText(filesToSend);
     return;
 #else
-    QFileInfo fi(fileUrl.toLocalFile());
+    QFileInfo fi(fileName);
     QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
 #endif
 }
 
-QString SystemController::getFileName()
+QString SystemController::getFileName(const QString &acceptLabel, const QString &nameFilter,
+                                      const QString &selectedFile, const bool isSaveMode, const QString &defaultSuffix)
 {
+    QString fileName;
 #ifdef Q_OS_IOS
+    MobileUtils::openFile();
+
     CFURLRef url = CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
             CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),
@@ -69,17 +72,34 @@ QString SystemController::getFileName()
     return fileName;
 #endif
 
-    auto mainFileDialog = m_qmlRoot->findChild<QObject>("mainFileDialog").parent();
+    QObject *mainFileDialog = m_qmlRoot->findChild<QObject>("mainFileDialog").parent();
     if (!mainFileDialog) {
         return "";
     }
-    QMetaObject::invokeMethod(mainFileDialog, "open", Qt::DirectConnection);
 
+    mainFileDialog->setProperty("acceptLabel", QVariant::fromValue(acceptLabel));
+    mainFileDialog->setProperty("nameFilters", QVariant::fromValue(QStringList(nameFilter)));
+    if (!selectedFile.isEmpty()) {
+        mainFileDialog->setProperty("selectedFile", QVariant::fromValue(selectedFile));
+    }
+    mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
+    mainFileDialog->setProperty("defaultSuffix", QVariant::fromValue(defaultSuffix));
+    QMetaObject::invokeMethod(mainFileDialog, "open");
+
+    bool isFileDialogAccepted = false;
     QEventLoop wait;
-    QObject::connect(this, &SystemController::fileDialogAccepted, &wait, &QEventLoop::quit);
+    QObject::connect(this, &SystemController::fileDialogClosed, [&wait, &isFileDialogAccepted](const bool isAccepted) {
+        isFileDialogAccepted = isAccepted;
+        wait.quit();
+    });
     wait.exec();
+    QObject::disconnect(this, &SystemController::fileDialogClosed, nullptr, nullptr);
 
-    auto fileName = mainFileDialog->property("selectedFile").toString();
+    if (!isFileDialogAccepted) {
+        return "";
+    }
+
+    fileName = mainFileDialog->property("selectedFile").toString();
 
 #ifdef Q_OS_ANDROID
     // patch for files containing spaces etc

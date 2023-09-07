@@ -81,42 +81,6 @@ Window  {
         function onShowPassphraseRequestDrawer() {
             privateKeyPassphraseDrawer.open()
         }
-
-        function onSetupFileDialogForConfig() {
-            mainFileDialog.acceptLabel = qsTr("Open config file")
-            mainFileDialog.nameFilters = !ServersModel.getServersCount() ? [ "Config or backup files (*.vpn *.ovpn *.conf *.backup)" ] :
-                                                                        [ "Config files (*.vpn *.ovpn *.conf)" ]
-            mainFileDialog.acceptFunction = function() {
-                if (mainFileDialog.selectedFile.toString().indexOf(".backup") !== -1 && !ServersModel.getServersCount()) {
-                    PageController.showBusyIndicator(true)
-                    SettingsController.restoreAppConfig(mainFileDialog.selectedFile.toString())
-                    PageController.showBusyIndicator(false)
-                } else {
-                    ImportController.extractConfigFromFile(mainFileDialog.selectedFile)
-                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                }
-            }
-        }
-
-        function onSetupFileDialogForSites(replaceExistingSites) {
-            mainFileDialog.acceptLabel = qsTr("Open sites file")
-            mainFileDialog.nameFilters = [ "Sites files (*.json)" ]
-            mainFileDialog.acceptFunction = function() {
-                PageController.showBusyIndicator(true)
-                SitesController.importSites(mainFileDialog.selectedFile.toString(), replaceExistingSites)
-                PageController.showBusyIndicator(false)
-            }
-        }
-
-        function onSetupFileDialogForBackup() {
-            mainFileDialog.acceptLabel = qsTr("Open backup file")
-            mainFileDialog.nameFilters = [ "Backup files (*.backup)" ]
-            mainFileDialog.acceptFunction = function() {
-                PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(mainFileDialog.selectedFile.toString())
-                PageController.showBusyIndicator(false)
-            }
-        }
     }
 
     Connections {
@@ -234,10 +198,12 @@ Window  {
     FileDialog {
         id: mainFileDialog
 
-        property var acceptFunction
+        property bool isSaveMode: false
 
         objectName: "mainFileDialog"
+        fileMode: isSaveMode ? FileDialog.SaveFile : FileDialog.OpenFile
 
-        onAccepted: acceptFunction()
+        onAccepted: SystemController.fileDialogClosed(true)
+        onRejected: SystemController.fileDialogClosed(false)
     }
 }

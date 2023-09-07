@@ -4,7 +4,7 @@
 #include <QHostInfo>
 #include <QStandardPaths>
 
-#include "fileUtilites.h"
+#include "systemController.h"
 #include "utilities.h"
 
 SitesController::SitesController(const std::shared_ptr<Settings> &settings,
@@ -82,7 +82,7 @@ void SitesController::removeSite(int index)
 
 void SitesController::importSites(const QString &fileName, bool replaceExisting)
 {
-    QFile file(FileUtilites::getFileName(fileName));
+    QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
         emit errorOccurred(tr("Can't open file: ") + fileName);
@@ -145,7 +145,7 @@ void SitesController::exportSites(const QString &fileName)
     QJsonDocument jsonDocument(jsonArray);
     QByteArray jsonData = jsonDocument.toJson();
 
-    FileUtilites::saveFile(fileName, jsonData);
+    SystemController::saveFile(fileName, jsonData);
 
     emit finished(tr("Export completed"));
 }

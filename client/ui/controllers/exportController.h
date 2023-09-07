@@ -35,13 +35,15 @@ public slots:
     QString getConfig();
     QList<QString> getQrCodes();
 
-    void saveFile(const QString &fileName);
+    void exportConfig(const QString &fileName);
 
 signals:
     void generateConfig(int type);
     void exportErrorOccurred(const QString &errorMessage);
 
     void exportConfigChanged();
+
+    void saveFile(const QString &fileName, const QString &data);
 
 private:
     QList<QString> generateQrCodeImageSeries(const QByteArray &data);

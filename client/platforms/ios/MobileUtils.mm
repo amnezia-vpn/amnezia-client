@@ -35,3 +35,31 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     }
 }
 
+@interface MyFilePickerDelegate : NSObject <UIDocumentPickerDelegate>
+@end
+
+@implementation MyFilePickerDelegate
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+    for (NSURL *url in urls) {
+        NSString *filePath = [url path];
+        
+        NSData *fileData = [NSData dataWithContentsOfFile:filePath];
+        NSString *fileContent = [[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding];
+        NSLog(@"Содержимое файла: %@", fileContent);
+    }
+}
+
+@end
+
+void MobileUtils::openFile() {
+    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
+
+    MyFilePickerDelegate *filePickerDelegate = [[MyFilePickerDelegate alloc] init];
+    documentPicker.delegate = filePickerDelegate;
+
+    UIViewController *qtController = getViewController();
+    if (!qtController) return;
+
+    [qtController presentViewController:documentPicker animated:YES completion:nil];
+}

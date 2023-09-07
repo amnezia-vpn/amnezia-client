@@ -11,7 +11,7 @@
 #include "configurators/openvpn_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/errorstrings.h"
-#include "fileUtilites.h"
+#include "systemController.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/androidutils.h"
 #endif
@@ -200,9 +200,9 @@ QList<QString> ExportController::getQrCodes()
     return m_qrCodes;
 }
 
-void ExportController::saveFile(const QString &fileName)
+void ExportController::exportConfig(const QString &fileName)
 {
-    FileUtilites::saveFile(fileName, m_config);
+    SystemController::saveFile(fileName, m_config);
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)

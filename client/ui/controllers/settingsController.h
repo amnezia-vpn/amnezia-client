@@ -63,6 +63,8 @@ signals:
     void changeSettingsFinished(const QString &finishedMessage);
     void changeSettingsErrorOccurred(const QString &errorMessage);
 
+    void saveFile(const QString &fileName, const QString &data);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

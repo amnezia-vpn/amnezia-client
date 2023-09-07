@@ -14,7 +14,6 @@
 #ifdef Q_OS_IOS
     #include <CoreFoundation/CoreFoundation.h>
 #endif
-#include "fileUtilites.h"
 
 namespace
 {
@@ -88,11 +87,7 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 
 void ImportController::extractConfigFromFile(const QString &fileName)
 {
-    QQuickItem *obj = findChild<QQuickItem *>("saveFileDialog");
-
-    QUrl url(fileName);
-    QString path = url.toLocalFile();
-    QFile file(path);
+    QFile file(fileName);
 
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();

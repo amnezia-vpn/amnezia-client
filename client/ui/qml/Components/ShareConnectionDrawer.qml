@@ -72,23 +72,20 @@ DrawerType {
                     imageSource: "qrc:/images/controls/share-2.svg"
 
                     onClicked: {
+                        var fileName = ""
                         if (GC.isMobile()) {
-                            ExportController.saveFile(configFileName)
+                            fileName = configFileName
                         } else {
-                            fileDialog.open()
+                            fileName = SystemController.getFileName(configCaption,
+                                                                    qsTr("Config files (*" + configExtension + ")"),
+                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + configFileName,
+                                                                    true,
+                                                                    configExtension)
                         }
-                    }
-
-                    FileDialog {
-                        id: fileDialog
-                        acceptLabel: configCaption
-                        nameFilters: [ "Config files (*" + configExtension + ")" ]
-                        fileMode: FileDialog.SaveFile
-
-                        currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + configFileName
-                        defaultSuffix: configExtension
-                        onAccepted: {
-                            ExportController.saveFile(fileDialog.currentFile.toString())
+                        if (fileName !== "") {
+                            PageController.showBusyIndicator(true)
+                            ExportController.exportConfig(fileName)
+                            PageController.showBusyIndicator(false)
                         }
                     }
                 }

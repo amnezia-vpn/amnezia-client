@@ -101,23 +101,20 @@ PageType {
                         image: "qrc:/images/controls/save.svg"
 
                         onClicked: {
+                            var fileName = ""
                             if (GC.isMobile()) {
-                                SettingsController.exportLogsFile("AmneziaVPN.log")
+                                fileName = "AmneziaVPN.log"
                             } else {
-                                fileDialog.open()
+                                fileName = SystemController.getFileName(qsTr("Save logs"),
+                                                                        qsTr("Logs files (*.log)"),
+                                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                        true,
+                                                                        ".log")
                             }
-                        }
-
-                        FileDialog {
-                            id: fileDialog
-                            acceptLabel: qsTr("Save logs")
-                            nameFilters: [ "Logs files (*.log)" ]
-                            fileMode: FileDialog.SaveFile
-
-                            currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN"
-                            defaultSuffix: ".log"
-                            onAccepted: {
-                                SettingsController.exportLogsFile(fileDialog.currentFile.toString())
+                            if (fileName !== "") {
+                                PageController.showBusyIndicator(true)
+                                SettingsController.exportLogsFile(fileName)
+                                PageController.showBusyIndicator(false)
                             }
                         }
                     }

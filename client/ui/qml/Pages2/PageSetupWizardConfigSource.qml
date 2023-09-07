@@ -70,8 +70,19 @@ It's okay as long as it's from someone you trust.")
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
-                    PageController.setupFileDialogForConfig()
-                    SystemController.getFileName()
+                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.backup)" :
+                                                                       "Config files (*.vpn *.ovpn *.conf)"
+                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+                    if (fileName !== "") {
+                        if (fileName.indexOf(".backup") !== -1 && !ServersModel.getServersCount()) {
+                            PageController.showBusyIndicator(true)
+                            SettingsController.restoreAppConfig(fileName)
+                            PageController.showBusyIndicator(false)
+                        } else {
+                            ImportController.extractConfigFromFile(fileName)
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                        }
+                    }
                 }
             }
 

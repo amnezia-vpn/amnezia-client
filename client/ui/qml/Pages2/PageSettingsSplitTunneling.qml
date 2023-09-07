@@ -300,25 +300,19 @@ PageType {
                     text: qsTr("Save site list")
 
                     clickedFunction: function() {
+                        var fileName = ""
                         if (GC.isMobile()) {
-                            SitesController.exportSites("amezia_tunnel.json")
+                            fileName = "amnezia_sites.json"
                         } else {
-                            saveFileDialog.open()
+                            fileName = SystemController.getFileName(qsTr("Save sites"),
+                                                                    qsTr("Sites files (*.json)"),
+                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_sites",
+                                                                    true,
+                                                                    ".json")
                         }
-                    }
-
-                    FileDialog {
-                        id: saveFileDialog
-                        objectName: saveFileDialog
-                        acceptLabel: qsTr("Save sites")
-                        nameFilters: [ "Sites files (*.json)" ]
-                        fileMode: FileDialog.SaveFile
-
-                        currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/sites"
-                        defaultSuffix: ".json"
-                        onAccepted: {
+                        if (fileName !== "") {
                             PageController.showBusyIndicator(true)
-                            SitesController.exportSites(saveFileDialog.currentFile.toString())
+                            SitesController.exportSites(fileName)
                             moreActionsDrawer.close()
                             PageController.showBusyIndicator(false)
                         }
@@ -377,8 +371,11 @@ PageType {
                     text: qsTr("Replace site list")
 
                     clickedFunction: function() {
-                        PageController.setupFileDialogForSites(true)
-                        SystemController.getFileName()
+                        var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                                    qsTr("Sites files (*.json)"))
+                        if (fileName !== "") {
+                            importSitesDrawerContent.importSites(fileName, true)
+                        }
                     }
                 }
 
@@ -389,11 +386,20 @@ PageType {
                     text: qsTr("Add imported sites to existing ones")
 
                     clickedFunction: function() {
-                        PageController.setupFileDialogForSites(false)
-                        SystemController.getFileName()
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
+                        var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                                    qsTr("Sites files (*.json)"))
+                        if (fileName !== "") {
+                            importSitesDrawerContent.importSites(fileName, false)
+                        }
                     }
+                }
+
+                function importSites(fileName, replaceExistingSites) {
+                    PageController.showBusyIndicator(true)
+                    SitesController.importSites(fileName, replaceExistingSites)
+                    PageController.showBusyIndicator(false)
+                    importSitesDrawer.close()
+                    moreActionsDrawer.close()
                 }
 
                 DividerType {}

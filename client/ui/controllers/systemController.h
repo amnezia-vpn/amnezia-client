@@ -11,15 +11,16 @@ class SystemController : public QObject
 public:
     explicit SystemController(const std::shared_ptr<Settings> &setting, QObject *parent = nullptr);
 
+    static void saveFile(QString fileName, const QString &data);
+
 public slots:
-    void saveFile(QString fileName, const QString &data);
-    QString getFileName();
+    QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
+                        const bool isSaveMode = false, const QString &defaultSuffix = "");
 
     void setQmlRoot(QObject *qmlRoot);
 
 signals:
-    void fileDialogAccepted();
-    void fileDialogRejected();
+    void fileDialogClosed(const bool isAccepted);
 
 private:
     std::shared_ptr<Settings> m_settings;

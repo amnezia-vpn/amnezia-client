@@ -84,30 +84,21 @@ PageType {
                 text: qsTr("Make a backup")
 
                 onClicked: {
+                    var fileName = ""
                     if (GC.isMobile()) {
-                        backupAppConfig("AmneziaVPN.backup")
+                        fileName = "AmneziaVPN.backup"
                     } else {
-                        saveFileDialog.open()
+                        fileName = SystemController.getFileName(qsTr("Save backup file"),
+                                                                qsTr("Backup files (*.backup)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                true,
+                                                                ".backup")
                     }
-                }
-
-                FileDialog {
-                    id: saveFileDialog
-                    acceptLabel: qsTr("Save backup file")
-                    nameFilters: [ "Backup files (*.backup)" ]
-                    fileMode: FileDialog.SaveFile
-
-                    currentFile: StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN"
-                    defaultSuffix: ".backup"
-                    onAccepted: {
-                        makeBackupButton.backupAppConfig(saveFileDialog.currentFile.toString())
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.backupAppConfig(fileName)
+                        PageController.showBusyIndicator(false)
                     }
-                }
-
-                function backupAppConfig(fileName) {
-                    PageController.showBusyIndicator(true)
-                    SettingsController.backupAppConfig(fileName)
-                    PageController.showBusyIndicator(false)
                 }
             }
 
@@ -125,8 +116,13 @@ PageType {
                 text: qsTr("Restore from backup")
 
                 onClicked: {
-                    PageController.setupFileDialogForBackup()
-                    SystemController.getFileName()
+                    var fileName = SystemController.getFileName(qsTr("Open backup file"),
+                                                                qsTr("Backup files (*.backup)"))
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.restoreAppConfig(fileName)
+                        PageController.showBusyIndicator(false)
+                    }
                 }
             }
         }

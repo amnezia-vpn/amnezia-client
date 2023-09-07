@@ -2,8 +2,8 @@
 
 #include <QStandardPaths>
 
-#include "fileUtilites.h"
 #include "logger.h"
+#include "systemController.h"
 #include "ui/qautostart.h"
 #include "version.h"
 
@@ -70,7 +70,7 @@ void SettingsController::openLogsFolder()
 
 void SettingsController::exportLogsFile(const QString &fileName)
 {
-    FileUtilites::saveFile(fileName, Logger::getLogFile());
+    SystemController::saveFile(fileName, Logger::getLogFile());
 }
 
 void SettingsController::clearLogs()
@@ -81,12 +81,12 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig(const QString &fileName)
 {
-    FileUtilites::saveFile(fileName, m_settings->backupAppConfig());
+    SystemController::saveFile(fileName, m_settings->backupAppConfig());
 }
 
 void SettingsController::restoreAppConfig(const QString &fileName)
 {
-    QFile file(FileUtilites::getFileName(fileName));
+    QFile file(fileName);
 
     file.open(QIODevice::ReadOnly);
 
