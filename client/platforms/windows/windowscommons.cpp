@@ -111,7 +111,7 @@ int WindowsCommons::VPNAdapterIndex() {
   // For someReason QNetworkInterface::fromName(MozillaVPN) does not work >:(
   auto adapterList = QNetworkInterface::allInterfaces();
   for (const auto& adapter : adapterList) {
-    if (adapter.humanReadableName().contains("AmeziaVPN")) {
+    if (adapter.humanReadableName().contains("AmneziaVPN")) {
       return adapter.index();
     }
   }

@@ -190,7 +190,7 @@ bool WindowsFirewall::enableKillSwitch(int vpnAdapterIndex) {
   FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
   FW_OK(allowHyperVTraffic(MED_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
-                                "Allow all for Mozilla VPN.exe"));
+                                "Allow all for AmneziaVPN.exe"));
   FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
   FW_OK(
       allowLoopbackTraffic(MED_WEIGHT, "Allow Loopback traffic on device %1"));

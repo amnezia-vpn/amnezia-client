@@ -134,6 +134,8 @@ bool WireguardUtilsWindows::deleteInterface() {
 bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
+  QByteArray pskKey =
+      QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
   // Enable the windows firewall for this peer.
   WindowsFirewall::instance()->enablePeerTraffic(config);
@@ -146,6 +148,7 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QTextStream out(&message);
   out << "set=1\n";
   out << "public_key=" << QString(publicKey.toHex()) << "\n";
+  out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   if (!config.m_serverIpv4AddrIn.isNull()) {
     out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
   } else if (!config.m_serverIpv6AddrIn.isNull()) {
