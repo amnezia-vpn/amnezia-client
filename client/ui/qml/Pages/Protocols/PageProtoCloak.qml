@@ -76,9 +76,14 @@ PageProtocolBase {
             TextFieldType {
                 id: lineEdit_proto_cloak_site
                 Layout.fillWidth: true
+                focus: true
                 height: 31
                 text: logic.lineEditSiteText
                 onEditingFinished: {
+                    logic.lineEditSiteText = text
+                }
+
+                onCursorRectangleChanged: {
                     logic.lineEditSiteText = text
                 }
             }
@@ -96,12 +101,17 @@ PageProtocolBase {
             TextFieldType {
                 id: lineEdit_proto_cloak_port
                 Layout.fillWidth: true
+                focus: true
                 height: 31
                 text: logic.lineEditPortText
                 onEditingFinished: {
                     logic.lineEditPortText = text
                 }
                 enabled: logic.lineEditPortEnabled
+
+                onCursorRectangleChanged: {
+                    logic.lineEditPortText = text
+                }
             }
         }
 
