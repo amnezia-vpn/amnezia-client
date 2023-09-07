@@ -113,7 +113,6 @@ void LocalSocketController::daemonConnected() {
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
-  qDebug() << rawConfig;
   QJsonObject wgConfig = rawConfig.value("wireguard_config_data").toObject();
 
   QJsonObject json;
