@@ -8,6 +8,7 @@
 #include <QQuickItem>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QtConcurrent>
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
@@ -58,8 +59,10 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 {
     QString fileName;
 #ifdef Q_OS_IOS
-    MobileUtils::openFile();
 
+    MobileUtils mobileUtils;
+    fileName = mobileUtils.openFile();
+    
     CFURLRef url = CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
             CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(fileName.unicode()), fileName.length()),

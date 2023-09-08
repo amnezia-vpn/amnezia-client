@@ -4,6 +4,7 @@ void MobileUtils::shareText(const QStringList &)
 {
 }
 
-void MobileUtils::openFile()
+QString MobileUtils::openFile()
 {
+    return QString();
 }

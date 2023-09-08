@@ -8,12 +8,15 @@ class MobileUtils : public QObject
 {
     Q_OBJECT
 
-public:
-    MobileUtils() = delete;
+//public:
+//    MobileUtils() = delete;
 
 public slots:
     static void shareText(const QStringList &filesToSend);
-    static void openFile();
+    QString openFile();
+    
+signals:
+    void finished();
 };
 
 #endif // MOBILEUTILS_H
