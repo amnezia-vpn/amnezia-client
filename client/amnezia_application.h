@@ -91,7 +91,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<LanguageModel> m_languageModel;
-    QScopedPointer<ProtocolsModel> m_protocolsModel;
+    QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
