@@ -23,6 +23,28 @@ PageType {
         function onShowBusyIndicator(visible) {
             busyIndicator.visible = visible
         }
+
+        function onClosePage() {
+            if (stackView.depth <= 1) {
+                return
+            }
+            stackView.pop()
+        }
+
+        function onGoToPage(page, slide) {
+            var pagePath = PageController.getPagePath(page)
+            if (slide) {
+                stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+            } else {
+                stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            }
+        }
+
+        function onGoToStartPage() {
+            while (stackView.depth > 1) {
+                stackView.pop()
+            }
+        }
     }
 
     Connections {
