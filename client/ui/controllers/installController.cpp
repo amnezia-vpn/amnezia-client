@@ -40,8 +40,13 @@ namespace
 
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel,
                                      const QSharedPointer<ContainersModel> &containersModel,
+                                     const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
+    : QObject(parent),
+      m_serversModel(serversModel),
+      m_containersModel(containersModel),
+      m_protocolModel(protocolsModel),
+      m_settings(settings)
 {
 }
 
@@ -252,6 +257,8 @@ void InstallController::updateContainer(QJsonObject config)
     auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
     if (errorCode == ErrorCode::NoError) {
         m_containersModel->setData(modelIndex, config, ContainersModel::Roles::ConfigRole);
+        m_protocolModel->updateModel(config);
+
         emit updateContainerFinished();
         return;
     }

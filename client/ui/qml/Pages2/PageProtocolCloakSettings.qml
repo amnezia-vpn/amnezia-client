@@ -91,7 +91,15 @@ PageType {
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== site) {
-                                    site = textFieldText
+                                    var tmpText = textFieldText
+                                    tmpText = tmpText.toLocaleLowerCase()
+
+                                    var indexHttps = tmpText.indexOf("https://")
+                                    if (indexHttps === 0) {
+                                        tmpText = textFieldText.substring(8)
+                                    } else {
+                                        site = textFieldText
+                                    }
                                 }
                             }
                         }

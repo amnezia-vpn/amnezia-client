@@ -8,6 +8,7 @@
 #include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/protocols_model.h"
 
 class InstallController : public QObject
 {
@@ -15,6 +16,7 @@ class InstallController : public QObject
 public:
     explicit InstallController(const QSharedPointer<ServersModel> &serversModel,
                                const QSharedPointer<ContainersModel> &containersModel,
+                               const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
@@ -71,6 +73,7 @@ private:
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ProtocolsModel> m_protocolModel;
     std::shared_ptr<Settings> m_settings;
 
     ServerCredentials m_currentlyInstalledServerCredentials;

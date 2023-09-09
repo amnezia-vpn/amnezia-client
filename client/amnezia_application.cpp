@@ -330,7 +330,7 @@ void AmneziaApplication::initControllers()
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_settings));
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
     connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
             &PageController::showPassphraseRequestDrawer);
