@@ -1,6 +1,6 @@
 #include "MobileUtils.h"
 
-void MobileUtils::shareText(const QStringList &)
+bool MobileUtils::shareText(const QStringList &)
 {
 }
 
