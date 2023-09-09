@@ -7,12 +7,12 @@
 class MobileUtils : public QObject
 {
     Q_OBJECT
-
-//public:
-//    MobileUtils() = delete;
+    
+public:
+    explicit MobileUtils(QObject *parent = nullptr);
 
 public slots:
-    static void shareText(const QStringList &filesToSend);
+    bool shareText(const QStringList &filesToSend);
     QString openFile();
     
 signals:

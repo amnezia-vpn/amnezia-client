@@ -3,7 +3,6 @@
 #include <UIKit/UIKit.h>
 #include <Security/Security.h>
 
-#include <QDebug>
 #include <QEventLoop>
 
 static UIViewController* getViewController() {
@@ -16,7 +15,11 @@ static UIViewController* getViewController() {
     return nil;
 }
 
-void MobileUtils::shareText(const QStringList& filesToSend) {
+MobileUtils::MobileUtils(QObject *parent) : QObject(parent) {
+    
+}
+
+bool MobileUtils::shareText(const QStringList& filesToSend) {
     NSMutableArray *sharingItems = [NSMutableArray new];
 
     for (int i = 0; i < filesToSend.size(); i++) {
@@ -28,35 +31,48 @@ void MobileUtils::shareText(const QStringList& filesToSend) {
     if (!qtController) return;
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+    
+    __block bool isAccepted = false;
+    
+    [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+        isAccepted = completed;
+        emit finished();
+    }];
 
     [qtController presentViewController:activityController animated:YES completion:nil];
     UIPopoverPresentationController *popController = activityController.popoverPresentationController;
     if (popController) {
         popController.sourceView = qtController.view;
     }
+    
+    QEventLoop wait;
+    QObject::connect(this, &MobileUtils::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+    
+    return isAccepted;
 }
 
-typedef void (^FileSelectionCallback)(NSString *fileContent);
+typedef void (^DocumentPickerClosedCallback)(NSString *path);
 
-@interface MyFilePickerDelegate : NSObject <UIDocumentPickerDelegate>
+@interface DocumentPickerDelegate : NSObject <UIDocumentPickerDelegate>
 
-@property (nonatomic, copy) FileSelectionCallback fileSelectionCallback;
+@property (nonatomic, copy) DocumentPickerClosedCallback documentPickerClosedCallback;
 
 @end
 
-@implementation MyFilePickerDelegate
+@implementation DocumentPickerDelegate 
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     for (NSURL *url in urls) {
-        if (self.fileSelectionCallback) {
-            self.fileSelectionCallback([url path]);
+        if (self.documentPickerClosedCallback) {
+            self.documentPickerClosedCallback([url path]);
         }
     }
 }
     
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    if (self.fileSelectionCallback) {
-        self.fileSelectionCallback(nil);
+    if (self.documentPickerClosedCallback) {
+        self.documentPickerClosedCallback(nil);
     }
 }
 
@@ -65,28 +81,28 @@ typedef void (^FileSelectionCallback)(NSString *fileContent);
 QString MobileUtils::openFile() {
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
 
-    MyFilePickerDelegate *filePickerDelegate = [[MyFilePickerDelegate alloc] init];
-    documentPicker.delegate = filePickerDelegate;
+    DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
+    documentPicker.delegate = documentPickerDelegate;
 
     UIViewController *qtController = getViewController();
     if (!qtController) return;
 
     [qtController presentViewController:documentPicker animated:YES completion:nil];
     
-    __block QString path1;
+    __block QString filePath;
 
-    filePickerDelegate.fileSelectionCallback = ^(NSString *filePath) {
-        if (filePath) {
-            path1 = QString::fromUtf8(filePath.UTF8String);
+    documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
+        if (path) {
+            filePath = QString::fromUtf8(path.UTF8String);
         } else {
-            path1 = QString("");
+            filePath = QString();
         }
         emit finished();
     };
 
-    QEventLoop wait1;
-    QObject::connect(this, &MobileUtils::finished, &wait1, &QEventLoop::quit);
-    wait1.exec();
+    QEventLoop wait;
+    QObject::connect(this, &MobileUtils::finished, &wait, &QEventLoop::quit);
+    wait.exec();
     
-    return path1;
+    return filePath;
 }

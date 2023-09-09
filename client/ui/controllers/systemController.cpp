@@ -46,7 +46,9 @@ void SystemController::saveFile(QString fileName, const QString &data)
 #ifdef Q_OS_IOS
     QStringList filesToSend;
     filesToSend.append(fileUrl.toString());
-    MobileUtils::shareText(filesToSend);
+    MobileUtils mobileUtils;
+    // todo check if save successful
+    mobileUtils.shareText(filesToSend);
     return;
 #else
     QFileInfo fi(fileName);
@@ -62,6 +64,9 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 
     MobileUtils mobileUtils;
     fileName = mobileUtils.openFile();
+    if (fileName.isEmpty()) {
+        return fileName;
+    }
     
     CFURLRef url = CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
