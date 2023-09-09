@@ -16,7 +16,6 @@ OpenVpnOverCloakProtocol::OpenVpnOverCloakProtocol(const QJsonObject &configurat
 
 OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
 {
-    qDebug() << "OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol";
     OpenVpnOverCloakProtocol::stop();
     m_ckProcess.close();
 }

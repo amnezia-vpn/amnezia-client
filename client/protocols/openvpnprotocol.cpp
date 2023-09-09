@@ -19,7 +19,6 @@ OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject *pare
 
 OpenVpnProtocol::~OpenVpnProtocol()
 {
-    qDebug() << "OpenVpnProtocol::~OpenVpnProtocol()";
     OpenVpnProtocol::stop();
     QThread::msleep(200);
 }
