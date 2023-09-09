@@ -129,7 +129,13 @@ PageType {
     DrawerType {
         id: menu
 
-        interactive: true
+        interactive: {
+            if (stackView && stackView.currentItem) {
+                return (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) ? true : false
+            } else {
+                return false
+            }
+        }
         dragMargin: buttonBackground.height + 56 // page start tabBar height
 
         width: parent.width
