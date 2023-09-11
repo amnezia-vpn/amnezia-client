@@ -665,7 +665,8 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
     // TODO reimplement with netstat
-    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
+    QString script =
+            QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
@@ -739,8 +740,10 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                                   genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
-            if (stdOut.contains("Packet manager not found")) return ErrorCode::ServerPacketManagerError;
-            if (stdOut.contains("fuser not installed")) return ErrorCode::NoError;
+            if (stdOut.contains("Packet manager not found"))
+                return ErrorCode::ServerPacketManagerError;
+            if (stdOut.contains("fuser not installed"))
+                return ErrorCode::NoError;
 
             if (stdOut.isEmpty()) {
                 return ErrorCode::NoError;
@@ -798,11 +801,19 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
             QString port = containerAndPortMatch.captured(2);
             QString transportProto = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerProps::containerFromString(name);
+
+            QJsonObject config;
             Proto mainProto = ContainerProps::defaultProtocol(container);
-            QJsonObject config { { config_key::container, name },
-                                 { ProtocolProps::protoToString(mainProto),
-                                   QJsonObject { { config_key::port, port },
-                                                 { config_key::transport_proto, transportProto } } } };
+            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
+                QJsonObject containerConfig;
+                if (protocol == mainProto) {
+                    containerConfig.insert(config_key::port, port);
+                    containerConfig.insert(config_key::transport_proto, transportProto);
+
+                    config.insert(config_key::container, ContainerProps::containerToString(container));
+                }
+                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+            }
             installedContainers.insert(container, config);
         }
     }

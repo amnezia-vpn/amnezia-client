@@ -122,7 +122,7 @@ And if you don't like the app, all the more support it - the donation will be us
                 leftImageSource: "qrc:/images/controls/telegram.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_dev"))
+                    Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
                 }
             }
 
