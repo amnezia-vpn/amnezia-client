@@ -145,6 +145,7 @@ PageType {
                                     }
 
                                     TextField {
+                                        implicitWidth: parent.width
                                         Layout.fillWidth: true
                                         Layout.topMargin: 16
                                         Layout.bottomMargin: 16
