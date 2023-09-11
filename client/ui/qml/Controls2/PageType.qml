@@ -7,15 +7,16 @@ Item {
 
     property StackView stackView: StackView.view
 
-    MouseArea {
-        z: 99
-        anchors.fill: parent
+//    MouseArea {
+//        id: globalMouseArea
+//        z: 99
+//        anchors.fill: parent
 
-        enabled: true
+//        enabled: true
 
-        onPressed: function(mouse) {
-            forceActiveFocus()
-            mouse.accepted = false
-        }
-    }
+//        onPressed: function(mouse) {
+//            forceActiveFocus()
+//            mouse.accepted = false
+//        }
+//    }
 }
