@@ -71,7 +71,7 @@ private:
     NETunnelProviderManager *m_currentTunnel{};
     NSString *m_serverAddress{};
     bool isOurManager(NETunnelProviderManager* manager);
-    void sendVpnExtensionMessage(NSDictionary* message, std::function<void(NSDictionary*)> callback);
+    void sendVpnExtensionMessage(NSDictionary* message, std::function<void(NSDictionary*)> callback = nullptr);
 #endif
 
     amnezia::Proto m_proto;

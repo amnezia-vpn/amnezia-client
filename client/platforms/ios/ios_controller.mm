@@ -55,7 +55,6 @@ IosController* s_instance = nullptr;
 
 IosController::IosController() : QObject()
 {
-    qDebug() << "IosController::IosController() init";
     s_instance = this;
     m_iosControllerWrapper = [[IosControllerWrapper alloc] initWithCppController:this];
 
@@ -78,8 +77,6 @@ IosController* IosController::Instance() {
 
 bool IosController::initialize()
 {
-    qDebug() << "IosController::initialize";
-
     __block bool ok = true;
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
@@ -115,8 +112,6 @@ bool IosController::initialize()
 
 bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration)
 {
-    qDebug() << "IosController::connectVpn called from thread:" << QThread::currentThread();
-
     m_proto = proto;
     m_rawConfig = configuration;
     m_serverAddress = configuration.value(config_key::hostName).toString().toNSString();
@@ -136,7 +131,6 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
 
     qDebug() << "IosController::connectVpn" << tunnelName;
 
-    // reset m_currentTunnel
     m_currentTunnel = nullptr;
 
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
@@ -260,8 +254,6 @@ void IosController::vpnConfigurationDidChange(void *pNotification)
 
 bool IosController::setupOpenVPN()
 {
-    qDebug() << "IosController::setupOpenVPN";
-
     QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
@@ -270,7 +262,6 @@ bool IosController::setupOpenVPN()
 
 bool IosController::setupCloak()
 {
-    qDebug() << "IosController::setupCloak";
     m_serverAddress = @"127.0.0.1";
     QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
@@ -308,7 +299,6 @@ bool IosController::setupCloak()
 
 bool IosController::setupWireGuard()
 {
-    qDebug() << "IosController::setupWireGuard";
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
 
     QString wgConfig = config[config_key::config].toString();
@@ -352,17 +342,13 @@ void IosController::startTunnel()
 
     [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            qDebug() << "IosController::saveToPreferencesWithCompletionHandler called from thread:" << QThread::currentThread();
 
             if (saveError) {
-                qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Save Error" << saveError.localizedDescription.UTF8String;
                 emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
                 return;
             }
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
-                    qDebug() << "IosController::loadFromPreferencesWithCompletionHandler called from thread:" << QThread::currentThread();
-
                     if (loadError) {
                         qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Load Error" << loadError.localizedDescription.UTF8String;
                         emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
@@ -379,9 +365,7 @@ void IosController::startTunnel()
                     NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
 
                     NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue};
-                    sendVpnExtensionMessage(message, [&](NSDictionary* response){
-                        qDebug() << "sendVpnExtensionMessage" << response;
-                    });
+                    sendVpnExtensionMessage(message);
 
 
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
@@ -440,7 +424,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 
     void (^completionHandler)(NSData *) = ^(NSData *responseData) {
         if (!responseData) {
-            callback(nil);
+            if (callback) callback(nil);
             return;
         }
 
@@ -448,13 +432,13 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
         NSDictionary *response = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&deserializeError];
 
         if (response && [response isKindOfClass:[NSDictionary class]]) {
-            callback(response);
+            if (callback) callback(response);
             return;
         } else if (deserializeError) {
             qDebug() << "Failed to deserialize the VpnExtension response";
         }
 
-        callback(nil);
+        if (callback) callback(nil);
     };
 
     NETunnelProviderSession *session = (NETunnelProviderSession *)m_currentTunnel.connection;
