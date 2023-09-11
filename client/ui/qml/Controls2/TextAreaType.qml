@@ -15,6 +15,9 @@ Rectangle {
     radius: 16
 
     FlickableType {
+        id: fl
+        interactive: false
+
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         contentHeight: textArea.implicitHeight
@@ -46,12 +49,23 @@ Rectangle {
                 }
             }
 
+            onCursorVisibleChanged:  {
+                if (textArea.cursorVisible) {
+                    fl.interactive = true
+                } else {
+                    fl.interactive = false
+                }
+            }
+
             wrapMode: Text.Wrap
 
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.RightButton
-                onClicked: contextMenu.open()
+                onClicked: {
+                    fl.interactive = true
+                    contextMenu.open()
+                }
             }
 
             ContextMenuType {
