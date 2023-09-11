@@ -109,14 +109,8 @@ public:
 
     QString routeModeString(RouteMode mode) const;
 
-    RouteMode routeMode() const
-    {
-        return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt());
-    }
-    void setRouteMode(RouteMode mode)
-    {
-        m_settings.setValue("Conf/routeMode", mode);
-    }
+    RouteMode routeMode() const;
+    void setRouteMode(RouteMode mode) { m_settings.setValue("Conf/routeMode", mode); }
 
     QVariantMap vpnSites(RouteMode mode) const
     {
