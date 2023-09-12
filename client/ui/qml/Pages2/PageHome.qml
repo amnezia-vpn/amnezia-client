@@ -210,7 +210,7 @@ PageType {
                         }
 
                         Component.onCompleted: updateContainersModelFilters()
-                        currentIndex: ContainersModel.getDefaultContainer()
+                        currentIndex: ContainersModel.getDefaultContainer() - 1
                     }
                 }
             }
