@@ -13,11 +13,20 @@ import "../Components"
 PageType {
     id: root
 
+
+    Connections {
+        target: ConnectionController
+
+        function onReconnectWithChangedContainer(message) {
+            PageController.showNotificationMessage(message)
+        }
+    }
+
     Connections {
         target: InstallController
 
-        function onUpdateContainerFinished() {
-            PageController.showNotificationMessage(qsTr("Settings updated successfully"))
+        function onUpdateContainerFinished(message) {
+            PageController.showNotificationMessage(message)
         }
     }
 

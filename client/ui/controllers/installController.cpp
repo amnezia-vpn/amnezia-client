@@ -254,12 +254,26 @@ void InstallController::updateContainer(QJsonObject config)
     ServerController serverController(m_settings);
     connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
 
-    auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
+    bool reinstallRequired = serverController.isReinstallContainerRequired(container, oldContainerConfig, config);
+    auto errorCode = serverController.updateContainer(reinstallRequired, serverCredentials, container, oldContainerConfig, config);
     if (errorCode == ErrorCode::NoError) {
         m_containersModel->setData(modelIndex, config, ContainersModel::Roles::ConfigRole);
         m_protocolModel->updateModel(config);
 
-        emit updateContainerFinished();
+        bool isCurrentContainerChanged = false;
+        if (reinstallRequired &&
+            (serverIndex == m_serversModel->getDefaultServerIndex()) &&
+            (container == m_containersModel->getDefaultContainer()) ) {
+            isCurrentContainerChanged = true;
+        }
+
+
+        if (isCurrentContainerChanged) {
+            emit currentContainerChanged();
+        } else {
+            emit updateContainerFinished(tr("Settings updated successfully"));
+        }
+
         return;
     }
 

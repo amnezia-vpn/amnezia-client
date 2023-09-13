@@ -26,8 +26,11 @@ public:
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config,
                              bool isUpdate = false);
-    ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
-                              const QJsonObject &oldConfig, QJsonObject &newConfig);
+    ErrorCode updateContainer(const bool reinstallRequired, const ServerCredentials &credentials,
+                              DockerContainer container,
+                              const QJsonObject &oldConfig,
+                              QJsonObject &newConfig);
+
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials,
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
 
@@ -60,6 +63,8 @@ public:
     ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
                                      const std::function<QString()> &callback);
 
+    bool isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig,
+                                      const QJsonObject &newConfig);
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container,
@@ -72,8 +77,7 @@ private:
 
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container,
                                const QJsonObject &config);
-    bool isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig,
-                                      const QJsonObject &newConfig);
+
     ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
 
