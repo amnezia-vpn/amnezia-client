@@ -61,11 +61,12 @@ ListView {
 
                 onClicked: {
                     if (checked) {
-                        isDefault = true
                         var needReconnected = false
-                        if (menuContent.currentIndex !== index) {
+                        if (!isDefault) {
                             needReconnected = true
                         }
+
+                        isDefault = true
 
                         menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
