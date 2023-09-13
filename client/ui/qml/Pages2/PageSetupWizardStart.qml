@@ -56,6 +56,20 @@ PageType {
         }
     }
 
+    Connections {
+        target: InstallController
+
+        function onInstallationErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+
+            var currentPageName = tabBarStackView.currentItem.objectName
+
+            if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
+                PageController.closePage()
+            }
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: parent.top
