@@ -33,7 +33,7 @@ DrawerType {
     onClosed: {
         configExtension = ".vpn"
         configCaption = qsTr("Save AmneziaVPN config")
-        configFileName = "amnezia_config.vpn"
+        configFileName = "amnezia_config"
     }
 
     Item {
@@ -74,7 +74,7 @@ DrawerType {
                     onClicked: {
                         var fileName = ""
                         if (GC.isMobile()) {
-                            fileName = configFileName
+                            fileName = configFileName + configExtension
                         } else {
                             fileName = SystemController.getFileName(configCaption,
                                                                     qsTr("Config files (*" + configExtension + ")"),
