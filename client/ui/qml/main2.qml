@@ -81,6 +81,10 @@ Window  {
         function onShowPassphraseRequestDrawer() {
             privateKeyPassphraseDrawer.open()
         }
+
+        function onGoToPageSettingsBackup() {
+            PageController.goToPage(PageEnum.PageSettingsBackup)
+        }
     }
 
     Connections {

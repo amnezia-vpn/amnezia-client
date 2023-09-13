@@ -117,6 +117,11 @@ void AmneziaApplication::init()
             &ImportController::extractConfigFromData);
     connect(IosController::Instance(), &IosController::importConfigFromOutside, m_pageController.get(),
             &PageController::goToPageViewConfig);
+
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, m_pageController.get(),
+            &PageController::goToPageSettingsBackup);
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, m_settingsController.get(),
+            &SettingsController::importBackupFromOutside);
 #endif
 
     m_notificationHandler.reset(NotificationHandler::create(nullptr));

@@ -85,6 +85,7 @@ signals:
     void goToPageSettings();
     void goToPageViewConfig();
     void goToPageSettingsServerServices();
+    void goToPageSettingsBackup();
 
     void closePage();
 

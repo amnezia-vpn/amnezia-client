@@ -169,7 +169,7 @@ DrawerType {
                                 Layout.topMargin: 16
                             }
 
-                            TextArea {
+                            TextField {
                                 id: configText
 
                                 Layout.fillWidth: true
@@ -179,6 +179,8 @@ DrawerType {
                                 padding: 0
                                 leftPadding: 0
                                 height: 24
+
+                                readOnly: true
 
                                 color: "#D7D8DB"
                                 selectionColor:  "#633303"

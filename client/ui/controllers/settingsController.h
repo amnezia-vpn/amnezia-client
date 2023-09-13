@@ -65,6 +65,8 @@ signals:
 
     void saveFile(const QString &fileName, const QString &data);
 
+    void importBackupFromOutside(QString filePath);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
