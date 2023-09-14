@@ -105,23 +105,26 @@ void AmneziaApplication::init()
         return;
     }
 
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_importController.get(),
-            &ImportController::extractConfigFromData);
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_pageController.get(),
-            &PageController::goToPageViewConfig);
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
+        m_pageController->replaceStartPage();
+        m_importController->extractConfigFromData(data);
+        m_pageController->goToPageViewConfig();
+    });
 #endif
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_importController.get(),
-            &ImportController::extractConfigFromData);
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_pageController.get(),
-            &PageController::goToPageViewConfig);
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
+        m_pageController->replaceStartPage();
+        m_importController->extractConfigFromData(data);
+        m_pageController->goToPageViewConfig();
+    });
 
-    connect(IosController::Instance(), &IosController::importBackupFromOutside, m_pageController.get(),
-            &PageController::goToPageSettingsBackup);
-    connect(IosController::Instance(), &IosController::importBackupFromOutside, m_settingsController.get(),
-            &SettingsController::importBackupFromOutside);
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
+        m_pageController->replaceStartPage();
+        m_pageController->goToPageSettingsBackup();
+        m_settingsController->importBackupFromOutside(filePath);
+    });
 #endif
 
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
