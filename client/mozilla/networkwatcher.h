@@ -33,6 +33,8 @@ class NetworkWatcher final : public QObject {
  private:
   void settingsChanged();
 
+ // void notificationClicked(NotificationHandler::Message message);
+
  private:
   bool m_active = false;
   bool m_reportUnsecuredNetwork = false;

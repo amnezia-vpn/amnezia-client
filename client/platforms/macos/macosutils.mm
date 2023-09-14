@@ -55,6 +55,7 @@ bool dockClickHandler(id self, SEL cmd, ...) {
   Q_UNUSED(cmd);
 
   logger.debug() << "Dock icon clicked.";
+  
   //TODO IMPL FOR AMNEZIA
   //QmlEngineHolder::instance()->showWindow();
   return FALSE;
