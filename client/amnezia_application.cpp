@@ -353,6 +353,9 @@ void AmneziaApplication::initControllers()
 
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+    if (m_settingsController->isAutoStartEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+        QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
+    }
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
