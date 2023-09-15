@@ -18,7 +18,7 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject* 
     // MZ
 #if defined(MZ_LINUX)
     //m_impl.reset(new LinuxController());
-#elif defined(MZ_MACOS) // || defined(MZ_WINDOWS)
+#elif defined(Q_OS_MAC) || defined(Q_OS_WIN)
     m_impl.reset(new LocalSocketController());
     connect(m_impl.get(), &ControllerImpl::connected, this, [this](const QString& pubkey, const QDateTime& connectionTimestamp) {
         emit connectionStateChanged(VpnProtocol::Connected);
@@ -38,7 +38,7 @@ WireguardProtocol::~WireguardProtocol()
 
 void WireguardProtocol::stop()
 {
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
     stopMzImpl();
     return;
 #endif
@@ -98,9 +98,11 @@ void WireguardProtocol::stop()
     setConnectionState(VpnProtocol::Disconnected);
 }
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
 ErrorCode WireguardProtocol::startMzImpl()
 {
+
+    qDebug() << "WireguardProtocol::startMzImpl():" << m_rawConfig;
     m_impl->activate(m_rawConfig);
     return ErrorCode::NoError;
 }
@@ -169,7 +171,7 @@ ErrorCode WireguardProtocol::start()
         return lastError();
     }
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
     return startMzImpl();
 #endif
 

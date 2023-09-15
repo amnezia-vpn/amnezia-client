@@ -50,4 +50,9 @@ class IPAddress final {
   int m_prefixLength;
 };
 
+inline size_t qHash(const IPAddress& key, size_t seed) {
+  const QHostAddress& address = key.address();
+  return qHash(address, seed) ^ key.prefixLength();
+}
+
 #endif  // IPADDRESS_H

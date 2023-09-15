@@ -28,16 +28,16 @@ class MacosRouteMonitor final : public QObject {
   bool deleteRoute(const IPAddress& prefix);
   int interfaceFlags() { return m_ifflags; }
 
-  bool addExclusionRoute(const QHostAddress& address);
-  bool deleteExclusionRoute(const QHostAddress& address);
+  bool addExclusionRoute(const IPAddress& prefix);
+  bool deleteExclusionRoute(const IPAddress& prefix);
   void flushExclusionRoutes();
 
  private:
   void handleRtmDelete(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleRtmUpdate(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleIfaceInfo(const struct if_msghdr* msg, const QByteArray& payload);
-  bool rtmSendRoute(int action, const QHostAddress& prefix, unsigned int plen,
-                    unsigned int ifindex, const void* gateway);
+  bool rtmSendRoute(int action, const IPAddress& prefix, unsigned int ifindex,
+                    const void* gateway);
   bool rtmFetchRoutes(int family);
   static void rtmAppendAddr(struct rt_msghdr* rtm, size_t maxlen, int rtaddr,
                             const void* sa);
@@ -50,7 +50,7 @@ class MacosRouteMonitor final : public QObject {
   static QString addrToString(const struct sockaddr* sa);
   static QString addrToString(const QByteArray& data);
 
-  QList<QHostAddress> m_exclusionRoutes;
+  QList<IPAddress> m_exclusionRoutes;
   QByteArray m_defaultGatewayIpv4;
   QByteArray m_defaultGatewayIpv6;
   unsigned int m_defaultIfindexIpv4 = 0;

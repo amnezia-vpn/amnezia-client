@@ -52,18 +52,51 @@ DnsPingSender::DnsPingSender(const QHostAddress& source, QObject* parent)
     : PingSender(parent) {
   MZ_COUNT_CTOR(DnsPingSender);
 
-  if (source.isNull()) {
-    m_socket.bind();
-  } else {
-    m_socket.bind(source);
-  }
+  m_source = source;
 
   connect(&m_socket, &QUdpSocket::readyRead, this, &DnsPingSender::readData);
 }
 
 DnsPingSender::~DnsPingSender() { MZ_COUNT_DTOR(DnsPingSender); }
 
+void DnsPingSender::start() {
+  auto state = m_socket.state();
+  if (state != QAbstractSocket::UnconnectedState) {
+    logger.info()
+        << "Attempted to start UDP socket, but it's in an invalid state:"
+        << state;
+    return;
+  }
+
+  bool bindResult = false;
+  if (m_source.isNull()) {
+    bindResult = m_socket.bind();
+  } else {
+    bindResult = m_socket.bind(m_source);
+  }
+
+  if (!bindResult) {
+    logger.error() << "Unable to bind UDP socket. Socket state:" << state;
+    return;
+  }
+
+  logger.debug() << "UDP socket bound to:"
+                 << m_socket.localAddress().toString();
+  return;
+}
+
 void DnsPingSender::sendPing(const QHostAddress& dest, quint16 sequence) {
+  if (dest.isNull()) {
+    logger.error() << "Attempted to send DNS ping to invalid destination:"
+                   << dest.toString() << "Ignoring.";
+    return;
+  }
+
+  if (!m_socket.isValid()) {
+    logger.error() << "Attempted to send DNS ping, but socket is invalid.";
+    return;
+  }
+
   QByteArray packet;
 
   // Assemble a DNS query header.
@@ -82,7 +115,14 @@ void DnsPingSender::sendPing(const QHostAddress& dest, quint16 sequence) {
   packet.append(query, sizeof(query));
 
   // Send the datagram.
-  m_socket.writeDatagram(packet, dest, DNS_PORT);
+  logger.debug() << "Sending" << packet.size() << "bytes to UDP socket.";
+  auto bytesWritten = m_socket.writeDatagram(packet, dest, DNS_PORT);
+
+  if (bytesWritten >= 0) {
+    logger.debug() << "Number of bytes written to UDP socket:" << bytesWritten;
+  } else {
+    logger.error() << "Error writing to UDP socket:" << m_socket.error();
+  }
 }
 
 void DnsPingSender::readData() {
@@ -112,6 +152,7 @@ void DnsPingSender::readData() {
       continue;
     }
 
+    logger.debug() << "Received valid DNS reply";
     emit recvPing(qFromBigEndian<quint16>(header.id));
   }
 }

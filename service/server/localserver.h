@@ -10,9 +10,14 @@
 
 #include "ipcserver.h"
 
-#ifdef Q_OS_MAC
-#include "macos/daemon/macosdaemon.h"
+#ifdef Q_OS_WIN
 #include "../../client/daemon/daemonlocalserver.h"
+#include "windows/daemon/windowsdaemon.h"
+#endif
+
+#ifdef Q_OS_MAC
+#include "../../client/daemon/daemonlocalserver.h"
+#include "macos/daemon/macosdaemon.h"
 #endif
 
 class QLocalServer;
@@ -33,9 +38,13 @@ public:
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
 
-#ifdef Q_OS_MAC
-    MacOSDaemon daemon;
+#ifdef Q_OS_WIN
     DaemonLocalServer server{qApp};
+    WindowsDaemon daemon;
+#endif
+#ifdef Q_OS_MAC
+    DaemonLocalServer server{qApp};
+    MacOSDaemon daemon;
 #endif
 };
 
