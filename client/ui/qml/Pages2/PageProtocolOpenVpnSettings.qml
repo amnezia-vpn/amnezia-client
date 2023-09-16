@@ -312,12 +312,12 @@ PageType {
 
                             visible: additionalClientCommandsSwitcher.checked
 
-                            text: additionalClientCommands
+                            textAreaText: additionalClientCommands
                             placeholderText: qsTr("Commands:")
 
-                            onEditingFinished: {
-                                if (additionalClientCommands !== text) {
-                                    additionalClientCommands = text
+                            textArea.onEditingFinished: {
+                                if (additionalClientCommands !== textAreaText) {
+                                    additionalClientCommands = textAreaText
                                 }
                             }
                         }
@@ -330,6 +330,12 @@ PageType {
                             checked: additionalServerCommands !== ""
 
                             text: qsTr("Additional server configuration commands")
+
+                            onCheckedChanged: {
+                                if (!checked) {
+                                    additionalServerCommands = ""
+                                }
+                            }
                         }
 
                         TextAreaType {
@@ -338,12 +344,12 @@ PageType {
 
                             visible: additionalServerCommandsSwitcher.checked
 
-                            text: additionalServerCommands
+                            textAreaText: additionalServerCommands
                             placeholderText: qsTr("Commands:")
 
-                            onEditingFinished: {
-                                if (additionalServerCommands !== text) {
-                                    additionalServerCommands = text
+                            textArea.onEditingFinished: {
+                                if (additionalServerCommands !== textAreaText) {
+                                    additionalServerCommands = textAreaText
                                 }
                             }
                         }
