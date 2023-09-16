@@ -27,6 +27,8 @@ PageType {
         target: ExportController
 
         function onGenerateConfig(type) {
+            shareConnectionDrawer.needCloseButton = false
+
             shareConnectionDrawer.open()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
@@ -58,6 +60,10 @@ PageType {
             }
 
             PageController.showBusyIndicator(false)
+
+            shareConnectionDrawer.needCloseButton = true
+            PageController.showTopCloseButton(true)
+
             shareConnectionDrawer.contentVisible = true
         }
 

@@ -115,3 +115,33 @@ void PageController::showOnStartup()
 #endif
     }
 }
+
+void PageController::updateDrawerRootPage(PageLoader::PageEnum page)
+{
+    m_drwaerLayer = 0;
+    m_currentRootPage = page;
+}
+
+void PageController::goToDrawerRootPage()
+{
+
+    m_drwaerLayer = 0;
+
+    emit showTopCloseButton(false);
+    emit forceCloseDrawer();
+}
+
+void PageController::drawerOpen()
+{
+    m_drwaerLayer = m_drwaerLayer + 1;
+    emit showTopCloseButton(true);
+}
+
+void PageController::drawerClose()
+{
+    m_drwaerLayer = m_drwaerLayer -1;
+    if (m_drwaerLayer <= 0) {
+        emit showTopCloseButton(false);
+        m_drwaerLayer = 0;
+    }
+}
