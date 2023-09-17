@@ -173,19 +173,22 @@ PageType {
             DropDownType {
                 id: serverSelector
 
+                signal severSelectorIndexChanged
+                property int currentIndex: 0
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
 
-                descriptionText: accessTypeSelector.currentIndex === 0 ? qsTr("Server and service") : qsTr("Server")
+                descriptionText: qsTr("Servers")
                 headerText: qsTr("Server")
 
-                listView: ListViewWithLabelsType {
-                    rootWidth: root.width
-                    dividerVisible: true
+                listView: ListViewWithRadioButtonType {
+                    id: serverSelectorListView
 
-                    imageSource: "qrc:/images/controls/chevron-right.svg"
+                    rootWidth: root.width
+                    imageSource: "qrc:/images/controls/check.svg"
 
                     model: SortFilterProxyModel {
                         id: proxyServersModel
@@ -203,14 +206,16 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (accessTypeSelector.currentIndex === 0) {
-                            protocolSelector.visible = true
-                            root.shareButtonEnabled = false
-                        } else {
+                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                            serverSelector.severSelectorIndexChanged()
+                        }
+
+                        if (accessTypeSelector.currentIndex !== 0) {
                             shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
                             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-                            serverSelector.menuVisible = false
                         }
+                        serverSelector.menuVisible = false
                     }
 
                     Component.onCompleted: {
@@ -224,117 +229,90 @@ PageType {
                         ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
+            }
 
-                DrawerType {
-                    id: protocolSelector
+            DropDownType {
+                id: protocolSelector
 
-                    width: parent.width
-                    height: parent.height * 0.5
+                Layout.fillWidth: true
+                Layout.topMargin: 16
 
-                    ColumnLayout {
-                        id: protocolSelectorHeader
+                drawerHeight: 0.5
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
+                descriptionText: qsTr("Protocols")
+                headerText: qsTr("Protocol")
 
-                        BackButtonType {
-                            backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                            backButtonFunction: function() {
-                                protocolSelector.visible = false
+                listView: ListViewWithRadioButtonType {
+                    id: protocolSelectorListView
+
+                    rootWidth: root.width
+                    imageSource: "qrc:/images/controls/check.svg"
+
+                    model: SortFilterProxyModel {
+                        id: proxyContainersModel
+                        sourceModel: ContainersModel
+                        filters: [
+                            ValueFilter {
+                                roleName: "isInstalled"
+                                value: true
+                            },
+                            ValueFilter {
+                                roleName: "isShareable"
+                                value: true
                             }
+                        ]
+                    }
+
+                    currentIndex: 0
+
+                    clickedFunction: function() {
+                        handler()
+
+                        protocolSelector.menuVisible = false
+                    }
+
+                    Component.onCompleted: {
+                        if (accessTypeSelector.currentIndex === 0) {
+                            handler()
                         }
                     }
 
-                    FlickableType {
-                        anchors.top: protocolSelectorHeader.bottom
-                        anchors.topMargin: 16
-                        contentHeight: protocolSelectorContent.implicitHeight
+                    Connections {
+                        target: serverSelector
 
-                        Column {
-                            id: protocolSelectorContent
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
+                        function onSeverSelectorIndexChanged() {
+                            protocolSelectorListView.currentIndex = 0
+                            protocolSelectorListView.triggerCurrentItem()
+                        }
+                    }
 
-                            spacing: 16
+                    function handler() {
+                        if (!proxyContainersModel.count) {
+                            root.shareButtonEnabled = false
+                            return
+                        } else {
+                            root.shareButtonEnabled = true
+                        }
 
-                            Header2TextType {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 16
-                                anchors.rightMargin: 16
+                        protocolSelector.text = selectedText
+                        root.connectionServerSelectorText = serverSelector.text
 
-                                text: qsTr("Protocols and services")
-                                wrapMode: Text.WordWrap
-                            }
+                        shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+                        shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
-                            ListViewWithRadioButtonType {
-                                rootWidth: root.width
+                        fillConnectionTypeModel()
+                    }
 
-                                imageSource: "qrc:/images/controls/check.svg"
+                    function fillConnectionTypeModel() {
+                        root.connectionTypesModel = [amneziaConnectionFormat]
 
-                                model: SortFilterProxyModel {
-                                    id: proxyContainersModel
-                                    sourceModel: ContainersModel
-                                    filters: [
-                                        ValueFilter {
-                                            roleName: "isInstalled"
-                                            value: true
-                                        },
-                                        ValueFilter {
-                                            roleName: "isShareable"
-                                            value: true
-                                        }
-                                    ]
-                                }
+                        var index = proxyContainersModel.mapToSource(currentIndex)
 
-                                currentIndex: 0
-
-                                clickedFunction: function() {
-                                    handler()
-
-                                    protocolSelector.visible = false
-                                    serverSelector.menuVisible = false
-                                }
-
-                                Component.onCompleted: {
-                                    if (accessTypeSelector.currentIndex === 0) {
-                                        handler()
-                                    }
-                                }
-
-                                function handler() {
-                                    if (!proxyContainersModel.count) {
-                                        root.shareButtonEnabled = false
-                                        return
-                                    } else {
-                                        root.shareButtonEnabled = true
-                                    }
-
-                                    serverSelector.text += ", " + selectedText
-                                    root.connectionServerSelectorText = serverSelector.text
-
-                                    shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-                                    ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
-
-                                    fillConnectionTypeModel()
-                                }
-
-                                function fillConnectionTypeModel() {
-                                    root.connectionTypesModel = [amneziaConnectionFormat]
-
-                                    var index = proxyContainersModel.mapToSource(currentIndex)
-
-                                    if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
-                                        root.connectionTypesModel.push(openVpnConnectionFormat)
-                                    } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
-                                        root.connectionTypesModel.push(wireGuardConnectionFormat)
-                                    }
-                                }
-                            }
+                        if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
+                            root.connectionTypesModel.push(openVpnConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
+                            root.connectionTypesModel.push(wireGuardConnectionFormat)
                         }
                     }
                 }

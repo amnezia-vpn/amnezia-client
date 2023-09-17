@@ -82,6 +82,18 @@ PageType {
                 PageController.closePage()
             }
         }
+
+        function onUpdateContainerFinished(message) {
+            PageController.showNotificationMessage(message)
+        }
+    }
+
+    Connections {
+        target: ConnectionController
+
+        function onReconnectWithUpdatedContainer(message) {
+            PageController.showNotificationMessage(message)
+        }
     }
 
     StackViewType {
@@ -97,8 +109,8 @@ PageType {
 
         function goToTabBarPage(page) {
             var pagePath = PageController.getPagePath(page)
-            tabBarStackView.clear(StackView.PopTransition)
-            tabBarStackView.replace(pagePath, { "objectName" : pagePath })
+            tabBarStackView.clear(StackView.Immediate)
+            tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
         }
 
         Component.onCompleted: {

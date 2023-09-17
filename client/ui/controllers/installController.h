@@ -49,7 +49,7 @@ signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
 
-    void updateContainerFinished();
+    void updateContainerFinished(const QString& message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 
@@ -65,6 +65,8 @@ signals:
     void passphraseRequestFinished();
 
     void serverIsBusy(const bool isBusy);
+
+    void currentContainerUpdated();
 
 private:
     void installServer(DockerContainer container, QJsonObject &config);

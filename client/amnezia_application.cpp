@@ -105,18 +105,26 @@ void AmneziaApplication::init()
         return;
     }
 
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_importController.get(),
-            &ImportController::extractConfigFromData);
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, m_pageController.get(),
-            &PageController::goToPageViewConfig);
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
+        m_pageController->replaceStartPage();
+        m_importController->extractConfigFromData(data);
+        m_pageController->goToPageViewConfig();
+    });
 #endif
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_importController.get(),
-            &ImportController::extractConfigFromData);
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, m_pageController.get(),
-            &PageController::goToPageViewConfig);
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
+        m_pageController->replaceStartPage();
+        m_importController->extractConfigFromData(data);
+        m_pageController->goToPageViewConfig();
+    });
+
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
+        m_pageController->replaceStartPage();
+        m_pageController->goToPageSettingsBackup();
+        m_settingsController->importBackupFromOutside(filePath);
+    });
 #endif
 
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
@@ -336,6 +344,8 @@ void AmneziaApplication::initControllers()
             &PageController::showPassphraseRequestDrawer);
     connect(m_pageController.get(), &PageController::passphraseRequestDrawerClosed, m_installController.get(),
             &InstallController::setEncryptedPassphrase);
+    connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
+            &ConnectionController::onCurrentContainerUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
@@ -345,6 +355,9 @@ void AmneziaApplication::initControllers()
 
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+    if (m_settingsController->isAutoStartEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+        QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
+    }
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());

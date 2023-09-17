@@ -10,6 +10,7 @@ import PageEnum 1.0
 import "./"
 import "../Controls2"
 import "../Config"
+import "../Components"
 import "../Controls2/TextTypes"
 
 PageType {
@@ -26,6 +27,10 @@ PageType {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
             //goToStartPage()
             PageController.goToPageHome()
+        }
+
+        function onImportBackupFromOutside(filePath) {
+            restoreBackup(filePath)
         }
     }
 
@@ -116,15 +121,35 @@ PageType {
                 text: qsTr("Restore from backup")
 
                 onClicked: {
-                    var fileName = SystemController.getFileName(qsTr("Open backup file"),
+                    var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.restoreAppConfig(fileName)
-                        PageController.showBusyIndicator(false)
+                    if (filePath !== "") {
+                        restoreBackup(filePath)
                     }
                 }
             }
         }
+    }
+
+    function restoreBackup(filePath) {
+        questionDrawer.headerText = qsTr("Import settings from a backup file?")
+        questionDrawer.descriptionText = qsTr("All current settings will be reset");
+        questionDrawer.yesButtonText = qsTr("Continue")
+        questionDrawer.noButtonText = qsTr("Cancel")
+
+        questionDrawer.yesButtonFunction = function() {
+            questionDrawer.visible = false
+            PageController.showBusyIndicator(true)
+            SettingsController.restoreAppConfig(filePath)
+            PageController.showBusyIndicator(false)
+        }
+        questionDrawer.noButtonFunction = function() {
+            questionDrawer.visible = false
+        }
+        questionDrawer.visible = true
+    }
+
+    QuestionDrawer {
+        id: questionDrawer
     }
 }

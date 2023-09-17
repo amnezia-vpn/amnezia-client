@@ -61,9 +61,24 @@ ListView {
 
                 onClicked: {
                     if (checked) {
+                        var needReconnected = false
+                        if (!isDefault) {
+                            needReconnected = true
+                        }
+
                         isDefault = true
+
                         menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
+
+
+                        if (needReconnected &&
+                                (ConnectionController.isConnected || ConnectionController.isConnectionInProgress)) {
+                            PageController.showNotificationMessage(qsTr("Reconnect via VPN Procotol: ") + name)
+                            PageController.goToPageHome()
+                            menu.visible = false
+                            ConnectionController.openConnection()
+                        }
                     } else {
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)

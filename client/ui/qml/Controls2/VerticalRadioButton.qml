@@ -8,6 +8,8 @@ import "TextTypes"
 RadioButton {
     id: root
 
+    property int textMaximumLineCount: 2
+    property int textElide: Qt.ElideRight
     property string descriptionText
 
     property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
@@ -104,6 +106,8 @@ RadioButton {
 
             ListItemTitleType {
                 text: root.text
+                maximumLineCount: root.textMaximumLineCount
+                elide: root.textElide
 
                 color: {
                     if (root.checked) {

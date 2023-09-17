@@ -118,6 +118,14 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     emit connectionStateChanged();
 }
 
+void ConnectionController::onCurrentContainerUpdated()
+{
+    if (m_isConnected || m_isConnectionInProgress) {
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, Reconnnection..."));
+        openConnection();
+    }
+}
+
 QString ConnectionController::connectionStateText() const
 {
     return m_connectionStateText;

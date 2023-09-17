@@ -5,11 +5,14 @@ import QtQuick.Layouts
 import "TextTypes"
 
 ListView {
-    id: menuContent
+    id: root
 
     property var rootWidth
 
     property var selectedText
+
+    property int textMaximumLineCount: 2
+    property int textElide: Qt.ElideRight
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
@@ -18,13 +21,19 @@ ListView {
     currentIndex: 0
 
     width: rootWidth
-    height: menuContent.contentItem.height
+    height: root.contentItem.height
 
     clip: true
     interactive: false
 
     ButtonGroup {
         id: buttonGroup
+    }
+
+    function triggerCurrentItem() {
+        var item = root.itemAtIndex(currentIndex)
+        var radioButton = item.children[0].children[0]
+        radioButton.clicked()
     }
 
     delegate: Item {
@@ -74,6 +83,9 @@ ListView {
                         Layout.bottomMargin: 20
 
                         text: name
+                        maximumLineCount: root.textMaximumLineCount
+                        elide: root.textElide
+
                     }
 
                     Image {
@@ -88,11 +100,11 @@ ListView {
                 }
 
                 ButtonGroup.group: buttonGroup
-                checked: menuContent.currentIndex === index
+                checked: root.currentIndex === index
 
                 onClicked: {
-                    menuContent.currentIndex = index
-                    menuContent.selectedText = name
+                    root.currentIndex = index
+                    root.selectedText = name
                     if (clickedFunction && typeof clickedFunction === "function") {
                         clickedFunction()
                     }
@@ -101,8 +113,8 @@ ListView {
         }
 
         Component.onCompleted: {
-            if (menuContent.currentIndex === index) {
-                menuContent.selectedText = name
+            if (root.currentIndex === index) {
+                root.selectedText = name
             }
         }
     }

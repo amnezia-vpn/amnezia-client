@@ -6,7 +6,8 @@ Rectangle {
 
     property string placeholderText
     property string text
-    property var onEditingFinished
+    property alias textArea: textArea
+    property alias textAreaText: textArea.text
 
     height: 148
     color: "#1C1D21"
@@ -42,12 +43,6 @@ Rectangle {
 
             placeholderText: root.placeholderText
             text: root.text
-
-            onEditingFinished: {
-                if (root.onEditingFinished && typeof root.onEditingFinished === "function") {
-                    root.onEditingFinished()
-                }
-            }
 
             onCursorVisibleChanged:  {
                 if (textArea.cursorVisible) {

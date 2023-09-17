@@ -5,9 +5,9 @@
 #ifndef CONTROLLERIMPL_H
 #define CONTROLLERIMPL_H
 
-#include <QDateTime>
 #include <QObject>
 #include <functional>
+#include <QDateTime>
 
 class Keys;
 class Device;

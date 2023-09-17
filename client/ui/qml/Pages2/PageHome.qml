@@ -75,12 +75,20 @@ PageType {
 
         RowLayout {
             Layout.topMargin: 24
+            Layout.leftMargin: 24
+            Layout.rightMargin: 24
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             spacing: 0
 
             Header1TextType {
+                Layout.maximumWidth: buttonContent.width - 48 - 18 - 12 // todo
+
+                maximumLineCount: 2
+                elide: Qt.ElideRight
+
                 text: root.defaultServerName
+                horizontalAlignment: Qt.AlignHCenter
             }
 
             Image {
@@ -148,10 +156,15 @@ PageType {
             anchors.left: parent.left
 
             Header1TextType {
+                Layout.fillWidth: true
                 Layout.topMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: root.defaultServerName
+                horizontalAlignment: Qt.AlignHCenter
+                maximumLineCount: 2
+                elide: Qt.ElideRight
             }
 
             LabelTextType {
@@ -210,7 +223,6 @@ PageType {
                         }
 
                         Component.onCompleted: updateContainersModelFilters()
-                        currentIndex: ContainersModel.getDefaultContainer()
                     }
                 }
             }
