@@ -118,7 +118,7 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     PageLoader::PageEnum m_currentRootPage;
-    int m_drwaerLayer;
+    int m_drawerLayer;
 };
 
 #endif // PAGECONTROLLER_H
