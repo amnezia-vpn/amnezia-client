@@ -48,20 +48,19 @@ Drawer {
         if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
             PageController.updateNavigationBarColor(0xFF1C1D21)
         }
-    }
 
-    onOpened: {
         if (needCloseButton) {
             PageController.drawerOpen()
         }
     }
 
-
-    onClosed: {
+    onAboutToHide: {
         if (needCloseButton) {
             PageController.drawerClose()
         }
+    }
 
+    onClosed: {
         var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
         if (initialPageNavigationBarColor !== 0xFF1C1D21) {
             PageController.updateNavigationBarColor(initialPageNavigationBarColor)
