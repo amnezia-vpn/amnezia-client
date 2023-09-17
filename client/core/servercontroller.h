@@ -28,6 +28,7 @@ public:
                              bool isUpdate = false);
     ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
                               const QJsonObject &oldConfig, QJsonObject &newConfig);
+
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials,
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
 

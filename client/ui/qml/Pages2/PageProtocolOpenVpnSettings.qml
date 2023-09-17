@@ -15,14 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    Connections {
-        target: InstallController
-
-        function onUpdateContainerFinished() {
-            PageController.showNotificationMessage(qsTr("Settings updated successfully"))
-        }
-    }
-
     ColumnLayout {
         id: backButton
 
