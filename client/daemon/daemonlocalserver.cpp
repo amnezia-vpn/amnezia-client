@@ -12,7 +12,7 @@
 #include "leakdetector.h"
 #include "logger.h"
 
-#ifdef MZ_MACOS
+#if defined(MZ_MACOS) || defined(MZ_LINUX)
 #  include <sys/stat.h>
 #  include <sys/types.h>
 #  include <unistd.h>
@@ -68,7 +68,8 @@ bool DaemonLocalServer::initialize() {
 QString DaemonLocalServer::daemonPath() const {
 #if defined(MZ_WINDOWS)
   return "\\\\.\\pipe\\amneziavpn";
-#elif defined(MZ_MACOS)
+#endif
+#if defined(MZ_MACOS) || defined(MZ_LINUX)
   QDir dir("/var/run");
   if (!dir.exists()) {
     logger.warning() << "/var/run doesn't exist. Fallback /tmp.";
@@ -76,12 +77,12 @@ QString DaemonLocalServer::daemonPath() const {
   }
 
   if (dir.exists("amneziavpn")) {
-    logger.debug() << "/var/run/amneziavpn seems to be usable";
+    logger.debug() << "/var/run/amnezia seems to be usable";
     return VAR_PATH;
   }
 
   if (!dir.mkdir("amneziavpn")) {
-    logger.warning() << "Failed to create /var/run/amneziavpn";
+    logger.warning() << "Failed to create /var/run/amnezia";
     return TMP_PATH;
   }
 
@@ -92,7 +93,5 @@ QString DaemonLocalServer::daemonPath() const {
   }
 
   return VAR_PATH;
-#else
-#  error Unsupported platform
 #endif
 }

@@ -30,7 +30,7 @@ IPAddress::IPAddress(const QString& ip) {
       m_prefixLength = 128;
     }
   } else {
-    Q_ASSERT(false);
+ //   Q_ASSERT(false);
   }
 }
 
