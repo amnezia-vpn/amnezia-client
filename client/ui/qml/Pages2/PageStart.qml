@@ -82,6 +82,18 @@ PageType {
                 PageController.closePage()
             }
         }
+
+        function onUpdateContainerFinished(message) {
+            PageController.showNotificationMessage(message)
+        }
+    }
+
+    Connections {
+        target: ConnectionController
+
+        function onReconnectWithUpdatedContainer(message) {
+            PageController.showNotificationMessage(message)
+        }
     }
 
     StackViewType {

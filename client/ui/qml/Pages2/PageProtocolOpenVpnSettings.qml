@@ -15,22 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    Connections {
-        target: ConnectionController
-
-        function onReconnectWithChangedContainer(message) {
-            PageController.showNotificationMessage(message)
-        }
-    }
-
-    Connections {
-        target: InstallController
-
-        function onUpdateContainerFinished(message) {
-            PageController.showNotificationMessage(message)
-        }
-    }
-
     ColumnLayout {
         id: backButton
 

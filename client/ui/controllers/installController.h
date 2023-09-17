@@ -66,7 +66,7 @@ signals:
 
     void serverIsBusy(const bool isBusy);
 
-    void currentContainerChanged();
+    void currentContainerUpdated();
 
 private:
     void installServer(DockerContainer container, QJsonObject &config);

@@ -290,11 +290,13 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     return startupContainerWorker(credentials, container, config);
 }
 
-ErrorCode ServerController::updateContainer(const bool reinstallRequired,
-                                            const ServerCredentials &credentials,
-                                            DockerContainer container,
+ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
                                             const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
+    bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is"
+             << reinstallRequired;
+
     if (reinstallRequired) {
         return setupContainer(credentials, container, newConfig, true);
     } else {

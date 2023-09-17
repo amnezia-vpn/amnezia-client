@@ -32,7 +32,7 @@ public slots:
     QString getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
-    void onCurrentContainerChanged();
+    void onCurrentContainerUpdated();
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
@@ -41,7 +41,7 @@ signals:
     void connectionStateChanged();
 
     void connectionErrorOccurred(const QString &errorMessage);
-    void reconnectWithChangedContainer(const QString &message);
+    void reconnectWithUpdatedContainer(const QString &message);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
