@@ -165,6 +165,8 @@ PageType {
                         }
 
                         BasicButtonType {
+                            visible: !GC.isMobile()
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
