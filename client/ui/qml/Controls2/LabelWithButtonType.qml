@@ -8,6 +8,9 @@ Item {
     id: root
 
     property string text
+    property int textMaximumLineCount: 2
+    property int textElide: Qt.ElideRight
+
     property string descriptionText
 
     property var clickedFunction
@@ -68,6 +71,8 @@ Item {
             ListItemTitleType {
                 text: root.text
                 color: root.descriptionOnTop ? root.descriptionColor : root.textColor
+                maximumLineCount: root.textMaximumLineCount
+                elide: root.textElide
 
                 opacity: root.textOpacity
 

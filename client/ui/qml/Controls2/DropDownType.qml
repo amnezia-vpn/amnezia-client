@@ -10,6 +10,8 @@ Item {
     property string text
     property string textColor: "#d7d8db"
     property string textDisabledColor: "#878B91"
+    property int textMaximumLineCount: 2
+    property int textElide: Qt.ElideRight
 
     property string descriptionText
     property string descriptionTextColor: "#878B91"
@@ -102,6 +104,8 @@ Item {
 
                 color: root.enabled ? root.textColor : root.textDisabledColor
                 text: root.text
+                maximumLineCount: root.textMaximumLineCount
+                elide: root.textElide
             }
         }
 

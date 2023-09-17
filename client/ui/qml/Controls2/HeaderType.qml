@@ -10,6 +10,9 @@ Item {
     property var actionButtonFunction
 
     property string headerText
+    property int headerTextMaximumLineCount: 2
+    property int headerTextElide: Qt.ElideRight
+
     property string descriptionText
 
     implicitWidth: content.implicitWidth
@@ -26,6 +29,8 @@ Item {
                 Layout.fillWidth: true
 
                 text: root.headerText
+                maximumLineCount: root.headerTextMaximumLineCount
+                elide: root.headerTextElide
             }
 
             ImageButtonType {

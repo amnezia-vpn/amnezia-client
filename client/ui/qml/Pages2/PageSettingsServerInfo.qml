@@ -101,7 +101,7 @@ PageType {
                             Layout.fillWidth: true
                             headerText: qsTr("Server name")
                             textFieldText: name
-                            textField.maximumLength: 20
+                            textField.maximumLength: 30
                         }
 
                         BasicButtonType {
