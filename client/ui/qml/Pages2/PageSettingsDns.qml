@@ -8,6 +8,7 @@ import "./"
 import "../Controls2"
 import "../Config"
 import "../Controls2/TextTypes"
+import "../Components"
 
 PageType {
     id: root
@@ -75,6 +76,38 @@ PageType {
             BasicButtonType {
                 Layout.fillWidth: true
 
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#D7D8DB"
+                borderWidth: 1
+
+                text: qsTr("Restore default")
+
+                onClicked: function() {
+                    questionDrawer.headerText = qsTr("Restore default DNS settings?")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        SettingsController.primaryDns = "1.1.1.1"
+                        primaryDns.textFieldText = SettingsController.primaryDns
+                        SettingsController.secondaryDns = "1.0.0.1"
+                        secondaryDns.textFieldText = SettingsController.secondaryDns
+                        PageController.showNotificationMessage(qsTr("Settings have been reset"))
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
+                }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+
                 text: qsTr("Save")
 
                 onClicked: function() {
@@ -84,8 +117,12 @@ PageType {
                     if (secondaryDns.textFieldText !== SettingsController.secondaryDns) {
                         SettingsController.secondaryDns = secondaryDns.textFieldText
                     }
+                    PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
             }
+        }
+        QuestionDrawer {
+            id: questionDrawer
         }
     }
 }
