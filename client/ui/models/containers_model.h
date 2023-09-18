@@ -26,6 +26,7 @@ public:
         IsEasySetupContainerRole,
         EasySetupHeaderRole,
         EasySetupDescriptionRole,
+        EasySetupOrderRole,
 
         IsInstalledRole,
         IsCurrentlyProcessedRole,

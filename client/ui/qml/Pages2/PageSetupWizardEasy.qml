@@ -27,7 +27,7 @@ PageType {
             }
         ]
         sorters: RoleSorter {
-            roleName: "dockerContainer"
+            roleName: "easySetupOrder"
             sortOrder: Qt.DescendingOrder
         }
     }

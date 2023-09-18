@@ -75,6 +75,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
     case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
     case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
+    case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
     case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
     case IsDefaultRole: return container == m_defaultContainerIndex;
@@ -213,11 +214,6 @@ bool ContainersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
     return containers.contains(DockerContainer::Dns);
 }
 
-// bool ContainersModel::isOnlyServicesInstalled(const int serverIndex)
-//{
-
-//}
-
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -231,6 +227,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsEasySetupContainerRole] = "isEasySetupContainer";
     roles[EasySetupHeaderRole] = "easySetupHeader";
     roles[EasySetupDescriptionRole] = "easySetupDescription";
+    roles[EasySetupOrderRole] = "easySetupOrder";
 
     roles[IsInstalledRole] = "isInstalled";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";

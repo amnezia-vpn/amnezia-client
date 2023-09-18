@@ -223,9 +223,9 @@ QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
 bool ContainerProps::isEasySetupContainer(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::OpenVpn: return true;
+    case DockerContainer::WireGuard: return true;
     case DockerContainer::Cloak: return true;
-    case DockerContainer::ShadowSocks: return true;
+    case DockerContainer::OpenVpn: return true;
     default: return false;
     }
 }
@@ -233,9 +233,9 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
 QString ContainerProps::easySetupHeader(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::OpenVpn: return tr("Low");
+    case DockerContainer::WireGuard: return tr("Low");
     case DockerContainer::Cloak: return tr("High");
-    case DockerContainer::ShadowSocks: return tr("Medium");
+    case DockerContainer::OpenVpn: return tr("Medium");
     default: return "";
     }
 }
@@ -243,10 +243,20 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 QString ContainerProps::easySetupDescription(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::OpenVpn: return tr("I just want to increase the level of privacy");
+    case DockerContainer::WireGuard: return tr("I just want to increase the level of privacy");
     case DockerContainer::Cloak: return tr("Many foreign websites and VPN providers are blocked");
-    case DockerContainer::ShadowSocks: return tr("Some foreign sites are blocked, but VPN providers are not blocked");
+    case DockerContainer::OpenVpn: return tr("Some foreign sites are blocked, but VPN providers are not blocked");
     default: return "";
+    }
+}
+
+int ContainerProps::easySetupOrder(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::WireGuard: return 1;
+    case DockerContainer::Cloak: return 3;
+    case DockerContainer::OpenVpn: return 2;
+    default: return 0;
     }
 }
 
