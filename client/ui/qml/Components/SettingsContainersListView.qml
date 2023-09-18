@@ -43,10 +43,12 @@ ListView {
                         var containerIndex = root.model.mapToSource(index)
                         ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
 
-                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolRaw)
-                            return
+                        if (serviceType !== ProtocolEnum.Other) {
+                            if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
+                                ProtocolsModel.updateModel(config)
+                                PageController.goToPage(PageEnum.PageProtocolRaw)
+                                return
+                            }
                         }
 
                         switch (containerIndex) {
@@ -78,12 +80,13 @@ ListView {
                             PageController.goToPage(PageEnum.PageServiceTorWebsiteSettings)
                             break
                         }
-
-                        default: {
-                            if (serviceType !== ProtocolEnum.Other) { //todo disable settings for dns container
-                                ProtocolsModel.updateModel(config)
-                                PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                            }
+                        case ContainerEnum.Dns: {
+                            PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                            break
+                        }
+                        default: { // go to the settings page of the container with multiple protocols
+                            ProtocolsModel.updateModel(config)
+                            PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                         }
                         }
 

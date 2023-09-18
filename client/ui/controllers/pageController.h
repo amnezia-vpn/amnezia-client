@@ -32,6 +32,7 @@ namespace PageLoader
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
+        PageServiceDnsSettings,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,
