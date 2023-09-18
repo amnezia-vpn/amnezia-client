@@ -2,6 +2,16 @@ import QtQuick
 import QtQuick.Controls
 
 Drawer {
+    property bool needCloseButton: true
+
+    Connections {
+        target: PageController
+
+        function onForceCloseDrawer() {
+            visible = false
+        }
+    }
+
     edge: Qt.BottomEdge
 
     clip: true
@@ -37,6 +47,16 @@ Drawer {
     onAboutToShow: {
         if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
             PageController.updateNavigationBarColor(0xFF1C1D21)
+        }
+
+        if (needCloseButton) {
+            PageController.drawerOpen()
+        }
+    }
+
+    onAboutToHide: {
+        if (needCloseButton) {
+            PageController.drawerClose()
         }
     }
 

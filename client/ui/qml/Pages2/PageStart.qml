@@ -19,22 +19,32 @@ PageType {
         function onGoToPageHome() {
             tabBar.currentIndex = 0
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
+
+            PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.currentIndex = 2
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
+
+            PageController.updateDrawerRootPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+
+            PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
         function onShowBusyIndicator(visible) {
             busyIndicator.visible = visible
             tabBarStackView.enabled = !visible
             tabBar.enabled = !visible
+        }
+
+        function onShowTopCloseButton(visible) {
+            topCloseButton.visible = visible
         }
 
         function onEnableTabBar(enabled) {
@@ -55,6 +65,8 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
+
+            PageController.updateDrawerRootPage(page)
         }
 
         function onGoToStartPage() {
@@ -111,6 +123,8 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+
+            PageController.updateDrawerRootPage(page)
         }
 
         Component.onCompleted: {
@@ -193,6 +207,12 @@ PageType {
     BusyIndicatorType {
         id: busyIndicator
         anchors.centerIn: parent
+        z: 1
+    }
+
+    TopCloseButtonType {
+        id: topCloseButton
+        x: tabBarStackView.width - topCloseButton.width
         z: 1
     }
 }
