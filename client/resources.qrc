@@ -214,5 +214,6 @@
         <file>images/controls/more-vertical.svg</file>
         <file>ui/qml/Controls2/ListViewWithLabelsType.qml</file>
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
+        <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
     </qresource>
 </RCC>

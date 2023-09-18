@@ -79,6 +79,11 @@ public slots:
 
     void showOnStartup();
 
+    void updateDrawerRootPage(PageLoader::PageEnum page);
+    void goToDrawerRootPage();
+    void drawerOpen();
+    void drawerClose();
+
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
     void goToStartPage();
@@ -105,10 +110,16 @@ signals:
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
 
+    void showTopCloseButton(bool visible);
+    void forceCloseDrawer();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
 
     std::shared_ptr<Settings> m_settings;
+
+    PageLoader::PageEnum m_currentRootPage;
+    int m_drawerLayer;
 };
 
 #endif // PAGECONTROLLER_H
