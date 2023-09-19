@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 Drawer {
+    id: drawer
     property bool needCloseButton: true
 
     Connections {
@@ -65,5 +66,17 @@ Drawer {
         if (initialPageNavigationBarColor !== 0xFF1C1D21) {
             PageController.updateNavigationBarColor(initialPageNavigationBarColor)
         }
+    }
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+
+        onCanceled: {
+            Drag.cancel()
+            drawer.close()
+        }
+
+        preventStealing: false
     }
 }
