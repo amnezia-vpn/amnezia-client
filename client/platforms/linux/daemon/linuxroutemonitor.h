@@ -13,9 +13,6 @@
 
 #include "ipaddress.h"
 
-struct if_msghdr;
-struct rt_msghdr;
-struct sockaddr;
 
 class LinuxRouteMonitor final : public QObject {
   Q_OBJECT
@@ -26,28 +23,24 @@ class LinuxRouteMonitor final : public QObject {
 
   bool insertRoute(const IPAddress& prefix);
   bool deleteRoute(const IPAddress& prefix);
-  int interfaceFlags() { return m_ifflags; }
 
   bool addExclusionRoute(const IPAddress& prefix);
   bool deleteExclusionRoute(const IPAddress& prefix);
-  void flushExclusionRoutes();
-
  private:
   static QString addrToString(const struct sockaddr* sa);
   static QString addrToString(const QByteArray& data);
-
-  QList<IPAddress> m_exclusionRoutes;
-  QByteArray m_defaultGatewayIpv4;
-  QByteArray m_defaultGatewayIpv6;
-  unsigned int m_defaultIfindexIpv4 = 0;
-  unsigned int m_defaultIfindexIpv6 = 0;
-
+  bool rtmSendRoute(int action, int flags, int type,
+                    const IPAddress& prefix);
+  QString getgatewayandiface();
   QString m_ifname;
   unsigned int m_ifindex = 0;
-  int m_ifflags = 0;
-  int m_rtsock = -1;
-  int m_rtseq = 0;
+  int m_nlsock = -1;
+  int m_nlseq = 0;
   QSocketNotifier* m_notifier = nullptr;
+
+ private slots:
+    void nlsockReady();
+
 };
 
 #endif  // LINUXROUTEMONITOR_H
