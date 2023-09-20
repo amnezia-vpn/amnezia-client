@@ -77,12 +77,12 @@ QString DaemonLocalServer::daemonPath() const {
   }
 
   if (dir.exists("amneziavpn")) {
-    logger.debug() << "/var/run/amnezia seems to be usable";
+    logger.debug() << "/var/run/amneziavpn seems to be usable";
     return VAR_PATH;
   }
 
   if (!dir.mkdir("amneziavpn")) {
-    logger.warning() << "Failed to create /var/run/amnezia";
+    logger.warning() << "Failed to create /var/run/amneziavpn";
     return TMP_PATH;
   }
 

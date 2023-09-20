@@ -29,8 +29,6 @@ IPAddress::IPAddress(const QString& ip) {
     if (m_prefixLength >= 128) {
       m_prefixLength = 128;
     }
-  } else {
- //   Q_ASSERT(false);
   }
 }
 

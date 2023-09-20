@@ -76,7 +76,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
 
     QDir appPath(QCoreApplication::applicationDirPath());
     QStringList wgArgs = {"-f", "amn0"};
-    m_tunnel.start(appPath.filePath("wireguard-go"), wgArgs);
+    m_tunnel.start(appPath.filePath("../../client/bin/wireguard-go"), wgArgs);
     if (!m_tunnel.waitForStarted(WG_TUN_PROC_TIMEOUT)) {
         logger.error() << "Unable to start tunnel process due to timeout";
         m_tunnel.kill();
