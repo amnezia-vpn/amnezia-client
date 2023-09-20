@@ -4,6 +4,7 @@ import QtQuick.Controls
 Drawer {
     id: drawer
     property bool needCloseButton: true
+    property bool isOpened: false
 
     Connections {
         target: PageController
@@ -61,22 +62,39 @@ Drawer {
         }
     }
 
+    onOpened: {
+        isOpened = true
+    }
+
     onClosed: {
+        isOpened = false
+
         var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
         if (initialPageNavigationBarColor !== 0xFF1C1D21) {
             PageController.updateNavigationBarColor(initialPageNavigationBarColor)
         }
     }
 
+
+    onPositionChanged: {
+        if (isOpened && (position <= 0.99 && position >= 0.95)) {
+            mouseArea.canceled()
+            drawer.close()
+            mouseArea.exited()
+            dropArea.exited()
+        }
+    }
+
+    DropArea {
+        id: dropArea
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
 
-        onCanceled: {
-            Drag.cancel()
-            drawer.close()
+        onPressed: {
+            isOpened = true
         }
-
-        preventStealing: false
     }
 }
