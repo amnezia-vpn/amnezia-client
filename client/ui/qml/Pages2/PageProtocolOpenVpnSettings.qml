@@ -26,6 +26,7 @@ PageType {
 
         BackButtonType {
             backButtonFunction: function()  {
+                forceActiveFocus()
                 InstallController.updateContainerOnlyMemory(OpenVpnConfigModel.getConfig())
                 PageController.closePage()
             }

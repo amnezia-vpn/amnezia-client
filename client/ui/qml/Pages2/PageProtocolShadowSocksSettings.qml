@@ -24,6 +24,7 @@ PageType {
 
         BackButtonType {
             backButtonFunction: function()  {
+                forceActiveFocus()
                 InstallController.updateContainerOnlyMemory(ShadowSocksConfigModel.getConfig())
                 PageController.closePage()
             }
