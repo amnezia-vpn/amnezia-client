@@ -124,6 +124,11 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
 
+#ifdef Q_OS_ANDROID
+    QString server_route = QString("\nroute remote_host 255.255.255.255 net_gateway\n");                             
+    config.append(server_route);
+#endif
+
     if (m_settings->routeMode() == Settings::VpnAllSites) {
         config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
         // Prevent ipv6 leak
