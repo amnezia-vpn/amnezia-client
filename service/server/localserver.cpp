@@ -40,12 +40,16 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         }
     });
 
-#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
     // Init Mozilla Wireguard Daemon
     if (!server.initialize()) {
         logger.error() << "Failed to initialize the server";
         return;
     }
+
+#ifdef Q_OS_LINUX
+    // Signal handling for a proper shutdown.
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
+                     []() { LinuxDaemon::instance()->deactivate(); });
 #endif
 
 #ifdef Q_OS_MAC

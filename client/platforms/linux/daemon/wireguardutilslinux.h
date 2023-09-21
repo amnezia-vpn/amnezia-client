@@ -1,0 +1,55 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#ifndef WIREGUARDUTILSLINUX_H
+#define WIREGUARDUTILSLINUX_H
+
+#include <QObject>
+#include <QProcess>
+
+#include "daemon/wireguardutils.h"
+#include "linuxroutemonitor.h"
+
+class WireguardUtilsLinux final : public WireguardUtils {
+    Q_OBJECT
+
+public:
+    WireguardUtilsLinux(QObject* parent);
+    ~WireguardUtilsLinux();
+
+    bool interfaceExists() override {
+        return m_tunnel.state() == QProcess::Running;
+    }
+    QString interfaceName() override { return m_ifname; }
+    bool addInterface(const InterfaceConfig& config) override;
+    bool deleteInterface() override;
+
+    bool updatePeer(const InterfaceConfig& config) override;
+    bool deletePeer(const InterfaceConfig& config) override;
+    QList<PeerStatus> getPeerStatus() override;
+
+    bool updateRoutePrefix(const IPAddress& prefix) override;
+    bool deleteRoutePrefix(const IPAddress& prefix) override;
+
+    bool addExclusionRoute(const IPAddress& prefix) override;
+    bool deleteExclusionRoute(const IPAddress& prefix) override;
+
+signals:
+    void backendFailure();
+
+private slots:
+    void tunnelStdoutReady();
+    void tunnelErrorOccurred(QProcess::ProcessError error);
+
+private:
+    QString uapiCommand(const QString& command);
+    static int uapiErrno(const QString& command);
+    QString waitForTunnelName(const QString& filename);
+
+    QString m_ifname;
+    QProcess m_tunnel;
+    LinuxRouteMonitor* m_rtmonitor = nullptr;
+};
+
+#endif  // WIREGUARDUTILSLINUX_H
