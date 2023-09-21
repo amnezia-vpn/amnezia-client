@@ -29,6 +29,7 @@ public slots:
     void scanServerForInstalledContainers();
 
     void updateContainer(QJsonObject config);
+    void updateContainerOnlyMemory(QJsonObject config);
 
     void removeCurrentlyProcessedServer();
     void removeAllContainers();

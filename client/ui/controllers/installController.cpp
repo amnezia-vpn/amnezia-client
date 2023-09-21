@@ -281,6 +281,15 @@ void InstallController::removeCurrentlyProcessedServer()
     emit removeCurrentlyProcessedServerFinished(tr("Server '") + serverName + tr("' was removed"));
 }
 
+void InstallController::updateContainerOnlyMemory(QJsonObject config)
+{
+    const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    auto modelIndex = m_containersModel->index(container);
+    m_containersModel->setData(modelIndex, config, ContainersModel::Roles::ConfigRole);
+
+    m_protocolModel->updateModel(config);
+}
+
 void InstallController::removeAllContainers()
 {
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();

@@ -23,6 +23,10 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            backButtonFunction: function()  {
+               InstallController.updateContainerOnlyMemory(CloakConfigModel.getConfig())
+               PageController.closePage()
+            }
         }
     }
 

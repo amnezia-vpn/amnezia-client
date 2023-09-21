@@ -25,6 +25,10 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            backButtonFunction: function()  {
+                InstallController.updateContainerOnlyMemory(OpenVpnConfigModel.getConfig())
+                PageController.closePage()
+            }
         }
     }
 
