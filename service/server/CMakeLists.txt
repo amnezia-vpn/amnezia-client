@@ -6,8 +6,9 @@ project(${PROJECT})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets RemoteObjects Core5Compat)
+find_package(Qt6 REQUIRED COMPONENTS DBus Core Network Widgets RemoteObjects Core5Compat)
 qt_standard_project_setup()
+
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
@@ -91,7 +92,7 @@ if(UNIX)
     )
 endif()
 
-if (WIN32 OR APPLE)
+if (WIN32 OR APPLE OR LINUX)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.h
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.h
@@ -198,12 +199,30 @@ if(APPLE)
 endif()
 
 if(LINUX)
+
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/router_linux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxnetworkwatcher.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxnetworkwatcherworker.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxdependencies.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/iputilslinux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/dbustypeslinux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxdaemon.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/dnsutilslinux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/wireguardutilslinux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.h
     )
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/router_linux.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxnetworkwatcher.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxnetworkwatcherworker.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/linuxdependencies.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/dnsutilslinux.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/iputilslinux.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxdaemon.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/wireguardutilslinux.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.cpp
     )
 endif()
 
@@ -217,7 +236,7 @@ include_directories(
 )
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat ${LIBS})
+target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -19,7 +19,7 @@
 #endif
 
 #ifdef MZ_LINUX
-//#  include "platforms/linux/linuxnetworkwatcher.h"
+#  include "platforms/linux/linuxnetworkwatcher.h"
 #endif
 
 #ifdef MZ_MACOS
@@ -56,7 +56,7 @@ void NetworkWatcher::initialize() {
 #if defined(MZ_WINDOWS)
   m_impl = new WindowsNetworkWatcher(this);
 #elif defined(MZ_LINUX)
-//  m_impl = new LinuxNetworkWatcher(this);
+  m_impl = new LinuxNetworkWatcher(this);
 #elif defined(MZ_MACOS)
   m_impl = new MacOSNetworkWatcher(this);
 #elif defined(MZ_WASM)
