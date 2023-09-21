@@ -50,7 +50,7 @@ PageType {
 
     Rectangle {
         id: buttonBackground
-        anchors.fill: buttonContent
+        anchors.fill: defaultServerInfo
 
         radius: 16
         color: root.defaultColor
@@ -67,70 +67,21 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: buttonContent
+    DefaultSeverType {
+        id: defaultServerInfo
+        height: 130
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
-        RowLayout {
-            Layout.topMargin: 24
-            Layout.leftMargin: 24
-            Layout.rightMargin: 24
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+        text: root.defaultServerName
+        rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
-            spacing: 0
+        defaultContainerName: root.defaultContainerName
+        defaultServerHostName: root.defaultServerHostName
 
-            Header1TextType {
-                Layout.maximumWidth: buttonContent.width - 48 - 18 - 12 // todo
-
-                maximumLineCount: 2
-                elide: Qt.ElideRight
-
-                text: root.defaultServerName
-                horizontalAlignment: Qt.AlignHCenter
-            }
-
-            Image {
-                Layout.preferredWidth: 18
-                Layout.preferredHeight: 18
-
-                Layout.leftMargin: 12
-
-                source: "qrc:/images/controls/chevron-down.svg"
-            }
-        }
-
-        LabelTextType {
-            Layout.bottomMargin: 44
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-            text: {
-                var description = ""
-                if (ServersModel.isDefaultServerHasWriteAccess()) {
-                    if (SettingsController.isAmneziaDnsEnabled()
-                            && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
-                        description += "Amnezia DNS | "
-                    }
-                } else {
-                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
-                        description += "Amnezia DNS | "
-                    }
-                }
-
-                description += root.defaultContainerName + " | " + root.defaultServerHostName
-                return description
-            }
-        }
-    }
-
-    MouseArea {
-        anchors.fill: buttonBackground
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-        onClicked: {
-            menu.visible = true
+        clickedFunction: function() {
+             menu.visible = true
         }
     }
 
