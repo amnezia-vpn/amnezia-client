@@ -9,7 +9,3 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT IOS AND NOT ANDROID)
     add_subdirectory(server)
 endif()
-
-if(WIN32)
-    add_subdirectory(wireguard-service)
-endif()

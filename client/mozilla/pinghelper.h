@@ -59,6 +59,10 @@ class PingHelper final : public QObject {
 
   QTimer m_pingTimer;
   PingSender* m_pingSender = nullptr;
+
+#ifdef UNIT_TEST
+  friend class TestConnectionHealth;
+#endif
 };
 
 #endif  // PINGHELPER_H

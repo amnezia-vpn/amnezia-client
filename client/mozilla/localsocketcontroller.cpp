@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 #include "protocols/protocols_defs.h"
 #include "localsocketcontroller.h"
 
@@ -14,10 +13,14 @@
 #include <QJsonValue>
 #include <QStandardPaths>
 
+//#include "errorhandler.h"
 #include "ipaddress.h"
 #include "leakdetector.h"
 #include "logger.h"
+//#include "models/device.h"
+//#include "models/keys.h"
 #include "models/server.h"
+//#include "settingsholder.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;
@@ -112,23 +115,22 @@ void LocalSocketController::daemonConnected() {
 }
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
-
   QJsonObject wgConfig = rawConfig.value("wireguard_config_data").toObject();
 
   QJsonObject json;
   json.insert("type", "activate");
-//  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
+  //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
   json.insert("deviceIpv6Address", "dead::1");
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
-//  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
+  //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
   json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
 
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
-//  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
+  //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
   json.insert("dnsServer", rawConfig.value(amnezia::config_key::dns1));
 
   QJsonArray jsAllowedIPAddesses;
@@ -148,17 +150,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
 
-    QJsonArray jsExcludedAddresses;
-    jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
-    json.insert("excludedAddresses", jsExcludedAddresses);
+  QJsonArray jsExcludedAddresses;
+  jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
+  json.insert("excludedAddresses", jsExcludedAddresses);
 
 
-//  QJsonArray splitTunnelApps;
-//  for (const auto& uri : hop.m_vpnDisabledApps) {
-//    splitTunnelApps.append(QJsonValue(uri));
-//  }
-//  json.insert("vpnDisabledApps", splitTunnelApps);
-
+  //  QJsonArray splitTunnelApps;
+  //  for (const auto& uri : hop.m_vpnDisabledApps) {
+  //    splitTunnelApps.append(QJsonValue(uri));
+  //  }
+  //  json.insert("vpnDisabledApps", splitTunnelApps);
   write(json);
 }
 

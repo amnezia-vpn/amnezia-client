@@ -23,7 +23,7 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     ErrorCode startMzImpl();
     ErrorCode stopMzImpl();
 #endif
@@ -47,7 +47,7 @@ private:
 
     bool m_isConfigLoaded = false;
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     QScopedPointer<ControllerImpl> m_impl;
 #endif
 };
