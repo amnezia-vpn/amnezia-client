@@ -4,28 +4,30 @@
 #include "protocols/vpnprotocol.h"
 
 #ifdef __OBJC__
-#import <Foundation/Foundation.h>
+    #import <Foundation/Foundation.h>
 @class NETunnelProviderManager;
 #endif
 
 using namespace amnezia;
 
-struct Action {
-    static const char* start;
-    static const char* restart;
-    static const char* stop;
-    static const char* getTunnelId;
-    static const char* getStatus;
+struct Action
+{
+    static const char *start;
+    static const char *restart;
+    static const char *stop;
+    static const char *getTunnelId;
+    static const char *getStatus;
 };
 
-struct MessageKey {
-    static const char* action;
-    static const char* tunnelId;
-    static const char* config;
-    static const char* errorCode;
-    static const char* host;
-    static const char* port;
-    static const char* isOnDemand;
+struct MessageKey
+{
+    static const char *action;
+    static const char *tunnelId;
+    static const char *config;
+    static const char *errorCode;
+    static const char *host;
+    static const char *port;
+    static const char *isOnDemand;
 };
 
 class IosController : public QObject
@@ -33,25 +35,26 @@ class IosController : public QObject
     Q_OBJECT
 
 public:
-    static IosController* Instance();
+    static IosController *Instance();
 
     virtual ~IosController() override = default;
 
     bool initialize();
-    bool connectVpn(amnezia::Proto proto, const QJsonObject& configuration);
+    bool connectVpn(amnezia::Proto proto, const QJsonObject &configuration);
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);
     void vpnConfigurationDidChange(void *pNotification);
 
-    void getBackendLogs(std::function<void (const QString &)> &&callback);
+    void getBackendLogs(std::function<void(const QString &)> &&callback);
     void checkStatus();
 signals:
-    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
+    void importConfigFromOutside(const QString);
+    void importBackupFromOutside(const QString);
 
 protected slots:
-
 
 private:
     explicit IosController();
@@ -66,12 +69,12 @@ private:
     void startTunnel();
 
 private:
-    void *m_iosControllerWrapper{};
+    void *m_iosControllerWrapper {};
 #ifdef __OBJC__
-    NETunnelProviderManager *m_currentTunnel{};
-    NSString *m_serverAddress{};
-    bool isOurManager(NETunnelProviderManager* manager);
-    void sendVpnExtensionMessage(NSDictionary* message, std::function<void(NSDictionary*)> callback = nullptr);
+    NETunnelProviderManager *m_currentTunnel {};
+    NSString *m_serverAddress {};
+    bool isOurManager(NETunnelProviderManager *manager);
+    void sendVpnExtensionMessage(NSDictionary *message, std::function<void(NSDictionary *)> callback = nullptr);
 #endif
 
     amnezia::Proto m_proto;

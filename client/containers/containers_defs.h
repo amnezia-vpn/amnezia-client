@@ -8,68 +8,72 @@
 
 using namespace amnezia;
 
-namespace amnezia {
-
-namespace ContainerEnumNS {
-Q_NAMESPACE
-enum DockerContainer {
-    None = 0,
-    OpenVpn,
-    ShadowSocks,
-    Cloak,
-    WireGuard,
-    Ipsec,
-
-    //non-vpn
-    TorWebSite,
-    Dns,
-    //FileShare,
-    Sftp
-};
-Q_ENUM_NS(DockerContainer)
-} // namespace ContainerEnumNS
-
-using namespace ContainerEnumNS;
-using namespace ProtocolEnumNS;
-
-class ContainerProps : public QObject
+namespace amnezia
 {
-    Q_OBJECT
 
-public:
-    Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
-    Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
-    Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
+    namespace ContainerEnumNS
+    {
+        Q_NAMESPACE
+        enum DockerContainer {
+            None = 0,
+            OpenVpn,
+            ShadowSocks,
+            Cloak,
+            WireGuard,
+            Ipsec,
 
-    Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
+            // non-vpn
+            TorWebSite,
+            Dns,
+            // FileShare,
+            Sftp
+        };
+        Q_ENUM_NS(DockerContainer)
+    } // namespace ContainerEnumNS
 
-    Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerHumanNames();
-    Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDescriptions();
+    using namespace ContainerEnumNS;
+    using namespace ProtocolEnumNS;
 
-    // these protocols will be displayed in container settings
-    Q_INVOKABLE static QVector<amnezia::Proto> protocolsForContainer(amnezia::DockerContainer container);
+    class ContainerProps : public QObject
+    {
+        Q_OBJECT
 
-    Q_INVOKABLE static amnezia::ServiceType containerService(amnezia::DockerContainer c);
+    public:
+        Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
+        Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
+        Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
 
-    // binding between Docker container and main protocol of given container
-    // it may be changed fot future containers :)
-    Q_INVOKABLE static amnezia::Proto defaultProtocol(amnezia::DockerContainer c);
+        Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
 
-    Q_INVOKABLE static bool isSupportedByCurrentPlatform(amnezia::DockerContainer c);
-    Q_INVOKABLE static QStringList fixedPortsForContainer(amnezia::DockerContainer c);
-};
+        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerHumanNames();
+        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDescriptions();
+        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDetailedDescriptions();
 
+        // these protocols will be displayed in container settings
+        Q_INVOKABLE static QVector<amnezia::Proto> protocolsForContainer(amnezia::DockerContainer container);
 
+        Q_INVOKABLE static amnezia::ServiceType containerService(amnezia::DockerContainer c);
 
-static void declareQmlContainerEnum() {   
-    qmlRegisterUncreatableMetaObject(
-                ContainerEnumNS::staticMetaObject,
-                "ContainerEnum",
-                1, 0,
-                "ContainerEnum",
-                "Error: only enums"
-                );
-}
+        // binding between Docker container and main protocol of given container
+        // it may be changed fot future containers :)
+        Q_INVOKABLE static amnezia::Proto defaultProtocol(amnezia::DockerContainer c);
+
+        Q_INVOKABLE static bool isSupportedByCurrentPlatform(amnezia::DockerContainer c);
+        Q_INVOKABLE static QStringList fixedPortsForContainer(amnezia::DockerContainer c);
+
+        static bool isEasySetupContainer(amnezia::DockerContainer container);
+        static QString easySetupHeader(amnezia::DockerContainer container);
+        static QString easySetupDescription(amnezia::DockerContainer container);
+        static int easySetupOrder(amnezia::DockerContainer container);
+
+        static bool isShareable(amnezia::DockerContainer container);
+    };
+
+    static void declareQmlContainerEnum()
+    {
+        qmlRegisterUncreatableMetaObject(ContainerEnumNS::staticMetaObject, "ContainerEnum", 1, 0, "ContainerEnum",
+                                         "Error: only enums");
+    }
 
 } // namespace amnezia
 

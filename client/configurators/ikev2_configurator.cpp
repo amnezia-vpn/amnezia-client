@@ -1,28 +1,26 @@
 #include "ikev2_configurator.h"
-#include <QApplication>
+
+#include <QDebug>
+#include <QJsonDocument>
 #include <QProcess>
 #include <QString>
 #include <QTemporaryDir>
-#include <QDebug>
 #include <QTemporaryFile>
-#include <QJsonDocument>
 #include <QUuid>
 
 #include "containers/containers_defs.h"
-#include "core/server_defs.h"
 #include "core/scripts_registry.h"
-#include "utilities.h"
+#include "core/server_defs.h"
 #include "core/servercontroller.h"
+#include "utilities.h"
 
-
-Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, QObject *parent)
+    : ConfiguratorBase(settings, parent)
 {
-
 }
 
 Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials,
-    DockerContainer container, ErrorCode *errorCode)
+                                                                        DockerContainer container, ErrorCode *errorCode)
 {
     Ikev2Configurator::ConnectionData connData;
     connData.host = credentials.hostName;
@@ -32,26 +30,27 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
 
     QString certFileName = "/opt/amnezia/ikev2/clients/" + connData.clientId + ".p12";
 
-    QString scriptCreateCert = QString("certutil -z <(head -c 1024 /dev/urandom) "\
-                             "-S -c \"IKEv2 VPN CA\" -n \"%1\" "\
-                             "-s \"O=IKEv2 VPN,CN=%1\" "\
-                             "-k rsa -g 3072 -v 120 "\
-                             "-d sql:/etc/ipsec.d -t \",,\" "\
-                             "--keyUsage digitalSignature,keyEncipherment "\
-                             "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
-            .arg(connData.clientId);
+    QString scriptCreateCert = QString("certutil -z <(head -c 1024 /dev/urandom) "
+                                       "-S -c \"IKEv2 VPN CA\" -n \"%1\" "
+                                       "-s \"O=IKEv2 VPN,CN=%1\" "
+                                       "-k rsa -g 3072 -v 120 "
+                                       "-d sql:/etc/ipsec.d -t \",,\" "
+                                       "--keyUsage digitalSignature,keyEncipherment "
+                                       "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
+                                       .arg(connData.clientId);
 
     ServerController serverController(m_settings);
     ErrorCode e = serverController.runContainerScript(credentials, container, scriptCreateCert);
 
     QString scriptExportCert = QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"")
-            .arg(connData.password)
-            .arg(connData.clientId)
-            .arg(certFileName);
+                                       .arg(connData.password)
+                                       .arg(connData.clientId)
+                                       .arg(certFileName);
     e = serverController.runContainerScript(credentials, container, scriptExportCert);
 
     connData.clientCert = serverController.getTextFileFromContainer(container, credentials, certFileName, &e);
-    connData.caCert = serverController.getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
+    connData.caCert =
+            serverController.getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", &e);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();
@@ -59,8 +58,8 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     return connData;
 }
 
-QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
     Q_UNUSED(containerConfig)
 
@@ -120,4 +119,3 @@ QString Ikev2Configurator::genStrongSwanConfig(const ConnectionData &connData)
 
     return config;
 }
-

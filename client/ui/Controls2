@@ -1,0 +1,34 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+TextArea {
+    id: root
+
+    width: parent.width
+
+    topPadding: 16
+    leftPadding: 16
+
+    color: "#D7D8DB"
+    selectionColor:  "#412102"
+    selectedTextColor: "#D7D8DB"
+    placeholderTextColor: "#878B91"
+
+    font.pixelSize: 16
+    font.weight: Font.Medium
+    font.family: "PT Root UI VF"
+
+    wrapMode: Text.Wrap
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: contextMenu.open()
+    }
+
+    ContextMenuType {
+        id: contextMenu
+        textObj: textField
+    }
+}

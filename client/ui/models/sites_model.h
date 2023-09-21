@@ -10,32 +10,43 @@ class SitesModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    enum SiteRoles {
+    enum Roles {
         UrlRole = Qt::UserRole + 1,
         IpRole
     };
 
-    explicit SitesModel(std::shared_ptr<Settings> settings, Settings::RouteMode mode, QObject *parent = nullptr);
-    void resetCache();
+    explicit SitesModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
-    // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant data(int row, int column);
+
+    Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+
+public slots:
+    bool addSite(const QString &hostname, const QString &ip);
+    void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
+    void removeSite(QModelIndex index);
+
+    int getRouteMode();
+    void setRouteMode(int routeMode);
+
+    QVector<QPair<QString, QString>> getCurrentSites();
+
+signals:
+    void routeModeChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    void genCache() const;
+    void fillSites();
 
-private:
-    Settings::RouteMode m_mode;
     std::shared_ptr<Settings> m_settings;
 
-    mutable QVector<QPair<QString, QString>> m_ipsCache;
-    mutable bool m_cacheReady = false;
+    Settings::RouteMode m_currentRouteMode;
+
+    QVector<QPair<QString, QString>> m_sites;
 };
 
 #endif // SITESMODEL_H

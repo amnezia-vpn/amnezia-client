@@ -4,15 +4,19 @@
 #include <QObject>
 #include <QStringList>
 
-class MobileUtils : public QObject {
+class MobileUtils : public QObject
+{
     Q_OBJECT
-
+    
 public:
-    MobileUtils() = delete;
+    explicit MobileUtils(QObject *parent = nullptr);
 
 public slots:
-    static void shareText(const QStringList& filesToSend);
-
+    bool shareText(const QStringList &filesToSend);
+    QString openFile();
+    
+signals:
+    void finished();
 };
 
 #endif // MOBILEUTILS_H

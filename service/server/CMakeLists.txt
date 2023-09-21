@@ -273,7 +273,7 @@ endif()
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 
-# deploy artifacts required to run the application to the debug build folder
+# copy deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DEPLOY_PLATFORM_PATH "windows/x64")

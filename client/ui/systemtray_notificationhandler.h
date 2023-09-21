@@ -17,7 +17,7 @@ public:
     explicit SystemTrayNotificationHandler(QObject* parent);
     ~SystemTrayNotificationHandler();
 
-    void setConnectionState(VpnProtocol::VpnConnectionState state) override;
+    void setConnectionState(Vpn::ConnectionState state) override;
 
 protected:
     virtual void notify(Message type, const QString& title,
@@ -26,7 +26,7 @@ protected:
 private:
     void showHideWindow();
 
-    void setTrayState(VpnProtocol::VpnConnectionState state);
+    void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
     void setTrayIcon(const QString &iconPath);

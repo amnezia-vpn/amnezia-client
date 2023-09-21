@@ -1,62 +1,89 @@
 #include "protocols_model.h"
 
-ProtocolsModel::ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent) :
-    m_settings(settings),
-    QAbstractListModel(parent)
+ProtocolsModel::ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent)
+    : m_settings(settings), QAbstractListModel(parent)
 {
-
 }
 
 int ProtocolsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return ProtocolProps::allProtocols().size();
+    return m_content.size();
 }
 
-QHash<int, QByteArray> ProtocolsModel::roleNames() const {
+QHash<int, QByteArray> ProtocolsModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
-    roles[NameRole] = "name_role";
-    roles[DescRole] = "desc_role";
-    roles[ServiceTypeRole] = "service_type_role";
-    roles[IsInstalledRole] = "is_installed_role";
+
+    roles[ProtocolNameRole] = "protocolName";
+    roles[ProtocolPageRole] = "protocolPage";
+    roles[ProtocolIndexRole] = "protocolIndex";
+    roles[RawConfigRole] = "rawConfig";
+
     return roles;
 }
 
 QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0
-            || index.row() >= ProtocolProps::allProtocols().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_content.size()) {
         return QVariant();
     }
 
-    Proto p = ProtocolProps::allProtocols().at(index.row());
-    if (role == NameRole) {
-        return ProtocolProps::protocolHumanNames().value(p);
+    switch (role) {
+    case ProtocolNameRole: {
+        amnezia::Proto proto = ProtocolProps::protoFromString(m_content.keys().at(index.row()));
+        return ProtocolProps::protocolHumanNames().value(proto);
     }
-    if (role == DescRole) {
-        return ProtocolProps::protocolDescriptions().value(p);
+    case ProtocolPageRole:
+        return static_cast<int>(protocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
+    case ProtocolIndexRole: return ProtocolProps::protoFromString(m_content.keys().at(index.row()));
+    case RawConfigRole: {
+        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
+        auto lastConfigJsonDoc =
+                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
+        auto lastConfigJson = lastConfigJsonDoc.object();
+
+        QString rawConfig;
+        QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+        for (const QString &l : lines) {
+            rawConfig.append(l + "\n");
+        }
+        return rawConfig;
     }
-    if (role == ServiceTypeRole) {
-        return ProtocolProps::protocolService(p);
     }
-    if (role == IsInstalledRole) {
-        return ContainerProps::protocolsForContainer(m_selectedDockerContainer).contains(p);
-    }
+
     return QVariant();
 }
 
-void ProtocolsModel::setSelectedServerIndex(int index)
+void ProtocolsModel::updateModel(const QJsonObject &content)
 {
-    beginResetModel();
-    m_selectedServerIndex = index;
-    endResetModel();
+    m_container = ContainerProps::containerFromString(content.value(config_key::container).toString());
+
+    m_content = content;
+    m_content.remove(config_key::container);
 }
 
-void ProtocolsModel::setSelectedDockerContainer(DockerContainer c)
+QJsonObject ProtocolsModel::getConfig()
 {
-    beginResetModel();
-    m_selectedDockerContainer = c;
-    endResetModel();
+    QJsonObject config = m_content;
+    config.insert(config_key::container, ContainerProps::containerToString(m_container));
+    return config;
 }
 
-
+PageLoader::PageEnum ProtocolsModel::protocolPage(Proto protocol) const
+{
+    switch (protocol) {
+    case Proto::OpenVpn: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::Cloak: return PageLoader::PageEnum::PageProtocolCloakSettings;
+    case Proto::ShadowSocks: return PageLoader::PageEnum::PageProtocolShadowSocksSettings;
+    case Proto::WireGuard: return PageLoader::PageEnum::PageProtocolWireGuardSettings;
+    case Proto::Ikev2: return PageLoader::PageEnum::PageProtocolIKev2Settings;
+    case Proto::L2tp: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    // non-vpn
+    case Proto::TorWebSite: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::Dns: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::FileShare: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::Sftp: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    }
+}

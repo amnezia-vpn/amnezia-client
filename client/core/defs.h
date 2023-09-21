@@ -12,10 +12,10 @@ struct ServerCredentials
 {
     QString hostName;
     QString userName;
-    QString password;
+    QString secretData;
     int port = 22;
 
-    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !password.isEmpty() && port > 0; }
+    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0; }
 };
 
 enum ErrorCode
@@ -37,7 +37,7 @@ enum ErrorCode
 
     // Ssh connection errors
     SshRequsetDeniedError, SshInterruptedError, SshInternalError,
-    SshPrivateKeyError, SshPrivateKeyFormatError,
+    SshPrivateKeyError, SshPrivateKeyFormatError, SshTimeoutError,
 
     // Ssh sftp errors
     SshSftpEofError, SshSftpNoSuchFileError, SshSftpPermissionDeniedError,
@@ -69,7 +69,10 @@ enum ErrorCode
     OpenSslFailed,
     OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
-    CloakExecutableCrashed
+    CloakExecutableCrashed,
+
+    // import and install errors
+    ImportInvalidConfigError
 };
 
 } // namespace amnezia
