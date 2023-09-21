@@ -79,7 +79,7 @@ if [ "${MAC_CERT_PW+x}" ]; then
 
   CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
   WWDRCA=$DEPLOY_DIR/WWDRCA.cer
-  KEYCHAIN=amnezia.build.keychain
+  KEYCHAIN=amnezia.build.macos.keychain
   TEMP_PASS=tmp_pass
 
   security create-keychain -p $TEMP_PASS $KEYCHAIN || true
