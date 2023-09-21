@@ -64,6 +64,11 @@ ListView {
     //                        goToPage(PageEnum.PageProtocolWireGuardSettings)
                             break
                         }
+                        case ContainerEnum.AmneziaWireGuard: {
+                            WireGuardConfigModel.updateModel(config)
+                            PageController.goToPage(PageEnum.PageProtocolAmneziaWireGuardSettings)
+                            break
+                        }
                         case ContainerEnum.Ipsec: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)

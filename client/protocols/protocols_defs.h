@@ -2,8 +2,8 @@
 #define PROTOCOLS_DEFS_H
 
 #include <QDebug>
-#include <QObject>
 #include <QMetaEnum>
+#include <QObject>
 
 namespace amnezia
 {
@@ -158,6 +158,7 @@ namespace amnezia
             ShadowSocks,
             Cloak,
             WireGuard,
+            AmneziaWireGuard,
             Ikev2,
             L2tp,
 

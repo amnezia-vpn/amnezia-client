@@ -18,7 +18,7 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
 
     // MZ
 #if defined(MZ_LINUX)
-    //m_impl.reset(new LinuxController());
+    // m_impl.reset(new LinuxController());
 #elif defined(Q_OS_MAC) || defined(Q_OS_WIN)
     m_impl.reset(new LocalSocketController());
     connect(m_impl.get(), &ControllerImpl::connected, this,

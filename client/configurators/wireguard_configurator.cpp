@@ -62,7 +62,10 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
-    connData.port = containerConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
+    connData.port = containerConfig.value(config_key::wireguard)
+                            .toObject()
+                            .value(config_key::port)
+                            .toString(protocols::wireguard::defaultPort);
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
         if (errorCode)

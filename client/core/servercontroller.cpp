@@ -486,6 +486,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
+    const QJsonObject &amneziaWireguarConfig =
+            config.value(ProtocolProps::protoToString(Proto::AmneziaWireGuard)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
 
     Vars vars;

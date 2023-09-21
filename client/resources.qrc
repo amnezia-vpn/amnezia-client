@@ -215,5 +215,6 @@
         <file>ui/qml/Controls2/ListViewWithLabelsType.qml</file>
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
+        <file>ui/qml/Pages2/PageProtocolAmneziaWireGuardSettings.qml</file>
     </qresource>
 </RCC>

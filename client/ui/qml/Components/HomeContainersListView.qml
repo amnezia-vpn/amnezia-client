@@ -72,8 +72,7 @@ ListView {
                         containersDropDown.menuVisible = false
 
 
-                        if (needReconnected &&
-                                (ConnectionController.isConnected || ConnectionController.isConnectionInProgress)) {
+                        if (needReconnected && (ConnectionController.isConnected || ConnectionController.isConnectionInProgress)) {
                             PageController.showNotificationMessage(qsTr("Reconnect via VPN Procotol: ") + name)
                             PageController.goToPageHome()
                             menu.visible = false
