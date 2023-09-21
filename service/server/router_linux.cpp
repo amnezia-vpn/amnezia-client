@@ -54,9 +54,9 @@ bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const
     if (int err = ioctl(sock, SIOCADDRT, &route) < 0)
     {
         qDebug().noquote() << "route add error: gw "
-        << ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr
-        << " ip " << ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr
-        << " mask " << ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr << " " << err;
+                           << ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr
+                           << " ip " << ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr
+                           << " mask " << ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr << " " << err;
         return false;
     }
 
