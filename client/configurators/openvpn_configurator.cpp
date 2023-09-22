@@ -126,7 +126,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
 
 #ifdef Q_OS_ANDROID
     QString server_route = QString("\nroute remote_host 255.255.255.255 net_gateway\n");                             
-    config.append(server_route);
+    config.append("\n" + server_route + "\n");
 #endif
 
     if (m_settings->routeMode() == Settings::VpnAllSites) {
