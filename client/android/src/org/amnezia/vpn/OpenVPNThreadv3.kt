@@ -108,6 +108,9 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
             resultingConfig.append("\n</cloak>\n")
 
             config.setUsePluggableTransports(true)
+        } else {
+           val remote_server = jsonVpnConfig.getString("hostName")
+           resultingConfig.append("\nroute " + remote_server + " 255.255.255.255 net_gateway\n")
         }
 
         config.content = resultingConfig.toString()
