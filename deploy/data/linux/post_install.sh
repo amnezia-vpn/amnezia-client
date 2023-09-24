@@ -37,6 +37,7 @@ sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
 
 echo "user desktop creation loop started" >> $LOG_FILE
 sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE
+sudo cp $APP_PATH/$APP_NAME.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
 echo "user desktop creation loop ended" >> $LOG_FILE

@@ -54,6 +54,11 @@ if test -f /usr/share/applications/$APP_NAME.desktop; then
 
 fi
 
+if test -f /usr/share/pixmaps/$APP_NAME.png; then
+	sudo rm -f /usr/share/pixmaps/$APP_NAME.png >> $LOG_FILE
+
+fi
+
 date >> $LOG_FILE
 echo "Service after uninstall status:" >> $LOG_FILE
 sudo systemctl status $APP_NAME >> $LOG_FILE
