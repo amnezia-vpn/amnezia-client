@@ -67,7 +67,7 @@ PageType {
         }
     }
 
-    DefaultSeverType {
+    HomeRootMenuButton {
         id: defaultServerInfo
         height: 130
         anchors.right: parent.right

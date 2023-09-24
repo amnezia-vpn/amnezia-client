@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "TextTypes"
+import "../Controls2/TextTypes"
+import "../Controls2"
 
 Item {
     id: root
