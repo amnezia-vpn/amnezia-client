@@ -2,7 +2,7 @@
 [Desktop Entry]
 Type=Application
 Name=AmneziaVPN
-Version=4.0.7
+Version=@CMAKE_PROJECT_VERSION@
 Comment=Client of your self-hosted VPN
 Exec=AmneziaVPN
 Icon=/usr/share/pixmaps/AmneziaVPN.png
