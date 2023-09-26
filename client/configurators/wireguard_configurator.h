@@ -6,12 +6,13 @@
 
 #include "configurator_base.h"
 #include "core/defs.h"
+#include "core/scripts_registry.h"
 
 class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAmneziaWireGuard, QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -35,6 +36,12 @@ private:
                                           const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     ConnectionData genClientKeys();
+
+    bool m_isAmneziaWireGuard;
+    QString m_serverConfigPath;
+    QString m_serverPublicKeyPath;
+    QString m_serverPskKeyPath;
+    amnezia::ProtocolScriptType m_configTemplate;
 };
 
 #endif // WIREGUARD_CONFIGURATOR_H

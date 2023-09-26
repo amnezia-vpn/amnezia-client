@@ -359,6 +359,17 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
   }
+
+  config.m_junkPacketCount = obj.value("Jc").toString();
+  config.m_junkPacketMinSize = obj.value("Jmin").toString();
+  config.m_junkPacketMaxSize = obj.value("Jmax").toString();
+  config.m_initPacketJunkSize = obj.value("S1").toString();
+  config.m_responsePacketJunkSize = obj.value("S2").toString();
+  config.m_initPacketMagicHeader = obj.value("H1").toString();
+  config.m_responsePacketMagicHeader = obj.value("H2").toString();
+  config.m_underloadPacketMagicHeader = obj.value("H3").toString();
+  config.m_transportPacketMagicHeader = obj.value("H4").toString();
+
   return true;
 }
 

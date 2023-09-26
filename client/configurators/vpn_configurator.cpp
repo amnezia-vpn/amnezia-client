@@ -5,6 +5,7 @@
 #include "shadowsocks_configurator.h"
 #include "ssh_configurator.h"
 #include "wireguard_configurator.h"
+#include "amneziaWireGuardConfigurator.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -20,9 +21,10 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *pa
     openVpnConfigurator = std::shared_ptr<OpenVpnConfigurator>(new OpenVpnConfigurator(settings, this));
     shadowSocksConfigurator = std::shared_ptr<ShadowSocksConfigurator>(new ShadowSocksConfigurator(settings, this));
     cloakConfigurator = std::shared_ptr<CloakConfigurator>(new CloakConfigurator(settings, this));
-    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, this));
+    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, false, this));
     ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, this));
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, this));
+    amneziaWireGuardConfigurator = std::shared_ptr<AmneziaWireGuardConfigurator>(new AmneziaWireGuardConfigurator(settings, this));
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
@@ -41,7 +43,7 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
         return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::AmneziaWireGuard:
-        return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
+        return amneziaWireGuardConfigurator->genAmneziaWireGuardConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::Ikev2: return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
 

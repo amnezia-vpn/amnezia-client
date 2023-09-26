@@ -61,11 +61,22 @@ namespace amnezia
 
         constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
 
+        constexpr char junkPacketCount[] = "Jc";
+        constexpr char junkPacketMinSize[] = "Jmin";
+        constexpr char junkPacketMaxSize[] = "Jmax";
+        constexpr char initPacketJunkSize[] = "S1";
+        constexpr char responsePacketJunkSize[] = "S2";
+        constexpr char initPacketMagicHeader[] = "H1";
+        constexpr char responsePacketMagicHeader[] = "H2";
+        constexpr char underloadPacketMagicHeader[] = "H3";
+        constexpr char transportPacketMagicHeader[] = "H4";
+
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
         constexpr char shadowsocks[] = "shadowsocks";
         constexpr char cloak[] = "cloak";
         constexpr char sftp[] = "sftp";
+        constexpr char amneziaWireguard[] = "amneziawireguard";
 
     }
 
@@ -139,6 +150,25 @@ namespace amnezia
             constexpr char defaultUserName[] = "sftp_user";
 
         } // namespace sftp
+
+        namespace amneziawireguard
+        {
+            constexpr char defaultPort[] = "55424";
+
+            constexpr char serverConfigPath[] = "/opt/amnezia/amneziawireguard/wg0.conf";
+            constexpr char serverPublicKeyPath[] = "/opt/amnezia/amneziawireguard/wireguard_server_public_key.key";
+            constexpr char serverPskKeyPath[] = "/opt/amnezia/amneziawireguard/wireguard_psk.key";
+
+            constexpr char defaultJunkPacketCount[] = "3";
+            constexpr char defaultJunkPacketMinSize[] = "10";
+            constexpr char defaultJunkPacketMaxSize[] = "30";
+            constexpr char defaultInitPacketJunkSize[] = "15";
+            constexpr char defaultResponsePacketJunkSize[] = "18";
+            constexpr char defaultInitPacketMagicHeader[] = "1020325451";
+            constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
+            constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
+            constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+        }
 
     } // namespace protocols
 

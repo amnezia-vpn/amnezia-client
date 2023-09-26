@@ -584,6 +584,37 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
     vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
 
+    // Amnezia wireguard vars
+    vars.append({ { "$AMNEZIAWIREGUARD_SERVER_PORT",
+                    amneziaWireguarConfig.value(config_key::port).toString(protocols::amneziawireguard::defaultPort) } });
+    vars.append({ { "$JUNK_PACKET_COUNT",
+                    amneziaWireguarConfig.value(config_key::junkPacketCount)
+                            .toString(protocols::amneziawireguard::defaultJunkPacketCount) } });
+    vars.append({ { "$JUNK_PACKET_MIN_SIZE",
+                    amneziaWireguarConfig.value(config_key::junkPacketMinSize)
+                            .toString(protocols::amneziawireguard::defaultJunkPacketMinSize) } });
+    vars.append({ { "$JUNK_PACKET_MAX_SIZE",
+                    amneziaWireguarConfig.value(config_key::junkPacketMaxSize)
+                            .toString(protocols::amneziawireguard::defaultJunkPacketMaxSize) } });
+    vars.append({ { "$INIT_PACKET_JUNK_SIZE",
+                    amneziaWireguarConfig.value(config_key::initPacketJunkSize)
+                            .toString(protocols::amneziawireguard::defaultInitPacketJunkSize) } });
+    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE",
+                    amneziaWireguarConfig.value(config_key::responsePacketJunkSize)
+                            .toString(protocols::amneziawireguard::defaultResponsePacketJunkSize) } });
+    vars.append({ { "$INIT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::initPacketMagicHeader)
+                            .toString(protocols::amneziawireguard::defaultInitPacketMagicHeader) } });
+    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::responsePacketMagicHeader)
+                            .toString(protocols::amneziawireguard::defaultResponsePacketMagicHeader) } });
+    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader)
+                            .toString(protocols::amneziawireguard::defaultUnderloadPacketMagicHeader) } });
+    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::transportPacketMagicHeader)
+                            .toString(protocols::amneziawireguard::defaultTransportPacketMagicHeader) } });
+
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
