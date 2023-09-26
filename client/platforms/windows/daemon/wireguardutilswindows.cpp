@@ -165,6 +165,16 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }
 
+  out << "jc=" << config.m_junkPacketCount << "\n";
+  out << "jmin=" << config.m_junkPacketMinSize << "\n";
+  out << "jmax=" << config.m_junkPacketMaxSize << "\n";
+  out << "s1=" << config.m_initPacketJunkSize << "\n";
+  out << "s2=" << config.m_responsePacketJunkSize << "\n";
+  out << "h1=" << config.m_initPacketMagicHeader << "\n";
+  out << "h2=" << config.m_responsePacketMagicHeader << "\n";
+  out << "h3=" << config.m_underloadPacketMagicHeader << "\n";
+  out << "h4=" << config.m_transportPacketMagicHeader << "\n";
+
   // Exclude the server address, except for multihop exit servers.
   if (config.m_hopType != InterfaceConfig::MultiHopExit) {
     m_routeMonitor.addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));

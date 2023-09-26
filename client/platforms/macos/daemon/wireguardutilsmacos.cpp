@@ -164,7 +164,7 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   }
 
 
-  out << "Jc=" << config.m_junkPacketCount << "\n";
+  out << "jc=" << config.m_junkPacketCount << "\n";
   out << "jmin=" << config.m_junkPacketMinSize << "\n";
   out << "jmax=" << config.m_junkPacketMaxSize << "\n";
   out << "s1=" << config.m_initPacketJunkSize << "\n";
