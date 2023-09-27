@@ -108,7 +108,7 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
   }
 
   if (type == "deactivate") {
-    Daemon::instance()->deactivate();
+    Daemon::instance()->deactivate(true);
     return;
   }
 

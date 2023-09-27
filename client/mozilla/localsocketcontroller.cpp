@@ -190,6 +190,7 @@ void LocalSocketController::deactivate() {
   QJsonObject json;
   json.insert("type", "deactivate");
   write(json);
+  emit disconnected();
 }
 
 void LocalSocketController::checkStatus() {

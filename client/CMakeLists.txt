@@ -324,16 +324,5 @@ if(NOT IOS AND NOT ANDROID)
 
 endif()
 
-if(WIN32)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy,true>
-        $<TARGET_FILE_DIR:${PROJECT}>/../service/wireguard-service/wireguard-service.exe
-        $<TARGET_FILE_DIR:${PROJECT}>/wireguard/wireguard-service.exe
-        COMMAND_EXPAND_LISTS
-    )
-endif()
-
-
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
 qt_finalize_target(${PROJECT})
