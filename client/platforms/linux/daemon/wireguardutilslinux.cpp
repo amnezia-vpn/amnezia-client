@@ -100,6 +100,19 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     QTextStream out(&message);
     out << "private_key=" << QString(privateKey.toHex()) << "\n";
     out << "replace_peers=true\n";
+
+    if (config.m_junkPacketCount != "") {
+        out << "jc=" << config.m_junkPacketCount << "\n";
+        out << "jmin=" << config.m_junkPacketMinSize << "\n";
+        out << "jmax=" << config.m_junkPacketMaxSize << "\n";
+        out << "s1=" << config.m_initPacketJunkSize << "\n";
+        out << "s2=" << config.m_responsePacketJunkSize << "\n";
+        out << "h1=" << config.m_initPacketMagicHeader << "\n";
+        out << "h2=" << config.m_responsePacketMagicHeader << "\n";
+        out << "h3=" << config.m_underloadPacketMagicHeader << "\n";
+        out << "h4=" << config.m_transportPacketMagicHeader << "\n";
+    }
+
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
@@ -160,16 +173,6 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
         out << "allowed_ip=" << ip.toString() << "\n";
     }
-
-    out << "jc=" << config.m_junkPacketCount << "\n";
-    out << "jmin=" << config.m_junkPacketMinSize << "\n";
-    out << "jmax=" << config.m_junkPacketMaxSize << "\n";
-    out << "s1=" << config.m_initPacketJunkSize << "\n";
-    out << "s2=" << config.m_responsePacketJunkSize << "\n";
-    out << "h1=" << config.m_initPacketMagicHeader << "\n";
-    out << "h2=" << config.m_responsePacketMagicHeader << "\n";
-    out << "h3=" << config.m_underloadPacketMagicHeader << "\n";
-    out << "h4=" << config.m_transportPacketMagicHeader << "\n";
 
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
