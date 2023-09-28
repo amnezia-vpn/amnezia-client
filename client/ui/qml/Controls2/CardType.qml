@@ -123,4 +123,11 @@ RadioButton {
             Layout.bottomMargin: 16
         }
     }
+
+    MouseArea {
+        anchors.fill: parent
+
+        cursorShape: Qt.PointingHandCursor
+        enabled: false
+    }
 }
