@@ -148,6 +148,7 @@ PageType {
 
         width: parent.width
         height: parent.height * 0.9
+        pageHeight: root.height
 
         ColumnLayout {
             id: serversMenuHeader

@@ -5,6 +5,7 @@ Drawer {
     id: drawer
     property bool needCloseButton: true
     property bool isOpened: false
+    property int pageHeight
 
     Connections {
         target: PageController
@@ -54,6 +55,7 @@ Drawer {
         if (needCloseButton) {
             PageController.drawerOpen()
         }
+        position = (dragMargin / pageHeight)
     }
 
     onAboutToHide: {
@@ -77,9 +79,10 @@ Drawer {
 
 
     onPositionChanged: {
-        if (isOpened && (position <= 0.99 && position >= 0.95)) {
+        if (position < (dragMargin / root.height)) {
             mouseArea.canceled()
             drawer.close()
+            position = 0
             mouseArea.exited()
             dropArea.exited()
         }
