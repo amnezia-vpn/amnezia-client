@@ -5,6 +5,7 @@ import QtQuick.Shapes
 import Qt5Compat.GraphicalEffects
 
 import ConnectionState 1.0
+import PageEnum 1.0
 
 Button {
     id: root
@@ -137,6 +138,13 @@ Button {
     }
 
     onClicked: {
+        if (!ContainersModel.isAnyContainerInstalled()) {
+            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+
+            return
+        }
+
         if (ConnectionController.isConnectionInProgress) {
             ConnectionController.closeConnection()
         } else if (ConnectionController.isConnected) {

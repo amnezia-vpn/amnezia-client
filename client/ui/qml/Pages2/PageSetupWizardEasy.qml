@@ -183,6 +183,8 @@ PageType {
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
+                visible: ContainersModel.isAnyContainerInstalled()
+
                 text: qsTr("Set up later")
 
                 onClicked: function() {

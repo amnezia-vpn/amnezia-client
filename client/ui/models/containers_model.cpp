@@ -214,6 +214,20 @@ bool ContainersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
     return containers.contains(DockerContainer::Dns);
 }
 
+bool ContainersModel::isAnyContainerInstalled()
+{
+    for (int row=0; row < rowCount(); row++) {
+        QModelIndex idx = this->index(row, 0);
+
+        if (this->data(idx, IsInstalledRole).toBool() &&
+            this->data(idx, ServiceTypeRole).toInt() == ServiceType::Vpn) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
