@@ -50,9 +50,29 @@ endif()
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
-qt6_add_translations(${PROJECT} TS_FILES
+set(AMNEZIAVPN_TR_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
 )
+
+file(GLOB_RECURSE AMNEZIAVPN_TR_SOURCES *.qrc *.cpp *.h *.ui)
+if ( BUILD_TRANSLATIONS )
+    qt_create_translation(AMNEZIAVPN_MESSAGES ${AMNEZIAVPN_TR_SOURCES} ${AMNEZIAVPN_TR_FILES})
+    qt_add_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TR_FILES})
+    add_custom_target(amnezia_messages DEPENDS ${AMNEZIAVPN_MESSAGES})
+    add_custom_target(amnezia_translations DEPENDS ${AMNEZIAVPN_QM_FILES} amnezia_messages)
+    add_dependencies(${PROJECT} amnezia_translations)
+
+    if (BUILD_TRANSLATIONS_AS_RESOURCES)
+        set(QM_FILE_LIST "")
+        foreach(FILE ${AMNEZIAVPN_QM_FILES})
+            list(APPEND QM_FILE_LIST "<file>${FILE}</file>")
+        endforeach()
+        string(REPLACE ";" "" QM_FILE_LIST ${QM_FILE_LIST})
+        configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc ${CMAKE_CURRENT_LIST_DIR}/translations.qrc)
+        target_sources(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/translations.qrc)
+    endif()
+endif( BUILD_TRANSLATIONS )
 
 if(IOS)
     #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)

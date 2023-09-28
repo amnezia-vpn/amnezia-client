@@ -221,27 +221,21 @@ void AmneziaApplication::loadTranslator()
 {
     auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
-    if (locale != QLocale::English) {
-        if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
-            if (QCoreApplication::installTranslator(m_translator.get())) {
-                m_settings->setAppLanguage(locale);
-            }
-        }
-    }
+    updateTranslator(locale);
 }
+
 
 void AmneziaApplication::updateTranslator(const QLocale &locale)
 {
     QResource::registerResource(":/translations.qrc");
-    if (!m_translator->isEmpty())
+    if (!m_translator->isEmpty()) {
         QCoreApplication::removeTranslator(m_translator.get());
-
-    if (locale == QLocale::English) {
-        m_settings->setAppLanguage(locale);
-        m_engine->retranslate();
     }
 
-    if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
+    m_settings->setAppLanguage(locale);
+
+    QString strFileName = QString("amneziavpn")+QLatin1String("_")+locale.name()+".qm";
+    if (m_translator->load(strFileName, "../../../")) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }
