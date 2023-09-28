@@ -15,8 +15,11 @@ Button {
     property string imageColor: "#878B91"
     property string disableImageColor: "#2C2D30"
 
-    implicitWidth: 40
-    implicitHeight: 40
+    property int backGroudRadius: 12
+    property int implicitSize: 40
+
+    implicitWidth: implicitSize
+    implicitHeight: implicitSize
 
     hoverEnabled: true
 
@@ -31,7 +34,7 @@ Button {
         id: background
 
         anchors.fill: parent
-        radius: 12
+        radius: backGroudRadius
         color: {
             if (root.enabled) {
                 if(root.pressed) {
