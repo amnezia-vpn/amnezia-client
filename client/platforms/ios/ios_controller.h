@@ -62,6 +62,7 @@ private:
     bool setupOpenVPN();
     bool setupCloak();
     bool setupWireGuard();
+    bool setupAmneziaWireGuard();
 
     bool startOpenVPN(const QString &config);
     bool startWireGuard(const QString &jsonConfig);
