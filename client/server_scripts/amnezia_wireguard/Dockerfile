@@ -3,7 +3,7 @@ FROM amneziavpn/amnezia-wg:latest
 LABEL maintainer="AmneziaVPN"
 
 #Install required packages
-RUN apk add --no-cache curl wireguard-tools dumb-init
+RUN apk add --no-cache bash curl dumb-init
 RUN apk --update upgrade --no-cache
 
 RUN mkdir -p /opt/amnezia
