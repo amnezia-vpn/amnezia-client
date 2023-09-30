@@ -61,9 +61,6 @@ set(AMNEZIAVPN_TS_FILES
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
 
 qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
-#add_custom_target(amnezia_messages DEPENDS ${AMNEZIAVPN_MESSAGES})
-#add_custom_target(amnezia_translations DEPENDS ${AMNEZIAVPN_QM_FILES} amnezia_messages)
-#add_dependencies(${PROJECT} amnezia_translations)
 
 set(QM_FILE_LIST "")
 foreach(FILE ${AMNEZIAVPN_QM_FILES})

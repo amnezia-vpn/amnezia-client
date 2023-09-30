@@ -234,9 +234,7 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
     m_settings->setAppLanguage(locale);
 
     QString strFileName = QString(":/translations/amneziavpn")+QLatin1String("_")+locale.name()+".qm";
-
     if (m_translator->load(strFileName)) {
-        qDebug() << "yyyyyyxxxxxxxx--------------" <<strFileName;
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }
