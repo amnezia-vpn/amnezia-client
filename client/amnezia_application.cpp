@@ -227,15 +227,16 @@ void AmneziaApplication::loadTranslator()
 
 void AmneziaApplication::updateTranslator(const QLocale &locale)
 {
-    QResource::registerResource(":/translations.qrc");
     if (!m_translator->isEmpty()) {
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
     m_settings->setAppLanguage(locale);
 
-    QString strFileName = QString("amneziavpn")+QLatin1String("_")+locale.name()+".qm";
-    if (m_translator->load(strFileName, "../../../")) {
+    QString strFileName = QString(":/translations/amneziavpn")+QLatin1String("_")+locale.name()+".qm";
+
+    if (m_translator->load(strFileName)) {
+        qDebug() << "yyyyyyxxxxxxxx--------------" <<strFileName;
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }

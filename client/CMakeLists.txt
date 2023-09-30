@@ -50,29 +50,31 @@ endif()
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
-set(AMNEZIAVPN_TR_FILES
+# -- i18n begin
+set(CMAKE_AUTORCC ON)
+
+set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
 )
 
-file(GLOB_RECURSE AMNEZIAVPN_TR_SOURCES *.qrc *.cpp *.h *.ui)
-if ( BUILD_TRANSLATIONS )
-    qt_create_translation(AMNEZIAVPN_MESSAGES ${AMNEZIAVPN_TR_SOURCES} ${AMNEZIAVPN_TR_FILES})
-    qt_add_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TR_FILES})
-    add_custom_target(amnezia_messages DEPENDS ${AMNEZIAVPN_MESSAGES})
-    add_custom_target(amnezia_translations DEPENDS ${AMNEZIAVPN_QM_FILES} amnezia_messages)
-    add_dependencies(${PROJECT} amnezia_translations)
+file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
 
-    if (BUILD_TRANSLATIONS_AS_RESOURCES)
-        set(QM_FILE_LIST "")
-        foreach(FILE ${AMNEZIAVPN_QM_FILES})
-            list(APPEND QM_FILE_LIST "<file>${FILE}</file>")
-        endforeach()
-        string(REPLACE ";" "" QM_FILE_LIST ${QM_FILE_LIST})
-        configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc ${CMAKE_CURRENT_LIST_DIR}/translations.qrc)
-        target_sources(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/translations.qrc)
-    endif()
-endif( BUILD_TRANSLATIONS )
+qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
+#add_custom_target(amnezia_messages DEPENDS ${AMNEZIAVPN_MESSAGES})
+#add_custom_target(amnezia_translations DEPENDS ${AMNEZIAVPN_QM_FILES} amnezia_messages)
+#add_dependencies(${PROJECT} amnezia_translations)
+
+set(QM_FILE_LIST "")
+foreach(FILE ${AMNEZIAVPN_QM_FILES})
+    get_filename_component(QM_FILE_NAME ${FILE} NAME)
+    list(APPEND QM_FILE_LIST "<file>${QM_FILE_NAME}</file>")
+endforeach()
+string(REPLACE ";" "" QM_FILE_LIST ${QM_FILE_LIST})
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+# -- i18n end
 
 if(IOS)
     #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
@@ -342,5 +344,5 @@ if(NOT IOS AND NOT ANDROID)
 
 endif()
 
-target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 qt_finalize_target(${PROJECT})
