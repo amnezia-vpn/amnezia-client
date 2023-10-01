@@ -19,6 +19,8 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
             Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
             Qt::QueuedConnection);
+
+    m_state = Vpn::ConnectionState::Disconnected;
 }
 
 ConnectionController::~ConnectionController()
@@ -70,6 +72,8 @@ QString ConnectionController::getLastConnectionError()
 
 void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
 {
+    m_state = state;
+
     m_isConnected = false;
     m_connectionStateText = tr("Connection...");
     switch (state) {
@@ -124,6 +128,16 @@ void ConnectionController::onCurrentContainerUpdated()
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully, Reconnnection..."));
         openConnection();
     }
+}
+
+void ConnectionController::translateMemoryText()
+{
+    onConnectionStateChanged(getCurrentConnectionState());
+}
+
+Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
+{
+    return m_state;
 }
 
 QString ConnectionController::connectionStateText() const

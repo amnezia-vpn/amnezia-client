@@ -87,6 +87,7 @@ void AmneziaApplication::init()
     m_vpnConnectionThread.start();
 
     initModels();
+    loadTranslator();
     initControllers();
 
 #ifdef Q_OS_ANDROID
@@ -231,16 +232,16 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
-    m_settings->setAppLanguage(locale);
-
     QString strFileName = QString(":/translations/amneziavpn")+QLatin1String("_")+locale.name()+".qm";
     if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }
-
-        m_engine->retranslate();
+    } else {
+        m_settings->setAppLanguage(QLocale::English);
     }
+
+    m_engine->retranslate();
 
     emit translationsUpdated();
 }
