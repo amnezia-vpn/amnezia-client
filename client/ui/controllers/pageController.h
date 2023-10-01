@@ -84,6 +84,10 @@ public slots:
     void drawerOpen();
     void drawerClose();
 
+
+    bool isConnectTrigger();
+    void setConnectTrigger(bool trigger);
+
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
     void goToStartPage();
@@ -120,6 +124,8 @@ private:
 
     PageLoader::PageEnum m_currentRootPage;
     int m_drawerLayer;
+
+    bool m_bConnectTrigger;
 };
 
 #endif // PAGECONTROLLER_H
