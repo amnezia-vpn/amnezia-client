@@ -219,13 +219,14 @@ PageType {
 
                         if (accessTypeSelector.currentIndex !== 0) {
                             shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-                            shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+                            shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         }
                         serverSelector.menuVisible = false
                     }
 
                     Component.onCompleted: {
                         handler()
+                        serverSelector.severSelectorIndexChanged()
                     }
 
                     function handler() {
@@ -239,6 +240,8 @@ PageType {
 
             DropDownType {
                 id: protocolSelector
+
+                visible: accessTypeSelector.currentIndex === 0
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
