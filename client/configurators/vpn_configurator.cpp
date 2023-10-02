@@ -5,7 +5,7 @@
 #include "shadowsocks_configurator.h"
 #include "ssh_configurator.h"
 #include "wireguard_configurator.h"
-#include "amneziaWireGuardConfigurator.h"
+#include "awg_configurator.h"
 
 #include <QFile>
 #include <QJsonDocument>

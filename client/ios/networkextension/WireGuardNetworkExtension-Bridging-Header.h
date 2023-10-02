@@ -1,6 +1,6 @@
 #include "wireguard-go-version.h"
-#include "3rd/wireguard-apple/Sources/WireGuardKitGo/wireguard.h"
-#include "3rd/wireguard-apple/Sources/WireGuardKitC/WireGuardKitC.h"
+#include "3rd/awg-apple/Sources/WireGuardKitGo/wireguard.h"
+#include "3rd/awg-apple/Sources/WireGuardKitC/WireGuardKitC.h"
 
 #include <stdbool.h>
 #include <stdint.h>

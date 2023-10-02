@@ -1,4 +1,4 @@
-#include "amneziaWireGuardProtocol.h"
+#include "amneziawireguardprotocol.h"
 
 AmneziaWireGuardProtocol::AmneziaWireGuardProtocol(const QJsonObject &configuration, QObject *parent)
     : WireguardProtocol(configuration, parent)

@@ -1,4 +1,4 @@
-#include "amneziaWireGuardConfigurator.h"
+#include "awg_configurator.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
