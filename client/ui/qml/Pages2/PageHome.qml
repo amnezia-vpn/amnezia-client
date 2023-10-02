@@ -27,10 +27,8 @@ PageType {
     property string defaultContainerName: ContainersModel.defaultContainerName
 
     Item {
-        anchors.top: parent.top
-        anchors.bottom: buttonBackground.top
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.fill: parent
+        anchors.bottomMargin: buttonContent.collapsedHeight
 
         ConnectButton {
             anchors.centerIn: parent
@@ -41,17 +39,45 @@ PageType {
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            menu.visible = true
+            buttonContent.state = "expanded"
             if (isContainerInstalled) {
                 containersDropDown.menuVisible = true
+            }
+        }
+        function onForceCloseDrawer() {
+            buttonContent.state = "collapsed"
+        }
+    }
+
+    MouseArea {
+        id: dragArea
+
+        anchors.fill: buttonBackground
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
+
+        drag.target: buttonContent
+        drag.axis: Drag.YAxis
+        drag.maximumY: root.height - buttonContent.collapsedHeight
+        drag.minimumY: 100
+
+        onReleased: {
+            if (buttonContent.state === "collapsed" && buttonContent.y < dragArea.drag.maximumY) {
+                buttonContent.state = "expanded"
+                return
+            }
+            if (buttonContent.state === "expanded" && buttonContent.y > dragArea.drag.minimumY) {
+                buttonContent.state = "collapsed"
+                return
             }
         }
     }
 
     Rectangle {
         id: buttonBackground
-        anchors.fill: buttonContent
 
+        anchors { left: buttonContent.left; right: buttonContent.right; top: buttonContent.top }
+        height: root.height
         radius: 16
         color: root.defaultColor
         border.color: root.borderColor
@@ -69,15 +95,67 @@ PageType {
 
     ColumnLayout {
         id: buttonContent
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+
+        property int collapsedHeight: 0
+        property bool expandedVisibility: buttonContent.state === "expanded" || (buttonContent.state === "collapsed" && dragArea.drag.active == true)
+        property bool collapsedVisibility: (buttonContent.state === "collapsed" && dragArea.drag.active == false) || buttonContent.state === "collapsed"
+
+        Drag.active: dragArea.drag.active
+        anchors.right: root.right
+        anchors.left: root.left
+        y: root.height - buttonContent.height
+
+        Component.onCompleted: {
+            buttonContent.state = "collapsed"
+        }
+
+        onImplicitHeightChanged: {
+            if (buttonContent.state === "collapsed" && collapsedHeight == 0) {
+                collapsedHeight = implicitHeight
+            }
+        }
+
+        onStateChanged: {
+            if (buttonContent.state === "collapsed") {
+                var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
+                if (initialPageNavigationBarColor !== 0xFF1C1D21) {
+                    PageController.updateNavigationBarColor(initialPageNavigationBarColor)
+                }
+                PageController.drawerClose()
+                return
+            }
+            if (buttonContent.state === "expanded") {
+                if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
+                    PageController.updateNavigationBarColor(0xFF1C1D21)
+                }
+                PageController.drawerOpen()
+                return
+            }
+        }
+
+        states: [
+            State {
+            name: "collapsed"
+            PropertyChanges {
+                target: buttonContent
+                y: root.height - collapsedHeight
+            }
+        },
+            State {
+                name: "expanded"
+                PropertyChanges {
+                    target: buttonContent
+                    y: dragArea.drag.minimumY
+
+                }
+            }]
 
         RowLayout {
             Layout.topMargin: 24
             Layout.leftMargin: 24
             Layout.rightMargin: 24
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            visible: buttonContent.collapsedVisibility
 
             spacing: 0
 
@@ -104,6 +182,7 @@ PageType {
         LabelTextType {
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            visible: buttonContent.collapsedVisibility
 
             text: {
                 var description = ""
@@ -122,39 +201,13 @@ PageType {
                 return description
             }
         }
-    }
-
-    MouseArea {
-        anchors.fill: buttonBackground
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-        onClicked: {
-            menu.visible = true
-        }
-    }
-
-    DrawerType {
-        id: menu
-
-        interactive: {
-            if (stackView && stackView.currentItem) {
-                return (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) ? true : false
-            } else {
-                return false
-            }
-        }
-        dragMargin: buttonBackground.height + 56 // page start tabBar height
-
-        width: parent.width
-        height: parent.height * 0.9
-        pageHeight: root.height
 
         ColumnLayout {
             id: serversMenuHeader
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.left: parent.left
+
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.fillWidth: true
+            visible: buttonContent.expandedVisibility
 
             Header1TextType {
                 Layout.fillWidth: true
@@ -233,13 +286,14 @@ PageType {
                 Layout.topMargin: 48
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                visible: buttonContent.expandedVisibility
 
                 actionButtonImage: "qrc:/images/controls/plus.svg"
 
                 headerText: qsTr("Servers")
 
                 actionButtonFunction: function() {
-                    menu.visible = false
+                    buttonContent.state = "collapsed"
                     connectionTypeSelection.visible = true
                 }
             }
@@ -249,10 +303,23 @@ PageType {
             }
         }
 
-        FlickableType {
-            anchors.top: serversMenuHeader.bottom
-            anchors.topMargin: 16
+        Flickable {
+            id: serversContainer
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.fillWidth: true
+            Layout.topMargin: 16
             contentHeight: col.implicitHeight
+            height: 500
+            visible: buttonContent.expandedVisibility
+            clip: true
+
+            ScrollBar.vertical: ScrollBar {
+                id: scrollBar
+                policy: serversContainer.height >= serversContainer.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+            }
+
+            Keys.onUpPressed: scrollBar.decrease()
+            Keys.onDownPressed: scrollBar.increase()
 
             Column {
                 id: col
@@ -265,6 +332,7 @@ PageType {
                 ButtonGroup {
                     id: serversRadioButtonGroup
                 }
+
 
                 ListView {
                     id: serversMenuContent
@@ -347,7 +415,7 @@ PageType {
                                     onClicked: function() {
                                         ServersModel.currentlyProcessedIndex = index
                                         PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                        menu.visible = false
+                                        buttonContent.state = "collapsed"
                                     }
                                 }
                             }
