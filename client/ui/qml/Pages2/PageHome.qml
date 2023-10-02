@@ -61,6 +61,7 @@ PageType {
         drag.maximumY: root.height - buttonContent.collapsedHeight
         drag.minimumY: 100
 
+        /** If drag area is released at any point other than min or max y, transition to the other state */
         onReleased: {
             if (buttonContent.state === "collapsed" && buttonContent.y < dragArea.drag.maximumY) {
                 buttonContent.state = "expanded"
@@ -96,8 +97,11 @@ PageType {
     ColumnLayout {
         id: buttonContent
 
+        /** Initial height of button content */
         property int collapsedHeight: 0
+        /** True when expanded objects should be visible */
         property bool expandedVisibility: buttonContent.state === "expanded" || (buttonContent.state === "collapsed" && dragArea.drag.active === true)
+        /** True when collapsed objects should be visible */
         property bool collapsedVisibility: buttonContent.state === "collapsed" && dragArea.drag.active === false
 
         Drag.active: dragArea.drag.active
@@ -109,6 +113,7 @@ PageType {
             buttonContent.state = "collapsed"
         }
 
+        /** Set once based on first implicit height change once all children are layed out */
         onImplicitHeightChanged: {
             if (buttonContent.state === "collapsed" && collapsedHeight == 0) {
                 collapsedHeight = implicitHeight
@@ -133,6 +138,7 @@ PageType {
             }
         }
 
+        /** Two states of buttonContent, great place to add any future animations for the drawer */
         states: [
             State {
             name: "collapsed"
