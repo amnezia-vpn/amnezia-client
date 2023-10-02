@@ -5,6 +5,9 @@
 echo "Container startup"
 #ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+
 # kill daemons in case of restart
 wg-quick down /opt/amnezia/amneziawireguard/wg0.conf
 
