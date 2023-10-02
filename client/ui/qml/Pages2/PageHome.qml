@@ -97,8 +97,8 @@ PageType {
         id: buttonContent
 
         property int collapsedHeight: 0
-        property bool expandedVisibility: buttonContent.state === "expanded" || (buttonContent.state === "collapsed" && dragArea.drag.active == true)
-        property bool collapsedVisibility: (buttonContent.state === "collapsed" && dragArea.drag.active == false) || buttonContent.state === "collapsed"
+        property bool expandedVisibility: buttonContent.state === "expanded" || (buttonContent.state === "collapsed" && dragArea.drag.active === true)
+        property bool collapsedVisibility: buttonContent.state === "collapsed" && dragArea.drag.active === false
 
         Drag.active: dragArea.drag.active
         anchors.right: root.right
