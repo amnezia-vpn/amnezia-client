@@ -360,7 +360,11 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     return false;
   }
 
-  if (!obj.value("Jc").isNull()) {
+  if (!obj.value("Jc").isNull() && !obj.value("Jmin").isNull() 
+  && !obj.value("Jmax").isNull() && !obj.value("S1").isNull() 
+  && !obj.value("S2").isNull() && !obj.value("H1").isNull() 
+  && !obj.value("H2").isNull() && !obj.value("H3").isNull() 
+  && !obj.value("H4").isNull()) {
     config.m_junkPacketCount = obj.value("Jc").toString();
     config.m_junkPacketMinSize = obj.value("Jmin").toString();
     config.m_junkPacketMaxSize = obj.value("Jmax").toString();
