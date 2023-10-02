@@ -62,25 +62,13 @@ Item {
                 hoverEnabled: false
                 image: rightImageSource
                 imageColor: rightImageColor
-                visible: rightImageSource ? true : false
 
-                implicitSize: 18
-                backGroudRadius: 5
-                horizontalPadding: 0
-                padding: 0
-                spacing: 0
-
-
-                Rectangle {
-                    id: rightImageBackground
-                    anchors.fill: parent
-                    radius: 16
-                    color: "transparent"
-
-                    Behavior on color {
-                        PropertyAnimation { duration: 200 }
-                    }
-                }
+                icon.width: 18
+                icon.height: 18
+                backgroundRadius: 16
+                horizontalPadding: 4
+                topPadding: 4
+                bottomPadding: 3
             }
         }
 
@@ -107,26 +95,25 @@ Item {
         }
     }
 
-
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
 
         onEntered: {
-            rightImageBackground.color = rightImage.hoveredColor
+            rightImage.backgroundColor = rightImage.hoveredColor
 
             root.textOpacity = 0.8
         }
 
         onExited: {
-            rightImageBackground.color = rightImage.defaultColor
+            rightImage.backgroundColor = rightImage.defaultColor
 
             root.textOpacity = 1
         }
 
         onPressedChanged: {
-            rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            rightImage.backgroundColor = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
 
             root.textOpacity = 0.7
         }

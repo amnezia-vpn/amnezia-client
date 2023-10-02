@@ -36,6 +36,9 @@ Item {
             ImageButtonType {
                 id: headerActionButton
 
+                implicitWidth: 40
+                implicitHeight: 40
+
                 Layout.alignment: Qt.AlignRight
 
                 image: root.actionButtonImage

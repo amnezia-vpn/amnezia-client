@@ -134,8 +134,10 @@ PageType {
 
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
+                    rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
+                    rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
                     rootButtonHoveredBorderColor: "transparent"
-                    rootButtonPressedBorderColor: "transparent"
+                    rootButtonDefaultBorderColor: "transparent"
                     rootButtonTextTopMargin: 8
                     rootButtonTextBottomMargin: 8
 
@@ -304,6 +306,8 @@ PageType {
 
                             DividerType {
                                 Layout.fillWidth: true
+                                Layout.leftMargin: 0
+                                Layout.rightMargin: 0
                             }
                         }
                     }
