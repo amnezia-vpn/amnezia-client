@@ -184,8 +184,8 @@ PageType {
                 borderWidth: 1
 
                 visible: {
-                    if (PageController.isConnectTrigger()) {
-                        PageController.setConnectTrigger(false)
+                    if (PageController.isTriggeredByConnectButton()) {
+                        PageController.setTriggeredBtConnectButton(false)
 
                         return ContainersModel.isAnyContainerInstalled()
                     }

@@ -139,7 +139,7 @@ Button {
 
     onClicked: {
         if (!ContainersModel.isAnyContainerInstalled()) {
-            PageController.setConnectTrigger(true)
+            PageController.setTriggeredBtConnectButton(true)
 
             ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
