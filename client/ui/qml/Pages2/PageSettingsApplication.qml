@@ -44,6 +44,26 @@ PageType {
             }
 
             SwitcherType {
+                visible: GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Allow application screenshots")
+
+                checked: SettingsController.isScreenshotsEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isScreenshotsEnabled()) {
+                        SettingsController.toggleScreenshotsEnabled(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: GC.isMobile()
+            }
+
+            SwitcherType {
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
