@@ -31,6 +31,9 @@ Item {
             ImageButtonType {
                 id: headerActionButton
 
+                implicitWidth: 40
+                implicitHeight: 40
+
                 image: root.actionButtonImage
                 imageColor: "#D7D8DB"
 

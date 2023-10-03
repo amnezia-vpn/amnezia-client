@@ -167,7 +167,7 @@ Item {
         }
 
         onEntered: {
-            backgroud.border.color =  getBackgroundBorderColor(bgBorderHoveredColor)
+            backgroud.border.color = getBackgroundBorderColor(bgBorderHoveredColor)
         }
 
 

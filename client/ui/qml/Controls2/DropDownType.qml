@@ -24,6 +24,8 @@ Item {
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
     property string rootButtonImageColor: "#D7D8DB"
     property string rootButtonBackgroundColor: "#1C1D21"
+    property string rootButtonBackgroundHoveredColor: "#1C1D21"
+    property string rootButtonBackgroundPressedColor: "#1C1D21"
 
     property string rootButtonHoveredBorderColor: "#494B50"
     property string rootButtonDefaultBorderColor: "#2C2D30"
@@ -71,6 +73,10 @@ Item {
         Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
+
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
     }
 
     RowLayout {
@@ -112,6 +118,9 @@ Item {
         ImageButtonType {
             Layout.rightMargin: 16
 
+            implicitWidth: 40
+            implicitHeight: 40
+
             hoverEnabled: false
             image: rootButtonImage
             imageColor: rootButtonImageColor
@@ -126,12 +135,20 @@ Item {
         onEntered: {
             if (menu.visible === false) {
                 rootButtonBackground.border.color = rootButtonHoveredBorderColor
+                rootButtonBackground.color = rootButtonBackgroundHoveredColor
             }
         }
 
         onExited: {
             if (menu.visible === false) {
                 rootButtonBackground.border.color = rootButtonDefaultBorderColor
+                rootButtonBackground.color = rootButtonBackgroundColor
+            }
+        }
+
+        onPressed: {
+            if (menu.visible === false) {
+                rootButtonBackground.color = pressed ? rootButtonBackgroundPressedColor : entered ? rootButtonHoveredBorderColor : rootButtonDefaultBorderColor
             }
         }
 

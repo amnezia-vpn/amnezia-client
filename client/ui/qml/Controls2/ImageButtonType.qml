@@ -15,11 +15,8 @@ Button {
     property string imageColor: "#878B91"
     property string disableImageColor: "#2C2D30"
 
-    property int backGroudRadius: 12
-    property int implicitSize: 40
-
-    implicitWidth: implicitSize
-    implicitHeight: implicitSize
+    property alias backgroundColor: background.color
+    property alias backgroundRadius: background.radius
 
     hoverEnabled: true
 
@@ -34,16 +31,16 @@ Button {
         id: background
 
         anchors.fill: parent
-        radius: backGroudRadius
         color: {
             if (root.enabled) {
-                if(root.pressed) {
+                if (root.pressed) {
                     return pressedColor
                 }
                 return hovered ? hoveredColor : defaultColor
             }
             return defaultColor
         }
+        radius: 12
         Behavior on color {
             PropertyAnimation { duration: 200 }
         }

@@ -81,6 +81,20 @@ PageType {
             }
         }
 
+        onEntered: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
+            collapsedButtonHeader.opacity = 0.8
+        }
+        onExited: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 1
+        }
+        onPressedChanged: {
+            collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 0.7
+        }
+
+
         onClicked: {
             if (buttonContent.state === "collapsed") {
                 buttonContent.state = "expanded"
@@ -202,6 +216,7 @@ PageType {
             spacing: 0
 
             Header1TextType {
+                id: collapsedButtonHeader
                 Layout.maximumWidth: buttonContent.width - 48 - 18 - 12 // todo
 
                 maximumLineCount: 2
@@ -209,15 +224,33 @@ PageType {
 
                 text: root.defaultServerName
                 horizontalAlignment: Qt.AlignHCenter
+
+                Behavior on opacity {
+                    PropertyAnimation { duration: 200 }
+                }
             }
 
-            Image {
-                Layout.preferredWidth: 18
-                Layout.preferredHeight: 18
+            ImageButtonType {
+                id: collapsedButtonChevron
 
-                Layout.leftMargin: 12
+                Layout.leftMargin: 8
 
-                source: "qrc:/images/controls/chevron-down.svg"
+                hoverEnabled: false
+                image: "qrc:/images/controls/chevron-down.svg"
+                imageColor: "#d7d8db"
+
+                icon.width: 18
+                icon.height: 18
+                backgroundRadius: 16
+                horizontalPadding: 4
+                topPadding: 4
+                bottomPadding: 3
+
+                onClicked: {
+                    if (buttonContent.state === "collapsed") {
+                        buttonContent.state = "expanded"
+                    }
+                }
             }
         }
 
@@ -279,8 +312,10 @@ PageType {
 
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
+                    rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
+                    rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
                     rootButtonHoveredBorderColor: "transparent"
-                    rootButtonPressedBorderColor: "transparent"
+                    rootButtonDefaultBorderColor: "transparent"
                     rootButtonTextTopMargin: 8
                     rootButtonTextBottomMargin: 8
 
@@ -463,6 +498,8 @@ PageType {
 
                             DividerType {
                                 Layout.fillWidth: true
+                                Layout.leftMargin: 0
+                                Layout.rightMargin: 0
                             }
                         }
                     }
