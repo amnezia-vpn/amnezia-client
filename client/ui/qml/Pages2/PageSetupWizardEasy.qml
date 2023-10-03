@@ -183,7 +183,16 @@ PageType {
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
-                visible: ContainersModel.isAnyContainerInstalled()
+                visible: {
+                    if (PageController.isTriggeredByConnectButton()) {
+                        PageController.setTriggeredBtConnectButton(false)
+
+                        return ContainersModel.isAnyContainerInstalled()
+                    }
+
+
+                    return  true
+                }
 
                 text: qsTr("Set up later")
 
