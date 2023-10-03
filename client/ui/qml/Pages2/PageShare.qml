@@ -248,7 +248,7 @@ PageType {
 
                 drawerHeight: 0.5
 
-                descriptionText: qsTr("Protocols")
+                descriptionText: qsTr("Protocol")
                 headerText: qsTr("Protocol")
 
                 listView: ListViewWithRadioButtonType {

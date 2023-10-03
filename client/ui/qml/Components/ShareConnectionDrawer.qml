@@ -114,7 +114,7 @@ DrawerType {
 
                 BasicButtonType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
+                    Layout.topMargin: 24
 
                     defaultColor: "transparent"
                     hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -123,7 +123,7 @@ DrawerType {
                     textColor: "#D7D8DB"
                     borderWidth: 1
 
-                    text: qsTr("Show content")
+                    text: qsTr("Show connection settings")
 
                     onClicked: {
                         configContentDrawer.visible = true

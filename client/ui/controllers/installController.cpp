@@ -113,8 +113,7 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
                 ContainerProps::containerHumanNames().value(container) + tr(" is already installed on the server. ");
     }
     if (installedContainers.size() > 1) {
-        finishMessage += tr("\nAlready installed containers were found on the server. "
-                            "All installed containers have been added to the application");
+        finishMessage += tr("\nAdded containers that were already installed on the server");
     }
 
     if (errorCode == ErrorCode::NoError) {

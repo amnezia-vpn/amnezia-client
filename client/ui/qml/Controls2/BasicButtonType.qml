@@ -90,6 +90,9 @@ Button {
             anchors.centerIn: parent
 
             Image {
+                Layout.preferredHeight: 20
+                Layout.preferredWidth: 20
+
                 source: root.imageSource
                 visible: root.imageSource === "" ? false : true
 
