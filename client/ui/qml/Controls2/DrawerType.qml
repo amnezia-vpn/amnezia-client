@@ -52,12 +52,16 @@ Drawer {
     }
 
     onOpened: {
+        isOpened = true
+
         if (needCloseButton) {
             PageController.drawerOpen()
         }
     }
 
     onClosed: {
+        isOpened = false
+
         if (needCloseButton) {
             PageController.drawerClose()
         }
