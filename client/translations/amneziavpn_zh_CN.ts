@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="300"/>
+        <location filename="../amnezia_application.cpp" line="299"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -26,41 +26,41 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="54"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="93"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="107"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="113"/>
+        <location filename="../ui/controllers/connectionController.h" line="58"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
         <source>Connect</source>
         <translation type="unfinished">连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="53"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="55"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation type="unfinished">未安装VPN协议，请安装</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="74"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
         <source>Connection...</source>
         <translation type="unfinished">连接中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
         <source>Connected</source>
         <translation type="unfinished">已连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Reconnection...</source>
         <translation type="unfinished">重连中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="98"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="102"/>
         <source>Disconnection...</source>
         <translation type="unfinished">断开中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="128"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation type="unfinished">配置已更新，重连中</translation>
     </message>
@@ -477,12 +477,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="365"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
@@ -526,12 +526,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="179"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -585,12 +585,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="67"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="68"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -673,12 +673,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="264"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="265"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -731,12 +731,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="142"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="143"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -759,7 +759,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="72"/>
         <source>Application</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">应用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="86"/>
@@ -861,77 +861,77 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="43"/>
         <source>Application</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">应用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
         <source>Auto start</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自动运行</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
         <source>Launch the application every time </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">当系统 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
         <source> starts</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"> 启动时应用自动运行</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Start minimized</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">最小化启动</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="74"/>
         <source>Launch application minimized</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">最小化启动应用程序</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="91"/>
         <source>Language</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">语言</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="110"/>
         <source>Logging</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">日志</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
         <source>Enabled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">开启</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
         <source>Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关闭</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="124"/>
         <source>Reset settings and remove all data from the application</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">重置并清理应用的所有数据</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="128"/>
         <source>Reset settings and remove all data from the application?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">重置并清理应用的所有数据？</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="129"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">所有配置恢复为默认值。所有已安装的AmneziaVPN服务将保留服务器上。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -995,12 +995,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="137"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="138"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -1081,12 +1081,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="91"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="99"/>
@@ -1096,7 +1096,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="120"/>
@@ -1109,18 +1109,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
         <source>Logging</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">日志</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="54"/>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
         <source>Save logs</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">记录日志</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
         <source>Open folder with logs</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开日志文件夹</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
+        <source>Save</source>
+        <translation type="unfinished">保存</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
@@ -1130,32 +1134,32 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
         <source>Save logs to file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存日志到文件</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="144"/>
         <source>Clear logs?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">清除日志？</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="145"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="153"/>
         <source>Logs have been cleaned up</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">已清理日志</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Clear logs</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">清理日志</translation>
     </message>
 </context>
 <context>
@@ -1195,14 +1199,14 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="140"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="171"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="94"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="141"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="172"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="117"/>
@@ -1255,7 +1259,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="110"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="137"/>
@@ -1299,12 +1303,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="118"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="119"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -1345,12 +1349,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="200"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="238"/>
@@ -1481,7 +1485,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="90"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="117"/>
@@ -1524,7 +1528,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="157"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="186"/>
@@ -1673,7 +1677,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="71"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">继续</translation>
     </message>
 </context>
 <context>
@@ -2421,7 +2425,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="49"/>
         <source>Choose language</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">选择语言</translation>
     </message>
 </context>
 <context>
@@ -2660,7 +2664,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/main2.qml" line="191"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存</translation>
     </message>
 </context>
 </TS>

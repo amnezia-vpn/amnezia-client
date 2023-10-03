@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="300"/>
+        <location filename="../amnezia_application.cpp" line="299"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -26,41 +26,41 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="53"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="55"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="74"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
         <source>Connection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
         <source>Connected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="128"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Reconnection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="54"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="93"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="107"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="113"/>
+        <location filename="../ui/controllers/connectionController.h" line="58"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
         <source>Connect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="98"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="102"/>
         <source>Disconnection...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1120,13 +1120,17 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="54"/>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
         <source>Save logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
         <source>Open folder with logs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
+        <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
