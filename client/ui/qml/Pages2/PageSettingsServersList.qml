@@ -37,6 +37,9 @@ PageType {
             actionButtonImage: "qrc:/images/controls/plus.svg"
 
             headerText: qsTr("Servers")
+            Accessible.role: Accessible.ButtonMenu
+            Accessible.name: qsTr("Adding a new server")
+            Accessible.onPressAction: actionButtonFunction()
 
             actionButtonFunction: function() {
                 connectionTypeSelection.visible = true
@@ -83,6 +86,10 @@ PageType {
                         LabelWithButtonType {
                             id: server
                             Layout.fillWidth: true
+
+                            Accessible.role: Accessible.ButtonMenu
+                            Accessible.name: name + qsTr(" server settings")
+                            Accessible.onPressAction: clickedFunction()
 
                             text: name
                             descriptionText: {

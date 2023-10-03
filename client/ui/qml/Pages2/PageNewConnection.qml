@@ -38,9 +38,6 @@ PageType {
             }
 
             LabelWithButtonType {
-                Accessible.role: Accessible.ButtonMenuMenu
-                Accessible.name: qsTr("Servers settings button")
-
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -56,9 +53,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                Accessible.role: Accessible.ButtonMenuMenu
-                Accessible.name: qsTr("Connections settings button")
-
                 Layout.fillWidth: true
 
                 text: qsTr("Connection")
@@ -73,9 +67,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                Accessible.role: Accessible.ButtonMenuMenu
-                Accessible.name: qsTr("Application settings button")
-
                 Layout.fillWidth: true
 
                 text: qsTr("Application")
@@ -90,9 +81,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                Accessible.role: Accessible.ButtonMenuMenu
-                Accessible.name: qsTr("Backup settings button")
-
                 Layout.fillWidth: true
 
                 text: qsTr("Backup")
@@ -107,9 +95,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                Accessible.role: Accessible.ButtonMenuMenu
-                Accessible.name: qsTr("About AmneziaVPN button")
-
                 Layout.fillWidth: true
 
                 text: qsTr("About AmneziaVPN")

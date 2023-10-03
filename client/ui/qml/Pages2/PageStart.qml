@@ -166,6 +166,9 @@ PageType {
         }
 
         TabImageButtonType {
+            Accessible.role: Accessible.ButtonMenuMenu
+            Accessible.name: qsTr("Home button")
+
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
@@ -175,6 +178,9 @@ PageType {
         }
         TabImageButtonType {
             id: shareTabButton
+
+            Accessible.role: Accessible.ButtonMenuMenu
+            Accessible.name: qsTr("Share button")
 
             Connections {
                 target: ServersModel
@@ -196,6 +202,9 @@ PageType {
             }
         }
         TabImageButtonType {
+            Accessible.role: Accessible.ButtonMenuMenu
+            Accessible.name: qsTr("Settings button")
+
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
