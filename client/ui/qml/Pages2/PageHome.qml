@@ -26,6 +26,14 @@ PageType {
     property string defaultServerHostName: ServersModel.defaultServerHostName
     property string defaultContainerName: ContainersModel.defaultContainerName
 
+    MouseArea {
+        anchors.fill: parent
+        enabled: buttonContent.state === "expanded"
+        onClicked: {
+            buttonContent.state = "collapsed"
+        }
+    }
+
     Item {
         anchors.fill: parent
         anchors.bottomMargin: buttonContent.collapsedHeight
@@ -59,7 +67,7 @@ PageType {
         drag.target: buttonContent
         drag.axis: Drag.YAxis
         drag.maximumY: root.height - buttonContent.collapsedHeight
-        drag.minimumY: 100
+        drag.minimumY: root.height - root.height * 0.9
 
         onReleased: {
             if (buttonContent.state === "collapsed" && buttonContent.y < dragArea.drag.maximumY) {
@@ -69,6 +77,12 @@ PageType {
             if (buttonContent.state === "expanded" && buttonContent.y > dragArea.drag.minimumY) {
                 buttonContent.state = "collapsed"
                 return
+            }
+        }
+
+        onClicked: {
+            if (buttonContent.state === "collapsed") {
+                buttonContent.state = "expanded"
             }
         }
     }
@@ -135,12 +149,12 @@ PageType {
 
         states: [
             State {
-            name: "collapsed"
-            PropertyChanges {
-                target: buttonContent
-                y: root.height - collapsedHeight
-            }
-        },
+                name: "collapsed"
+                PropertyChanges {
+                    target: buttonContent
+                    y: root.height - collapsedHeight
+                }
+            },
             State {
                 name: "expanded"
                 PropertyChanges {
@@ -148,7 +162,29 @@ PageType {
                     y: dragArea.drag.minimumY
 
                 }
-            }]
+            }
+        ]
+
+        transitions: [
+            Transition {
+                from: "collapsed"
+                to: "expanded"
+                PropertyAnimation {
+                    target: buttonContent
+                    properties: "y"
+                    duration: 200
+                }
+            },
+            Transition {
+                from: "expanded"
+                to: "collapsed"
+                PropertyAnimation {
+                    target: buttonContent
+                    properties: "y"
+                    duration: 200
+                }
+            }
+        ]
 
         RowLayout {
             Layout.topMargin: 24
@@ -309,7 +345,7 @@ PageType {
             Layout.fillWidth: true
             Layout.topMargin: 16
             contentHeight: col.implicitHeight
-            height: 500
+            implicitHeight: root.height - (root.height * 0.1) - serversMenuHeader.implicitHeight - 52 //todo 52 is tabbar height
             visible: buttonContent.expandedVisibility
             clip: true
 
@@ -332,7 +368,6 @@ PageType {
                 ButtonGroup {
                     id: serversRadioButtonGroup
                 }
-
 
                 ListView {
                     id: serversMenuContent
