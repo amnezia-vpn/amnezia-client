@@ -98,34 +98,31 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
 
   if (!m_junkPacketCount.isNull()) {
-    out << "JunkPacketCount = " << m_junkPacketCount << "\n";
+    out << "Jc = " << m_junkPacketCount << "\n";
   }
   if (!m_junkPacketMinSize.isNull()) {
-    out << "JunkPacketMinSize = " << m_junkPacketMinSize << "\n";
+    out << "JMin = " << m_junkPacketMinSize << "\n";
   }
   if (!m_junkPacketMaxSize.isNull()) {
-    out << "JunkPacketMaxSize = " << m_junkPacketMaxSize << "\n";
+    out << "JMax = " << m_junkPacketMaxSize << "\n";
   }
   if (!m_initPacketJunkSize.isNull()) {
-    out << "InitPacketJunkSize = " << m_initPacketJunkSize << "\n";
+    out << "S1 = " << m_initPacketJunkSize << "\n";
   }
   if (!m_responsePacketJunkSize.isNull()) {
-    out << "ResponsePacketJunkSize = " << m_responsePacketJunkSize << "\n";
+    out << "S2 = " << m_responsePacketJunkSize << "\n";
   }
   if (!m_initPacketMagicHeader.isNull()) {
-    out << "InitPacketMagicHeader = " << m_initPacketMagicHeader << "\n";
+    out << "H1 = " << m_initPacketMagicHeader << "\n";
   }
   if (!m_responsePacketMagicHeader.isNull()) {
-    out << "ResponsePacketMagicHeader = " << m_responsePacketMagicHeader
-        << "\n";
+    out << "H2 = " << m_responsePacketMagicHeader << "\n";
   }
   if (!m_underloadPacketMagicHeader.isNull()) {
-    out << "UnderloadPacketMagicHeader = " << m_underloadPacketMagicHeader
-        << "\n";
+    out << "H3 = " << m_underloadPacketMagicHeader << "\n";
   }
   if (!m_transportPacketMagicHeader.isNull()) {
-    out << "TransportPacketMagicHeader = " << m_transportPacketMagicHeader
-        << "\n";
+    out << "H4 = " << m_transportPacketMagicHeader << "\n";
   }
 
   // If any extra config was provided, append it now.
