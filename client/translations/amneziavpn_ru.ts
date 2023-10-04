@@ -177,8 +177,18 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/controllers/installController.cpp" line="291"/>
+        <source>&apos; have been removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/installController.cpp" line="307"/>
         <source> has been removed from the server &apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="308"/>
+        <source>&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1078,6 +1088,16 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="49"/>
         <source>If AmneziaDNS is not used or installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="56"/>
+        <source>Primary DNS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="68"/>
+        <source>Secondary DNS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

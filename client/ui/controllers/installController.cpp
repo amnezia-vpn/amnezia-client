@@ -288,7 +288,7 @@ void InstallController::removeAllContainers()
 
     ErrorCode errorCode = m_containersModel->removeAllContainers();
     if (errorCode == ErrorCode::NoError) {
-        emit removeAllContainersFinished(tr("All containers from server '") + serverName + ("' have been removed"));
+        emit removeAllContainersFinished(tr("All containers from server '") + serverName + tr("' have been removed"));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));
@@ -305,7 +305,7 @@ void InstallController::removeCurrentlyProcessedContainer()
     ErrorCode errorCode = m_containersModel->removeCurrentlyProcessedContainer();
     if (errorCode == ErrorCode::NoError) {
         emit removeCurrentlyProcessedContainerFinished(containerName + tr(" has been removed from the server '")
-                                                       + serverName + "'");
+                                                       + serverName + tr("'"));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));
