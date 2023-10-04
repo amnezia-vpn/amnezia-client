@@ -19,7 +19,7 @@ public:
                                   const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<VpnConnection> &vpnConnection, QObject *parent = nullptr);
 
-    ~ConnectionController();
+    ~ConnectionController() = default;
 
     bool isConnected() const;
     bool isConnectionInProgress() const;

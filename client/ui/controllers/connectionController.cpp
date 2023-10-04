@@ -21,23 +21,6 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
             Qt::QueuedConnection);
 }
 
-ConnectionController::~ConnectionController()
-{
-// todo use ConnectionController instead of using m_vpnConnection directly
-#ifdef AMNEZIA_DESKTOP
-    if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Disconnected) {
-        m_vpnConnection->disconnectFromVpn();
-        for (int i = 0; i < 50; i++) {
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(100);
-            if (m_vpnConnection->isDisconnected()) {
-                break;
-            }
-        }
-    }
-#endif
-}
-
 void ConnectionController::openConnection()
 {
     int serverIndex = m_serversModel->getDefaultServerIndex();
