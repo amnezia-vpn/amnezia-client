@@ -6,7 +6,7 @@
     <message>
         <location filename="../amnezia_application.cpp" line="299"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">禁用选项，还未实现基于WireGuard协议的VPN分流</translation>
     </message>
 </context>
 <context>
@@ -37,7 +37,7 @@
         <location filename="../ui/controllers/connectionController.cpp" line="55"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
-        <translation type="unfinished">未安装VPN协议，请安装</translation>
+        <translation type="unfinished">不存在VPN协议，请先安装</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="78"/>
@@ -262,7 +262,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="238"/>
         <source>Servers</source>
-        <translation type="unfinished">服务器列表</translation>
+        <translation type="unfinished">服务器</translation>
     </message>
 </context>
 <context>
@@ -744,12 +744,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="37"/>
         <source>Settings</source>
-        <translation type="unfinished">配置列表</translation>
+        <translation type="unfinished">设置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="44"/>
         <source>Servers</source>
-        <translation type="unfinished">服务器列表</translation>
+        <translation type="unfinished">服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="58"/>
@@ -769,7 +769,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="100"/>
         <source>About AmneziaVPN</source>
-        <translation type="unfinished">关于AmneziaVPN</translation>
+        <translation type="unfinished">关于</translation>
     </message>
 </context>
 <context>
@@ -777,13 +777,14 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">捐赠项目</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>This is a free and open source application. If you like it, support the developers with a donation.
 And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">这是一个免费且开源的应用程序。如果您喜欢，请捐款支持开发人员。
+如果您不喜欢该应用程序，请更加支持它 - 捐款将用于改进该应用程序。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
@@ -803,17 +804,17 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
         <source>Contacts</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">联系方式</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="120"/>
         <source>Telegram group</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">电报群</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="121"/>
         <source>To discuss features</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">用于功能讨论</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="125"/>
@@ -823,12 +824,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="134"/>
         <source>Mail</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">邮件</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="135"/>
         <source>For reviews and bug reports</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">用于评论和提交软件的缺陷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="147"/>
@@ -843,7 +844,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="160"/>
         <source>Website</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">官网</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="164"/>
@@ -853,7 +854,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">检查更新</translation>
     </message>
 </context>
 <context>
@@ -871,22 +872,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
         <source>Launch the application every time </source>
-        <translation type="unfinished">当系统 </translation>
+        <translation type="unfinished">总是在系统 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
         <source> starts</source>
-        <translation type="unfinished"> 启动时应用自动运行</translation>
+        <translation type="unfinished"> 启动时自动运行运用程序</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Start minimized</source>
-        <translation type="unfinished">最小化启动</translation>
+        <translation type="unfinished">最小化</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="74"/>
         <source>Launch application minimized</source>
-        <translation type="unfinished">最小化启动应用程序</translation>
+        <translation type="unfinished">开启应用程序时窗口最小化</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="91"/>
@@ -921,7 +922,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="129"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation type="unfinished">所有配置恢复为默认值。所有已安装的AmneziaVPN服务将保留服务器上。</translation>
+        <translation type="unfinished">所有配置恢复为默认值。在服务器上保留所有已安装的AmneziaVPN服务。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
@@ -939,7 +940,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="27"/>
         <source>Settings restored from backup file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">从备份文件还原配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
@@ -949,22 +950,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>
         <source>Configuration backup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">配置备份</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
         <source>It will help you instantly restore connection settings at the next installation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">帮助您在下次安装时立即恢复连接设置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="89"/>
         <source>Make a backup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">进行备份</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="96"/>
         <source>Save backup file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存备份</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="97"/>
@@ -975,22 +976,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="121"/>
         <source>Restore from backup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">从备份还原</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="124"/>
         <source>Open backup file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开备份文件</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="135"/>
         <source>Import settings from a backup file?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">从备份文件导入设置？</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="136"/>
         <source>All current settings will be reset</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">当前所有设置将重置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="137"/>
@@ -1018,42 +1019,51 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="51"/>
         <source>Connect to VPN on app start</source>
-        <translation type="unfinished">应用启动时连接到VPN</translation>
+        <translation type="unfinished">应用开启时连接VPN</translation>
+    </message>
+    <message>
+        <source>Use AmneziaDNS if installed on the server</source>
+        <translation type="obsolete">使用AmneziaDNS，如其已安装在服务器上</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="69"/>
-        <source>Use AmneziaDNS if installed on the server</source>
-        <translation type="unfinished">使用AmneziaDNS，如果服务器上已安装</translation>
+        <source>Use AmneziaDNS</source>
+        <translation type="unfinished">使用AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="70"/>
+        <source>If AmneziaDNS is installed on the server</source>
+        <translation type="unfinished">如其已安装至服务上</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="85"/>
         <source>DNS servers</source>
         <translation type="unfinished">DNS服务器列表</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="85"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished">如果AmneziaDNS未使用或安装</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="98"/>
-        <source>Split site tunneling</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">如果未使用或未安装AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
-        <source>Allows you to connect to some sites through a secure connection, and to others bypassing it</source>
-        <translation type="unfinished"></translation>
+        <source>Split site tunneling</source>
+        <translation type="unfinished">网站级VPN分流</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="112"/>
-        <source>Separate application tunneling</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
+        <source>Allows you to connect to some sites through a secure connection, and to others bypassing it</source>
+        <translation type="unfinished">使用VPN访问指定网站，其他的则绕过</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
+        <source>Separate application tunneling</source>
+        <translation type="unfinished">应用级VPN分流</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="114"/>
         <source>Allows you to use the VPN only for certain applications</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">仅限指定应用使用VPN</translation>
     </message>
 </context>
 <context>
@@ -1061,22 +1071,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="45"/>
         <source>DNS servers</source>
-        <translation type="unfinished">DNS服务器列表</translation>
+        <translation type="unfinished">DNS服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="49"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished">Amnezia DNS未使用或安装</translation>
+        <translation type="unfinished">如果未使用或未安装Amnezia DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="86"/>
         <source>Restore default</source>
-        <translation type="unfinished">恢复为默认DNS配置</translation>
+        <translation type="unfinished">恢复默认配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="89"/>
         <source>Restore default DNS settings?</source>
-        <translation type="unfinished">是否恢复为默认DNS配置？</translation>
+        <translation type="unfinished">是否恢复默认DNS配置？</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
@@ -1316,7 +1326,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
         <source>Servers</source>
-        <translation type="unfinished">服务器列表</translation>
+        <translation type="unfinished">服务器</translation>
     </message>
 </context>
 <context>
@@ -1334,7 +1344,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="84"/>
         <source>Split site tunneling</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">网站级VPN分流</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="120"/>
@@ -1629,7 +1639,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="54"/>
         <source>Settings restored from backup file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">从备份文件还原配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="105"/>
@@ -1763,7 +1773,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Servers</source>
-        <translation type="unfinished">服务器列表</translation>
+        <translation type="unfinished">服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>

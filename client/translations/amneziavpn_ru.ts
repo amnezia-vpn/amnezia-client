@@ -1029,36 +1029,41 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="69"/>
-        <source>Use AmneziaDNS if installed on the server</source>
+        <source>Use AmneziaDNS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
-        <source>DNS servers</source>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="70"/>
+        <source>If AmneziaDNS is installed on the server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="85"/>
+        <source>DNS servers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>If AmneziaDNS is not used or installed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
         <source>Split site tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Allows you to connect to some sites through a secure connection, and to others bypassing it</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
         <source>Separate application tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="114"/>
         <source>Allows you to use the VPN only for certain applications</source>
         <translation type="unfinished"></translation>
     </message>
