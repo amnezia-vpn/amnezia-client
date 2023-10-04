@@ -262,7 +262,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="238"/>
         <source>Servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务器列表</translation>
     </message>
 </context>
 <context>
@@ -744,17 +744,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="37"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">配置列表</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="44"/>
         <source>Servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务器列表</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="58"/>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">连接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="72"/>
@@ -764,12 +764,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="86"/>
         <source>Backup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">备份</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="100"/>
         <source>About AmneziaVPN</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关于AmneziaVPN</translation>
     </message>
 </context>
 <context>
@@ -944,7 +944,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
         <source>Backup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">备份</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>
@@ -1008,32 +1008,32 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="41"/>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">连接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="50"/>
         <source>Auto connect</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自动连接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="51"/>
         <source>Connect to VPN on app start</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">应用启动时连接到VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="69"/>
         <source>Use AmneziaDNS if installed on the server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">使用AmneziaDNS，如果服务器上已安装</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
         <source>DNS servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">DNS服务器列表</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="85"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">如果AmneziaDNS未使用或安装</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="98"/>
@@ -1061,22 +1061,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="45"/>
         <source>DNS servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">DNS服务器列表</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="49"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Amnezia DNS未使用或安装</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="86"/>
         <source>Restore default</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">恢复为默认DNS配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="89"/>
         <source>Restore default DNS settings?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否恢复为默认DNS配置？</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
@@ -1091,7 +1091,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="99"/>
         <source>Settings have been reset</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">已重配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
@@ -1101,7 +1101,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="120"/>
         <source>Settings saved</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">配置已保存</translation>
     </message>
 </context>
 <context>
@@ -1316,7 +1316,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
         <source>Servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务器列表</translation>
     </message>
 </context>
 <context>
@@ -1743,7 +1743,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="146"/>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">连接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="158"/>
@@ -1763,7 +1763,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Servers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务器列表</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
