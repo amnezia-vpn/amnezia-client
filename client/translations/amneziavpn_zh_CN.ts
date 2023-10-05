@@ -728,17 +728,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="106"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
-        <translation type="unfinished">Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor 浏览器&lt;/a&gt; to open this url.</translation>
+        <translation type="unfinished">用 &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor 浏览器&lt;/a&gt; 打开上面网址</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="115"/>
         <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">安装几分钟后,洋葱站点才会在 Tor 网络中生效。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="124"/>
         <source>When configuring WordPress set the domain as this onion address.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">配置 WordPress 时，将域设置为此洋葱地址。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="138"/>
@@ -748,7 +748,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="141"/>
         <source>The site with all data will be removed from the tor network.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">网站及其所有数据将从 Tor 网络中删除</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="142"/>
@@ -805,13 +805,13 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>This is a free and open source application. If you like it, support the developers with a donation.
 And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
-        <translation type="unfinished">这是一个免费且开源的应用程序。如果您喜欢，请捐款支持开发人员。
-如果您不喜欢该应用程序，请更加支持它 - 捐款将用于改进该应用程序。</translation>
+        <translation type="unfinished">这是一个免费且开源的应用。如果您喜欢，请捐助支持我们。
+如果您不喜欢该应用，请更加支持它 - 捐款将用于改进该应用。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
         <source>Card on Patreon</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">请在Patreon上支持我们</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="85"/>
@@ -2358,7 +2358,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="114"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
-        <translation type="unfinished">只需点击两次即可在 Tor 网络上部署 WordPress 网站</translation>
+        <translation type="unfinished">只需点两次即可架设 WordPress 网站到 Tor 网络</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="116"/>
@@ -2593,7 +2593,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="30"/>
         <source>Show</source>
-        <translation type="unfinished">显示界面</translation>
+        <translation type="unfinished">界面</translation>
     </message>
     <message>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="34"/>
