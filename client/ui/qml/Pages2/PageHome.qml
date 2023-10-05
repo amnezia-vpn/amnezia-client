@@ -26,6 +26,55 @@ PageType {
     property string defaultServerHostName: ServersModel.defaultServerHostName
     property string defaultContainerName: ContainersModel.defaultContainerName
 
+    Connections {
+        target: PageController
+
+        function onRestorePageHomeState(isContainerInstalled) {
+            buttonContent.state = "expanded"
+            if (isContainerInstalled) {
+                containersDropDown.menuVisible = true
+            }
+        }
+        function onForceCloseDrawer() {
+            buttonContent.state = "collapsed"
+        }
+    }
+
+    Connections {
+        target: ServersModel
+
+        function onDefaultServerIndexChanged() {
+            updateDescriptions()
+        }
+    }
+
+    Connections {
+        target: ContainersModel
+
+        function onDefaultContainerChanged() {
+            updateDescriptions()
+        }
+    }
+
+    function updateDescriptions() {
+        var description = ""
+        if (ServersModel.isDefaultServerHasWriteAccess()) {
+            if (SettingsController.isAmneziaDnsEnabled()
+                    && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
+                description += "Amnezia DNS | "
+            }
+        } else {
+            if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
+                description += "Amnezia DNS | "
+            }
+        }
+
+        collapsedServerMenuDescription.text = description + root.defaultContainerName + " | " + root.defaultServerHostName
+        expandedServersMenuDescription.text = description + root.defaultServerHostName
+    }
+
+    Component.onCompleted: updateDescriptions()
+
     MouseArea {
         anchors.fill: parent
         enabled: buttonContent.state === "expanded"
@@ -40,20 +89,6 @@ PageType {
 
         ConnectButton {
             anchors.centerIn: parent
-        }
-    }
-
-    Connections {
-        target: PageController
-
-        function onRestorePageHomeState(isContainerInstalled) {
-            buttonContent.state = "expanded"
-            if (isContainerInstalled) {
-                containersDropDown.menuVisible = true
-            }
-        }
-        function onForceCloseDrawer() {
-            buttonContent.state = "collapsed"
         }
     }
 
@@ -255,26 +290,10 @@ PageType {
         }
 
         LabelTextType {
+            id: collapsedServerMenuDescription
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             visible: buttonContent.collapsedVisibility
-
-            text: {
-                var description = ""
-                if (ServersModel.isDefaultServerHasWriteAccess()) {
-                    if (SettingsController.isAmneziaDnsEnabled()
-                            && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
-                        description += "Amnezia DNS | "
-                    }
-                } else {
-                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
-                        description += "Amnezia DNS | "
-                    }
-                }
-
-                description += root.defaultContainerName + " | " + root.defaultServerHostName
-                return description
-            }
         }
 
         ColumnLayout {
@@ -297,10 +316,11 @@ PageType {
             }
 
             LabelTextType {
+                id: expandedServersMenuDescription
                 Layout.bottomMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                text: root.defaultServerHostName
+                Layout.fillWidth: true
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
             }
 
             RowLayout {
@@ -450,11 +470,11 @@ PageType {
                                         if (hasWriteAccess) {
                                             if (SettingsController.isAmneziaDnsEnabled()
                                                     && ContainersModel.isAmneziaDnsContainerInstalled(index)) {
-                                                description += "AmneziaDNS | "
+                                                description += "Amnezia DNS | "
                                             }
                                         } else {
                                             if (containsAmneziaDns) {
-                                                description += "AmneziaDNS | "
+                                                description += "Amnezia DNS | "
                                             }
                                         }
 
