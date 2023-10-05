@@ -6,7 +6,7 @@
     <message>
         <location filename="../amnezia_application.cpp" line="299"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation type="unfinished">禁用选项，还未实现基于WireGuard协议的VPN分流</translation>
+        <translation type="unfinished">未启用选项，还未实现基于WireGuard协议的VPN分流</translation>
     </message>
 </context>
 <context>
@@ -138,66 +138,72 @@
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="163"/>
         <source> installed successfully. </source>
-        <translation type="unfinished">安装成功</translation>
+        <translation type="obsolete">安装成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="113"/>
-        <location filename="../ui/controllers/installController.cpp" line="166"/>
         <source> is already installed on the server. </source>
-        <translation type="unfinished"> 已安装在服务上</translation>
+        <translation type="obsolete"> 已安装在服务器上</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="116"/>
-        <location filename="../ui/controllers/installController.cpp" line="185"/>
+        <location filename="../ui/controllers/installController.cpp" line="110"/>
+        <location filename="../ui/controllers/installController.cpp" line="162"/>
+        <source>%1 installed successfully. </source>
+        <translation type="unfinished">%1 安装成功。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="112"/>
+        <location filename="../ui/controllers/installController.cpp" line="164"/>
+        <source>%1 is already installed on the server. </source>
+        <translation type="unfinished">服务器上已经安装 %1。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="115"/>
+        <location filename="../ui/controllers/installController.cpp" line="183"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
-        <translation type="unfinished">在服务上发现已经安装协议并添加到应用程序</translation>
+        <translation type="unfinished">
+在服务上发现已经安装协议并添加到应用程序</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="266"/>
+        <location filename="../ui/controllers/installController.cpp" line="264"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished">配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
+        <location filename="../ui/controllers/installController.cpp" line="279"/>
+        <source>Server &apos;%1&apos; was removed</source>
+        <translation type="unfinished">已移除服务器 &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="289"/>
+        <source>All containers from server &apos;%1&apos; have been removed</source>
+        <translation type="unfinished">服务器 &apos;%1&apos; 的所有容器已移除</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <source>1% has been removed from the server &apos;%2&apos;</source>
+        <translation type="unfinished">容器 1% 已从服务器 &apos;%2&apos; 上移除</translation>
+    </message>
+    <message>
         <source>Server &apos;</source>
-        <translation type="unfinished">服务器 </translation>
+        <translation type="obsolete">服务器 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
         <source>&apos; was removed</source>
-        <translation type="unfinished"> 已经移除</translation>
+        <translation type="obsolete"> 已经移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
-        <source>All containers from server &apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
-        <source>&apos; have been removed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="307"/>
         <source> has been removed from the server &apos;</source>
-        <translation type="unfinished"> 协议已从</translation>
+        <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
-        <source>&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="454"/>
+        <location filename="../ui/controllers/installController.cpp" line="452"/>
         <source>Please login as the user</source>
         <translation type="unfinished">请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="481"/>
+        <location filename="../ui/controllers/installController.cpp" line="479"/>
         <source>Server added successfully</source>
         <translation type="unfinished">服务器添加成功</translation>
     </message>
@@ -253,8 +259,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageDeinstalling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="62"/>
-        <source>Removing services from </source>
-        <translation type="unfinished"></translation>
+        <source>Removing services from %1</source>
+        <translation type="unfinished">正从 %1 移除服务</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="87"/>
@@ -519,14 +525,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="172"/>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
         <source>Remove </source>
         <translation type="unfinished">移除</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
+        <source>Remove %1 from server?</source>
+        <translation type="unfinished">从服务器移除 %1 ?</translation>
+    </message>
+    <message>
         <source> from server?</source>
-        <translation type="unfinished"> 从服务器</translation>
+        <translation type="obsolete"> 从服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
@@ -583,14 +592,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
         <source>Remove </source>
         <translation type="unfinished">移除</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
+        <source>Remove %1 from server?</source>
+        <translation type="unfinished">从服务器移除 %1 ?</translation>
+    </message>
+    <message>
         <source> from server?</source>
-        <translation type="unfinished"> 从服务器</translation>
+        <translation type="obsolete"> 从服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="67"/>
@@ -673,12 +685,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="260"/>
         <source>Remove SFTP and all data stored there</source>
-        <translation type="unfinished">删除SFTP和其存储在这里的所有数据</translation>
+        <translation type="unfinished">移除SFTP和其本地所有数据</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="263"/>
         <source>Remove SFTP and all data stored there?</source>
-        <translation type="unfinished">删除SFTP和其存储在这里的所有数据?</translation>
+        <translation type="unfinished">移除SFTP和其本地所有数据?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="264"/>
@@ -864,7 +876,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
-        <translation type="unfinished">检查更新</translation>
+        <translation type="unfinished">更新</translation>
     </message>
 </context>
 <context>
@@ -917,7 +929,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
         <source>Disabled</source>
-        <translation type="unfinished">关闭</translation>
+        <translation type="unfinished">禁用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="124"/>
@@ -1241,22 +1253,22 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="117"/>
         <source>Check the server for previously installed Amnezia services</source>
-        <translation type="unfinished">检查服务器上是否有以前安装的 Amnezia 服务</translation>
+        <translation type="unfinished">检查服务器上是否存在 Amnezia 服务</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="118"/>
         <source>Add them to the application if they were not displayed</source>
-        <translation type="unfinished">如果未显示，请将它们添加到应用程序中</translation>
+        <translation type="unfinished">如果存在且未被显示，则添加到应用程序里</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="134"/>
         <source>Remove server from application</source>
-        <translation type="unfinished">从应用程序中移除服务器</translation>
+        <translation type="unfinished">移除本地服务器信息</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="138"/>
         <source>Remove server?</source>
-        <translation type="unfinished">移除服务器?</translation>
+        <translation type="unfinished">移除本地服务器信息?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="139"/>
@@ -1266,7 +1278,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="165"/>
         <source>Clear server from Amnezia software</source>
-        <translation type="unfinished">从Amnezia中清除服务器</translation>
+        <translation type="unfinished">移除Amnezia中服务器信息</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
@@ -1316,14 +1328,17 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="112"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
         <source>Remove </source>
         <translation type="unfinished">移除</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
         <source> from server?</source>
-        <translation type="unfinished"> 从服务器</translation>
+        <translation type="obsolete"> 从服务器</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
+        <source>Remove %1 from server?</source>
+        <translation type="unfinished">从服务器移除 %1 ?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
@@ -1374,7 +1389,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="198"/>
         <source>Remove </source>
-        <translation type="unfinished">移除</translation>
+        <translation type="unfinished">移除 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
@@ -1583,7 +1598,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="66"/>
         <source>Amnesia has detected that your server is currently </source>
-        <translation type="unfinished">Amnezia 检测到您的服务器当前处于</translation>
+        <translation type="unfinished">Amnezia 检测到您的服务器当前</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
@@ -1731,7 +1746,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
         <source>Show content</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">展示内容</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="148"/>
@@ -1754,7 +1769,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
         <source>For the AmneziaVPN app</source>
-        <translation type="unfinished">来自应用AmneziaVPN</translation>
+        <translation type="unfinished">AmneziaVPN 应用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="91"/>
@@ -1779,17 +1794,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="158"/>
         <source>Full access</source>
-        <translation type="unfinished">完全授权</translation>
+        <translation type="unfinished">完整授权</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="174"/>
         <source>VPN access without the ability to manage the server</source>
-        <translation type="unfinished">VPN 访问，不能管理服务器</translation>
+        <translation type="unfinished">无权控制服务器</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
         <source>Full access to server</source>
-        <translation type="unfinished">完全授权方式访问服务器</translation>
+        <translation type="unfinished">获得服务器完整授权</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
@@ -1810,7 +1825,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="222"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="307"/>
         <source>File with connection settings to </source>
-        <translation type="unfinished">连接配置文件到 </translation>
+        <translation type="unfinished">连接配置文件的内容为:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="248"/>
@@ -2000,12 +2015,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="68"/>
         <source>Could not retrieve private key from keystore</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法从密钥存储库中检索私钥</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="75"/>
         <source>Could not create decryption cipher</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法创建解密密码</translation>
     </message>
 </context>
 <context>
@@ -2059,27 +2074,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="124"/>
         <source>Could not create private key generator</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法创建私钥生成器</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="131"/>
         <source>Could not generate new private key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法生成新的私钥</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="139"/>
         <source>Could not retrieve private key from keystore</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法从密钥库检索私钥</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="147"/>
         <source>Could not create encryption cipher</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法创建加密密码</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/keychain_android.cpp" line="155"/>
         <source>Could not encrypt data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法加密数据</translation>
     </message>
 </context>
 <context>
@@ -2328,7 +2343,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation type="unfinished">OpenVPN over Cloak - OpenVPN，具有伪装成网络流量的 VPN 和针对主动探测检测的保护.非常适合绕过审查力度特别强的地区的封锁。</translation>
+        <translation type="unfinished">OpenVPN over Cloak - OpenVPN 与 VPN 具有伪装成网络流量和防止主动探测检测的保护。非常适合绕过审查力度特别强的地区的封锁。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>
@@ -2338,7 +2353,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="111"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation type="unfinished">IKEv2 - 现代稳定协议，比其他协议快一点，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
+        <translation type="unfinished">IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="114"/>
@@ -2478,22 +2493,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="20"/>
         <source>Software version</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">软件版本</translation>
     </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="102"/>
         <source>Backup file is corrupted</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">备份文件已损坏</translation>
     </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="117"/>
         <source>All settings have been reset to default values</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">所配置恢复为默认值</translation>
     </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="123"/>
         <source>Cached profiles cleared</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">缓存的配置文件已清除</translation>
     </message>
 </context>
 <context>
@@ -2502,7 +2517,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="27"/>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="35"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="71"/>
@@ -2512,22 +2527,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="104"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">拷贝</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="111"/>
         <source>Copied</source>
-        <translation type="unfinished">拷贝</translation>
+        <translation type="unfinished">已拷贝</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="126"/>
         <source>Show content</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">展示内容</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="250"/>
         <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">要读取 Amnezia 应用程序中的二维码，请选择“添加服务器”→“我有数据要连接”→“二维码、密钥或配置文件”</translation>
     </message>
 </context>
 <context>
@@ -2539,22 +2554,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="67"/>
-        <source>New site added: </source>
+        <source>New site added: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="80"/>
-        <source>Site removed: </source>
+        <source>Site removed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="88"/>
-        <source>Can&apos;t open file: </source>
+        <source>Can&apos;t open file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="95"/>
-        <source>Failed to parse JSON data from file: </source>
+        <source>Failed to parse JSON data from file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2593,7 +2608,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="39"/>
         <source>Visit Website</source>
-        <translation type="unfinished">访问官网</translation>
+        <translation type="unfinished">官网</translation>
     </message>
     <message>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="43"/>
@@ -2677,7 +2692,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="247"/>
         <source>Many foreign websites and VPN providers are blocked</source>
-        <translation type="unfinished">许多国外网站和VPN提供商被屏蔽</translation>
+        <translation type="unfinished">大多国外网站和VPN提供商被屏蔽</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="248"/>

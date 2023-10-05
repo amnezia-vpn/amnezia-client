@@ -139,65 +139,50 @@
     <name>InstallController</name>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="163"/>
-        <source> installed successfully. </source>
+        <location filename="../ui/controllers/installController.cpp" line="162"/>
+        <source>%1 installed successfully. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="113"/>
-        <location filename="../ui/controllers/installController.cpp" line="166"/>
-        <source> is already installed on the server. </source>
+        <location filename="../ui/controllers/installController.cpp" line="112"/>
+        <location filename="../ui/controllers/installController.cpp" line="164"/>
+        <source>%1 is already installed on the server. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="116"/>
-        <location filename="../ui/controllers/installController.cpp" line="185"/>
+        <location filename="../ui/controllers/installController.cpp" line="115"/>
+        <location filename="../ui/controllers/installController.cpp" line="183"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="266"/>
+        <location filename="../ui/controllers/installController.cpp" line="264"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
-        <source>Server &apos;</source>
+        <location filename="../ui/controllers/installController.cpp" line="279"/>
+        <source>Server &apos;%1&apos; was removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
-        <source>&apos; was removed</source>
+        <location filename="../ui/controllers/installController.cpp" line="289"/>
+        <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
-        <source>All containers from server &apos;</source>
+        <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <source>1% has been removed from the server &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
-        <source>&apos; have been removed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="307"/>
-        <source> has been removed from the server &apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
-        <source>&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="454"/>
+        <location filename="../ui/controllers/installController.cpp" line="452"/>
         <source>Please login as the user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="481"/>
+        <location filename="../ui/controllers/installController.cpp" line="479"/>
         <source>Server added successfully</source>
         <translation type="unfinished"></translation>
     </message>
@@ -253,7 +238,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageDeinstalling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="62"/>
-        <source>Removing services from </source>
+        <source>Removing services from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -519,13 +504,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="172"/>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
         <source>Remove </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
-        <source> from server?</source>
+        <source>Remove %1 from server?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -590,13 +574,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
         <source>Remove </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
-        <source> from server?</source>
+        <source>Remove %1 from server?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1318,13 +1301,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="112"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
         <source>Remove </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
-        <source> from server?</source>
+        <source>Remove %1 from server?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2540,22 +2522,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="67"/>
-        <source>New site added: </source>
+        <source>New site added: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="80"/>
-        <source>Site removed: </source>
+        <source>Site removed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="88"/>
-        <source>Can&apos;t open file: </source>
+        <source>Can&apos;t open file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="95"/>
-        <source>Failed to parse JSON data from file: </source>
+        <source>Failed to parse JSON data from file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

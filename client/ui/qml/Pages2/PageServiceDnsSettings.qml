@@ -63,7 +63,7 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" from server?")
+                    questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 
