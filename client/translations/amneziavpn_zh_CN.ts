@@ -815,7 +815,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
         <source>Card on Patreon</source>
-        <translation type="unfinished">请在Patreon上支持我们</translation>
+        <translation type="unfinished">Patreon订阅</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="85"/>
@@ -825,7 +825,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="102"/>
         <source>Show other methods on Github</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">其他捐款途径</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
