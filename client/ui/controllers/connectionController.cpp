@@ -130,8 +130,9 @@ void ConnectionController::onCurrentContainerUpdated()
     }
 }
 
-void ConnectionController::translateMemoryText()
+void ConnectionController::onTranslationsUpdated()
 {
+    // get translated text of current state
     onConnectionStateChanged(getCurrentConnectionState());
 }
 

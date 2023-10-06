@@ -171,8 +171,6 @@ PageType {
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
-
-                ConnectionController.translateMemoryText()
             }
         }
         TabImageButtonType {

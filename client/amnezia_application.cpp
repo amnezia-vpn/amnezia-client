@@ -330,6 +330,8 @@ void AmneziaApplication::initControllers()
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
+
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 

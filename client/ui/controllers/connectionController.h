@@ -34,7 +34,7 @@ public slots:
 
     void onCurrentContainerUpdated();
 
-    void translateMemoryText();
+    void onTranslationsUpdated();
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
