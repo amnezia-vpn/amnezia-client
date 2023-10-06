@@ -78,43 +78,43 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     m_fullConfig = config;
 
-    QJsonObject protocolConfig = config.value(config_key::amneziaWireguard).toObject();
+    QJsonObject protocolConfig = config.value(config_key::awg).toObject();
 
     m_protocolConfig[config_key::port] =
-            protocolConfig.value(config_key::port).toString(protocols::amneziawireguard::defaultPort);
+            protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     m_protocolConfig[config_key::junkPacketCount] =
-            protocolConfig.value(config_key::junkPacketCount).toString(protocols::amneziawireguard::defaultJunkPacketCount);
+            protocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     m_protocolConfig[config_key::junkPacketMinSize] =
             protocolConfig.value(config_key::junkPacketMinSize)
-                    .toString(protocols::amneziawireguard::defaultJunkPacketMinSize);
+                    .toString(protocols::awg::defaultJunkPacketMinSize);
     m_protocolConfig[config_key::junkPacketMaxSize] =
             protocolConfig.value(config_key::junkPacketMaxSize)
-                    .toString(protocols::amneziawireguard::defaultJunkPacketMaxSize);
+                    .toString(protocols::awg::defaultJunkPacketMaxSize);
     m_protocolConfig[config_key::initPacketJunkSize] =
             protocolConfig.value(config_key::initPacketJunkSize)
-                    .toString(protocols::amneziawireguard::defaultInitPacketJunkSize);
+                    .toString(protocols::awg::defaultInitPacketJunkSize);
     m_protocolConfig[config_key::responsePacketJunkSize] =
             protocolConfig.value(config_key::responsePacketJunkSize)
-                    .toString(protocols::amneziawireguard::defaultResponsePacketJunkSize);
+                    .toString(protocols::awg::defaultResponsePacketJunkSize);
     m_protocolConfig[config_key::initPacketMagicHeader] =
             protocolConfig.value(config_key::initPacketMagicHeader)
-                    .toString(protocols::amneziawireguard::defaultInitPacketMagicHeader);
+                    .toString(protocols::awg::defaultInitPacketMagicHeader);
     m_protocolConfig[config_key::responsePacketMagicHeader] =
             protocolConfig.value(config_key::responsePacketMagicHeader)
-                    .toString(protocols::amneziawireguard::defaultResponsePacketMagicHeader);
+                    .toString(protocols::awg::defaultResponsePacketMagicHeader);
     m_protocolConfig[config_key::underloadPacketMagicHeader] =
             protocolConfig.value(config_key::underloadPacketMagicHeader)
-                    .toString(protocols::amneziawireguard::defaultUnderloadPacketMagicHeader);
+                    .toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     m_protocolConfig[config_key::transportPacketMagicHeader] =
             protocolConfig.value(config_key::transportPacketMagicHeader)
-                    .toString(protocols::amneziawireguard::defaultTransportPacketMagicHeader);
+                    .toString(protocols::awg::defaultTransportPacketMagicHeader);
 
     endResetModel();
 }
 
 QJsonObject AwgConfigModel::getConfig()
 {
-    m_fullConfig.insert(config_key::amneziaWireguard, m_protocolConfig);
+    m_fullConfig.insert(config_key::awg, m_protocolConfig);
     return m_fullConfig;
 }
 
