@@ -87,6 +87,7 @@ void AmneziaApplication::init()
     m_vpnConnectionThread.start();
 
     initModels();
+    loadTranslator();
     initControllers();
 
 #ifdef Q_OS_ANDROID
@@ -138,6 +139,7 @@ void AmneziaApplication::init()
             &ConnectionController::openConnection);
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
+    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(),  &NotificationHandler::onTranslationsUpdated);
 
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
@@ -221,33 +223,26 @@ void AmneziaApplication::loadTranslator()
 {
     auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
-    if (locale != QLocale::English) {
-        if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
-            if (QCoreApplication::installTranslator(m_translator.get())) {
-                m_settings->setAppLanguage(locale);
-            }
-        }
-    }
+    updateTranslator(locale);
 }
+
 
 void AmneziaApplication::updateTranslator(const QLocale &locale)
 {
-    QResource::registerResource(":/translations.qrc");
-    if (!m_translator->isEmpty())
+    if (!m_translator->isEmpty()) {
         QCoreApplication::removeTranslator(m_translator.get());
-
-    if (locale == QLocale::English) {
-        m_settings->setAppLanguage(locale);
-        m_engine->retranslate();
     }
 
-    if (m_translator->load(locale, QString("amneziavpn"), QLatin1String("_"), QLatin1String(":/i18n"))) {
+    QString strFileName = QString(":/translations/amneziavpn")+QLatin1String("_")+locale.name()+".qm";
+    if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
         }
-
-        m_engine->retranslate();
+    } else {
+        m_settings->setAppLanguage(QLocale::English);
     }
+
+    m_engine->retranslate();
 
     emit translationsUpdated();
 }
@@ -337,6 +332,8 @@ void AmneziaApplication::initControllers()
 {
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
+
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());

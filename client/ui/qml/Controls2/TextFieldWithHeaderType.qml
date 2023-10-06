@@ -31,6 +31,7 @@ Item {
 
     property string backgroundColor: "#1c1d21"
     property string backgroundDisabledColor: "transparent"
+    property string bgBorderHoveredColor: "#494B50"
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -45,7 +46,7 @@ Item {
             Layout.preferredHeight: input.implicitHeight
             color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
             radius: 16
-            border.color: textField.focus ? root.borderFocusedColor : root.borderColor
+            border.color: getBackgroundBorderColor(root.borderColor)
             border.width: 1
 
             Behavior on border.color {
@@ -109,11 +110,16 @@ Item {
                             anchors.fill: parent
                             acceptedButtons: Qt.RightButton
                             onClicked: contextMenu.open()
+                            enabled: true
                         }
 
                         ContextMenuType {
                             id: contextMenu
                             textObj: textField
+                        }
+
+                        onFocusChanged: {
+                            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
                         }
                     }
                 }
@@ -156,11 +162,28 @@ Item {
 
     MouseArea {
         anchors.fill: root
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: Qt.IBeamCursor
+
+        hoverEnabled: true
 
         onPressed: function(mouse) {
             textField.forceActiveFocus()
             mouse.accepted = false
+
+            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
         }
+
+        onEntered: {
+            backgroud.border.color = getBackgroundBorderColor(bgBorderHoveredColor)
+        }
+
+
+        onExited: {
+            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
+        }
+    }
+
+    function getBackgroundBorderColor(noneFocusedColor) {
+        return textField.focus ? root.borderFocusedColor : noneFocusedColor
     }
 }

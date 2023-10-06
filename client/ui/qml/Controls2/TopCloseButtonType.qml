@@ -23,6 +23,9 @@ Popup {
         image: "qrc:/images/svg/close_black_24dp.svg"
         imageColor: "#D7D8DB"
 
+        implicitWidth: 40
+        implicitHeight: 40
+
         onClicked: {
             PageController.goToDrawerRootPage()
         }

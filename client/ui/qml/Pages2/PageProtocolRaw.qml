@@ -173,7 +173,7 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" from server?")
+                    questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
                     questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")

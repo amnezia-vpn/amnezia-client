@@ -59,7 +59,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
-                            headerText: qsTr("Removing services from ") + name
+                            headerText: qsTr("Removing services from %1").arg(name)
                         }
 
                         ProgressBarType {

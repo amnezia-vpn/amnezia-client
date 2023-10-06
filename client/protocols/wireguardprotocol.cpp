@@ -101,8 +101,6 @@ void WireguardProtocol::stop()
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN) || defined(Q_OS_LINUX)
 ErrorCode WireguardProtocol::startMzImpl()
 {
-
-    qDebug() << "WireguardProtocol::startMzImpl():" << m_rawConfig;
     m_impl->activate(m_rawConfig);
     return ErrorCode::NoError;
 }

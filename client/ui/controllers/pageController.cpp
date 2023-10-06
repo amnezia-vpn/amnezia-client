@@ -37,6 +37,8 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
     connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
 #endif
+    
+    m_isTriggeredByConnectButton = false;
 }
 
 QString PageController::getInitialPage()
@@ -144,4 +146,14 @@ void PageController::drawerClose()
         emit showTopCloseButton(false);
         m_drawerLayer = 0;
     }
+}
+
+bool PageController::isTriggeredByConnectButton()
+{
+    return m_isTriggeredByConnectButton;
+}
+
+void PageController::setTriggeredBtConnectButton(bool trigger)
+{
+    m_isTriggeredByConnectButton = trigger;
 }

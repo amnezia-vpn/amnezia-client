@@ -62,6 +62,7 @@ PageType {
                 id: header
 
                 implicitWidth: parent.width
+                headerTextMaximumLineCount: 10
 
                 headerText: qsTr("What is the level of internet control in your region?")
             }
@@ -145,14 +146,13 @@ PageType {
 
             Item {
                 implicitWidth: 1
-                implicitHeight: 1
+                implicitHeight: 54
             }
 
             BasicButtonType {
                 id: continueButton
 
                 implicitWidth: parent.width
-                anchors.topMargin: 24
 
                 text: qsTr("Continue")
 
@@ -182,6 +182,17 @@ PageType {
                 disabledColor: "#878B91"
                 textColor: "#D7D8DB"
                 borderWidth: 1
+
+                visible: {
+                    if (PageController.isTriggeredByConnectButton()) {
+                        PageController.setTriggeredBtConnectButton(false)
+
+                        return ContainersModel.isAnyContainerInstalled()
+                    }
+
+
+                    return  true
+                }
 
                 text: qsTr("Set up later")
 

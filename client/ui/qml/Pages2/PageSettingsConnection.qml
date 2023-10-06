@@ -66,7 +66,8 @@ PageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
-                text: qsTr("Use AmneziaDNS if installed on the server")
+                text: qsTr("Use AmneziaDNS")
+                descriptionText: qsTr("If AmneziaDNS is installed on the server")
 
                 checked: SettingsController.isAmneziaDnsEnabled()
                 onCheckedChanged: {

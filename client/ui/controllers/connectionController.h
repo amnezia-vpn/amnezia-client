@@ -19,7 +19,7 @@ public:
                                   const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<VpnConnection> &vpnConnection, QObject *parent = nullptr);
 
-    ~ConnectionController();
+    ~ConnectionController() = default;
 
     bool isConnected() const;
     bool isConnectionInProgress() const;
@@ -34,6 +34,8 @@ public slots:
 
     void onCurrentContainerUpdated();
 
+    void onTranslationsUpdated();
+
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                       const QJsonObject &containerConfig);
@@ -44,6 +46,8 @@ signals:
     void reconnectWithUpdatedContainer(const QString &message);
 
 private:
+    Vpn::ConnectionState getCurrentConnectionState();
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
 
@@ -52,6 +56,8 @@ private:
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Connect");
+
+    Vpn::ConnectionState m_state;
 };
 
 #endif // CONNECTIONCONTROLLER_H

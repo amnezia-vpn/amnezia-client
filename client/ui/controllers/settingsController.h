@@ -54,6 +54,9 @@ public slots:
     bool isStartMinimizedEnabled();
     void toggleStartMinimized(bool enable);
 
+    bool isScreenshotsEnabled();
+    void toggleScreenshotsEnabled(bool enable);
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();

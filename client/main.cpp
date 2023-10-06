@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
 
-    app.loadTranslator();
     app.loadFonts();
 
     bool doExec = app.parseCommands();
