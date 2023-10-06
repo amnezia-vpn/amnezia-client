@@ -42,6 +42,8 @@ private:
     QString m_serverPublicKeyPath;
     QString m_serverPskKeyPath;
     amnezia::ProtocolScriptType m_configTemplate;
+    QString m_protocolName;
+    QString m_defaultPort;
 };
 
 #endif // WIREGUARD_CONFIGURATOR_H

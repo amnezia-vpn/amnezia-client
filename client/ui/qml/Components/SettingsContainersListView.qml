@@ -65,7 +65,7 @@ ListView {
                             break
                         }
                         case ContainerEnum.AmneziaWireGuard: {
-                            WireGuardConfigModel.updateModel(config)
+                            AmneziaWireGuardConfigModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolAmneziaWireGuardSettings)
                             break
                         }

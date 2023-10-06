@@ -4,6 +4,8 @@ import QtQuick.Layouts
 
 import SortFilterProxyModel 0.2
 
+import PageEnum 1.0
+
 import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -75,6 +77,7 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -88,132 +91,175 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: junkPacketCountTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Junk packet count")
-                            textFieldText: port
+                            textFieldText: junkPacketCount
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                console.log("1")
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+
+                                if (textFieldText !== junkPacketCount) {
+                                    junkPacketCount = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: junkPacketMinSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Junk packet minimum size")
-                            textFieldText: port
+                            textFieldText: junkPacketMinSize
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== junkPacketMinSize) {
+                                    junkPacketMinSize = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: junkPacketMaxSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Junk packet maximum size")
-                            textFieldText: port
+                            textFieldText: junkPacketMaxSize
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== junkPacketMaxSize) {
+                                    junkPacketMaxSize = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: initPacketJunkSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Init packet junk size")
-                            textFieldText: port
+                            textFieldText: initPacketJunkSize
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== initPacketJunkSize) {
+                                    initPacketJunkSize = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: responsePacketJunkSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Response packet junk size")
-                            textFieldText: port
+                            textFieldText: responsePacketJunkSize
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== responsePacketJunkSize) {
+                                    responsePacketJunkSize = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: initPacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Init packet magic header")
-                            textFieldText: port
+                            textFieldText: initPacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== initPacketMagicHeader) {
+                                    initPacketMagicHeader = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: responsePacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Response packet magic header")
-                            textFieldText: port
+                            textFieldText: responsePacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== responsePacketMagicHeader) {
+                                    responsePacketMagicHeader = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: transportPacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Transport packet magic header")
-                            textFieldText: port
+                            textFieldText: transportPacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== transportPacketMagicHeader) {
+                                    transportPacketMagicHeader = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
+                            id: underloadPacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             headerText: qsTr("Underload packet magic header")
-                            textFieldText: port
+                            textFieldText: underloadPacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
+                                if (textFieldText !== underloadPacketMagicHeader) {
+                                    underloadPacketMagicHeader = textFieldText
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         BasicButtonType {
@@ -251,13 +297,24 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: underloadPacketMagicHeaderTextField.errorText === "" &&
+                                     transportPacketMagicHeaderTextField.errorText === "" &&
+                                     responsePacketMagicHeaderTextField.errorText === "" &&
+                                     initPacketMagicHeaderTextField.errorText === "" &&
+                                     responsePacketJunkSizeTextField.errorText === "" &&
+                                     initPacketJunkSizeTextField.errorText === "" &&
+                                     junkPacketMaxSizeTextField.errorText === "" &&
+                                     junkPacketMinSizeTextField.errorText === "" &&
+                                     junkPacketCountTextField.errorText === "" &&
+                                     portTextField.errorText === ""
+
                             text: qsTr("Save and Restart Amnezia")
 
                             onClicked: {
                                 forceActiveFocus()
-//                                PageController.showBusyIndicator(true)
-//                                InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
-//                                PageController.showBusyIndicator(false)
+                                PageController.showBusyIndicator(true)
+                                InstallController.updateContainer(AmneziaWireGuardConfigModel.getConfig())
+                                PageController.showBusyIndicator(false)
                             }
                         }
                     }

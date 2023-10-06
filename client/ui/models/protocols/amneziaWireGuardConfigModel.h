@@ -13,7 +13,15 @@ class AmneziaWireGuardConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
-        CipherRole
+        JunkPacketCountRole,
+        JunkPacketMinSizeRole,
+        JunkPacketMaxSizeRole,
+        InitPacketJunkSizeRole,
+        ResponsePacketJunkSizeRole,
+        InitPacketMagicHeaderRole,
+        ResponsePacketMagicHeaderRole,
+        UnderloadPacketMagicHeaderRole,
+        TransportPacketMagicHeaderRole
     };
 
     explicit AmneziaWireGuardConfigModel(QObject *parent = nullptr);

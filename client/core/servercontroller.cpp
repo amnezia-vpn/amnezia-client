@@ -338,6 +338,10 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             return true;
     }
 
+    if (container == DockerContainer::AmneziaWireGuard) {
+        return true;
+    }
+
     return false;
 }
 

@@ -30,6 +30,9 @@ WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
                                               : amnezia::protocols::wireguard::serverPskKeyPath;
     m_configTemplate = m_isAmneziaWireGuard ? ProtocolScriptType::amnezia_wireguard_template
                                             : ProtocolScriptType::wireguard_template;
+
+    m_protocolName = m_isAmneziaWireGuard ? config_key::amneziaWireguard : config_key::wireguard;
+    m_defaultPort = m_isAmneziaWireGuard ? protocols::wireguard::defaultPort : protocols::amneziawireguard::defaultPort;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
@@ -70,10 +73,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
-    connData.port = containerConfig.value(m_isAmneziaWireGuard ? config_key::amneziaWireguard : config_key::wireguard)
-                            .toObject()
-                            .value(config_key::port)
-                            .toString(protocols::wireguard::defaultPort);
+    connData.port = containerConfig.value(m_protocolName).toObject().value(config_key::port).toString(m_defaultPort);
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
         if (errorCode)
