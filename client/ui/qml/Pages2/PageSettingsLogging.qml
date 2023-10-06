@@ -105,7 +105,7 @@ PageType {
                             if (GC.isMobile()) {
                                 fileName = "AmneziaVPN.log"
                             } else {
-                                fileName = SystemController.getFileName(qsTr("Save logs"),
+                                fileName = SystemController.getFileName(qsTr("Save"),
                                                                         qsTr("Logs files (*.log)"),
                                                                         StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
                                                                         true,

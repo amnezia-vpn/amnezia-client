@@ -72,7 +72,7 @@ PageType {
 
                             Layout.fillWidth: true
 
-                            headerText: qsTr("Installing ") + name
+                            headerText: qsTr("Installing %1").arg(name)
                             descriptionText: description
                         }
 

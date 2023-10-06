@@ -107,10 +107,9 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
     if (!installedContainers.contains(container)) {
         errorCode = serverController.setupContainer(m_currentlyInstalledServerCredentials, container, config);
         installedContainers.insert(container, config);
-        finishMessage = ContainerProps::containerHumanNames().value(container) + tr(" installed successfully. ");
+        finishMessage = tr("%1 installed successfully. ").arg(ContainerProps::containerHumanNames().value(container));
     } else {
-        finishMessage =
-                ContainerProps::containerHumanNames().value(container) + tr(" is already installed on the server. ");
+        finishMessage = tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
     }
     if (installedContainers.size() > 1) {
         finishMessage += tr("\nAdded containers that were already installed on the server");
@@ -159,10 +158,9 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
     if (!installedContainers.contains(container)) {
         errorCode = serverController.setupContainer(serverCredentials, container, config);
         installedContainers.insert(container, config);
-        finishMessage = ContainerProps::containerHumanNames().value(container) + tr(" installed successfully. ");
+        finishMessage = tr("%1 installed successfully. ").arg(ContainerProps::containerHumanNames().value(container));
     } else {
-        finishMessage =
-                ContainerProps::containerHumanNames().value(container) + tr(" is already installed on the server. ");
+        finishMessage = tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
     }
 
     bool isInstalledContainerAddedToGui = false;
@@ -277,7 +275,7 @@ void InstallController::removeCurrentlyProcessedServer()
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     m_serversModel->removeServer();
-    emit removeCurrentlyProcessedServerFinished(tr("Server '") + serverName + tr("' was removed"));
+    emit removeCurrentlyProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
 void InstallController::removeAllContainers()
@@ -287,7 +285,7 @@ void InstallController::removeAllContainers()
 
     ErrorCode errorCode = m_containersModel->removeAllContainers();
     if (errorCode == ErrorCode::NoError) {
-        emit removeAllContainersFinished(tr("All containers from server '") + serverName + ("' have been removed"));
+        emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));
@@ -303,8 +301,8 @@ void InstallController::removeCurrentlyProcessedContainer()
 
     ErrorCode errorCode = m_containersModel->removeCurrentlyProcessedContainer();
     if (errorCode == ErrorCode::NoError) {
-        emit removeCurrentlyProcessedContainerFinished(containerName + tr(" has been removed from the server '")
-                                                       + serverName + "'");
+
+        emit removeCurrentlyProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName).arg(serverName));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));

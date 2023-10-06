@@ -88,6 +88,10 @@ void NotificationHandler::setConnectionState(Vpn::ConnectionState state)
     }
 }
 
+void NotificationHandler::onTranslationsUpdated()
+{
+}
+
 void NotificationHandler::unsecuredNetworkNotification(const QString& networkName) {
     qDebug() << "Unsecured network notification shown";
 
