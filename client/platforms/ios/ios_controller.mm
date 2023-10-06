@@ -204,8 +204,8 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (proto == amnezia::Proto::WireGuard) {
         return setupWireGuard();
     }
-    if (proto == amnezia::Proto::AmneziaWireGuard) {
-        return setupAmneziaWireGuard();
+    if (proto == amnezia::Proto::Awg) {
+        return setupAwg();
     }
 
     return false;
@@ -310,9 +310,9 @@ bool IosController::setupWireGuard()
     return startWireGuard(wgConfig);
 }
 
-bool IosController::setupAmneziaWireGuard()
+bool IosController::setupAwg()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::AmneziaWireGuard)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
     QString wgConfig = config[config_key::config].toString();
     
