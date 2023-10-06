@@ -5,14 +5,11 @@
 echo "Container startup"
 #ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
-mkdir -p /dev/net
-mknod /dev/net/tun c 10 200
-
 # kill daemons in case of restart
-wg-quick down /opt/amnezia/amneziawireguard/wg0.conf
+wg-quick down /opt/amnezia/awg/wg0.conf
 
 # start daemons if configured
-if [ -f /opt/amnezia/amneziawireguard/wg0.conf ]; then (wg-quick up /opt/amnezia/amneziawireguard/wg0.conf); fi
+if [ -f /opt/amnezia/awg/wg0.conf ]; then (wg-quick up /opt/amnezia/awg/wg0.conf); fi
 
 # Allow traffic on the TUN interface.
 iptables -A INPUT -i wg0 -j ACCEPT

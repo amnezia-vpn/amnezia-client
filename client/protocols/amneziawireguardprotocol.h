@@ -1,17 +1,17 @@
-#ifndef AMNEZIAWIREGUARDPROTOCOL_H
-#define AMNEZIAWIREGUARDPROTOCOL_H
+#ifndef AWGPROTOCOL_H
+#define AWGPROTOCOL_H
 
 #include <QObject>
 
 #include "wireguardprotocol.h"
 
-class AmneziaWireGuardProtocol : public WireguardProtocol
+class Awg : public WireguardProtocol
 {
     Q_OBJECT
 
 public:
-    explicit AmneziaWireGuardProtocol(const QJsonObject &configuration, QObject *parent = nullptr);
-    virtual ~AmneziaWireGuardProtocol() override;
+    explicit Awg(const QJsonObject &configuration, QObject *parent = nullptr);
+    virtual ~Awg() override;
 };
 
-#endif // AMNEZIAWIREGUARDPROTOCOL_H
+#endif // AWGPROTOCOL_H

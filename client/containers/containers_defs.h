@@ -20,7 +20,7 @@ namespace amnezia
             ShadowSocks,
             Cloak,
             WireGuard,
-            AmneziaWireGuard,
+            Awg,
             Ipsec,
 
             // non-vpn

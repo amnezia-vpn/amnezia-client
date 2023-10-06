@@ -215,7 +215,7 @@
         <file>ui/qml/Controls2/ListViewWithLabelsType.qml</file>
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
-        <file>ui/qml/Pages2/PageProtocolAmneziaWireGuardSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolAwgSettings.qml</file>
         <file>server_scripts/amnezia_wireguard/template.conf</file>
         <file>server_scripts/amnezia_wireguard/start.sh</file>
         <file>server_scripts/amnezia_wireguard/configure_container.sh</file>

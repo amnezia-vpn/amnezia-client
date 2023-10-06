@@ -24,7 +24,7 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *pa
     wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, false, this));
     ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, this));
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, this));
-    amneziaWireGuardConfigurator = std::shared_ptr<AmneziaWireGuardConfigurator>(new AmneziaWireGuardConfigurator(settings, this));
+    awgConfigurator = std::shared_ptr<AwgConfigurator>(new AwgConfigurator(settings, this));
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
@@ -42,8 +42,8 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     case Proto::WireGuard:
         return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
 
-    case Proto::AmneziaWireGuard:
-        return amneziaWireGuardConfigurator->genAmneziaWireGuardConfig(credentials, container, containerConfig, errorCode);
+    case Proto::Awg:
+        return awgConfigurator->genAwgConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::Ikev2: return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
 

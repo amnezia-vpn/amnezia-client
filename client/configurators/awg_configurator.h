@@ -1,18 +1,18 @@
-#ifndef AMNEZIAWIREGUARDCONFIGURATOR_H
-#define AMNEZIAWIREGUARDCONFIGURATOR_H
+#ifndef AWGCONFIGURATOR_H
+#define AWGCONFIGURATOR_H
 
 #include <QObject>
 
 #include "wireguard_configurator.h"
 
-class AmneziaWireGuardConfigurator : public WireguardConfigurator
+class AwgConfigurator : public WireguardConfigurator
 {
     Q_OBJECT
 public:
-    AmneziaWireGuardConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    AwgConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
-    QString genAmneziaWireGuardConfig(const ServerCredentials &credentials, DockerContainer container,
+    QString genAwgConfig(const ServerCredentials &credentials, DockerContainer container,
                                       const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 };
 
-#endif // AMNEZIAWIREGUARDCONFIGURATOR_H
+#endif // AWGCONFIGURATOR_H

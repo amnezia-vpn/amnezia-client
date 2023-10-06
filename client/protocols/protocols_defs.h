@@ -76,7 +76,7 @@ namespace amnezia
         constexpr char shadowsocks[] = "shadowsocks";
         constexpr char cloak[] = "cloak";
         constexpr char sftp[] = "sftp";
-        constexpr char amneziaWireguard[] = "amneziawireguard";
+        constexpr char awg[] = "awg";
 
     }
 
@@ -151,13 +151,13 @@ namespace amnezia
 
         } // namespace sftp
 
-        namespace amneziawireguard
+        namespace awg
         {
             constexpr char defaultPort[] = "55424";
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/amneziawireguard/wg0.conf";
-            constexpr char serverPublicKeyPath[] = "/opt/amnezia/amneziawireguard/wireguard_server_public_key.key";
-            constexpr char serverPskKeyPath[] = "/opt/amnezia/amneziawireguard/wireguard_psk.key";
+            constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
+            constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
+            constexpr char serverPskKeyPath[] = "/opt/amnezia/awg/wireguard_psk.key";
 
             constexpr char defaultJunkPacketCount[] = "3";
             constexpr char defaultJunkPacketMinSize[] = "10";
@@ -188,7 +188,7 @@ namespace amnezia
             ShadowSocks,
             Cloak,
             WireGuard,
-            AmneziaWireGuard,
+            Awg,
             Ikev2,
             L2tp,
 

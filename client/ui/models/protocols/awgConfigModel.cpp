@@ -1,20 +1,20 @@
-#include "amneziaWireGuardConfigModel.h"
+#include "awgConfigModel.h"
 
 #include <QJsonDocument>
 
 #include "protocols/protocols_defs.h"
 
-AmneziaWireGuardConfigModel::AmneziaWireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
+AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
-int AmneziaWireGuardConfigModel::rowCount(const QModelIndex &parent) const
+int AwgConfigModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return 1;
 }
 
-bool AmneziaWireGuardConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
         return false;
@@ -49,7 +49,7 @@ bool AmneziaWireGuardConfigModel::setData(const QModelIndex &index, const QVaria
     return true;
 }
 
-QVariant AmneziaWireGuardConfigModel::data(const QModelIndex &index, int role) const
+QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return false;
@@ -71,7 +71,7 @@ QVariant AmneziaWireGuardConfigModel::data(const QModelIndex &index, int role) c
     return QVariant();
 }
 
-void AmneziaWireGuardConfigModel::updateModel(const QJsonObject &config)
+void AwgConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
     m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
@@ -112,13 +112,13 @@ void AmneziaWireGuardConfigModel::updateModel(const QJsonObject &config)
     endResetModel();
 }
 
-QJsonObject AmneziaWireGuardConfigModel::getConfig()
+QJsonObject AwgConfigModel::getConfig()
 {
     m_fullConfig.insert(config_key::amneziaWireguard, m_protocolConfig);
     return m_fullConfig;
 }
 
-QHash<int, QByteArray> AmneziaWireGuardConfigModel::roleNames() const
+QHash<int, QByteArray> AwgConfigModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 

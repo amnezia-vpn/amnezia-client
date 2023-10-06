@@ -19,20 +19,20 @@
 #include "settings.h"
 #include "utilities.h"
 
-WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAmneziaWireGuard, QObject *parent)
-    : ConfiguratorBase(settings, parent), m_isAmneziaWireGuard(isAmneziaWireGuard)
+WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAwg, QObject *parent)
+    : ConfiguratorBase(settings, parent), m_isAwg(isAwg)
 {
-    m_serverConfigPath = m_isAmneziaWireGuard ? amnezia::protocols::amneziawireguard::serverConfigPath
+    m_serverConfigPath = m_isAwg ? amnezia::protocols::awg::serverConfigPath
                                               : amnezia::protocols::wireguard::serverConfigPath;
-    m_serverPublicKeyPath = m_isAmneziaWireGuard ? amnezia::protocols::amneziawireguard::serverPublicKeyPath
+    m_serverPublicKeyPath = m_isAwg ? amnezia::protocols::awg::serverPublicKeyPath
                                                  : amnezia::protocols::wireguard::serverPublicKeyPath;
-    m_serverPskKeyPath = m_isAmneziaWireGuard ? amnezia::protocols::amneziawireguard::serverPskKeyPath
+    m_serverPskKeyPath = m_isAwg ? amnezia::protocols::awg::serverPskKeyPath
                                               : amnezia::protocols::wireguard::serverPskKeyPath;
-    m_configTemplate = m_isAmneziaWireGuard ? ProtocolScriptType::amnezia_wireguard_template
+    m_configTemplate = m_isAwg ? ProtocolScriptType::amnezia_wireguard_template
                                             : ProtocolScriptType::wireguard_template;
 
-    m_protocolName = m_isAmneziaWireGuard ? config_key::amneziaWireguard : config_key::wireguard;
-    m_defaultPort = m_isAmneziaWireGuard ? protocols::wireguard::defaultPort : protocols::amneziawireguard::defaultPort;
+    m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;
+    m_defaultPort = m_isAwg ? protocols::wireguard::defaultPort : protocols::awg::defaultPort;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()

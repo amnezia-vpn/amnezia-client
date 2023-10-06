@@ -291,7 +291,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
         lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
-        protocolName = "amneziawireguard";
+        protocolName = "awg";
     }
 
     QJsonObject wireguardConfig;

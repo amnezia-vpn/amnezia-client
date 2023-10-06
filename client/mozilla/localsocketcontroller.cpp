@@ -162,8 +162,8 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   //    splitTunnelApps.append(QJsonValue(uri));
   //  }
   //  json.insert("vpnDisabledApps", splitTunnelApps);
-
-  if (protocolName == amnezia::config_key::amneziaWireguard) {
+  
+  if (protocolName == amnezia::config_key::awg) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
     json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));

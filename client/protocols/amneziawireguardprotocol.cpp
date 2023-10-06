@@ -1,10 +1,10 @@
 #include "amneziawireguardprotocol.h"
 
-AmneziaWireGuardProtocol::AmneziaWireGuardProtocol(const QJsonObject &configuration, QObject *parent)
+Awg::Awg(const QJsonObject &configuration, QObject *parent)
     : WireguardProtocol(configuration, parent)
 {
 }
 
-AmneziaWireGuardProtocol::~AmneziaWireGuardProtocol()
+Awg::~Awg()
 {
 }

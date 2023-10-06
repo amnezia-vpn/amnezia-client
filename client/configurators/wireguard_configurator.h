@@ -12,7 +12,7 @@ class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAmneziaWireGuard, QObject *parent = nullptr);
+    WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAwg, QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -36,8 +36,8 @@ private:
                                           const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
 
     ConnectionData genClientKeys();
-
-    bool m_isAmneziaWireGuard;
+    
+    bool m_isAwg;
     QString m_serverConfigPath;
     QString m_serverPublicKeyPath;
     QString m_serverPskKeyPath;

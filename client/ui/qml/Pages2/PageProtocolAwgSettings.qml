@@ -52,7 +52,7 @@ PageType {
                 clip: true
                 interactive: false
 
-                model: AmneziaWireGuardConfigModel
+                model: AwgConfigModel
 
                 delegate: Item {
                     implicitWidth: listview.width
@@ -313,7 +313,7 @@ PageType {
                             onClicked: {
                                 forceActiveFocus()
                                 PageController.showBusyIndicator(true)
-                                InstallController.updateContainer(AmneziaWireGuardConfigModel.getConfig())
+                                InstallController.updateContainer(AwgConfigModel.getConfig())
                                 PageController.showBusyIndicator(false)
                             }
                         }

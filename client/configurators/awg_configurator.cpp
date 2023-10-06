@@ -5,12 +5,12 @@
 
 #include "core/servercontroller.h"
 
-AmneziaWireGuardConfigurator::AmneziaWireGuardConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
+AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
     : WireguardConfigurator(settings, true, parent)
 {
 }
 
-QString AmneziaWireGuardConfigurator::genAmneziaWireGuardConfig(const ServerCredentials &credentials,
+QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials,
                                                                 DockerContainer container,
                                                                 const QJsonObject &containerConfig, ErrorCode *errorCode)
 {
@@ -19,7 +19,7 @@ QString AmneziaWireGuardConfigurator::genAmneziaWireGuardConfig(const ServerCred
     QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
 
     ServerController serverController(m_settings);
-    QString serverConfig = serverController.getTextFileFromContainer(container, credentials, protocols::amneziawireguard::serverConfigPath, errorCode);
+    QString serverConfig = serverController.getTextFileFromContainer(container, credentials, protocols::awg::serverConfigPath, errorCode);
 
     QMap<QString, QString> serverConfigMap;
     auto serverConfigLines = serverConfig.split("\n");

@@ -1,19 +1,19 @@
-mkdir -p /opt/amnezia/amneziawireguard
-cd /opt/amnezia/amneziawireguard
+mkdir -p /opt/amnezia/awg
+cd /opt/amnezia/awg
 WIREGUARD_SERVER_PRIVATE_KEY=$(wg genkey)
-echo $WIREGUARD_SERVER_PRIVATE_KEY > /opt/amnezia/amneziawireguard/wireguard_server_private_key.key
+echo $WIREGUARD_SERVER_PRIVATE_KEY > /opt/amnezia/awg/wireguard_server_private_key.key
 
 WIREGUARD_SERVER_PUBLIC_KEY=$(echo $WIREGUARD_SERVER_PRIVATE_KEY | wg pubkey)
-echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/amneziawireguard/wireguard_server_public_key.key
+echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/awg/wireguard_server_public_key.key
 
 WIREGUARD_PSK=$(wg genpsk)
-echo $WIREGUARD_PSK > /opt/amnezia/amneziawireguard/wireguard_psk.key
+echo $WIREGUARD_PSK > /opt/amnezia/awg/wireguard_psk.key
 
-cat > /opt/amnezia/amneziawireguard/wg0.conf <<EOF
+cat > /opt/amnezia/awg/wg0.conf <<EOF
 [Interface]
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
-Address = 10.8.1.1/24
-ListenPort = $AMNEZIAWIREGUARD_SERVER_PORT
+Address = $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
+ListenPort = $AWG_SERVER_PORT
 Jc = $JUNK_PACKET_COUNT
 Jmin = $JUNK_PACKET_MIN_SIZE
 Jmax = $JUNK_PACKET_MAX_SIZE

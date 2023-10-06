@@ -1,12 +1,12 @@
-#ifndef AMNEZIAWIREGUARDCONFIGMODEL_H
-#define AMNEZIAWIREGUARDCONFIGMODEL_H
+#ifndef AWGCONFIGMODEL_H
+#define AWGCONFIGMODEL_H
 
 #include <QAbstractListModel>
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
 
-class AmneziaWireGuardConfigModel : public QAbstractListModel
+class AwgConfigModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -24,7 +24,7 @@ public:
         TransportPacketMagicHeaderRole
     };
 
-    explicit AmneziaWireGuardConfigModel(QObject *parent = nullptr);
+    explicit AwgConfigModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -44,4 +44,4 @@ private:
     QJsonObject m_fullConfig;
 };
 
-#endif // AMNEZIAWIREGUARDCONFIGMODEL_H
+#endif // AWGCONFIGMODEL_H

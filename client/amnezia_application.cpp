@@ -321,8 +321,8 @@ void AmneziaApplication::initModels()
     m_wireGuardConfigModel.reset(new WireGuardConfigModel(this));
     m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel.get());
 
-    m_amneziaWireGuardConfigModel.reset(new AmneziaWireGuardConfigModel(this));
-    m_engine->rootContext()->setContextProperty("AmneziaWireGuardConfigModel", m_amneziaWireGuardConfigModel.get());
+    m_awgConfigModel.reset(new AwgConfigModel(this));
+    m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));

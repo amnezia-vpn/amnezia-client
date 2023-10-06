@@ -13,7 +13,7 @@ class CloakConfigurator;
 class WireguardConfigurator;
 class Ikev2Configurator;
 class SshConfigurator;
-class AmneziaWireGuardConfigurator;
+class AwgConfigurator;
 
 // Retrieve connection settings from server
 class VpnConfigurator : ConfiguratorBase
@@ -41,7 +41,7 @@ public:
     std::shared_ptr<WireguardConfigurator> wireguardConfigurator;
     std::shared_ptr<Ikev2Configurator> ikev2Configurator;
     std::shared_ptr<SshConfigurator> sshConfigurator;
-    std::shared_ptr<AmneziaWireGuardConfigurator> amneziaWireGuardConfigurator;
+    std::shared_ptr<AwgConfigurator> awgConfigurator;
 };
 
 #endif // VPN_CONFIGURATOR_H

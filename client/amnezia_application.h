@@ -31,7 +31,7 @@
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
-#include "ui/models/protocols/amneziaWireGuardConfigModel.h"
+#include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
@@ -99,7 +99,7 @@ private:
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
     QScopedPointer<CloakConfigModel> m_cloakConfigModel;
     QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
-    QScopedPointer<AmneziaWireGuardConfigModel> m_amneziaWireGuardConfigModel;
+    QScopedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
     QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
 #endif
