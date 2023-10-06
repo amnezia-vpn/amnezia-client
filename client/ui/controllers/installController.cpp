@@ -303,7 +303,7 @@ void InstallController::removeCurrentlyProcessedContainer()
     ErrorCode errorCode = m_containersModel->removeCurrentlyProcessedContainer();
     if (errorCode == ErrorCode::NoError) {
 
-        emit removeCurrentlyProcessedContainerFinished(tr("1% has been removed from the server '%2'").arg(containerName).arg(serverName));
+        emit removeCurrentlyProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName).arg(serverName));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));

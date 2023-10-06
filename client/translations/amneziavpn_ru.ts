@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="299"/>
+        <location filename="../amnezia_application.cpp" line="300"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -173,7 +173,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="306"/>
-        <source>1% has been removed from the server &apos;%2&apos;</source>
+        <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -224,12 +224,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="95"/>
+        <location filename="../ui/notificationhandler.cpp" line="99"/>
         <source>AmneziaVPN notification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="96"/>
+        <location filename="../ui/notificationhandler.cpp" line="100"/>
         <source>Unsecured network detected: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -1588,7 +1588,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <name>PageSetupWizardProtocolSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="75"/>
-        <source>Installing </source>
+        <source>Installing %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2559,27 +2559,32 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>SystemTrayNotificationHandler</name>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="30"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="28"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="60"/>
         <source>Show</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="34"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="32"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="61"/>
         <source>Connect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="35"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="33"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="62"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="39"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="37"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="63"/>
         <source>Visit Website</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="43"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="41"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="64"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>

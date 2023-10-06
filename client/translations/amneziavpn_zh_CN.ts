@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="299"/>
+        <location filename="../amnezia_application.cpp" line="300"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished">未启用选项，还未实现基于WireGuard协议的VPN分流</translation>
     </message>
@@ -182,8 +182,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <source>%1 has been removed from the server &apos;%2&apos;</source>
+        <translation type="unfinished">%1 已从服务器 &apos;%2&apos; 上移除</translation>
+    </message>
+    <message>
         <source>1% has been removed from the server &apos;%2&apos;</source>
-        <translation type="unfinished">容器 1% 已从服务器 &apos;%2&apos; 上移除</translation>
+        <translation type="obsolete">%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
     <message>
         <source>Server &apos;</source>
@@ -245,12 +249,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">已从VPN断开</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="95"/>
+        <location filename="../ui/notificationhandler.cpp" line="99"/>
         <source>AmneziaVPN notification</source>
         <translation type="unfinished">AmneziaVPN 提示</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="96"/>
+        <location filename="../ui/notificationhandler.cpp" line="100"/>
         <source>Unsecured network detected: </source>
         <translation type="unfinished">发现不安全网络</translation>
     </message>
@@ -1620,13 +1624,13 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <name>PageSetupWizardProtocolSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="75"/>
-        <source>Installing </source>
-        <translation type="unfinished"></translation>
+        <source>Installing %1</source>
+        <translation type="unfinished">正在安装 %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="93"/>
         <source>More detailed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">更多细节</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="183"/>
@@ -1646,7 +1650,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
         <source>Install</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">安装</translation>
     </message>
 </context>
 <context>
@@ -2318,7 +2322,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../containers/containers_defs.cpp" line="89"/>
         <location filename="../containers/containers_defs.cpp" line="132"/>
         <source>Website in Tor network</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">在 Tor 网络中架设网站</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
@@ -2358,7 +2362,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="114"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
-        <translation type="unfinished">只需点两次即可架设 WordPress 网站到 Tor 网络</translation>
+        <translation type="unfinished">只需点击两次即可架设 WordPress 网站到 Tor 网络</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="116"/>
@@ -2591,27 +2595,32 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>SystemTrayNotificationHandler</name>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="30"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="28"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="60"/>
         <source>Show</source>
         <translation type="unfinished">界面</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="34"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="32"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="61"/>
         <source>Connect</source>
         <translation type="unfinished">连接</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="35"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="33"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="62"/>
         <source>Disconnect</source>
         <translation type="unfinished">断开</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="39"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="37"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="63"/>
         <source>Visit Website</source>
         <translation type="unfinished">官网</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="43"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="41"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="64"/>
         <source>Quit</source>
         <translation type="unfinished">退出</translation>
     </message>
