@@ -119,6 +119,9 @@ Item {
         ImageButtonType {
             id: rightImage
 
+            implicitWidth: 40
+            implicitHeight: 40
+
             hoverEnabled: false
             image: rightImageSource
             imageColor: rightImageColor

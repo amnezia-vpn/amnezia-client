@@ -11,7 +11,8 @@ namespace LanguageSettings
     Q_NAMESPACE
     enum class AvailableLanguageEnum {
         English,
-        Russian
+        Russian,
+        China_cn
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 
@@ -59,6 +60,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language);
+
     QVector<LanguageModelData> m_availableLanguages;
 
     std::shared_ptr<Settings> m_settings;

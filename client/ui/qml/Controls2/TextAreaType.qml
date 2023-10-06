@@ -9,71 +9,99 @@ Rectangle {
     property alias textArea: textArea
     property alias textAreaText: textArea.text
 
+    property string borderHoveredColor: "#494B50"
+    property string borderNormalColor: "#2C2D30"
+    property string borderFocusedColor: "#d7d8db"
+
     height: 148
     color: "#1C1D21"
     border.width: 1
-    border.color: "#2C2D30"
+    border.color: getBorderColor(borderNormalColor)
     radius: 16
 
-    FlickableType {
-        id: fl
-        interactive: false
+    MouseArea {
+        id: parentMouse
+        anchors.fill: parent
+        cursorShape: Qt.IBeamCursor
+        onClicked: textArea.forceActiveFocus()
+        hoverEnabled: true
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: textArea.implicitHeight
-        TextArea {
-            id: textArea
+        FlickableType {
+            id: fl
+            interactive: false
 
-            width: parent.width
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            contentHeight: textArea.implicitHeight
+            TextArea {
+                id: textArea
 
-            topPadding: 16
-            leftPadding: 16
-            anchors.topMargin: 16
-            anchors.bottomMargin: 16
+                width: parent.width
 
-            color: "#D7D8DB"
-            selectionColor:  "#633303"
-            selectedTextColor: "#D7D8DB"
-            placeholderTextColor: "#878B91"
+                topPadding: 16
+                leftPadding: 16
+                anchors.topMargin: 16
+                anchors.bottomMargin: 16
 
-            font.pixelSize: 16
-            font.weight: Font.Medium
-            font.family: "PT Root UI VF"
+                color: "#D7D8DB"
+                selectionColor:  "#633303"
+                selectedTextColor: "#D7D8DB"
+                placeholderTextColor: "#878B91"
 
-            placeholderText: root.placeholderText
-            text: root.text
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                font.family: "PT Root UI VF"
 
-            onCursorVisibleChanged:  {
-                if (textArea.cursorVisible) {
-                    fl.interactive = true
-                } else {
-                    fl.interactive = false
+                placeholderText: root.placeholderText
+                text: root.text
+
+                onCursorVisibleChanged:  {
+                    if (textArea.cursorVisible) {
+                        fl.interactive = true
+                    } else {
+                        fl.interactive = false
+                    }
+                }
+
+                wrapMode: Text.Wrap
+
+                MouseArea {
+                    id: textAreaMouse
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    hoverEnabled: true
+                    onClicked: {
+                        fl.interactive = true
+                        contextMenu.open()
+                    }
+                }
+
+                onFocusChanged: {
+                    root.border.color = getBorderColor(borderNormalColor)
+                }
+
+                ContextMenuType {
+                    id: contextMenu
+                    textObj: textArea
                 }
             }
+        }
 
-            wrapMode: Text.Wrap
+        onPressed: {
+            root.border.color = getBorderColor(borderFocusedColor)
+        }
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.RightButton
-                onClicked: {
-                    fl.interactive = true
-                    contextMenu.open()
-                }
-            }
+        onExited: {
+            root.border.color = getBorderColor(borderNormalColor)
+        }
 
-            ContextMenuType {
-                id: contextMenu
-                textObj: textArea
-            }
+        onEntered: {
+            root.border.color = getBorderColor(borderHoveredColor)
         }
     }
 
-    //todo make whole background clickable, with code below we lose ability to select text by mouse
-//    MouseArea {
-//        anchors.fill: parent
-//        cursorShape: Qt.IBeamCursor
-//        onClicked: textArea.forceActiveFocus()
-//    }
+
+    function getBorderColor(noneFocusedColor) {
+        return textArea.focus ? root.borderFocusedColor : noneFocusedColor
+    }
 }

@@ -6,6 +6,11 @@
 #include "systemController.h"
 #include "ui/qautostart.h"
 #include "version.h"
+#ifdef Q_OS_ANDROID
+    #include "../../platforms/android/android_controller.h"
+    #include "../../platforms/android/androidutils.h"
+    #include <QJniObject>
+#endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
@@ -18,6 +23,20 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_settings(settings)
 {
     m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
+
+#ifdef Q_OS_ANDROID
+    if (!m_settings->isScreenshotsEnabled()) {
+        // Set security screen for Android app
+        AndroidUtils::runOnAndroidThreadSync([]() {
+            QJniObject activity = AndroidUtils::getActivity();
+            QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+            if (window.isValid()) {
+                const int FLAG_SECURE = 8192;
+                window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
+            }
+        });
+    }
+#endif
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -151,4 +170,27 @@ bool SettingsController::isStartMinimizedEnabled()
 void SettingsController::toggleStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
+}
+
+bool SettingsController::isScreenshotsEnabled()
+{
+    return m_settings->isScreenshotsEnabled();
+}
+
+void SettingsController::toggleScreenshotsEnabled(bool enable)
+{
+    m_settings->setScreenshotsEnabled(enable);
+#ifdef Q_OS_ANDROID
+    std::string command = enable ? "clearFlags" : "addFlags";
+
+    // Set security screen for Android app
+    AndroidUtils::runOnAndroidThreadSync([&command]() {
+        QJniObject activity = AndroidUtils::getActivity();
+        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (window.isValid()) {
+            const int FLAG_SECURE = 8192;
+            window.callMethod<void>(command.c_str(), "(I)V", FLAG_SECURE);
+        }
+    });
+#endif
 }

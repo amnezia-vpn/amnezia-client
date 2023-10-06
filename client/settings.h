@@ -178,6 +178,15 @@ public:
         m_settings.setValue("Conf/appLanguage", locale);
     };
 
+    bool isScreenshotsEnabled() const
+    {
+        return m_settings.value("Conf/screenshotsEnabled", false).toBool();
+    }
+    void setScreenshotsEnabled(bool enabled)
+    {
+        m_settings.setValue("Conf/screenshotsEnabled", enabled);
+    }
+
     void clearSettings();
 
 signals:

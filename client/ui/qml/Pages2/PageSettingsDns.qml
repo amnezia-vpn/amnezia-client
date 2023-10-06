@@ -53,7 +53,7 @@ PageType {
                 id: primaryDns
 
                 Layout.fillWidth: true
-                headerText: "Primary DNS"
+                headerText: qsTr("Primary DNS")
 
                 textFieldText: SettingsController.primaryDns
                 textField.validator: RegularExpressionValidator {
@@ -65,7 +65,7 @@ PageType {
                 id: secondaryDns
 
                 Layout.fillWidth: true
-                headerText: "Secondary DNS"
+                headerText: qsTr("Secondary DNS")
 
                 textFieldText: SettingsController.secondaryDns
                 textField.validator: RegularExpressionValidator {

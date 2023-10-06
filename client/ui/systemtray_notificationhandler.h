@@ -19,6 +19,8 @@ public:
 
     void setConnectionState(Vpn::ConnectionState state) override;
 
+    void onTranslationsUpdated() override;
+
 protected:
     virtual void notify(Message type, const QString& title,
                         const QString& message, int timerMsec) override;
@@ -35,9 +37,11 @@ private:
     QMenu m_menu;
     QSystemTrayIcon m_systemTrayIcon;
 
+    QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
     QAction* m_trayActionDisconnect = nullptr;
-    QAction* m_preferencesAction = nullptr;
+    QAction* m_trayActionVisitWebSite = nullptr;
+    QAction* m_trayActionQuit = nullptr;
     QAction* m_statusLabel = nullptr;    
     QAction* m_separator = nullptr;
 

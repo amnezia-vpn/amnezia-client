@@ -23,6 +23,9 @@ Item {
             image: backButtonImage
             imageColor: "#D7D8DB"
 
+            implicitWidth: 40
+            implicitHeight: 40
+
             onClicked: {
                 if (backButtonFunction && typeof backButtonFunction === "function") {
                     backButtonFunction()
