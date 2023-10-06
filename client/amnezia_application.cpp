@@ -139,6 +139,7 @@ void AmneziaApplication::init()
             &ConnectionController::openConnection);
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
+    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(),  &NotificationHandler::onTranslationsUpdated);
 
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
