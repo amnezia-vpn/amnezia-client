@@ -803,14 +803,14 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation type="unfinished">捐赠项目</translation>
+        <translation type="unfinished">捐款</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>This is a free and open source application. If you like it, support the developers with a donation.
 And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
-        <translation type="unfinished">这是一个免费且开源的应用。如果您喜欢，请捐助支持我们。
-如果您不喜欢该应用，请更加支持它 - 捐款将用于改进该应用。</translation>
+        <translation type="unfinished">这是一个免费且开源的应用软件。如果您喜欢它，请捐助支持我们继续研发。
+如果您不喜欢，请捐助支持我们改进它。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
