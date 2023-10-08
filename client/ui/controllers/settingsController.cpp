@@ -22,7 +22,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_languageModel(languageModel),
       m_settings(settings)
 {
-    m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_MAJOR_VERSION), __DATE__);
+    m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_VERSION), __DATE__);
 
 #ifdef Q_OS_ANDROID
     if (!m_settings->isScreenshotsEnabled()) {

@@ -172,7 +172,7 @@ PageType {
                 Layout.bottomMargin: 24
 
                 text: accessTypeSelector.currentIndex === 0 ? qsTr("VPN access without the ability to manage the server") :
-                                                              qsTr("Full access to server")
+                                                              qsTr("Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the servers, as well as change settings.")
                 color: "#878B91"
             }
 
