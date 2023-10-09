@@ -183,6 +183,7 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
                                 "All installed containers have been added to the application");
         }
 
+        m_containersModel->setData(m_containersModel->index(0, 0), container, ContainersModel::Roles::IsDefaultRole);
         emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
         return;
     }
