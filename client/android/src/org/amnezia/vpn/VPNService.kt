@@ -615,6 +615,17 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             ifaceBuilder.parseH2(ifaceConfig["H2"])
             ifaceBuilder.parseH3(ifaceConfig["H3"])
             ifaceBuilder.parseH4(ifaceConfig["H4"])
+        } else {
+            ifaceBuilder.parseJc("0")
+            ifaceBuilder.parseJmin("0")
+            ifaceBuilder.parseJmax("0")
+            ifaceBuilder.parseS1("0")
+            ifaceBuilder.parseS2("0")
+            ifaceBuilder.parseH1("0")
+            ifaceBuilder.parseH2("0")
+            ifaceBuilder.parseH3("0")
+            ifaceBuilder.parseH4("0")           
+        
         }
         /*val jExcludedApplication = obj.getJSONArray("excludedApps")
     (0 until jExcludedApplication.length()).toList().forEach {
@@ -745,9 +756,15 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         val builder = Builder()
         setupBuilder(wireguard_conf, builder)
         builder.setSession("Amnezia")
+        
+        
         builder.establish().use { tun ->
-            if (tun == null) return
-            currentTunnelHandle = GoBackend.wgTurnOn("Amnezia", tun.detachFd(), wgConfig)
+        if (tun == null) return
+            if (type == "awg"){
+      	        currentTunnelHandle = GoBackend.wgTurnOn("awg0", tun.detachFd(), wgConfig)
+            } else {
+                currentTunnelHandle = GoBackend.wgTurnOn("amn0", tun.detachFd(), wgConfig)
+            }
         }
         if (currentTunnelHandle < 0) {
             Log.e(tag, "Activation Error Code -> $currentTunnelHandle")

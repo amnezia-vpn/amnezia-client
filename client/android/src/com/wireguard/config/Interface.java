@@ -595,7 +595,7 @@ public final class Interface {
       if (jc < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.JC, Reason.INVALID_VALUE, String.valueOf(jc));
-      this.jc = jc == 0 ? Optional.empty() : Optional.of(jc);
+      this.jc = Optional.of(jc);
       return this;
     }      
     
@@ -603,7 +603,7 @@ public final class Interface {
       if (jmin < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.JMIN, Reason.INVALID_VALUE, String.valueOf(jmin));
-      this.jmin = jmin == 0 ? Optional.empty() : Optional.of(jmin);
+      this.jmin = Optional.of(jmin);
       return this;
     }
 
@@ -611,7 +611,7 @@ public final class Interface {
       if (jmax < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.JMAX, Reason.INVALID_VALUE, String.valueOf(jmax));
-      this.jmax = jmax == 0 ? Optional.empty() : Optional.of(jmax);
+      this.jmax = Optional.of(jmax);
       return this;
     }
 
@@ -619,7 +619,7 @@ public final class Interface {
       if (s1 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.S1, Reason.INVALID_VALUE, String.valueOf(s1));
-      this.s1 = s1 == 0 ? Optional.empty() : Optional.of(s1);
+      this.s1 = Optional.of(s1);
       return this;
     }
 
@@ -627,7 +627,7 @@ public final class Interface {
       if (s2 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.S2, Reason.INVALID_VALUE, String.valueOf(s2));
-      this.s2 = s2 == 0 ? Optional.empty() : Optional.of(s2);
+      this.s2 = Optional.of(s2);
       return this;
     }
 
@@ -635,7 +635,7 @@ public final class Interface {
       if (h1 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.H1, Reason.INVALID_VALUE, String.valueOf(h1));
-      this.h1 = h1 == 0 ? Optional.empty() : Optional.of(h1);
+      this.h1 = Optional.of(h1);
       return this;
     }
 
@@ -643,7 +643,7 @@ public final class Interface {
       if (h2 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.H2, Reason.INVALID_VALUE, String.valueOf(h2));
-      this.h2 = h2 == 0 ? Optional.empty() : Optional.of(h2);
+      this.h2 = Optional.of(h2);
       return this;
     }
 
@@ -651,7 +651,7 @@ public final class Interface {
       if (h3 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.H3, Reason.INVALID_VALUE, String.valueOf(h3));
-      this.h3 = h3 == 0 ? Optional.empty() : Optional.of(h3);
+      this.h3 = Optional.of(h3);
       return this;
     }
 
@@ -659,7 +659,7 @@ public final class Interface {
       if (h4 < 0)
         throw new BadConfigException(
             Section.INTERFACE, Location.H4, Reason.INVALID_VALUE, String.valueOf(h4));
-      this.h4 = h4 == 0 ? Optional.empty() : Optional.of(h4);
+      this.h4 = Optional.of(h4);
       return this;
     }
   }
