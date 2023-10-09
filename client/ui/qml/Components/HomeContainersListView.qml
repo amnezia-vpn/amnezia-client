@@ -76,7 +76,6 @@ ListView {
                                 (ConnectionController.isConnected || ConnectionController.isConnectionInProgress)) {
                             PageController.showNotificationMessage(qsTr("Reconnect via VPN Procotol: ") + name)
                             PageController.goToPageHome()
-                            menu.visible = false
                             ConnectionController.openConnection()
                         }
                     } else {
@@ -84,7 +83,6 @@ ListView {
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.menuVisible = false
-                        menu.visible = false
                     }
                 }
 

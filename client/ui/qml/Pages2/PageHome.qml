@@ -96,7 +96,7 @@ PageType {
         id: dragArea
 
         anchors.fill: buttonBackground
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: buttonContent.state === "collapsed" ? Qt.PointingHandCursor : Qt.ArrowCursor
         hoverEnabled: true
 
         drag.target: buttonContent
@@ -385,18 +385,7 @@ PageType {
                 Layout.rightMargin: 16
                 visible: buttonContent.expandedVisibility
 
-                actionButtonImage: "qrc:/images/controls/plus.svg"
-
                 headerText: qsTr("Servers")
-
-                actionButtonFunction: function() {
-                    buttonContent.state = "collapsed"
-                    connectionTypeSelection.visible = true
-                }
-            }
-
-            ConnectionTypeSelectionDrawer {
-                id: connectionTypeSelection
             }
         }
 

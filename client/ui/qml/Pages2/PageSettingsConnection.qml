@@ -97,7 +97,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Split site tunneling")
-                descriptionText: qsTr("Allows you to connect to some sites through a secure connection, and to others bypassing it")
+                descriptionText: qsTr("Allows you to choose which sites you want to use the VPN for.")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

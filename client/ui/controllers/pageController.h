@@ -84,9 +84,10 @@ public slots:
     void drawerOpen();
     void drawerClose();
 
-
     bool isTriggeredByConnectButton();
     void setTriggeredBtConnectButton(bool trigger);
+
+    void closeApplication();
 
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);

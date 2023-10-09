@@ -17,6 +17,7 @@ Item {
 
     property string rightImageSource
     property string leftImageSource
+    property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
 
     property string textColor: "#d7d8db"
     property string descriptionColor: "#878B91"
@@ -42,9 +43,9 @@ Item {
 
             visible: leftImageSource ? true : false
 
-            Layout.preferredHeight: rightImageSource ? leftImage.implicitHeight : 56
-            Layout.preferredWidth: rightImageSource ? leftImage.implicitWidth : 56
-            Layout.rightMargin: rightImageSource ? 16 : 0
+            Layout.preferredHeight: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitHeight : 56
+            Layout.preferredWidth: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitWidth : 56
+            Layout.rightMargin: rightImageSource || !isLeftImageHoverEnabled ? 16 : 0
 
             radius: 12
             color: "transparent"
