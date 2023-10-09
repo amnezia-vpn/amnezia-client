@@ -213,6 +213,7 @@ DrawerType {
 
                     Image {
                         anchors.fill: parent
+                        anchors.margins: 2
                         smooth: false
 
                         source: ExportController.qrCodesCount ? ExportController.qrCodes[0] : ""
