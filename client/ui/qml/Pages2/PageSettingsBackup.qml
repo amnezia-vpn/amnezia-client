@@ -77,7 +77,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: -12
 
-                text: qsTr("It will help you instantly restore connection settings at the next installation")
+                text: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
                 color: "#878B91"
             }
 

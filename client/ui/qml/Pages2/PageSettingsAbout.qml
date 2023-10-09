@@ -68,8 +68,8 @@ PageType {
                 height: 20
                 font.pixelSize: 14
 
-                text: qsTr("This is a free and open source application. If you like it, support the developers with a donation.
-And if you don't like the app, all the more support it - the donation will be used to improve the app.")
+                text: qsTr("This is a free and open source application. If you like it, support the developers with a donation. ") +
+                      qsTr("And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.")
                 color: "#CCCAC8"
             }
 

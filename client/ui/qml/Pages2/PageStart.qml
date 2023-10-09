@@ -9,6 +9,7 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
@@ -17,14 +18,14 @@ PageType {
         target: PageController
 
         function onGoToPageHome() {
-            tabBar.currentIndex = 0
+            tabBar.setCurrentIndex(0)
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
 
             PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
-            tabBar.currentIndex = 2
+            tabBar.setCurrentIndex(2)
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
 
             PageController.updateDrawerRootPage(PageEnum.PageSettings)
@@ -70,6 +71,7 @@ PageType {
         }
 
         function onGoToStartPage() {
+            connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
             }
@@ -120,6 +122,8 @@ PageType {
         height: root.height - tabBar.implicitHeight
 
         function goToTabBarPage(page) {
+            connectionTypeSelection.close()
+
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
@@ -137,14 +141,16 @@ PageType {
     TabBar {
         id: tabBar
 
+        property int previousIndex: 0
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
         topPadding: 8
         bottomPadding: 8
-        leftPadding: shareTabButton.visible ? 96 : 128
-        rightPadding: shareTabButton.visible ? 96 : 128
+        leftPadding: 96
+        rightPadding: 96
 
         background: Shape {
             width: parent.width
@@ -171,8 +177,10 @@ PageType {
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                tabBar.previousIndex = 0
             }
         }
+
         TabImageButtonType {
             id: shareTabButton
 
@@ -193,13 +201,24 @@ PageType {
             image: "qrc:/images/controls/share-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
+                tabBar.previousIndex = 1
             }
         }
+
         TabImageButtonType {
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
+                tabBar.previousIndex = 2
+            }
+        }
+
+        TabImageButtonType {
+            isSelected: tabBar.currentIndex === 3
+            image: "qrc:/images/controls/plus.svg"
+            onClicked: {
+                connectionTypeSelection.open()
             }
         }
     }
@@ -214,5 +233,13 @@ PageType {
         id: topCloseButton
         x: tabBarStackView.width - topCloseButton.width
         z: 1
+    }
+
+    ConnectionTypeSelectionDrawer {
+        id: connectionTypeSelection
+
+        onAboutToHide: {
+            tabBar.setCurrentIndex(tabBar.previousIndex)
+        }
     }
 }

@@ -157,3 +157,8 @@ void PageController::setTriggeredBtConnectButton(bool trigger)
 {
     m_isTriggeredByConnectButton = trigger;
 }
+
+void PageController::closeApplication()
+{
+    qApp->quit();
+}

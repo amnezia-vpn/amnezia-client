@@ -187,7 +187,7 @@ PageType {
 
                 drawerHeight: 0.4375
 
-                descriptionText: qsTr("Servers")
+                descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
 
                 listView: ListViewWithRadioButtonType {

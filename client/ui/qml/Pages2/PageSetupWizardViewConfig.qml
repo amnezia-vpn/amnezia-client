@@ -25,11 +25,7 @@ PageType {
 
         function onImportFinished() {
             PageController.goToStartPage()
-            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
-                PageController.restorePageHomeState()
-            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                PageController.goToPage(PageEnum.PageSettingsServersList, false)
-            } else {
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
                 PageController.replaceStartPage()
             }
         }

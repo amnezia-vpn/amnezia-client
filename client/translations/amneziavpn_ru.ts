@@ -130,7 +130,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="429"/>
+        <location filename="../ui/controllers/importController.cpp" line="375"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -260,7 +260,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="390"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="388"/>
         <source>Servers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -864,6 +864,11 @@ Already installed containers were found on the server. All installed containers 
         <source>About AmneziaVPN</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="114"/>
+        <source>Close application</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsAbout</name>
@@ -1426,7 +1431,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
 <context>
     <name>PageSettingsServersList</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="37"/>
         <source>Servers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1651,33 +1656,33 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardInstalling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="57"/>
         <source>The server has already been added to the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="62"/>
         <source>Amnesia has detected that your server is currently </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
         <source>busy installing other software. Amnesia installation </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
         <source>will pause until the server finishes installing other software</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="121"/>
         <source>Installing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="71"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
         <source>Usually it takes no more than 5 minutes</source>
         <translation type="unfinished"></translation>
     </message>
