@@ -107,6 +107,20 @@ PageType {
             }
 
             DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Close application")
+                leftImageSource: "qrc:/images/controls/x-circle.svg"
+                isLeftImageHoverEnabled: false
+
+                clickedFunction: function() {
+                    PageController.closeApplication()
+                }
+            }
+
+            DividerType {}
         }
     }
 }
