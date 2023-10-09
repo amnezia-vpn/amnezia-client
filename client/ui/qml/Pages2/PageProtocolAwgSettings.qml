@@ -73,7 +73,7 @@ PageType {
                         HeaderType {
                             Layout.fillWidth: true
 
-                            headerText: qsTr("Amnezia WireGuard settings")
+                            headerText: qsTr("AmneziaWG settings")
                         }
 
                         TextFieldWithHeaderType {
@@ -272,11 +272,11 @@ PageType {
                             pressedColor: Qt.rgba(1, 1, 1, 0.12)
                             textColor: "#EB5757"
 
-                            text: qsTr("Remove Amnezia WireGuard")
+                            text: qsTr("Remove AmneziaWG")
 
                             onClicked: {
-                                questionDrawer.headerText = qsTr("Remove Amnezia WireGuard from server?")
-                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it")
+                                questionDrawer.headerText = qsTr("Remove AmneziaWG from server?")
+                                questionDrawer.descriptionText = qsTr("All users who you shared a connection with will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
                                 questionDrawer.noButtonText = qsTr("Cancel")
 

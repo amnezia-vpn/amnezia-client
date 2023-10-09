@@ -84,7 +84,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::ShadowSocks, "ShadowSocks" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
-            { DockerContainer::Awg, "Amnezia WireGuard" },
+             { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
@@ -131,7 +131,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                QObject::tr("Container with OpenVpn and ShadowSocks protocols "
                            "configured with traffic masking by Cloak plugin") },
              { DockerContainer::WireGuard, QObject::tr("WireGuard container") },
-             { DockerContainer::WireGuard, QObject::tr("Amnezia WireGuard container") },
+             { DockerContainer::WireGuard, QObject::tr("AmneziaWG container") },
              { DockerContainer::Ipsec, QObject::tr("IPsec container") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },

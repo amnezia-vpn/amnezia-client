@@ -27,40 +27,40 @@
     <name>ConnectionController</name>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="80"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="100"/>
         <source>Connect</source>
         <translation type="unfinished">连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="55"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="38"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation type="unfinished">不存在VPN协议，请先安装</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="61"/>
         <source>Connection...</source>
         <translation type="unfinished">连接中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="66"/>
         <source>Connected</source>
         <translation type="unfinished">已连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="75"/>
         <source>Reconnection...</source>
         <translation type="unfinished">重连中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="102"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="85"/>
         <source>Disconnection...</source>
         <translation type="unfinished">断开中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="128"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation type="unfinished">配置已更新，重连中</translation>
     </message>
@@ -122,7 +122,7 @@
         <translation type="unfinished">当前平台不支持所选协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="77"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="76"/>
         <source>Reconnect via VPN Procotol: </source>
         <translation type="unfinished">重连基于VPN协议: </translation>
     </message>
@@ -130,7 +130,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="384"/>
+        <location filename="../ui/controllers/importController.cpp" line="429"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished">扫描 %1 of %2.</translation>
     </message>
@@ -147,41 +147,46 @@
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="162"/>
+        <location filename="../ui/controllers/installController.cpp" line="161"/>
         <source>%1 installed successfully. </source>
         <translation type="unfinished">%1 安装成功。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="112"/>
-        <location filename="../ui/controllers/installController.cpp" line="164"/>
+        <location filename="../ui/controllers/installController.cpp" line="163"/>
         <source>%1 is already installed on the server. </source>
         <translation type="unfinished">服务器上已经安装 %1。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="115"/>
-        <location filename="../ui/controllers/installController.cpp" line="183"/>
+        <source>
+Added containers that were already installed on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="182"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation type="unfinished">
 在服务上发现已经安装协议并添加到应用程序</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="264"/>
+        <location filename="../ui/controllers/installController.cpp" line="263"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished">配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="279"/>
+        <location filename="../ui/controllers/installController.cpp" line="278"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation type="unfinished">已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="289"/>
+        <location filename="../ui/controllers/installController.cpp" line="288"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation type="unfinished">服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <location filename="../ui/controllers/installController.cpp" line="305"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation type="unfinished">%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
@@ -202,12 +207,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="452"/>
+        <location filename="../ui/controllers/installController.cpp" line="451"/>
         <source>Please login as the user</source>
         <translation type="unfinished">请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="479"/>
+        <location filename="../ui/controllers/installController.cpp" line="478"/>
         <source>Server added successfully</source>
         <translation type="unfinished">服务器添加成功</translation>
     </message>
@@ -275,14 +280,102 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="344"/>
         <source>VPN protocol</source>
         <translation type="unfinished">VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="390"/>
         <source>Servers</source>
         <translation type="unfinished">服务器</translation>
+    </message>
+</context>
+<context>
+    <name>PageProtocolAwgSettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="76"/>
+        <source>AmneziaWG settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="84"/>
+        <source>Port</source>
+        <translation type="unfinished">端口</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="103"/>
+        <source>Junk packet count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="126"/>
+        <source>Junk packet minimum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="144"/>
+        <source>Junk packet maximum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="162"/>
+        <source>Init packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="180"/>
+        <source>Response packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="198"/>
+        <source>Init packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="216"/>
+        <source>Response packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="234"/>
+        <source>Transport packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
+        <source>Underload packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="275"/>
+        <source>Remove AmneziaWG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="278"/>
+        <source>Remove AmneziaWG from server?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="280"/>
+        <source>Continue</source>
+        <translation type="unfinished">继续</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="281"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="311"/>
+        <source>Save and Restart Amnezia</source>
+        <translation type="unfinished">保存并重启Amnezia</translation>
     </message>
 </context>
 <context>
@@ -892,71 +985,76 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
+        <source>Allow application screenshots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
         <source>Auto start</source>
         <translation type="unfinished">自动运行</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Launch the application every time </source>
         <translation type="unfinished">总是在系统 </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source> starts</source>
         <translation type="unfinished"> 启动时自动运行运用程序</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
         <source>Start minimized</source>
         <translation type="unfinished">最小化</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Launch application minimized</source>
         <translation type="unfinished">开启应用程序时窗口最小化</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
         <source>Language</source>
         <translation type="unfinished">语言</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
         <source>Logging</source>
         <translation type="unfinished">日志</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Enabled</source>
         <translation type="unfinished">开启</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Disabled</source>
         <translation type="unfinished">禁用</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="144"/>
         <source>Reset settings and remove all data from the application</source>
         <translation type="unfinished">重置并清理应用的所有数据</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="148"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation type="unfinished">重置并清理应用的所有数据？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="149"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation type="unfinished">所有配置恢复为默认值。在服务器上保留所有已安装的AmneziaVPN服务。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="150"/>
         <source>Continue</source>
         <translation type="unfinished">继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="151"/>
         <source>Cancel</source>
         <translation type="unfinished">取消</translation>
     </message>
@@ -1561,17 +1659,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardEasy</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
         <source>What is the level of internet control in your region?</source>
         <translation type="unfinished">您所在地区的互联网控制力度如何？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
         <source>Set up a VPN yourself</source>
         <translation type="unfinished">自己架设VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
         <source>I want to choose a VPN protocol</source>
         <translation type="unfinished">我想选择VPN协议</translation>
     </message>
@@ -1581,7 +1679,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished">继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="186"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
         <source>Set up later</source>
         <translation type="unfinished">稍后设置</translation>
     </message>
@@ -1807,8 +1905,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
+        <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the servers, as well as change settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Full access to server</source>
-        <translation type="unfinished">获得服务器完整授权</translation>
+        <translation type="obsolete">获得服务器完整授权</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
@@ -1827,33 +1929,37 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="222"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="307"/>
+        <source>File with accessing settings to </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="310"/>
         <source>File with connection settings to </source>
         <translation type="unfinished">连接配置文件的内容为:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="248"/>
         <source>Protocols</source>
-        <translation type="unfinished">协议</translation>
+        <translation type="obsolete">协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="252"/>
         <source>Protocol</source>
         <translation type="unfinished">协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="306"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="309"/>
         <source>Connection to </source>
         <translation type="unfinished">连接到</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="340"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="343"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="344"/>
         <source>Connection format</source>
         <translation type="unfinished">连接方式</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="379"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="382"/>
         <source>Share</source>
         <translation type="unfinished">共享</translation>
     </message>
@@ -2104,7 +2210,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="75"/>
+        <location filename="../protocols/protocols_defs.cpp" line="76"/>
         <source>Sftp service</source>
         <translation type="unfinished">Sftp 服务</translation>
     </message>
@@ -2314,98 +2420,104 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished">内部错误</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="87"/>
+        <location filename="../containers/containers_defs.cpp" line="88"/>
         <source>IPsec</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="89"/>
-        <location filename="../containers/containers_defs.cpp" line="132"/>
+        <location filename="../containers/containers_defs.cpp" line="90"/>
+        <location filename="../containers/containers_defs.cpp" line="137"/>
         <source>Website in Tor network</source>
         <translation type="unfinished">在 Tor 网络中架设网站</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="90"/>
+        <location filename="../containers/containers_defs.cpp" line="91"/>
         <source>Amnezia DNS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="92"/>
+        <location filename="../containers/containers_defs.cpp" line="93"/>
         <source>Sftp file sharing service</source>
         <translation type="unfinished">SFTP文件共享服务</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="98"/>
+        <location filename="../containers/containers_defs.cpp" line="99"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
         <translation type="unfinished">OpenVPN 是最流行的 VPN 协议，具有灵活的配置选项。它使用自己的安全协议与 SSL/TLS 进行密钥交换。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="101"/>
+        <location filename="../containers/containers_defs.cpp" line="102"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
         <translation type="unfinished">ShadowSocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="104"/>
+        <location filename="../containers/containers_defs.cpp" line="105"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
         <translation type="unfinished">OpenVPN over Cloak - OpenVPN 与 VPN 具有伪装成网络流量和防止主动探测检测的保护。非常适合绕过审查力度特别强的地区的封锁。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="108"/>
+        <location filename="../containers/containers_defs.cpp" line="109"/>
+        <location filename="../containers/containers_defs.cpp" line="112"/>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
         <translation type="unfinished">WireGuard - 新型流行的VPN协议，具有高性能、高速度和低功耗。建议用于审查力度较低的地区</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="111"/>
+        <location filename="../containers/containers_defs.cpp" line="115"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation type="unfinished">IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="114"/>
+        <location filename="../containers/containers_defs.cpp" line="118"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation type="unfinished">只需点击两次即可架设 WordPress 网站到 Tor 网络</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="116"/>
+        <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation type="unfinished">将当前的 DNS 服务器替换为您自己的。这将提高您的隐私级别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="119"/>
+        <location filename="../containers/containers_defs.cpp" line="123"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
         <translation type="unfinished">在您的服务器上创建文件库以安全地存储和传输文件</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="124"/>
+        <location filename="../containers/containers_defs.cpp" line="128"/>
         <source>OpenVPN container</source>
         <translation type="unfinished">OpenVPN容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="125"/>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
         <source>Container with OpenVpn and ShadowSocks</source>
         <translation type="unfinished">带有 OpenVpn 和 ShadowSocks 的容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="127"/>
+        <location filename="../containers/containers_defs.cpp" line="131"/>
         <source>Container with OpenVpn and ShadowSocks protocols configured with traffic masking by Cloak plugin</source>
         <translation type="unfinished">具有 OpenVpn 和 ShadowSocks 协议的容器，通过 Cloak 插件配置混淆流量</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="129"/>
+        <location filename="../containers/containers_defs.cpp" line="133"/>
         <source>WireGuard container</source>
         <translation type="unfinished">WireGuard 容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="130"/>
+        <location filename="../containers/containers_defs.cpp" line="134"/>
+        <source>AmneziaWG container</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="135"/>
         <source>IPsec container</source>
         <translation type="unfinished">IPsec 容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="133"/>
+        <location filename="../containers/containers_defs.cpp" line="138"/>
         <source>DNS Service</source>
         <translation type="unfinished">DNS 服务</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="135"/>
+        <location filename="../containers/containers_defs.cpp" line="140"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation type="unfinished">Sftp 文件共享服务 - 安全的 FTP 服务</translation>
     </message>
@@ -2469,6 +2581,16 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <source>error 0x%1: %2</source>
         <translation type="unfinished">错误 0x%1: %2</translation>
     </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>
@@ -2495,22 +2617,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="20"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="25"/>
         <source>Software version</source>
         <translation type="unfinished">软件版本</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="102"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="121"/>
         <source>Backup file is corrupted</source>
         <translation type="unfinished">备份文件已损坏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="117"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="136"/>
         <source>All settings have been reset to default values</source>
         <translation type="unfinished">所配置恢复为默认值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="142"/>
         <source>Cached profiles cleared</source>
         <translation type="unfinished">缓存的配置文件已清除</translation>
     </message>
@@ -2540,8 +2662,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="126"/>
+        <source>Show connection settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Show content</source>
-        <translation type="unfinished">展示内容</translation>
+        <translation type="obsolete">展示内容</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="250"/>
@@ -2626,6 +2752,14 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
 </context>
 <context>
+    <name>TextFieldWithHeaderType</name>
+    <message>
+        <location filename="../ui/qml/Controls2/TextFieldWithHeaderType.qml" line="105"/>
+        <source>The field can&apos;t be empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>VpnConnection</name>
     <message>
         <location filename="../vpnconnection.cpp" line="405"/>
@@ -2679,32 +2813,32 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="236"/>
+        <location filename="../containers/containers_defs.cpp" line="245"/>
         <source>Low</source>
         <translation type="unfinished">低</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="237"/>
+        <location filename="../containers/containers_defs.cpp" line="246"/>
         <source>High</source>
         <translation type="unfinished">高</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="238"/>
+        <location filename="../containers/containers_defs.cpp" line="247"/>
         <source>Medium</source>
         <translation type="unfinished">中</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="246"/>
+        <location filename="../containers/containers_defs.cpp" line="255"/>
         <source>I just want to increase the level of privacy</source>
         <translation type="unfinished">我只是想提高隐私级别</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="247"/>
+        <location filename="../containers/containers_defs.cpp" line="256"/>
         <source>Many foreign websites and VPN providers are blocked</source>
         <translation type="unfinished">大多国外网站和VPN提供商被屏蔽</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="248"/>
+        <location filename="../containers/containers_defs.cpp" line="257"/>
         <source>Some foreign sites are blocked, but VPN providers are not blocked</source>
         <translation type="unfinished">一些国外网站被屏蔽，但VPN提供商未被屏蔽</translation>
     </message>
