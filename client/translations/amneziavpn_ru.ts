@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="300"/>
+        <location filename="../amnezia_application.cpp" line="302"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -130,7 +130,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="375"/>
+        <location filename="../ui/controllers/importController.cpp" line="429"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -471,7 +471,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="363"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it</source>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -519,7 +519,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it</source>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -791,8 +791,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
-        <source>This is a free and open source application. If you like it, support the developers with a donation.
-And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
+        <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
+        <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -968,7 +972,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
-        <source>It will help you instantly restore connection settings at the next installation</source>
+        <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1062,7 +1066,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
-        <source>Allows you to connect to some sites through a secure connection, and to others bypassing it</source>
+        <source>Allows you to choose which sites you want to use the VPN for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1326,7 +1330,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it</source>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1712,27 +1716,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="59"/>
         <source>New connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="86"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="144"/>
         <source>Connect</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1765,6 +1769,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
         <source>Server</source>
         <translation type="unfinished"></translation>
@@ -1812,11 +1817,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
         <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the servers, as well as change settings.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
-        <source>Servers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2533,7 +2533,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="250"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="251"/>
         <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2617,7 +2617,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="405"/>
+        <location filename="../vpnconnection.cpp" line="406"/>
         <source>Mbps</source>
         <translation type="unfinished"></translation>
     </message>

@@ -65,6 +65,8 @@ public slots:
 
     bool isAnyContainerInstalled();
 
+    void updateContainersConfig();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
