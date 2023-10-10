@@ -136,6 +136,11 @@ PageType {
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
+
+        onWidthChanged: {
+            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
+                    topCloseButton.buttonWidth - topCloseButton.rightPadding
+        }
     }
 
     TabBar {
@@ -231,7 +236,7 @@ PageType {
 
     TopCloseButtonType {
         id: topCloseButton
-        x: tabBarStackView.width - topCloseButton.width
+        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
         z: 1
     }
 
