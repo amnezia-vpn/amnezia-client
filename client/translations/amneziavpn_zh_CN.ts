@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="300"/>
+        <location filename="../amnezia_application.cpp" line="302"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="unfinished">未启用选项，还未实现基于WireGuard协议的VPN分流</translation>
     </message>
@@ -27,9 +27,6 @@
     <name>ConnectionController</name>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="80"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="94"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="100"/>
         <location filename="../ui/controllers/connectionController.cpp" line="80"/>
         <location filename="../ui/controllers/connectionController.cpp" line="94"/>
         <location filename="../ui/controllers/connectionController.cpp" line="100"/>
@@ -133,7 +130,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="375"/>
+        <location filename="../ui/controllers/importController.cpp" line="429"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished">扫描 %1 of %2.</translation>
     </message>
@@ -174,22 +171,22 @@ Already installed containers were found on the server. All installed containers 
 在服务上发现已经安装协议并添加到应用程序</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="263"/>
+        <location filename="../ui/controllers/installController.cpp" line="264"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished">配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="278"/>
+        <location filename="../ui/controllers/installController.cpp" line="279"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation type="unfinished">已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="288"/>
+        <location filename="../ui/controllers/installController.cpp" line="289"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation type="unfinished">服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="305"/>
+        <location filename="../ui/controllers/installController.cpp" line="306"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation type="unfinished">%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
@@ -210,12 +207,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="451"/>
+        <location filename="../ui/controllers/installController.cpp" line="452"/>
         <source>Please login as the user</source>
         <translation type="unfinished">请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="478"/>
+        <location filename="../ui/controllers/installController.cpp" line="479"/>
         <source>Server added successfully</source>
         <translation type="unfinished">服务器添加成功</translation>
     </message>
@@ -587,8 +584,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="363"/>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
-        <translation type="unfinished">与您共享连接的所有用户将无法再连接到此链接</translation>
+        <translation type="obsolete">与您共享连接的所有用户将无法再连接到此链接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
@@ -634,13 +635,17 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">从服务器移除 %1 ?</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source> from server?</source>
         <translation type="obsolete"> 从服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
-        <translation type="unfinished">与您共享连接的所有用户将无法再连接到此链接</translation>
+        <translation type="obsolete">与您共享连接的所有用户将无法再连接到此链接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
@@ -907,11 +912,20 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">捐款</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>This is a free and open source application. If you like it, support the developers with a donation.
 And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
-        <translation type="unfinished">这是一个免费且开源的应用软件。如果您喜欢它，请捐助支持我们继续研发。
+        <translation type="obsolete">这是一个免费且开源的应用软件。如果您喜欢它，请捐助支持我们继续研发。
 如果您不喜欢，请捐助支持我们改进它。</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
+        <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
+        <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
@@ -1085,9 +1099,13 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished">配置备份</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
         <source>It will help you instantly restore connection settings at the next installation</source>
-        <translation type="unfinished">帮助您在下次安装时立即恢复连接设置</translation>
+        <translation type="obsolete">帮助您在下次安装时立即恢复连接设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
+        <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="89"/>
@@ -1184,8 +1202,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
+        <source>Allows you to choose which sites you want to use the VPN for.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Allows you to connect to some sites through a secure connection, and to others bypassing it</source>
-        <translation type="unfinished">使用VPN访问指定网站，其他的则绕过</translation>
+        <translation type="obsolete">使用VPN访问指定网站，其他的则绕过</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
@@ -1442,6 +1464,11 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished">移除</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source> from server?</source>
         <translation type="obsolete"> 从服务器</translation>
     </message>
@@ -1451,9 +1478,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished">从服务器移除 %1 ?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
-        <translation type="unfinished">与您共享连接的所有用户将无法再连接到此链接</translation>
+        <translation type="obsolete">与您共享连接的所有用户将无法再连接到此链接</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="118"/>
@@ -1839,27 +1865,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="59"/>
         <source>New connection</source>
         <translation type="unfinished">新连接</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="86"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
         <translation type="unfinished">请勿使用公共来源的连接代码。它可以被创建来拦截您的数据。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation type="unfinished">展示内容</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="144"/>
         <source>Connect</source>
         <translation type="unfinished">连接</translation>
     </message>
@@ -1921,11 +1947,11 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="obsolete">获得服务器完整授权</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Servers</source>
-        <translation type="unfinished">服务器</translation>
+        <translation type="obsolete">服务器</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
         <source>Server</source>
         <translation type="unfinished">服务器</translation>
@@ -2678,7 +2704,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="obsolete">展示内容</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="250"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="251"/>
         <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
         <translation type="unfinished">要读取 Amnezia 应用程序中的二维码，请选择“添加服务器”→“我有数据要连接”→“二维码、密钥或配置文件”</translation>
     </message>
@@ -2770,7 +2796,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="405"/>
+        <location filename="../vpnconnection.cpp" line="406"/>
         <source>Mbps</source>
         <translation type="unfinished"></translation>
     </message>
