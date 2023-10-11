@@ -5,6 +5,8 @@ import QtQuick.Shapes
 Popup {
     id: root
 
+    property alias buttonWidth: button.implicitWidth
+
     modal: false
     closePolicy: Popup.NoAutoClose
     padding: 4
@@ -20,6 +22,8 @@ Popup {
     }
 
     ImageButtonType {
+        id: button
+
         image: "qrc:/images/svg/close_black_24dp.svg"
         imageColor: "#D7D8DB"
 
