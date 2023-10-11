@@ -279,6 +279,8 @@ void AmneziaApplication::initModels()
 {
     m_containersModel.reset(new ContainersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
+    connect(m_vpnConnection.get(), &VpnConnection::newVpnConfigurationCreated, m_containersModel.get(),
+            &ContainersModel::updateContainersConfig);
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());

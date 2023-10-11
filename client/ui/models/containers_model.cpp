@@ -228,6 +228,11 @@ bool ContainersModel::isAnyContainerInstalled()
     return false;
 }
 
+void ContainersModel::updateContainersConfig()
+{
+    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
