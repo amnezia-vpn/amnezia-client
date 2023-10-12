@@ -1149,17 +1149,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
-        <source>Split site tunneling</source>
+        <source>Split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
+        <source>App-based split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Allows you to choose which sites you want to use the VPN for.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
-        <source>Separate application tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1444,17 +1444,17 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettingsSplitTunneling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="49"/>
-        <source>Only the addresses in the list must be opened via VPN</source>
+        <source>Addresses from the list should be accessed via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="54"/>
-        <source>Addresses from the list should never be opened via VPN</source>
+        <source>Addresses from the list should not be accessed via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="84"/>
-        <source>Split site tunneling</source>
+        <source>Split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2540,16 +2540,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

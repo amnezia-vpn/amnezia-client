@@ -1197,8 +1197,17 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
+        <source>Split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
+        <source>App-based split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Split site tunneling</source>
-        <translation type="unfinished">网站级VPN分流</translation>
+        <translation type="obsolete">网站级VPN分流</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
@@ -1210,9 +1219,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="obsolete">使用VPN访问指定网站，其他的则绕过</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
         <source>Separate application tunneling</source>
-        <translation type="unfinished">应用级VPN分流</translation>
+        <translation type="obsolete">应用级VPN分流</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="114"/>
@@ -1503,19 +1511,31 @@ And if you don&apos;t like the app, all the more support it - the donation will 
 <context>
     <name>PageSettingsSplitTunneling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="49"/>
         <source>Only the addresses in the list must be opened via VPN</source>
-        <translation type="unfinished">仅列表中的地址须通过VPN访问</translation>
+        <translation type="obsolete">仅列表中的地址须通过VPN访问</translation>
+    </message>
+    <message>
+        <source>Addresses from the list should never be opened via VPN</source>
+        <translation type="obsolete">勿通过VPN访问列表中的地址</translation>
+    </message>
+    <message>
+        <source>Split site tunneling</source>
+        <translation type="obsolete">网站级VPN分流</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="49"/>
+        <source>Addresses from the list should be accessed via VPN</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="54"/>
-        <source>Addresses from the list should never be opened via VPN</source>
-        <translation type="unfinished">勿通过VPN访问列表中的地址</translation>
+        <source>Addresses from the list should not be accessed via VPN</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="84"/>
-        <source>Split site tunneling</source>
-        <translation type="unfinished">网站级VPN分流</translation>
+        <source>Split tunneling</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="120"/>
@@ -2614,16 +2634,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation type="unfinished">错误 0x%1: %2</translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

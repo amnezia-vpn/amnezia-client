@@ -28,7 +28,7 @@ WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
                                                  : amnezia::protocols::wireguard::serverPublicKeyPath;
     m_serverPskKeyPath = m_isAwg ? amnezia::protocols::awg::serverPskKeyPath
                                               : amnezia::protocols::wireguard::serverPskKeyPath;
-    m_configTemplate = m_isAwg ? ProtocolScriptType::amnezia_wireguard_template
+    m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template
                                             : ProtocolScriptType::wireguard_template;
 
     m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;

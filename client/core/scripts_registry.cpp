@@ -11,7 +11,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
     case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
-    case DockerContainer::Awg: return QLatin1String("amnezia_wireguard");
+    case DockerContainer::Awg: return QLatin1String("awg");
     case DockerContainer::Ipsec: return QLatin1String("ipsec");
 
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
@@ -46,7 +46,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::container_startup: return QLatin1String("start.sh");
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
-    case ProtocolScriptType::amnezia_wireguard_template: return QLatin1String("template.conf");
+    case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
     }
 }
 

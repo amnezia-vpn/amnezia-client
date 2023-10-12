@@ -27,7 +27,7 @@ enum ProtocolScriptType {
     container_startup,
     openvpn_template,
     wireguard_template,
-    amnezia_wireguard_template
+    awg_template
 };
 
 
