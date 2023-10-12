@@ -592,7 +592,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="130"/>
-        <source>Connection options </source>
+        <source>Connection options %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -860,12 +860,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="101"/>
         <source>About AmneziaVPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="116"/>
         <source>Close application</source>
         <translation type="unfinished"></translation>
     </message>
@@ -977,12 +977,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
-        <source>Launch the application every time </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
-        <source> starts</source>
+        <source>Launch the application every time %1 starts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1149,21 +1144,21 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
-        <source>Split tunneling</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="113"/>
-        <source>App-based split tunneling</source>
+        <source>Site-based split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
-        <source>Allows you to choose which sites you want to use the VPN for.</source>
+        <source>Allows you to select which sites you want to access through the VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="114"/>
+        <source>App-based split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="115"/>
         <source>Allows you to use the VPN only for certain applications</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2651,7 +2646,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="100"/>
-        <source>The JSON data is not an array in file: </source>
+        <source>The JSON data is not an array in file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

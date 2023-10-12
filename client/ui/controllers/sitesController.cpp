@@ -97,7 +97,7 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
     }
 
     if (!jsonDocument.isArray()) {
-        emit errorOccurred(tr("The JSON data is not an array in file: ").arg(fileName));
+        emit errorOccurred(tr("The JSON data is not an array in file: %1").arg(fileName));
         return;
     }
 

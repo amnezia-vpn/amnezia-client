@@ -127,7 +127,7 @@ PageType {
                                         Layout.fillWidth: true
                                         Layout.topMargin: 16
 
-                                        headerText: qsTr("Connection options ") + protocolName
+                                        headerText: qsTr("Connection options %1").arg(protocolName)
                                     }
 
                                     TextArea {
