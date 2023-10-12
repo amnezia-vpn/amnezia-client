@@ -109,8 +109,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
                            "consumption. Recommended for regions with low levels of censorship.") },
             { DockerContainer::Awg,
-               QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
-                           "consumption. Recommended for regions with low levels of censorship.") },
+               QObject::tr("AmneziaWG - Special protocol from Amnezia, based on WireGuard. It's fast like WireGuard, but very resistant to blockages. "
+                         "Recommended for regions with high levels of censorship.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
