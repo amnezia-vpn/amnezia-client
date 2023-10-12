@@ -10,7 +10,7 @@
 #include <configurators/shadowsocks_configurator.h>
 #include <configurators/vpn_configurator.h>
 #include <configurators/wireguard_configurator.h>
-#include <core/servercontroller.h>
+#include "core/controllers/serverController.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
@@ -258,9 +258,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         QJsonObject vpnConfigData =
                 QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
-                                                                       containerConfig, proto, errorCode)
-                                                .toUtf8())
-                        .object();
+                                                                       containerConfig, proto, errorCode).toUtf8()).object();
 
         if (errorCode && *errorCode) {
             return {};

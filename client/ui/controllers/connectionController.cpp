@@ -40,6 +40,7 @@ void ConnectionController::openConnection()
     }
 
     qApp->processEvents();
+
     emit connectToVpn(serverIndex, credentials, container, containerConfig);
 }
 

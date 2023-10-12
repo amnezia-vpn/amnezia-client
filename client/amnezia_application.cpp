@@ -139,7 +139,8 @@ void AmneziaApplication::init()
             &ConnectionController::openConnection);
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
-    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(),  &NotificationHandler::onTranslationsUpdated);
+    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(),
+            &NotificationHandler::onTranslationsUpdated);
 
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
@@ -226,14 +227,13 @@ void AmneziaApplication::loadTranslator()
     updateTranslator(locale);
 }
 
-
 void AmneziaApplication::updateTranslator(const QLocale &locale)
 {
     if (!m_translator->isEmpty()) {
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
-    QString strFileName = QString(":/translations/amneziavpn")+QLatin1String("_")+locale.name()+".qm";
+    QString strFileName = QString(":/translations/amneziavpn") + QLatin1String("_") + locale.name() + ".qm";
     if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);
@@ -330,7 +330,8 @@ void AmneziaApplication::initControllers()
     m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(),
+            &ConnectionController::onTranslationsUpdated);
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
@@ -361,4 +362,10 @@ void AmneziaApplication::initControllers()
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    m_cloudController.reset(new CloudController(m_serversModel, m_containersModel));
+    m_engine->rootContext()->setContextProperty("CloudController", m_cloudController.get());
+
+    connect(m_cloudController.get(), &CloudController::serverConfigUpdated, this,
+            [this]() { m_containersModel->setCurrentlyProcessedServerIndex(m_serversModel->getDefaultServerIndex()); });
 }

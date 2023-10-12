@@ -138,6 +138,10 @@ Button {
     }
 
     onClicked: {
+        if (!CloudController.updateServerConfigFromCloud()) {
+            return
+        }
+
         if (!ContainersModel.isAnyContainerInstalled()) {
             PageController.setTriggeredBtConnectButton(true)
 

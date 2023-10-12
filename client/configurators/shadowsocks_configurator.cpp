@@ -5,7 +5,7 @@
 #include <QJsonDocument>
 
 #include "containers/containers_defs.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 
 ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
     ConfiguratorBase(settings, parent)

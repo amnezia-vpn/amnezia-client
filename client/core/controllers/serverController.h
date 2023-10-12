@@ -5,8 +5,8 @@
 #include <QObject>
 
 #include "containers/containers_defs.h"
-#include "defs.h"
-#include "sshclient.h"
+#include "core/defs.h"
+#include "core/sshclient.h"
 
 class Settings;
 class VpnConfigurator;

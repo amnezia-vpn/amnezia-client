@@ -55,9 +55,12 @@ public slots:
     QString getCurrentlyProcessedServerHostName();
 
     void addServer(const QJsonObject &server);
+    void editServer(const QJsonObject &server);
     void removeServer();
 
     bool isDefaultServerConfigContainsAmneziaDns();
+
+    QJsonObject getDefaultServerConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

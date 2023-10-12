@@ -7,7 +7,7 @@
 #include <QStandardPaths>
 
 #include "core/errorstrings.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "utilities.h"
 
 namespace

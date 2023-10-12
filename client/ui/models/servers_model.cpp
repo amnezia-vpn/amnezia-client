@@ -168,6 +168,14 @@ void ServersModel::addServer(const QJsonObject &server)
     endResetModel();
 }
 
+void ServersModel::editServer(const QJsonObject &server)
+{
+    beginResetModel();
+    m_settings->editServer(m_currentlyProcessedServerIndex, server);
+    m_servers = m_settings->serversArray();
+    endResetModel();
+}
+
 void ServersModel::removeServer()
 {
     beginResetModel();
@@ -218,4 +226,9 @@ ServerCredentials ServersModel::serverCredentials(int index) const
     credentials.port = s.value(config_key::port).toInt();
 
     return credentials;
+}
+
+QJsonObject ServersModel::getDefaultServerConfig()
+{
+    return m_servers.at(m_defaultServerIndex).toObject();
 }

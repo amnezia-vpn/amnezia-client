@@ -24,43 +24,51 @@
     </message>
 </context>
 <context>
+    <name>CloudController</name>
+    <message>
+        <location filename="../ui/controllers/cloudController.cpp" line="102"/>
+        <source>Error when retrieving configuration from cloud server</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="55"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="38"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="62"/>
         <source>Connection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="67"/>
         <source>Connected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="128"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="112"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="76"/>
         <source>Reconnection...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="81"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="95"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="101"/>
         <source>Connect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="102"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="86"/>
         <source>Disconnection...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -130,7 +138,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="384"/>
+        <location filename="../ui/controllers/importController.cpp" line="381"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -139,50 +147,55 @@
     <name>InstallController</name>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="162"/>
+        <location filename="../ui/controllers/installController.cpp" line="161"/>
         <source>%1 installed successfully. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="112"/>
-        <location filename="../ui/controllers/installController.cpp" line="164"/>
+        <location filename="../ui/controllers/installController.cpp" line="163"/>
         <source>%1 is already installed on the server. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="115"/>
-        <location filename="../ui/controllers/installController.cpp" line="183"/>
+        <source>
+Added containers that were already installed on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="182"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="264"/>
+        <location filename="../ui/controllers/installController.cpp" line="263"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="279"/>
+        <location filename="../ui/controllers/installController.cpp" line="278"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="289"/>
+        <location filename="../ui/controllers/installController.cpp" line="288"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <location filename="../ui/controllers/installController.cpp" line="305"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="452"/>
+        <location filename="../ui/controllers/installController.cpp" line="451"/>
         <source>Please login as the user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="479"/>
+        <location filename="../ui/controllers/installController.cpp" line="478"/>
         <source>Server added successfully</source>
         <translation type="unfinished"></translation>
     </message>
@@ -250,12 +263,12 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="324"/>
         <source>VPN protocol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="370"/>
         <source>Servers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -865,71 +878,76 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
+        <source>Allow application screenshots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
         <source>Auto start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Launch the application every time </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source> starts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
         <source>Start minimized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Launch application minimized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
         <source>Logging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="144"/>
         <source>Reset settings and remove all data from the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="148"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="149"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="150"/>
         <source>Continue</source>
         <translation type="unfinished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="151"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1525,17 +1543,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardEasy</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
         <source>What is the level of internet control in your region?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
         <source>Set up a VPN yourself</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
         <source>I want to choose a VPN protocol</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1545,7 +1563,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="186"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
         <source>Set up later</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1765,13 +1783,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="306"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="222"/>
+        <source>File with accessing settings to </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="309"/>
         <source>Connection to </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="222"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="307"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="310"/>
         <source>File with connection settings to </source>
         <translation type="unfinished"></translation>
     </message>
@@ -1801,23 +1823,19 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="248"/>
-        <source>Protocols</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="252"/>
         <source>Protocol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="340"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="343"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="344"/>
         <source>Connection format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="379"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="382"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2264,7 +2282,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="61"/>
-        <source>The config does not contain any containers and credentiaks for connecting to the server</source>
+        <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2433,6 +2451,16 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <source>error 0x%1: %2</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>
@@ -2459,22 +2487,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="20"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="25"/>
         <source>Software version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="117"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="136"/>
         <source>All settings have been reset to default values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="142"/>
         <source>Cached profiles cleared</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="102"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="121"/>
         <source>Backup file is corrupted</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2504,7 +2532,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="126"/>
-        <source>Show content</source>
+        <source>Show connection settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2592,7 +2620,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="405"/>
+        <location filename="../vpnconnection.cpp" line="403"/>
         <source>Mbps</source>
         <translation type="unfinished"></translation>
     </message>
