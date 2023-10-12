@@ -337,6 +337,10 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             != newProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort))
             return true;
     }
+    
+    if (container == DockerContainer::Awg) {
+        return true;
+    }
 
     return false;
 }
@@ -486,6 +490,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
+    const QJsonObject &amneziaWireguarConfig =
+        config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
 
     Vars vars;
@@ -581,6 +587,37 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
                 sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) } });
     vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
     vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
+
+    // Amnezia wireguard vars
+    vars.append({ { "$AWG_SERVER_PORT",
+                    amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
+    vars.append({ { "$JUNK_PACKET_COUNT",
+                    amneziaWireguarConfig.value(config_key::junkPacketCount)
+                            .toString(protocols::awg::defaultJunkPacketCount) } });
+    vars.append({ { "$JUNK_PACKET_MIN_SIZE",
+                    amneziaWireguarConfig.value(config_key::junkPacketMinSize)
+                            .toString(protocols::awg::defaultJunkPacketMinSize) } });
+    vars.append({ { "$JUNK_PACKET_MAX_SIZE",
+                    amneziaWireguarConfig.value(config_key::junkPacketMaxSize)
+                            .toString(protocols::awg::defaultJunkPacketMaxSize) } });
+    vars.append({ { "$INIT_PACKET_JUNK_SIZE",
+                    amneziaWireguarConfig.value(config_key::initPacketJunkSize)
+                            .toString(protocols::awg::defaultInitPacketJunkSize) } });
+    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE",
+                    amneziaWireguarConfig.value(config_key::responsePacketJunkSize)
+                            .toString(protocols::awg::defaultResponsePacketJunkSize) } });
+    vars.append({ { "$INIT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::initPacketMagicHeader)
+                            .toString(protocols::awg::defaultInitPacketMagicHeader) } });
+    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::responsePacketMagicHeader)
+                            .toString(protocols::awg::defaultResponsePacketMagicHeader) } });
+    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader)
+                            .toString(protocols::awg::defaultUnderloadPacketMagicHeader) } });
+    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::transportPacketMagicHeader)
+                            .toString(protocols::awg::defaultTransportPacketMagicHeader) } });
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {

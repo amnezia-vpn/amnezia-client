@@ -66,6 +66,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::ShadowSocks, "ShadowSocks" },
              { Proto::Cloak, "Cloak" },
              { Proto::WireGuard, "WireGuard" },
+             { Proto::WireGuard, "AmneziaWG" },
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
 
@@ -88,6 +89,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::Cloak: return ServiceType::Vpn;
     case Proto::ShadowSocks: return ServiceType::Vpn;
     case Proto::WireGuard: return ServiceType::Vpn;
+    case Proto::Awg: return ServiceType::Vpn;
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
     case Proto::FileShare: return ServiceType::Other;
@@ -103,6 +105,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::Cloak: return 443;
     case Proto::ShadowSocks: return 6789;
     case Proto::WireGuard: return 51820;
+    case Proto::Awg: return 55424;
     case Proto::Ikev2: return -1;
     case Proto::L2tp: return -1;
 
@@ -122,6 +125,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Cloak: return true;
     case Proto::ShadowSocks: return true;
     case Proto::WireGuard: return true;
+    case Proto::Awg: return true;
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
 
@@ -140,6 +144,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Cloak: return TransportProto::Tcp;
     case Proto::ShadowSocks: return TransportProto::Tcp;
     case Proto::WireGuard: return TransportProto::Udp;
+    case Proto::Awg: return TransportProto::Udp;
     case Proto::Ikev2: return TransportProto::Udp;
     case Proto::L2tp: return TransportProto::Udp;
     // non-vpn
@@ -158,6 +163,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::Cloak: return false;
     case Proto::ShadowSocks: return false;
     case Proto::WireGuard: return false;
+    case Proto::Awg: return false;
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
     // non-vpn

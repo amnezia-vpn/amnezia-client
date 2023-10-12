@@ -97,6 +97,34 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "DNS = " << dnsServers.join(", ") << "\n";
   }
 
+  if (!m_junkPacketCount.isNull()) {
+    out << "Jc = " << m_junkPacketCount << "\n";
+  }
+  if (!m_junkPacketMinSize.isNull()) {
+    out << "JMin = " << m_junkPacketMinSize << "\n";
+  }
+  if (!m_junkPacketMaxSize.isNull()) {
+    out << "JMax = " << m_junkPacketMaxSize << "\n";
+  }
+  if (!m_initPacketJunkSize.isNull()) {
+    out << "S1 = " << m_initPacketJunkSize << "\n";
+  }
+  if (!m_responsePacketJunkSize.isNull()) {
+    out << "S2 = " << m_responsePacketJunkSize << "\n";
+  }
+  if (!m_initPacketMagicHeader.isNull()) {
+    out << "H1 = " << m_initPacketMagicHeader << "\n";
+  }
+  if (!m_responsePacketMagicHeader.isNull()) {
+    out << "H2 = " << m_responsePacketMagicHeader << "\n";
+  }
+  if (!m_underloadPacketMagicHeader.isNull()) {
+    out << "H3 = " << m_underloadPacketMagicHeader << "\n";
+  }
+  if (!m_transportPacketMagicHeader.isNull()) {
+    out << "H4 = " << m_transportPacketMagicHeader << "\n";
+  }
+
   // If any extra config was provided, append it now.
   for (const QString& key : extra.keys()) {
     out << key << " = " << extra[key] << "\n";

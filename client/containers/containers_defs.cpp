@@ -84,6 +84,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::ShadowSocks, "ShadowSocks" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
+             { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
@@ -107,6 +108,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
                            "consumption. Recommended for regions with low levels of censorship.") },
+            { DockerContainer::Awg,
+               QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
+                           "consumption. Recommended for regions with low levels of censorship.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -127,6 +131,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                QObject::tr("Container with OpenVpn and ShadowSocks protocols "
                            "configured with traffic masking by Cloak plugin") },
              { DockerContainer::WireGuard, QObject::tr("WireGuard container") },
+             { DockerContainer::WireGuard, QObject::tr("AmneziaWG container") },
              { DockerContainer::Ipsec, QObject::tr("IPsec container") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
@@ -143,6 +148,7 @@ amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
     case DockerContainer::Cloak: return ServiceType::Vpn;
     case DockerContainer::ShadowSocks: return ServiceType::Vpn;
     case DockerContainer::WireGuard: return ServiceType::Vpn;
+    case DockerContainer::Awg: return ServiceType::Vpn;
     case DockerContainer::Ipsec: return ServiceType::Vpn;
     case DockerContainer::TorWebSite: return ServiceType::Other;
     case DockerContainer::Dns: return ServiceType::Other;
@@ -160,6 +166,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Cloak: return Proto::Cloak;
     case DockerContainer::ShadowSocks: return Proto::ShadowSocks;
     case DockerContainer::WireGuard: return Proto::WireGuard;
+    case DockerContainer::Awg: return Proto::Awg;
     case DockerContainer::Ipsec: return Proto::Ikev2;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
@@ -179,6 +186,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
+    case DockerContainer::Awg: return true;
     case DockerContainer::Cloak:
         return true;
         //    case DockerContainer::ShadowSocks: return true;
@@ -196,6 +204,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
     case DockerContainer::ShadowSocks: return true;
+    case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     default: return false;
     }

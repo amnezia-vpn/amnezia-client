@@ -315,8 +315,11 @@ void AmneziaApplication::initModels()
     m_cloakConfigModel.reset(new CloakConfigModel(this));
     m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel.get());
 
-    m_wireguardConfigModel.reset(new WireGuardConfigModel(this));
-    m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireguardConfigModel.get());
+    m_wireGuardConfigModel.reset(new WireGuardConfigModel(this));
+    m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel.get());
+
+    m_awgConfigModel.reset(new AwgConfigModel(this));
+    m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));

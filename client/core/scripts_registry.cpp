@@ -1,8 +1,8 @@
 #include "scripts_registry.h"
 
-#include <QObject>
 #include <QDebug>
 #include <QFile>
+#include <QObject>
 
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
@@ -11,11 +11,12 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
     case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
+    case DockerContainer::Awg: return QLatin1String("awg");
     case DockerContainer::Ipsec: return QLatin1String("ipsec");
 
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
     case DockerContainer::Dns: return QLatin1String("dns");
-    //case DockerContainer::FileShare: return QLatin1String("file_share");
+    // case DockerContainer::FileShare: return QLatin1String("file_share");
     case DockerContainer::Sftp: return QLatin1String("sftp");
     default: return "";
     }
@@ -45,6 +46,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::container_startup: return QLatin1String("start.sh");
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
+    case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
     }
 }
 
@@ -52,7 +54,7 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
 {
     QString fileName = QString(":/server_scripts/%1").arg(amnezia::scriptName(type));
     QFile file(fileName);
-    if (! file.open(QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Warning: script missing" << fileName;
         return "";
     }
@@ -67,7 +69,7 @@ QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer co
 {
     QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
     QFile file(fileName);
-    if (! file.open(QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Warning: script missing" << fileName;
         return "";
     }
