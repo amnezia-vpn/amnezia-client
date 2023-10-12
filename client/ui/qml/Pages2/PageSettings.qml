@@ -109,6 +109,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                visible: GC.isMobile()
                 Layout.fillWidth: true
 
                 text: qsTr("Close application")
@@ -120,7 +121,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: GC.isMobile()
+            }
         }
     }
 }
