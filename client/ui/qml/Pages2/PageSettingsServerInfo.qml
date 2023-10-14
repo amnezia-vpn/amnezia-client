@@ -71,13 +71,14 @@ PageType {
                     }
 
                     actionButtonFunction: function() {
-                        serverNameEditDrawer.visible = true
+                        serverNameEditDrawer.open()
                     }
                 }
 
-                DrawerType {
+                Drawer2Type {
                     id: serverNameEditDrawer
 
+                    parent: root
                     width: root.width
                     height: root.height * 0.35
 
@@ -94,6 +95,7 @@ PageType {
                         anchors.topMargin: 16
                         anchors.leftMargin: 16
                         anchors.rightMargin: 16
+
 
                         TextFieldWithHeaderType {
                             id: serverName

@@ -135,6 +135,8 @@ PageType {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
+
+            connectionTypeSelection.parent = tabBarStackView
         }
 
         onWidthChanged: {
@@ -243,7 +245,7 @@ PageType {
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
 
-        onAboutToHide: {
+        onClose: function() {
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }

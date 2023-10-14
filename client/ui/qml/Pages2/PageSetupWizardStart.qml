@@ -115,7 +115,7 @@ PageType {
                 text: qsTr("I have the data to connect")
 
                 onClicked: {
-                    connectionTypeSelection.visible = true
+                    connectionTypeSelection.open()
                 }
             }
 
@@ -140,6 +140,7 @@ PageType {
 
         ConnectionTypeSelectionDrawer {
             id: connectionTypeSelection
+            parent: root
         }
     }
 

@@ -8,7 +8,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType {
+Drawer2Type {
     id: root
 
     width: parent.width

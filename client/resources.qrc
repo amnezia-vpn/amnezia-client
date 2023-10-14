@@ -216,5 +216,6 @@
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
         <file>images/controls/x-circle.svg</file>
+        <file>ui/qml/Controls2/Drawer2Type.qml</file>
     </qresource>
 </RCC>

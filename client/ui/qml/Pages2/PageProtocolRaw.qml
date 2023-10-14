@@ -90,8 +90,9 @@ PageType {
 
                         DividerType {}
 
-                        DrawerType {
+                        Drawer2Type {
                             id: configContentDrawer
+                            parent: root
 
                             width: parent.width
                             height: parent.height * 0.9
@@ -179,14 +180,14 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
 
                 MouseArea {
@@ -201,6 +202,7 @@ PageType {
 
         QuestionDrawer {
             id: questionDrawer
+            parent: root
         }
     }
 }

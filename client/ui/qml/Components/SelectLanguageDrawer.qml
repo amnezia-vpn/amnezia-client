@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType {
+Drawer2Type {
     id: root
 
     width: parent.width

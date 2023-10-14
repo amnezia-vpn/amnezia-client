@@ -200,13 +200,13 @@ PageType {
                                 questionDrawer.noButtonText = qsTr("Cancel")
 
                                 questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                    questionDrawer.onClose()
                                     SitesController.removeSite(index)
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                    questionDrawer.onClose()
                                 }
-                                questionDrawer.visible = true
+                                questionDrawer.open()
                             }
                         }
 
@@ -214,6 +214,7 @@ PageType {
 
                         QuestionDrawer {
                             id: questionDrawer
+                            parent: root
                         }
                     }
                 }
@@ -259,11 +260,13 @@ PageType {
         }
     }
 
-    DrawerType {
+    Drawer2Type {
         id: moreActionsDrawer
 
         width: parent.width
         height: parent.height * 0.4375
+
+        parent: root
 
         FlickableType {
             anchors.fill: parent
@@ -324,11 +327,13 @@ PageType {
         }
     }
 
-    DrawerType {
+    Drawer2Type {
         id: importSitesDrawer
 
         width: parent.width
         height: parent.height * 0.4375
+
+        parent: root
 
         BackButtonType {
             id: importSitesDrawerBackButton

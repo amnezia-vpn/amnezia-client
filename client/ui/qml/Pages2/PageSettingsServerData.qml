@@ -94,15 +94,15 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                         PageController.showBusyIndicator(true)
                         SettingsController.clearCachedProfiles()
                         PageController.showBusyIndicator(false)
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 
@@ -172,7 +172,7 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
@@ -180,9 +180,9 @@ PageType {
                         InstallController.removeAllContainers()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 

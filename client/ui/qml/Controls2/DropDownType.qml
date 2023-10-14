@@ -156,16 +156,19 @@ Item {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
             } else {
-                menu.visible = true
+                menu.open()
             }
         }
     }
 
+    // Drawer2Type {
     DrawerType {
         id: menu
 
         width: parent.width
         height: parent.height * drawerHeight
+
+        // parent: root.parent.parent
 
         ColumnLayout {
             id: header

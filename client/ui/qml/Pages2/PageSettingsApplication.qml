@@ -119,6 +119,7 @@ PageType {
 
             SelectLanguageDrawer {
                 id: selectLanguageDrawer
+                parent: root
             }
 
 
@@ -151,14 +152,14 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                         SettingsController.clearSettings()
                         PageController.replaceStartPage()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.onClose()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 
@@ -166,6 +167,7 @@ PageType {
 
             QuestionDrawer {
                 id: questionDrawer
+                parent: root
             }
         }
     }

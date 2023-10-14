@@ -371,6 +371,7 @@ PageType {
 
             ShareConnectionDrawer {
                 id: shareConnectionDrawer
+                parent: root
             }
 
             BasicButtonType {

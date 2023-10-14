@@ -97,11 +97,13 @@ PageType {
                             }
                         }
 
-                        DrawerType {
+                        Drawer2Type {
                             id: showDetailsDrawer
 
                             width: parent.width
                             height: parent.height * 0.9
+
+                            parent: root
 
                             BackButtonType {
                                 id: showDetailsBackButton
