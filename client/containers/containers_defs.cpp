@@ -233,8 +233,8 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::WireGuard: return true;
+    case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
-    case DockerContainer::OpenVpn: return true;
     default: return false;
     }
 }
@@ -243,8 +243,8 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::WireGuard: return tr("Low");
-    case DockerContainer::Cloak: return tr("High");
-    case DockerContainer::OpenVpn: return tr("Medium");
+    case DockerContainer::Awg: return tr("Medium or High");
+    case DockerContainer::Cloak: return tr("Extreme");
     default: return "";
     }
 }
@@ -252,9 +252,9 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 QString ContainerProps::easySetupDescription(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::WireGuard: return tr("I just want to increase the level of privacy");
-    case DockerContainer::Cloak: return tr("Many foreign websites and VPN providers are blocked");
-    case DockerContainer::OpenVpn: return tr("Some foreign sites are blocked, but VPN providers are not blocked");
+    case DockerContainer::WireGuard: return tr("I just want to increase the level of my privacy.");
+    case DockerContainer::Awg: return tr("I want to bypass censorship. This option recommended in most cases.");
+    case DockerContainer::Cloak: return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
     default: return "";
     }
 }
@@ -262,9 +262,9 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
 int ContainerProps::easySetupOrder(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::WireGuard: return 1;
-    case DockerContainer::Cloak: return 3;
-    case DockerContainer::OpenVpn: return 2;
+    case DockerContainer::WireGuard: return 3;
+    case DockerContainer::Awg: return 2;
+    case DockerContainer::Cloak: return 1;
     default: return 0;
     }
 }
