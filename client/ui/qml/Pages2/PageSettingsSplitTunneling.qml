@@ -20,6 +20,10 @@ import "../Components"
 PageType {
     id: root
 
+    property bool pageEnabled: {
+        return !ConnectionController.isConnected
+    }
+
     Connections {
         target: SitesController
 
@@ -78,6 +82,8 @@ PageType {
 
         RowLayout {
             HeaderType {
+                enabled: root.pageEnabled
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
 
@@ -88,6 +94,8 @@ PageType {
                 id: switcher
 
                 property int lastActiveRouteMode: routeMode.onlyForwardSites
+
+                enabled: root.pageEnabled
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -115,7 +123,7 @@ PageType {
 
             drawerHeight: 0.4375
 
-            enabled: switcher.checked
+            enabled: switcher.checked && root.pageEnabled
 
             headerText: qsTr("Mode")
 
@@ -155,9 +163,9 @@ PageType {
     FlickableType {
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight + connectButton.implicitHeight + connectButton.anchors.bottomMargin + connectButton.anchors.topMargin
+        contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
 
-        enabled: switcher.checked
+        enabled: switcher.checked && root.pageEnabled
 
         Column {
             id: col
@@ -221,8 +229,17 @@ PageType {
         }
     }
 
+    Rectangle {
+        anchors.fill: addSiteButton
+        anchors.bottomMargin: -24
+        color: "#0E0E11"
+        opacity: 0.8
+    }
+
     RowLayout {
-        id: connectButton
+        id: addSiteButton
+
+        enabled: root.pageEnabled
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left

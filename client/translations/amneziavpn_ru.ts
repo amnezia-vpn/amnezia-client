@@ -130,7 +130,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="429"/>
+        <location filename="../ui/controllers/importController.cpp" line="375"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -777,7 +777,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="115"/>
         <source>Close application</source>
         <translation type="unfinished"></translation>
     </message>

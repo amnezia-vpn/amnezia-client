@@ -94,6 +94,8 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
 
                 text: qsTr("Split site tunneling")
@@ -105,9 +107,13 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: !GC.isMobile()
+            }
 
             LabelWithButtonType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
 
                 text: qsTr("Separate application tunneling")
@@ -118,7 +124,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: !GC.isMobile()
+            }
         }
     }
 }
