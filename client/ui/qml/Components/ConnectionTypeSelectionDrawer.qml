@@ -36,7 +36,7 @@ DrawerType {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: qsTr("Server IP, login and password")
+            text: qsTr("Configure your server")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -50,7 +50,7 @@ DrawerType {
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: qsTr("QR code, key or configuration file")
+            text: qsTr("Open QR code, key or config file")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
