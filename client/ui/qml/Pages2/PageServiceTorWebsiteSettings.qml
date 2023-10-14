@@ -121,7 +121,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("When configuring WordPress set the domain as this onion address.")
+                text: qsTr("When configuring WordPress set the this address as domain.")
             }
 
             BasicButtonType {

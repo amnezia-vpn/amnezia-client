@@ -20,16 +20,15 @@ DrawerType {
         anchors.right: parent.right
         spacing: 0
 
-        Header2TextType {
+        Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-            Layout.bottomMargin: 32
-            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: 16
 
-            text: qsTr("Connection data")
-            wrapMode: Text.WordWrap
+            headerText: qsTr("Add server")
+            descriptionText: qsTr("Select data type")
         }
 
         LabelWithButtonType {

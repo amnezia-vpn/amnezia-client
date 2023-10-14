@@ -108,9 +108,10 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
                            "consumption. Recommended for regions with low levels of censorship.") },
-            { DockerContainer::Awg,
-               QObject::tr("AmneziaWG - Special protocol from Amnezia, based on WireGuard. It's fast like WireGuard, but very resistant to blockages. "
-                         "Recommended for regions with high levels of censorship.") },
+             { DockerContainer::Awg,
+               QObject::tr("AmneziaWG - Special protocol from Amnezia, based on WireGuard. It's fast like WireGuard, "
+                           "but very resistant to blockages. "
+                           "Recommended for regions with high levels of censorship.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -125,19 +126,73 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
 {
-    return { { DockerContainer::OpenVpn, QObject::tr("OpenVPN container") },
-             { DockerContainer::ShadowSocks, QObject::tr("Container with OpenVpn and ShadowSocks") },
-             { DockerContainer::Cloak,
-               QObject::tr("Container with OpenVpn and ShadowSocks protocols "
-                           "configured with traffic masking by Cloak plugin") },
-             { DockerContainer::WireGuard, QObject::tr("WireGuard container") },
-             { DockerContainer::WireGuard, QObject::tr("AmneziaWG container") },
-             { DockerContainer::Ipsec, QObject::tr("IPsec container") },
+    return {
+        { DockerContainer::OpenVpn,
+          QObject::tr(
+                  "The time-tested most popular VPN protocol.\n\n"
+                  "Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports "
+                  "various authentication methods, making it suitable for a variety of devices and operating "
+                  "systems.\n\n"
+                  "* Normal power consumption on mobile devices\n"
+                  "* Flexible customisation to suit user needs to work with different operating systems and devices.\n"
+                  "* Recognised by DPI analysis systems and therefore susceptible to blocking.\n"
+                  "* Can operate over both TCP and UDP network protocols.") },
+        { DockerContainer::ShadowSocks,
+          QObject::tr("Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - "
+                      "roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to "
+                      "identify because it is virtually identical to a normal HTTPS connection.\n\n"
+                      "However, some traffic analysis systems can still recognise a ShadowSocks connection, so in "
+                      "countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.\n"
+                      "* Average power consumption on mobile devices (higher than OpenVPN).\n"
+                      "* It is possible to configure the encryption protocol.\n"
+                      "* Recognised by some DPI analysis systems\n"
+                      "* Works only via TCP network protocol\n") },
+        { DockerContainer::Cloak,
+          QObject::tr("This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for "
+                      "blocking protection.\n\n"
+                      "OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client "
+                      "and the server.\n\n"
+                      "Cloak protects OpenVPN from detection and blocking. \n\n"
+                      "Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, "
+                      "and also protects the VPN from detection by Active Probing. This makes it very resistant to "
+                      "being detected\n\n"
+                      "Immediately after receiving the first data packet, Cloak authenticates the incoming connection. "
+                      "If authentication fails, the plugin masks the server as a fake website and your VPN becomes "
+                      "invisible to analysis systems.\n\n"
+                      "If there is a high level of Internet censorship in your region, we advise you to use only "
+                      "OpenVPN over Cloak from the first connection\n"
+                      "* High power consumption on mobile devices\n"
+                      "* Flexible settings\n"
+                      "* Not recognised by DPI analysis systems\n"
+                      "* Works via TCP network protocol\n") },
+        { DockerContainer::WireGuard,
+          QObject::tr("A relatively new popular VPN protocol with a simplified architecture.\n"
+                      "Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption "
+                      "settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.\n"
 
-             { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
-             { DockerContainer::Dns, QObject::tr("DNS Service") },
-             //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
-             { DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service") } };
+                      "* Low power consumption on mobile devices.\n"
+                      "* Minimum number of settings.\n"
+                      "* Easily recognised by DPI analysis systems, susceptible to blocking.\n"
+                      "* Works via UDP network protocol.\n") },
+        { DockerContainer::Awg, QObject::tr("AmneziaWG container") },
+        { DockerContainer::Ipsec,
+          QObject::tr("A modern stable protocol.\n\n"
+
+                      "IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting "
+                      "them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks "
+                      "and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN "
+                      "solutions for mobile devices. Vulnerable to detection and blocking.\n"
+
+                      "* Low power consumption, on mobile devices\n"
+                      "* Minimal configuration.\n"
+                      "* Recognised by DPI analysis systems.\n"
+                      "* Works only over UDP network protocol\n") },
+
+        { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
+        { DockerContainer::Dns, QObject::tr("DNS Service") },
+        //{DockerContainer::FileShare, QObject::tr("SMB file sharing service - is Window file sharing protocol")},
+        { DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service") }
+    };
 }
 
 amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
@@ -254,7 +309,8 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return tr("I just want to increase the level of my privacy.");
     case DockerContainer::Awg: return tr("I want to bypass censorship. This option recommended in most cases.");
-    case DockerContainer::Cloak: return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
+    case DockerContainer::Cloak:
+        return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
     default: return "";
     }
 }

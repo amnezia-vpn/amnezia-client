@@ -144,32 +144,15 @@ PageType {
                                         headerText: name
                                     }
 
-                                    TextField {
-                                        implicitWidth: parent.width
+                                    ParagraphTextType {
                                         Layout.fillWidth: true
                                         Layout.topMargin: 16
                                         Layout.bottomMargin: 16
 
-                                        padding: 0
-                                        leftPadding: 0
-                                        height: 24
-
-                                        color: "#D7D8DB"
-
-                                        font.pixelSize: 16
-                                        font.weight: Font.Medium
-                                        font.family: "PT Root UI VF"
-
                                         text: detailedDescription
-
-                                        wrapMode: Text.WordWrap
-
-                                        readOnly: true
-                                        background: Rectangle {
-                                            anchors.fill: parent
-                                            color: "transparent"
-                                        }
+                                        textFormat: Text.MarkdownText
                                     }
+
 
                                     Rectangle {
                                         Layout.fillHeight: true

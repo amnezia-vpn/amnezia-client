@@ -68,17 +68,22 @@
 <context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="31"/>
-        <source>Connection data</source>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="30"/>
+        <source>Add server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="40"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="31"/>
+        <source>Select data type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="39"/>
         <source>Server IP, login and password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="54"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="53"/>
         <source>QR code, key or configuration file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -130,7 +135,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="375"/>
+        <location filename="../ui/controllers/importController.cpp" line="429"/>
         <source>Scanned %1 of %2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -808,7 +813,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="124"/>
-        <source>When configuring WordPress set the domain as this onion address.</source>
+        <source>When configuring WordPress set the this address as domain.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -865,7 +870,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
         <source>Close application</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1143,22 +1148,22 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Site-based split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="102"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
         <source>App-based split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="121"/>
         <source>Allows you to use the VPN only for certain applications</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1438,90 +1443,90 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsSplitTunneling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="53"/>
         <source>Addresses from the list should be accessed via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="58"/>
         <source>Addresses from the list should not be accessed via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="84"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="90"/>
         <source>Split tunneling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="128"/>
         <source>Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="206"/>
         <source>Remove </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="207"/>
         <source>Continue</source>
         <translation type="unfinished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="208"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="255"/>
         <source>Site or IP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="282"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="299"/>
         <source>Import/Export Sites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="288"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="305"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="300"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="317"/>
         <source>Save site list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="307"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="324"/>
         <source>Save sites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="308"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="375"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="390"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="325"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="392"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="407"/>
         <source>Sites files (*.json)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="382"/>
         <source>Import a list of sites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="371"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="388"/>
         <source>Replace site list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="374"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="389"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="391"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="406"/>
         <source>Open sites file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="386"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="403"/>
         <source>Add imported sites to existing ones</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1699,22 +1704,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="183"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="192"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="207"/>
         <source>Network protocol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="223"/>
         <source>Port</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="239"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1852,6 +1857,11 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
+        <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the server, as well as change settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
         <source>Server</source>
@@ -1895,11 +1905,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="158"/>
         <source>Full access</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
-        <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the servers, as well as change settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2376,7 +2381,74 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="138"/>
+        <location filename="../containers/containers_defs.cpp" line="131"/>
+        <source>The time-tested most popular VPN protocol.
+
+Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports various authentication methods, making it suitable for a variety of devices and operating systems.
+
+* Normal power consumption on mobile devices
+* Flexible customisation to suit user needs to work with different operating systems and devices.
+* Recognised by DPI analysis systems and therefore susceptible to blocking.
+* Can operate over both TCP and UDP network protocols.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="141"/>
+        <source>Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to identify because it is virtually identical to a normal HTTPS connection.
+
+However, some traffic analysis systems can still recognise a ShadowSocks connection, so in countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.
+* Average power consumption on mobile devices (higher than OpenVPN).
+* It is possible to configure the encryption protocol.
+* Recognised by some DPI analysis systems
+* Works only via TCP network protocol
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="151"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
+
+OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a high level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works via TCP network protocol
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="169"/>
+        <source>A relatively new popular VPN protocol with a simplified architecture.
+Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
+* Low power consumption on mobile devices.
+* Minimum number of settings.
+* Easily recognised by DPI analysis systems, susceptible to blocking.
+* Works via UDP network protocol.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="179"/>
+        <source>A modern stable protocol.
+
+IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
+* Low power consumption, on mobile devices
+* Minimal configuration.
+* Recognised by DPI analysis systems.
+* Works only over UDP network protocol
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="192"/>
         <source>DNS Service</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2387,7 +2459,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="137"/>
+        <location filename="../containers/containers_defs.cpp" line="191"/>
         <source>Website in Tor network</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2413,62 +2485,41 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="109"/>
-        <location filename="../containers/containers_defs.cpp" line="112"/>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="115"/>
+        <location filename="../containers/containers_defs.cpp" line="112"/>
+        <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="116"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="118"/>
+        <location filename="../containers/containers_defs.cpp" line="119"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="120"/>
+        <location filename="../containers/containers_defs.cpp" line="121"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="123"/>
+        <location filename="../containers/containers_defs.cpp" line="124"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="128"/>
-        <source>OpenVPN container</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="129"/>
-        <source>Container with OpenVpn and ShadowSocks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="131"/>
-        <source>Container with OpenVpn and ShadowSocks protocols configured with traffic masking by Cloak plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="133"/>
-        <source>WireGuard container</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="134"/>
+        <location filename="../containers/containers_defs.cpp" line="177"/>
         <source>AmneziaWG container</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="135"/>
-        <source>IPsec container</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="140"/>
+        <location filename="../containers/containers_defs.cpp" line="194"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2535,6 +2586,16 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2755,33 +2816,33 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="245"/>
+        <location filename="../containers/containers_defs.cpp" line="300"/>
         <source>Low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="246"/>
-        <source>High</source>
+        <location filename="../containers/containers_defs.cpp" line="301"/>
+        <source>Medium or High</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="247"/>
-        <source>Medium</source>
+        <location filename="../containers/containers_defs.cpp" line="302"/>
+        <source>Extreme</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="256"/>
-        <source>Many foreign websites and VPN providers are blocked</source>
+        <location filename="../containers/containers_defs.cpp" line="310"/>
+        <source>I just want to increase the level of my privacy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="257"/>
-        <source>Some foreign sites are blocked, but VPN providers are not blocked</source>
+        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="255"/>
-        <source>I just want to increase the level of privacy</source>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
