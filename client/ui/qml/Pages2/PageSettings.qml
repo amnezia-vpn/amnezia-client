@@ -110,7 +110,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: GC.isMobile()
+                visible: GC.isDesktop()
                 Layout.fillWidth: true
                 Layout.preferredHeight: about.height
 
@@ -124,7 +124,7 @@ PageType {
             }
 
             DividerType {
-                visible: GC.isMobile()
+                visible: GC.isDesktop()
             }
         }
     }

@@ -115,7 +115,6 @@ PageType {
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
-                visible: false
 
                 text: qsTr("App-based split tunneling")
                 descriptionText: qsTr("Allows you to use the VPN only for certain applications")

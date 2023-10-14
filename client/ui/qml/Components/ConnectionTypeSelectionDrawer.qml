@@ -27,8 +27,7 @@ DrawerType {
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
 
-            headerText: qsTr("Add server")
-            descriptionText: qsTr("Select data type")
+            headerText: qsTr("Add new connection")
         }
 
         LabelWithButtonType {
@@ -50,7 +49,7 @@ DrawerType {
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: qsTr("Open QR code, key or config file")
+            text: qsTr("Open config file, key or QR code")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
