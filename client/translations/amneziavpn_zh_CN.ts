@@ -1807,22 +1807,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>更多细节</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="192"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="166"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="181"/>
         <source>Network protocol</source>
         <translation>网络协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="197"/>
         <source>Port</source>
         <translation>端口</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="239"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="213"/>
         <source>Install</source>
         <translation>安装</translation>
     </message>
