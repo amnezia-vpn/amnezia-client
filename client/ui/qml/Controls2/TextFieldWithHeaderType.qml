@@ -12,6 +12,7 @@ Item {
     property string headerTextColor: "#878b91"
 
     property alias errorText: errorField.text
+    property bool checkEmptyText: false
 
     property string buttonText
     property string buttonImageSource
@@ -97,6 +98,12 @@ Item {
 
                         onTextChanged: {
                             root.errorText = ""
+                        }
+
+                        onActiveFocusChanged: {
+                            if (checkEmptyText && textFieldText === "") {
+                                errorText = qsTr("The field can't be empty")
+                            }
                         }
 
                         MouseArea {

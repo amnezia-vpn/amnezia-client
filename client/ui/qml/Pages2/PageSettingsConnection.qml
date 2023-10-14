@@ -98,8 +98,8 @@ PageType {
 
                 Layout.fillWidth: true
 
-                text: qsTr("Split site tunneling")
-                descriptionText: qsTr("Allows you to choose which sites you want to use the VPN for.")
+                text: qsTr("Site-based split tunneling")
+                descriptionText: qsTr("Allows you to select which sites you want to access through the VPN")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -115,8 +115,9 @@ PageType {
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
+                visible: false
 
-                text: qsTr("Separate application tunneling")
+                text: qsTr("App-based split tunneling")
                 descriptionText: qsTr("Allows you to use the VPN only for certain applications")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 

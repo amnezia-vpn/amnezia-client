@@ -50,12 +50,12 @@ PageType {
 
     QtObject {
         id: onlyForwardSites
-        property string name: qsTr("Only the addresses in the list must be opened via VPN")
+        property string name: qsTr("Addresses from the list should be accessed via VPN")
         property int type: routeMode.onlyForwardSites
     }
     QtObject {
         id: allExceptSites
-        property string name: qsTr("Addresses from the list should never be opened via VPN")
+        property string name: qsTr("Addresses from the list should not be accessed via VPN")
         property int type: routeMode.allExceptSites
     }
 
@@ -87,7 +87,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Split site tunneling")
+                headerText: qsTr("Split tunneling")
             }
 
             SwitcherType {

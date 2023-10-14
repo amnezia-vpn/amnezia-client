@@ -214,21 +214,75 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
 
 QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 {
+    QMap<QString, QString> configMap;
+    auto configByLines = data.split("\n");
+    for (const QString &line : configByLines) {
+        QString trimmedLine = line.trimmed();
+        if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
+            continue;
+        } else {
+            QStringList parts = trimmedLine.split(" = ");
+            if (parts.count() == 2) {
+                configMap[parts.at(0).trimmed()] = parts.at(1).trimmed();
+            }
+        }
+    }
+
     QJsonObject lastConfig;
     lastConfig[config_key::config] = data;
 
-    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*)(?::([0-9]*))?");
+    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*):([0-9]*)");
     QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(data);
     QString hostName;
     QString port;
     if (hostNameAndPortMatch.hasCaptured(1)) {
         hostName = hostNameAndPortMatch.captured(1);
-    } /*else {
-        qDebug() << "send error?"
-    }*/
+    } else {
+        qDebug() << "Failed to import profile";
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+    }
 
     if (hostNameAndPortMatch.hasCaptured(2)) {
         port = hostNameAndPortMatch.captured(2);
+    } else {
+        port = protocols::wireguard::defaultPort;
+    }
+
+    lastConfig[config_key::hostName] = hostName;
+    lastConfig[config_key::port] = port.toInt();
+
+//    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
+//        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
+        lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
+        lastConfig[config_key::client_ip] = configMap.value("Address");
+        lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
+        lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
+//    } else {
+//        qDebug() << "Failed to import profile";
+//        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+//        return QJsonObject();
+//    }
+
+    QString protocolName = "wireguard";
+    if (!configMap.value(config_key::junkPacketCount).isEmpty()
+        && !configMap.value(config_key::junkPacketMinSize).isEmpty()
+        && !configMap.value(config_key::junkPacketMaxSize).isEmpty()
+        && !configMap.value(config_key::initPacketJunkSize).isEmpty()
+        && !configMap.value(config_key::responsePacketJunkSize).isEmpty()
+        && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
+        && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
+        && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
+        && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()) {
+        lastConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
+        lastConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
+        lastConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
+        lastConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
+        lastConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
+        lastConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
+        lastConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
+        lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
+        lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
+        protocolName = "awg";
     }
 
     QJsonObject wireguardConfig;
@@ -238,15 +292,15 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     wireguardConfig[config_key::transport_proto] = "udp";
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-wireguard"));
-    containers.insert(config_key::wireguard, QJsonValue(wireguardConfig));
+    containers.insert(config_key::container, QJsonValue("amnezia-" + protocolName));
+    containers.insert(protocolName, QJsonValue(wireguardConfig));
 
     QJsonArray arr;
     arr.push_back(containers);
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-wireguard";
+    config[config_key::defaultContainer] = "amnezia-" + protocolName;
     config[config_key::description] = m_settings->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(

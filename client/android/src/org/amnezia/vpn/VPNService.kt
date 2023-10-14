@@ -380,7 +380,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 mNetworkState.bindNetworkListener()
             }
             "wireguard" -> {
-                startWireGuard()
+                startWireGuard("wireguard")
+            }
+            "awg" -> {
+                startWireGuard("awg")
             }
             "shadowsocks" -> {
                 startShadowsocks()
@@ -457,7 +460,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     fun turnOff() {
         Log.v(tag, "Aman: turnOff....................")
         when (mProtocol) {
-            "wireguard" -> {
+            "wireguard",
+            "awg" -> {
                 GoBackend.wgTurnOff(currentTunnelHandle)
             }
             "cloak",
@@ -559,14 +563,14 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         }
         return parseData
     }
-
+    
     /**
      * Create a Wireguard [Config]  from a [json] string -
      * The [json] will be created in AndroidVpnProtocol.cpp
      */
-    private fun buildWireguardConfig(obj: JSONObject): Config {
+    private fun buildWireguardConfig(obj: JSONObject, type: String): Config {
         val confBuilder = Config.Builder()
-        val wireguardConfigData = obj.getJSONObject("wireguard_config_data")
+        val wireguardConfigData = obj.getJSONObject(type)
         val config = parseConfigData(wireguardConfigData.getString("config"))
         val peerBuilder = Peer.Builder()
         val peerConfig = config["Peer"]!!
@@ -598,6 +602,30 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         ifaceBuilder.addAddress(InetNetwork.parse(ifaceConfig["Address"]))
         ifaceConfig["DNS"]!!.split(",").forEach {
             ifaceBuilder.addDnsServer(InetNetwork.parse(it.trim()).address)
+        }
+        
+        ifaceBuilder.parsePrivateKey(ifaceConfig["PrivateKey"])
+        if (type == "awg_config_data") {
+            ifaceBuilder.parseJc(ifaceConfig["Jc"])
+            ifaceBuilder.parseJmin(ifaceConfig["Jmin"])
+            ifaceBuilder.parseJmax(ifaceConfig["Jmax"])
+            ifaceBuilder.parseS1(ifaceConfig["S1"])
+            ifaceBuilder.parseS2(ifaceConfig["S2"])
+            ifaceBuilder.parseH1(ifaceConfig["H1"])
+            ifaceBuilder.parseH2(ifaceConfig["H2"])
+            ifaceBuilder.parseH3(ifaceConfig["H3"])
+            ifaceBuilder.parseH4(ifaceConfig["H4"])
+        } else {
+            ifaceBuilder.parseJc("0")
+            ifaceBuilder.parseJmin("0")
+            ifaceBuilder.parseJmax("0")
+            ifaceBuilder.parseS1("0")
+            ifaceBuilder.parseS2("0")
+            ifaceBuilder.parseH1("0")
+            ifaceBuilder.parseH2("0")
+            ifaceBuilder.parseH3("0")
+            ifaceBuilder.parseH4("0")           
+        
         }
         /*val jExcludedApplication = obj.getJSONArray("excludedApps")
     (0 until jExcludedApplication.length()).toList().forEach {
@@ -716,8 +744,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         }).start()
     }
 
-    private fun startWireGuard() {
-        val wireguard_conf = buildWireguardConfig(mConfig!!)
+    private fun startWireGuard(type: String) {
+        val wireguard_conf = buildWireguardConfig(mConfig!!, type + "_config_data")
         Log.i(tag, "startWireGuard: wireguard_conf : $wireguard_conf")
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")
@@ -728,9 +756,15 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         val builder = Builder()
         setupBuilder(wireguard_conf, builder)
         builder.setSession("Amnezia")
+        
+        
         builder.establish().use { tun ->
-            if (tun == null) return
-            currentTunnelHandle = GoBackend.wgTurnOn("Amnezia", tun.detachFd(), wgConfig)
+        if (tun == null) return
+            if (type == "awg"){
+      	        currentTunnelHandle = GoBackend.wgTurnOn("awg0", tun.detachFd(), wgConfig)
+            } else {
+                currentTunnelHandle = GoBackend.wgTurnOn("amn0", tun.detachFd(), wgConfig)
+            }
         }
         if (currentTunnelHandle < 0) {
             Log.e(tag, "Activation Error Code -> $currentTunnelHandle")
