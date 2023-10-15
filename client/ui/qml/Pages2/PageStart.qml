@@ -44,9 +44,9 @@ PageType {
             tabBar.enabled = !visible
         }
 
-        function onShowTopCloseButton(visible) {
-            topCloseButton.visible = visible
-        }
+//        function onShowTopCloseButton(visible) {
+//            topCloseButton.visible = visible
+//        }
 
         function onEnableTabBar(enabled) {
             tabBar.enabled = enabled
@@ -137,10 +137,10 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
 
-        onWidthChanged: {
-            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
-                    topCloseButton.buttonWidth - topCloseButton.rightPadding
-        }
+//        onWidthChanged: {
+//            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
+//                    topCloseButton.buttonWidth - topCloseButton.rightPadding
+//        }
     }
 
     TabBar {
@@ -234,11 +234,12 @@ PageType {
         z: 1
     }
 
-    TopCloseButtonType {
-        id: topCloseButton
-        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
-        z: 1
-    }
+//    TopCloseButtonType {
+//        id: topCloseButton
+
+//        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
+//        z: 1
+//    }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection

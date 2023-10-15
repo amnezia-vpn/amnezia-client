@@ -20,16 +20,14 @@ DrawerType {
         anchors.right: parent.right
         spacing: 0
 
-        Header2TextType {
+        Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-            Layout.bottomMargin: 32
-            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: 16
 
-            text: qsTr("Add new connection")
-            wrapMode: Text.WordWrap
+            headerText: qsTr("Add new connection")
         }
 
         LabelWithButtonType {
@@ -51,7 +49,7 @@ DrawerType {
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: qsTr("Open QR code, key or config file")
+            text: qsTr("Open config file, key or QR code")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
