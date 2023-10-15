@@ -340,7 +340,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="275"/>
         <source>Remove AmneziaWG</source>
-        <translation>Remove AmneziaWG</translation>
+        <translation>Удалить AmneziaWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="278"/>
@@ -350,7 +350,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN с этим протоколом, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="280"/>
@@ -383,13 +383,13 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="103"/>
         <source>Port</source>
-        <translation>Port</translation>
+        <translation>Порт</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="120"/>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="121"/>
         <source>Cipher</source>
-        <translation>Cipher</translation>
+        <translation>Шифрование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="159"/>
@@ -484,7 +484,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="207"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="208"/>
         <source>Cipher</source>
-        <translation>Шифрованаие</translation>
+        <translation>Шифрование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="216"/>
@@ -575,7 +575,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="363"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
@@ -623,7 +623,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN с этим протоколом больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
@@ -679,7 +679,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно в настройках, во вкладке &quot;Соединения&quot;.</translation>
+        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно во вкладке &quot;Соединения&quot; настроек приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
@@ -772,7 +772,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="260"/>
         <source>Remove SFTP and all data stored there</source>
-        <translation>Удалите SFTP-хранилище со всеми данными</translation>
+        <translation>Удалить SFTP-хранилище со всеми данными</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="263"/>
@@ -820,7 +820,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="115"/>
         <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation>Через несколько минут после установки  ваш Onion сайт станет доступен в сети Tor.</translation>
+        <translation>Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="124"/>
@@ -835,7 +835,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="141"/>
         <source>The site with all data will be removed from the tor network.</source>
-        <translation>Сайт со всеми данными будет удален из сети tor.</translation>
+        <translation>Сайт со всеми данными будет удален из сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="142"/>
@@ -891,7 +891,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation>Поддержите проект донатами</translation>
+        <translation>Поддержите проект пожертвованием</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -999,12 +999,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
         <source>Start minimized</source>
-        <translation>Запуск в свернутом виде</translation>
+        <translation>Запускать в свернутом виде</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Launch application minimized</source>
-        <translation>Запуск приложения в свернутом виде</translation>
+        <translation>Запускать приложение в свернутом виде</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
@@ -1039,7 +1039,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="149"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>Все данные из приложения будут удалены Все установленные сервисы AmneziaVPN останутся на сервере.</translation>
+        <translation>Все данные из приложения будут удалены, все установленные сервисы AmneziaVPN останутся на сервере.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="150"/>
@@ -1267,7 +1267,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
         <source>Save logs to file</source>
-        <translation>Сохранить логи в файл</translation>
+        <translation>Сохранять логи в файл</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="144"/>
@@ -1344,7 +1344,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="117"/>
         <source>Check the server for previously installed Amnezia services</source>
-        <translation>Проверка сервера на наличие ранее установленных сервисов Amnezia</translation>
+        <translation>Проверить сервер на наличие ранее установленных сервисов Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="118"/>
@@ -1369,7 +1369,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="165"/>
         <source>Clear server from Amnezia software</source>
-        <translation>Очистка сервера от протоколов и сервисов Amnezia</translation>
+        <translation>Очистить сервер от протоколов и сервисов Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
@@ -1379,7 +1379,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="170"/>
         <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation>На сервере будут удалены все, что связанно с Amnezia: протоколы сервисы конфигурационные файлы, ключи и сертификаты.</translation>
+        <translation>На сервере будут удалены все данные, связанные с Amnezia: протоколы, сервисы, конфигурационные файлы, ключи и сертификаты.</translation>
     </message>
 </context>
 <context>
@@ -1466,7 +1466,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="84"/>
         <source>Split tunneling</source>
-        <translation>Раздельно VPN-туннелирование</translation>
+        <translation>Раздельное VPN-туннелирование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="120"/>
@@ -1539,7 +1539,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="386"/>
         <source>Add imported sites to existing ones</source>
-        <translation>Добавление импортированных сайтов к существующим</translation>
+        <translation>Добавить импортированные сайты к существующим</translation>
     </message>
 </context>
 <context>
@@ -1561,7 +1561,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="61"/>
         <source>What do you have?</source>
-        <translation>Выберете что у вас есть?</translation>
+        <translation>Выберете что у вас есть</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
@@ -1657,7 +1657,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
         <source>I want to choose a VPN protocol</source>
-        <translation>Выбор VPN-протокола</translation>
+        <translation>Выбрать VPN-протокол</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="157"/>
@@ -1709,7 +1709,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="75"/>
         <source>Installing %1</source>
-        <translation>Установка %1</translation>
+        <translation>Установить %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="93"/>
@@ -1734,7 +1734,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
         <source>Install</source>
-        <translation>Установка</translation>
+        <translation>Установить</translation>
     </message>
 </context>
 <context>
@@ -1747,7 +1747,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="74"/>
         <source>Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.</source>
-        <translation>Выберите протокол, который вам больше подходит . В дальнейшем можно установить другие протоколы и дополнительные сервисы, такие как DNS-прокси и SFTP.</translation>
+        <translation>Выберите протокол, который вам больше подходит. В дальнейшем можно установить другие протоколы и дополнительные сервисы, такие как DNS-прокси, TOR-сайт и SFTP.</translation>
     </message>
 </context>
 <context>
@@ -1806,7 +1806,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="53"/>
         <source>Insert</source>
-        <translation>Вставка</translation>
+        <translation>Вставить</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="71"/>
@@ -2452,7 +2452,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
-        <translation>Замените адрес DNS-сервера на собственный. Это повысит уровень конфиденциальности.</translation>
+        <translation>Замените DNS-сервер на Amnezia DNS. Это повысит уровень конфиденциальности.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="123"/>
@@ -2565,7 +2565,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="49"/>
         <source>Choose language</source>
-        <translation>Выберете язык</translation>
+        <translation>Выберите язык</translation>
     </message>
 </context>
 <context>
