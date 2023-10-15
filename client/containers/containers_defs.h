@@ -26,7 +26,6 @@ namespace amnezia
             // non-vpn
             TorWebSite,
             Dns,
-            // FileShare,
             Sftp
         };
         Q_ENUM_NS(DockerContainer)

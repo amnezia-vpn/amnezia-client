@@ -78,12 +78,11 @@ PageLoader::PageEnum ProtocolsModel::protocolPage(Proto protocol) const
     case Proto::ShadowSocks: return PageLoader::PageEnum::PageProtocolShadowSocksSettings;
     case Proto::WireGuard: return PageLoader::PageEnum::PageProtocolWireGuardSettings;
     case Proto::Ikev2: return PageLoader::PageEnum::PageProtocolIKev2Settings;
-    case Proto::L2tp: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::L2tp: return PageLoader::PageEnum::PageProtocolIKev2Settings;
     // non-vpn
-    case Proto::TorWebSite: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
-    case Proto::Dns: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
-    case Proto::FileShare: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
-    case Proto::Sftp: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
+    case Proto::TorWebSite: return PageLoader::PageEnum::PageServiceTorWebsiteSettings;
+    case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;
+    case Proto::Sftp: return PageLoader::PageEnum::PageServiceSftpSettings;
     default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
     }
 }

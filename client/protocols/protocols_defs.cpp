@@ -72,7 +72,6 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
-             { Proto::FileShare, "File Sharing Service" },
              { Proto::Sftp, QObject::tr("Sftp service") } };
 }
 
@@ -90,9 +89,11 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::ShadowSocks: return ServiceType::Vpn;
     case Proto::WireGuard: return ServiceType::Vpn;
     case Proto::Awg: return ServiceType::Vpn;
+    case Proto::Ikev2: return ServiceType::Vpn;
+
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
-    case Proto::FileShare: return ServiceType::Other;
+    case Proto::Sftp: return ServiceType::Other;
     default: return ServiceType::Other;
     }
 }
@@ -111,7 +112,6 @@ int ProtocolProps::defaultPort(Proto p)
 
     case Proto::TorWebSite: return -1;
     case Proto::Dns: return 53;
-    case Proto::FileShare: return 139;
     case Proto::Sftp: return 222;
     default: return -1;
     }
@@ -129,10 +129,10 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
 
-    case Proto::TorWebSite: return true;
+    case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
-    case Proto::FileShare: return false;
-    default: return -1;
+    case Proto::Sftp: return true;
+    default: return false;
     }
 }
 
@@ -150,7 +150,6 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     // non-vpn
     case Proto::TorWebSite: return TransportProto::Tcp;
     case Proto::Dns: return TransportProto::Udp;
-    case Proto::FileShare: return TransportProto::Udp;
     case Proto::Sftp: return TransportProto::Tcp;
     }
 }
@@ -169,7 +168,6 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     // non-vpn
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
-    case Proto::FileShare: return false;
     case Proto::Sftp: return false;
     default: return false;
     }

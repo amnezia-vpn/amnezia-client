@@ -183,22 +183,22 @@ Already installed containers were found on the server. All installed containers 
 在服务上发现已经安装协议并添加至应用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="264"/>
+        <location filename="../ui/controllers/installController.cpp" line="266"/>
         <source>Settings updated successfully</source>
         <translation>配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="279"/>
+        <location filename="../ui/controllers/installController.cpp" line="281"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="289"/>
+        <location filename="../ui/controllers/installController.cpp" line="291"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="306"/>
+        <location filename="../ui/controllers/installController.cpp" line="308"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
@@ -219,12 +219,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="452"/>
+        <location filename="../ui/controllers/installController.cpp" line="454"/>
         <source>Please login as the user</source>
         <translation>请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="479"/>
+        <location filename="../ui/controllers/installController.cpp" line="481"/>
         <source>Server added successfully</source>
         <translation>增加服务器成功</translation>
     </message>
@@ -1798,13 +1798,21 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="62"/>
-        <source>Amnesia has detected that your server is currently </source>
-        <translation>Amnezia 检测到您的服务器当前</translation>
+        <source>Amnezia has detected that your server is currently </source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
+        <source>busy installing other software. Amnezia installation </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Amnesia has detected that your server is currently </source>
+        <translation type="vanished">Amnezia 检测到您的服务器当前</translation>
+    </message>
+    <message>
         <source>busy installing other software. Amnesia installation </source>
-        <translation>正安装其他软件。Amnezia安装</translation>
+        <translation type="vanished">正安装其他软件。Amnezia安装</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
@@ -2313,7 +2321,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="76"/>
+        <location filename="../protocols/protocols_defs.cpp" line="75"/>
         <source>Sftp service</source>
         <translation>Sftp 服务</translation>
     </message>
@@ -2529,7 +2537,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="191"/>
+        <location filename="../containers/containers_defs.cpp" line="189"/>
         <source>Website in Tor network</source>
         <translation>在 Tor 网络中架设网站</translation>
     </message>
@@ -2539,57 +2547,57 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="93"/>
+        <location filename="../containers/containers_defs.cpp" line="92"/>
         <source>Sftp file sharing service</source>
         <translation>SFTP文件共享服务</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="99"/>
+        <location filename="../containers/containers_defs.cpp" line="98"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
         <translation>OpenVPN 是最流行的 VPN 协议，具有灵活的配置选项。它使用自己的安全协议与 SSL/TLS 进行密钥交换。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="102"/>
+        <location filename="../containers/containers_defs.cpp" line="101"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
         <translation>ShadowSocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="105"/>
+        <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
         <translation>OpenVPN over Cloak - OpenVPN 与 VPN 具有伪装成网络流量和防止主动探测检测的保护。非常适合绕过审查力度特别强的地区的封锁。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="109"/>
+        <location filename="../containers/containers_defs.cpp" line="108"/>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
         <translation>WireGuard - 新型流行的VPN协议，具有高性能、高速度和低功耗。建议用于审查力度较低的地区</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="112"/>
+        <location filename="../containers/containers_defs.cpp" line="111"/>
         <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="116"/>
+        <location filename="../containers/containers_defs.cpp" line="115"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="119"/>
+        <location filename="../containers/containers_defs.cpp" line="118"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>只需点击两次即可架设 WordPress 网站到 Tor 网络</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="121"/>
+        <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>将当前的 DNS 服务器替换为您自己的。这将提高您的隐私保护级别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="124"/>
+        <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
         <translation>在您的服务器上创建文件仓库，以便安全地存储和传输文件</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="131"/>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
         <source>The time-tested most popular VPN protocol.
 
 Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports various authentication methods, making it suitable for a variety of devices and operating systems.
@@ -2601,7 +2609,7 @@ Uses a proprietary security protocol with SSL/TLS for encryption and key exchang
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="141"/>
+        <location filename="../containers/containers_defs.cpp" line="139"/>
         <source>Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to identify because it is virtually identical to a normal HTTPS connection.
 
 However, some traffic analysis systems can still recognise a ShadowSocks connection, so in countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.
@@ -2613,7 +2621,7 @@ However, some traffic analysis systems can still recognise a ShadowSocks connect
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="151"/>
+        <location filename="../containers/containers_defs.cpp" line="149"/>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
 
 OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
@@ -2633,7 +2641,7 @@ If there is a high level of Internet censorship in your region, we advise you to
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="169"/>
+        <location filename="../containers/containers_defs.cpp" line="167"/>
         <source>A relatively new popular VPN protocol with a simplified architecture.
 Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 * Low power consumption on mobile devices.
@@ -2644,7 +2652,7 @@ Provides stable VPN connection, high performance on all devices. Uses hard-coded
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="179"/>
+        <location filename="../containers/containers_defs.cpp" line="177"/>
         <source>A modern stable protocol.
 
 IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
@@ -2672,7 +2680,7 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
         <translation type="vanished">WireGuard 容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="177"/>
+        <location filename="../containers/containers_defs.cpp" line="175"/>
         <source>AmneziaWG container</source>
         <translation></translation>
     </message>
@@ -2681,12 +2689,12 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
         <translation type="vanished">IPsec 容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="192"/>
+        <location filename="../containers/containers_defs.cpp" line="190"/>
         <source>DNS Service</source>
         <translation>DNS 服务</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="194"/>
+        <location filename="../containers/containers_defs.cpp" line="191"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation>Sftp 文件共享服务 - 安全的 FTP 服务</translation>
     </message>
@@ -2972,32 +2980,32 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="300"/>
+        <location filename="../containers/containers_defs.cpp" line="283"/>
         <source>Low</source>
         <translation>低</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="301"/>
+        <location filename="../containers/containers_defs.cpp" line="284"/>
         <source>Medium or High</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="302"/>
+        <location filename="../containers/containers_defs.cpp" line="285"/>
         <source>Extreme</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="310"/>
+        <location filename="../containers/containers_defs.cpp" line="293"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="294"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <location filename="../containers/containers_defs.cpp" line="296"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation type="unfinished"></translation>
     </message>

@@ -59,8 +59,8 @@ PageType {
 
         function onServerIsBusy(isBusy) {
             if (isBusy) {
-                root.progressBarText = qsTr("Amnesia has detected that your server is currently ") +
-                                       qsTr("busy installing other software. Amnesia installation ") +
+                root.progressBarText = qsTr("Amnezia has detected that your server is currently ") +
+                                       qsTr("busy installing other software. Amnezia installation ") +
                                        qsTr("will pause until the server finishes installing other software")
                 root.isTimerRunning = false
             } else {
