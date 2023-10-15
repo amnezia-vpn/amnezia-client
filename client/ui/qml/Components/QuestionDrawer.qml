@@ -15,10 +15,11 @@ Drawer2Type {
 
     property var yesButtonFunction
     property var noButtonFunction
+    property real drawerHeight: 0.5
 
     width: parent.width
     height: parent.height
-    contentHeight: parent.height * 0.5
+    contentHeight: parent.height * drawerHeight
 
     ColumnLayout {
         parent: root.contentParent

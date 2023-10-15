@@ -31,7 +31,7 @@ Drawer2Type {
     height: parent.height
     contentHeight: parent.height * 0.9
 
-    onClose: {
+    onClosed: {
         configExtension = ".vpn"
         configCaption = qsTr("Save AmneziaVPN config")
         configFileName = "amnezia_config"

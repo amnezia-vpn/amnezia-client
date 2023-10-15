@@ -151,5 +151,6 @@ PageType {
 
     QuestionDrawer {
         id: questionDrawer
+        parent: root
     }
 }

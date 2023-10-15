@@ -193,6 +193,8 @@ PageType {
             QuestionDrawer {
                 id: questionDrawer
 
+                drawerHeight: 0.8
+
                 parent: root
             }
         }
