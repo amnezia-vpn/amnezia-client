@@ -2537,7 +2537,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="215"/>
+        <location filename="../containers/containers_defs.cpp" line="214"/>
         <source>Website in Tor network</source>
         <translation>在 Tor 网络中架设网站</translation>
     </message>
@@ -2670,15 +2670,15 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="203"/>
-        <source>A modern stable protocol.
-
-IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the AmneziaVPN only on Windows
 * Low power consumption, on mobile devices
 * Minimal configuration
 * Recognised by DPI analysis systems
-* Works over UDP network protocol</source>
+* Works over UDP network protocol, ports 500 and 4500.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2702,12 +2702,12 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
         <translation type="vanished">IPsec 容器</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
+        <location filename="../containers/containers_defs.cpp" line="215"/>
         <source>DNS Service</source>
         <translation>DNS 服务</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="217"/>
+        <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation>Sftp 文件共享服务 - 安全的 FTP 服务</translation>
     </message>
@@ -2993,32 +2993,32 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="309"/>
+        <location filename="../containers/containers_defs.cpp" line="308"/>
         <source>Low</source>
         <translation>低</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="310"/>
+        <location filename="../containers/containers_defs.cpp" line="309"/>
         <source>Medium or High</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="310"/>
         <source>Extreme</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="319"/>
+        <location filename="../containers/containers_defs.cpp" line="318"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="320"/>
+        <location filename="../containers/containers_defs.cpp" line="319"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="322"/>
+        <location filename="../containers/containers_defs.cpp" line="321"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation type="unfinished"></translation>
     </message>
