@@ -34,6 +34,8 @@ Item {
 
     state: "closed"
 
+    Drag.active: dragArea.drag.active
+
     Rectangle {
         id: draw2Background
 
@@ -46,104 +48,110 @@ Item {
         border.width: 1
         visible: true
 
-        Rectangle {
-            id: semiArea
-            anchors.top: parent.top
-            height: parent.height - contentHeight
-            anchors.right: parent.right
-            anchors.left: parent.left
-            visible: true
-            color: "transparent"
-        }
+        MouseArea {
+            id: fullArea
+            anchors.fill: parent
+            enabled: (root.state === "expanded" || root.state === "opened")
+            onClicked: {
+                if (root.state === "expanded") {
+                    root.state = "collapsed"
+                    return
+                }
 
-        Rectangle {
-            id: contentArea
-            anchors.top: semiArea.bottom
-            height: contentHeight
-            radius: 16
-            color: root.defaultColor
-            border.width: 1
-            border.color: root.borderColor
-            width: parent.width
-            visible: true
+                if (root.state === "opened") {
+                    root.state = "closed"
+                    return
+                }
+            }
 
             Rectangle {
-                width: parent.radius
-                height: parent.radius
-                anchors.bottom: parent.bottom
+                id: semiArea
+                anchors.top: parent.top
+                height: parent.height - contentHeight
                 anchors.right: parent.right
                 anchors.left: parent.left
-                color: parent.color
-            }
-        }
-    }
-
-
-    MouseArea {
-        id: fullArea
-        anchors.fill: parent
-        enabled: (root.state === "expanded" || root.state === "opened")
-        onClicked: {
-            if (root.state === "expanded") {
-                root.state = "collapsed"
-                return
+                visible: true
+                color: "transparent"
             }
 
-            if (root.state === "opened") {
-                root.state = "closed"
-                return
-            }
-        }
-    }
+            Rectangle {
+                id: contentArea
 
-    Drag.active: dragArea.drag.active
+                anchors.top: semiArea.bottom
+                height: contentHeight
+                radius: 16
+                color: root.defaultColor
+                border.width: 1
+                border.color: root.borderColor
+                width: parent.width
+                visible: true
 
-    MouseArea {
-        id: dragArea
+                Rectangle {
+                    width: parent.radius
+                    height: parent.radius
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    color: parent.color
+                }
 
-        anchors.fill: parent
+                MouseArea {
+                    id: dragArea
 
-        cursorShape: (root.state === "opened"  || root.state === "expanded") ? Qt.PointingHandCursor : Qt.ArrowCursor
-        hoverEnabled: true
+                    anchors.fill: parent
 
-        drag.target: parent
-        drag.axis: Drag.YAxis
-        drag.maximumY: parent.height
-        drag.minimumY: parent.height - root.height
+                    cursorShape: (root.state === "opened"  || root.state === "expanded") ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    hoverEnabled: true
 
-        /** If drag area is released at any point other than min or max y, transition to the other state */
-        onReleased: {
-            if (root.state === "closed" && root.y < dragArea.drag.maximumY) {
-                root.state = "opened"
-                PageController.drawerOpen()
-                return
-            }
+                    drag.target: root
+                    drag.axis: Drag.YAxis
+                    drag.maximumY: root.height
+                    drag.minimumY: root.height - root.height
 
-            if (root.state === "opened" && root.y > dragArea.drag.minimumY) {
-                root.state = "closed"
-                PageController.drawerClose()
-                return
-            }
+                    /** If drag area is released at any point other than min or max y, transition to the other state */
+                    onReleased: {
+                        if (root.state === "closed" && root.y < dragArea.drag.maximumY) {
+                            root.state = "opened"
+                            PageController.drawerOpen()
+                            return
+                        }
 
-            if (root.state === "collapsed" && root.y < dragArea.drag.maximumY) {
-                root.state = "expanded"
-                return
-            }
-            if (root.state === "expanded" && root.y > dragArea.drag.minimumY) {
-                root.state = "collapsed"
-                return
-            }
-        }
+                        if (root.state === "opened" && root.y > dragArea.drag.minimumY) {
+                            root.state = "closed"
+                            PageController.drawerClose()
+                            return
+                        }
 
-        onClicked: {
-            if (root.state === "expanded") {
-                root.state = "collapsed"
-                return
-            }
+                        if (root.state === "collapsed" && root.y < dragArea.drag.maximumY) {
+                            root.state = "expanded"
+                            return
+                        }
+                        if (root.state === "expanded" && root.y > dragArea.drag.minimumY) {
+                            root.state = "collapsed"
+                            return
+                        }
+                    }
 
-            if (root.state === "opened") {
-                root.state = "closed"
-                return
+                    onClicked: {
+                        if (root.state === "expanded") {
+                            root.state = "collapsed"
+                            return
+                        }
+
+                        if (root.state === "opened") {
+                            root.state = "closed"
+                            return
+                        }
+                    }
+
+//                    onEntered: {
+//                        fullArea.enabled = false
+//                    }
+
+//                    onExited: {
+//                        fullArea.enabled = true
+//                    }
+                }
             }
         }
     }
