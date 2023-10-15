@@ -142,7 +142,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="429"/>
+        <location filename="../ui/controllers/importController.cpp" line="436"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
@@ -2952,7 +2952,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="406"/>
+        <location filename="../vpnconnection.cpp" line="422"/>
         <source>Mbps</source>
         <translation></translation>
     </message>

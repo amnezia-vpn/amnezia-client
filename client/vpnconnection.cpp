@@ -329,6 +329,8 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         return;
     }
 
+    appendSplitTunnelingConfig();
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
@@ -361,6 +363,20 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(Vpn::ConnectionState)), this,
             SLOT(onConnectionStateChanged(Vpn::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+}
+
+void VpnConnection::appendSplitTunnelingConfig()
+{
+    auto routeMode = m_settings->routeMode();
+    auto sites = m_settings->getVpnIps(routeMode);
+
+    QJsonArray sitesJsonArray;
+    for (const auto &site : sites) {
+        sitesJsonArray.append(site);
+    }
+
+    m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
+    m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 }
 
 #ifdef Q_OS_ANDROID

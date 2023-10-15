@@ -131,7 +131,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="429"/>
+        <location filename="../ui/controllers/importController.cpp" line="436"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -2473,6 +2473,11 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="112"/>
+        <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2 Современный стабильный протокол, немного быстрее других восстанавливает соединение после потери сигнала. Имеет нативную поддержку последних версиий Android и iOS.</translation>
@@ -2637,6 +2642,16 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
@@ -2815,7 +2830,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="406"/>
+        <location filename="../vpnconnection.cpp" line="422"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>
