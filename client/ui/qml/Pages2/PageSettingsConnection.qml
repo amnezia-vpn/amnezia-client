@@ -94,6 +94,8 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -105,11 +107,14 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: !GC.isMobile()
+            }
 
             LabelWithButtonType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
-                visible: false
 
                 text: qsTr("App-based split tunneling")
                 descriptionText: qsTr("Allows you to use the VPN only for certain applications")
@@ -119,7 +124,9 @@ PageType {
                 }
             }
 
-            // DividerType {}
+            DividerType {
+                visible: !GC.isMobile()
+            }
         }
     }
 }

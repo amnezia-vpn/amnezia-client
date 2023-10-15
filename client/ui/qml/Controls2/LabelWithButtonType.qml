@@ -20,7 +20,9 @@ Item {
     property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
 
     property string textColor: "#d7d8db"
+    property string textDisabledColor: "#878B91"
     property string descriptionColor: "#878B91"
+    property string descriptionDisabledColor: "#494B50"
     property real textOpacity: 1.0
 
     property string rightImageColor: "#d7d8db"
@@ -71,7 +73,14 @@ Item {
 
             ListItemTitleType {
                 text: root.text
-                color: root.descriptionOnTop ? root.descriptionColor : root.textColor
+                color: {
+                    if (root.enabled) {
+                        return root.descriptionOnTop ? root.descriptionColor : root.textColor
+                    } else {
+                        return root.descriptionOnTop ? root.descriptionDisabledColor : root.textDisabledColor
+                    }
+                }
+
                 maximumLineCount: root.textMaximumLineCount
                 elide: root.textElide
 
@@ -96,7 +105,13 @@ Item {
                 id: description
 
                 text: root.descriptionText
-                color: root.descriptionOnTop ? root.textColor : root.descriptionColor
+                color: {
+                    if (root.enabled) {
+                        return root.descriptionOnTop ? root.textColor : root.descriptionColor
+                    } else {
+                        return root.descriptionOnTop ? root.textDisabledColor : root.descriptionDisabledColor
+                    }
+                }
 
                 opacity: root.textOpacity
 
@@ -157,7 +172,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
+        hoverEnabled: root.enabled
 
         onEntered: {
             if (rightImageSource) {

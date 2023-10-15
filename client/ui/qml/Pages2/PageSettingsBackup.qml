@@ -103,6 +103,7 @@ PageType {
                         PageController.showBusyIndicator(true)
                         SettingsController.backupAppConfig(fileName)
                         PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
             }

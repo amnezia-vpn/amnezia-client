@@ -74,7 +74,6 @@ qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 # -- i18n end
 
 if(IOS)
-    #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()

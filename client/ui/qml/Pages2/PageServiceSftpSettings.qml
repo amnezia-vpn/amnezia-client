@@ -96,7 +96,7 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                col.copyToClipBoard(descriptionText)
+                                GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
@@ -113,7 +113,7 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                col.copyToClipBoard(descriptionText)
+                                GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
@@ -130,7 +130,7 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                col.copyToClipBoard(descriptionText)
+                                GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
@@ -147,21 +147,9 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                col.copyToClipBoard(descriptionText)
+                                GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                             }
-                        }
-
-                        TextEdit{
-                            id: clipboard
-                            visible: false
-                        }
-
-                        function copyToClipBoard(text) {
-                            clipboard.text = text
-                            clipboard.selectAll()
-                            clipboard.copy()
-                            clipboard.select(0, 0)
                         }
 
                         BasicButtonType {
