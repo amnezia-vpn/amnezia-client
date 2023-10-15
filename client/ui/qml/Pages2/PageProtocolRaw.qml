@@ -95,10 +95,13 @@ PageType {
                             parent: root
 
                             width: parent.width
-                            height: parent.height * 0.9
+                            height: parent.height
+                            contentHeight: parent.height * 0.9
 
                             BackButtonType {
                                 id: backButton
+
+                                parent: configContentDrawer.contentParent
 
                                 anchors.top: parent.top
                                 anchors.left: parent.left

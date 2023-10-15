@@ -156,6 +156,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
+                            drawerParent: root
+
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 
                             descriptionText: qsTr("Hash")
@@ -201,6 +203,8 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            drawerParent: root
 
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 

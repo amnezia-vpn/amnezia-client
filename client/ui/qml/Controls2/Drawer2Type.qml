@@ -16,8 +16,6 @@ Item {
 
     visible: false
 
-    parent: Overlay.overlay
-
     signal close()
 
     property bool needCloseButton: true
@@ -27,7 +25,10 @@ Item {
     property int collapsedHeight: 0
 
     property bool needCollapsed: false
-
+    property double scaely
+    property int contentHeight: 0
+    property Item contentParent: contentArea
+    // property bool inContentArea: false
 
     y: parent.height - root.height
 
@@ -37,23 +38,49 @@ Item {
         id: draw2Background
 
         anchors { left: root.left; right: root.right; top: root.top }
-        height: root.height
+        height: root.parent.height
+        width: parent.width
         radius: 16
-        color: root.defaultColor
-        border.color: root.borderColor
+        color:  "transparent"
+        border.color: "transparent" //"green"
         border.width: 1
+        visible: true
 
         Rectangle {
-            width: parent.radius
-            height: parent.radius
-            anchors.bottom: parent.bottom
+            id: semiArea
+            anchors.top: parent.top
+            height: parent.height - contentHeight
             anchors.right: parent.right
             anchors.left: parent.left
-            color: parent.color
+            visible: true
+            color: "transparent"
+        }
+
+        Rectangle {
+            id: contentArea
+            anchors.top: semiArea.bottom
+            height: contentHeight
+            radius: 16
+            color: root.defaultColor
+            border.width: 1
+            border.color: root.borderColor
+            width: parent.width
+            visible: true
+
+            Rectangle {
+                width: parent.radius
+                height: parent.radius
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.left: parent.left
+                color: parent.color
+            }
         }
     }
 
+
     MouseArea {
+        id: fullArea
         anchors.fill: parent
         enabled: (root.state === "expanded" || root.state === "opened")
         onClicked: {
@@ -75,6 +102,7 @@ Item {
         id: dragArea
 
         anchors.fill: parent
+
         cursorShape: (root.state === "opened"  || root.state === "expanded") ? Qt.PointingHandCursor : Qt.ArrowCursor
         hoverEnabled: true
 
@@ -108,12 +136,14 @@ Item {
         }
 
         onClicked: {
-            if (root.state === "opened") {
-                root.state = "closed"
+            if (root.state === "expanded") {
+                root.state = "collapsed"
+                return
             }
 
-            if (root.state == "expanded") {
-                root.state == "collapsed"
+            if (root.state === "opened") {
+                root.state = "closed"
+                return
             }
         }
     }
@@ -217,7 +247,7 @@ Item {
         target: root
         property: "y"
         from: parent.height
-        to: parent.height  - root.height
+        to: 0
         duration: 200
     }
 
@@ -226,9 +256,11 @@ Item {
             return
         }
 
+        root.y = 0
         root.state = "opened"
         root.visible = true
-        root.y = parent.height - root.height
+        root.height = parent.height
+        contentArea.height = contentHeight
 
         dragArea.drag.maximumY =  parent.height
         dragArea.drag.minimumY =  parent.height - root.height

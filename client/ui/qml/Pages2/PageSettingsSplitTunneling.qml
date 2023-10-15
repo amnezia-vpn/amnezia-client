@@ -108,6 +108,8 @@ PageType {
         DropDownType {
             id: selector
 
+            drawerParent: root
+
             Layout.fillWidth: true
             Layout.topMargin: 32
             Layout.leftMargin: 16
@@ -264,11 +266,14 @@ PageType {
         id: moreActionsDrawer
 
         width: parent.width
-        height: parent.height * 0.4375
+        height: parent.height
+        contentHeight: parent.height * 0.4375
 
         parent: root
 
         FlickableType {
+            parent: moreActionsDrawer.contentParent
+
             anchors.fill: parent
             contentHeight: moreActionsDrawerContent.height
             ColumnLayout {
@@ -331,12 +336,15 @@ PageType {
         id: importSitesDrawer
 
         width: parent.width
-        height: parent.height * 0.4375
+        height: parent.height
+        contentHeight: parent.height * 0.4375
 
         parent: root
 
         BackButtonType {
             id: importSitesDrawerBackButton
+
+            parent: importSitesDrawer.contentParent
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -349,6 +357,8 @@ PageType {
         }
 
         FlickableType {
+            parent: importSitesDrawer.contentParent
+
             anchors.top: importSitesDrawerBackButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right

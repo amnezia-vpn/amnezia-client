@@ -40,6 +40,8 @@ Item {
 
     property alias menuVisible: menu.visible
 
+    property Item drawerParent: root
+
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
@@ -161,17 +163,20 @@ Item {
         }
     }
 
-    // Drawer2Type {
-    DrawerType {
+    //DrawerType {
+    Drawer2Type {
         id: menu
 
-        width: parent.width
-        height: parent.height * drawerHeight
+        parent: drawerParent
 
-        // parent: root.parent.parent
+        width: parent.width
+        height: parent.height
+        contentHeight: parent.height * drawerHeight
 
         ColumnLayout {
             id: header
+
+            parent: menu.contentParent
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -187,6 +192,8 @@ Item {
         }
 
         FlickableType {
+            parent: menu.contentParent
+
             anchors.top: header.bottom
             anchors.topMargin: 16
             contentHeight: col.implicitHeight

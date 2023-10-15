@@ -17,15 +17,20 @@ Drawer2Type {
     property var noButtonFunction
 
     width: parent.width
-    height: parent.height * 0.5
+    height: parent.height
+    contentHeight: parent.height * 0.5
 
     ColumnLayout {
+        parent: root.contentParent
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 16
         anchors.rightMargin: 16
         anchors.leftMargin: 16
+
+        // visible: false
 
         spacing: 8
 

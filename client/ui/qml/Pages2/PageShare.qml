@@ -179,6 +179,8 @@ PageType {
             DropDownType {
                 id: serverSelector
 
+                drawerParent: root
+
                 signal severSelectorIndexChanged
                 property int currentIndex: 0
 
@@ -240,6 +242,8 @@ PageType {
 
             DropDownType {
                 id: protocolSelector
+
+                drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
 
@@ -329,6 +333,8 @@ PageType {
 
             DropDownType {
                 id: exportTypeSelector
+
+                drawerParent: root
 
                 property int currentIndex: 0
 

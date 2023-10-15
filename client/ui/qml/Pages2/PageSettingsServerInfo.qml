@@ -80,7 +80,8 @@ PageType {
 
                     parent: root
                     width: root.width
-                    height: root.height * 0.35
+                    height: root.height // * 0.35
+                    contentHeight: root.height * 0.35
 
                     onVisibleChanged: {
                         if (serverNameEditDrawer.visible) {
@@ -89,6 +90,8 @@ PageType {
                     }
 
                     ColumnLayout {
+                        parent: serverNameEditDrawer.contentParent
+
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right

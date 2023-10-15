@@ -9,10 +9,13 @@ Drawer2Type {
     id: root
 
     width: parent.width
-    height: parent.height * 0.9
+    height: parent.height
+    contentHeight: parent.height * 0.9
 
     ColumnLayout {
         id: backButton
+
+        parent: root.contentParent
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,6 +31,7 @@ Drawer2Type {
     }
 
     FlickableType {
+        parent: root.contentParent
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right

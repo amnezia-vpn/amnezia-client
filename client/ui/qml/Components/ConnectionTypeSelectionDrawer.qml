@@ -12,9 +12,12 @@ Drawer2Type {
     id: root
 
     width: parent.width
-    height: parent.height * 0.4375
+    height: parent.height
+    contentHeight: parent.height * 0.4375
 
     ColumnLayout {
+        parent: root.contentParent
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
