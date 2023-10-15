@@ -202,11 +202,11 @@ PageType {
                                 questionDrawer.noButtonText = qsTr("Cancel")
 
                                 questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.onClose()
+                                    questionDrawer.close()
                                     SitesController.removeSite(index)
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.onClose()
+                                    questionDrawer.close()
                                 }
                                 questionDrawer.open()
                             }

@@ -245,7 +245,7 @@ PageType {
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
 
-        onClose: function() {
+        onClosed: {
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }

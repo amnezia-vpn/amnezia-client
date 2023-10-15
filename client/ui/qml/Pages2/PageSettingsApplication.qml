@@ -152,12 +152,12 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.onClose()
+                        questionDrawer.close()
                         SettingsController.clearSettings()
                         PageController.replaceStartPage()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.onClose()
+                        questionDrawer.close()
                     }
                     questionDrawer.open()
                 }

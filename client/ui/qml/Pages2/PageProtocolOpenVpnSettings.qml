@@ -369,12 +369,12 @@ PageType {
                                 questionDrawer.noButtonText = qsTr("Cancel")
 
                                 questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.onClose()
+                                    questionDrawer.close()
                                     PageController.goToPage(PageEnum.PageDeinstalling)
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.onClose()
+                                    questionDrawer.close()
                                 }
                                 questionDrawer.open()
                             }

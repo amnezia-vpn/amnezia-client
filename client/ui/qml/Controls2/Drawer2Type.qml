@@ -14,9 +14,9 @@ Item {
         }
     }
 
-    visible: false
+    signal closed
 
-    signal close()
+    visible: false
 
     property bool needCloseButton: true
 
@@ -28,7 +28,6 @@ Item {
     property double scaely
     property int contentHeight: 0
     property Item contentParent: contentArea
-    // property bool inContentArea: false
 
     y: parent.height - root.height
 
@@ -44,7 +43,7 @@ Item {
         width: parent.width
         radius: 16
         color:  "transparent"
-        border.color: "transparent" //"green"
+        border.color: "transparent"
         border.width: 1
         visible: true
 
@@ -52,6 +51,8 @@ Item {
             id: fullArea
             anchors.fill: parent
             enabled: (root.state === "expanded" || root.state === "opened")
+            hoverEnabled: true
+
             onClicked: {
                 if (root.state === "expanded") {
                     root.state = "collapsed"
@@ -65,7 +66,7 @@ Item {
             }
 
             Rectangle {
-                id: semiArea
+                id: placeAreaHolder
                 anchors.top: parent.top
                 height: parent.height - contentHeight
                 anchors.right: parent.right
@@ -77,7 +78,7 @@ Item {
             Rectangle {
                 id: contentArea
 
-                anchors.top: semiArea.bottom
+                anchors.top: placeAreaHolder.bottom
                 height: contentHeight
                 radius: 16
                 color: root.defaultColor
@@ -112,13 +113,13 @@ Item {
                     onReleased: {
                         if (root.state === "closed" && root.y < dragArea.drag.maximumY) {
                             root.state = "opened"
-                            PageController.drawerOpen()
+                            // PageController.drawerOpen()
                             return
                         }
 
                         if (root.state === "opened" && root.y > dragArea.drag.minimumY) {
                             root.state = "closed"
-                            PageController.drawerClose()
+                            // PageController.drawerClose()
                             return
                         }
 
@@ -134,23 +135,17 @@ Item {
 
                     onClicked: {
                         if (root.state === "expanded") {
+                            // PageController.drawerOpen()
                             root.state = "collapsed"
                             return
                         }
 
                         if (root.state === "opened") {
+                            // PageController.drawerClose()
                             root.state = "closed"
                             return
                         }
                     }
-
-//                    onEntered: {
-//                        fullArea.enabled = false
-//                    }
-
-//                    onExited: {
-//                        fullArea.enabled = true
-//                    }
                 }
             }
         }
@@ -163,14 +158,23 @@ Item {
                 PageController.updateNavigationBarColor(initialPageNavigationBarColor)
             }
 
-            PageController.drawerClose()
+            if (needCloseButton) {
+                PageController.drawerClose()
+            }
+
+            closed()
+
             return
         }
         if (root.state === "expanded" || root.state === "opened") {
             if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
                 PageController.updateNavigationBarColor(0xFF1C1D21)
             }
-            PageController.drawerOpen()
+
+            if (needCloseButton) {
+                PageController.drawerOpen()
+            }
+
             return
         }
     }
@@ -275,31 +279,22 @@ Item {
 
 
         animationVisible.running = true
-
-        if (needCloseButton) {
-            PageController.drawerOpen()
-        }
-
-        if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
-            PageController.updateNavigationBarColor(0xFF1C1D21)
-        }
     }
 
-    function onClose() {
-        if (needCloseButton) {
-            PageController.drawerClose()
-        }
-
-        var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
-        if (initialPageNavigationBarColor !== 0xFF1C1D21) {
-            PageController.updateNavigationBarColor(initialPageNavigationBarColor)
-        }
-
+    function close() {
         root.visible = false
+        root.state = "closed"
     }
 
     onVisibleChanged: {
+        // e.g cancel, ......
         if (!visible) {
+            if (root.state === "opened") {
+                if (needCloseButton) {
+                    PageController.drawerClose()
+                }
+            }
+
             close()
         }
     }
