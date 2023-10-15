@@ -112,7 +112,7 @@ PageType {
             }
 
             LabelWithButtonType {
-                visible: !GC.isMobile()
+                visible: false//!GC.isMobile()
 
                 Layout.fillWidth: true
 
