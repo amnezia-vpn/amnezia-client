@@ -328,7 +328,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="275"/>
         <source>Remove AmneziaWG</source>
-        <translation>Remove AmneziaWG</translation>
+        <translation>Удалить AmneziaWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="278"/>
@@ -338,7 +338,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN с этим протоколом, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="280"/>
@@ -371,13 +371,13 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="103"/>
         <source>Port</source>
-        <translation>Port</translation>
+        <translation>Порт</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="120"/>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="121"/>
         <source>Cipher</source>
-        <translation>Cipher</translation>
+        <translation>Шифрование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="159"/>
@@ -472,7 +472,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="207"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="208"/>
         <source>Cipher</source>
-        <translation>Шифрованаие</translation>
+        <translation>Шифрование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="216"/>
@@ -563,7 +563,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="363"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
@@ -611,7 +611,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN с этим протоколом больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
@@ -667,7 +667,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно в настройках, во вкладке &quot;Соединения&quot;.</translation>
+        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно во вкладке &quot;Соединения&quot; настроек приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
@@ -760,7 +760,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="248"/>
         <source>Remove SFTP and all data stored there</source>
-        <translation>Удалите SFTP-хранилище со всеми данными</translation>
+        <translation>Удалить SFTP-хранилище со всеми данными</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="251"/>
@@ -808,7 +808,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
         <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation>Через несколько минут после установки  ваш Onion сайт станет доступен в сети Tor.</translation>
+        <translation>Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
@@ -827,7 +827,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="129"/>
         <source>The site with all data will be removed from the tor network.</source>
-        <translation>Сайт со всеми данными будет удален из сети tor.</translation>
+        <translation>Сайт со всеми данными будет удален из сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="130"/>
@@ -883,7 +883,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation>Поддержите проект донатами</translation>
+        <translation>Поддержите проект пожертвованием</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -991,12 +991,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
         <source>Start minimized</source>
-        <translation>Запуск в свернутом виде</translation>
+        <translation>Запускать в свернутом виде</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Launch application minimized</source>
-        <translation>Запуск приложения в свернутом виде</translation>
+        <translation>Запускать приложение в свернутом виде</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="111"/>
@@ -1031,7 +1031,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="149"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>Все данные из приложения будут удалены Все установленные сервисы AmneziaVPN останутся на сервере.</translation>
+        <translation>Все данные из приложения будут удалены, все установленные сервисы AmneziaVPN останутся на сервере.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="150"/>
@@ -1269,7 +1269,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="127"/>
         <source>Save logs to file</source>
-        <translation>Сохранить логи в файл</translation>
+        <translation>Сохранять логи в файл</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="145"/>
@@ -1346,7 +1346,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="117"/>
         <source>Check the server for previously installed Amnezia services</source>
-        <translation>Проверка сервера на наличие ранее установленных сервисов Amnezia</translation>
+        <translation>Проверить сервер на наличие ранее установленных сервисов Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="118"/>
@@ -1371,7 +1371,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="165"/>
         <source>Clear server from Amnezia software</source>
-        <translation>Очистка сервера от протоколов и сервисов Amnezia</translation>
+        <translation>Очистить сервер от протоколов и сервисов Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
@@ -1381,7 +1381,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="170"/>
         <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation>На сервере будут удалены все, что связанно с Amnezia: протоколы сервисы конфигурационные файлы, ключи и сертификаты.</translation>
+        <translation>На сервере будут удалены все данные, связанные с Amnezia: протоколы, сервисы, конфигурационные файлы, ключи и сертификаты.</translation>
     </message>
 </context>
 <context>
@@ -1468,7 +1468,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="90"/>
         <source>Split tunneling</source>
-        <translation>Раздельно VPN-туннелирование</translation>
+        <translation>Раздельное VPN-туннелирование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="121"/>
@@ -1541,7 +1541,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="396"/>
         <source>Add imported sites to existing ones</source>
-        <translation>Добавление импортированных сайтов к существующим</translation>
+        <translation>Добавить импортированные сайты к существующим</translation>
     </message>
 </context>
 <context>
@@ -1563,7 +1563,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="61"/>
         <source>What do you have?</source>
-        <translation>Выберете что у вас есть?</translation>
+        <translation>Выберете что у вас есть</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
@@ -1669,7 +1669,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
         <source>I want to choose a VPN protocol</source>
-        <translation>Выбор VPN-протокола</translation>
+        <translation>Выбрать VPN-протокол</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="157"/>
@@ -1729,7 +1729,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="75"/>
         <source>Installing %1</source>
-        <translation>Установка %1</translation>
+        <translation>Установить %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="93"/>
@@ -1754,7 +1754,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="213"/>
         <source>Install</source>
-        <translation>Установка</translation>
+        <translation>Установить</translation>
     </message>
 </context>
 <context>
@@ -1767,7 +1767,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="74"/>
         <source>Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.</source>
-        <translation>Выберите протокол, который вам больше подходит . В дальнейшем можно установить другие протоколы и дополнительные сервисы, такие как DNS-прокси и SFTP.</translation>
+        <translation>Выберите протокол, который вам больше подходит. В дальнейшем можно установить другие протоколы и дополнительные сервисы, такие как DNS-прокси, TOR-сайт и SFTP.</translation>
     </message>
 </context>
 <context>
@@ -1826,7 +1826,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="53"/>
         <source>Insert</source>
-        <translation>Вставка</translation>
+        <translation>Вставить</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="71"/>
@@ -2414,74 +2414,20 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="129"/>
-        <source>The time-tested most popular VPN protocol.
+        <location filename="../containers/containers_defs.cpp" line="203"/>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
-Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports various authentication methods, making it suitable for a variety of devices and operating systems.
-
-* Normal power consumption on mobile devices
-* Flexible customisation to suit user needs to work with different operating systems and devices.
-* Recognised by DPI analysis systems and therefore susceptible to blocking.
-* Can operate over both TCP and UDP network protocols.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="139"/>
-        <source>Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to identify because it is virtually identical to a normal HTTPS connection.
-
-However, some traffic analysis systems can still recognise a ShadowSocks connection, so in countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.
-* Average power consumption on mobile devices (higher than OpenVPN).
-* It is possible to configure the encryption protocol.
-* Recognised by some DPI analysis systems
-* Works only via TCP network protocol
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="149"/>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
-
-OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
-
-Cloak protects OpenVPN from detection and blocking. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a high level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works via TCP network protocol
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="167"/>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-* Low power consumption on mobile devices.
-* Minimum number of settings.
-* Easily recognised by DPI analysis systems, susceptible to blocking.
-* Works via UDP network protocol.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="177"/>
-        <source>A modern stable protocol.
-
-IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
+* Available in the AmneziaVPN only on Windows
 * Low power consumption, on mobile devices
-* Minimal configuration.
-* Recognised by DPI analysis systems.
-* Works only over UDP network protocol
-</source>
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="190"/>
+        <location filename="../containers/containers_defs.cpp" line="215"/>
         <source>DNS Service</source>
         <translation>DNS Сервис</translation>
     </message>
@@ -2492,7 +2438,7 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="189"/>
+        <location filename="../containers/containers_defs.cpp" line="214"/>
         <source>Website in Tor network</source>
         <translation>Веб-сайт в сети Tor</translation>
     </message>
@@ -2539,7 +2485,7 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
     <message>
         <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
-        <translation>Замените адрес DNS-сервера на собственный. Это повысит уровень конфиденциальности.</translation>
+        <translation>Замените DNS-сервер на Amnezia DNS. Это повысит уровень конфиденциальности.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="122"/>
@@ -2547,12 +2493,83 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
         <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="175"/>
-        <source>AmneziaWG container</source>
-        <translation>AmneziaWG протокол</translation>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
+        <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
+It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
+
+* Available in the AmneziaVPN across all platforms
+* Normal power consumption on mobile devices
+* Flexible customisation to suit user needs to work with different operating systems and devices
+* Recognised by DPI analysis systems and therefore susceptible to blocking
+* Can operate over both TCP and UDP network protocols.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="191"/>
+        <location filename="../containers/containers_defs.cpp" line="145"/>
+        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
+
+* Available in the AmneziaVPN only on desktop platforms
+* Normal power consumption on mobile devices
+
+* Configurable encryption protocol
+* Detectable by some DPI systems
+* Works over TCP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="155"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
+
+OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+
+* Available in the AmneziaVPN across all platforms
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works over TCP network protocol, 443 port.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="174"/>
+        <source>A relatively new popular VPN protocol with a simplified architecture.
+Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
+WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Easily recognised by DPI analysis systems, susceptible to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="187"/>
+        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
+While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
+This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Not recognised by DPI analysis systems, resistant to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AmneziaWG container</source>
+        <translation type="vanished">AmneziaWG протокол</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
     </message>
@@ -2637,7 +2654,7 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="49"/>
         <source>Choose language</source>
-        <translation>Выберете язык</translation>
+        <translation>Выберите язык</translation>
     </message>
 </context>
 <context>
@@ -2849,32 +2866,32 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="283"/>
+        <location filename="../containers/containers_defs.cpp" line="308"/>
         <source>Low</source>
         <translation>Низкий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="284"/>
+        <location filename="../containers/containers_defs.cpp" line="309"/>
         <source>Medium or High</source>
         <translation>Спедний или Высокий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="285"/>
+        <location filename="../containers/containers_defs.cpp" line="310"/>
         <source>Extreme</source>
         <translation>Экстремальный</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="293"/>
+        <location filename="../containers/containers_defs.cpp" line="318"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>Я просто хочу повысить уровень своей приватности.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="294"/>
+        <location filename="../containers/containers_defs.cpp" line="319"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>Я хочу обойти блокировки. Этот вариант рекомендуется в большинстве случаев.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="296"/>
+        <location filename="../containers/containers_defs.cpp" line="321"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>Большинство VPN протоколов заблокированы. Рекомендуется, если другие варианты не работают.</translation>
     </message>
