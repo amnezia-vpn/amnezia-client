@@ -245,6 +245,8 @@ PageType {
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
 
+        z: 1
+
         onClosed: {
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
