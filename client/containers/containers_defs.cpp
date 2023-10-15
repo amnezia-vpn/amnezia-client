@@ -127,24 +127,30 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
     return {
         { DockerContainer::OpenVpn,
           QObject::tr(
-                  "The time-tested most popular VPN protocol.\n\n"
-                  "Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports "
-                  "various authentication methods, making it suitable for a variety of devices and operating "
-                  "systems.\n\n"
-                  "* Normal power consumption on mobile devices\n"
-                  "* Flexible customisation to suit user needs to work with different operating systems and devices.\n"
-                  "* Recognised by DPI analysis systems and therefore susceptible to blocking.\n"
-                  "* Can operate over both TCP and UDP network protocols.") },
+                      "OpenVPN stands as one of the most popular and time-tested VPN protocols available.\n"
+                      "It employs its unique security protocol, "
+                      "leveraging the strength of SSL/TLS for encryption and key exchange. "
+                      "Furthermore, OpenVPN's support for a multitude of authentication methods makes it versatile and adaptable, "
+                      "catering to a wide range of devices and operating systems. "
+                      "Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, "
+                      "which continually reinforces its security. "
+                      "With a strong balance of performance, security, and compatibility, "
+                      "OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.\n\n"
+                      "* Available in the AmneziaVPN across all platforms\n"
+                      "* Normal power consumption on mobile devices\n"
+                      "* Flexible customisation to suit user needs to work with different operating systems and devices\n"
+                      "* Recognised by DPI analysis systems and therefore susceptible to blocking\n"
+                      "* Can operate over both TCP and UDP network protocols.") },
         { DockerContainer::ShadowSocks,
-          QObject::tr("Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - "
-                      "roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to "
-                      "identify because it is virtually identical to a normal HTTPS connection.\n\n"
-                      "However, some traffic analysis systems can still recognise a ShadowSocks connection, so in "
-                      "countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.\n"
-                      "* Average power consumption on mobile devices (higher than OpenVPN).\n"
-                      "* It is possible to configure the encryption protocol.\n"
-                      "* Recognised by some DPI analysis systems\n"
-                      "* Works only via TCP network protocol\n") },
+          QObject::tr("Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. "
+                      "Although Shadowsocks is designed to be discreet and challenging to identify, it isn't identical to a standard HTTPS connection."
+                      "However, certain traffic analysis systems might still detect a Shadowsocks connection. "
+                      "Due to limited support in Amnezia, it's recommended to use AmneziaWG protocol.\n\n"
+                      "* Available in the AmneziaVPN only on desktop platforms\n"
+                      "* Normal power consumption on mobile devices\n\n"
+                      "* Configurable encryption protocol\n"
+                      "* Detectable by some DPI systems\n"
+                      "* Works over TCP network protocol.") },
         { DockerContainer::Cloak,
           QObject::tr("This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for "
                       "blocking protection.\n\n"
@@ -157,34 +163,53 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "Immediately after receiving the first data packet, Cloak authenticates the incoming connection. "
                       "If authentication fails, the plugin masks the server as a fake website and your VPN becomes "
                       "invisible to analysis systems.\n\n"
-                      "If there is a high level of Internet censorship in your region, we advise you to use only "
-                      "OpenVPN over Cloak from the first connection\n"
+                      "If there is a extreme level of Internet censorship in your region, we advise you to use only "
+                      "OpenVPN over Cloak from the first connection\n\n"
+                      "* Available in the AmneziaVPN across all platforms\n"
                       "* High power consumption on mobile devices\n"
                       "* Flexible settings\n"
                       "* Not recognised by DPI analysis systems\n"
-                      "* Works via TCP network protocol\n") },
+                      "* Works over TCP network protocol, 443 port.\n") },
         { DockerContainer::WireGuard,
           QObject::tr("A relatively new popular VPN protocol with a simplified architecture.\n"
                       "Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption "
                       "settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.\n"
-
-                      "* Low power consumption on mobile devices.\n"
-                      "* Minimum number of settings.\n"
-                      "* Easily recognised by DPI analysis systems, susceptible to blocking.\n"
-                      "* Works via UDP network protocol.\n") },
-        { DockerContainer::Awg, QObject::tr("AmneziaWG container") },
+                      "WireGuard is very susceptible to blocking due to its distinct packet signatures. "
+                      "Unlike some other VPN protocols that employ obfuscation techniques, "
+                      "the consistent signature patterns of WireGuard packets can be more easily identified and "
+                      "thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.\n\n"
+                      "* Available in the AmneziaVPN across all platforms\n"
+                      "* Low power consumption\n"
+                      "* Minimum number of settings\n"
+                      "* Easily recognised by DPI analysis systems, susceptible to blocking\n"
+                      "* Works over UDP network protocol.") },
+        { DockerContainer::Awg,
+          QObject::tr("A modern iteration of the popular VPN protocol, "
+                      "AmneziaWG builds upon the foundation set by WireGuard, "
+                      "retaining its simplified architecture and high-performance capabilities across devices.\n"
+                      "While WireGuard is known for its efficiency, "
+                      "it had issues with being easily detected due to its distinct packet signatures. "
+                      "AmneziaWG solves this problem by using better obfuscation methods, "
+                      "making its traffic blend in with regular internet traffic.\n"
+                      "This means that AmneziaWG keeps the fast performance of the original "
+                      "while adding an extra layer of stealth, "
+                      "making it a great choice for those wanting a fast and discreet VPN connection.\n\n"
+                      "* Available in the AmneziaVPN across all platforms\n"
+                      "* Low power consumption\n"
+                      "* Minimum number of settings\n"
+                      "* Not recognised by DPI analysis systems, resistant to blocking\n"
+                      "* Works over UDP network protocol.") },
         { DockerContainer::Ipsec,
-          QObject::tr("A modern stable protocol.\n\n"
-
-                      "IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting "
-                      "them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks "
-                      "and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN "
-                      "solutions for mobile devices. Vulnerable to detection and blocking.\n"
-
+          QObject::tr("IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.\n"
+                      "One of its distinguishing features is its ability to swiftly switch between networks and devices, "
+                      "making it particularly adaptive in dynamic network environments. \n"
+                      "While it offers a blend of security, stability, and speed, "
+                      "it's essential to note that IKEv2 can be easily detected and is susceptible to blocking.\n\n"
+                      "* Available in the AmneziaVPN only on Windows\n"
                       "* Low power consumption, on mobile devices\n"
-                      "* Minimal configuration.\n"
-                      "* Recognised by DPI analysis systems.\n"
-                      "* Works only over UDP network protocol\n") },
+                      "* Minimal configuration\n"
+                      "* Recognised by DPI analysis systems\n"
+                      "* Works over UDP network protocol, ports 500 and 4500.") },
 
         { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
         { DockerContainer::Dns, QObject::tr("DNS Service") },

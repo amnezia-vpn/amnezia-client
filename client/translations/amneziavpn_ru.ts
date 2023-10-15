@@ -2414,74 +2414,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="129"/>
-        <source>The time-tested most popular VPN protocol.
-
-Uses a proprietary security protocol with SSL/TLS for encryption and key exchange and supports various authentication methods, making it suitable for a variety of devices and operating systems.
-
-* Normal power consumption on mobile devices
-* Flexible customisation to suit user needs to work with different operating systems and devices.
-* Recognised by DPI analysis systems and therefore susceptible to blocking.
-* Can operate over both TCP and UDP network protocols.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="139"/>
-        <source>Based on the SOCKS5 proxy protocol, which protects the connection using the AEAD cipher - roughly along the same lines as SSH tunnelling. A Shadowsocks connection is difficult to identify because it is virtually identical to a normal HTTPS connection.
-
-However, some traffic analysis systems can still recognise a ShadowSocks connection, so in countries with high levels of censorship we recommend using OpenVPN in conjunction with Cloak.
-* Average power consumption on mobile devices (higher than OpenVPN).
-* It is possible to configure the encryption protocol.
-* Recognised by some DPI analysis systems
-* Works only via TCP network protocol
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="149"/>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
-
-OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
-
-Cloak protects OpenVPN from detection and blocking. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a high level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works via TCP network protocol
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="167"/>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-* Low power consumption on mobile devices.
-* Minimum number of settings.
-* Easily recognised by DPI analysis systems, susceptible to blocking.
-* Works via UDP network protocol.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="177"/>
-        <source>A modern stable protocol.
-
-IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
-* Low power consumption, on mobile devices
-* Minimal configuration.
-* Recognised by DPI analysis systems.
-* Works only over UDP network protocol
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="190"/>
+        <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>DNS Service</source>
         <translation>DNS Сервис</translation>
     </message>
@@ -2492,7 +2425,7 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="189"/>
+        <location filename="../containers/containers_defs.cpp" line="215"/>
         <source>Website in Tor network</source>
         <translation>Веб-сайт в сети Tor</translation>
     </message>
@@ -2547,12 +2480,96 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
         <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="175"/>
-        <source>AmneziaWG container</source>
-        <translation>AmneziaWG протокол</translation>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
+        <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
+It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
+
+* Available in the AmneziaVPN across all platforms
+* Normal power consumption on mobile devices
+* Flexible customisation to suit user needs to work with different operating systems and devices
+* Recognised by DPI analysis systems and therefore susceptible to blocking
+* Can operate over both TCP and UDP network protocols.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="191"/>
+        <location filename="../containers/containers_defs.cpp" line="145"/>
+        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
+
+* Available in the AmneziaVPN only on desktop platforms
+* Normal power consumption on mobile devices
+
+* Configurable encryption protocol
+* Detectable by some DPI systems
+* Works over TCP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="155"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
+
+OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+
+* Available in the AmneziaVPN across all platforms
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works over TCP network protocol, 443 port.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="174"/>
+        <source>A relatively new popular VPN protocol with a simplified architecture.
+Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
+WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Easily recognised by DPI analysis systems, susceptible to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="187"/>
+        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
+While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
+This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Not recognised by DPI analysis systems, resistant to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="203"/>
+        <source>A modern stable protocol.
+
+IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4500 protecting them with strong 3DES and AES crypto algorithms. Allows very fast switching between networks and devices. Due to its security, stability and speed, IKEv2 is currently one of the best VPN solutions for mobile devices. Vulnerable to detection and blocking.
+
+* Available in the AmneziaVPN only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AmneziaWG container</source>
+        <translation type="vanished">AmneziaWG протокол</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>Sftp file sharing service - is secure FTP service</source>
         <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
     </message>
@@ -2839,32 +2856,32 @@ IKEv2 with IPSec encryption layer. Transmits data over fixed UDP ports 500 and 4
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="283"/>
+        <location filename="../containers/containers_defs.cpp" line="309"/>
         <source>Low</source>
         <translation>Низкий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="284"/>
+        <location filename="../containers/containers_defs.cpp" line="310"/>
         <source>Medium or High</source>
         <translation>Спедний или Высокий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="285"/>
+        <location filename="../containers/containers_defs.cpp" line="311"/>
         <source>Extreme</source>
         <translation>Экстремальный</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="293"/>
+        <location filename="../containers/containers_defs.cpp" line="319"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>Я просто хочу повысить уровень своей приватности.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="294"/>
+        <location filename="../containers/containers_defs.cpp" line="320"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>Я хочу обойти блокировки. Этот вариант рекомендуется в большинстве случаев.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="296"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>Большинство VPN протоколов заблокированы. Рекомендуется, если другие варианты не работают.</translation>
     </message>
