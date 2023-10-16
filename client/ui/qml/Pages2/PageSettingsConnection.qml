@@ -125,7 +125,7 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: false//!GC.isMobile()
             }
         }
     }
