@@ -116,7 +116,7 @@ PageType {
 
             drawerHeight: 0.4375
 
-            enabled: switcher.checked && root.pageEnabled
+            enabled: root.pageEnabled
 
             headerText: qsTr("Mode")
 
@@ -158,7 +158,7 @@ PageType {
         anchors.topMargin: 16
         contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
 
-        enabled: switcher.checked && root.pageEnabled
+        enabled: root.pageEnabled
 
         Column {
             id: col
