@@ -72,6 +72,13 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
         val jsonVpnConfig = mService.getVpnConfig()
         val ovpnConfig = jsonVpnConfig.getJSONObject("openvpn_config_data").getString("config")
+        Log.e(tag, "jsonVpnConfig $jsonVpnConfig")
+        val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
+        val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
+
+        Log.e(tag, "splitTunnelType $splitTunnelType")
+        Log.e(tag, "splitTunnelSites $splitTunnelSites")
+
 
         val resultingConfig = StringBuilder()
         resultingConfig.append(ovpnConfig)
@@ -115,6 +122,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         eval_config(config)
 
         val status = connect()
+        
         if (status.getError()) {
             Log.i(tag, "connect() error: " + status.getError() + ": " + status.getMessage())
         }
@@ -139,7 +147,46 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_establish(): Int {
         Log.v(tag, "tun_builder_establish")
-        return mService.establish()!!.detachFd()
+        val Fd = mService.establish()!!.detachFd()
+        
+        val jsonVpnConfig = mService.getVpnConfig()
+        
+        val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
+        val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
+        
+        Log.e(tag, "splitTunnelSites $splitTunnelSites")
+        for (i in 0 until splitTunnelSites.length()) {
+	    val site = splitTunnelSites.getString(i)
+            if (site.contains("\\/")) {
+                Log.e(tag, "site $site rawMask 32")
+                mService.addRoute(site, 32)
+            } else {
+                var slash = site.lastIndexOf('/');
+                var maskString: String = ""
+                var rawMask = 32
+                var rawAddress: String = ""
+                if (slash >= 0) {
+                    maskString = site.substring(slash + 1)
+                    try {
+                        rawMask = Integer.parseInt(maskString, 10)
+		    } catch (e: Exception) {
+                        
+                    }
+                    rawAddress = site.substring(0, slash)
+		} else {
+		      maskString = ""
+		      rawMask = 32
+		      rawAddress = site
+		}
+                Log.e(tag, "rawAddress $rawAddress rawMask $rawMask")
+                mService.addRoute(rawAddress, rawMask)
+                //val internet = InetNetwork.parse(site)
+                //peerBuilder.addAllowedIp(internet)
+            }
+            Log.e(tag, "splitTunnelSites $site")
+        }
+        
+        return Fd
     }
 
     override fun  tun_builder_add_address(address: String , prefix_length: Int , gateway: String , ipv6:Boolean , net30: Boolean ): Boolean {
@@ -159,7 +206,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean , flags: Long): Boolean {
           Log.v(tag, "tun_builder_reroute_gw")
-          mService.addRoute("0.0.0.0", 0)
+         // mService.addRoute("0.0.0.0", 0)
           return true
     }
 

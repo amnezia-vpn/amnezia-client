@@ -297,7 +297,7 @@ void AmneziaApplication::initModels()
     connect(m_containersModel.get(), &ContainersModel::defaultContainerChanged, this, [this]() {
         if (m_containersModel->getDefaultContainer() == DockerContainer::WireGuard
             && m_sitesModel->isSplitTunnelingEnabled()) {
-            m_sitesModel->toggleSplitTunneling(false);
+            m_sitesModel->toggleSplitTunneling(true);
             emit m_pageController->showNotificationMessage(
                     tr("Split tunneling for WireGuard is not implemented, the option was disabled"));
         }

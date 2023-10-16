@@ -571,6 +571,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     private fun buildWireguardConfig(obj: JSONObject, type: String): Config {
         val confBuilder = Config.Builder()
         val wireguardConfigData = obj.getJSONObject(type)
+        val splitTunnelType = obj.getInt("splitTunnelType")
+        val splitTunnelSites = obj.getJSONArray("splitTunnelSites")
+
         val config = parseConfigData(wireguardConfigData.getString("config"))
         val peerBuilder = Peer.Builder()
         val peerConfig = config["Peer"]!!
@@ -579,15 +582,37 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             peerBuilder.setPreSharedKey(Key.fromBase64(it))
         }
         val allowedIPList = peerConfig["AllowedIPs"]?.split(",") ?: emptyList()
-        if (allowedIPList.isEmpty()) {
-            val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
-            peerBuilder.addAllowedIp(internet)
-        } else {
-            allowedIPList.forEach {
-                val network = InetNetwork.parse(it.trim())
-                peerBuilder.addAllowedIp(network)
+        
+        Log.e(tag, "splitTunnelSites $splitTunnelSites")
+        for (i in 0 until splitTunnelSites.length()) {
+	    val site = splitTunnelSites.getString(i)
+            if (site.contains("\\/")) {
+                val internet = InetNetwork.parse(site + "\\32")
+                peerBuilder.addAllowedIp(internet)
+            } else {
+                val internet = InetNetwork.parse(site)
+                peerBuilder.addAllowedIp(internet)
             }
+            Log.e(tag, "splitTunnelSites $site")
         }
+    
+    //    if (allowedIPList.isEmpty() /*&& splitTunnelType.equals("0", true) */) {
+    //        Log.e(tag, "splitTunnelSites $splitTunnelSites")
+    //        for (i in 0 until splitTunnelSites.length()) {
+    //		val site = splitTunnelSites.getString(i)
+    //            Log.e(tag, "splitTunnelSites $site")
+    //        }
+        
+    //        val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
+    //        peerBuilder.addAllowedIp(internet)
+    //    } else {
+
+        
+    //        allowedIPList.forEach {
+    //            val network = InetNetwork.parse(it.trim())
+    //            peerBuilder.addAllowedIp(network)
+    //        }
+    //    }
         val endpointConfig = peerConfig["Endpoint"]
         val endpoint = InetEndpoint.parse(endpointConfig)
         peerBuilder.setEndpoint(endpoint)
@@ -753,6 +778,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             GoBackend.wgTurnOff(currentTunnelHandle)
         }
         val wgConfig: String = wireguard_conf.toWgUserspaceString()
+        
+        Log.e(tag, "wgConfig : $wgConfig") 
+        
         val builder = Builder()
         setupBuilder(wireguard_conf, builder)
         builder.setSession("Amnezia")

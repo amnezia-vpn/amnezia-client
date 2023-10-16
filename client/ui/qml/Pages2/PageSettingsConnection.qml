@@ -94,7 +94,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: !GC.isMobile()
+                visible: GC.isDesktop() || Qt.platform.os === "android"
 
                 Layout.fillWidth: true
 
