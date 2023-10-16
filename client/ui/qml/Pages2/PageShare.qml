@@ -320,7 +320,7 @@ PageType {
 
                         if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                        } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
                         }
                     }

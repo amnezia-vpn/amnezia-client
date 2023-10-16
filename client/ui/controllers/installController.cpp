@@ -184,7 +184,7 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
         }
 
         if (ContainerProps::containerService(container) == ServiceType::Vpn) {
-            m_containersModel->setData(m_containersModel->index(0, 0), container, ContainersModel::Roles::IsDefaultRole);
+            m_containersModel->setData(m_containersModel->index(container), true, ContainersModel::Roles::IsDefaultRole);
         }
         emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
         return;

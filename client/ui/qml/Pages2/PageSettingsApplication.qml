@@ -70,7 +70,7 @@ PageType {
                 Layout.margins: 16
 
                 text: qsTr("Auto start")
-                descriptionText: qsTr("Launch the application every time %1 starts").arg(Qt.platform.os)
+                descriptionText: qsTr("Launch the application every time the device is starts")
 
                 checked: SettingsController.isAutoStartEnabled()
                 onCheckedChanged: {
