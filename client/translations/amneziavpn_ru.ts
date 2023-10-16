@@ -4,9 +4,13 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="302"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation>Раздельное туннелирование для &quot;Wireguard&quot; не реализовано,опция отключена</translation>
+        <translation type="vanished">Раздельное туннелирование для &quot;Wireguard&quot; не реализовано,опция отключена</translation>
+    </message>
+    <message>
+        <location filename="../amnezia_application.cpp" line="303"/>
+        <source>Split tunneling for %1 is not implemented, the option was disabled</source>
+        <translation>Раздельное туннелирование для %1 не реализовано, опция отключена</translation>
     </message>
 </context>
 <context>
