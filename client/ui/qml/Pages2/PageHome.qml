@@ -471,10 +471,16 @@ PageType {
                                     }
 
                                     checked: index === serversMenuContent.currentIndex
+                                    checkable: !ConnectionController.isConnected
 
                                     ButtonGroup.group: serversRadioButtonGroup
 
                                     onClicked: {
+                                        if (ConnectionController.isConnected) {
+                                            PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                                            return
+                                        }
+
                                         serversMenuContent.currentIndex = index
 
                                         ServersModel.currentlyProcessedIndex = index

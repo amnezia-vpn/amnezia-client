@@ -119,13 +119,17 @@
     <name>HomeContainersListView</name>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="58"/>
+        <source>Unable change protocol while there is an active connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="69"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="76"/>
         <source>Reconnect via VPN Procotol: </source>
-        <translation>Переподключение через VPN протокол: </translation>
+        <translation type="vanished">Переподключение через VPN протокол: </translation>
     </message>
 </context>
 <context>
@@ -266,6 +270,11 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageHome.qml" line="388"/>
         <source>Servers</source>
         <translation>Серверы</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="480"/>
+        <source>Unable change server while there is an active connection</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

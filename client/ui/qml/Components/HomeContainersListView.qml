@@ -50,34 +50,26 @@ ListView {
                 imageSource: "qrc:/images/controls/download.svg"
                 showImage: !isInstalled
 
-                checkable: isInstalled
+                checkable: isInstalled && !ConnectionController.isConnected && isSupported
                 checked: isDefault
 
-                onPressed: function(mouse) {
-                    if (!isSupported) {
-                        PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
-                    }
-                }
-
                 onClicked: {
-                    if (checked) {
-                        var needReconnected = false
-                        if (!isDefault) {
-                            needReconnected = true
-                        }
+                    if (ConnectionController.isConnected && isInstalled) {
+                        PageController.showNotificationMessage(qsTr("Unable change protocol while there is an active connection"))
+                        return
+                    }
 
+                    if (checked) {
                         isDefault = true
 
                         menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
-
-
-                        if (needReconnected && (ConnectionController.isConnected || ConnectionController.isConnectionInProgress)) {
-                            PageController.showNotificationMessage(qsTr("Reconnect via VPN Procotol: ") + name)
-                            PageController.goToPageHome()
-                            ConnectionController.openConnection()
-                        }
                     } else {
+                        if (!isSupported && isInstalled) {
+                            PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
+                            return
+                        }
+
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
