@@ -42,6 +42,8 @@ Item {
 
     property Item drawerParent: root
 
+    property Drawer2Type menu: menu
+
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
@@ -157,13 +159,12 @@ Item {
         onClicked: {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
-            } else {
-                menu.open()
             }
+
+            menu.open()
         }
     }
 
-    //DrawerType {
     Drawer2Type {
         id: menu
 
@@ -186,7 +187,7 @@ Item {
             BackButtonType {
                 backButtonImage: root.headerBackButtonImage
                 backButtonFunction: function() {
-                    root.menuVisible = false
+                    menu.state = "closed"
                 }
             }
         }

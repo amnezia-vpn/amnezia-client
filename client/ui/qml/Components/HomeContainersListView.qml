@@ -69,7 +69,7 @@ ListView {
                         isDefault = true
 
                         menuContent.currentIndex = index
-                        containersDropDown.menuVisible = false
+                        containersDropDown.menu.state = "closed"
 
 
                         if (needReconnected &&
