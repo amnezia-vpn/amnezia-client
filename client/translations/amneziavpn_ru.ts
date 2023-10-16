@@ -611,7 +611,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <translation type="unfinished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
@@ -765,7 +765,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="251"/>
         <source>Remove SFTP and all data stored there?</source>
-        <translation>Удалить SFTP-хранилище и все хранящиеся на нем  данные?</translation>
+        <translation>Удалить SFTP-хранилище и все хранящиеся на нем данные?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="252"/>
@@ -984,13 +984,9 @@ Already installed containers were found on the server. All installed containers 
         <translation>Авто-запуск</translation>
     </message>
     <message>
-        <source>Launch the application every time %1 starts</source>
-        <translation type="vanished">Запускать приложение при каждом включении %1</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Launch the application every time the device is starts</source>
-        <translation>Запускать приложение при каждом включении устройства</translation>
+        <translation>Запускать приложение при каждом включении</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
@@ -1089,7 +1085,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="106"/>
         <source>Backup file saved</source>
-        <translation type="unfinished"></translation>
+        <translation>Бэкап файл сохранен</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="122"/>
@@ -1248,7 +1244,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="54"/>
         <source>Save logs</source>
-        <translation>Сохранить логи</translation>
+        <translation>Сохранять логи</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
@@ -1268,7 +1264,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="118"/>
         <source>Logs file saved</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл с логами сохранен</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="127"/>
@@ -1704,12 +1700,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="62"/>
         <source>Amnezia has detected that your server is currently </source>
-        <translation type="unfinished"></translation>
+        <translation>Amnezia обнаружила, что ваш сервер в настоящее время </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
         <source>busy installing other software. Amnezia installation </source>
-        <translation type="unfinished"></translation>
+        <translation>занят установкой другого программного обеспечения. Установка Amnezia </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
@@ -2428,7 +2424,15 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="unfinished"></translation>
+        <translation>IKEv2 в сочетании с уровнем шифрования IPSec это современный и стабильный протокол VPN.
+Он может быстро переключаться между сетями и устройствами, что делает его особенно адаптивным в динамичных сетевых средах. 
+Несмотря на сочетание безопасности, стабильности и скорости, необходимо отметить, что IKEv2 легко обнаруживается и подвержен блокировке.
+
+* Доступно в AmneziaVPN только для Windows.
+* Низкое энергопотребление, на мобильных устройствах
+* Минимальная конфигурация
+* Распознается системами DPI-анализа
+* Работает по сетевому протоколу UDP, порты 500 и 4500.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="215"/>
@@ -2474,7 +2478,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../containers/containers_defs.cpp" line="111"/>
         <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation>AmneziaWG - Специальный протокол от Amnezia, основанный на протоколе WireGuard. Он такой же быстрый, как WireGuard, но очень устойчив к блокировкам. Рекомендуется для регионов с высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
@@ -2506,7 +2510,14 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenVPN однин из самых популярных и проверенных временем VPN-протоколов.
+В нем используется уникальный протокол безопасности, опирающийся на протокол SSL/TLS для шифрования и обмена ключами. Кроме того, поддержка OpenVPN множества методов аутентификации делает его универсальным и адаптируемым к широкому спектру устройств и операционных систем. Благодаря открытому исходному коду OpenVPN подвергается тщательному анализу со стороны мирового сообщества, что постоянно повышает его безопасность. Благодаря оптимальному соотношению производительности, безопасности и совместимости OpenVPN остается лучшим выбором как для частных лиц, так и для компаний, заботящихся о конфиденциальности.
+
+* Доступность AmneziaVPN для всех платформ
+* Нормальное энергопотребление на мобильных устройствах
+* Гибкая настройка под нужды пользователя для работы с различными операционными системами и устройствами
+* Распознается системами DPI-анализа и поэтому подвержен блокировке
+* Может работать по сетевым протоколам TCP и UDP.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="145"/>
@@ -2518,7 +2529,12 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation type="unfinished"></translation>
+        <translation>Shadowsocks, создан на основе протокола SOCKS5, защищает соединение с помощью шифра AEAD. Несмотря на то, что протокол Shadowsocks разработан таким образом, чтобы быть незаметным и сложным для идентификации, он не идентичен стандартному HTTPS-соединению. Однако некоторые системы анализа трафика все же могут обнаружить соединение Shadowsocks. В связи с ограниченной поддержкой в Amnezia рекомендуется использовать протокол AmneziaWG, или OpenVPN over Cloak.
+
+* Доступен в AmneziaVPN только на ПК ноутбуках.
+* Настраиваемый протокол шифрования
+* Обнаруживается некоторыми DPI-системами
+* Работает по сетевому протоколу TCP.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="155"/>
@@ -2540,7 +2556,24 @@ If there is a extreme level of Internet censorship in your region, we advise you
 * Not recognised by DPI analysis systems
 * Works over TCP network protocol, 443 port.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>OpenVPN over Cloak - это комбинация протокола OpenVPN и плагина Cloak, разработанного специально для защиты от блокировок.
+
+OpenVPN обеспечивает безопасное VPN-соединение за счет шифрования всего интернет-трафика между клиентом и сервером.
+
+Cloak защищает OpenVPN от обнаружения и блокировок. 
+
+Cloak может изменять метаданные пакетов. Он полностью маскирует VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью Active Probing. Это делает ее очень устойчивой к обнаружению
+
+Сразу же после получения первого пакета данных Cloak проверяет подлинность входящего соединения. Если аутентификация не проходит, плагин маскирует сервер под поддельный сайт, и ваша VPN становится невидимой для аналитических систем.
+
+Если в вашем регионе существует экстремальный уровень цензуры в Интернете, мы советуем вам при первом подключении использовать только OpenVPN через Cloak
+
+* Доступность AmneziaVPN на всех платформах
+* Высокое энергопотребление на мобильных устройствах
+* Гибкие настройки
+* Не распознается системами DPI-анализа
+* Работает по сетевому протоколу TCP, 443 порт.
+</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="174"/>
@@ -2553,7 +2586,15 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation type="unfinished"></translation>
+        <translation>WireGuard - относительно новый популярный VPN-протокол с упрощенной архитектурой.
+Обеспечивает стабильное VPN-соединение, высокую производительность на всех устройствах. Использует жестко заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
+WireGuard очень восприимчив к блокированию из-за особенностей сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче выявляются и, соответственно, блокируются современными системами глубокой проверки пакетов (DPI) и другими средствами сетевого мониторинга.
+
+* Доступность AmneziaVPN для всех платформ
+* Низкое энергопотребление
+* Минимальное количество настроек
+* Легко распознается системами DPI-анализа, подвержен блокировке
+* Работает по сетевому протоколу UDP.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="187"/>
@@ -2566,7 +2607,15 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
 * Works over UDP network protocol.</source>
-        <translation type="unfinished"></translation>
+        <translation>AmneziaWG - усовершенствованная версия популярного VPN-протокола Wireguard. AmneziaWG опирается на фундамент, заложенный WireGuard, сохраняя упрощенную архитектуру и высокопроизводительные возможности работы на разных устройствах.
+Хотя WireGuard известен своей эффективностью, у него были проблемы с обнаружением из-за характерных сигнатур пакетов. AmneziaWG решает эту проблему за счет использования более совершенных методов обфускации, благодаря чему его трафик сливается с обычным интернет-трафиком.
+Таким образом, AmneziaWG сохраняет высокую производительность оригинала, добавляя при этом дополнительный уровень скрытности, что делает его отличным выбором для тех, кому нужно быстрое и незаметное VPN-соединение.
+
+* Доступность AmneziaVPN на всех платформах
+* Низкое энергопотребление
+* Минимальное количество настроек
+* Не распознается системами DPI-анализа, устойчив к блокировке
+* Работает по сетевому протоколу UDP.</translation>
     </message>
     <message>
         <source>AmneziaWG container</source>
@@ -2641,16 +2690,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2877,7 +2916,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../containers/containers_defs.cpp" line="309"/>
         <source>Medium or High</source>
-        <translation>Спедний или Высокий</translation>
+        <translation>Средний или Высокий</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="310"/>
@@ -2925,7 +2964,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../ui/qml/main2.qml" line="172"/>
         <source>Private key passphrase</source>
-        <translation>Кодовая фраза  для закрытого ключа</translation>
+        <translation>Кодовая фраза для закрытого ключа</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="191"/>
