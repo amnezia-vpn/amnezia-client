@@ -10,7 +10,7 @@ Item {
         target: PageController
 
         function onForceCloseDrawer() {
-            root.state = "closed"
+            close()
         }
     }
 
@@ -32,8 +32,6 @@ Item {
 
     state: "closed"
 
-    Drag.active: dragArea.drag.active
-
     Rectangle {
         id: draw2Background
 
@@ -41,7 +39,7 @@ Item {
         height: root.parent.height
         width: parent.width
         radius: 16
-        color:  "transparent"
+        color:  "#90000000"
         border.color: "transparent"
         border.width: 1
         visible: true
@@ -54,6 +52,7 @@ Item {
 
             onClicked: {
                 if (root.state === "opened") {
+                    draw2Background.color = "transparent"
                     root.state = "closed"
                     return
                 }
@@ -61,13 +60,15 @@ Item {
 
             Rectangle {
                 id: placeAreaHolder
-                anchors.top: parent.top
                 height: parent.height - contentHeight
                 anchors.right: parent.right
                 anchors.left: parent.left
                 visible: true
                 color: "transparent"
+
+                Drag.active: dragArea.drag.active
             }
+
 
             Rectangle {
                 id: contentArea
@@ -98,27 +99,27 @@ Item {
                     cursorShape: (root.state === "opened") ? Qt.PointingHandCursor : Qt.ArrowCursor
                     hoverEnabled: true
 
-                    drag.target: root
+                    drag.target: placeAreaHolder
                     drag.axis: Drag.YAxis
                     drag.maximumY: root.height
                     drag.minimumY: root.height - root.height
 
                     /** If drag area is released at any point other than min or max y, transition to the other state */
                     onReleased: {
-                        if (root.state === "closed" && root.y < dragArea.drag.maximumY) {
+                        if (root.state === "closed" && placeAreaHolder.y < dragArea.drag.maximumY) {
                             root.state = "opened"
                             return
                         }
 
-                        if (root.state === "opened" && root.y > dragArea.drag.minimumY) {
-                            root.state = "closed"
+                        if (root.state === "opened" && placeAreaHolder.y > dragArea.drag.minimumY) {
+                            close()
                             return
                         }
                     }
 
                     onClicked: {
                         if (root.state === "opened") {
-                            root.state = "closed"
+                            close()
                             return
                         }
                     }
@@ -209,22 +210,24 @@ Item {
         if (root.visible && root.state !== "closed") {
             return
         }
+        draw2Background.color = "#90000000"
 
         root.y = 0
         root.state = "opened"
         root.visible = true
         root.height = parent.height
         contentArea.height = contentHeight
+        placeAreaHolder.height =  parent.height - contentHeight
+        placeAreaHolder.y = parent.height - root.height
 
         dragArea.drag.maximumY =  parent.height
         dragArea.drag.minimumY =  parent.height - root.height
-
 
         animationVisible.running = true
     }
 
     function close() {
-        root.visible = false
+        draw2Background.color = "transparent"
         root.state = "closed"
     }
 

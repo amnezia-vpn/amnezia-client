@@ -187,7 +187,7 @@ Item {
             BackButtonType {
                 backButtonImage: root.headerBackButtonImage
                 backButtonFunction: function() {
-                    menu.state = "closed"
+                    menu.close()
                 }
             }
         }
