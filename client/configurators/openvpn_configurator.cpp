@@ -127,7 +127,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
     if (m_settings->routeMode() == Settings::VpnAllSites) {
         qDebug() << "Settings::VpnAllSites";
         
-        //config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+        config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
         // Prevent ipv6 leak
         config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
         config.append("block-ipv6\n");
@@ -140,7 +140,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
     if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
         qDebug() << "Settings::VpnAllExceptSites";
         
-        //config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
+        config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
         // Prevent ipv6 leak
         config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
         config.append("block-ipv6\n");

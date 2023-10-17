@@ -564,6 +564,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         return parseData
     }
     
+    
     /**
      * Create a Wireguard [Config]  from a [json] string -
      * The [json] will be created in AndroidVpnProtocol.cpp
@@ -578,47 +579,67 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         val peerBuilder = Peer.Builder()
         val peerConfig = config["Peer"]!!
         peerBuilder.setPublicKey(Key.fromBase64(peerConfig["PublicKey"]))
-        peerConfig["PresharedKey"]?.let {
-            peerBuilder.setPreSharedKey(Key.fromBase64(it))
-        }
-        val allowedIPList = peerConfig["AllowedIPs"]?.split(",") ?: emptyList()
-        
-        Log.e(tag, "splitTunnelSites $splitTunnelSites")
-        for (i in 0 until splitTunnelSites.length()) {
-	    val site = splitTunnelSites.getString(i)
-            if (site.contains("\\/")) {
-                val internet = InetNetwork.parse(site + "\\32")
-                peerBuilder.addAllowedIp(internet)
-            } else {
-                val internet = InetNetwork.parse(site)
-                peerBuilder.addAllowedIp(internet)
-            }
-            Log.e(tag, "splitTunnelSites $site")
-        }
-    
-    //    if (allowedIPList.isEmpty() /*&& splitTunnelType.equals("0", true) */) {
-    //        Log.e(tag, "splitTunnelSites $splitTunnelSites")
-    //        for (i in 0 until splitTunnelSites.length()) {
-    //		val site = splitTunnelSites.getString(i)
-    //            Log.e(tag, "splitTunnelSites $site")
-    //        }
-        
-    //        val internet = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
-    //        peerBuilder.addAllowedIp(internet)
-    //    } else {
+        peerConfig["PresharedKey"]?.let { peerBuilder.setPreSharedKey(Key.fromBase64(it)) }
 
-        
-    //        allowedIPList.forEach {
-    //            val network = InetNetwork.parse(it.trim())
-    //            peerBuilder.addAllowedIp(network)
-    //        }
-    //    }
+        val allIpString = peerConfig["AllowedIPs"]
+
+        var allowedIPList = peerConfig["AllowedIPs"]?.split(",") ?: emptyList()
+
+        /* default value in template */
+        if (allIpString == "0.0.0.0/0, ::/0") {
+            allowedIPList = emptyList()
+        }
+
+        if (allowedIPList.isEmpty() && (splitTunnelType == 0)) {
+            /* AllowedIP is empty and splitTunnel is turnoff */
+            /* use VPN for whole Internet */
+            val internetV4 = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
+            peerBuilder.addAllowedIp(internetV4)
+            val internetV6 = InetNetwork.parse("::/0") // aka The whole internet.
+            peerBuilder.addAllowedIp(internetV6)
+        } else {
+            if (!allowedIPList.isEmpty()) {
+                /* We have predefined AllowedIP in WG config */
+                /* It's have higher priority than system SplitTunnel */
+                allowedIPList.forEach {
+                    val network = InetNetwork.parse(it.trim())
+                    peerBuilder.addAllowedIp(network)
+                }
+            } else {
+                if (splitTunnelType == 1) {
+                    /* Use system SplitTunnel */
+                    /* VPN connection used only for defined IPs */
+                    for (i in 0 until splitTunnelSites.length()) {
+                        val site = splitTunnelSites.getString(i)
+                        Log.e(tag, "splitTunnelSites $site")
+                        if (site.contains("\\/")) {
+                            val internet = InetNetwork.parse(site + "\\32")
+                            peerBuilder.addAllowedIp(internet)
+                        } else {
+                            val internet = InetNetwork.parse(site)
+                            peerBuilder.addAllowedIp(internet)
+                        }
+                    }
+                }
+                if (splitTunnelType == 2) {
+                    /* Use system SplitTunnel */
+                    /* VPN connection used for all Internet exclude defined IPs */
+                    val ipRangeSet = IPRangeSet.fromString("0.0.0.0/0")
+                    ipRangeSet.remove(IPRange("127.0.0.0/8"))
+                    for (i in 0 until splitTunnelSites.length()) {
+                        val site = splitTunnelSites.getString(i)
+                        ipRangeSet.remove(IPRange(site))
+                    }
+                    val allowedIps = ipRangeSet.subnets().joinToString(", ") + ", 2000::/3"
+                    Log.e(tag, "allowedIps $allowedIps")
+                    peerBuilder.parseAllowedIPs(allowedIps)
+                }
+            }
+        }
         val endpointConfig = peerConfig["Endpoint"]
         val endpoint = InetEndpoint.parse(endpointConfig)
         peerBuilder.setEndpoint(endpoint)
-        peerConfig["PersistentKeepalive"]?.let {
-            peerBuilder.setPersistentKeepalive(it.toInt())
-        }
+        peerConfig["PersistentKeepalive"]?.let { peerBuilder.setPersistentKeepalive(it.toInt()) }
         confBuilder.addPeer(peerBuilder.build())
 
         val ifaceBuilder = Interface.Builder()
@@ -628,7 +649,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         ifaceConfig["DNS"]!!.split(",").forEach {
             ifaceBuilder.addDnsServer(InetNetwork.parse(it.trim()).address)
         }
-        
+
         ifaceBuilder.parsePrivateKey(ifaceConfig["PrivateKey"])
         if (type == "awg_config_data") {
             ifaceBuilder.parseJc(ifaceConfig["Jc"])
@@ -649,14 +670,13 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             ifaceBuilder.parseH1("0")
             ifaceBuilder.parseH2("0")
             ifaceBuilder.parseH3("0")
-            ifaceBuilder.parseH4("0")           
-        
+            ifaceBuilder.parseH4("0")
         }
         /*val jExcludedApplication = obj.getJSONArray("excludedApps")
-    (0 until jExcludedApplication.length()).toList().forEach {
+        (0 until jExcludedApplication.length()).toList().forEach {
         val appName = jExcludedApplication.get(it).toString()
         ifaceBuilder.excludeApplication(appName)
-    }*/
+        }*/
         confBuilder.setInterface(ifaceBuilder.build())
 
         return confBuilder.build()
@@ -771,15 +791,12 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
     private fun startWireGuard(type: String) {
         val wireguard_conf = buildWireguardConfig(mConfig!!, type + "_config_data")
-        Log.i(tag, "startWireGuard: wireguard_conf : $wireguard_conf")
         if (currentTunnelHandle != -1) {
             Log.e(tag, "Tunnel already up")
             // Turn the tunnel down because this might be a switch
             GoBackend.wgTurnOff(currentTunnelHandle)
         }
         val wgConfig: String = wireguard_conf.toWgUserspaceString()
-        
-        Log.e(tag, "wgConfig : $wgConfig") 
         
         val builder = Builder()
         setupBuilder(wireguard_conf, builder)
