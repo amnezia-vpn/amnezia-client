@@ -475,6 +475,8 @@ void InstallController::addEmptyServer()
     server.insert(config_key::port, m_currentlyInstalledServerCredentials.port);
     server.insert(config_key::description, m_settings->nextAvailableServerName());
 
+    server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
     m_serversModel->addServer(server);
     m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
