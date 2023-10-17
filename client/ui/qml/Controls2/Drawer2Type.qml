@@ -28,15 +28,13 @@ Item {
     property int contentHeight: 0
     property Item contentParent: contentArea
 
-    y: parent.height - root.height
-
     state: "closed"
 
     Rectangle {
         id: draw2Background
 
-        anchors { left: root.left; right: root.right; top: root.top }
-        height: root.parent.height
+        anchors.fill: parent
+        height: parent.height
         width: parent.width
         radius: 16
         color:  "#90000000"
@@ -45,15 +43,14 @@ Item {
         visible: true
 
         MouseArea {
-            id: fullArea
+            id: fullMouseArea
             anchors.fill: parent
             enabled: (root.state === "opened")
             hoverEnabled: true
 
             onClicked: {
                 if (root.state === "opened") {
-                    draw2Background.color = "transparent"
-                    root.state = "closed"
+                    close()
                     return
                 }
             }
@@ -106,15 +103,17 @@ Item {
 
                     /** If drag area is released at any point other than min or max y, transition to the other state */
                     onReleased: {
-                        if (root.state === "closed" && placeAreaHolder.y < dragArea.drag.maximumY) {
+                        if (root.state === "closed" && placeAreaHolder.y < root.height * 0.9) {
                             root.state = "opened"
                             return
                         }
 
-                        if (root.state === "opened" && placeAreaHolder.y > dragArea.drag.minimumY) {
+                        if (root.state === "opened" && placeAreaHolder.y > (root.height - root.height * 0.9)) {
                             close()
                             return
                         }
+
+                        placeAreaHolder.y = 0
                     }
 
                     onClicked: {
@@ -161,15 +160,15 @@ Item {
         State {
             name: "closed"
             PropertyChanges {
-                target: root
+                target: placeAreaHolder
                 y: parent.height
             }
         },
 
         State {
-            name: "opend"
+            name: "opened"
             PropertyChanges {
-                target: root
+                target: placeAreaHolder
                 y: dragArea.drag.minimumY
             }
         }
@@ -180,7 +179,7 @@ Item {
             from: "opened"
             to: "closed"
             PropertyAnimation {
-                target: root
+                target: placeAreaHolder
                 properties: "y"
                 duration: 200
             }
@@ -190,7 +189,7 @@ Item {
             from: "closed"
             to: "opened"
             PropertyAnimation {
-                target: root
+                target: placeAreaHolder
                 properties: "y"
                 duration: 200
             }
@@ -199,7 +198,7 @@ Item {
 
     NumberAnimation {
         id: animationVisible
-        target: root
+        target: placeAreaHolder
         property: "y"
         from: parent.height
         to: 0
@@ -212,21 +211,29 @@ Item {
         }
         draw2Background.color = "#90000000"
 
+        fullMouseArea.visible = true
+        dragArea.visible = true
+
         root.y = 0
         root.state = "opened"
         root.visible = true
         root.height = parent.height
-        contentArea.height = contentHeight
-        placeAreaHolder.height =  parent.height - contentHeight
-        placeAreaHolder.y = parent.height - root.height
 
-        dragArea.drag.maximumY =  parent.height
-        dragArea.drag.minimumY =  parent.height - root.height
+        contentArea.height = contentHeight
+
+        placeAreaHolder.height =  root.height - contentHeight
+        placeAreaHolder.y = root.height - root.height
+
+        dragArea.drag.maximumY =  root.height
+        dragArea.drag.minimumY =  0
 
         animationVisible.running = true
     }
 
     function close() {
+        fullMouseArea.visible = false
+        dragArea.visible = false
+
         draw2Background.color = "transparent"
         root.state = "closed"
     }
