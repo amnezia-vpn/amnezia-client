@@ -16,6 +16,8 @@ import com.wireguard.crypto.Key
 import org.json.JSONObject
 import java.util.Base64
 
+import com.wireguard.config.*
+
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
 import net.openvpn.ovpn3.ClientAPI_Event
@@ -147,45 +149,34 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_establish(): Int {
         Log.v(tag, "tun_builder_establish")
-        val Fd = mService.establish()!!.detachFd()
-        
         val jsonVpnConfig = mService.getVpnConfig()
-        
+
         val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
         val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
-        
-        Log.e(tag, "splitTunnelSites $splitTunnelSites")
-        for (i in 0 until splitTunnelSites.length()) {
-	    val site = splitTunnelSites.getString(i)
-            if (site.contains("\\/")) {
-                Log.e(tag, "site $site rawMask 32")
-                mService.addRoute(site, 32)
-            } else {
-                var slash = site.lastIndexOf('/');
-                var maskString: String = ""
-                var rawMask = 32
-                var rawAddress: String = ""
-                if (slash >= 0) {
-                    maskString = site.substring(slash + 1)
-                    try {
-                        rawMask = Integer.parseInt(maskString, 10)
-		    } catch (e: Exception) {
-                        
-                    }
-                    rawAddress = site.substring(0, slash)
-		} else {
-		      maskString = ""
-		      rawMask = 32
-		      rawAddress = site
-		}
-                Log.e(tag, "rawAddress $rawAddress rawMask $rawMask")
-                mService.addRoute(rawAddress, rawMask)
-                //val internet = InetNetwork.parse(site)
-                //peerBuilder.addAllowedIp(internet)
+        if (splitTunnelType == 1) {
+            for (i in 0 until splitTunnelSites.length()) {
+                val site = splitTunnelSites.getString(i)
+                val ipRange = IPRange(site)
+                mService.addRoute(ipRange.getFrom().getHostAddress(), ipRange.getPrefix())
+                Log.e(tag, "splitTunnelSites $ipRange")
             }
-            Log.e(tag, "splitTunnelSites $site")
         }
-        
+        if (splitTunnelType == 2) {
+            val ipRangeSet = IPRangeSet.fromString("0.0.0.0/0")
+            ipRangeSet.remove(IPRange("127.0.0.0/8"))
+            for (i in 0 until splitTunnelSites.length()) {
+                val site = splitTunnelSites.getString(i)
+                ipRangeSet.remove(IPRange(site))
+            }
+            ipRangeSet.subnets().forEach {
+                mService.addRoute(it.getFrom().getHostAddress(), it.getPrefix())
+                Thread.sleep(100)
+                Log.e(tag, "splitTunnelSites $it")
+            }
+            mService.addRoute("2000::", 3)
+        }
+        val Fd = mService.establish()!!.detachFd()
+
         return Fd
     }
 

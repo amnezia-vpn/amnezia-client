@@ -612,13 +612,8 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                     for (i in 0 until splitTunnelSites.length()) {
                         val site = splitTunnelSites.getString(i)
                         Log.e(tag, "splitTunnelSites $site")
-                        if (site.contains("\\/")) {
-                            val internet = InetNetwork.parse(site + "\\32")
-                            peerBuilder.addAllowedIp(internet)
-                        } else {
-                            val internet = InetNetwork.parse(site)
-                            peerBuilder.addAllowedIp(internet)
-                        }
+                        val internet = InetNetwork.parse(site)
+                        peerBuilder.addAllowedIp(internet)
                     }
                 }
                 if (splitTunnelType == 2) {
