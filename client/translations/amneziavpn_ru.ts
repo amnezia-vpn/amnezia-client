@@ -262,17 +262,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="344"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="354"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="388"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="398"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="480"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="490"/>
         <source>Unable change server while there is an active connection</source>
         <translation type="unfinished"></translation>
     </message>

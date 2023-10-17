@@ -241,8 +241,18 @@ PageType {
             }
         ]
 
+        DividerType {
+            Layout.topMargin: 10
+            Layout.fillWidth: false
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 2
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+            visible: GC.isMobile() && (buttonContent.collapsedVisibility || buttonContent.expandedVisibility)
+        }
+
         RowLayout {
-            Layout.topMargin: 24
+            Layout.topMargin: 14
             Layout.leftMargin: 24
             Layout.rightMargin: 24
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -305,7 +315,7 @@ PageType {
 
             Header1TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 14
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
