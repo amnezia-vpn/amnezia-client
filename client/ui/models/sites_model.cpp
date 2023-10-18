@@ -112,6 +112,7 @@ void SitesModel::toggleSplitTunneling(bool enabled)
     } else {
         m_settings->setRouteMode(Settings::RouteMode::VpnAllSites);
     }
+    m_isSplitTunnelingEnabled = enabled;
 }
 
 QVector<QPair<QString, QString> > SitesModel::getCurrentSites()
