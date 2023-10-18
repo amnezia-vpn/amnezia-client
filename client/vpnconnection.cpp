@@ -68,7 +68,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
             QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
-            QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
+            QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
