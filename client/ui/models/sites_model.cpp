@@ -8,6 +8,7 @@ SitesModel::SitesModel(std::shared_ptr<Settings> settings, QObject *parent)
         m_isSplitTunnelingEnabled = false;
         m_currentRouteMode = Settings::RouteMode::VpnOnlyForwardSites;
     } else {
+        m_isSplitTunnelingEnabled = true;
         m_currentRouteMode = routeMode;
     }
     fillSites();
