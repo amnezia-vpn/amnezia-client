@@ -175,9 +175,8 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
             }
             mService.addRoute("2000::", 3)
         }
-        val Fd = mService.establish()!!.detachFd()
 
-        return Fd
+        return mService.establish()!!.detachFd()
     }
 
     override fun  tun_builder_add_address(address: String , prefix_length: Int , gateway: String , ipv6:Boolean , net30: Boolean ): Boolean {
