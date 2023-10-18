@@ -46,6 +46,7 @@ PageType {
             }
 
             ParagraphTextType {
+                Layout.fillWidth: true
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
 

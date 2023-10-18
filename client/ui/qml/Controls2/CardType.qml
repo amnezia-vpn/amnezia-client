@@ -81,6 +81,7 @@ RadioButton {
 
         Text {
             text: root.headerText
+            wrapMode: Text.WordWrap
             color: "#D7D8DB"
             font.pixelSize: 25
             font.weight: 700
@@ -110,6 +111,7 @@ RadioButton {
 
         Text {
             text: root.footerText
+            wrapMode: Text.WordWrap
             visible: root.footerText !== ""
             color: "#878B91"
             font.pixelSize: 13
