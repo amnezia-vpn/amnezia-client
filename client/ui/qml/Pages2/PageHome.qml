@@ -248,7 +248,7 @@ PageType {
             Layout.preferredHeight: 2
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            visible: GC.isMobile() && (buttonContent.collapsedVisibility || buttonContent.expandedVisibility)
+            visible: (buttonContent.collapsedVisibility || buttonContent.expandedVisibility)
         }
 
         RowLayout {

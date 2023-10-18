@@ -2839,16 +2839,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <source>error 0x%1: %2</source>
         <translation>错误 0x%1: %2</translation>
     </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>

@@ -2700,16 +2700,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
     </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>
