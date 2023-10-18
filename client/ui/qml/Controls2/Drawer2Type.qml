@@ -183,6 +183,12 @@ Item {
                 properties: "y"
                 duration: 200
             }
+
+            onRunningChanged: {
+                if (!running) {
+                    visibledMouseArea(false)
+                }
+            }
         },
 
         Transition {
@@ -211,8 +217,7 @@ Item {
         }
         draw2Background.color = "#90000000"
 
-        fullMouseArea.visible = true
-        dragArea.visible = true
+        visibledMouseArea(true)
 
         root.y = 0
         root.state = "opened"
@@ -231,9 +236,6 @@ Item {
     }
 
     function close() {
-        fullMouseArea.visible = false
-        dragArea.visible = false
-
         draw2Background.color = "transparent"
         root.state = "closed"
     }
@@ -249,5 +251,10 @@ Item {
 
             close()
         }
+    }
+
+    function visibledMouseArea(visbile) {
+        fullMouseArea.visible = visbile
+        dragArea.visible = visbile
     }
 }
