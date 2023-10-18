@@ -142,6 +142,7 @@ Button {
             PageController.setTriggeredBtConnectButton(true)
 
             ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            InstallController.setShouldCreateServer(false)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
 
             return

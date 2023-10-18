@@ -4,7 +4,7 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="302"/>
+        <location filename="../amnezia_application.cpp" line="304"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation>未启用选项，还未实现基于WireGuard协议的VPN分离</translation>
     </message>
@@ -228,7 +228,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="481"/>
+        <location filename="../ui/controllers/installController.cpp" line="483"/>
         <source>Server added successfully</source>
         <translation>增加服务器成功</translation>
     </message>
@@ -296,17 +296,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="344"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="354"/>
         <source>VPN protocol</source>
         <translation>VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="388"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="398"/>
         <source>Servers</source>
         <translation>服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="480"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="490"/>
         <source>Unable change server while there is an active connection</source>
         <translation>Невозможно изменить сервер при наличии активного соединения</translation>
     </message>
