@@ -5,6 +5,7 @@
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QStandardPaths>
+#include <QRandomGenerator>
 
 #include "core/errorstrings.h"
 #include "core/servercontroller.h"
@@ -72,6 +73,36 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::port, QString::number(port));
             containerConfig.insert(config_key::transport_proto,
                                    ProtocolProps::transportProtoToString(transportProto, protocol));
+
+            if (container == DockerContainer::Awg) {
+                QString defaultJunkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
+                QString defaultJunkPacketMinSize = QString::number(50);
+                QString defaultJunkPacketMaxSize = QString::number(1000);
+                QString defaultInitPacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+                QString defaultResponsePacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+
+                QSet<QString> headersValue;
+                while (headersValue.size() != 4) {
+                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, std::numeric_limits<qint32>::max())));
+                }
+
+                auto headersValueList = headersValue.values();
+
+                QString defaultInitPacketMagicHeader = headersValueList.at(0);
+                QString defaultResponsePacketMagicHeader = headersValueList.at(1);
+                QString defaultUnderloadPacketMagicHeader = headersValueList.at(2);
+                QString defaultTransportPacketMagicHeader = headersValueList.at(3);
+
+                containerConfig[config_key::junkPacketCount] = defaultJunkPacketCount;
+                containerConfig[config_key::junkPacketMinSize] = defaultJunkPacketMinSize;
+                containerConfig[config_key::junkPacketMaxSize] = defaultJunkPacketMaxSize;
+                containerConfig[config_key::initPacketJunkSize] = defaultInitPacketJunkSize;
+                containerConfig[config_key::responsePacketJunkSize] = defaultResponsePacketJunkSize;
+                containerConfig[config_key::initPacketMagicHeader] = defaultInitPacketMagicHeader;
+                containerConfig[config_key::responsePacketMagicHeader] = defaultResponsePacketMagicHeader;
+                containerConfig[config_key::underloadPacketMagicHeader] = defaultUnderloadPacketMagicHeader;
+                containerConfig[config_key::transportPacketMagicHeader] = defaultTransportPacketMagicHeader;
+            }
 
             if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
