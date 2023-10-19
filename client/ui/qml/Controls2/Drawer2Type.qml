@@ -22,6 +22,11 @@ Item {
     }
 
     signal drawerClosed
+    signal collapsedEntered
+    signal collapsedExited
+    signal collapsedEnter
+    signal collapsedPressChanged
+
 
     visible: false
 
@@ -41,6 +46,7 @@ Item {
     property int collapsedHeight: 0
 
     property bool fullMouseAreaVisible: true
+    property MouseArea drawerDragArea: dragArea
 
     state: "closed"
 
@@ -164,6 +170,18 @@ Item {
                     if (root.collapsed()) {
                         root.state = "expanded"
                     }
+                }
+
+                onExited: {
+                    collapsedExited()
+                }
+
+                onEntered: {
+                    collapsedEnter()
+                }
+
+                onPressedChanged: {
+                    collapsedPressChanged()
                 }
             }
         }
@@ -306,7 +324,6 @@ Item {
     }
 
     function open() {
-        //if (root.visible && !root.closed()) {
         if (root.opened()) {
             return
         }
@@ -341,6 +358,11 @@ Item {
         root.state = "collapsed"
     }
 
+    function expand() {
+        draw2Background.color = "#90000000"
+        root.state = "expanded"
+    }
+
 
     function visibledMouseArea(visbile) {
         fullMouseArea.visible = visbile
@@ -373,14 +395,6 @@ Item {
                 }
 
                 close()
-            }
-
-            if (root.expanded()) {
-                if (needCloseButton) {
-                    PageController.drawerClose()
-                }
-
-                collapse()
             }
         }
     }

@@ -122,7 +122,7 @@ PageType {
 
 
         ColumnLayout {
-            id: content
+            id: collapsedButtonContent
 
             parent: buttonContent.contentParent
 
@@ -176,6 +176,12 @@ PageType {
 
                         Behavior on color {
                             PropertyAnimation { duration: 200 }
+                        }
+                    }
+
+                    onClicked: {
+                        if (buttonContent.collapsed()) {
+                            buttonContent.expand()
                         }
                     }
                 }
@@ -423,6 +429,23 @@ PageType {
                     }
                 }
             }
+        }
+
+        onCollapsedEnter: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
+            collapsedButtonHeader.opacity = 0.8
+        }
+
+        onCollapsedExited: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 1
+        }
+
+        onCollapsedPressChanged: {
+            collapsedButtonChevron.backgroundColor = buttonContent.drawerDragArea.pressed ?
+                        collapsedButtonChevron.pressedColor : buttonContent.drawerDragArea.entered ?
+                            collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 0.7
         }
     }
 }
