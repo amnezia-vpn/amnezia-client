@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    property Item questionDrawerParent
+
     Connections {
         target: InstallController
 
@@ -193,9 +195,9 @@ PageType {
             QuestionDrawer {
                 id: questionDrawer
 
-                drawerHeight: 0.8
+                drawerHeight: 0.5
 
-                parent: root
+                parent: questionDrawerParent
             }
         }
     }

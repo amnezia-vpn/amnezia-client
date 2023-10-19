@@ -169,6 +169,7 @@ PageType {
             }
             PageSettingsServerData {
                 stackView: root.stackView
+                questionDrawerParent: root
             }
         }
     }
