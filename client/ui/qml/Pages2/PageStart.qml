@@ -176,6 +176,12 @@ PageType {
                 strokeColor: "#2C2D30"
                 fillColor: "#1C1D21"
             }
+
+            MouseArea {
+                id: noPropagateMouseEvent
+                anchors.fill: parent
+                enabled: true
+            }
         }
 
         TabImageButtonType {
