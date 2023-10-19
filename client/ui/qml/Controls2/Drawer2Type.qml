@@ -34,6 +34,7 @@ Item {
 
     property string defaultColor: "#1C1D21"
     property string borderColor: "#2C2D30"
+    property string semitransparentColor: "#90000000"
 
     property bool needCollapsed: false
 
@@ -57,7 +58,7 @@ Item {
         height: parent.height
         width: parent.width
         radius: 16
-        color: "transparent" //"#90000000"
+        color: "transparent"
         border.color: "transparent"
         border.width: 1
         visible: true
@@ -264,7 +265,7 @@ Item {
 
             onRunningChanged: {
                 if (!running) {
-                    visibledMouseArea(false)
+                    fullMouseArea.visible = false
                 }
             }
         },
@@ -307,8 +308,8 @@ Item {
 
             onRunningChanged: {
                 if (!running) {
-                    draw2Background.color = "#90000000"
-                    visibledMouseArea(true)
+                    draw2Background.color = semitransparentColor
+                    fullMouseArea.visible = true
                 }
             }
         }
@@ -328,9 +329,8 @@ Item {
             return
         }
 
-        draw2Background.color = "#90000000"
-
-        visibledMouseArea(true)
+        draw2Background.color = semitransparentColor
+        fullMouseArea.visible = true
 
         root.y = 0
         root.state = "opened"
@@ -359,14 +359,8 @@ Item {
     }
 
     function expand() {
-        draw2Background.color = "#90000000"
+        draw2Background.color = semitransparentColor
         root.state = "expanded"
-    }
-
-
-    function visibledMouseArea(visbile) {
-        fullMouseArea.visible = visbile
-        dragArea.visible = visbile
     }
 
     function opened() {
