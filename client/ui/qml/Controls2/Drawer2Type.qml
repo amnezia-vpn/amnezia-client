@@ -10,11 +10,18 @@ Item {
         target: PageController
 
         function onForceCloseDrawer() {
-            close()
+            if (root.opened()) {
+                close()
+                return
+            }
+
+            if (root.expanded()) {
+                collapse()
+            }
         }
     }
 
-    signal closed
+    signal drawerClosed
 
     visible: false
 
@@ -28,6 +35,13 @@ Item {
     property int contentHeight: 0
     property Item contentParent: contentArea
 
+    property bool dragActive: dragArea.drag.active
+
+    /** Initial height of button content */
+    property int collapsedHeight: 0
+
+    property bool fullMouseAreaVisible: true
+
     state: "closed"
 
     Rectangle {
@@ -37,7 +51,7 @@ Item {
         height: parent.height
         width: parent.width
         radius: 16
-        color:  "#90000000"
+        color: "transparent" //"#90000000"
         border.color: "transparent"
         border.width: 1
         visible: true
@@ -45,90 +59,119 @@ Item {
         MouseArea {
             id: fullMouseArea
             anchors.fill: parent
-            enabled: (root.state === "opened")
+            enabled: (root.opened() || root.expanded())
             hoverEnabled: true
+            visible: fullMouseAreaVisible
 
             onClicked: {
-                if (root.state === "opened") {
+                if (root.opened()) {
                     close()
                     return
                 }
+
+                if (root.expanded()) {
+                    collapse()
+                }
             }
+        }
+
+        Rectangle {
+            id: placeAreaHolder
+            height: (!root.opened())  ? 0 :  parent.height - contentHeight
+            anchors.right: parent.right
+            anchors.left: parent.left
+            visible: true
+            color: "transparent"
+
+            Drag.active: dragArea.drag.active
+        }
+
+
+        Rectangle {
+            id: contentArea
+
+            anchors.top: placeAreaHolder.bottom
+            height: contentHeight
+            radius: 16
+            color: root.defaultColor
+            border.width: 1
+            border.color: root.borderColor
+            width: parent.width
+            visible: true
 
             Rectangle {
-                id: placeAreaHolder
-                height: parent.height - contentHeight
+                width: parent.radius
+                height: parent.radius
+                anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
-                visible: true
-                color: "transparent"
-
-                Drag.active: dragArea.drag.active
+                color: parent.color
             }
 
+            MouseArea {
+                id: dragArea
 
-            Rectangle {
-                id: contentArea
+                anchors.fill: parent
 
-                anchors.top: placeAreaHolder.bottom
-                height: contentHeight
-                radius: 16
-                color: root.defaultColor
-                border.width: 1
-                border.color: root.borderColor
-                width: parent.width
-                visible: true
+                cursorShape: root.collapsed() ? Qt.PointingHandCursor : Qt.ArrowCursor // ?
+                hoverEnabled: true
 
-                Rectangle {
-                    width: parent.radius
-                    height: parent.radius
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    color: parent.color
-                }
+                drag.target: placeAreaHolder
+                drag.axis: Drag.YAxis
+                drag.maximumY: (root.collapsed() || root.expanded()) ? (root.height - collapsedHeight) : root.height
+                drag.minimumY: (root.collapsed() || root.expanded()) ? (root.height - root.height * 0.9) : (root.height - root.height)
 
-                MouseArea {
-                    id: dragArea
-
-                    anchors.fill: parent
-
-                    cursorShape: (root.state === "opened") ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    hoverEnabled: true
-
-                    drag.target: placeAreaHolder
-                    drag.axis: Drag.YAxis
-                    drag.maximumY: root.height
-                    drag.minimumY: root.height - root.height
-
-                    /** If drag area is released at any point other than min or max y, transition to the other state */
-                    onReleased: {
-                        if (root.state === "closed" && placeAreaHolder.y < root.height * 0.9) {
-                            root.state = "opened"
-                            return
-                        }
-
-                        if (root.state === "opened" && placeAreaHolder.y > (root.height - root.height * 0.9)) {
-                            close()
-                            return
-                        }
-
-                        placeAreaHolder.y = 0
+                /** If drag area is released at any point other than min or max y, transition to the other state */
+                onReleased: {
+                    if (root.closed() && placeAreaHolder.y < root.height * 0.9) {
+                        root.state = "opened"
+                        return
                     }
 
-                    onClicked: {
-                        if (root.state === "opened") {
-                            close()
-                            return
-                        }
+                    if (root.opened() && placeAreaHolder.y > (root.height - root.height * 0.9)) {
+                        close()
+                        return
+                    }
+
+
+                    if (root.collapsed() && placeAreaHolder.y < (root.height - collapsedHeight)) {
+                        root.state = "expanded"
+                        return
+                    }
+
+                    if (root.expanded() && placeAreaHolder.y > (root.height - root.height * 0.9)) {
+                        root.state = "collapsed"
+                        return
+                    }
+
+
+                    if (root.opened()) {
+                        placeAreaHolder.y = 0
+                    }
+                }
+
+                onClicked: {
+                    if (root.opened()) {
+                        close()
+                        return
+                    }
+
+                    if (root.expanded()) {
+                        collapse()
+                        return
+                    }
+
+                    if (root.collapsed()) {
+                        root.state = "expanded"
                     }
                 }
             }
         }
+
     }
 
     onStateChanged: {
-        if (root.state === "closed") {
+        if (root.closed() || root.collapsed()) {
             var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
             if (initialPageNavigationBarColor !== 0xFF1C1D21) {
                 PageController.updateNavigationBarColor(initialPageNavigationBarColor)
@@ -138,11 +181,12 @@ Item {
                 PageController.drawerClose()
             }
 
-            closed()
+            drawerClosed()
 
             return
         }
-        if (root.state === "opened") {
+
+        if (root.opened() || root.expanded()) {
             if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
                 PageController.updateNavigationBarColor(0xFF1C1D21)
             }
@@ -161,7 +205,7 @@ Item {
             name: "closed"
             PropertyChanges {
                 target: placeAreaHolder
-                y: parent.height
+                y: root.height
             }
         },
 
@@ -170,6 +214,22 @@ Item {
             PropertyChanges {
                 target: placeAreaHolder
                 y: dragArea.drag.minimumY
+            }
+        },
+
+        State {
+            name: "collapsed"
+            PropertyChanges {
+                target: placeAreaHolder
+                y: root.height - collapsedHeight
+            }
+        },
+
+        State {
+            name: "expanded"
+            PropertyChanges {
+                target: placeAreaHolder
+                y: root.height - root.height * 0.9
             }
         }
     ]
@@ -199,6 +259,40 @@ Item {
                 properties: "y"
                 duration: 200
             }
+        },
+
+        Transition {
+            from: "expanded"
+            to: "collapsed"
+            PropertyAnimation {
+                target: placeAreaHolder
+                properties: "y"
+                duration: 200
+            }
+
+            onRunningChanged: {
+                if (!running) {
+                    draw2Background.color = "transparent"
+                    fullMouseArea.visible = false
+                }
+            }
+        },
+
+        Transition {
+            from: "collapsed"
+            to: "expanded"
+            PropertyAnimation {
+                target: placeAreaHolder
+                properties: "y"
+                duration: 200
+            }
+
+            onRunningChanged: {
+                if (!running) {
+                    draw2Background.color = "#90000000"
+                    visibledMouseArea(true)
+                }
+            }
         }
     ]
 
@@ -212,9 +306,11 @@ Item {
     }
 
     function open() {
-        if (root.visible && root.state !== "closed") {
+        //if (root.visible && !root.closed()) {
+        if (root.opened()) {
             return
         }
+
         draw2Background.color = "#90000000"
 
         visibledMouseArea(true)
@@ -240,21 +336,52 @@ Item {
         root.state = "closed"
     }
 
-    onVisibleChanged: {
-        // e.g cancel, ......
-        if (!visible) {
-            if (root.state === "opened") {
-                if (needCloseButton) {
-                    PageController.drawerClose()
-                }
-            }
-
-            close()
-        }
+    function collapse() {
+        draw2Background.color = "transparent"
+        root.state = "collapsed"
     }
+
 
     function visibledMouseArea(visbile) {
         fullMouseArea.visible = visbile
         dragArea.visible = visbile
+    }
+
+    function opened() {
+        return root.state === "opened" ? true : false
+    }
+
+    function expanded() {
+        return root.state === "expanded" ? true : false
+    }
+
+    function closed() {
+        return root.state === "closed" ? true : false
+    }
+
+    function collapsed() {
+        return root.state === "collapsed" ? true : false
+    }
+
+
+    onVisibleChanged: {
+        // e.g cancel, ......
+        if (!visible) {
+            if (root.opened()) {
+                if (needCloseButton) {
+                    PageController.drawerClose()
+                }
+
+                close()
+            }
+
+            if (root.expanded()) {
+                if (needCloseButton) {
+                    PageController.drawerClose()
+                }
+
+                collapse()
+            }
+        }
     }
 }

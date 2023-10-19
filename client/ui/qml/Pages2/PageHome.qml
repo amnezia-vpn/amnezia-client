@@ -30,13 +30,13 @@ PageType {
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            menu.close()
+            buttonContent.collapse()
             if (isContainerInstalled) {
                 containersDropDown.menuVisible = true
             }
         }
         function onForceCloseDrawer() {
-            menu.close()
+            buttonContent.collapse()
         }
     }
 
@@ -69,7 +69,7 @@ PageType {
             }
         }
 
-        // collapsedServerMenuDescription.text = description + root.defaultContainerName + " | " + root.defaultServerHostName
+        collapsedServerMenuDescription.text = description + root.defaultContainerName + " | " + root.defaultServerHostName
         expandedServersMenuDescription.text = description + root.defaultServerHostName
     }
 
@@ -79,7 +79,7 @@ PageType {
 
     Item {
         anchors.fill: parent
-        anchors.bottomMargin: defaultServerInfo.implicitHeight
+        anchors.bottomMargin: buttonContent.collapsedHeight
 
         ConnectButton {
             anchors.centerIn: parent
@@ -88,7 +88,7 @@ PageType {
 
     Rectangle {
         id: buttonBackground
-        anchors.fill: defaultServerInfo
+        anchors { left: buttonContent.left; right: buttonContent.right; top: buttonContent.top }
 
         radius: 16
         color: root.defaultColor
@@ -105,26 +105,16 @@ PageType {
         }
     }
 
-    HomeRootMenuButton {
-        id: defaultServerInfo
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-
-        text: root.defaultServerName
-        rightImageSource: "qrc:/images/controls/chevron-down.svg"
-
-        defaultContainerName: root.defaultContainerName
-        defaultServerHostName: root.defaultServerHostName
-
-        clickedFunction: function() {
-             menu.open()
-        }
-    }
-
     Drawer2Type {
-        id: menu
-        parent: root
+        id: buttonContent
+        visible: true
+
+        fullMouseAreaVisible: false
+
+        /** True when expanded objects should be visible */
+        property bool expandedVisibility: buttonContent.expanded() || (buttonContent.collapsed() && buttonContent.dragActive)
+        /** True when collapsed objects should be visible */
+        property bool collapsedVisibility: buttonContent.collapsed() && !buttonContent.dragActive
 
         width: parent.width
         height: parent.height
@@ -132,13 +122,87 @@ PageType {
 
 
         ColumnLayout {
+            id: content
+
+            parent: buttonContent.contentParent
+
+            visible: buttonContent.collapsedVisibility
+
+            anchors.right: parent.right
+            anchors.left: parent.left
+            anchors.top: parent.top
+
+            onImplicitHeightChanged: {
+                if (buttonContent.collapsed() && buttonContent.collapsedHeight === 0) {
+                    buttonContent.collapsedHeight = implicitHeight
+                }
+            }
+
+            RowLayout {
+                Layout.topMargin: 24
+                Layout.leftMargin: 24
+                Layout.rightMargin: 24
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                Header1TextType {
+                    id: collapsedButtonHeader
+                    Layout.maximumWidth: root.width - 48 - 18 - 12 // todo
+
+                    maximumLineCount: 2
+                    elide: Qt.ElideRight
+
+                    text: root.defaultServerName
+
+                    Layout.alignment: Qt.AlignLeft
+                }
+
+
+                ImageButtonType {
+                    id: collapsedButtonChevron
+
+                    hoverEnabled: false
+                    image: "qrc:/images/controls/chevron-down.svg"
+                    imageColor: "#d7d8db"
+
+                    horizontalPadding: 0
+                    padding: 0
+                    spacing: 0
+
+                    Rectangle {
+                        id: rightImageBackground
+                        anchors.fill: parent
+                        radius: 16
+                        color: "transparent"
+
+                        Behavior on color {
+                            PropertyAnimation { duration: 200 }
+                        }
+                    }
+                }
+            }
+
+            LabelTextType {
+                id: collapsedServerMenuDescription
+                Layout.bottomMargin: 44
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                visible: buttonContent.collapsedVisibility
+            }
+        }
+
+        Component.onCompleted: {
+            buttonContent.collapse()
+        }
+
+        ColumnLayout {
             id: serversMenuHeader
 
-            parent: menu.contentParent
+            parent: buttonContent.contentParent
 
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.left: parent.left
+
+            visible: buttonContent.expandedVisibility
 
             Header1TextType {
                 Layout.fillWidth: true
@@ -222,6 +286,7 @@ PageType {
                 Layout.topMargin: 48
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                visible: buttonContent.expandedVisibility
 
                 headerText: qsTr("Servers")
             }
@@ -230,7 +295,7 @@ PageType {
         Flickable {
             id: serversContainer
 
-            parent: menu.contentParent
+            parent: buttonContent.contentParent
 
             anchors.top: serversMenuHeader.bottom
             anchors.right: parent.right
@@ -238,6 +303,8 @@ PageType {
             anchors.bottom: parent.bottom
             anchors.topMargin: 16
             contentHeight: col.implicitHeight
+
+            visible: buttonContent.expandedVisibility
 
             clip: true
 
@@ -342,7 +409,7 @@ PageType {
                                     onClicked: function() {
                                         ServersModel.currentlyProcessedIndex = index
                                         PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                        menu.close()
+                                        buttonContent.collapse()
                                     }
                                 }
                             }

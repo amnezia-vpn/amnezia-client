@@ -247,7 +247,7 @@ PageType {
 
         z: 1
 
-        onClosed: {
+        onDrawerClosed: {
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }
