@@ -263,11 +263,8 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 //        return QJsonObject();
 //    }
 
-    auto allowedIps = configMap.value("AllowedIPs").split(",");
-    QJsonArray allowedIpsJsonArray;
-    for (const auto &allowedIp : allowedIps) {
-        allowedIpsJsonArray.append(allowedIp);
-    }
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
+
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
