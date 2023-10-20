@@ -228,6 +228,8 @@ namespace amnezia
 
         Q_INVOKABLE static ServiceType protocolService(Proto p);
 
+        Q_INVOKABLE static int getPortForInstall(Proto p);
+
         Q_INVOKABLE static int defaultPort(Proto p);
         Q_INVOKABLE static bool defaultPortChangeable(Proto p);
 

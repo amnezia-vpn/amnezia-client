@@ -143,58 +143,58 @@
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="141"/>
-        <location filename="../ui/controllers/installController.cpp" line="191"/>
+        <location filename="../ui/controllers/installController.cpp" line="143"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 успешно установлен. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="143"/>
-        <location filename="../ui/controllers/installController.cpp" line="193"/>
+        <location filename="../ui/controllers/installController.cpp" line="145"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 уже установлен на сервер. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="146"/>
+        <location filename="../ui/controllers/installController.cpp" line="148"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 В приложение добавлены обнаруженные на сервере протоклы и сервисы</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="212"/>
+        <location filename="../ui/controllers/installController.cpp" line="214"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервере обнаружены установленные протоколы и сервисы, все они добавлены в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="293"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
+        <location filename="../ui/controllers/installController.cpp" line="310"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; был удален</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="318"/>
+        <location filename="../ui/controllers/installController.cpp" line="320"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="335"/>
+        <location filename="../ui/controllers/installController.cpp" line="337"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 был удален с сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="481"/>
+        <location filename="../ui/controllers/installController.cpp" line="483"/>
         <source>Please login as the user</source>
         <translation>Пожалуйста, войдите в систему от имени пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="509"/>
+        <location filename="../ui/controllers/installController.cpp" line="511"/>
         <source>Server added successfully</source>
         <translation>Сервер успешно добавлен</translation>
     </message>
@@ -2636,7 +2636,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="75"/>
+        <location filename="../protocols/protocols_defs.cpp" line="77"/>
         <source>Sftp service</source>
         <translation>Сервис SFTP</translation>
     </message>

@@ -131,7 +131,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="58"/>
         <source>Unable change protocol while there is an active connection</source>
-        <translation>Невозможно изменить протокол при наличии активного соединения</translation>
+        <translation type="unfinished">已建立连接时无法更改服务器配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="69"/>
@@ -162,47 +162,47 @@
         <translation type="obsolete"> 已安装在服务器上</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="141"/>
-        <location filename="../ui/controllers/installController.cpp" line="191"/>
+        <location filename="../ui/controllers/installController.cpp" line="143"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 安装成功。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="143"/>
-        <location filename="../ui/controllers/installController.cpp" line="193"/>
+        <location filename="../ui/controllers/installController.cpp" line="145"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>服务器上已经安装 %1。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="146"/>
+        <location filename="../ui/controllers/installController.cpp" line="148"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>添加已安装在服务器上的容器</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="212"/>
+        <location filename="../ui/controllers/installController.cpp" line="214"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 在服务上发现已经安装协议并添加至应用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="293"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>Settings updated successfully</source>
         <translation>配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
+        <location filename="../ui/controllers/installController.cpp" line="310"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="318"/>
+        <location filename="../ui/controllers/installController.cpp" line="320"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="335"/>
+        <location filename="../ui/controllers/installController.cpp" line="337"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
@@ -223,12 +223,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="481"/>
+        <location filename="../ui/controllers/installController.cpp" line="483"/>
         <source>Please login as the user</source>
         <translation>请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="509"/>
+        <location filename="../ui/controllers/installController.cpp" line="511"/>
         <source>Server added successfully</source>
         <translation>增加服务器成功</translation>
     </message>
@@ -308,7 +308,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="490"/>
         <source>Unable change server while there is an active connection</source>
-        <translation>Невозможно изменить сервер при наличии активного соединения</translation>
+        <translation>已建立连接时无法更改服务器配置</translation>
     </message>
 </context>
 <context>
@@ -2335,7 +2335,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="75"/>
+        <location filename="../protocols/protocols_defs.cpp" line="77"/>
         <source>Sftp service</source>
         <translation>Sftp 服务</translation>
     </message>
