@@ -75,33 +75,35 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                                    ProtocolProps::transportProtoToString(transportProto, protocol));
 
             if (container == DockerContainer::Awg) {
-                QString defaultJunkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
-                QString defaultJunkPacketMinSize = QString::number(50);
-                QString defaultJunkPacketMaxSize = QString::number(1000);
-                QString defaultInitPacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
-                QString defaultResponsePacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
+                QString junkPacketMinSize = QString::number(50);
+                QString junkPacketMaxSize = QString::number(1000);
+                QString initPacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+                QString responsePacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
 
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
-                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, std::numeric_limits<qint32>::max())));
+
+                    auto max = (std::numeric_limits<qint32>::max)();
+                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, max)));
                 }
 
                 auto headersValueList = headersValue.values();
 
-                QString defaultInitPacketMagicHeader = headersValueList.at(0);
-                QString defaultResponsePacketMagicHeader = headersValueList.at(1);
-                QString defaultUnderloadPacketMagicHeader = headersValueList.at(2);
-                QString defaultTransportPacketMagicHeader = headersValueList.at(3);
+                QString initPacketMagicHeader = headersValueList.at(0);
+                QString responsePacketMagicHeader = headersValueList.at(1);
+                QString underloadPacketMagicHeader = headersValueList.at(2);
+                QString transportPacketMagicHeader = headersValueList.at(3);
 
-                containerConfig[config_key::junkPacketCount] = defaultJunkPacketCount;
-                containerConfig[config_key::junkPacketMinSize] = defaultJunkPacketMinSize;
-                containerConfig[config_key::junkPacketMaxSize] = defaultJunkPacketMaxSize;
-                containerConfig[config_key::initPacketJunkSize] = defaultInitPacketJunkSize;
-                containerConfig[config_key::responsePacketJunkSize] = defaultResponsePacketJunkSize;
-                containerConfig[config_key::initPacketMagicHeader] = defaultInitPacketMagicHeader;
-                containerConfig[config_key::responsePacketMagicHeader] = defaultResponsePacketMagicHeader;
-                containerConfig[config_key::underloadPacketMagicHeader] = defaultUnderloadPacketMagicHeader;
-                containerConfig[config_key::transportPacketMagicHeader] = defaultTransportPacketMagicHeader;
+                containerConfig[config_key::junkPacketCount] = junkPacketCount;
+                containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
+                containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
+                containerConfig[config_key::initPacketJunkSize] = initPacketJunkSize;
+                containerConfig[config_key::responsePacketJunkSize] = responsePacketJunkSize;
+                containerConfig[config_key::initPacketMagicHeader] = initPacketMagicHeader;
+                containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
+                containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
+                containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
             }
 
             if (container == DockerContainer::Sftp) {
