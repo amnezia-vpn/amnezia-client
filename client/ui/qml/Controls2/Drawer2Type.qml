@@ -10,11 +10,6 @@ Item {
         target: PageController
 
         function onForceCloseDrawer() {
-            if (root.opened()) {
-                close()
-                return
-            }
-
             if (root.expanded()) {
                 collapse()
             }
@@ -43,13 +38,12 @@ Item {
 
     property bool dragActive: dragArea.drag.active
 
-    /** Initial height of button content */
     property int collapsedHeight: 0
 
     property bool fullMouseAreaVisible: true
     property MouseArea drawerDragArea: dragArea
 
-    state: "closed"
+    state: "collapsed"
 
     Rectangle {
         id: draw2Background
@@ -66,16 +60,11 @@ Item {
         MouseArea {
             id: fullMouseArea
             anchors.fill: parent
-            enabled: (root.opened() || root.expanded())
+            enabled: root.expanded()
             hoverEnabled: true
             visible: fullMouseAreaVisible
 
             onClicked: {
-                if (root.opened()) {
-                    close()
-                    return
-                }
-
                 if (root.expanded()) {
                     collapse()
                 }
@@ -84,7 +73,10 @@ Item {
 
         Rectangle {
             id: placeAreaHolder
-            height: (!root.opened())  ? 0 :  parent.height - contentHeight
+
+            // for apdating home drawer, normal drawer will reset it
+            height: 0
+
             anchors.right: parent.right
             anchors.left: parent.left
             visible: true
@@ -120,49 +112,27 @@ Item {
 
                 anchors.fill: parent
 
-                cursorShape: root.collapsed() ? Qt.PointingHandCursor : Qt.ArrowCursor // ?
+                cursorShape: root.collapsed() ? Qt.PointingHandCursor : Qt.ArrowCursor
                 hoverEnabled: true
 
                 drag.target: placeAreaHolder
                 drag.axis: Drag.YAxis
-                drag.maximumY: (root.collapsed() || root.expanded()) ? (root.height - collapsedHeight) : root.height
-                drag.minimumY: (root.collapsed() || root.expanded()) ? (root.height - root.height * 0.9) : (root.height - root.height)
+                drag.maximumY: root.height - root.collapsedHeight
+                drag.minimumY: root.collapsedHeight > 0 ? root.height - root.height * 0.9 : 0
 
                 /** If drag area is released at any point other than min or max y, transition to the other state */
                 onReleased: {
-                    if (root.closed() && placeAreaHolder.y < root.height * 0.9) {
-                        root.state = "opened"
-                        return
-                    }
-
-                    if (root.opened() && placeAreaHolder.y > (root.height - root.height * 0.9)) {
-                        close()
-                        return
-                    }
-
-
-                    if (root.collapsed() && placeAreaHolder.y < (root.height - collapsedHeight)) {
+                    if (root.collapsed() && placeAreaHolder.y < drag.maximumY) {
                         root.state = "expanded"
                         return
                     }
-
-                    if (root.expanded() && placeAreaHolder.y > (root.height - root.height * 0.9)) {
+                    if (root.expanded() && placeAreaHolder.y > drag.minimumY) {
                         root.state = "collapsed"
                         return
-                    }
-
-
-                    if (root.opened()) {
-                        placeAreaHolder.y = 0
                     }
                 }
 
                 onClicked: {
-                    if (root.opened()) {
-                        close()
-                        return
-                    }
-
                     if (root.expanded()) {
                         collapse()
                         return
@@ -186,11 +156,10 @@ Item {
                 }
             }
         }
-
     }
 
     onStateChanged: {
-        if (root.closed() || root.collapsed()) {
+        if (root.collapsed()) {
             var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
             if (initialPageNavigationBarColor !== 0xFF1C1D21) {
                 PageController.updateNavigationBarColor(initialPageNavigationBarColor)
@@ -205,7 +174,7 @@ Item {
             return
         }
 
-        if (root.opened() || root.expanded()) {
+        if (root.expanded()) {
             if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
                 PageController.updateNavigationBarColor(0xFF1C1D21)
             }
@@ -221,26 +190,10 @@ Item {
     /** Two states of buttonContent, great place to add any future animations for the drawer */
     states: [
         State {
-            name: "closed"
-            PropertyChanges {
-                target: placeAreaHolder
-                y: root.height
-            }
-        },
-
-        State {
-            name: "opened"
-            PropertyChanges {
-                target: placeAreaHolder
-                y: dragArea.drag.minimumY
-            }
-        },
-
-        State {
             name: "collapsed"
             PropertyChanges {
                 target: placeAreaHolder
-                y: root.height - collapsedHeight
+                y: dragArea.drag.maximumY
             }
         },
 
@@ -248,38 +201,12 @@ Item {
             name: "expanded"
             PropertyChanges {
                 target: placeAreaHolder
-                y: root.height - root.height * 0.9
+                y: dragArea.drag.minimumY
             }
         }
     ]
 
     transitions: [
-        Transition {
-            from: "opened"
-            to: "closed"
-            PropertyAnimation {
-                target: placeAreaHolder
-                properties: "y"
-                duration: 200
-            }
-
-            onRunningChanged: {
-                if (!running) {
-                    fullMouseArea.visible = false
-                }
-            }
-        },
-
-        Transition {
-            from: "closed"
-            to: "opened"
-            PropertyAnimation {
-                target: placeAreaHolder
-                properties: "y"
-                duration: 200
-            }
-        },
-
         Transition {
             from: "expanded"
             to: "collapsed"
@@ -324,33 +251,32 @@ Item {
         duration: 200
     }
 
+    // for normal drawer
     function open() {
-        if (root.opened()) {
+        if (root.expanded()) {
             return
         }
 
         draw2Background.color = semitransparentColor
         fullMouseArea.visible = true
 
+        collapsedHeight = 0
+
         root.y = 0
-        root.state = "opened"
+        root.state = "expanded"
         root.visible = true
         root.height = parent.height
 
         contentArea.height = contentHeight
 
-        placeAreaHolder.height =  root.height - contentHeight
-        placeAreaHolder.y = root.height - root.height
-
-        dragArea.drag.maximumY =  root.height
-        dragArea.drag.minimumY =  0
+        placeAreaHolder.y = 0
+        placeAreaHolder.height = root.height - contentHeight
 
         animationVisible.running = true
     }
 
     function close() {
-        draw2Background.color = "transparent"
-        root.state = "closed"
+        collapse()
     }
 
     function collapse() {
@@ -358,21 +284,14 @@ Item {
         root.state = "collapsed"
     }
 
+    // for page home
     function expand() {
         draw2Background.color = semitransparentColor
         root.state = "expanded"
     }
 
-    function opened() {
-        return root.state === "opened" ? true : false
-    }
-
     function expanded() {
         return root.state === "expanded" ? true : false
-    }
-
-    function closed() {
-        return root.state === "closed" ? true : false
     }
 
     function collapsed() {
@@ -383,7 +302,7 @@ Item {
     onVisibleChanged: {
         // e.g cancel, ......
         if (!visible) {
-            if (root.opened()) {
+            if (root.expanded()) {
                 if (needCloseButton) {
                     PageController.drawerClose()
                 }
