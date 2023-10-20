@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
 
-project(${PROJECT} VERSION 4.0.8.4
+project(${PROJECT} VERSION 4.0.8.5
         DESCRIPTION "AmneziaVPN"
         HOMEPAGE_URL "https://amnezia.org/"
 )
