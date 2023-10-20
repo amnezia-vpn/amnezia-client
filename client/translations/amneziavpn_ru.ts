@@ -143,58 +143,58 @@
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="161"/>
+        <location filename="../ui/controllers/installController.cpp" line="141"/>
+        <location filename="../ui/controllers/installController.cpp" line="192"/>
         <source>%1 installed successfully. </source>
         <translation>%1 успешно установлен. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="112"/>
-        <location filename="../ui/controllers/installController.cpp" line="163"/>
+        <location filename="../ui/controllers/installController.cpp" line="143"/>
+        <location filename="../ui/controllers/installController.cpp" line="194"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 уже установлен на сервер. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="115"/>
+        <location filename="../ui/controllers/installController.cpp" line="146"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 В приложение добавлены обнаруженные на сервере протоклы и сервисы</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="182"/>
+        <location filename="../ui/controllers/installController.cpp" line="213"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервере обнаружены установленные протоколы и сервисы, все они добавлены в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="266"/>
+        <location filename="../ui/controllers/installController.cpp" line="297"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
+        <location filename="../ui/controllers/installController.cpp" line="312"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; был удален</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
+        <location filename="../ui/controllers/installController.cpp" line="322"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
+        <location filename="../ui/controllers/installController.cpp" line="339"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 был удален с сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="454"/>
+        <location filename="../ui/controllers/installController.cpp" line="485"/>
         <source>Please login as the user</source>
         <translation>Пожалуйста, войдите в систему от имени пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="483"/>
+        <location filename="../ui/controllers/installController.cpp" line="514"/>
         <source>Server added successfully</source>
         <translation>Сервер успешно добавлен</translation>
     </message>
@@ -2699,6 +2699,16 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -162,47 +162,47 @@
         <translation type="obsolete"> 已安装在服务器上</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="110"/>
-        <location filename="../ui/controllers/installController.cpp" line="161"/>
+        <location filename="../ui/controllers/installController.cpp" line="141"/>
+        <location filename="../ui/controllers/installController.cpp" line="192"/>
         <source>%1 installed successfully. </source>
         <translation>%1 安装成功。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="112"/>
-        <location filename="../ui/controllers/installController.cpp" line="163"/>
+        <location filename="../ui/controllers/installController.cpp" line="143"/>
+        <location filename="../ui/controllers/installController.cpp" line="194"/>
         <source>%1 is already installed on the server. </source>
         <translation>服务器上已经安装 %1。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="115"/>
+        <location filename="../ui/controllers/installController.cpp" line="146"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>添加已安装在服务器上的容器</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="182"/>
+        <location filename="../ui/controllers/installController.cpp" line="213"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 在服务上发现已经安装协议并添加至应用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="266"/>
+        <location filename="../ui/controllers/installController.cpp" line="297"/>
         <source>Settings updated successfully</source>
         <translation>配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="281"/>
+        <location filename="../ui/controllers/installController.cpp" line="312"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="291"/>
+        <location filename="../ui/controllers/installController.cpp" line="322"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="308"/>
+        <location filename="../ui/controllers/installController.cpp" line="339"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
@@ -223,12 +223,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="454"/>
+        <location filename="../ui/controllers/installController.cpp" line="485"/>
         <source>Please login as the user</source>
         <translation>请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="483"/>
+        <location filename="../ui/controllers/installController.cpp" line="514"/>
         <source>Server added successfully</source>
         <translation>增加服务器成功</translation>
     </message>
@@ -2838,6 +2838,16 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>错误 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
