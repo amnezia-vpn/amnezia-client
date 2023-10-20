@@ -41,7 +41,7 @@ bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, i
         //        return container;
     case IsInstalledRole:
     //        return m_settings->containers(m_currentlyProcessedServerIndex).contains(container);
-    case IsDefaultRole: {
+    case IsDefaultRole: { //todo remove
         m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
         m_defaultContainerIndex = container;
         emit defaultContainerChanged();
@@ -115,6 +115,13 @@ DockerContainer ContainersModel::getDefaultContainer()
 QString ContainersModel::getDefaultContainerName()
 {
     return ContainerProps::containerHumanNames().value(m_defaultContainerIndex);
+}
+
+void ContainersModel::setDefaultContainer(DockerContainer container)
+{
+    m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
+    m_defaultContainerIndex = container;
+    emit defaultContainerChanged();
 }
 
 int ContainersModel::getCurrentlyProcessedContainerIndex()

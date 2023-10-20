@@ -135,7 +135,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="429"/>
+        <location filename="../ui/controllers/importController.cpp" line="427"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -143,58 +143,58 @@
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="141"/>
-        <location filename="../ui/controllers/installController.cpp" line="192"/>
+        <location filename="../ui/controllers/installController.cpp" line="143"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 успешно установлен. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="143"/>
-        <location filename="../ui/controllers/installController.cpp" line="194"/>
+        <location filename="../ui/controllers/installController.cpp" line="145"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 уже установлен на сервер. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="146"/>
+        <location filename="../ui/controllers/installController.cpp" line="148"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 В приложение добавлены обнаруженные на сервере протоклы и сервисы</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="213"/>
+        <location filename="../ui/controllers/installController.cpp" line="214"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервере обнаружены установленные протоколы и сервисы, все они добавлены в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="297"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="312"/>
+        <location filename="../ui/controllers/installController.cpp" line="310"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; был удален</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="322"/>
+        <location filename="../ui/controllers/installController.cpp" line="320"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="339"/>
+        <location filename="../ui/controllers/installController.cpp" line="337"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 был удален с сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="485"/>
+        <location filename="../ui/controllers/installController.cpp" line="483"/>
         <source>Please login as the user</source>
         <translation>Пожалуйста, войдите в систему от имени пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="514"/>
+        <location filename="../ui/controllers/installController.cpp" line="511"/>
         <source>Server added successfully</source>
         <translation>Сервер успешно добавлен</translation>
     </message>
@@ -397,195 +397,195 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolOpenVpnSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="77"/>
         <source>OpenVPN settings</source>
         <translation>Настройки OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
         <source>VPN Addresses Subnet</source>
         <translation>VPN Адреса Подсеть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="98"/>
         <source>Network protocol</source>
         <translation>Сетевой протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="127"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="145"/>
         <source>Auto-negotiate encryption</source>
         <translation>Шифрование с автоматическим согласованием</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="161"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="163"/>
         <source>Hash</source>
         <translation>Хэш</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="171"/>
         <source>SHA512</source>
         <translation>SHA512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
         <source>SHA384</source>
         <translation>SHA384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
         <source>SHA256</source>
         <translation>SHA256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="174"/>
         <source>SHA3-512</source>
         <translation>SHA3-512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="175"/>
         <source>SHA3-384</source>
         <translation>SHA3-384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="175"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="176"/>
         <source>SHA3-256</source>
         <translation>SHA3-256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="177"/>
         <source>whirlpool</source>
         <translation>whirlpool</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="178"/>
         <source>BLAKE2b512</source>
         <translation>BLAKE2b512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="179"/>
         <source>BLAKE2s256</source>
         <translation>BLAKE2s256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="180"/>
         <source>SHA1</source>
         <translation>SHA1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="207"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="209"/>
         <source>Cipher</source>
         <translation>Шифрование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="216"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="217"/>
         <source>AES-256-GCM</source>
         <translation>AES-256-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="217"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="218"/>
         <source>AES-192-GCM</source>
         <translation>AES-192-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="218"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="219"/>
         <source>AES-128-GCM</source>
         <translation>AES-128-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="220"/>
         <source>AES-256-CBC</source>
         <translation>AES-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="220"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="221"/>
         <source>AES-192-CBC</source>
         <translation>AES-192-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="222"/>
         <source>AES-128-CBC</source>
         <translation>AES-128-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="223"/>
         <source>ChaCha20-Poly1305</source>
         <translation>ChaCha20-Poly1305</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="224"/>
         <source>ARIA-256-CBC</source>
         <translation>ARIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="225"/>
         <source>CAMELLIA-256-CBC</source>
         <translation>CAMELLIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="225"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="226"/>
         <source>none</source>
         <translation>none</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="261"/>
         <source>TLS auth</source>
         <translation>TLS авторизация</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="273"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="276"/>
         <source>Block DNS requests outside of VPN</source>
         <translation>Блокировать DNS запросы за пределами VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="292"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="295"/>
         <source>Additional client configuration commands</source>
         <translation>Дополнительные команды конфигурации клиента</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="308"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="340"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="343"/>
         <source>Commands:</source>
         <translation>Commands:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="327"/>
         <source>Additional server configuration commands</source>
         <translation>Дополнительные команды конфигурации сервера</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
         <source>Remove OpenVPN</source>
         <translation>Удалить OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="362"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="367"/>
         <source>Remove OpenVpn from server?</source>
         <translation>Удалить OpenVpn с сервера?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="368"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="369"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="370"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="389"/>
         <source>Save and Restart Amnezia</source>
         <translation>Сохранить и перезагрузить</translation>
     </message>
@@ -608,27 +608,27 @@ Already installed containers were found on the server. All installed containers 
         <translation>Параметры подключения %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="172"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="174"/>
         <source>Remove </source>
         <translation>Удалить </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
         <source>Remove %1 from server?</source>
         <translation>Удалить %1 с сервера?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="179"/>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation type="unfinished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="180"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="181"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
@@ -1694,7 +1694,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardInstalling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="65"/>
         <source>The server has already been added to the application</source>
         <translation>Сервер уже был добавлен в приложение</translation>
     </message>
@@ -1707,28 +1707,28 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">занят установкой других протоколов или сервисов. Установка Amnesia </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="62"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="70"/>
         <source>Amnezia has detected that your server is currently </source>
         <translation>Amnezia обнаружила, что ваш сервер в настоящее время </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="71"/>
         <source>busy installing other software. Amnezia installation </source>
         <translation>занят установкой другого программного обеспечения. Установка Amnezia </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="72"/>
         <source>will pause until the server finishes installing other software</source>
         <translation>будет приостановлена до тех пор, пока сервер не завершит установку</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="129"/>
         <source>Installing</source>
         <translation>Установка</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="75"/>
         <source>Usually it takes no more than 5 minutes</source>
         <translation>Обычно это занимает не более 5 минут</translation>
     </message>
@@ -1846,27 +1846,27 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="63"/>
         <source>New connection</source>
         <translation>Новое соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="90"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
         <translation>Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
         <source>Collapse content</source>
         <translation>Свернуть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
         <source>Show content</source>
         <translation>Показать содержимое ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="148"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -2636,7 +2636,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="75"/>
+        <location filename="../protocols/protocols_defs.cpp" line="77"/>
         <source>Sftp service</source>
         <translation>Сервис SFTP</translation>
     </message>

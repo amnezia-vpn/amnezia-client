@@ -165,7 +165,6 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
         m_serversModel->addServer(server);
-        m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
         emit installServerFinished(finishMessage);
         return;
@@ -216,9 +215,6 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
                                 "All installed containers have been added to the application");
         }
 
-        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
-            m_containersModel->setData(m_containersModel->index(container), true, ContainersModel::Roles::IsDefaultRole);
-        }
         emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
         return;
     }
@@ -511,7 +507,6 @@ void InstallController::addEmptyServer()
     server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
     m_serversModel->addServer(server);
-    m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
     emit installServerFinished(tr("Server added successfully"));
 }

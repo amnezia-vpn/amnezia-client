@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import ContainerEnum 1.0
 
 import "./"
 import "../Controls2"
@@ -252,6 +253,8 @@ PageType {
 
                             ColumnLayout {
                                 id: checkboxLayout
+
+                                anchors.fill: parent
                                 CheckBoxType {
                                     Layout.fillWidth: true
 
@@ -350,6 +353,8 @@ PageType {
                             Layout.topMargin: 24
                             Layout.leftMargin: -8
                             implicitHeight: 32
+
+                            visible: ContainersModel.getCurrentlyProcessedContainerIndex() === ContainerEnum.OpenVpn
 
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
