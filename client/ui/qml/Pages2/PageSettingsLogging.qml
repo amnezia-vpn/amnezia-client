@@ -147,16 +147,16 @@ PageType {
                             questionDrawer.noButtonText = qsTr("Cancel")
 
                             questionDrawer.yesButtonFunction = function() {
-                                questionDrawer.close()
+                                questionDrawer.visible = false
                                 PageController.showBusyIndicator(true)
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
                             }
                             questionDrawer.noButtonFunction = function() {
-                                questionDrawer.close()
+                                questionDrawer.visible = false
                             }
-                            questionDrawer.open()
+                            questionDrawer.visible = true
                         }
                     }
 
@@ -172,7 +172,6 @@ PageType {
 
             QuestionDrawer {
                 id: questionDrawer
-                parent: root
             }
         }
     }

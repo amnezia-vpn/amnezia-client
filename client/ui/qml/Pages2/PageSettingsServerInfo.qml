@@ -71,17 +71,15 @@ PageType {
                     }
 
                     actionButtonFunction: function() {
-                        serverNameEditDrawer.open()
+                        serverNameEditDrawer.visible = true
                     }
                 }
 
-                Drawer2Type {
+                DrawerType {
                     id: serverNameEditDrawer
 
-                    parent: root
                     width: root.width
-                    height: root.height // * 0.35
-                    contentHeight: root.height * 0.35
+                    height: root.height * 0.35
 
                     onVisibleChanged: {
                         if (serverNameEditDrawer.visible) {
@@ -90,15 +88,12 @@ PageType {
                     }
 
                     ColumnLayout {
-                        parent: serverNameEditDrawer.contentParent
-
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
                         anchors.leftMargin: 16
                         anchors.rightMargin: 16
-
 
                         TextFieldWithHeaderType {
                             id: serverName
@@ -169,7 +164,6 @@ PageType {
             }
             PageSettingsServerData {
                 stackView: root.stackView
-                questionDrawerParent: root
             }
         }
     }

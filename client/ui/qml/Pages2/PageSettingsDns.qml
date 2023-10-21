@@ -92,7 +92,7 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.close()
+                        questionDrawer.visible = false
                         SettingsController.primaryDns = "1.1.1.1"
                         primaryDns.textFieldText = SettingsController.primaryDns
                         SettingsController.secondaryDns = "1.0.0.1"
@@ -100,9 +100,9 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.close()
+                        questionDrawer.visible = false
                     }
-                    questionDrawer.open()
+                    questionDrawer.visible = true
                 }
             }
 
@@ -124,7 +124,6 @@ PageType {
         }
         QuestionDrawer {
             id: questionDrawer
-            parent: root
         }
     }
 }

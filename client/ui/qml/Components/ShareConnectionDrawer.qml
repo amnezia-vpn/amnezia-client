@@ -16,7 +16,7 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-Drawer2Type {
+DrawerType {
     id: root
 
     property alias headerText: header.headerText
@@ -28,10 +28,9 @@ Drawer2Type {
     property string configFileName: "amnezia_config.vpn"
 
     width: parent.width
-    height: parent.height
-    contentHeight: parent.height * 0.9
+    height: parent.height * 0.9
 
-    onDrawerClosed: {
+    onClosed: {
         configExtension = ".vpn"
         configCaption = qsTr("Save AmneziaVPN config")
         configFileName = "amnezia_config"
@@ -42,9 +41,6 @@ Drawer2Type {
 
         Header2Type {
             id: header
-
-            parent: root.contentParent
-
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
@@ -54,8 +50,6 @@ Drawer2Type {
         }
 
         FlickableType {
-            parent: root.contentParent
-
             anchors.top: header.bottom
             anchors.bottom: parent.bottom
             contentHeight: content.height + 32
@@ -132,23 +126,18 @@ Drawer2Type {
                     text: qsTr("Show connection settings")
 
                     onClicked: {
-                        configContentDrawer.open()
+                        configContentDrawer.visible = true
                     }
                 }
 
-                Drawer2Type {
+                DrawerType {
                     id: configContentDrawer
 
-                    parent: root
                     width: parent.width
-                    height: parent.height
-
-                    contentHeight: parent.height * 0.9
+                    height: parent.height * 0.9
 
                     BackButtonType {
                         id: backButton
-
-                        parent: configContentDrawer.contentParent
 
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -156,13 +145,11 @@ Drawer2Type {
                         anchors.topMargin: 16
 
                         backButtonFunction: function() {
-                            configContentDrawer.close()
+                            configContentDrawer.visible = false
                         }
                     }
 
                     FlickableType {
-                        parent: configContentDrawer.contentParent
-
                         anchors.top: backButton.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right

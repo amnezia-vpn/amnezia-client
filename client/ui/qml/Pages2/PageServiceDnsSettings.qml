@@ -68,14 +68,14 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.close()
+                        questionDrawer.visible = false
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.close()
+                        questionDrawer.visible = false
                     }
-                    questionDrawer.open()
+                    questionDrawer.visible = true
                 }
 
                 MouseArea {
@@ -89,7 +89,6 @@ PageType {
 
             QuestionDrawer {
                 id: questionDrawer
-                parent: root
             }
         }
     }
