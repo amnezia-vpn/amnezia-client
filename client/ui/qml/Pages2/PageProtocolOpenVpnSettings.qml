@@ -157,6 +157,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
+                            drawerParent: root
+
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 
                             descriptionText: qsTr("Hash")
@@ -202,6 +204,8 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            drawerParent: root
 
                             enabled: !autoNegotiateEncryprionSwitcher.checked
 
@@ -370,14 +374,14 @@ PageType {
                                 questionDrawer.noButtonText = qsTr("Cancel")
 
                                 questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                    questionDrawer.close()
                                     PageController.goToPage(PageEnum.PageDeinstalling)
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                    questionDrawer.close()
                                 }
-                                questionDrawer.visible = true
+                                questionDrawer.open()
                             }
                         }
 
@@ -402,6 +406,7 @@ PageType {
 
         QuestionDrawer {
             id: questionDrawer
+            parent: root
         }
     }
 }

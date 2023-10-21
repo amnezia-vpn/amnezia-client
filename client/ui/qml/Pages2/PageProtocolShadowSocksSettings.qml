@@ -95,6 +95,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
+                            drawerParent: root
+
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
 

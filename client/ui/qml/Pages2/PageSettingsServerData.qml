@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    property Item questionDrawerParent
+
     Connections {
         target: InstallController
 
@@ -94,15 +96,15 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                         PageController.showBusyIndicator(true)
                         SettingsController.clearCachedProfiles()
                         PageController.showBusyIndicator(false)
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 
@@ -141,7 +143,7 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                         PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
@@ -150,9 +152,9 @@ PageType {
                         PageController.showBusyIndicator(false)
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 
@@ -172,7 +174,7 @@ PageType {
                     questionDrawer.noButtonText = qsTr("Cancel")
 
                     questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
@@ -180,9 +182,9 @@ PageType {
                         InstallController.removeAllContainers()
                     }
                     questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                        questionDrawer.close()
                     }
-                    questionDrawer.visible = true
+                    questionDrawer.open()
                 }
             }
 
@@ -192,6 +194,10 @@ PageType {
 
             QuestionDrawer {
                 id: questionDrawer
+
+                drawerHeight: 0.5
+
+                parent: questionDrawerParent
             }
         }
     }

@@ -139,18 +139,19 @@ PageType {
         questionDrawer.noButtonText = qsTr("Cancel")
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.visible = false
+            questionDrawer.close()
             PageController.showBusyIndicator(true)
             SettingsController.restoreAppConfig(filePath)
             PageController.showBusyIndicator(false)
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.visible = false
+            questionDrawer.close()
         }
-        questionDrawer.visible = true
+        questionDrawer.open()
     }
 
     QuestionDrawer {
         id: questionDrawer
+        parent: root
     }
 }
