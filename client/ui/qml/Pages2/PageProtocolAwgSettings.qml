@@ -286,9 +286,9 @@ PageType {
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                    questionDrawer.close()
                                 }
-                                questionDrawer.visible = true
+                                questionDrawer.open()
                             }
                         }
 
@@ -324,6 +324,7 @@ PageType {
 
         QuestionDrawer {
             id: questionDrawer
+            parent: root
         }
     }
 }
