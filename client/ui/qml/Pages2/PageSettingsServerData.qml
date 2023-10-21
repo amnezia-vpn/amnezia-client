@@ -195,7 +195,7 @@ PageType {
             QuestionDrawer {
                 id: questionDrawer
 
-                drawerHeight: 0.5
+                drawerHeight: 0.6
 
                 parent: questionDrawerParent
             }
