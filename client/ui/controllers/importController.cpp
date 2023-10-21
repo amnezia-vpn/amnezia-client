@@ -144,8 +144,6 @@ void ImportController::importConfig()
     if (credentials.isValid() || m_config.contains(config_key::containers)) {
         m_serversModel->addServer(m_config);
 
-        m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
-
         emit importFinished();
     } else {
         qDebug() << "Failed to import profile";

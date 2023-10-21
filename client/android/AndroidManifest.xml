@@ -45,6 +45,7 @@
             android:label="-- %%INSERT_APP_NAME%% --"
             android:screenOrientation="unspecified"
             android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
     
 <!--            android:theme="@style/splashScreenTheme"-->

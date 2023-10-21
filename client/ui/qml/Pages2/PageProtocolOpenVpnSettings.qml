@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import ContainerEnum 1.0
 
 import "./"
 import "../Controls2"
@@ -252,6 +253,8 @@ PageType {
 
                             ColumnLayout {
                                 id: checkboxLayout
+
+                                anchors.fill: parent
                                 CheckBoxType {
                                     Layout.fillWidth: true
 
@@ -351,6 +354,8 @@ PageType {
                             Layout.leftMargin: -8
                             implicitHeight: 32
 
+                            visible: ContainersModel.getCurrentlyProcessedContainerIndex() === ContainerEnum.OpenVpn
+
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
                             pressedColor: Qt.rgba(1, 1, 1, 0.12)
@@ -360,7 +365,7 @@ PageType {
 
                             onClicked: {
                                 questionDrawer.headerText = qsTr("Remove OpenVpn from server?")
-                                questionDrawer.descriptionText = qsTr("All users who you shared a connection with will no longer be able to connect to it.")
+                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
                                 questionDrawer.noButtonText = qsTr("Cancel")
 

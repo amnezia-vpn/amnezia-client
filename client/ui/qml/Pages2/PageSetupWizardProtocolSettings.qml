@@ -224,7 +224,7 @@ PageType {
                             if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
                                 port.visible = false
                             } else {
-                                port.textFieldText = ProtocolProps.defaultPort(defaultContainerProto)
+                                port.textFieldText = ProtocolProps.getPortForInstall(defaultContainerProto)
                             }
                             transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
 

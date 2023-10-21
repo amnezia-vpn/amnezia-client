@@ -16,8 +16,6 @@ QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials,
 {
     QString config = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, errorCode);
 
-    QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
-
     ServerController serverController(m_settings);
     QString serverConfig = serverController.getTextFileFromContainer(container, credentials, protocols::awg::serverConfigPath, errorCode);
 
@@ -44,6 +42,8 @@ QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials,
     config.replace("$RESPONSE_PACKET_MAGIC_HEADER", serverConfigMap.value(config_key::responsePacketMagicHeader));
     config.replace("$UNDERLOAD_PACKET_MAGIC_HEADER", serverConfigMap.value(config_key::underloadPacketMagicHeader));
     config.replace("$TRANSPORT_PACKET_MAGIC_HEADER", serverConfigMap.value(config_key::transportPacketMagicHeader));
+
+    QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
 
     jsonConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
     jsonConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
