@@ -5,6 +5,7 @@
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QStandardPaths>
+#include <QRandomGenerator>
 
 #include "core/errorstrings.h"
 #include "core/servercontroller.h"
@@ -73,6 +74,38 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::transport_proto,
                                    ProtocolProps::transportProtoToString(transportProto, protocol));
 
+            if (container == DockerContainer::Awg) {
+                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
+                QString junkPacketMinSize = QString::number(50);
+                QString junkPacketMaxSize = QString::number(1000);
+                QString initPacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+                QString responsePacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+
+                QSet<QString> headersValue;
+                while (headersValue.size() != 4) {
+
+                    auto max = (std::numeric_limits<qint32>::max)();
+                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, max)));
+                }
+
+                auto headersValueList = headersValue.values();
+
+                QString initPacketMagicHeader = headersValueList.at(0);
+                QString responsePacketMagicHeader = headersValueList.at(1);
+                QString underloadPacketMagicHeader = headersValueList.at(2);
+                QString transportPacketMagicHeader = headersValueList.at(3);
+
+                containerConfig[config_key::junkPacketCount] = junkPacketCount;
+                containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
+                containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
+                containerConfig[config_key::initPacketJunkSize] = initPacketJunkSize;
+                containerConfig[config_key::responsePacketJunkSize] = responsePacketJunkSize;
+                containerConfig[config_key::initPacketMagicHeader] = initPacketMagicHeader;
+                containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
+                containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
+                containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
+            }
+
             if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
                 containerConfig.insert(config_key::password, Utils::getRandomString(10));
@@ -132,7 +165,6 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
         m_serversModel->addServer(server);
-        m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
         emit installServerFinished(finishMessage);
         return;
@@ -183,7 +215,6 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
                                 "All installed containers have been added to the application");
         }
 
-        m_containersModel->setData(m_containersModel->index(0, 0), container, ContainersModel::Roles::IsDefaultRole);
         emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
         return;
     }
@@ -473,8 +504,9 @@ void InstallController::addEmptyServer()
     server.insert(config_key::port, m_currentlyInstalledServerCredentials.port);
     server.insert(config_key::description, m_settings->nextAvailableServerName());
 
+    server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
     m_serversModel->addServer(server);
-    m_serversModel->setDefaultServerIndex(m_serversModel->getServersCount() - 1);
 
     emit installServerFinished(tr("Server added successfully"));
 }

@@ -217,5 +217,11 @@
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
         <file>images/controls/x-circle.svg</file>
         <file>ui/qml/Controls2/Drawer2Type.qml</file>
+        <file>ui/qml/Pages2/PageProtocolAwgSettings.qml</file>
+        <file>server_scripts/awg/template.conf</file>
+        <file>server_scripts/awg/start.sh</file>
+        <file>server_scripts/awg/configure_container.sh</file>
+        <file>server_scripts/awg/run_container.sh</file>
+        <file>server_scripts/awg/Dockerfile</file>
     </qresource>
 </RCC>

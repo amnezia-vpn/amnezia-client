@@ -96,7 +96,7 @@ void ServersModel::setDefaultServerIndex(const int index)
 {
     m_settings->setDefaultServer(index);
     m_defaultServerIndex = m_settings->defaultServerIndex();
-    emit defaultServerIndexChanged();
+    emit defaultServerIndexChanged(m_defaultServerIndex);
 }
 
 const int ServersModel::getDefaultServerIndex()

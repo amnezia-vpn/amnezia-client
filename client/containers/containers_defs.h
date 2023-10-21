@@ -16,16 +16,16 @@ namespace amnezia
         Q_NAMESPACE
         enum DockerContainer {
             None = 0,
-            OpenVpn,
-            ShadowSocks,
-            Cloak,
+            Awg,
             WireGuard,
+            OpenVpn,
+            Cloak,
+            ShadowSocks,
             Ipsec,
 
             // non-vpn
             TorWebSite,
             Dns,
-            // FileShare,
             Sftp
         };
         Q_ENUM_NS(DockerContainer)

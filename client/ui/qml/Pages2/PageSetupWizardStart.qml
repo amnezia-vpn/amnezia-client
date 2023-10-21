@@ -62,7 +62,7 @@ PageType {
         function onInstallationErrorOccurred(errorMessage) {
             PageController.showErrorMessage(errorMessage)
 
-            var currentPageName = tabBarStackView.currentItem.objectName
+            var currentPageName = stackView.currentItem.objectName
 
             if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
                 PageController.closePage()

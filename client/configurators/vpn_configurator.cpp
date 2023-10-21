@@ -1,32 +1,34 @@
 #include "vpn_configurator.h"
-#include "openvpn_configurator.h"
 #include "cloak_configurator.h"
-#include "shadowsocks_configurator.h"
-#include "wireguard_configurator.h"
 #include "ikev2_configurator.h"
+#include "openvpn_configurator.h"
+#include "shadowsocks_configurator.h"
 #include "ssh_configurator.h"
+#include "wireguard_configurator.h"
+#include "awg_configurator.h"
 
 #include <QFile>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 #include "containers/containers_defs.h"
-#include "utilities.h"
 #include "settings.h"
+#include "utilities.h"
 
-VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
+    : ConfiguratorBase(settings, parent)
 {
     openVpnConfigurator = std::shared_ptr<OpenVpnConfigurator>(new OpenVpnConfigurator(settings, this));
     shadowSocksConfigurator = std::shared_ptr<ShadowSocksConfigurator>(new ShadowSocksConfigurator(settings, this));
     cloakConfigurator = std::shared_ptr<CloakConfigurator>(new CloakConfigurator(settings, this));
-    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, this));
+    wireguardConfigurator = std::shared_ptr<WireguardConfigurator>(new WireguardConfigurator(settings, false, this));
     ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, this));
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, this));
+    awgConfigurator = std::shared_ptr<AwgConfigurator>(new AwgConfigurator(settings, this));
 }
 
-QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode)
+QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode)
 {
     switch (proto) {
     case Proto::OpenVpn:
@@ -35,17 +37,17 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     case Proto::ShadowSocks:
         return shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, errorCode);
 
-    case Proto::Cloak:
-        return cloakConfigurator->genCloakConfig(credentials, container, containerConfig, errorCode);
+    case Proto::Cloak: return cloakConfigurator->genCloakConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::WireGuard:
         return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
 
-    case Proto::Ikev2:
-        return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
+    case Proto::Awg:
+        return awgConfigurator->genAwgConfig(credentials, container, containerConfig, errorCode);
 
-    default:
-        return "";
+    case Proto::Ikev2: return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
+
+    default: return "";
     }
 }
 
@@ -62,8 +64,8 @@ QPair<QString, QString> VpnConfigurator::getDnsForConfig(int serverIndex)
     if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
         if (useAmneziaDns && m_settings->containers(serverIndex).contains(DockerContainer::Dns)) {
             dns.first = protocols::dns::amneziaDnsIp;
-        }
-        else dns.first = m_settings->primaryDns();
+        } else
+            dns.first = m_settings->primaryDns();
     }
     if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
         dns.second = m_settings->secondaryDns();
@@ -73,8 +75,8 @@ QPair<QString, QString> VpnConfigurator::getDnsForConfig(int serverIndex)
     return dns;
 }
 
-QString &VpnConfigurator::processConfigWithDnsSettings(int serverIndex, DockerContainer container,
-    Proto proto, QString &config)
+QString &VpnConfigurator::processConfigWithDnsSettings(int serverIndex, DockerContainer container, Proto proto,
+                                                       QString &config)
 {
     auto dns = getDnsForConfig(serverIndex);
 
@@ -84,8 +86,8 @@ QString &VpnConfigurator::processConfigWithDnsSettings(int serverIndex, DockerCo
     return config;
 }
 
-QString &VpnConfigurator::processConfigWithLocalSettings(int serverIndex, DockerContainer container,
-    Proto proto, QString &config)
+QString &VpnConfigurator::processConfigWithLocalSettings(int serverIndex, DockerContainer container, Proto proto,
+                                                         QString &config)
 {
     processConfigWithDnsSettings(serverIndex, container, proto, config);
 
@@ -95,8 +97,8 @@ QString &VpnConfigurator::processConfigWithLocalSettings(int serverIndex, Docker
     return config;
 }
 
-QString &VpnConfigurator::processConfigWithExportSettings(int serverIndex, DockerContainer container,
-    Proto proto, QString &config)
+QString &VpnConfigurator::processConfigWithExportSettings(int serverIndex, DockerContainer container, Proto proto,
+                                                          QString &config)
 {
     processConfigWithDnsSettings(serverIndex, container, proto, config);
 
@@ -107,7 +109,7 @@ QString &VpnConfigurator::processConfigWithExportSettings(int serverIndex, Docke
 }
 
 void VpnConfigurator::updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig,
-    const QString &stdOut)
+                                                             const QString &stdOut)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 

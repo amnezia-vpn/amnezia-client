@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "wireguard-go-version.h"
-#include "3rd/wireguard-apple/Sources/WireGuardKitC/WireGuardKitC.h"
+#include "3rd/awg-apple/Sources/WireGuardKitC/WireGuardKitC.h"
 
 #include <stdbool.h>
 #include <stdint.h>

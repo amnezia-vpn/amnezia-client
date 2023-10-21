@@ -26,4 +26,16 @@ Item {
         }
         return false
     }
+
+    TextEdit{
+        id: clipboard
+        visible: false
+    }
+
+    function copyToClipBoard(text) {
+        clipboard.text = text
+        clipboard.selectAll()
+        clipboard.copy()
+        clipboard.select(0, 0)
+    }
 }

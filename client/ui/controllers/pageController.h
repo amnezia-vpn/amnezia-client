@@ -49,6 +49,7 @@ namespace PageLoader
         PageProtocolShadowSocksSettings,
         PageProtocolCloakSettings,
         PageProtocolWireGuardSettings,
+        PageProtocolAwgSettings,
         PageProtocolIKev2Settings,
         PageProtocolRaw
     };

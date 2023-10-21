@@ -24,6 +24,10 @@ PageType {
         }
 
         function onImportFinished() {
+            if (ConnectionController.isConnected) {
+                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+            }
+
             PageController.goToStartPage()
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
                 PageController.replaceStartPage()

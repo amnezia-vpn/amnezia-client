@@ -78,21 +78,9 @@ PageType {
                 rightImageColor: "#D7D8DB"
 
                 clickedFunction: function() {
-                    content.copyToClipBoard(descriptionText)
+                    GC.copyToClipBoard(descriptionText)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
-            }
-
-            TextEdit{
-                id: clipboard
-                visible: false
-            }
-
-            function copyToClipBoard(text) {
-                clipboard.text = text
-                clipboard.selectAll()
-                clipboard.copy()
-                clipboard.select(0, 0)
             }
 
             ParagraphTextType {
@@ -121,7 +109,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("When configuring WordPress set the domain as this onion address.")
+                text: qsTr("When configuring WordPress set the this onion address as domain.")
             }
 
             BasicButtonType {

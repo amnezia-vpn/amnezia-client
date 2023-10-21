@@ -41,7 +41,7 @@ PageType {
             HeaderType {
                 Layout.fillWidth: true
 
-                headerText: qsTr("Server connection")
+                headerText: qsTr("Configure your server")
             }
 
             TextFieldWithHeaderType {
@@ -106,6 +106,14 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
+            }
+
+            LabelTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+
+                text: qsTr("All data you enter will remain strictly confidential
+and will not be shared or disclosed to the Amnezia or any third parties")
             }
         }
     }

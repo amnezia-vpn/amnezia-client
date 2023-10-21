@@ -131,7 +131,7 @@ PageType {
                                         Layout.fillWidth: true
                                         Layout.topMargin: 16
 
-                                        headerText: qsTr("Connection options ") + protocolName
+                                        headerText: qsTr("Connection options %1").arg(protocolName)
                                     }
 
                                     TextArea {
@@ -172,6 +172,8 @@ PageType {
                 id: removeButton
 
                 width: parent.width
+
+                visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"

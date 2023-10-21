@@ -23,16 +23,14 @@ Drawer2Type {
         anchors.right: parent.right
         spacing: 0
 
-        Header2TextType {
+        Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-            Layout.bottomMargin: 32
-            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: 16
 
-            text: qsTr("Connection data")
-            wrapMode: Text.WordWrap
+            headerText: qsTr("Add new connection")
         }
 
         LabelWithButtonType {
@@ -40,7 +38,7 @@ Drawer2Type {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: qsTr("Server IP, login and password")
+            text: qsTr("Configure your server")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -54,7 +52,7 @@ Drawer2Type {
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: qsTr("QR code, key or configuration file")
+            text: qsTr("Open config file, key or QR code")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
