@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-Drawer2Type {
+DrawerType {
     id: root
 
     property string headerText
@@ -15,14 +15,12 @@ Drawer2Type {
 
     property var yesButtonFunction
     property var noButtonFunction
-    property real drawerHeight: 0.5
 
     width: parent.width
-    height: parent.height
-    contentHeight: parent.height * drawerHeight
+    height: content.implicitHeight + 32
 
     ColumnLayout {
-        parent: root.contentParent
+        id: content
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -30,8 +28,6 @@ Drawer2Type {
         anchors.topMargin: 16
         anchors.rightMargin: 16
         anchors.leftMargin: 16
-
-        // visible: false
 
         spacing: 8
 

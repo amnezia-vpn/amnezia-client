@@ -97,19 +97,14 @@ PageType {
                             }
                         }
 
-                        Drawer2Type {
+                        DrawerType {
                             id: showDetailsDrawer
 
                             width: parent.width
-                            height: parent.height
-                            contentHeight: parent.height * 0.9
-
-                            parent: root
+                            height: parent.height * 0.9
 
                             BackButtonType {
                                 id: showDetailsBackButton
-
-                                parent: showDetailsDrawer.contentParent
 
                                 anchors.top: parent.top
                                 anchors.left: parent.left
@@ -122,8 +117,6 @@ PageType {
                             }
 
                             FlickableType {
-                                parent: showDetailsDrawer.contentParent
-
                                 anchors.top: showDetailsBackButton.bottom
                                 anchors.left: parent.left
                                 anchors.right: parent.right

@@ -116,8 +116,6 @@ PageType {
         DropDownType {
             id: selector
 
-            drawerParent: root
-
             Layout.fillWidth: true
             Layout.topMargin: 32
             Layout.leftMargin: 16
@@ -210,13 +208,13 @@ PageType {
                                 questionDrawer.noButtonText = qsTr("Cancel")
 
                                 questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.close()
+                                    questionDrawer.visible = false
                                     SitesController.removeSite(index)
                                 }
                                 questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.close()
+                                    questionDrawer.visible = false
                                 }
-                                questionDrawer.open()
+                                questionDrawer.visible = true
                             }
                         }
 
@@ -224,7 +222,6 @@ PageType {
 
                         QuestionDrawer {
                             id: questionDrawer
-                            parent: root
                         }
                     }
                 }
@@ -279,18 +276,13 @@ PageType {
         }
     }
 
-    Drawer2Type {
+    DrawerType {
         id: moreActionsDrawer
 
         width: parent.width
-        height: parent.height
-        contentHeight: parent.height * 0.4375
-
-        parent: root
+        height: parent.height * 0.4375
 
         FlickableType {
-            parent: moreActionsDrawer.contentParent
-
             anchors.fill: parent
             contentHeight: moreActionsDrawerContent.height
             ColumnLayout {
@@ -349,19 +341,14 @@ PageType {
         }
     }
 
-    Drawer2Type {
+    DrawerType {
         id: importSitesDrawer
 
         width: parent.width
-        height: parent.height
-        contentHeight: parent.height * 0.4375
-
-        parent: root
+        height: parent.height * 0.4375
 
         BackButtonType {
             id: importSitesDrawerBackButton
-
-            parent: importSitesDrawer.contentParent
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -374,8 +361,6 @@ PageType {
         }
 
         FlickableType {
-            parent: importSitesDrawer.contentParent
-
             anchors.top: importSitesDrawerBackButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right

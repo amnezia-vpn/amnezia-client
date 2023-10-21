@@ -63,7 +63,7 @@ ListView {
                         isDefault = true
 
                         menuContent.currentIndex = index
-                        containersDropDown.menu.close()
+                        containersDropDown.menuVisible = false
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))

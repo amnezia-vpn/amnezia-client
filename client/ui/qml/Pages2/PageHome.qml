@@ -30,13 +30,13 @@ PageType {
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            buttonContent.collapse()
+            buttonContent.state = "expanded"
             if (isContainerInstalled) {
                 containersDropDown.menuVisible = true
             }
         }
         function onForceCloseDrawer() {
-            buttonContent.collapse()
+            buttonContent.state = "collapsed"
         }
     }
 
@@ -73,8 +73,14 @@ PageType {
         expandedServersMenuDescription.text = description + root.defaultServerHostName
     }
 
-    Component.onCompleted: {
-        updateDescriptions()
+    Component.onCompleted: updateDescriptions()
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: buttonContent.state === "expanded"
+        onClicked: {
+            buttonContent.state = "collapsed"
+        }
     }
 
     Item {
@@ -86,10 +92,56 @@ PageType {
         }
     }
 
+    MouseArea {
+        id: dragArea
+
+        anchors.fill: buttonBackground
+        cursorShape: buttonContent.state === "collapsed" ? Qt.PointingHandCursor : Qt.ArrowCursor
+        hoverEnabled: true
+
+        drag.target: buttonContent
+        drag.axis: Drag.YAxis
+        drag.maximumY: root.height - buttonContent.collapsedHeight
+        drag.minimumY: root.height - root.height * 0.9
+
+        /** If drag area is released at any point other than min or max y, transition to the other state */
+        onReleased: {
+            if (buttonContent.state === "collapsed" && buttonContent.y < dragArea.drag.maximumY) {
+                buttonContent.state = "expanded"
+                return
+            }
+            if (buttonContent.state === "expanded" && buttonContent.y > dragArea.drag.minimumY) {
+                buttonContent.state = "collapsed"
+                return
+            }
+        }
+
+        onEntered: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
+            collapsedButtonHeader.opacity = 0.8
+        }
+        onExited: {
+            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 1
+        }
+        onPressedChanged: {
+            collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
+            collapsedButtonHeader.opacity = 0.7
+        }
+
+
+        onClicked: {
+            if (buttonContent.state === "collapsed") {
+                buttonContent.state = "expanded"
+            }
+        }
+    }
+
     Rectangle {
         id: buttonBackground
-        anchors { left: buttonContent.left; right: buttonContent.right; top: buttonContent.top }
 
+        anchors { left: buttonContent.left; right: buttonContent.right; top: buttonContent.top }
+        height: root.height
         radius: 16
         color: root.defaultColor
         border.color: root.borderColor
@@ -105,126 +157,161 @@ PageType {
         }
     }
 
-    Drawer2Type {
+    ColumnLayout {
         id: buttonContent
-        visible: true
 
-        fullMouseAreaVisible: false
-
+        /** Initial height of button content */
+        property int collapsedHeight: 0
         /** True when expanded objects should be visible */
-        property bool expandedVisibility: buttonContent.expanded() || (buttonContent.collapsed() && buttonContent.dragActive)
+        property bool expandedVisibility: buttonContent.state === "expanded" || (buttonContent.state === "collapsed" && dragArea.drag.active === true)
         /** True when collapsed objects should be visible */
-        property bool collapsedVisibility: buttonContent.collapsed() && !buttonContent.dragActive
+        property bool collapsedVisibility: buttonContent.state === "collapsed" && dragArea.drag.active === false
 
-        width: parent.width
-        height: parent.height
-        contentHeight: parent.height * 0.9
+        Drag.active: dragArea.drag.active
+        anchors.right: root.right
+        anchors.left: root.left
+        y: root.height - buttonContent.height
 
+        Component.onCompleted: {
+            buttonContent.state = "collapsed"
+        }
 
-        ColumnLayout {
-            id: collapsedButtonContent
-
-            parent: buttonContent.contentParent
-
-            visible: buttonContent.collapsedVisibility
-
-            anchors.right: parent.right
-            anchors.left: parent.left
-            anchors.top: parent.top
-
-            onImplicitHeightChanged: {
-                if (buttonContent.collapsed() && buttonContent.collapsedHeight === 0) {
-                    buttonContent.collapsedHeight = implicitHeight
-                }
-            }
-
-            DividerType {
-                Layout.topMargin: 10
-                Layout.fillWidth: false
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 2
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            }
-        
-            RowLayout {
-                Layout.topMargin: 14
-                Layout.leftMargin: 24
-                Layout.rightMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                Header1TextType {
-                    id: collapsedButtonHeader
-                    Layout.maximumWidth: root.width - 48 - 18 - 12 // todo
-
-                    maximumLineCount: 2
-                    elide: Qt.ElideRight
-
-                    text: root.defaultServerName
-
-                    Layout.alignment: Qt.AlignLeft
-                }
-
-
-                ImageButtonType {
-                    id: collapsedButtonChevron
-
-                    hoverEnabled: false
-                    image: "qrc:/images/controls/chevron-down.svg"
-                    imageColor: "#d7d8db"
-
-                    horizontalPadding: 0
-                    padding: 0
-                    spacing: 0
-
-                    Rectangle {
-                        id: rightImageBackground
-                        anchors.fill: parent
-                        radius: 16
-                        color: "transparent"
-
-                        Behavior on color {
-                            PropertyAnimation { duration: 200 }
-                        }
-                    }
-
-                    onClicked: {
-                        if (buttonContent.collapsed()) {
-                            buttonContent.expand()
-                        }
-                    }
-                }
-            }
-
-            LabelTextType {
-                id: collapsedServerMenuDescription
-                Layout.bottomMargin: 44
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                visible: buttonContent.collapsedVisibility
+        /** Set once based on first implicit height change once all children are layed out */
+        onImplicitHeightChanged: {
+            if (buttonContent.state === "collapsed" && collapsedHeight == 0) {
+                collapsedHeight = implicitHeight
             }
         }
 
-        Component.onCompleted: {
-            buttonContent.collapse()
+        onStateChanged: {
+            if (buttonContent.state === "collapsed") {
+                var initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
+                if (initialPageNavigationBarColor !== 0xFF1C1D21) {
+                    PageController.updateNavigationBarColor(initialPageNavigationBarColor)
+                }
+                PageController.drawerClose()
+                return
+            }
+            if (buttonContent.state === "expanded") {
+                if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
+                    PageController.updateNavigationBarColor(0xFF1C1D21)
+                }
+                PageController.drawerOpen()
+                return
+            }
+        }
+
+        /** Two states of buttonContent, great place to add any future animations for the drawer */
+        states: [
+            State {
+                name: "collapsed"
+                PropertyChanges {
+                    target: buttonContent
+                    y: root.height - collapsedHeight
+                }
+            },
+            State {
+                name: "expanded"
+                PropertyChanges {
+                    target: buttonContent
+                    y: dragArea.drag.minimumY
+
+                }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                from: "collapsed"
+                to: "expanded"
+                PropertyAnimation {
+                    target: buttonContent
+                    properties: "y"
+                    duration: 200
+                }
+            },
+            Transition {
+                from: "expanded"
+                to: "collapsed"
+                PropertyAnimation {
+                    target: buttonContent
+                    properties: "y"
+                    duration: 200
+                }
+            }
+        ]
+
+        DividerType {
+            Layout.topMargin: 10
+            Layout.fillWidth: false
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 2
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+            visible: (buttonContent.collapsedVisibility || buttonContent.expandedVisibility)
+        }
+
+        RowLayout {
+            Layout.topMargin: 14
+            Layout.leftMargin: 24
+            Layout.rightMargin: 24
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            visible: buttonContent.collapsedVisibility
+
+            spacing: 0
+
+            Header1TextType {
+                id: collapsedButtonHeader
+                Layout.maximumWidth: buttonContent.width - 48 - 18 - 12 // todo
+
+                maximumLineCount: 2
+                elide: Qt.ElideRight
+
+                text: root.defaultServerName
+                horizontalAlignment: Qt.AlignHCenter
+
+                Behavior on opacity {
+                    PropertyAnimation { duration: 200 }
+                }
+            }
+
+            ImageButtonType {
+                id: collapsedButtonChevron
+
+                Layout.leftMargin: 8
+
+                hoverEnabled: false
+                image: "qrc:/images/controls/chevron-down.svg"
+                imageColor: "#d7d8db"
+
+                icon.width: 18
+                icon.height: 18
+                backgroundRadius: 16
+                horizontalPadding: 4
+                topPadding: 4
+                bottomPadding: 3
+
+                onClicked: {
+                    if (buttonContent.state === "collapsed") {
+                        buttonContent.state = "expanded"
+                    }
+                }
+            }
+        }
+
+        LabelTextType {
+            id: collapsedServerMenuDescription
+            Layout.bottomMargin: 44
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            visible: buttonContent.collapsedVisibility
         }
 
         ColumnLayout {
             id: serversMenuHeader
 
-            parent: buttonContent.contentParent
-
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.left: parent.left
-
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.fillWidth: true
             visible: buttonContent.expandedVisibility
-            
-            DividerType {
-                Layout.topMargin: 10
-                Layout.fillWidth: false
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 2
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            }
 
             Header1TextType {
                 Layout.fillWidth: true
@@ -252,8 +339,6 @@ PageType {
 
                 DropDownType {
                     id: containersDropDown
-
-                    drawerParent: root
 
                     rootButtonImageColor: "#0E0E11"
                     rootButtonBackgroundColor: "#D7D8DB"
@@ -316,18 +401,12 @@ PageType {
 
         Flickable {
             id: serversContainer
-
-            parent: buttonContent.contentParent
-
-            anchors.top: serversMenuHeader.bottom
-            anchors.right: parent.right
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.topMargin: 16
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.fillWidth: true
+            Layout.topMargin: 16
             contentHeight: col.implicitHeight
-
+            implicitHeight: root.height - (root.height * 0.1) - serversMenuHeader.implicitHeight - 52 //todo 52 is tabbar height
             visible: buttonContent.expandedVisibility
-
             clip: true
 
             ScrollBar.vertical: ScrollBar {
@@ -437,7 +516,7 @@ PageType {
                                     onClicked: function() {
                                         ServersModel.currentlyProcessedIndex = index
                                         PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                        buttonContent.collapse()
+                                        buttonContent.state = "collapsed"
                                     }
                                 }
                             }
@@ -451,23 +530,6 @@ PageType {
                     }
                 }
             }
-        }
-
-        onCollapsedEnter: {
-            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
-            collapsedButtonHeader.opacity = 0.8
-        }
-
-        onCollapsedExited: {
-            collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
-            collapsedButtonHeader.opacity = 1
-        }
-
-        onCollapsedPressChanged: {
-            collapsedButtonChevron.backgroundColor = buttonContent.drawerDragArea.pressed ?
-                        collapsedButtonChevron.pressedColor : buttonContent.drawerDragArea.entered ?
-                            collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
-            collapsedButtonHeader.opacity = 0.7
         }
     }
 }

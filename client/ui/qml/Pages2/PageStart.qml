@@ -135,8 +135,6 @@ PageType {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
-
-            connectionTypeSelection.parent = tabBarStackView
         }
 
 //        onWidthChanged: {
@@ -175,12 +173,6 @@ PageType {
                 strokeWidth: 1
                 strokeColor: "#2C2D30"
                 fillColor: "#1C1D21"
-            }
-
-            MouseArea {
-                id: noPropagateMouseEvent
-                anchors.fill: parent
-                enabled: true
             }
         }
 
@@ -252,9 +244,7 @@ PageType {
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
 
-        z: 1
-
-        onDrawerClosed: {
+        onAboutToHide: {
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }

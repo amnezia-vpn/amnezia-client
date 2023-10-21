@@ -40,10 +40,6 @@ Item {
 
     property alias menuVisible: menu.visible
 
-    property Item drawerParent: root
-
-    property Drawer2Type menu: menu
-
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
@@ -159,25 +155,20 @@ Item {
         onClicked: {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
+            } else {
+                menu.visible = true
             }
-
-            menu.open()
         }
     }
 
-    Drawer2Type {
+    DrawerType {
         id: menu
 
-        parent: drawerParent
-
         width: parent.width
-        height: parent.height
-        contentHeight: parent.height * drawerHeight
+        height: parent.height * drawerHeight
 
         ColumnLayout {
             id: header
-
-            parent: menu.contentParent
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -187,14 +178,12 @@ Item {
             BackButtonType {
                 backButtonImage: root.headerBackButtonImage
                 backButtonFunction: function() {
-                    menu.close()
+                    root.menuVisible = false
                 }
             }
         }
 
         FlickableType {
-            parent: menu.contentParent
-
             anchors.top: header.bottom
             anchors.topMargin: 16
             contentHeight: col.implicitHeight
