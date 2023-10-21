@@ -365,7 +365,7 @@ PageType {
 
                             onClicked: {
                                 questionDrawer.headerText = qsTr("Remove OpenVpn from server?")
-                                questionDrawer.descriptionText = qsTr("All users who you shared a connection with will no longer be able to connect to it.")
+                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
                                 questionDrawer.noButtonText = qsTr("Cancel")
 

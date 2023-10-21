@@ -120,7 +120,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="58"/>
         <source>Unable change protocol while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно изменить протокол при активном соединении</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="69"/>
@@ -274,7 +274,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="490"/>
         <source>Unable change server while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно изменить сервер при активном соединении</translation>
     </message>
 </context>
 <context>
@@ -346,8 +346,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
         <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+    </message>
+    <message>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="vanished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="280"/>
@@ -571,8 +575,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="368"/>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
         <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+    </message>
+    <message>
+        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="vanished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="369"/>
@@ -619,8 +627,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="179"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="unfinished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <translation type="obsolete">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="180"/>
@@ -1440,8 +1452,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, которым вы поделились VPN, больше не смогут к нему подключаться.</translation>
+        <translation type="vanished">Все пользователи, которым вы поделились VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="118"/>
@@ -1884,9 +1900,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>WireGuard нативный формат</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
         <source>VPN Access</source>
-        <translation>VPN-Доступ</translation>
+        <translation type="vanished">VPN-Доступ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="146"/>
@@ -1894,14 +1909,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="174"/>
         <source>VPN access without the ability to manage the server</source>
-        <translation>Доступ к VPN, без возможности управления сервером</translation>
+        <translation type="vanished">Доступ к VPN, без возможности управления сервером</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
         <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the server, as well as change settings.</source>
-        <translation>Доступ к управлению сервером. Пользователь, с которым вы делитесь полным доступом к соединению, сможет добавлять и удалять ваши протоколы и службы на сервере, а также изменять настройки.</translation>
+        <translation type="vanished">Доступ к управлению сервером. Пользователь, с которым вы делитесь полным доступом к соединению, сможет добавлять и удалять ваши протоколы и службы на сервере, а также изменять настройки.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
@@ -1945,9 +1958,24 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Для AmneziaVPN</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
+        <source>Share VPN Access</source>
+        <translation>Поделиться VPN</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="158"/>
         <source>Full access</source>
         <translation>Полный доступ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="174"/>
+        <source>Share VPN access without the ability to manage the server</source>
+        <translation>Поделиться доступом к VPN, без возможности управления сервером</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
+        <source>Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.</source>
+        <translation>Поделиться доступом к управлению сервером. Пользователь, с которым вы делитесь полным доступом к серверу, сможет добавлять и удалять любые протоколы и службы на сервере, а также изменять настройки.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="251"/>
@@ -2699,16 +2727,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -131,7 +131,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="58"/>
         <source>Unable change protocol while there is an active connection</source>
-        <translation type="unfinished">已建立连接时无法更改服务器配置</translation>
+        <translation>已建立连接时无法更改服务器配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="69"/>
@@ -380,8 +380,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>使用此共享连接的所有用户，将无法再连接它。</translation>
+        <translation type="vanished">使用此共享连接的所有用户，将无法再连接它。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="280"/>
@@ -605,8 +609,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="368"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>使用此共享连接的所有用户，将无法再连接它。</translation>
+        <translation type="vanished">使用此共享连接的所有用户，将无法再连接它。</translation>
     </message>
     <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
@@ -661,8 +669,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="179"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>使用此共享连接的所有用户，将无法再连接它。</translation>
+        <translation type="vanished">使用此共享连接的所有用户，将无法再连接它。</translation>
     </message>
     <message>
         <source> from server?</source>
@@ -1521,8 +1533,12 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+    </message>
+    <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation>使用此共享连接的所有用户，将无法再连接它。</translation>
+        <translation type="vanished">使用此共享连接的所有用户，将无法再连接它。</translation>
     </message>
     <message>
         <source> from server?</source>
@@ -2006,8 +2022,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
+        <source>Share VPN Access</source>
+        <translation>共享 VPN 访问</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="174"/>
+        <source>Share VPN access without the ability to manage the server</source>
+        <translation>共享 VPN 访问，无需管理服务器</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
+        <source>Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.</source>
+        <translation>共享服务器管理访问权限。与您共享服务器全部访问权限的用户将可以添加和删除服务器上的任何协议和服务，以及更改设置。</translation>
+    </message>
+    <message>
         <source>VPN Access</source>
-        <translation>访问VPN</translation>
+        <translation type="vanished">访问VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="146"/>
@@ -2020,14 +2050,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>完全访问</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="174"/>
         <source>VPN access without the ability to manage the server</source>
-        <translation>访问VPN，但没有权限管理服务。</translation>
+        <translation type="vanished">访问VPN，但没有权限管理服务。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
         <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the server, as well as change settings.</source>
-        <translation>除访问VPN外，用户还能添加和删除协议、服务以及更改配置信息</translation>
+        <translation type="vanished">除访问VPN外，用户还能添加和删除协议、服务以及更改配置信息</translation>
     </message>
     <message>
         <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the servers, as well as change settings.</source>
@@ -2838,16 +2866,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>错误 0x%1: %2</translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
-        <source>&amp;Randomize colors</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
