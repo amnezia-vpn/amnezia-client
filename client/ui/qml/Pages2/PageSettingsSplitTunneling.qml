@@ -93,22 +93,15 @@ PageType {
             SwitcherType {
                 id: switcher
 
-                property int lastActiveRouteMode: routeMode.onlyForwardSites
-
                 enabled: root.pageEnabled
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.routeMode !== routeMode.allSites
-                onToggled: {
-                    if (checked) {
-                        SitesModel.routeMode = lastActiveRouteMode
-                    } else {
-                        lastActiveRouteMode = SitesModel.routeMode
-                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-                        SitesModel.routeMode = routeMode.allSites
-                    }
+                checked: SitesModel.isSplitTunnelingEnabled()
+                onToggled: {                    
+                    SitesModel.toggleSplitTunneling(checked)
+                    selector.text = root.routeModesModel[getRouteModesModelIndex()].name
                 }
             }
         }
@@ -123,7 +116,7 @@ PageType {
 
             drawerHeight: 0.4375
 
-            enabled: switcher.checked && root.pageEnabled
+            enabled: root.pageEnabled
 
             headerText: qsTr("Mode")
 
@@ -165,7 +158,7 @@ PageType {
         anchors.topMargin: 16
         contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
 
-        enabled: switcher.checked && root.pageEnabled
+        enabled: root.pageEnabled
 
         Column {
             id: col

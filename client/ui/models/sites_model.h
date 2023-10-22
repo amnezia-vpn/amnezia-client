@@ -31,6 +31,9 @@ public slots:
     int getRouteMode();
     void setRouteMode(int routeMode);
 
+    bool isSplitTunnelingEnabled();
+    void toggleSplitTunneling(bool enabled);
+
     QVector<QPair<QString, QString>> getCurrentSites();
 
 signals:
@@ -44,6 +47,7 @@ private:
 
     std::shared_ptr<Settings> m_settings;
 
+    bool m_isSplitTunnelingEnabled;
     Settings::RouteMode m_currentRouteMode;
 
     QVector<QPair<QString, QString>> m_sites;
