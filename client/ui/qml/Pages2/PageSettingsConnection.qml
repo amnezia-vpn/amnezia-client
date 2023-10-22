@@ -108,11 +108,11 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: GC.isDesktop()
             }
 
             LabelWithButtonType {
-                visible: false//!GC.isMobile()
+                visible: false
 
                 Layout.fillWidth: true
 
@@ -125,7 +125,7 @@ PageType {
             }
 
             DividerType {
-                visible: false//!GC.isMobile()
+                visible: false
             }
         }
     }

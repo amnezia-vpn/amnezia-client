@@ -1,5 +1,7 @@
 #include "protocols_defs.h"
 
+#include <QRandomGenerator>
+
 using namespace amnezia;
 
 QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Proto &p)
@@ -98,15 +100,28 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     }
 }
 
+int ProtocolProps::getPortForInstall(Proto p)
+{
+    switch (p) {
+    case Awg:
+    case WireGuard:
+    case ShadowSocks:
+    case OpenVpn:
+        return QRandomGenerator::global()->bounded(30000, 50000);
+    default:
+        return defaultPort(p);
+    }
+}
+
 int ProtocolProps::defaultPort(Proto p)
 {
     switch (p) {
     case Proto::Any: return -1;
-    case Proto::OpenVpn: return 1194;
-    case Proto::Cloak: return 443;
-    case Proto::ShadowSocks: return 6789;
-    case Proto::WireGuard: return 51820;
-    case Proto::Awg: return 55424;
+    case Proto::OpenVpn: return QString(protocols::openvpn::defaultPort).toInt();
+    case Proto::Cloak: return QString(protocols::cloak::defaultPort).toInt();
+    case Proto::ShadowSocks: return QString(protocols::shadowsocks::defaultPort).toInt();
+    case Proto::WireGuard: return QString(protocols::wireguard::defaultPort).toInt();
+    case Proto::Awg: return QString(protocols::awg::defaultPort).toInt();
     case Proto::Ikev2: return -1;
     case Proto::L2tp: return -1;
 

@@ -17,9 +17,11 @@ DrawerType {
     property var noButtonFunction
 
     width: parent.width
-    height: parent.height * 0.5
+    height: content.implicitHeight + 32
 
     ColumnLayout {
+        id: content
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
