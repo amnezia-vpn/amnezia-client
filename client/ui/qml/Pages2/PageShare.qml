@@ -118,7 +118,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
-                headerText: qsTr("VPN Access")
+                headerText: qsTr("Share VPN Access")
             }
 
             Rectangle {
@@ -171,8 +171,8 @@ PageType {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
 
-                text: accessTypeSelector.currentIndex === 0 ? qsTr("VPN access without the ability to manage the server") :
-                                                              qsTr("Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the server, as well as change settings.")
+                text: accessTypeSelector.currentIndex === 0 ? qsTr("Share VPN access without the ability to manage the server") :
+                                                              qsTr("Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.")
                 color: "#878B91"
             }
 
