@@ -117,8 +117,9 @@ QString ContainersModel::getDefaultContainerName()
     return ContainerProps::containerHumanNames().value(m_defaultContainerIndex);
 }
 
-void ContainersModel::setDefaultContainer(DockerContainer container)
+void ContainersModel::setDefaultContainer(int index)
 {
+    auto container = static_cast<DockerContainer>(index);
     m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
     m_defaultContainerIndex = container;
     emit defaultContainerChanged();

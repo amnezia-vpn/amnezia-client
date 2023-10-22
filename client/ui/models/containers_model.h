@@ -46,7 +46,7 @@ public:
 public slots:
     DockerContainer getDefaultContainer();
     QString getDefaultContainerName();
-    void setDefaultContainer(DockerContainer container);
+    void setDefaultContainer(int index);
 
     void setCurrentlyProcessedServerIndex(const int index);
 
