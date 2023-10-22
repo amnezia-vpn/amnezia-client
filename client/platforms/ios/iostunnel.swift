@@ -29,6 +29,8 @@ struct Constants {
     static let kMessageKeyHost = "host"
     static let kMessageKeyPort = "port"
     static let kMessageKeyOnDemand = "is-on-demand"
+    static let kMessageKeySplitTunnelType = "SplitTunnelType"
+    static let kMessageKeySplitTunnelSites = "SplitTunnelSites"
 }
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
@@ -49,6 +51,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private let dispatchQueue = DispatchQueue(label: "PacketTunnel", qos: .utility)
     
     private var openVPNConfig: Data? = nil
+    private var SplitTunnelType: String? = nil
+    private var SplitTunnelSites: String? = nil
       
     let vpnReachability = OpenVPNReachability()
 
@@ -63,6 +67,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
     
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        
+        let tmpStr = String(data: messageData, encoding: .utf8)!
+        wg_log(.error, message: tmpStr)
         guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
             Logger.global?.log(message: "Failed to serialize message from app")
             return
@@ -81,6 +88,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         if action == Constants.kActionStatus {
             handleStatusAppMessage(messageData, completionHandler: completionHandler)
+        }
+        
+        if action == Constants.kActionStart {
+            SplitTunnelType = message[Constants.kMessageKeySplitTunnelType] as? String
+            SplitTunnelSites = message[Constants.kMessageKeySplitTunnelSites] as? String
         }
         
         let callbackWrapper: (NSNumber?) -> Void = { errorCode in
@@ -175,6 +187,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                return
             }
         
+        
         let wgConfigStr = String(data: wgConfig, encoding: .utf8)!
         
         guard let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr) else {
@@ -182,7 +195,63 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler(nil)
             return
         }
-                
+        
+        wg_log(.error, message: tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", "))
+       
+        if (tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", ") == "0.0.0.0/0, ::/0"){
+            if (SplitTunnelType == "1") {
+                wg_log(.error, message: SplitTunnelSites!)
+                for index in tunnelConfiguration.peers.indices {
+                    tunnelConfiguration.peers[index].allowedIPs.removeAll()
+                    var allowedIPs = [IPAddressRange]()
+                    
+                    let data = Data(SplitTunnelSites!.utf8)
+                    do {
+                        let array = try JSONSerialization.jsonObject(with: data) as! [String]
+                        for allowedIPString in array {
+                            wg_log(.error,message: allowedIPString)
+                            guard let allowedIP = IPAddressRange(from: allowedIPString) else {
+                                wg_log(.error,message: "Parse SplitTunnelSites Error")
+                                   return
+                            }
+                            allowedIPs.append(allowedIP)
+                            }
+                        
+                    } catch {
+                        wg_log(.error,message: "Parse JSONSerialization Error")
+                    }
+                    tunnelConfiguration.peers[index].allowedIPs = allowedIPs
+                }
+            } else {
+                if (SplitTunnelType == "2")
+                {
+                    wg_log(.error, message: SplitTunnelSites!)
+                    for index in tunnelConfiguration.peers.indices {
+                        var excludeIPs = [IPAddressRange]()
+                        
+                        let data = Data(SplitTunnelSites!.utf8)
+                        do {
+                            let array = try JSONSerialization.jsonObject(with: data) as! [String]
+                            for excludeIPString in array {
+                                wg_log(.error,message: excludeIPString)
+                                guard let excludeIP = IPAddressRange(from: excludeIPString) else {
+                                    wg_log(.error,message: "Parse SplitTunnelSites Error")
+                                       return
+                                }
+                                excludeIPs.append(excludeIP)
+                                }
+                            
+                        } catch {
+                            wg_log(.error,message: "Parse JSONSerialization Error")
+                        }
+                        tunnelConfiguration.peers[index].excludeIPs = excludeIPs
+                    }
+                }
+            }
+        }
+        
+        wg_log(.error, message: tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", "))
+             
         wg_log(.info, message: "Starting wireguard tunnel from the " + (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
         
         // Start the tunnel

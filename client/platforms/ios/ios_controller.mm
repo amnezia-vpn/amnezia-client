@@ -29,6 +29,9 @@ const char* MessageKey::errorCode = "errorCode";
 const char* MessageKey::host = "host";
 const char* MessageKey::port = "port";
 const char* MessageKey::isOnDemand = "is-on-demand";
+const char* MessageKey::SplitTunnelType = "SplitTunnelType";
+const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
+
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -351,6 +354,15 @@ void IosController::startTunnel()
 {
     m_rxBytes = 0;
     m_txBytes = 0;
+    
+    qDebug() << "m_rawConfig " << m_rawConfig;
+    
+    int STT = m_rawConfig["splitTunnelType"].toInt();
+    QJsonArray splitTunnelSites = m_rawConfig["splitTunnelSites"].toArray();
+    QJsonDocument doc;
+    doc.setArray(splitTunnelSites);
+    QString STS(doc.toJson());
+    
     [m_currentTunnel setEnabled:YES];
 
     [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
@@ -376,8 +388,16 @@ void IosController::startTunnel()
                     NSString *actionValue = [NSString stringWithUTF8String:Action::start];
                     NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
                     NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
+                    NSString *SplitTunnelTypeKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelType];
+                    NSString *SplitTunnelTypeValue = [NSString stringWithFormat:@"%d",STT];
+                    NSString *SplitTunnelSitesKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelSites];
+                    NSString *SplitTunnelSitesValue = STS.toNSString();
+                
 
-                    NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue};
+                    NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue,
+                    SplitTunnelTypeKey: SplitTunnelTypeValue, SplitTunnelSitesKey: SplitTunnelSitesValue};
+                
+                    qDebug() << "sendVpnExtensionMessage " << message;
                     sendVpnExtensionMessage(message);
 
 
