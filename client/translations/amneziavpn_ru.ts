@@ -1332,7 +1332,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="87"/>
         <source>Clear Amnezia cache</source>
-        <translation>Очистить кэш Amnezia на сервере</translation>
+        <translation>Очистить кэш Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="88"/>
