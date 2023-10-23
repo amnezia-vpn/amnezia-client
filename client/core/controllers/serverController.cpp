@@ -1,4 +1,4 @@
-#include "servercontroller.h"
+#include "serverController.h"
 
 #include <QCryptographicHash>
 #include <QDir>
