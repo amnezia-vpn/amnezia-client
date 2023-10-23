@@ -31,13 +31,30 @@ QString CloudController::genCertificateRequest(ServiceTypeId serviceTypeId)
     {
         case ServiceTypeId::AmneziaFreeRuWG: return "";
         case ServiceTypeId::AmneziaFreeRuCloak: {
-            auto data = OpenVpnConfigurator::createCertRequest();
-            return data.request;
+            m_certRequest = OpenVpnConfigurator::createCertRequest();
+            return m_certRequest.request;
         }
         case ServiceTypeId::AmneziaFreeRuAWG: return "";
         case ServiceTypeId::AmneziaFreeRuReverseWG: return "";
         case ServiceTypeId::AmneziaFreeRuReverseCloak: return "";
         case ServiceTypeId::AmneziaFreeRuReverseAWG: return "";
+    }
+}
+
+void CloudController::processCloudConfig(ServiceTypeId serviceTypeId, QString &config)
+{
+    switch (serviceTypeId)
+    {
+    case ServiceTypeId::AmneziaFreeRuWG: return;
+    case ServiceTypeId::AmneziaFreeRuCloak: {
+        config.replace("<key>", "<key>\n");
+        config.replace("$OPENVPN_PRIV_KEY", m_certRequest.privKey);
+        return;
+    }
+    case ServiceTypeId::AmneziaFreeRuAWG: return;
+    case ServiceTypeId::AmneziaFreeRuReverseWG: return;
+    case ServiceTypeId::AmneziaFreeRuReverseCloak: return;
+    case ServiceTypeId::AmneziaFreeRuReverseAWG: return;
     }
 }
 
@@ -53,7 +70,7 @@ bool CloudController::updateServerConfigFromCloud()
         QNetworkRequest request;
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         QString endpoint = serverConfig.value(config_key::apiEdnpoint).toString();
-        request.setUrl(endpoint.replace("https", "http")); //
+        request.setUrl(endpoint.replace("https", "http")); // todo remove
 
         ServiceTypeId serviceTypeId = static_cast<ServiceTypeId>(serverConfig.value(config_key::serviceTypeId).toInt());
 
@@ -85,7 +102,11 @@ bool CloudController::updateServerConfigFromCloud()
                 ba = ba_uncompressed;
             }
 
-            QJsonObject cloudConfig = QJsonDocument::fromJson(ba).object();
+            QString configStr = ba;
+            processCloudConfig(serviceTypeId, configStr);
+
+            QJsonObject cloudConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+
             serverConfig.insert("cloudConfig", cloudConfig);
             serverConfig.insert(config_key::dns1, cloudConfig.value(config_key::dns1));
             serverConfig.insert(config_key::dns2, cloudConfig.value(config_key::dns2));

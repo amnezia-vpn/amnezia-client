@@ -5,6 +5,7 @@
 
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+#include "configurators/openvpn_configurator.h"
 
 class CloudController : public QObject
 {
@@ -36,8 +37,12 @@ private:
     QString genPublicKey(ServiceTypeId serviceTypeId);
     QString genCertificateRequest(ServiceTypeId serviceTypeId);
 
+    void processCloudConfig(ServiceTypeId serviceTypeId, QString &config);
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+
+    OpenVpnConfigurator::ConnectionData m_certRequest;
 };
 
 #endif // CLOUDCONTROLLER_H
