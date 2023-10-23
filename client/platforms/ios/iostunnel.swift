@@ -15,7 +15,7 @@ struct Constants {
     static let ovpnConfigKey = "ovpn"
     static let wireGuardConfigKey = "wireguard"
     static let loggerTag = "NET"
-
+    
     static let kActionStart = "start"
     static let kActionRestart = "restart"
     static let kActionStop = "stop"
@@ -40,7 +40,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             wg_log(logLevel.osLogLevel, message: message)
         }
     }()
-
+    
     private lazy var ovpnAdapter: OpenVPNAdapter = {
         let adapter = OpenVPNAdapter()
         adapter.delegate = self
@@ -53,9 +53,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private var openVPNConfig: Data? = nil
     private var SplitTunnelType: String? = nil
     private var SplitTunnelSites: String? = nil
-      
+    
     let vpnReachability = OpenVPNReachability()
-
+    
     var startHandler: ((Error?) -> Void)?
     var stopHandler: (() -> Void)?
     var protoType: TunnelProtoType = .none
@@ -74,18 +74,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             Logger.global?.log(message: "Failed to serialize message from app")
             return
         }
-
+        
         guard let completionHandler = completionHandler else {
             Logger.global?.log(message: "Missing message completion handler")
             return
         }
-
+        
         guard let action = message[Constants.kMessageKeyAction] as? String else {
             Logger.global?.log(message: "Missing action key in app message")
             completionHandler(nil)
             return
         }
-
+        
         if action == Constants.kActionStatus {
             handleStatusAppMessage(messageData, completionHandler: completionHandler)
         }
@@ -102,11 +102,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 Constants.kMessageKeyErrorCode: errorCode ?? NSNull(),
                 Constants.kMessageKeyTunnelId: 0
             ]
-
+            
             completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
         }
     }
-
+    
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         dispatchQueue.async {
             let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
@@ -130,8 +130,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             switch self.protoType {
             case .wireguard:
                 self.startWireguard(activationAttemptId: activationAttemptId,
-                               errorNotifier: errorNotifier,
-                               completionHandler: completionHandler)
+                                    errorNotifier: errorNotifier,
+                                    completionHandler: completionHandler)
             case .openvpn:
                 self.startOpenVPN(completionHandler: completionHandler)
             case .shadowsocks:
@@ -168,7 +168,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             handleOpenVPNStatusMessage(messageData, completionHandler: completionHandler)
         case .shadowsocks:
             break
-//            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
+            //            handleShadowSocksAppMessage(messageData, completionHandler: completionHandler)
         case .none:
             break
             
@@ -180,12 +180,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                                 errorNotifier: ErrorNotifier,
                                 completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
-           let providerConfiguration = protocolConfiguration.providerConfiguration,
-           let wgConfig: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
-               wg_log(.error, message: "Can't start WireGuard config missing")
-               completionHandler(nil)
-               return
-            }
+              let providerConfiguration = protocolConfiguration.providerConfiguration,
+              let wgConfig: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
+            wg_log(.error, message: "Can't start WireGuard config missing")
+            completionHandler(nil)
+            return
+        }
         
         
         let wgConfigStr = String(data: wgConfig, encoding: .utf8)!
@@ -196,26 +196,20 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
         
-        wg_log(.error, message: tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", "))
-       
-        if (tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", ") == "0.0.0.0/0, ::/0"){
+        
+        if (tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", ") == "0.0.0.0/0, ::/0") {
             if (SplitTunnelType == "1") {
-                wg_log(.error, message: SplitTunnelSites!)
                 for index in tunnelConfiguration.peers.indices {
                     tunnelConfiguration.peers[index].allowedIPs.removeAll()
                     var allowedIPs = [IPAddressRange]()
-                    
-                    let data = Data(SplitTunnelSites!.utf8)
+                    let STSdata = Data(SplitTunnelSites!.utf8)
                     do {
-                        let array = try JSONSerialization.jsonObject(with: data) as! [String]
-                        for allowedIPString in array {
-                            wg_log(.error,message: allowedIPString)
-                            guard let allowedIP = IPAddressRange(from: allowedIPString) else {
-                                wg_log(.error,message: "Parse SplitTunnelSites Error")
-                                   return
+                        let STSArray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+                        for allowedIPString in STSArray {
+                            if let allowedIP = IPAddressRange(from: allowedIPString) {
+                                allowedIPs.append(allowedIP)
                             }
-                            allowedIPs.append(allowedIP)
-                            }
+                        }
                         
                     } catch {
                         wg_log(.error,message: "Parse JSONSerialization Error")
@@ -225,22 +219,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             } else {
                 if (SplitTunnelType == "2")
                 {
-                    wg_log(.error, message: SplitTunnelSites!)
                     for index in tunnelConfiguration.peers.indices {
                         var excludeIPs = [IPAddressRange]()
-                        
-                        let data = Data(SplitTunnelSites!.utf8)
+                        let STSdata = Data(SplitTunnelSites!.utf8)
                         do {
-                            let array = try JSONSerialization.jsonObject(with: data) as! [String]
-                            for excludeIPString in array {
-                                wg_log(.error,message: excludeIPString)
-                                guard let excludeIP = IPAddressRange(from: excludeIPString) else {
-                                    wg_log(.error,message: "Parse SplitTunnelSites Error")
-                                       return
+                            let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+                            for excludeIPString in STSarray {
+                                if let excludeIP = IPAddressRange(from: excludeIPString) {
+                                    excludeIPs.append(excludeIP)
                                 }
-                                excludeIPs.append(excludeIP)
-                                }
-                            
+                            }
                         } catch {
                             wg_log(.error,message: "Parse JSONSerialization Error")
                         }
@@ -250,8 +238,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             }
         }
         
-        wg_log(.error, message: tunnelConfiguration.peers.first!.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", "))
-             
         wg_log(.info, message: "Starting wireguard tunnel from the " + (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
         
         // Start the tunnel
@@ -262,30 +248,30 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 completionHandler(nil)
                 return
             }
-
+            
             switch adapterError {
             case .cannotLocateTunnelFileDescriptor:
                 wg_log(.error, staticMessage: "Starting tunnel failed: could not determine file descriptor")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
                 completionHandler(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
-
+                
             case .dnsResolution(let dnsErrors):
                 let hostnamesWithDnsResolutionFailure = dnsErrors.map { $0.address }
                     .joined(separator: ", ")
                 wg_log(.error, message: "DNS resolution failed for the following hostnames: \(hostnamesWithDnsResolutionFailure)")
                 errorNotifier.notify(PacketTunnelProviderError.dnsResolutionFailure)
                 completionHandler(PacketTunnelProviderError.dnsResolutionFailure)
-
+                
             case .setNetworkSettings(let error):
                 wg_log(.error, message: "Starting tunnel failed with setTunnelNetworkSettings returning \(error.localizedDescription)")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotSetNetworkSettings)
                 completionHandler(PacketTunnelProviderError.couldNotSetNetworkSettings)
-
+                
             case .startWireGuardBackend(let errorCode):
                 wg_log(.error, message: "Starting tunnel failed with wgTurnOn returning \(errorCode)")
                 errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
                 completionHandler(PacketTunnelProviderError.couldNotStartBackend)
-
+                
             case .invalidState:
                 // Must never happen
                 fatalError()
@@ -295,27 +281,27 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     
     private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
-           let providerConfiguration = protocolConfiguration.providerConfiguration,
+              let providerConfiguration = protocolConfiguration.providerConfiguration,
               let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
             // TODO: handle errors properly
-               wg_log(.error, message: "Can't start startOpenVPN()")
+            wg_log(.error, message: "Can't start startOpenVPN()")
             return
         }
         
         setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
     }
-
+    
     private func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         wg_log(.info, staticMessage: "Stopping tunnel")
         
         wgAdapter.stop { error in
             ErrorNotifier.removeLastErrorFile()
-
+            
             if let error = error {
                 wg_log(.error, message: "Failed to stop WireGuard adapter: \(error.localizedDescription)")
             }
             completionHandler()
-
+            
 #if os(macOS)
             // HACK: This is a filthy hack to work around Apple bug 32073323 (dup'd by us as 47526107).
             // Remove it when they finally fix this upstream and the fix has been rolled out to
@@ -332,7 +318,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
         ovpnAdapter.disconnect()
     }
-
+    
     func handleWireguardStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         wgAdapter.getRuntimeConfiguration { settings in
@@ -347,8 +333,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             for component in components{
                 let pair = component.components(separatedBy: "=")
                 if pair.count == 2 {
-                   settingsDictionary[pair[0]] = pair[1]
-                 }
+                    settingsDictionary[pair[0]] = pair[1]
+                }
             }
             
             let response: [String: Any] = [
@@ -378,7 +364,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 completionHandler(nil)
                 return
             }
-
+            
             do {
                 let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
                 wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
@@ -387,7 +373,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                         completionHandler(nil)
                         return
                     }
-
+                    
                     self.wgAdapter.getRuntimeConfiguration { settings in
                         var data: Data?
                         if let settings = settings {
@@ -403,76 +389,76 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler(nil)
         }
     }
-
+    
     private func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
-            let bytesin = ovpnAdapter.transportStatistics.bytesIn
-            let bytesout = ovpnAdapter.transportStatistics.bytesOut
-
-            let response: [String: Any] = [
-                "rx_bytes" : bytesin,
-                "tx_bytes" : bytesout
-            ]
-            
-            completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
+        let bytesin = ovpnAdapter.transportStatistics.bytesIn
+        let bytesout = ovpnAdapter.transportStatistics.bytesOut
+        
+        let response: [String: Any] = [
+            "rx_bytes" : bytesin,
+            "tx_bytes" : bytesout
+        ]
+        
+        completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
     }
-
-
+    
+    
     // TODO review
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data, withShadowSocks viaSS: Bool = false, completionHandler: @escaping (Error?) -> Void) {
         wg_log(.info, message: "setupAndlaunchOpenVPN")
-
+        
         let str = String(decoding: ovpnConfiguration, as: UTF8.self)
-
+        
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = ovpnConfiguration
         if(str.contains("cloak")){
             configuration.setPTCloak();
         }
-
+        
         let evaluation: OpenVPNConfigurationEvaluation
         do {
             evaluation = try ovpnAdapter.apply(configuration: configuration)
-
+            
         } catch {
             completionHandler(error)
             return
         }
-
+        
         if !evaluation.autologin {
             wg_log(.info, message: "Implement login with user credentials")
         }
-
+        
         vpnReachability.startTracking { [weak self] status in
             guard status == .reachableViaWiFi else { return }
             self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
         }
-
+        
         startHandler = completionHandler
         ovpnAdapter.connect(using: packetFlow)
-
-//        let ifaces = Interface.allInterfaces()
-//            .filter { $0.family == .ipv4 }
-//            .map { iface in iface.name }
-
-//        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+        
+        //        let ifaces = Interface.allInterfaces()
+        //            .filter { $0.family == .ipv4 }
+        //            .map { iface in iface.name }
+        
+        //        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
     }
-
+    
     // MARK: -- Network observing methods
-
+    
     private func startListeningForNetworkChanges() {
         stopListeningForNetworkChanges()
         addObserver(self, forKeyPath: Constants.kDefaultPathKey, options: .old, context: nil)
     }
-
+    
     private func stopListeningForNetworkChanges() {
         removeObserver(self, forKeyPath: Constants.kDefaultPathKey)
     }
-
+    
     override func observeValue(forKeyPath keyPath: String?,
-                                     of object: Any?,
-                                     change: [NSKeyValueChangeKey : Any]?,
-                                     context: UnsafeMutableRawPointer?) {
+                               of object: Any?,
+                               change: [NSKeyValueChangeKey : Any]?,
+                               context: UnsafeMutableRawPointer?) {
         guard Constants.kDefaultPathKey != keyPath else { return }
         // Since iOS 11, we have observed that this KVO event fires repeatedly when connecting over Wifi,
         // even though the underlying network has not changed (i.e. `isEqualToPath` returns false),
@@ -481,28 +467,28 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         guard let lastPath: NWPath = change?[.oldKey] as? NWPath,
               let defPath = defaultPath,
               lastPath != defPath || lastPath.description != defPath.description else {
-                  return
-              }
+            return
+        }
         DispatchQueue.main.async { [weak self] in
             guard let `self` = self, self.defaultPath != nil else { return }
             self.handle(networkChange: self.defaultPath!) { _ in }
         }
     }
-
+    
     private func handle(networkChange changePath: NWPath, completion: @escaping (Error?) -> Void) {
         wg_log(.info, message: "Tunnel restarted.")
         startTunnel(options: nil, completionHandler: completion)
     }
-
+    
     private func startEmptyTunnel(completionHandler: @escaping (Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dispatchQueue))
-
+        
         let emptyTunnelConfiguration = TunnelConfiguration(
             name: nil,
             interface: InterfaceConfiguration(privateKey: PrivateKey()),
             peers: []
         )
-
+        
         wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
             self.dispatchQueue.async {
                 if let error {
@@ -514,9 +500,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 }
             }
         }
-
+        
         let settings = NETunnelNetworkSettings(tunnelRemoteAddress: "1.1.1.1")
-
+        
         self.setTunnelNetworkSettings(settings) { error in
             completionHandler(error)
         }
@@ -546,6 +532,50 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         // In order to direct all DNS queries first to the VPN DNS servers before the primary DNS servers
         // send empty string to NEDNSSettings.matchDomains
         networkSettings?.dnsSettings?.matchDomains = [""]
+        
+        if (SplitTunnelType == "1") {
+            var ipv4IncludedRoutes = [NEIPv4Route]()
+            let STSdata = Data(SplitTunnelSites!.utf8)
+            do {
+                let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+                for allowedIPString in STSarray {
+                    if let allowedIP = IPAddressRange(from: allowedIPString){
+                        ipv4IncludedRoutes.append(NEIPv4Route(destinationAddress: "\(allowedIP.address)", subnetMask: "\(allowedIP.subnetMask())"))
+                    }
+                }
+            } catch {
+                wg_log(.error,message: "Parse JSONSerialization Error")
+            }
+            networkSettings?.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
+        } else {
+            if (SplitTunnelType == "2")
+            {
+                var ipv4ExcludedRoutes = [NEIPv4Route]()
+                var ipv4IncludedRoutes = [NEIPv4Route]()
+                var ipv6IncludedRoutes = [NEIPv6Route]()
+                let STSdata = Data(SplitTunnelSites!.utf8)
+                do {
+                    let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+                    for excludeIPString in STSarray {
+                        if let excludeIP = IPAddressRange(from: excludeIPString) {
+                            ipv4ExcludedRoutes.append(NEIPv4Route(destinationAddress: "\(excludeIP.address)", subnetMask: "\(excludeIP.subnetMask())"))
+                        }
+                    }
+                } catch {
+                    wg_log(.error,message: "Parse JSONSerialization Error")
+                }
+                if let allIPv4 = IPAddressRange(from: "0.0.0.0/0"){
+                    ipv4IncludedRoutes.append(NEIPv4Route(destinationAddress: "\(allIPv4.address)", subnetMask: "\(allIPv4.subnetMask())"))
+                }
+                if let allIPv6 = IPAddressRange(from: "::/0") {
+                    ipv6IncludedRoutes.append(NEIPv6Route(destinationAddress: "\(allIPv6.address)", networkPrefixLength: NSNumber(value: allIPv6.networkPrefixLength)))
+                }
+                networkSettings?.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
+                networkSettings?.ipv6Settings?.includedRoutes = ipv6IncludedRoutes
+                networkSettings?.ipv4Settings?.excludedRoutes = ipv4ExcludedRoutes
+            }
+            
+        }
         
         // Set the network settings for the current tunneling session.
         setTunnelNetworkSettings(networkSettings, completionHandler: completionHandler)
@@ -607,7 +637,7 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         wg_log(.info, message: logMessage)
     }
 }
-    
+
 extension WireGuardLogLevel {
     var osLogLevel: OSLogType {
         switch self {
