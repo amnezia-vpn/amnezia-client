@@ -57,6 +57,10 @@ Item {
         border.width: 1
         visible: true
 
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+
         MouseArea {
             id: fullMouseArea
             anchors.fill: parent
