@@ -32,7 +32,7 @@ PageType {
         function onRestorePageHomeState(isContainerInstalled) {
             buttonContent.state = "expanded"
             if (isContainerInstalled) {
-                containersDropDown.menuVisible = true
+                containersDropDown.rootButtonClickedFunction()
             }
         }
         function onForceCloseDrawer() {

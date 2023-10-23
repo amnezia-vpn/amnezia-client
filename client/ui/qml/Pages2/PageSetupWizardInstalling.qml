@@ -28,17 +28,11 @@ PageType {
                 ContainersModel.setDefaultContainer(ContainersModel.getCurrentlyProcessedContainerIndex())
             }
 
-            PageController.goToStartPage()
+            PageController.closePage() // close installing page
+            PageController.closePage() // close protocol settings page
+
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
-            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                PageController.goToPage(PageEnum.PageSettingsServersList, false)
-                PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
-                if (isServiceInstall) {
-                    PageController.goToPageSettingsServerServices()
-                }
-            } else {
-                PageController.goToPage(PageEnum.PageHome)
             }
 
             PageController.showNotificationMessage(finishedMessage)
