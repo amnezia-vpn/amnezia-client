@@ -4,9 +4,13 @@
 <context>
     <name>AmneziaApplication</name>
     <message>
-        <location filename="../amnezia_application.cpp" line="304"/>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation>未启用选项，还未实现基于WireGuard协议的VPN分离</translation>
+        <translation type="vanished">未启用选项，还未实现基于WireGuard协议的VPN分离</translation>
+    </message>
+    <message>
+        <location filename="../amnezia_application.cpp" line="305"/>
+        <source>Split tunneling for %1 is not implemented, the option was disabled</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1602,75 +1606,75 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>隧道分离</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="121"/>
         <source>Mode</source>
         <translation>规则</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
         <source>Remove </source>
         <translation>移除 </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="200"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="201"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="248"/>
         <source>Site or IP</source>
         <translation>网站或IP地址</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="299"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="292"/>
         <source>Import/Export Sites</source>
         <translation>导入/导出网站</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
         <source>Import</source>
         <translation>导入</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="310"/>
         <source>Save site list</source>
         <translation>保存网址</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="317"/>
         <source>Save sites</source>
         <translation>保存网址</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="325"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="392"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="407"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="318"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="385"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="400"/>
         <source>Sites files (*.json)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="382"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="375"/>
         <source>Import a list of sites</source>
         <translation>导入网址列表</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="388"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="381"/>
         <source>Replace site list</source>
         <translation>替换网址列表</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="391"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="406"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="384"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="399"/>
         <source>Open sites file</source>
         <translation>打开网址文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="403"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="396"/>
         <source>Add imported sites to existing ones</source>
         <translation>将导入的网址添加到现有网址中</translation>
     </message>
@@ -2866,6 +2870,16 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>错误 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
