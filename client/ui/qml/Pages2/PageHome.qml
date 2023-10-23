@@ -26,6 +26,55 @@ PageType {
     property string defaultServerHostName: ServersModel.defaultServerHostName
     property string defaultContainerName: ContainersModel.defaultContainerName
 
+    Connections {
+        target: PageController
+
+        function onRestorePageHomeState(isContainerInstalled) {
+            buttonContent.state = "expanded"
+            if (isContainerInstalled) {
+                containersDropDown.menuVisible = true
+            }
+        }
+        function onForceCloseDrawer() {
+            buttonContent.state = "collapsed"
+        }
+    }
+
+    Connections {
+        target: ServersModel
+
+        function onDefaultServerIndexChanged() {
+            updateDescriptions()
+        }
+    }
+
+    Connections {
+        target: ContainersModel
+
+        function onDefaultContainerChanged() {
+            updateDescriptions()
+        }
+    }
+
+    function updateDescriptions() {
+        var description = ""
+        if (ServersModel.isDefaultServerHasWriteAccess()) {
+            if (SettingsController.isAmneziaDnsEnabled()
+                    && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
+                description += "Amnezia DNS | "
+            }
+        } else {
+            if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
+                description += "Amnezia DNS | "
+            }
+        }
+
+        collapsedServerMenuDescription.text = description + root.defaultContainerName + " | " + root.defaultServerHostName
+        expandedServersMenuDescription.text = description + root.defaultServerHostName
+    }
+
+    Component.onCompleted: updateDescriptions()
+
     MouseArea {
         anchors.fill: parent
         enabled: buttonContent.state === "expanded"
@@ -43,25 +92,11 @@ PageType {
         }
     }
 
-    Connections {
-        target: PageController
-
-        function onRestorePageHomeState(isContainerInstalled) {
-            buttonContent.state = "expanded"
-            if (isContainerInstalled) {
-                containersDropDown.menuVisible = true
-            }
-        }
-        function onForceCloseDrawer() {
-            buttonContent.state = "collapsed"
-        }
-    }
-
     MouseArea {
         id: dragArea
 
         anchors.fill: buttonBackground
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: buttonContent.state === "collapsed" ? Qt.PointingHandCursor : Qt.ArrowCursor
         hoverEnabled: true
 
         drag.target: buttonContent
@@ -206,8 +241,18 @@ PageType {
             }
         ]
 
+        DividerType {
+            Layout.topMargin: 10
+            Layout.fillWidth: false
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 2
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+            visible: (buttonContent.collapsedVisibility || buttonContent.expandedVisibility)
+        }
+
         RowLayout {
-            Layout.topMargin: 24
+            Layout.topMargin: 14
             Layout.leftMargin: 24
             Layout.rightMargin: 24
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -255,26 +300,10 @@ PageType {
         }
 
         LabelTextType {
+            id: collapsedServerMenuDescription
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             visible: buttonContent.collapsedVisibility
-
-            text: {
-                var description = ""
-                if (ServersModel.isDefaultServerHasWriteAccess()) {
-                    if (SettingsController.isAmneziaDnsEnabled()
-                            && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
-                        description += "Amnezia DNS | "
-                    }
-                } else {
-                    if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
-                        description += "Amnezia DNS | "
-                    }
-                }
-
-                description += root.defaultContainerName + " | " + root.defaultServerHostName
-                return description
-            }
         }
 
         ColumnLayout {
@@ -286,7 +315,7 @@ PageType {
 
             Header1TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 14
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -297,10 +326,11 @@ PageType {
             }
 
             LabelTextType {
+                id: expandedServersMenuDescription
                 Layout.bottomMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                text: root.defaultServerHostName
+                Layout.fillWidth: true
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
             }
 
             RowLayout {
@@ -365,18 +395,7 @@ PageType {
                 Layout.rightMargin: 16
                 visible: buttonContent.expandedVisibility
 
-                actionButtonImage: "qrc:/images/controls/plus.svg"
-
                 headerText: qsTr("Servers")
-
-                actionButtonFunction: function() {
-                    buttonContent.state = "collapsed"
-                    connectionTypeSelection.visible = true
-                }
-            }
-
-            ConnectionTypeSelectionDrawer {
-                id: connectionTypeSelection
             }
         }
 
@@ -450,11 +469,11 @@ PageType {
                                         if (hasWriteAccess) {
                                             if (SettingsController.isAmneziaDnsEnabled()
                                                     && ContainersModel.isAmneziaDnsContainerInstalled(index)) {
-                                                description += "AmneziaDNS | "
+                                                description += "Amnezia DNS | "
                                             }
                                         } else {
                                             if (containsAmneziaDns) {
-                                                description += "AmneziaDNS | "
+                                                description += "Amnezia DNS | "
                                             }
                                         }
 
@@ -462,10 +481,16 @@ PageType {
                                     }
 
                                     checked: index === serversMenuContent.currentIndex
+                                    checkable: !ConnectionController.isConnected
 
                                     ButtonGroup.group: serversRadioButtonGroup
 
                                     onClicked: {
+                                        if (ConnectionController.isConnected) {
+                                            PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                                            return
+                                        }
+
                                         serversMenuContent.currentIndex = index
 
                                         ServersModel.currentlyProcessedIndex = index

@@ -24,12 +24,12 @@ PageType {
         }
 
         function onImportFinished() {
+            if (ConnectionController.isConnected) {
+                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+            }
+
             PageController.goToStartPage()
-            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
-                PageController.restorePageHomeState()
-            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                PageController.goToPage(PageEnum.PageSettingsServersList, false)
-            } else {
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
                 PageController.replaceStartPage()
             }
         }

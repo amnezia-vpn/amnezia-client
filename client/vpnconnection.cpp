@@ -321,6 +321,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     ErrorCode e = ErrorCode::NoError;
 
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
+    emit newVpnConfigurationCreated();
     if (e) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;

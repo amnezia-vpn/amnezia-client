@@ -17,9 +17,12 @@ Item {
 
     property string rightImageSource
     property string leftImageSource
+    property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
 
     property string textColor: "#d7d8db"
+    property string textDisabledColor: "#878B91"
     property string descriptionColor: "#878B91"
+    property string descriptionDisabledColor: "#494B50"
     property real textOpacity: 1.0
 
     property string rightImageColor: "#d7d8db"
@@ -42,9 +45,9 @@ Item {
 
             visible: leftImageSource ? true : false
 
-            Layout.preferredHeight: rightImageSource ? leftImage.implicitHeight : 56
-            Layout.preferredWidth: rightImageSource ? leftImage.implicitWidth : 56
-            Layout.rightMargin: rightImageSource ? 16 : 0
+            Layout.preferredHeight: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitHeight : 56
+            Layout.preferredWidth: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitWidth : 56
+            Layout.rightMargin: rightImageSource || !isLeftImageHoverEnabled ? 16 : 0
 
             radius: 12
             color: "transparent"
@@ -70,7 +73,14 @@ Item {
 
             ListItemTitleType {
                 text: root.text
-                color: root.descriptionOnTop ? root.descriptionColor : root.textColor
+                color: {
+                    if (root.enabled) {
+                        return root.descriptionOnTop ? root.descriptionColor : root.textColor
+                    } else {
+                        return root.descriptionOnTop ? root.descriptionDisabledColor : root.textDisabledColor
+                    }
+                }
+
                 maximumLineCount: root.textMaximumLineCount
                 elide: root.textElide
 
@@ -95,7 +105,13 @@ Item {
                 id: description
 
                 text: root.descriptionText
-                color: root.descriptionOnTop ? root.textColor : root.descriptionColor
+                color: {
+                    if (root.enabled) {
+                        return root.descriptionOnTop ? root.textColor : root.descriptionColor
+                    } else {
+                        return root.descriptionOnTop ? root.textDisabledColor : root.descriptionDisabledColor
+                    }
+                }
 
                 opacity: root.textOpacity
 
@@ -156,7 +172,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
+        hoverEnabled: root.enabled
 
         onEntered: {
             if (rightImageSource) {

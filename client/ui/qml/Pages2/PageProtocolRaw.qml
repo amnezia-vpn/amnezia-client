@@ -127,7 +127,7 @@ PageType {
                                         Layout.fillWidth: true
                                         Layout.topMargin: 16
 
-                                        headerText: qsTr("Connection options ") + protocolName
+                                        headerText: qsTr("Connection options %1").arg(protocolName)
                                     }
 
                                     TextArea {
@@ -169,12 +169,14 @@ PageType {
 
                 width: parent.width
 
+                visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
-                    questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it")
+                    questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 

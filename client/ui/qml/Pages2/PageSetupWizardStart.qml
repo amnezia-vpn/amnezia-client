@@ -62,7 +62,7 @@ PageType {
         function onInstallationErrorOccurred(errorMessage) {
             PageController.showErrorMessage(errorMessage)
 
-            var currentPageName = tabBarStackView.currentItem.objectName
+            var currentPageName = stackView.currentItem.objectName
 
             if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
                 PageController.closePage()
@@ -134,7 +134,7 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: Qt.openUrlExternally("https://ru-docs.amnezia.org/guides/hosting-instructions")
+                onClicked: Qt.openUrlExternally("https://amnezia.org/instructions/0_starter-guide")
             }
         }
 

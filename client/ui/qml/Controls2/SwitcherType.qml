@@ -30,17 +30,13 @@ Switch {
     property string hoveredIndicatorBackgroundColor: Qt.rgba(1, 1, 1, 0.08)
     property string defaultIndicatorBackgroundColor: "transparent"
 
-    implicitWidth: content.implicitWidth + switcher.implicitWidth
-    implicitHeight: content.implicitHeight
-
     hoverEnabled: enabled ? true : false
 
     indicator: Rectangle {
         id: switcher
 
-        anchors.left: content.right
+        anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 4
 
         implicitWidth: 52
         implicitHeight: 32
@@ -90,11 +86,11 @@ Switch {
     contentItem: ColumnLayout {
         id: content
 
-        anchors.fill: parent
-        anchors.rightMargin: switcher.implicitWidth
+        anchors.verticalCenter: parent.verticalCenter
 
         ListItemTitleType {
             Layout.fillWidth: true
+            rightPadding: indicator.width
 
             text: root.text
             color: root.enabled ? root.textColor : root.textDisabledColor
@@ -104,6 +100,7 @@ Switch {
             id: description
 
             Layout.fillWidth: true
+            rightPadding: indicator.width
 
             color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
 

@@ -1,22 +1,21 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "vpnprotocol.h"
 #include "core/errorstrings.h"
+#include "vpnprotocol.h"
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
-#include "openvpnprotocol.h"
-#include "shadowsocksvpnprotocol.h"
-#include "openvpnovercloakprotocol.h"
-#include "wireguardprotocol.h"
+    #include "openvpnovercloakprotocol.h"
+    #include "openvpnprotocol.h"
+    #include "shadowsocksvpnprotocol.h"
+    #include "wireguardprotocol.h"
 #endif
 
 #ifdef Q_OS_WINDOWS
-#include "ikev2_vpn_protocol_windows.h"
+    #include "ikev2_vpn_protocol_windows.h"
 #endif
 
-
-VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
+VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
     : QObject(parent),
       m_connectionState(Vpn::ConnectionState::Unknown),
       m_rawConfig(configuration),
@@ -31,7 +30,7 @@ VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject* parent)
 void VpnProtocol::setLastError(ErrorCode lastError)
 {
     m_lastError = lastError;
-    if (lastError){
+    if (lastError) {
         setConnectionState(Vpn::ConnectionState::Error);
     }
     qCritical().noquote() << "VpnProtocol error, code" << m_lastError << errorString(m_lastError);
@@ -103,7 +102,7 @@ QString VpnProtocol::vpnGateway() const
     return m_vpnGateway;
 }
 
-VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject& configuration)
+VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
 #if defined(Q_OS_WINDOWS)
@@ -114,6 +113,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject& 
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
     case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);
     case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
+    case DockerContainer::Awg: return new WireguardProtocol(configuration);
 #endif
     default: return nullptr;
     }
@@ -135,8 +135,7 @@ QString VpnProtocol::textConnectionState(Vpn::ConnectionState connectionState)
     case Vpn::ConnectionState::Disconnecting: return tr("Disconnecting...");
     case Vpn::ConnectionState::Reconnecting: return tr("Reconnecting...");
     case Vpn::ConnectionState::Error: return tr("Error");
-    default:
-        ;
+    default:;
     }
 
     return QString();

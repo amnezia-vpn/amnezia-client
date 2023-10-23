@@ -67,7 +67,7 @@ protected:
 
 signals:
     void currentlyProcessedServerIndexChanged(const int index);
-    void defaultServerIndexChanged();
+    void defaultServerIndexChanged(const int index);
     void defaultServerNameChanged();
 
 private:

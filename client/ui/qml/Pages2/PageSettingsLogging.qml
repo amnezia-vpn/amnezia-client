@@ -115,6 +115,7 @@ PageType {
                                 PageController.showBusyIndicator(true)
                                 SettingsController.exportLogsFile(fileName)
                                 PageController.showBusyIndicator(false)
+                                PageController.showNotificationMessage(qsTr("Logs file saved"))
                             }
                         }
                     }

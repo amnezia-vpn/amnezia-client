@@ -279,10 +279,14 @@ void AmneziaApplication::initModels()
 {
     m_containersModel.reset(new ContainersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
+    connect(m_vpnConnection.get(), &VpnConnection::newVpnConfigurationCreated, m_containersModel.get(),
+            &ContainersModel::updateContainersConfig);
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
     connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
+            &ContainersModel::setCurrentlyProcessedServerIndex);
+    connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
             &ContainersModel::setCurrentlyProcessedServerIndex);
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
@@ -293,11 +297,13 @@ void AmneziaApplication::initModels()
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
     connect(m_containersModel.get(), &ContainersModel::defaultContainerChanged, this, [this]() {
-        if (m_containersModel->getDefaultContainer() == DockerContainer::WireGuard
-            && m_sitesModel->getRouteMode() != Settings::RouteMode::VpnAllSites) {
-            m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+        if ((m_containersModel->getDefaultContainer() == DockerContainer::WireGuard
+             || m_containersModel->getDefaultContainer() == DockerContainer::Awg)
+            && m_sitesModel->isSplitTunnelingEnabled()) {
+            m_sitesModel->toggleSplitTunneling(false);
             emit m_pageController->showNotificationMessage(
-                    tr("Split tunneling for WireGuard is not implemented, the option was disabled"));
+                    tr("Split tunneling for %1 is not implemented, the option was disabled")
+                            .arg(ContainerProps::containerHumanNames().value(m_containersModel->getDefaultContainer())));
         }
     });
 
@@ -313,8 +319,11 @@ void AmneziaApplication::initModels()
     m_cloakConfigModel.reset(new CloakConfigModel(this));
     m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel.get());
 
-    m_wireguardConfigModel.reset(new WireGuardConfigModel(this));
-    m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireguardConfigModel.get());
+    m_wireGuardConfigModel.reset(new WireGuardConfigModel(this));
+    m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel.get());
+
+    m_awgConfigModel.reset(new AwgConfigModel(this));
+    m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));

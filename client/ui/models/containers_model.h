@@ -46,6 +46,7 @@ public:
 public slots:
     DockerContainer getDefaultContainer();
     QString getDefaultContainerName();
+    void setDefaultContainer(int index);
 
     void setCurrentlyProcessedServerIndex(const int index);
 
@@ -64,6 +65,8 @@ public slots:
     bool isAmneziaDnsContainerInstalled(const int serverIndex);
 
     bool isAnyContainerInstalled();
+
+    void updateContainersConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

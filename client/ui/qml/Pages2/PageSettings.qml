@@ -95,6 +95,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: about
                 Layout.fillWidth: true
 
                 text: qsTr("About AmneziaVPN")
@@ -107,6 +108,24 @@ PageType {
             }
 
             DividerType {}
+
+            LabelWithButtonType {
+                visible: GC.isDesktop()
+                Layout.fillWidth: true
+                Layout.preferredHeight: about.height
+
+                text: qsTr("Close application")
+                leftImageSource: "qrc:/images/controls/x-circle.svg"
+                isLeftImageHoverEnabled: false
+
+                clickedFunction: function() {
+                    PageController.closeApplication()
+                }
+            }
+
+            DividerType {
+                visible: GC.isDesktop()
+            }
         }
     }
 }

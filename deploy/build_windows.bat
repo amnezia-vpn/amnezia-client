@@ -47,7 +47,7 @@ cd %PROJECT_DIR%
 call "%QT_BIN_DIR:"=%\qt-cmake" . -B %WORK_DIR%
 
 cd %WORK_DIR%
-cmake --build . --config release
+cmake --build . --config release -- /p:UseMultiToolTask=true /m
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cmake --build . --target clean

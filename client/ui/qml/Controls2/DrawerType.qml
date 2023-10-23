@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import "../Config"
+
 Drawer {
     id: drawer
     property bool needCloseButton: true
@@ -39,6 +41,18 @@ Drawer {
 
         border.color: "#2C2D30"
         border.width: 1
+
+        Rectangle {
+            visible: GC.isMobile()
+
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 10
+
+            width: 20
+            height: 2
+            color: "#2C2D30"
+        }
     }
 
     Overlay.modal: Rectangle {

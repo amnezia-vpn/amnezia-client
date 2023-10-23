@@ -20,6 +20,10 @@ import "../Components"
 PageType {
     id: root
 
+    property bool pageEnabled: {
+        return !ConnectionController.isConnected
+    }
+
     Connections {
         target: SitesController
 
@@ -46,12 +50,12 @@ PageType {
 
     QtObject {
         id: onlyForwardSites
-        property string name: qsTr("Only the addresses in the list must be opened via VPN")
+        property string name: qsTr("Addresses from the list should be accessed via VPN")
         property int type: routeMode.onlyForwardSites
     }
     QtObject {
         id: allExceptSites
-        property string name: qsTr("Addresses from the list should never be opened via VPN")
+        property string name: qsTr("Addresses from the list should not be accessed via VPN")
         property int type: routeMode.allExceptSites
     }
 
@@ -78,29 +82,26 @@ PageType {
 
         RowLayout {
             HeaderType {
+                enabled: root.pageEnabled
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Split site tunneling")
+                headerText: qsTr("Split tunneling")
             }
 
             SwitcherType {
                 id: switcher
 
-                property int lastActiveRouteMode: routeMode.onlyForwardSites
+                enabled: root.pageEnabled
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.routeMode !== routeMode.allSites
-                onToggled: {
-                    if (checked) {
-                        SitesModel.routeMode = lastActiveRouteMode
-                    } else {
-                        lastActiveRouteMode = SitesModel.routeMode
-                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-                        SitesModel.routeMode = routeMode.allSites
-                    }
+                checked: SitesModel.isSplitTunnelingEnabled()
+                onToggled: {                    
+                    SitesModel.toggleSplitTunneling(checked)
+                    selector.text = root.routeModesModel[getRouteModesModelIndex()].name
                 }
             }
         }
@@ -115,7 +116,7 @@ PageType {
 
             drawerHeight: 0.4375
 
-            enabled: switcher.checked
+            enabled: root.pageEnabled
 
             headerText: qsTr("Mode")
 
@@ -155,9 +156,9 @@ PageType {
     FlickableType {
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight + connectButton.implicitHeight + connectButton.anchors.bottomMargin + connectButton.anchors.topMargin
+        contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
 
-        enabled: switcher.checked
+        enabled: root.pageEnabled
 
         Column {
             id: col
@@ -221,8 +222,17 @@ PageType {
         }
     }
 
+    Rectangle {
+        anchors.fill: addSiteButton
+        anchors.bottomMargin: -24
+        color: "#0E0E11"
+        opacity: 0.8
+    }
+
     RowLayout {
-        id: connectButton
+        id: addSiteButton
+
+        enabled: root.pageEnabled
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left

@@ -34,18 +34,8 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            actionButtonImage: "qrc:/images/controls/plus.svg"
-
             headerText: qsTr("Servers")
-
-            actionButtonFunction: function() {
-                connectionTypeSelection.visible = true
-            }
         }
-    }
-
-    ConnectionTypeSelectionDrawer {
-        id: connectionTypeSelection
     }
 
     FlickableType {

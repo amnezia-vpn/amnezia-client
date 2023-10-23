@@ -26,6 +26,11 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
+// QTBUG-95974 QTBUG-95764 QTBUG-102168
+#ifdef Q_OS_ANDROID
+    qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
+#endif
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication app(argc, argv);
 #else

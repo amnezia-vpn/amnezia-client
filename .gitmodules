@@ -1,6 +1,3 @@
-[submodule "client/3rd/wireguard-apple"]
-	path = client/3rd/wireguard-apple
-	url = https://github.com/WireGuard/wireguard-apple
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
 	url = https://github.com/amnezia-vpn/OpenVPNAdapter.git
@@ -25,3 +22,6 @@
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
 	url = https://github.com/amnezia-vpn/3rd-prebuilt
+[submodule "client/3rd/awg-apple"]
+	path = client/3rd/awg-apple
+	url = https://github.com/amnezia-vpn/awg-apple
