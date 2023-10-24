@@ -591,22 +591,20 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$AWG_SERVER_PORT",
                     amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
 
-    if (!amneziaWireguarConfig.value(config_key::junkPacketCount).toString().isEmpty()){
-        vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
-        vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
-        vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
-        vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
-        vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE",
-                        amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-        vars.append({ { "$INIT_PACKET_MAGIC_HEADER",
-                        amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
-        vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER",
-                        amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
-        vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER",
-                        amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
-        vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
-                        amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
-    }
+    vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
+    vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
+    vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
+    vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE",
+                    amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
+    vars.append({ { "$INIT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
+    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
+                    amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
     QString serverIp = Utils::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
