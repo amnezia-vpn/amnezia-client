@@ -131,7 +131,6 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
         config.append("block-ipv6\n");
     }
     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-        qDebug() << "Settings::VpnOnlyForwardSites";
         
         // no redirect-gateway
     }

@@ -355,8 +355,6 @@ void IosController::startTunnel()
     m_rxBytes = 0;
     m_txBytes = 0;
     
-    qDebug() << "m_rawConfig " << m_rawConfig;
-    
     int STT = m_rawConfig["splitTunnelType"].toInt();
     QJsonArray splitTunnelSites = m_rawConfig["splitTunnelSites"].toArray();
     QJsonDocument doc;
@@ -397,7 +395,6 @@ void IosController::startTunnel()
                     NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue,
                     SplitTunnelTypeKey: SplitTunnelTypeValue, SplitTunnelSitesKey: SplitTunnelSitesValue};
                 
-                    qDebug() << "sendVpnExtensionMessage " << message;
                     sendVpnExtensionMessage(message);
 
 

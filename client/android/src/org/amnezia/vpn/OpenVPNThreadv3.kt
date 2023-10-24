@@ -74,13 +74,8 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
         val jsonVpnConfig = mService.getVpnConfig()
         val ovpnConfig = jsonVpnConfig.getJSONObject("openvpn_config_data").getString("config")
-        Log.e(tag, "jsonVpnConfig $jsonVpnConfig")
         val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
         val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
-
-        Log.e(tag, "splitTunnelType $splitTunnelType")
-        Log.e(tag, "splitTunnelSites $splitTunnelSites")
-
 
         val resultingConfig = StringBuilder()
         resultingConfig.append(ovpnConfig)
@@ -158,7 +153,6 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
                 val site = splitTunnelSites.getString(i)
                 val ipRange = IPRange(site)
                 mService.addRoute(ipRange.getFrom().getHostAddress(), ipRange.getPrefix())
-                Log.e(tag, "splitTunnelSites $ipRange")
             }
         }
         if (splitTunnelType == 2) {
@@ -170,8 +164,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
             }
             ipRangeSet.subnets().forEach {
                 mService.addRoute(it.getFrom().getHostAddress(), it.getPrefix())
-                Thread.sleep(100)
-                Log.e(tag, "splitTunnelSites $it")
+                Thread.sleep(10)
             }
             mService.addRoute("2000::", 3)
         }
@@ -196,7 +189,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean , flags: Long): Boolean {
           Log.v(tag, "tun_builder_reroute_gw")
-         // mService.addRoute("0.0.0.0", 0)
+          mService.addRoute("0.0.0.0", 0)
           return true
     }
 

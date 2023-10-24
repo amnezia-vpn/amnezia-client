@@ -611,7 +611,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                     /* VPN connection used only for defined IPs */
                     for (i in 0 until splitTunnelSites.length()) {
                         val site = splitTunnelSites.getString(i)
-                        Log.e(tag, "splitTunnelSites $site")
                         val internet = InetNetwork.parse(site)
                         peerBuilder.addAllowedIp(internet)
                     }
@@ -626,7 +625,6 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                         ipRangeSet.remove(IPRange(site))
                     }
                     val allowedIps = ipRangeSet.subnets().joinToString(", ") + ", 2000::/3"
-                    Log.e(tag, "allowedIps $allowedIps")
                     peerBuilder.parseAllowedIPs(allowedIps)
                 }
             }
