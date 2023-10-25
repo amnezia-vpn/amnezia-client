@@ -199,14 +199,6 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
                   jsAllowedIPAddesses.append(range);
               }
           }
-
-          // Allow access to Amnezia DNS
-          QJsonObject range_ipv4;
-          range_ipv4.insert("address", amnezia::protocols::dns::amneziaDnsIp);
-          range_ipv4.insert("range", 32);
-          range_ipv4.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range_ipv4);
-
       }
   }
 
