@@ -31,7 +31,8 @@ public:
     void messageClickHandle();
 
 public slots:
-    virtual void setConnectionState(VpnProtocol::VpnConnectionState state);
+    virtual void setConnectionState(Vpn::ConnectionState state);
+    virtual void onTranslationsUpdated();
 
 signals:
     void notificationShown(const QString& title, const QString& message);

@@ -47,7 +47,7 @@ cd %PROJECT_DIR%
 call "%QT_BIN_DIR:"=%\qt-cmake" . -B %WORK_DIR%
 
 cd %WORK_DIR%
-cmake --build . --config release
+cmake --build . --config release -- /p:UseMultiToolTask=true /m
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cmake --build . --target clean
@@ -68,7 +68,6 @@ signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.co
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 xcopy %PREBILT_DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
-copy "%WORK_DIR:"=%\service\wireguard-service\release\wireguard-service.exe"	%OUT_APP_DIR%\wireguard\
 
 cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer  %WORK_DIR:"=%\installer /s /e /y /i /f

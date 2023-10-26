@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/translations">
+				@QM_FILE_LIST@
+    </qresource>
+</RCC>

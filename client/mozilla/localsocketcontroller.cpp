@@ -115,7 +115,9 @@ void LocalSocketController::daemonConnected() {
 }
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
-  QJsonObject wgConfig = rawConfig.value("wireguard_config_data").toObject();
+  QString protocolName = rawConfig.value("protocol").toString();
+
+  QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
   json.insert("type", "activate");
@@ -160,6 +162,19 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   //    splitTunnelApps.append(QJsonValue(uri));
   //  }
   //  json.insert("vpnDisabledApps", splitTunnelApps);
+  
+  if (protocolName == amnezia::config_key::awg) {
+    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
+    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
+    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
+    json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
+    json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
+    json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
+    json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
+    json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
+    json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
+  }
+
   write(json);
 }
 
@@ -175,6 +190,7 @@ void LocalSocketController::deactivate() {
   QJsonObject json;
   json.insert("type", "deactivate");
   write(json);
+  emit disconnected();
 }
 
 void LocalSocketController::checkStatus() {

@@ -10,30 +10,34 @@ set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 set(PACKAGES
-    Widgets Core Gui Network Xml
+    Core Gui Network Xml
     RemoteObjects Quick Svg QuickControls2
     Core5Compat Concurrent LinguistTools
 )
+
 if(IOS)
-    set(PACKAGES
-        ${PACKAGES}
-        Multimedia
-	)
+    set(PACKAGES ${PACKAGES} Multimedia)
+endif()
+
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+    set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS} 
-    Qt6::Widgets Qt6::Core Qt6::Gui
+    Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
+
 if(IOS)
-    set(LIBS
-        ${LIBS}
-        Qt6::Multimedia
-    )
+    set(LIBS ${LIBS} Qt6::Multimedia)
+endif()
+
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+    set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
@@ -46,12 +50,30 @@ endif()
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
-qt6_add_translations(${PROJECT} TS_FILES
+# -- i18n begin
+set(CMAKE_AUTORCC ON)
+
+set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
 )
 
+file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
+
+qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
+
+set(QM_FILE_LIST "")
+foreach(FILE ${AMNEZIAVPN_QM_FILES})
+    get_filename_component(QM_FILE_NAME ${FILE} NAME)
+    list(APPEND QM_FILE_LIST "<file>${QM_FILE_NAME}</file>")
+endforeach()
+string(REPLACE ";" "" QM_FILE_LIST ${QM_FILE_LIST})
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+# -- i18n end
+
 if(IOS)
-    #execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/scripts/run-build-cloak.sh)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
@@ -91,7 +113,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/property_helper.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
@@ -128,7 +149,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/servercontroller.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/uilogic.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
@@ -162,20 +182,33 @@ file(GLOB_RECURSE PAGE_LOGIC_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/
 file(GLOB CONFIGURATORS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.h)
 file(GLOB CONFIGURATORS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.cpp)
 
-file(GLOB UI_MODELS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.h)
-file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.cpp)
+file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/services/*.h
+)
+file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols/*.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/models/services/*.cpp
+)
+
+file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.h)
+file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.cpp)
 
 set(HEADERS ${HEADERS}
     ${COMMON_FILES_H}
     ${PAGE_LOGIC_H}
     ${CONFIGURATORS_H}
     ${UI_MODELS_H}
+    ${UI_CONTROLLERS_H}
 )
 set(SOURCES ${SOURCES}
     ${COMMON_FILES_CPP}
     ${PAGE_LOGIC_CPP}
     ${CONFIGURATORS_CPP}
     ${UI_MODELS_CPP}
+    ${UI_CONTROLLERS_CPP}
 )
 
 if(WIN32)
@@ -248,6 +281,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.h
     )
 
     set(SOURCES ${SOURCES}
@@ -258,6 +292,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.cpp
     )
 endif()
 
@@ -307,16 +342,5 @@ if(NOT IOS AND NOT ANDROID)
 
 endif()
 
-if(WIN32)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy,true>
-        $<TARGET_FILE_DIR:${PROJECT}>/../service/wireguard-service/wireguard-service.exe
-        $<TARGET_FILE_DIR:${PROJECT}>/wireguard/wireguard-service.exe
-        COMMAND_EXPAND_LISTS
-    )
-endif()
-
-
-target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC})
+target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 qt_finalize_target(${PROJECT})

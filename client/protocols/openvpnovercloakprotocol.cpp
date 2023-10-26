@@ -61,7 +61,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
 
     m_errorHandlerConnection = connect(&m_ckProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus){
         qDebug().noquote() << "OpenVpnOverCloakProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
-        setConnectionState(VpnProtocol::Disconnected);
+        setConnectionState(Vpn::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit){
             emit protocolError(amnezia::ErrorCode::CloakExecutableCrashed);
             stop();
@@ -76,7 +76,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_ckProcess.waitForStarted();
 
     if (m_ckProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(VpnConnectionState::Connecting);
+        setConnectionState(Vpn::ConnectionState::Connecting);
 
         return OpenVpnProtocol::start();
     }

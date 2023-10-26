@@ -24,6 +24,7 @@ QString errorString(ErrorCode code){
     case(SshInternalError): return QObject::tr("Ssh internal error");
     case(SshPrivateKeyError): return QObject::tr("Invalid private key or invalid passphrase entered");
     case(SshPrivateKeyFormatError): return QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types");
+    case(SshTimeoutError): return QObject::tr("Timeout connecting to server");
 
     // Libssh sftp errors
     case(SshSftpEofError): return QObject::tr("Sftp error: End-of-file encountered");
@@ -56,6 +57,8 @@ QString errorString(ErrorCode code){
     case (OpenVpnAdaptersInUseError): return QObject::tr("Can't connect: another VPN connection is active");
     case (OpenVpnTapAdapterError): return QObject::tr("Can't setup OpenVPN TAP network adapter");
     case (AddressPoolError): return QObject::tr("VPN pool error: no available addresses");
+
+    case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentiaks for connecting to the server");
 
     case(InternalError):
     default:

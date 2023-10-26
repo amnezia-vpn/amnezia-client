@@ -49,14 +49,15 @@
 
     _videoPreviewPlayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession: _captureSession];
     
-    CGFloat tabBarHeight = 20.0;
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+
     QRect cameraRect = _qrCodeReader->cameraSize();
     CGRect cameraCGRect = CGRectMake(cameraRect.x(),
-                                     cameraRect.y() + tabBarHeight,
+                                     cameraRect.y() + statusBarHeight,
                                      cameraRect.width(),
                                      cameraRect.height());
 
-    [_videoPreviewPlayer setVideoGravity: AVLayerVideoGravityResizeAspect];
+    [_videoPreviewPlayer setVideoGravity: AVLayerVideoGravityResizeAspectFill];
     [_videoPreviewPlayer setFrame: cameraCGRect];
 
     CALayer* layer = [UIApplication sharedApplication].keyWindow.layer;

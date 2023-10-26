@@ -30,22 +30,22 @@ const char* MessageKey::host = "host";
 const char* MessageKey::port = "port";
 const char* MessageKey::isOnDemand = "is-on-demand";
 
-VpnProtocol::VpnConnectionState iosStatusToState(NEVPNStatus status) {
+Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
     case NEVPNStatusInvalid:
-        return VpnProtocol::VpnConnectionState::Unknown;
+        return Vpn::ConnectionState::Unknown;
     case NEVPNStatusDisconnected:
-        return VpnProtocol::VpnConnectionState::Disconnected;
+        return Vpn::ConnectionState::Disconnected;
     case NEVPNStatusConnecting:
-        return VpnProtocol::VpnConnectionState::Connecting;
+        return Vpn::ConnectionState::Connecting;
     case NEVPNStatusConnected:
-        return VpnProtocol::VpnConnectionState::Connected;
+        return Vpn::ConnectionState::Connected;
     case NEVPNStatusReasserting:
-        return VpnProtocol::VpnConnectionState::Connecting;
+        return Vpn::ConnectionState::Connecting;
     case NEVPNStatusDisconnecting:
-        return VpnProtocol::VpnConnectionState::Disconnecting;
+        return Vpn::ConnectionState::Disconnecting;
     default:
-        return VpnProtocol::VpnConnectionState::Unknown;
+        return Vpn::ConnectionState::Unknown;
 }
 }
 
@@ -82,7 +82,7 @@ bool IosController::initialize()
         @try {
             if (error) {
                 qDebug() << "IosController::initialize : Error:" << [error.localizedDescription UTF8String];
-                emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
+                emit connectionStateChanged(Vpn::ConnectionState::Error);
                 ok = false;
                 return;
             }
@@ -95,6 +95,7 @@ bool IosController::initialize()
                 if (manager.connection.status == NEVPNStatusConnected) {
                     m_currentTunnel = manager;
                     qDebug() << "IosController::initialize : VPN already connected";
+                    emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     break;
 
                     // TODO: show connected state
@@ -141,7 +142,7 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
         @try {
             if (error) {
                 qDebug() << "IosController::connectVpn : Error:" << [error.localizedDescription UTF8String];
-                emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
+                emit connectionStateChanged(Vpn::ConnectionState::Error);
                 ok = false;
                 return;
             }
@@ -155,7 +156,7 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
                     m_currentTunnel = manager;
                     qDebug() << "IosController::connectVpn : Using existing tunnel";
                     if (manager.connection.status == NEVPNStatusConnected) {
-                        emit connectionStateChanged(VpnProtocol::VpnConnectionState::Connected);
+                        emit connectionStateChanged(Vpn::ConnectionState::Connected);
                         return;
                     }
 
@@ -202,6 +203,9 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     }
     if (proto == amnezia::Proto::WireGuard) {
         return setupWireGuard();
+    }
+    if (proto == amnezia::Proto::Awg) {
+        return setupAwg();
     }
 
     return false;
@@ -306,6 +310,15 @@ bool IosController::setupWireGuard()
     return startWireGuard(wgConfig);
 }
 
+bool IosController::setupAwg()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
+
+    QString wgConfig = config[config_key::config].toString();
+    
+    return startWireGuard(wgConfig);
+}
+
 bool IosController::startOpenVPN(const QString &config)
 {
     qDebug() << "IosController::startOpenVPN";
@@ -344,14 +357,14 @@ void IosController::startTunnel()
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
             if (saveError) {
-                emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
+                emit connectionStateChanged(Vpn::ConnectionState::Error);
                 return;
             }
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     if (loadError) {
                         qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Load Error" << loadError.localizedDescription.UTF8String;
-                        emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
+                        emit connectionStateChanged(Vpn::ConnectionState::Error);
                         return;
                     }
 
@@ -373,7 +386,7 @@ void IosController::startTunnel()
                     if (!started || startError) {
                         qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Start Error"
                             << (startError ? startError.localizedDescription.UTF8String : "");
-                        emit connectionStateChanged(VpnProtocol::VpnConnectionState::Error);
+                        emit connectionStateChanged(Vpn::ConnectionState::Error);
                     } else {
                         qDebug() << "IosController::startOpenVPN : Starting the tunnel succeeded";
                     }

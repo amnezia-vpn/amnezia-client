@@ -40,6 +40,16 @@ class InterfaceConfig {
   QString m_installationId;
 #endif
 
+  QString m_junkPacketCount;
+  QString m_junkPacketMinSize;
+  QString m_junkPacketMaxSize;
+  QString m_initPacketJunkSize;
+  QString m_responsePacketJunkSize;
+  QString m_initPacketMagicHeader;
+  QString m_responsePacketMagicHeader;
+  QString m_underloadPacketMagicHeader;
+  QString m_transportPacketMagicHeader;
+
   QJsonObject toJson() const;
   QString toWgConf(
       const QMap<QString, QString>& extra = QMap<QString, QString>()) const;

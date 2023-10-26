@@ -36,7 +36,8 @@
         android:requestLegacyExternalStorage="true"
         android:allowNativeHeapPointerTagging="false"
         android:theme="@style/Theme.AppCompat.NoActionBar"
-        android:icon="@drawable/icon">
+        android:icon="@drawable/icon"
+        android:roundIcon="@drawable/icon_round">
         
         <activity
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
@@ -44,6 +45,7 @@
             android:label="-- %%INSERT_APP_NAME%% --"
             android:screenOrientation="unspecified"
             android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
     
 <!--            android:theme="@style/splashScreenTheme"-->

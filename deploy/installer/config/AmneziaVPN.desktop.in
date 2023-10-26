@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=AmneziaVPN
+Version=@CMAKE_PROJECT_VERSION@
+Comment=Client of your self-hosted VPN
+Exec=AmneziaVPN
+Icon=/usr/share/pixmaps/AmneziaVPN.png
+Categories=Network;Qt;Security;
+Terminal=false

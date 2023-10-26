@@ -52,9 +52,9 @@ NotificationHandler::~NotificationHandler() {
     s_instance = nullptr;
 }
 
-void NotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState state)
+void NotificationHandler::setConnectionState(Vpn::ConnectionState state)
 {
-    if (state != VpnProtocol::Connected && state != VpnProtocol::Disconnected) {
+    if (state != Vpn::ConnectionState::Connected && state != Vpn::ConnectionState::Disconnected) {
         return;
     }
 
@@ -62,14 +62,14 @@ void NotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState sta
     QString message;
 
     switch (state) {
-    case VpnProtocol::VpnConnectionState::Connected:
+    case Vpn::ConnectionState::Connected:
         m_connected = true;
 
         title = tr("AmneziaVPN");
         message = tr("VPN Connected");
         break;
 
-    case VpnProtocol::VpnConnectionState::Disconnected:
+    case Vpn::ConnectionState::Disconnected:
         if (m_connected) {
             m_connected = false;
             title = tr("AmneziaVPN");
@@ -86,6 +86,10 @@ void NotificationHandler::setConnectionState(VpnProtocol::VpnConnectionState sta
     if (!title.isEmpty()) {
         notifyInternal(VpnState, title, message, 2000);
     }
+}
+
+void NotificationHandler::onTranslationsUpdated()
+{
 }
 
 void NotificationHandler::unsecuredNetworkNotification(const QString& networkName) {
