@@ -288,6 +288,8 @@ void AmneziaApplication::initModels()
             &ContainersModel::setCurrentlyProcessedServerIndex);
     connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
             &ContainersModel::setCurrentlyProcessedServerIndex);
+    connect(m_containersModel.get(), &ContainersModel::containersModelUpdated, m_serversModel.get(),
+            &ServersModel::updateContainersConfig);
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
