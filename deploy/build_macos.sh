@@ -163,7 +163,18 @@ if [ "${MAC_CERT_PW+x}" ]; then
   fi
 fi
 
-echo "Finished, artifact is $DMG_FILENAME"
-
+echo "Finished to generate local installer, artifact is $DMG_FILENAME"
 # restore keychain
 security default-keychain -s login.keychain
+
+echo "Generate online installer and repository..."
+
+cd $PROJECT_DIR
+DIRNAME=$0
+if [ "${DIRNAME:0:1}" = "/" ];then
+    CURDIR=`dirname $DIRNAME`
+else
+    CURDIR="`pwd`"/"`dirname $DIRNAME`"
+fi
+
+source $CURDIR/build_macos_online_installer.sh
