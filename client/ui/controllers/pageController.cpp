@@ -167,7 +167,7 @@ void PageController::closeApplication()
 
 bool PageController::checkForUpdates()
 {
-    QString path = QApplication::applicationDirPath();
+    QString path = qApp->applicationDirPath();
 
     bool checked = false;
 
