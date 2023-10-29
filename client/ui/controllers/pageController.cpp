@@ -168,7 +168,7 @@ void PageController::closeApplication()
 bool PageController::checkForUpdates()
 {
 #ifdef Q_OS_IOS
-    return false
+    return false;
 #else
     QString path = qApp->applicationDirPath();
 
