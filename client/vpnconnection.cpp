@@ -68,7 +68,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
             QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
-            QString dns2 = m_vpnConfiguration.value(config_key::dns1).toString();
+            QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
@@ -329,6 +329,8 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         return;
     }
 
+    appendSplitTunnelingConfig();
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
@@ -361,6 +363,25 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(Vpn::ConnectionState)), this,
             SLOT(onConnectionStateChanged(Vpn::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+}
+
+void VpnConnection::appendSplitTunnelingConfig()
+{
+    auto routeMode = m_settings->routeMode();
+    auto sites = m_settings->getVpnIps(routeMode);
+
+    QJsonArray sitesJsonArray;
+    for (const auto &site : sites) {
+        sitesJsonArray.append(site);
+    }
+
+    // Allow traffic to Amezia DNS
+    if (routeMode == Settings::VpnOnlyForwardSites){
+        sitesJsonArray.append(amnezia::protocols::dns::amneziaDnsIp);
+    }
+
+    m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
+    m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 }
 
 #ifdef Q_OS_ANDROID

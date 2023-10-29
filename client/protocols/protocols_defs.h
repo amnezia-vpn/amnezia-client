@@ -43,6 +43,7 @@ namespace amnezia
         constexpr char server_priv_key[] = "server_priv_key";
         constexpr char server_pub_key[] = "server_pub_key";
         constexpr char psk_key[] = "psk_key";
+        constexpr char allowed_ips[] = "allowed_ips";
 
         constexpr char client_ip[] = "client_ip"; // internal ip address
 
@@ -77,6 +78,9 @@ namespace amnezia
         constexpr char cloak[] = "cloak";
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
+
+        constexpr char splitTunnelSites[] = "splitTunnelSites";
+        constexpr char splitTunnelType[] = "splitTunnelType";
 
     }
 

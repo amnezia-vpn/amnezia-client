@@ -158,15 +158,15 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
         return false;
     }
     nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_OIF, index);
+    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 1);
     }
 
     if (rtm->rtm_type == RTN_THROW) {
-    int index = if_nametoindex(getgatewayandiface().toUtf8());
-    if (index <= 0) {
-        logger.error() << "if_nametoindex() failed:" << strerror(errno);
-        return false;
-    }
-    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_OIF, index);
+    struct in_addr ip4;
+    inet_pton(AF_INET, getgatewayandiface().toUtf8(), &ip4);
+    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
+    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
+    rtm->rtm_type = RTN_UNICAST;
     }
 
     struct sockaddr_nl nladdr;
@@ -334,7 +334,7 @@ QString LinuxRouteMonitor::getgatewayandiface()
     }
     }
     close(sock);
-    return interface;
+    return gateway_address;
 }
 
 static bool buildAllowedIp(wg_allowedip* ip,

@@ -112,6 +112,8 @@ private:
 #endif
 
    void createProtocolConnections();
+
+   void appendSplitTunnelingConfig();
 };
 
 #endif // VPNCONNECTION_H

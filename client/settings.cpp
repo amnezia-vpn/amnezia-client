@@ -233,10 +233,6 @@ QString Settings::routeModeString(RouteMode mode) const
 
 Settings::RouteMode Settings::routeMode() const
 {
-// TODO implement for mobiles
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    return RouteMode::VpnAllSites;
-#endif
     return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt());
 }
 

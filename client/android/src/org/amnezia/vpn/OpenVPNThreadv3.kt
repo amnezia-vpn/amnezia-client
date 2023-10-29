@@ -16,6 +16,8 @@ import com.wireguard.crypto.Key
 import org.json.JSONObject
 import java.util.Base64
 
+import com.wireguard.config.*
+
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
 import net.openvpn.ovpn3.ClientAPI_Event
@@ -72,6 +74,8 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
         val jsonVpnConfig = mService.getVpnConfig()
         val ovpnConfig = jsonVpnConfig.getJSONObject("openvpn_config_data").getString("config")
+        val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
+        val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
 
         val resultingConfig = StringBuilder()
         resultingConfig.append(ovpnConfig)
@@ -115,6 +119,7 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         eval_config(config)
 
         val status = connect()
+        
         if (status.getError()) {
             Log.i(tag, "connect() error: " + status.getError() + ": " + status.getMessage())
         }
@@ -139,6 +144,31 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
 
     override fun tun_builder_establish(): Int {
         Log.v(tag, "tun_builder_establish")
+        val jsonVpnConfig = mService.getVpnConfig()
+
+        val splitTunnelType = jsonVpnConfig.getInt("splitTunnelType")
+        val splitTunnelSites = jsonVpnConfig.getJSONArray("splitTunnelSites")
+        if (splitTunnelType == 1) {
+            for (i in 0 until splitTunnelSites.length()) {
+                val site = splitTunnelSites.getString(i)
+                val ipRange = IPRange(site)
+                mService.addRoute(ipRange.getFrom().getHostAddress(), ipRange.getPrefix())
+            }
+        }
+        if (splitTunnelType == 2) {
+            val ipRangeSet = IPRangeSet.fromString("0.0.0.0/0")
+            ipRangeSet.remove(IPRange("127.0.0.0/8"))
+            for (i in 0 until splitTunnelSites.length()) {
+                val site = splitTunnelSites.getString(i)
+                ipRangeSet.remove(IPRange(site))
+            }
+            ipRangeSet.subnets().forEach {
+                mService.addRoute(it.getFrom().getHostAddress(), it.getPrefix())
+                Thread.sleep(10)
+            }
+            mService.addRoute("2000::", 3)
+        }
+
         return mService.establish()!!.detachFd()
     }
 
