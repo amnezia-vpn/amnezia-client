@@ -90,6 +90,8 @@ public slots:
 
     void closeApplication();
 
+    bool checkForUpdates();
+
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
     void goToStartPage();

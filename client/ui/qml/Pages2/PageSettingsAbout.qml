@@ -192,7 +192,13 @@ PageType {
                 text: qsTr("Check for updates")
 
                 onClicked: {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    PageController.showBusyIndicator(true)
+
+                    if (!PageController.checkForUpdates()) {
+                        Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    }
+
+                   PageController.showBusyIndicator(false)
                 }
             }
         }

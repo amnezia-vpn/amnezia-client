@@ -1,5 +1,7 @@
 #include "pageController.h"
 
+#include <QProcess>
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #include <QGuiApplication>
 #else
@@ -161,4 +163,62 @@ void PageController::setTriggeredBtConnectButton(bool trigger)
 void PageController::closeApplication()
 {
     qApp->quit();
+}
+
+bool PageController::checkForUpdates()
+{
+    QString path = QApplication::applicationDirPath();
+
+    bool checked = false;
+
+#ifdef Q_OS_MACOS
+    if(path.contains(qApp->applicationName()+".app/Contents/MacOS")) {
+        path = path.remove("Contents/MacOS");
+    }
+    path = path + "maintenancetool.app";
+
+    checked = true;
+#endif
+
+    if (!checked) {
+        return false;
+    }
+
+    QStringList argsCheckUpdates;
+    argsCheckUpdates << "--checkupdates";
+
+    QProcess process;
+    process.start(path, argsCheckUpdates);
+
+    // Wait until the update tool is finished
+    process.waitForFinished();
+
+    if (process.error() != QProcess::UnknownError) {
+        emit showNotificationMessage(tr("Checking for updates: %1").arg(process.errorString()));
+        return true;
+    }
+
+    // Read the output
+    QByteArray data = process.readAllStandardOutput();
+
+    // No output means no updates available
+    // Note that the exit code will also be 1, but we don't use that
+    // Also note that we should parse the output instead of just checking if it is empty if we want specific update info
+    if (data.isEmpty()) {
+        emit showNotificationMessage(tr("Checking for updates: %1").arg("it's the latest version"));
+        return true;
+    }
+
+    // Note: we start it detached because this application need to close for the update
+    QStringList argsUpdater("--updater");
+    bool bresult = QProcess::startDetached(path, argsUpdater);
+    if (!bresult) {
+        emit showNotificationMessage(tr("Checking for updates: %1").arg("test"));
+        return true;
+    }
+
+
+    // Close the application
+    qApp->quit();
+    return true;
 }
