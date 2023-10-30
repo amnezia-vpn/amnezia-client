@@ -9,7 +9,7 @@ deploy/build_32/*
 deploy/build_64/*
 winbuild*.bat
 .cache/
-
+.vscode/
 
 # Qt-es
 /.qmake.cache
