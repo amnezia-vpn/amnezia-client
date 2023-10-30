@@ -31,6 +31,8 @@ public slots:
     void generateConnectionConfig();
     void generateOpenVpnConfig();
     void generateWireGuardConfig();
+    void generateShadowSocksConfig();
+    void generateCloakConfig();
 
     QString getConfig();
     QList<QString> getQrCodes();

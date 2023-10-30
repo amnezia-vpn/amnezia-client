@@ -20,7 +20,9 @@ PageType {
         AmneziaConnection,
         AmneziaFullAccess,
         OpenVpn,
-        WireGuard
+        WireGuard,
+        ShadowSocks,
+        Cloak
     }
 
     Connections {
@@ -44,18 +46,32 @@ PageType {
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig();
+                ExportController.generateOpenVpnConfig()
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
                 shareConnectionDrawer.configExtension = ".ovpn"
                 shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
-                break;
+                break
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig();
+                ExportController.generateWireGuardConfig()
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
-                break;
+                break
+            }
+            case PageShare.ConfigType.ShadowSocks: {
+                ExportController.generateShadowSocksConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save ShadowSocks config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_shadowsocks"
+                break
+            }
+            case PageShare.ConfigType.Cloak: {
+                ExportController.generateCloakConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save Cloak config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_cloak"
+                break
             }
             }
 
@@ -95,6 +111,16 @@ PageType {
         id: wireGuardConnectionFormat
         property string name: qsTr("WireGuard native format")
         property var type: PageShare.ConfigType.WireGuard
+    }
+    QtObject {
+        id: shadowSocksConnectionFormat
+        property string name: qsTr("ShadowSocks native format")
+        property var type: PageShare.ConfigType.ShadowSocks
+    }
+    QtObject {
+        id: cloakConnectionFormat
+        property string name: qsTr("Cloak native format")
+        property var type: PageShare.ConfigType.Cloak
     }
 
     FlickableType {
@@ -322,6 +348,13 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
+                            root.connectionTypesModel.push(openVpnConnectionFormat)
+                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-openvpn-cloak")) {
+                            root.connectionTypesModel.push(openVpnConnectionFormat)
+                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
+                            root.connectionTypesModel.push(cloakConnectionFormat)
                         }
                     }
                 }

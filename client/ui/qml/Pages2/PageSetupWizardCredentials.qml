@@ -54,7 +54,7 @@ PageType {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
 
-                onTextFieldTextChanged: {
+                onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
             }
@@ -81,6 +81,10 @@ PageType {
                 clickedFunc: function() {
                     hidePassword = !hidePassword
                 }
+
+                onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                }
             }
 
             BasicButtonType {
@@ -90,6 +94,7 @@ PageType {
                 text: qsTr("Continue")
 
                 onClicked: function() {
+                    forceActiveFocus()
                     if (!isCredentialsFilled()) {
                         return
                     }
@@ -112,8 +117,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 12
 
-                text: qsTr("All data you enter will remain strictly confidential
-and will not be shared or disclosed to the Amnezia or any third parties")
+                text: qsTr("All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties")
             }
         }
     }
