@@ -249,7 +249,7 @@ jobs:
         bash deploy/build_macos.sh
 
     - name: 'Upload upacked build to update server'
-      if: github.ref_name == 'dev'
+#      if: github.ref_name == 'dev'
       env:
         MACOS_UNPACKED_BUILD_PATH: deploy/build/installer/amneziavpn-macos-repository
         AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
