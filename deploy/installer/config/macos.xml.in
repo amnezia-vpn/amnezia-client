@@ -15,11 +15,11 @@
     <ControlScript>controlscript.js</ControlScript>
     <RepositorySettingsPageVisible>true</RepositorySettingsPageVisible>
     <DependsOnLocalInstallerBinary>true</DependsOnLocalInstallerBinary>
-    <SupportsModify>false</SupportsModify>
+    <SupportsModify>true</SupportsModify>
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
         <Repository>
-            <Url>https://updates.amzsvc.com/stable/macos</Url>
+            <Url>https://updates.amzsvc.com/beta/macos</Url>
             <Enabled>1</Enabled>
             <DisplayName>AmneziaVPN - repository for macOS</DisplayName>
         </Repository>
