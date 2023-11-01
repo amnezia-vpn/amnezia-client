@@ -288,6 +288,8 @@ void AmneziaApplication::initModels()
             &ContainersModel::setCurrentlyProcessedServerIndex);
     connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
             &ContainersModel::setCurrentlyProcessedServerIndex);
+    connect(m_containersModel.get(), &ContainersModel::containersModelUpdated, m_serversModel.get(),
+            &ServersModel::updateContainersConfig);
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -296,17 +298,7 @@ void AmneziaApplication::initModels()
 
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
-    connect(m_containersModel.get(), &ContainersModel::defaultContainerChanged, this, [this]() {
-        if ((m_containersModel->getDefaultContainer() == DockerContainer::WireGuard
-             || m_containersModel->getDefaultContainer() == DockerContainer::Awg)
-            && m_sitesModel->isSplitTunnelingEnabled()) {
-            m_sitesModel->toggleSplitTunneling(false);
-            emit m_pageController->showNotificationMessage(
-                    tr("Split tunneling for %1 is not implemented, the option was disabled")
-                            .arg(ContainerProps::containerHumanNames().value(m_containersModel->getDefaultContainer())));
-        }
-    });
-
+    
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 

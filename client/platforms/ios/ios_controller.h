@@ -28,6 +28,8 @@ struct MessageKey
     static const char *host;
     static const char *port;
     static const char *isOnDemand;
+    static const char *SplitTunnelType;
+    static const char *SplitTunnelSites;
 };
 
 class IosController : public QObject

@@ -167,11 +167,8 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
         return ErrorCode::ServerContainerMissingError;
     }
 
-    runScript(credentials,
-              replaceVars(QString("sudo shred %1").arg(tmpFileName), genVarsForScript(credentials, container)));
-
-    runScript(credentials, replaceVars(QString("sudo rm %1").arg(tmpFileName), genVarsForScript(credentials, container)));
-
+    runScript(credentials, 
+              replaceVars(QString("sudo shred -u %1").arg(tmpFileName), genVarsForScript(credentials, container)));
     return e;
 }
 

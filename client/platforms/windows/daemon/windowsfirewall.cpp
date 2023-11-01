@@ -236,6 +236,17 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
     }
   }
 
+  if (!config.m_excludedAddresses.empty()) {
+    for (const QString& i : config.m_excludedAddresses) {
+      logger.debug() << "range: " << i;
+
+      if (!allowTrafficToRange(i, HIGH_WEIGHT,
+                          "Allow Ecxlude route", config.m_serverPublicKey)) {
+        return false;
+      }
+    }
+  }
+
   result = FwpmTransactionCommit0(m_sessionHandle);
   if (result != ERROR_SUCCESS) {
     logger.error() << "FwpmTransactionCommit0 failed with error:" << result;
@@ -411,8 +422,8 @@ bool WindowsFirewall::allowTrafficOfAdapter(int networkAdapter, uint8_t weight,
 }
 
 bool WindowsFirewall::allowTrafficTo(const QHostAddress& targetIP, uint port,
-                                     int weight, const QString& title,
-                                     const QString& peer) {
+                                          int weight, const QString& title,
+                                          const QString& peer) {
   bool isIPv4 = targetIP.protocol() == QAbstractSocket::IPv4Protocol;
   GUID layerOut =
       isIPv4 ? FWPM_LAYER_ALE_AUTH_CONNECT_V4 : FWPM_LAYER_ALE_AUTH_CONNECT_V6;
@@ -468,6 +479,57 @@ bool WindowsFirewall::allowTrafficTo(const QHostAddress& targetIP, uint port,
   if (!enableFilter(&filter, title,
                     description.arg("from").arg(targetIP.toString()).arg(port),
                     peer)) {
+    return false;
+  }
+  return true;
+}
+
+bool WindowsFirewall::allowTrafficToRange(const IPAddress& addr, uint8_t weight,
+                                     const QString& title,
+                                     const QString& peer) {
+  QString description("Allow traffic %1 %2 ");
+
+  auto lower = addr.address();
+  auto upper = addr.broadcastAddress();
+
+  const bool isV4 = addr.type() == QAbstractSocket::IPv4Protocol;
+  const GUID layerKeyOut =
+      isV4 ? FWPM_LAYER_ALE_AUTH_CONNECT_V4 : FWPM_LAYER_ALE_AUTH_CONNECT_V6;
+  const GUID layerKeyIn = isV4 ? FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4
+                               : FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
+
+  // Assemble the Filter base
+  FWPM_FILTER0 filter;
+  memset(&filter, 0, sizeof(filter));
+  filter.action.type = FWP_ACTION_PERMIT;
+  filter.weight.type = FWP_UINT8;
+  filter.weight.uint8 = weight;
+  filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+
+  FWPM_FILTER_CONDITION0 cond[1] = {0};
+  FWP_RANGE0 ipRange;
+  QByteArray lowIpV6Buffer;
+  QByteArray highIpV6Buffer;
+
+  importAddress(lower, ipRange.valueLow, &lowIpV6Buffer);
+  importAddress(upper, ipRange.valueHigh, &highIpV6Buffer);
+
+  cond[0].fieldKey = FWPM_CONDITION_IP_REMOTE_ADDRESS;
+  cond[0].matchType = FWP_MATCH_RANGE;
+  cond[0].conditionValue.type = FWP_RANGE_TYPE;
+  cond[0].conditionValue.rangeValue = &ipRange;
+
+  filter.numFilterConditions = 1;
+  filter.filterCondition = cond;
+
+  filter.layerKey = layerKeyOut;
+  if (!enableFilter(&filter, title, description.arg("to").arg(addr.toString()),
+                    peer)) {
+    return false;
+  }
+  filter.layerKey = layerKeyIn;
+  if (!enableFilter(&filter, title,
+                    description.arg("from").arg(addr.toString()), peer)) {
     return false;
   }
   return true;

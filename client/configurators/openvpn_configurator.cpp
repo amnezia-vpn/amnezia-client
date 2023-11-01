@@ -131,10 +131,13 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
         config.append("block-ipv6\n");
     }
     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        
         // no redirect-gateway
     }
     if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+#ifndef Q_OS_ANDROID    
         config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
+#endif       
         // Prevent ipv6 leak
         config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
         config.append("block-ipv6\n");

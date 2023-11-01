@@ -73,6 +73,7 @@ protected:
 
 signals:
     void defaultContainerChanged();
+    void containersModelUpdated();
 
 private:
     QMap<DockerContainer, QJsonObject> m_containers;

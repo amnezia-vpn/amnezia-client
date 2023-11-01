@@ -697,7 +697,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
-        <translation>На вашем сервере устанавливается DNS-сервис, доступ к нему возможен только через VPN.
+        <translation>На вашем сервере установлен DNS-сервис, доступ к нему возможен только через VPN.
 </translation>
     </message>
     <message>
@@ -1343,7 +1343,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="87"/>
         <source>Clear Amnezia cache</source>
-        <translation>Очистить кэш Amnezia на сервере</translation>
+        <translation>Очистить кэш Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="88"/>
