@@ -193,6 +193,12 @@ bool ServersModel::isDefaultServerConfigContainsAmneziaDns()
     return primaryDns == protocols::dns::amneziaDnsIp;
 }
 
+void ServersModel::updateContainersConfig()
+{
+    auto server = m_settings->server(m_currentlyProcessedServerIndex);
+    m_servers.replace(m_currentlyProcessedServerIndex, server);
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
