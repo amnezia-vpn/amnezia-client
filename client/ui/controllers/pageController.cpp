@@ -167,7 +167,7 @@ void PageController::closeApplication()
 
 bool PageController::checkForUpdates()
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     return false;
 #else
     QString path = qApp->applicationDirPath();
@@ -179,6 +179,15 @@ bool PageController::checkForUpdates()
         path = path.remove("Contents/MacOS");
     }
     path = path + "maintenancetool.app";
+
+    checked = true;
+#endif
+
+#ifdef Q_OS_LINUX
+    if(path.contains("/client/bin")) {
+        path = path.remove("/client/bin");
+    }
+    path = path + "/maintenancetool";
 
     checked = true;
 #endif
