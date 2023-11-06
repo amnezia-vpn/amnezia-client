@@ -214,7 +214,7 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setProgram(PermittedProcess::OpenVPN);
     QStringList arguments({
             "--config", configPath(), "--management", m_managementHost, QString::number(mgmtPort),
-            "--management-client" , "--log", "/Users/nethius/Documents/git/log"
+            "--management-client" /*, "--log", vpnLogFileNamePath */
     });
     m_openVpnProcess->setArguments(arguments);
 
