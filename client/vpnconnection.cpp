@@ -377,7 +377,8 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     // Allow traffic to Amezia DNS
     if (routeMode == Settings::VpnOnlyForwardSites){
-        sitesJsonArray.append(amnezia::protocols::dns::amneziaDnsIp);
+        sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+        sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
     }
 
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
