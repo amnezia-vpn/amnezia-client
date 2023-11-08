@@ -13,14 +13,14 @@
     <AllowSpaceInPath>true</AllowSpaceInPath>
     <AllowNonAsciiCharacters>false</AllowNonAsciiCharacters>
     <ControlScript>controlscript.js</ControlScript>
-    <RepositorySettingsPageVisible>false</RepositorySettingsPageVisible>
+    <RepositorySettingsPageVisible>true</RepositorySettingsPageVisible>
     <DependsOnLocalInstallerBinary>true</DependsOnLocalInstallerBinary>
-    <SupportsModify>false</SupportsModify>
+    <SupportsModify>true</SupportsModify>
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
         <Repository>
-            <Url>https://amneziavpn.org/updates/macos</Url>
-            <Enabled>true</Enabled>
+            <Url>https://updates.amzsvc.com/beta/macos</Url>
+            <Enabled>1</Enabled>
             <DisplayName>AmneziaVPN - repository for macOS</DisplayName>
         </Repository>
     </RemoteRepositories>

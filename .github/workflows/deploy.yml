@@ -1,6 +1,5 @@
 name: 'Deploy workflow'
 
-
 on: [push]
 
 jobs:
@@ -249,12 +248,21 @@ jobs:
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
 
+    - name: 'Upload upacked build to update server'
+#      if: github.ref_name == 'dev'
+      env:
+        MACOS_UNPACKED_BUILD_PATH: deploy/build/installer/amneziavpn-macos-repository
+        AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+      run: aws s3 sync --endpoint-url https://${{ vars.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com ${{ env.MACOS_UNPACKED_BUILD_PATH }} s3://updates/beta/macos --delete
+
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v3
       with:
         name: AmneziaVPN_MacOS_installer
         path: AmneziaVPN.dmg
         retention-days: 7
+
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v3
       with:

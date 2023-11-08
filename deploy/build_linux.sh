@@ -42,6 +42,9 @@ if [ -z "${QT_VERSION+x}" ]; then
   elif [ -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
     QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
   fi
+  
+  QIF_VERSION=4.6
+  QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
@@ -84,5 +87,11 @@ ldd $CQTDEPLOYER_DIR/bin/binarycreator
 cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
 
 $CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
+
+# echo "Generating repository..."
+$QIF_BIN_DIR/repogen -p $BUILD_DIR/installer/packages $BUILD_DIR/installer/amneziavpn-linux-repository
+
+# echo "Building online installer..."
+$CQTDEPLOYER_DIR/binarycreator.sh --online-only -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages $PROJECT_DIR/deploy/AmneziaVPN_Linux_Online_Installer
 
 
