@@ -25,8 +25,6 @@ public:
     static QString defaultConfigFileName();
     static QString defaultConfigPath();
 
-protected slots:
-    void onReadyReadDataFromManagementServer();
 
 private:
     QString configPath() const;
@@ -34,6 +32,7 @@ private:
     bool sendTermSignal();
     void readOpenVpnConfiguration(const QJsonObject &configuration);
     void disconnectFromManagementServer();
+    void handle_cli_message(QString message);
     void killOpenVpnProcess();
     void sendByteCount();
     void sendInitialData();
@@ -42,6 +41,7 @@ private:
     const QString m_managementHost = "127.0.0.1";
     const unsigned int m_managementPort = 57775;
 
+    QHash<QRemoteObjectPendingCallWatcher*, QTimer*> m_watchers;
     ManagementServer m_managementServer;
     QString m_configFileName;
     QTemporaryFile m_configFile;
