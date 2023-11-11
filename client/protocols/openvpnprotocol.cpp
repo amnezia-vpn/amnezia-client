@@ -84,12 +84,12 @@ void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
             QJsonObject cloakConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::Cloak)).toObject();
             cloakConfig["NumConn"] = 1;
             cloakConfig["ProxyMethod"] = "openvpn";
-            if (cloakConfig.contains("port")){
+            if (cloakConfig.contains("port")) {
                 int portValue = cloakConfig.value("port").toInt();
                 cloakConfig.remove("port");
                 cloakConfig["RemotePort"] = portValue;
             }
-            if (cloakConfig.contains("remote")){
+            if (cloakConfig.contains("remote")) {
                 QString hostValue = cloakConfig.value("remote").toString();
                 cloakConfig.remove("remote");
                 cloakConfig["RemoteHost"] = hostValue;

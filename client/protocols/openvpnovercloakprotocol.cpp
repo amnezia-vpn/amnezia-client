@@ -94,16 +94,6 @@ void OpenVpnOverCloakProtocol::stop()
 
     qDebug() << "OpenVpnOverCloakProtocol::stop()";
 
-#ifdef Q_OS_WIN
-    Utils::signalCtrl(m_ckProcess.processId(), CTRL_C_EVENT);
-#endif
-
-    m_ckProcess.terminate();
-
-    if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
-        QThread::msleep(1000);
-        Utils::killProcessByName(Utils::executable("ck-client", false));
-    }
 }
 
 QString OpenVpnOverCloakProtocol::cloakExecPath()
