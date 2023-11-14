@@ -12,6 +12,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Parcel
 import androidx.core.app.NotificationCompat
+import org.amnezia.vpn.shadowsocks.core.R
 import org.json.JSONObject
 
 object NotificationUtil {
@@ -102,7 +103,7 @@ object NotificationUtil {
         val pendingIntent = PendingIntent.getActivity(service, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         // Build our notification
         sNotificationBuilder?.let {
-            it.setSmallIcon(org.amnezia.vpn.R.drawable.ic_amnezia_round)
+            it.setSmallIcon(R.drawable.ic_amnezia_round)
                 .setContentTitle(header)
                 .setContentText(message)
                 .setOnlyAlertOnce(true)

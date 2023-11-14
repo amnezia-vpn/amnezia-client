@@ -65,6 +65,7 @@ class VpnRequestActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.vpn_permission_denied, Toast.LENGTH_LONG).show()
         }
         finish()
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {

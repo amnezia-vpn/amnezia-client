@@ -33,6 +33,7 @@ import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import kotlinx.coroutines.channels.trySendBlocking
 
 abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name) {
     private val localSocket = LocalSocket().apply {
@@ -60,7 +61,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 }
             }
         }
-        closeChannel.sendBlocking(Unit)
+        closeChannel.trySendBlocking(Unit)
     }
 
     open fun shutdown(scope: CoroutineScope) {

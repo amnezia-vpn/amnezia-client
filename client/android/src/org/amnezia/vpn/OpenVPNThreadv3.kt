@@ -83,29 +83,32 @@ class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runna
         if (jsonVpnConfig.getString("protocol") == "cloak") {
             val cloakConfigJson: JSONObject = jsonVpnConfig.getJSONObject("cloak_config_data")
 
-            if (cloakConfigJson.keySet().contains("NumConn")) {
+            if (cloakConfigJson.has("NumConn")) {
                 cloakConfigJson.put("NumConn", 1)
             }
 
-            if (cloakConfigJson.keySet().contains("ProxyMethod")) {
+            if (cloakConfigJson.has("ProxyMethod")) {
                 cloakConfigJson.put("ProxyMethod", "openvpn")
             }
 
-            if (cloakConfigJson.keySet().contains("port")) {
+            if (cloakConfigJson.has("port")) {
                 val portValue = cloakConfigJson.get("port")
                 cloakConfigJson.remove("port")
                 cloakConfigJson.put("RemotePort", portValue)
             }
 
-            if (cloakConfigJson.keySet().contains("remote")) {
+            if (cloakConfigJson.has("remote")) {
                 val hostValue = cloakConfigJson.get("remote")
                 cloakConfigJson.remove("remote")
                 cloakConfigJson.put("RemoteHost", hostValue)
             }
 
-            val cloakConfig = Base64.getEncoder().encodeToString(
-                jsonVpnConfig.getJSONObject("cloak_config_data").toString().toByteArray()
-            )
+            val cloakConfigData = jsonVpnConfig.getJSONObject("cloak_config_data").toString().toByteArray()
+            val cloakConfig = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Base64.getEncoder().encodeToString(cloakConfigData)
+            } else {
+                android.util.Base64.encodeToString(cloakConfigData, android.util.Base64.DEFAULT)
+            }
 
             resultingConfig.append("\n<cloak>\n")
             resultingConfig.append(cloakConfig)

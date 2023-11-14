@@ -28,6 +28,7 @@ import kotlinx.coroutines.channels.sendBlocking
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.*
+import kotlinx.coroutines.channels.trySendBlocking
 
 class ChannelMonitor : Thread("ChannelMonitor") {
     private data class Registration(val channel: SelectableChannel,
@@ -52,7 +53,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
             registerInternal(this, SelectionKey.OP_READ) {
                 val junk = ByteBuffer.allocateDirect(1)
                 while (read(junk) > 0) {
-                    pendingRegistrations.poll()!!.apply {
+                    pendingRegistrations.tryReceive().getOrNull()!!.apply {
                         try {
                             result.complete(registerInternal(channel, ops, listener))
                         } catch (e: Exception) {
@@ -112,7 +113,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
                 (key.attachment() as (SelectionKey) -> Unit)(key)
             }
         }
-        closeChannel.sendBlocking(Unit)
+        closeChannel.trySendBlocking(Unit)
     }
 
     fun close(scope: CoroutineScope) {

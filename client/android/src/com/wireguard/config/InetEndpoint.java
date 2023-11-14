@@ -31,7 +31,7 @@ public final class InetEndpoint {
   private final boolean isResolved;
   private final Object lock = new Object();
   private final int port;
-  private Instant lastResolution = Instant.EPOCH;
+  private long lastResolution;
   @Nullable private InetEndpoint resolved;
 
   private InetEndpoint(final String host, final boolean isResolved, final int port) {
@@ -89,7 +89,7 @@ public final class InetEndpoint {
       return Optional.of(this);
     synchronized (lock) {
       // TODO(zx2c4): Implement a real timeout mechanism using DNS TTL
-      if (Duration.between(lastResolution, Instant.now()).toMinutes() > 1) {
+      if (System.currentTimeMillis() - lastResolution > 60000L) {
         try {
           // Prefer v4 endpoints over v6 to work around DNS64 and IPv6 NAT issues.
           final InetAddress[] candidates = InetAddress.getAllByName(host);
@@ -101,7 +101,7 @@ public final class InetEndpoint {
             }
           }
           resolved = new InetEndpoint(address.getHostAddress(), true, port);
-          lastResolution = Instant.now();
+          lastResolution = System.currentTimeMillis();
         } catch (final UnknownHostException e) {
           resolved = null;
         }
