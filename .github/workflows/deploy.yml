@@ -273,21 +273,10 @@ jobs:
     name: 'Build-Android'
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        include:
-        - abi: 'x86_64'
-          qt_arch: 'android_x86_64'
-        - abi: 'x86'
-          qt_arch: 'android_x86'
-        - abi: 'armeabi-v7a'
-          qt_arch: 'android_armv7'
-        - abi: 'arm64-v8a'
-          qt_arch: 'android_arm64_v8a'
-
     env:
-      QT_VERSION: 6.5.2
-      ANDROID_BUILD_PLATFORM: android-33
+      ANDROID_BUILD_PLATFORM: android-34
+      QT_VERSION: 6.5.3
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
 
     steps:
     - name: 'Install desktop Qt'
@@ -297,29 +286,58 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install android Qt'
+    - name: 'Install android_x86_64 Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'android'
-        arch: ${{ matrix.qt_arch }}
-        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        arch: 'android_x86_64'
+        modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_x86 Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_armv7 Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_armv7'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_arm64_v8a Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Grant execute permission for qt-cmake'
       shell: bash
       run: |
-        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/${{ matrix.qt_arch }}/bin/qt-cmake
+        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
 
     - name: 'Get sources'
       uses: actions/checkout@v3
@@ -333,14 +351,14 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '11'
+        java-version: '17'
         cache: 'gradle'
 
     - name: 'Setup Android NDK'
       id: setup-ndk
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: 'r25c'
+        ndk-version: 'r26b'
         local-cache: 'true'
 
     - name: 'Decode keystore secret to file'
@@ -354,16 +372,36 @@ jobs:
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
-        QT_ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --apk ${{ matrix.abi }} --platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
-    - name: 'Upload apk'
+    - name: 'Upload x86_64 apk'
       uses: actions/upload-artifact@v3
       with:
-        name: AmneziaVPN-android-${{ matrix.abi }}
-        path: deploy/build/AmneziaVPN-${{ matrix.abi }}-release-signed.apk
+        name: AmneziaVPN-android-x86_64
+        path: deploy/build/AmneziaVPN-x86_64-release.apk
+        retention-days: 7
+
+    - name: 'Upload x86 apk'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN-android-x86
+        path: deploy/build/AmneziaVPN-x86-release.apk
+        retention-days: 7
+
+    - name: 'Upload arm64-v8a apk'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN-android-arm64-v8a
+        path: deploy/build/AmneziaVPN-arm64-v8a-release.apk
+        retention-days: 7
+
+    - name: 'Upload armeabi-v7a apk'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN-android-armeabi-v7a
+        path: deploy/build/AmneziaVPN-armeabi-v7a-release.apk
         retention-days: 7
