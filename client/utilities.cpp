@@ -232,7 +232,7 @@ QString Utils::openVpnExecPath()
     // path for client and service.
     return Utils::executable("../../client/bin/ovpncli", true);
 #else
-    return Utils::executable("ovpncli", true);
+    return Utils::executable("/ovpncli", true);
 #endif
 }
 
