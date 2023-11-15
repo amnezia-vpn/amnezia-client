@@ -36,7 +36,7 @@ enum ErrorCode
     ServerPacketManagerError,
 
     // Ssh connection errors
-    SshRequsetDeniedError, SshInterruptedError, SshInternalError,
+    SshRequestDeniedError, SshInterruptedError, SshInternalError,
     SshPrivateKeyError, SshPrivateKeyFormatError, SshTimeoutError,
 
     // Ssh sftp errors
