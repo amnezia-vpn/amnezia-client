@@ -24,19 +24,19 @@ import com.wireguard.android.backend.GoBackend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.amnezia.vpn.shadowsocks.core.Core
-import org.amnezia.vpn.shadowsocks.core.R
-import org.amnezia.vpn.shadowsocks.core.VpnRequestActivity
-import org.amnezia.vpn.shadowsocks.core.acl.Acl
-import org.amnezia.vpn.shadowsocks.core.bg.*
-import org.amnezia.vpn.shadowsocks.core.database.Profile
-import org.amnezia.vpn.shadowsocks.core.database.ProfileManager
-import org.amnezia.vpn.shadowsocks.core.net.ConcurrentLocalSocketListener
-import org.amnezia.vpn.shadowsocks.core.net.DefaultNetworkListener
-import org.amnezia.vpn.shadowsocks.core.net.Subnet
-import org.amnezia.vpn.shadowsocks.core.preference.DataStore
-import org.amnezia.vpn.shadowsocks.core.utils.Key.modeVpn
-import org.amnezia.vpn.shadowsocks.core.utils.printLog
+// import org.amnezia.vpn.shadowsocks.core.Core
+// import org.amnezia.vpn.shadowsocks.core.R
+// import org.amnezia.vpn.shadowsocks.core.VpnRequestActivity
+// import org.amnezia.vpn.shadowsocks.core.acl.Acl
+// import org.amnezia.vpn.shadowsocks.core.bg.*
+// import org.amnezia.vpn.shadowsocks.core.database.Profile
+// import org.amnezia.vpn.shadowsocks.core.database.ProfileManager
+// import org.amnezia.vpn.shadowsocks.core.net.ConcurrentLocalSocketListener
+// import org.amnezia.vpn.shadowsocks.core.net.DefaultNetworkListener
+// import org.amnezia.vpn.shadowsocks.core.net.Subnet
+// import org.amnezia.vpn.shadowsocks.core.preference.DataStore
+// import org.amnezia.vpn.shadowsocks.core.utils.Key.modeVpn
+// import org.amnezia.vpn.shadowsocks.core.utils.printLog
 import org.json.JSONObject
 import java.io.Closeable
 import java.io.File
@@ -46,16 +46,16 @@ import java.lang.Exception
 import android.net.VpnService as BaseVpnService
 
 
-class VPNService : BaseVpnService(), LocalDnsService.Interface {
+class VPNService : BaseVpnService()/* , LocalDnsService.Interface */ {
 
-    override val data = BaseService.Data(this)
+    // override val data = BaseService.Data(this)
     
-    override val tag: String get() = "VPNService"
+    /* override */ val tag: String get() = "VPNService"
 //    override fun createNotification(profileName: String): ServiceNotification =
 //        ServiceNotification(this, profileName, "service-vpn")
 
     private var conn: ParcelFileDescriptor? = null
-    private var worker: ProtectWorker? = null
+    // private var worker: ProtectWorker? = null
     private var active = false
     private var metered = false
     private var mNetworkState = NetworkState(this)
@@ -77,7 +77,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
     var runnable: Runnable = object : Runnable {
         override fun run() {
             if (mProtocol.equals("shadowsocks", true)) {
-                Log.e(tag, "run:  -----------------: ${data.state}")
+                /* Log.e(tag, "run:  -----------------: ${data.state}")
                 when (data.state) {
                     BaseService.State.Connected -> {
                         currentTunnelHandle = 1
@@ -90,7 +90,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                     else -> {
 
                     }
-                }
+                } */
             }
             handler.postDelayed(this, 1000L) //wait 4 sec and run again
         }
@@ -181,11 +181,11 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
 
         when (mProtocol) {
             "shadowsocks" -> {
-                when (intent.action) {
+                /* when (intent.action) {
                     SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
                     else -> super<LocalDnsService.Interface>.onBind(intent)
                 }
-                startTest()
+                startTest() */
             }
             else -> {
                 init()
@@ -231,7 +231,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             startOpenVpn()
             mNetworkState.bindNetworkListener()
         }
-        if (mProtocol.equals("shadowsocks", true)) {
+        /* if (mProtocol.equals("shadowsocks", true)) {
             if (DataStore.serviceMode == modeVpn) {
                 if (prepare(this) != null) {
                     startActivity(
@@ -248,7 +248,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 }
             }
             stopRunner()
-        }
+        } */
         return START_REDELIVER_INTENT
     }
 
@@ -385,10 +385,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             "awg" -> {
                 startWireGuard("awg")
             }
-            "shadowsocks" -> {
+            /* "shadowsocks" -> {
                 startShadowsocks()
                 startTest()
-            }
+            } */
             else -> {
                 Log.e(tag, "No protocol")
                 return 0
@@ -469,10 +469,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                 ovpnTurnOff()
                 mNetworkState.unBindNetworkListener()
             }
-            "shadowsocks" -> {
+            /* "shadowsocks" -> {
                 stopRunner(false)
                 stopTest()
-            }
+            } */
             else -> {
                 Log.e(tag, "No protocol")
             }
@@ -679,7 +679,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         return mConfig!!
     }
 
-    private fun startShadowsocks() {
+   /*  private fun startShadowsocks() {
         Log.e(tag, "startShadowsocks method enters")
         if (mConfig != null) {
             try {
@@ -768,7 +768,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         } else {
             Log.e(tag, "Invalid config file!!")
         }
-    }
+    } */
 
     private fun startOpenVpn() {
         if (isUp || mOpenVPNThreadv3 != null) {
@@ -821,7 +821,7 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             .apply()
     }
 
-    override suspend fun startProcesses() {
+   /*  override suspend fun startProcesses() {
         worker = ProtectWorker().apply { start() }
         try {
             Log.i(tag, "startProcesses: ------------------1")
@@ -832,9 +832,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
+    } */
 
-    override fun killProcesses(scope: CoroutineScope) {
+   /*  override fun killProcesses(scope: CoroutineScope) {
         super.killProcesses(scope)
         active = false
         scope.launch { DefaultNetworkListener.stop(this) }
@@ -842,9 +842,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         worker = null
         conn?.close()
         conn = null
-    }
+    } */
 
-    private suspend fun startVpn(): FileDescriptor {
+    /* private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         Log.i(tag, "startVpn: -----------------------1")
         val builder = Builder()
@@ -925,9 +925,9 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
         })
         Log.i(tag, "startVpn: -----------------------13")
         return conn.fileDescriptor
-    }
+    } */
 
-    private suspend fun sendFd(fd: FileDescriptor) {
+   /*  private suspend fun sendFd(fd: FileDescriptor) {
         var tries = 0
         val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
         while (true) try {
@@ -947,10 +947,10 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
             if (tries > 5) throw e
             tries += 1
         }
-    }
+    } */
 
 
-    private inner class ProtectWorker : ConcurrentLocalSocketListener(
+    /* private inner class ProtectWorker : ConcurrentLocalSocketListener(
         "ShadowsocksVpnThread",
         File(Core.deviceStorage.noBackupFilesDir, "protect_path")
     ) {
@@ -970,11 +970,11 @@ class VPNService : BaseVpnService(), LocalDnsService.Interface {
                     }) 0 else 1)
             }
         }
-    }
+    } */
 
-    inner class NullConnectionException : NullPointerException() {
+   /*  inner class NullConnectionException : NullPointerException() {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
-    }
+    } */
 
     class CloseableFd(val fd: FileDescriptor) : Closeable {
         override fun close() = Os.close(fd)

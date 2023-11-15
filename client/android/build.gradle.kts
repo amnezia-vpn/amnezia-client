@@ -86,7 +86,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
-    implementation(project(":shadowsocks"))
     // todo: remove after finish refactoring
     implementation(libs.androidx.constraintlayout)
 }

@@ -12,7 +12,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Parcel
 import androidx.core.app.NotificationCompat
-import org.amnezia.vpn.shadowsocks.core.R
 import org.json.JSONObject
 
 object NotificationUtil {
