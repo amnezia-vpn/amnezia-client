@@ -359,7 +359,6 @@ jobs:
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: 'r26b'
-        local-cache: 'true'
 
     - name: 'Decode keystore secret to file'
       env:
