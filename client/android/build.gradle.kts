@@ -11,7 +11,6 @@ kotlin {
 // get values from gradle or local properties
 val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
-val qtAndroidDir: String by gradleProperties
 
 android {
     namespace = "org.amnezia.vpn"
@@ -42,8 +41,9 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("AndroidManifest.xml")
-            java.setSrcDirs(listOf("$qtAndroidDir/src", "src"))
-            res.setSrcDirs(listOf("$qtAndroidDir/res", "res"))
+            java.setSrcDirs(listOf("src"))
+            res.setSrcDirs(listOf("res"))
+            // androyddeployqt creates the folders below
             assets.setSrcDirs(listOf("assets"))
             jniLibs.setSrcDirs(listOf("libs"))
         }
@@ -80,6 +80,7 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+    implementation(project(":qt"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.security.crypto)
