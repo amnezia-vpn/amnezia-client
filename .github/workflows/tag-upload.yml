@@ -1,0 +1,64 @@
+name: 'Upload a new version'
+
+on:
+  push:
+    tags:
+    - '[0-9]+.[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    name: upload
+    steps:
+      - name: Checkout CMakeLists.txt
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          sparse-checkout: |
+            CMakeLists.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Verify git tag
+        run: |
+          GIT_TAG=${{ github.ref_name }}
+          CMAKE_TAG=$(grep 'project.*VERSION' CMakeLists.txt | sed -E 's/.* ([0-9]+.[0-9]+.[0-9]+.[0-9]+)$/\1/')
+
+          if [[ "$GIT_TAG" == "$CMAKE_TAG" ]]; then
+            echo "Git tag ($GIT_TAG) and version in CMakeLists.txt ($CMAKE_TAG) are the same. Continuing..."
+          else
+            echo "Git tag ($GIT_TAG) and version in CMakeLists.txt ($CMAKE_TAG) are not the same! Cancelling..."
+            exit 1
+          fi
+
+      - name: Download artifacts from the "${{ github.ref_name }}" tag
+        uses: robinraju/release-downloader@v1.8
+        with:
+          tag: ${{ github.ref_name }}
+          fileName: "AmneziaVPN_(Linux_|)${{ github.ref_name }}*"
+          out-file-path: ${{ github.ref_name }}
+
+      - name: Upload beta version
+        uses: jakejarvis/s3-sync-action@master
+        if: contains(github.event.base_ref, 'dev')
+        with:
+          args: --include "AmneziaVPN*" --delete
+        env:
+          AWS_S3_BUCKET: updates
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_S3_ENDPOINT: https://${{ vars.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          SOURCE_DIR: ${{ github.ref_name }}
+          DEST_DIR: beta/${{ github.ref_name }}
+
+      - name: Upload stable version
+        uses: jakejarvis/s3-sync-action@master
+        if: contains(github.event.base_ref, 'master')
+        with:
+          args: --include "AmneziaVPN*" --delete
+        env:
+          AWS_S3_BUCKET: updates
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_S3_ENDPOINT: https://${{ vars.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          SOURCE_DIR: ${{ github.ref_name }}
+          DEST_DIR: stable/${{ github.ref_name }}

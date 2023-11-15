@@ -1,7 +1,12 @@
 name: 'Deploy workflow'
 
+on:
+  push:
+    branches:
+      - '**'
 
-on: [push]
+env:
+  QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
 jobs:
   Build-Linux-Ubuntu:
@@ -25,7 +30,7 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
       uses: actions/checkout@v3
@@ -89,7 +94,7 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
@@ -119,15 +124,14 @@ jobs:
 
 # ------------------------------------------------------
 
-  Build-IOS:
-    name: 'Build-IOS'
+  Build-iOS:
+    name: 'Build-iOS'
     runs-on: macos-12
 
     env:
       QT_VERSION: 6.5.2
 
     steps:
-    # Just select XCode
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -143,6 +147,7 @@ jobs:
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install iOS Qt'
       uses: jurplel/install-qt-action@v3
@@ -154,7 +159,7 @@ jobs:
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install go'
       uses: actions/setup-go@v3
@@ -174,7 +179,7 @@ jobs:
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: Install dependencies
+    - name: 'Install dependencies'
       run: pip install jsonschema jinja2
 
     - name: 'Build project'
@@ -232,7 +237,7 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
       uses: actions/checkout@v3
@@ -296,7 +301,7 @@ jobs:
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android Qt'
       uses: jurplel/install-qt-action@v3
@@ -309,7 +314,7 @@ jobs:
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
-        extra: '--external 7z'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Grant execute permission for qt-cmake'
       shell: bash
