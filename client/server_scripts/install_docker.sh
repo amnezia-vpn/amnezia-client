@@ -8,12 +8,11 @@ if ! command -v sudo > /dev/null 2>&1; then $pm update -yq; $pm install -yq sudo
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm install -yq psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm install -yq lsof; fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm update -yq; sudo $pm install -yq $docker_pkg;\
-  if [ "$dist" = "fedora" ] || [ "$dist" = "centos" ] || [ "$dist" = "debian" ]; then sudo systemctl enable docker && sudo systemctl start docker; fi;\
+  if ! [ "$dist" = "debian" ]; then sudo systemctl enable --now docker; fi;\
+  if [ "$dist" = "centos" ]; then sudo sh -c "echo -e '[main]\nenabled=0' >> /etc/yum/pluginconf.d/subscription-manager.conf"; fi;\
 fi;\
-if [ "$dist" = "debian" ]; then \
-  docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
-  if [ -z "$docker_service" ]; then sudo $pm update -yq; sudo $pm install -yq curl $docker_pkg; fi;\
-  sleep 3 && sudo systemctl start docker && sleep 3;\
-fi;\
-if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker";exit 1;fi;\
+docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
+if [ -z "$docker_service" ]; then sudo $pm update -y -q; sudo $pm install -y -q $docker_pkg; fi;\
+sleep 3 && sudo systemctl start docker && sleep 3;\
+if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 docker --version
