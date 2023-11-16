@@ -4,6 +4,9 @@ set(APP_ANDROID_MIN_SDK 24)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
+# set QTP0002 policy: target properties that specify Android-specific paths may contain generator expressions
+qt_policy(SET QTP0002 NEW)
+
 set_target_properties(${PROJECT} PROPERTIES
     QT_ANDROID_VERSION_NAME ${CMAKE_PROJECT_VERSION}
     QT_ANDROID_VERSION_CODE ${APP_ANDROID_VERSION_CODE}
