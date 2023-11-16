@@ -1,72 +1,33 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.amnezia.vpn
 
-import android.content.Context
-import java.io.File
-import java.time.LocalDateTime
-import android.util.Log as nativeLog
+import android.util.Log as NativeLog
 
-/*
- * Drop in replacement for android.util.Log 
- * Also stores a copy of all logs in tmp/amnezia_daemon_logs.txt
-*/
 class Log {
-    val LOG_MAX_FILE_SIZE = 204800
-    private var file: File
-    private constructor(context: Context) {
-        val tempDIR = context.cacheDir
-        file = File(tempDIR, "amnezia_daemon_logs.txt")
-        if (file.length() > LOG_MAX_FILE_SIZE) {
-            file.writeText("")
-        }
-    }
-
     companion object {
-        var instance: Log? = null
-        fun init(ctx: Context) {
-            if (instance == null) {
-                instance = Log(ctx)
-            }
-        }
-        fun i(tag: String, message: String) {
-            instance?.write("[info] - ($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
-            nativeLog.i(tag, message)
-        }
-        fun v(tag: String, message: String) {
-            instance?.write("($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
-            nativeLog.v(tag, message)
-        }
-        fun e(tag: String, message: String) {
-            instance?.write("[error] - ($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
-            nativeLog.e(tag, message)
-        }
-        // Only Prints && Logs when in debug, noop in release.
-        fun sensitive(tag: String, message: String?) {
-            if (!BuildConfig.DEBUG) { return; }
-            if (message == null) { return; }
-            e(tag, message)
-        }
+        fun v(tag: String, msg: String) = debugLog(tag, msg, NativeLog::v)
 
-        fun getContent(): String? {
-            return try {
-                instance?.file?.readText()
-            } catch (e: Exception) {
-                "=== Failed to read Daemon Logs === \n ${e.localizedMessage} "
-            }
-        }
+        fun d(tag: String, msg: String) = debugLog(tag, msg, NativeLog::d)
 
-        fun clearFile() {
-            instance?.file?.writeText("")
+        fun i(tag: String, msg: String) = log(tag, msg, NativeLog::i)
+
+        fun w(tag: String, msg: String) = log(tag, msg, NativeLog::w)
+
+        fun e(tag: String, msg: String) = log(tag, msg, NativeLog::e)
+
+        fun v(tag: String, msg: Any?) = v(tag, msg.toString())
+
+        fun d(tag: String, msg: Any?) = d(tag, msg.toString())
+
+        fun i(tag: String, msg: Any?) = i(tag, msg.toString())
+
+        fun w(tag: String, msg: Any?) = w(tag, msg.toString())
+
+        fun e(tag: String, msg: Any?) = e(tag, msg.toString())
+
+        private inline fun log(tag: String, msg: String, delegate: (String, String) -> Unit) = delegate(tag, msg)
+
+        private inline fun debugLog(tag: String, msg: String, delegate: (String, String) -> Unit) {
+            if (BuildConfig.DEBUG) delegate(tag, msg)
         }
-    }
-    private fun write(message: String) {
-        //LocalDateTime.now()
-        //file.appendText("[${LocalDateTime.now()}] $message  \n")
     }
 }

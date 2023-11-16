@@ -119,12 +119,12 @@ class VPNServiceBinder(service: VPNService) : Binder() {
 
             ACTIONS.requestGetLog -> {
                 // Grabs all the Logs and dispatch new Log Event
-                dispatchEvent(EVENTS.backendLogs, Log.getContent())
+                // dispatchEvent(EVENTS.backendLogs, Log.getContent())
                 return true
             }
 
             ACTIONS.requestCleanupLog -> {
-                Log.clearFile()
+                // Log.clearFile()
                 return true
             }
 

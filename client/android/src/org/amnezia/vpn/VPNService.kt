@@ -144,7 +144,7 @@ class VPNService : BaseVpnService()/* , LocalDnsService.Interface */ {
         if (mAlreadyInitialised) {
             return
         }
-        Log.init(this)
+        // Log.init(this)
         SharedLibraryLoader.loadSharedLibrary(this, "wg-go")
         SharedLibraryLoader.loadSharedLibrary(this, "ovpn3")
         Log.i(tag, "Loaded libs")
