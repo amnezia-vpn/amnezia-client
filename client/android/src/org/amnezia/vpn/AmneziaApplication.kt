@@ -1,4 +1,4 @@
-package org.amnezia.vpn.qt
+package org.amnezia.vpn
 
 import android.content.res.Configuration
 // import org.amnezia.vpn.shadowsocks.core.Core
@@ -7,7 +7,7 @@ import org.qtproject.qt.android.bindings.QtActivity
 import org.qtproject.qt.android.bindings.QtApplication
 import android.app.Application
 
-class AmneziaApp: org.qtproject.qt.android.bindings.QtApplication() {
+class AmneziaApplication: org.qtproject.qt.android.bindings.QtApplication() {
 
     override fun onCreate() {
         super.onCreate()

@@ -46,11 +46,11 @@ import java.lang.Exception
 import android.net.VpnService as BaseVpnService
 
 
-class VPNService : BaseVpnService()/* , LocalDnsService.Interface */ {
+class AmneziaVpnService : BaseVpnService()/* , LocalDnsService.Interface */ {
 
     // override val data = BaseService.Data(this)
     
-    /* override */ val tag: String get() = "VPNService"
+    /* override */ val tag: String get() = "AmneziaVpnService"
 //    override fun createNotification(profileName: String): ServiceNotification =
 //        ServiceNotification(this, profileName, "service-vpn")
 
@@ -119,7 +119,7 @@ class VPNService : BaseVpnService()/* , LocalDnsService.Interface */ {
         @JvmStatic
         fun startService(c: Context) {
             c.applicationContext.startService(
-                Intent(c.applicationContext, VPNService::class.java).apply {
+                Intent(c.applicationContext, AmneziaVpnService::class.java).apply {
                     putExtra("startOnly", true)
                 })
         }

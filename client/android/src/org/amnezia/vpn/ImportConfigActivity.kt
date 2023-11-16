@@ -1,4 +1,4 @@
-package org.amnezia.vpn.qt
+package org.amnezia.vpn
 
 import android.Manifest
 import android.app.Activity
@@ -14,10 +14,7 @@ import androidx.core.content.ContextCompat
 
 import java.io.*
 
-import org.amnezia.vpn.R
-
-
-const val INTENT_ACTION_IMPORT_CONFIG = "org.amnezia.vpn.qt.IMPORT_CONFIG"
+const val INTENT_ACTION_IMPORT_CONFIG = "org.amnezia.vpn.IMPORT_CONFIG"
 
 class ImportConfigActivity : Activity() {
 
@@ -40,7 +37,7 @@ class ImportConfigActivity : Activity() {
             return
         }
 
-        val activityIntent = Intent(applicationContext, VPNActivity::class.java)
+        val activityIntent = Intent(applicationContext, AmneziaActivity::class.java)
         activityIntent.action = INTENT_ACTION_IMPORT_CONFIG
         activityIntent.addCategory("android.intent.category.DEFAULT")
         activityIntent.putExtra("CONFIG", config)

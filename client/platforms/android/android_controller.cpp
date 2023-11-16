@@ -21,7 +21,7 @@ namespace
 {
     AndroidController *s_instance = nullptr;
 
-    constexpr auto PERMISSIONHELPER_CLASS = "org/amnezia/vpn/qt/VPNPermissionHelper";
+    constexpr auto PERMISSIONHELPER_CLASS = "org/amnezia/vpn/VPNPermissionHelper";
 } // namespace
 
 AndroidController::AndroidController() : QObject()

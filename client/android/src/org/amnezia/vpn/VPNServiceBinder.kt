@@ -11,7 +11,7 @@ import com.wireguard.config.*
 import org.json.JSONObject
 import java.lang.Exception
 
-class VPNServiceBinder(service: VPNService) : Binder() {
+class VPNServiceBinder(service: AmneziaVpnService) : Binder() {
 
     private val mService = service
     private val tag = "VPNServiceBinder"

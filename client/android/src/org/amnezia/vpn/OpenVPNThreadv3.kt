@@ -32,10 +32,10 @@ import net.openvpn.ovpn3.ClientAPI_TransportStats
 
 import java.lang.StringBuilder
 
-class OpenVPNThreadv3(var service: VPNService): ClientAPI_OpenVPNClient(), Runnable {
+class OpenVPNThreadv3(var service: AmneziaVpnService): ClientAPI_OpenVPNClient(), Runnable {
     private val tag = "OpenVPNThreadv3"
     private var mAlreadyInitialised = false
-    private var mService: VPNService = service
+    private var mService: AmneziaVpnService = service
 
     private var bytesInIndex = -1
     private var bytesOutIndex = -1

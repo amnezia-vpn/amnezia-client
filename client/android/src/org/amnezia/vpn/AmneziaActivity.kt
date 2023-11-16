@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.amnezia.vpn.qt;
+package org.amnezia.vpn
 
 import android.Manifest
 import android.content.ComponentName
@@ -19,7 +19,6 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import org.amnezia.vpn.VPNService
 import org.amnezia.vpn.VPNServiceBinder
 import org.amnezia.vpn.IMPORT_COMMAND_CODE
 import org.amnezia.vpn.IMPORT_ACTION_CODE
@@ -27,7 +26,7 @@ import org.amnezia.vpn.IMPORT_CONFIG_KEY
 import org.qtproject.qt.android.bindings.QtActivity
 import java.io.*
 
-class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
+class AmneziaActivity : org.qtproject.qt.android.bindings.QtActivity() {
 
     private var configString: String? = null
     private var vpnServiceBinder: IBinder? = null
@@ -40,7 +39,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             }
         }
 
-    private val TAG = "VPNActivity"
+    private val TAG = "AmneziaActivity"
 
     private val CAMERA_ACTION_CODE = 101
     private val CREATE_FILE_ACTION_CODE = 102
@@ -50,26 +49,26 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
     private val delayedCommands: ArrayList<Pair<Int, String>> = ArrayList()
 
     companion object {
-        private lateinit var instance: VPNActivity
+        private lateinit var instance: AmneziaActivity
 
-        @JvmStatic fun getInstance(): VPNActivity {
+        @JvmStatic fun getInstance(): AmneziaActivity {
             return instance
         }
 
         @JvmStatic fun connectService() {
-            VPNActivity.getInstance().initServiceConnection()
+            getInstance().initServiceConnection()
         }
 
         @JvmStatic fun startQrCodeReader() {
-            VPNActivity.getInstance().startQrCodeActivity()
+            getInstance().startQrCodeActivity()
         }
 
         @JvmStatic fun sendToService(actionCode: Int, body: String) {
-            VPNActivity.getInstance().dispatchParcel(actionCode, body)
+            getInstance().dispatchParcel(actionCode, body)
         }
 
         @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
-            VPNActivity.getInstance().saveFile(fileContent, suggestedName)
+            getInstance().saveFile(fileContent, suggestedName)
         }
     }
 
@@ -81,7 +80,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
         val newIntent = intent
         val newIntentAction: String? = newIntent.action
 
-        if (newIntent != null && newIntentAction != null && newIntentAction == "org.amnezia.vpn.qt.IMPORT_CONFIG") {
+        if (newIntent != null && newIntentAction != null && newIntentAction == "org.amnezia.vpn.IMPORT_CONFIG") {
             configString = newIntent.getStringExtra("CONFIG")
         }
     }
@@ -232,7 +231,7 @@ class VPNActivity : org.qtproject.qt.android.bindings.QtActivity() {
             return
         }
 
-        bindService(Intent(this, VPNService::class.java), connection, Context.BIND_AUTO_CREATE)
+        bindService(Intent(this, AmneziaVpnService::class.java), connection, Context.BIND_AUTO_CREATE)
     }
 
     // TODO: Move all ipc codes into a shared lib.

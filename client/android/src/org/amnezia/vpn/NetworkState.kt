@@ -47,9 +47,8 @@ import java.io.FileDescriptor
 import java.io.IOException
 import java.lang.Exception
 
-
-class NetworkState(var service: VPNService)  {
-    private var mService: VPNService = service
+class NetworkState(var service: AmneziaVpnService)  {
+    private var mService: AmneziaVpnService = service
     var mCurrentContext: Context = service
     private val tag = "NetworkState"
     private var active = false

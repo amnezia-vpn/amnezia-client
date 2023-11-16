@@ -15,7 +15,7 @@
 namespace
 {
     AndroidVPNActivity *s_instance = nullptr;
-    constexpr auto CLASSNAME = "org.amnezia.vpn.qt.VPNActivity";
+    constexpr auto CLASSNAME = "org.amnezia.vpn.AmneziaActivity";
 }
 
 AndroidVPNActivity::AndroidVPNActivity()

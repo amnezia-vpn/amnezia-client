@@ -1,4 +1,4 @@
-package org.amnezia.vpn.qt
+package org.amnezia.vpn
 
 import android.Manifest
 import android.annotation.SuppressLint

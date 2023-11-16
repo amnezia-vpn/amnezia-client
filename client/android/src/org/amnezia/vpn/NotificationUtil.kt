@@ -72,7 +72,7 @@ object NotificationUtil {
     * Creates a new Notification using the current set of Strings
     * Shows the notification in the given {context}
     */
-    fun show(service: VPNService) {
+    fun show(service: AmneziaVpnService) {
         sNotificationBuilder = NotificationCompat.Builder(service, NOTIFICATION_CHANNEL_ID)
         sCurrentContext = service
         val notificationManager: NotificationManager =
@@ -96,7 +96,7 @@ object NotificationUtil {
         val header = "" + prefs.getString("fallbackNotificationHeader", "Amnezia VPN")
 
         // Create the Intent that Should be Fired if the User Clicks the notification
-        val mainActivityName = "org.amnezia.vpn.qt.VPNActivity"
+        val mainActivityName = "org.amnezia.vpn.AmneziaActivity"
         val activity = Class.forName(mainActivityName)
         val intent = Intent(service, activity)
         val pendingIntent = PendingIntent.getActivity(service, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

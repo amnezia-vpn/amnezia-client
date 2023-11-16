@@ -28,7 +28,7 @@
     <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/> -->
 
     <application
-        android:name=".qt.AmneziaApp"
+        android:name=".AmneziaApplication"
         android:label="-- %%INSERT_APP_NAME%% --"
         android:allowNativeHeapPointerTagging="false"
         android:icon="@drawable/icon"
@@ -36,7 +36,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
-            android:name=".qt.VPNActivity"
+            android:name=".AmneziaActivity"
             android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|density
                 |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
             android:launchMode="singleInstance"
@@ -48,7 +48,7 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="org.amnezia.vpn.qt.IMPORT_CONFIG" />
+                <action android:name="org.amnezia.vpn.IMPORT_CONFIG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
@@ -62,11 +62,11 @@
         </activity>
 
         <activity
-            android:name=".qt.CameraActivity"
+            android:name=".CameraActivity"
             android:exported="false" />
 
         <activity
-            android:name=".qt.ImportConfigActivity"
+            android:name=".ImportConfigActivity"
             android:exported="true">
 
             <intent-filter android:label="AmneziaVPN">
@@ -122,7 +122,7 @@
         </activity>
 
         <service
-            android:name=".VPNService"
+            android:name=".AmneziaVpnService"
             android:process=":QtOnlyProcess"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="specialUse"
@@ -136,7 +136,7 @@
         </service>
 
         <service
-            android:name=".qt.VPNPermissionHelper"
+            android:name=".VPNPermissionHelper"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="specialUse"
             android:exported="true">

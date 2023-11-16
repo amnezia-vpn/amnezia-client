@@ -50,7 +50,7 @@ namespace
 #endif
 
 #ifdef Q_OS_ANDROID
-    constexpr auto AndroidCameraActivity = "org.amnezia.vpn.qt.CameraActivity";
+    constexpr auto AndroidCameraActivity = "org.amnezia.vpn.CameraActivity";
 #endif
 } // namespace
 
