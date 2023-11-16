@@ -34,6 +34,7 @@ rootProject.name = "AmneziaVPN"
 rootProject.buildFileName = "build.gradle.kts"
 
 include(":qt")
+include(":utils")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties

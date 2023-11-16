@@ -16,7 +16,6 @@ android {
     namespace = "org.amnezia.vpn"
 
     buildFeatures {
-        buildConfig = true
         viewBinding = true
     }
 
@@ -81,6 +80,7 @@ android {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(project(":qt"))
+    implementation(project(":utils"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.security.crypto)
