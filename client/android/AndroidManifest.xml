@@ -31,8 +31,8 @@
         android:name=".AmneziaApplication"
         android:label="-- %%INSERT_APP_NAME%% --"
         android:allowNativeHeapPointerTagging="false"
-        android:icon="@drawable/icon"
-        android:roundIcon="@drawable/icon_round"
+        android:icon="@mipmap/icon"
+        android:roundIcon="@mipmap/icon_round"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
