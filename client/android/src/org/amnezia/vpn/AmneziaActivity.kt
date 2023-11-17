@@ -1,286 +1,33 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.amnezia.vpn
 
-import android.Manifest
-import android.content.ComponentName
-import android.content.ContentResolver
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.*
-import android.provider.MediaStore
-import android.util.Log
-import android.view.KeyEvent
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import org.amnezia.vpn.VPNServiceBinder
-import org.amnezia.vpn.IMPORT_COMMAND_CODE
-import org.amnezia.vpn.IMPORT_ACTION_CODE
-import org.amnezia.vpn.IMPORT_CONFIG_KEY
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import org.qtproject.qt.android.bindings.QtActivity
-import java.io.*
 
-class AmneziaActivity : org.qtproject.qt.android.bindings.QtActivity() {
+private const val TAG = "AmneziaActivity"
 
-    private var configString: String? = null
-    private var vpnServiceBinder: IBinder? = null
-    private var isBound = false
-        set(value) {
-            field = value
+private const val CAMERA_ACTION_CODE = 101
+private const val CREATE_FILE_ACTION_CODE = 102
 
-            if (value && configString != null) {
-                sendImportConfigCommand()
-            }
-        }
-
-    private val TAG = "AmneziaActivity"
-
-    private val CAMERA_ACTION_CODE = 101
-    private val CREATE_FILE_ACTION_CODE = 102
+class AmneziaActivity : QtActivity() {
 
     private var tmpFileContentToSave: String = ""
-
-    private val delayedCommands: ArrayList<Pair<Int, String>> = ArrayList()
-
-    companion object {
-        private lateinit var instance: AmneziaActivity
-
-        @JvmStatic fun getInstance(): AmneziaActivity {
-            return instance
-        }
-
-        @JvmStatic fun connectService() {
-            getInstance().initServiceConnection()
-        }
-
-        @JvmStatic fun startQrCodeReader() {
-            getInstance().startQrCodeActivity()
-        }
-
-        @JvmStatic fun sendToService(actionCode: Int, body: String) {
-            getInstance().dispatchParcel(actionCode, body)
-        }
-
-        @JvmStatic fun saveFileAs(fileContent: String, suggestedName: String) {
-            getInstance().saveFile(fileContent, suggestedName)
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        instance = this
-
-        val newIntent = intent
-        val newIntentAction: String? = newIntent.action
-
-        if (newIntent != null && newIntentAction != null && newIntentAction == "org.amnezia.vpn.IMPORT_CONFIG") {
-            configString = newIntent.getStringExtra("CONFIG")
-        }
-    }
 
     private fun startQrCodeActivity() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivityForResult(intent, CAMERA_ACTION_CODE)
     }
 
-    private fun saveFile(fileContent: String, suggestedName: String) {
-        tmpFileContentToSave = fileContent
-
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/*"
-            putExtra(Intent.EXTRA_TITLE, suggestedName)
-        }
-
-        startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
-    }
-
-    external fun handleBackButton(): Boolean
-
-    external fun onServiceMessage(actionCode: Int, body: String?)
-    external fun qtOnServiceConnected()
-    external fun qtOnServiceDisconnected()
-    external fun onActivityMessage(actionCode: Int, body: String?)
-
-    private fun dispatchParcel(actionCode: Int, body: String) {
-        if (!isBound) {
-            Log.d(TAG, "dispatchParcel: not bound")
-            delayedCommands.add(Pair(actionCode, body))
-            return
-        }
-
-        if (delayedCommands.size > 0) {
-            for (command in delayedCommands) {
-                processCommand(command.first, command.second)
-            }
-
-            delayedCommands.clear()
-        }
-
-        processCommand(actionCode, body)
-    }
-
-    private fun processCommand(actionCode: Int, body: String) {
-        val out: Parcel = Parcel.obtain()
-        out.writeByteArray(body.toByteArray())
-
-        try {
-            vpnServiceBinder?.transact(actionCode, out, Parcel.obtain(), 0)
-        } catch (e: DeadObjectException) {
-            isBound = false
-            vpnServiceBinder = null
-            qtOnServiceDisconnected()
-        } catch (e: RemoteException) {
-            e.printStackTrace()
-        }
-    }
-
-    override fun onNewIntent(newIntent: Intent) {
-        super.onNewIntent(intent)
-
-        setIntent(newIntent)
-
-        val newIntentAction = newIntent.action
-
-        if (newIntent != null && newIntentAction != null && newIntentAction == INTENT_ACTION_IMPORT_CONFIG) {
-            configString = newIntent.getStringExtra("CONFIG")
-        } 
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (configString != null && isBound) {
-            sendImportConfigCommand()
-        }
-    }
-
-    private fun sendImportConfigCommand() {
-        if (configString != null) {
-            val msg: Parcel = Parcel.obtain()
-            msg.writeString(configString!!)
-
-            try {
-                vpnServiceBinder?.transact(ACTION_IMPORT_CONFIG, msg, Parcel.obtain(), 0)
-            } catch (e: RemoteException) {
-                e.printStackTrace()
-            }
-
-            configString = null
-        }
-    }
-
-    private fun createConnection() = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, binder: IBinder) {
-            vpnServiceBinder = binder
-
-            // This is called when the connection with the service has been
-            // established, giving us the object we can use to
-            // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
-            // representation of that from the raw IBinder object.
-            if (registerBinder()){
-                qtOnServiceConnected();
-            } else {
-                qtOnServiceDisconnected();
-                return
-            }
-
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            vpnServiceBinder = null
-            isBound = false
-            qtOnServiceDisconnected();
-        }
-    }
-
-    private var connection: ServiceConnection = createConnection()
-
-    private fun registerBinder(): Boolean {
-        val binder = VPNClientBinder()
-        val out: Parcel = Parcel.obtain()
-        out.writeStrongBinder(binder)
-
-        try {
-            // Register our IBinder Listener
-            vpnServiceBinder?.transact(ACTION_REGISTER_LISTENER, out, Parcel.obtain(), 0)
-            return true
-        } catch (e: DeadObjectException) {
-            isBound = false
-            vpnServiceBinder = null
-        } catch (e: RemoteException) {
-            e.printStackTrace()
-        }
-        return false
-    }
-
-    private fun initServiceConnection() {
-        // We already have a connection to the service,
-        // just need to re-register the binder
-        if (isBound && vpnServiceBinder!!.isBinderAlive() && registerBinder()) {
-            qtOnServiceConnected()
-            return
-        }
-
-        bindService(Intent(this, AmneziaVpnService::class.java), connection, Context.BIND_AUTO_CREATE)
-    }
-
-    // TODO: Move all ipc codes into a shared lib.
-    // this is getting out of hand.
-    private val PERMISSION_TRANSACTION = 1337
-    private val ACTION_REGISTER_LISTENER = 3
-    private val ACTION_RESUME_ACTIVATE = 7
-    private val ACTION_IMPORT_CONFIG = 11
-    private val EVENT_PERMISSION_REQUIRED = 6
-    private val EVENT_DISCONNECTED = 2
-
-    private val UI_EVENT_QR_CODE_RECEIVED = 0
-
-    fun onPermissionRequest(code: Int, data: Parcel?) {
-        if (code != EVENT_PERMISSION_REQUIRED) {
-            return
-        }
-
-        val x = Intent()
-        x.readFromParcel(data)
-
-        startActivityForResult(x, PERMISSION_TRANSACTION)
-    }
-
-    override protected fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == PERMISSION_TRANSACTION) {
-            // THATS US!
-            if (resultCode == RESULT_OK) {
-                // Prompt accepted, tell service to retry.
-                dispatchParcel(ACTION_RESUME_ACTIVATE, "")
-            } else {
-                // Tell the Client we've disconnected
-                onServiceMessage(EVENT_DISCONNECTED, "")
-            }
-            return
-        }
-
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == CAMERA_ACTION_CODE && resultCode == RESULT_OK) {
-            val extra = data?.getStringExtra("result") ?: ""
-            onActivityMessage(UI_EVENT_QR_CODE_RECEIVED, extra)
-        }
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CREATE_FILE_ACTION_CODE && resultCode == RESULT_OK) {
             data?.data?.also { uri ->
                 alterDocument(uri)
             }
         }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun alterDocument(uri: Uri) {
@@ -297,5 +44,59 @@ class AmneziaActivity : org.qtproject.qt.android.bindings.QtActivity() {
         }
 
         tmpFileContentToSave = ""
+    }
+
+    /**
+     * Methods called by Qt
+     */
+    @Suppress("unused")
+    fun qtAndroidControllerInitialized() {
+        Log.v(TAG, "Qt Android controller initialized")
+        Log.w(TAG, "Not yet implemented")
+    }
+
+    @Suppress("unused")
+    fun start(vpnConfig: String) {
+        Log.v(TAG, "Start VPN")
+        Log.w(TAG, "Not yet implemented")
+    }
+
+    @Suppress("unused")
+    fun stop() {
+        Log.v(TAG, "Stop VPN")
+        Log.w(TAG, "Not yet implemented")
+    }
+
+    @Suppress("unused")
+    fun saveFile(fileName: String, data: String) {
+        Log.v(TAG, "Save file $fileName")
+        // todo: refactor
+        tmpFileContentToSave = data
+
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/*"
+            putExtra(Intent.EXTRA_TITLE, fileName)
+        }
+
+        startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
+    }
+
+    @Suppress("unused")
+    fun setNotificationText(title: String, message: String, timerSec: Int) {
+        Log.v(TAG, "Set notification text")
+        Log.w(TAG, "Not yet implemented")
+    }
+
+    @Suppress("unused")
+    fun cleanupLogs() {
+        Log.v(TAG, "Cleanup logs")
+        Log.w(TAG, "Not yet implemented")
+    }
+
+    @Suppress("unused")
+    fun startQrCodeReader() {
+        Log.v(TAG, "Start camera")
+        startQrCodeActivity()
     }
 }

@@ -1,154 +1,82 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-#include <QDebug>
-#include <QHostAddress>
-#include <QJsonArray>
+#include <QCoreApplication>
+#include <QJniEnvironment>
 #include <QJsonDocument>
-#include <QJsonObject>
-#include <QRandomGenerator>
-#include <QTextCodec>
-#include <QTimer>
 
 #include "android_controller.h"
-#include "private/qandroidextras_p.h"
-
-#include "androidutils.h"
-#include "androidvpnactivity.h"
 
 namespace
 {
     AndroidController *s_instance = nullptr;
 
-    constexpr auto PERMISSIONHELPER_CLASS = "org/amnezia/vpn/VPNPermissionHelper";
+    constexpr auto QT_ANDROID_CONTROLLER_CLASS = "org/amnezia/vpn/qt/QtAndroidController";
 } // namespace
 
 AndroidController::AndroidController() : QObject()
 {
-    connect(this, &AndroidController::scheduleStatusCheckSignal, this, &AndroidController::scheduleStatusCheckSlot);
-
-    s_instance = this;
-
-    auto activity = AndroidVPNActivity::instance();
-
-    connect(
-            activity, &AndroidVPNActivity::serviceConnected, this,
-            []() {
-                qDebug() << "Transact: service connected";
-                AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_STATISTIC, "");
-            },
-            Qt::QueuedConnection);
-
-    connect(
-            activity, &AndroidVPNActivity::eventInitialized, this,
-            [this](const QString &parcelBody) {
-                // We might get multiple Init events as widgets, or fragments
-                // might query this.
-                if (m_init) {
-                    return;
-                }
-
-                qDebug() << "Transact: init";
-
-                m_init = true;
-
-                auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
-                qlonglong time = doc.object()["time"].toVariant().toLongLong();
-
-                isConnected = doc.object()["connected"].toBool();
-
-                if (isConnected) {
-                    emit scheduleStatusCheckSignal();
-                }
-
-                emit initialized(true, isConnected, time > 0 ? QDateTime::fromMSecsSinceEpoch(time) : QDateTime());
-
-                setFallbackConnectedNotification();
-            },
-            Qt::QueuedConnection);
-
-    connect(
-            activity, &AndroidVPNActivity::eventConnected, this,
-            [this](const QString &parcelBody) {
-                Q_UNUSED(parcelBody);
-                qDebug() << "Transact: connected";
-
-                if (!isConnected) {
-                    emit scheduleStatusCheckSignal();
-                }
-
-                isConnected = true;
-
-                emit connectionStateChanged(Vpn::ConnectionState::Connected);
-            },
-            Qt::QueuedConnection);
-
-    connect(
-            activity, &AndroidVPNActivity::eventDisconnected, this,
-            [this]() {
-                qDebug() << "Transact: disconnected";
-
-                isConnected = false;
-
-                emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
-            },
-            Qt::QueuedConnection);
-
-    connect(
-            activity, &AndroidVPNActivity::eventStatisticUpdate, this,
-            [this](const QString &parcelBody) {
-                auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
-
-                QString rx = doc.object()["rx_bytes"].toString();
-                QString tx = doc.object()["tx_bytes"].toString();
-                QString endpoint = doc.object()["endpoint"].toString();
-                QString deviceIPv4 = doc.object()["deviceIpv4"].toString();
-
-                emit statusUpdated(rx, tx, endpoint, deviceIPv4);
-            },
-            Qt::QueuedConnection);
-
-    connect(
-            activity, &AndroidVPNActivity::eventBackendLogs, this,
-            [this](const QString &parcelBody) {
-                qDebug() << "Transact: backend logs";
-
-                QString buffer = parcelBody.toUtf8();
-                if (m_logCallback) {
-                    m_logCallback(buffer);
+    connect(this, &AndroidController::status, this,
+            [this](bool isVpnConnected) {
+                qDebug() << "Android event: status; connected:" << isVpnConnected;
+                if (isWaitingInitStatus) {
+                    qDebug() << "Android VPN service is alive, initialization by service status";
+                    isWaitingInitStatus = false;
+                    emit serviceIsAlive(isVpnConnected);
                 }
             },
             Qt::QueuedConnection);
 
     connect(
-            activity, &AndroidVPNActivity::eventActivationError, this,
-            [this](const QString &parcelBody) {
-                Q_UNUSED(parcelBody)
-                qDebug() << "Transact: error";
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
-            },
-            Qt::QueuedConnection);
+        this, &AndroidController::serviceDisconnected, this,
+        [this]() {
+            qDebug() << "Android event: service disconnected";
+            emit connectionStateChanged(Vpn::ConnectionState::Unknown);
+        },
+        Qt::QueuedConnection);
 
     connect(
-            activity, &AndroidVPNActivity::eventConfigImport, this,
-            [this](const QString &parcelBody) {
-                qDebug() << "Transact: config import";
-                auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
-
-                QString buffer = doc.object()["config"].toString();
-                qDebug() << "Transact: config string" << buffer;
-                importConfigFromOutside(buffer);
-            },
-            Qt::QueuedConnection);
+        this, &AndroidController::serviceError, this,
+        [this]() {
+            qDebug() << "Android event: service error";
+            // todo: add error message
+            emit connectionStateChanged(Vpn::ConnectionState::Error);
+        },
+        Qt::QueuedConnection);
 
     connect(
-            activity, &AndroidVPNActivity::serviceDisconnected, this,
-            [this]() {
-                qDebug() << "Transact: service disconnected";
-                m_serviceConnected = false;
-            },
-            Qt::QueuedConnection);
+        this, &AndroidController::vpnPermissionRejected, this,
+        [this]() {
+            qWarning() << "Android event: VPN permission rejected";
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        this, &AndroidController::vpnConnected, this,
+        [this]() {
+            qDebug() << "Android event: VPN connected";
+            emit connectionStateChanged(Vpn::ConnectionState::Connected);
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        this, &AndroidController::vpnDisconnected, this,
+        [this]() {
+            qDebug() << "Android event: VPN disconnected";
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        this, &AndroidController::configImported, this,
+        []() {
+            // todo: not yet implemented
+            qDebug() << "Transact: config import";
+            /*auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
+
+            QString buffer = doc.object()["config"].toString();
+            qDebug() << "Transact: config string" << buffer;
+            importConfigFromOutside(buffer);*/
+        },
+        Qt::QueuedConnection);
 }
 
 AndroidController *AndroidController::instance()
@@ -162,166 +90,160 @@ AndroidController *AndroidController::instance()
 
 bool AndroidController::initialize()
 {
-    qDebug() << "Initializing";
+    qDebug() << "Initialize AndroidController";
 
-    // Hook in the native implementation for startActivityForResult into the JNI
-    JNINativeMethod methods[] { { "startActivityForResult", "(Landroid/content/Intent;)V",
-                                  reinterpret_cast<void *>(startActivityForResult) } };
-    QJniObject javaClass(PERMISSIONHELPER_CLASS);
+    const JNINativeMethod methods[] = {
+        {"onStatus", "(Z)V", reinterpret_cast<void *>(onStatus)},
+        {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
+        {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
+        {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
+        {"onVpnConnected", "()V", reinterpret_cast<void *>(onVpnConnected)},
+        {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
+        {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
+        {"onConfigImported", "()V", reinterpret_cast<void *>(onConfigImported)},
+    };
+
     QJniEnvironment env;
-    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
-    env->RegisterNatives(objectClass, methods, sizeof(methods) / sizeof(methods[0]));
-    env->DeleteLocalRef(objectClass);
-
-    AndroidVPNActivity::connectService();
-
+    bool registered = env.registerNativeMethods(QT_ANDROID_CONTROLLER_CLASS, methods,
+                                                sizeof(methods) / sizeof(JNINativeMethod));
+    if (!registered) {
+        qCritical() << "Failed native method registration";
+        return false;
+    }
+    qtAndroidControllerInitialized();
     return true;
 }
 
-ErrorCode AndroidController::start()
+// static
+template <typename Ret, typename ...Args>
+auto AndroidController::callActivityMethod(const char *methodName, const char *signature,
+                                           const std::function<Ret()> &defValue, Args &&...args)
 {
-    qDebug() << "Prompting for VPN permission";
-    QJniObject activity = AndroidUtils::getActivity();
-    auto appContext = activity.callObjectMethod("getApplicationContext", "()Landroid/content/Context;");
-    QJniObject::callStaticMethod<void>(PERMISSIONHELPER_CLASS, "startService", "(Landroid/content/Context;)V",
-                                       appContext.object());
+    qDebug() << "Call activity method:" << methodName;
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    if (activity.isValid()) {
+        return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
+    } else {
+        qCritical() << "Activity is not valid";
+        return defValue();
+    }
+}
 
-    QJsonDocument doc(m_vpnConfig);
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_ACTIVATE, doc.toJson());
+// static
+template <typename ...Args>
+void AndroidController::callActivityMethod(const char *methodName, const char *signature, Args &&...args)
+{
+    callActivityMethod<void>(methodName, signature, [] {}, std::forward<Args>(args)...);
+}
+
+ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
+{
+    isWaitingInitStatus = false;
+    auto config = QJsonDocument(vpnConfig).toJson();
+    callActivityMethod("start", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(config).object<jstring>());
 
     return NoError;
 }
 
 void AndroidController::stop()
 {
-    qDebug() << "AndroidController::stop";
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_DEACTIVATE, QString());
+    callActivityMethod("stop", "()V");
 }
 
-// Activates the tunnel that is currently set
-// in the VPN Service
-void AndroidController::resumeStart()
+void AndroidController::saveFile(const QString &fileName, const QString &data)
 {
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_RESUME_ACTIVATE, QString());
+    callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(fileName).object<jstring>(),
+                       QJniObject::fromString(data).object<jstring>());
 }
 
-/*
- * Sets the current notification text that is shown
- */
 void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
 {
-    QJsonObject args;
-    args["title"] = title;
-    args["message"] = message;
-    args["sec"] = timerSec;
-    QJsonDocument doc(args);
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_SET_NOTIFICATION_TEXT, doc.toJson());
-}
-
-void AndroidController::shareConfig(const QString &configContent, const QString &suggestedName)
-{
-    AndroidVPNActivity::saveFileAs(configContent, suggestedName);
-}
-
-/*
- * Sets fallback Notification text that should be shown in case the VPN
- * switches into the Connected state without the app open
- * e.g via always-on vpn
- */
-void AndroidController::setFallbackConnectedNotification()
-{
-    QJsonObject args;
-    args["title"] = tr("AmneziaVPN");
-    //% "Ready for you to connect"
-    //: Refers to the app - which is currently running the background and waiting
-    args["message"] = tr("VPN Connected");
-    QJsonDocument doc(args);
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_SET_NOTIFICATION_FALLBACK, doc.toJson());
-}
-
-void AndroidController::checkStatus()
-{
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_STATISTIC, QString());
-}
-
-void AndroidController::getBackendLogs(std::function<void(const QString &)> &&a_callback)
-{
-    qDebug() << "get logs";
-
-    m_logCallback = std::move(a_callback);
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_GET_LOG, QString());
-}
-
-void AndroidController::cleanupBackendLogs()
-{
-    qDebug() << "cleanup logs";
-
-    AndroidVPNActivity::sendToService(ServiceAction::ACTION_REQUEST_CLEANUP_LOG, QString());
-}
-
-const QJsonObject &AndroidController::vpnConfig() const
-{
-    return m_vpnConfig;
-}
-
-void AndroidController::setVpnConfig(const QJsonObject &newVpnConfig)
-{
-    m_vpnConfig = newVpnConfig;
+    callActivityMethod("setNotificationText", "(Ljava/lang/String;Ljava/lang/String;I)V",
+                       QJniObject::fromString(title).object<jstring>(),
+                       QJniObject::fromString(message).object<jstring>(),
+                       (jint) timerSec);
 }
 
 void AndroidController::startQrReaderActivity()
 {
-    AndroidVPNActivity::instance()->startQrCodeReader();
+    callActivityMethod("startQrCodeReader", "()V");
 }
 
-void AndroidController::scheduleStatusCheckSlot()
+void AndroidController::qtAndroidControllerInitialized()
 {
-    QTimer::singleShot(1000, [this]() {
-        if (isConnected) {
-            checkStatus();
-            emit scheduleStatusCheckSignal();
-        }
-    });
+    callActivityMethod("qtAndroidControllerInitialized", "()V");
 }
 
-const int ACTIVITY_RESULT_OK = 0xffffffff;
-/**
- * @brief Starts the Given intent in Context of the QTActivity
- * @param env
- * @param intent
- */
-void AndroidController::startActivityForResult(JNIEnv *env, jobject, jobject intent)
+// JNI functions called by Android
+// static
+void AndroidController::onStatus(JNIEnv *env, jobject thiz, jboolean isVpnConnected)
 {
-    qDebug() << "start vpnPermissionHelper";
     Q_UNUSED(env);
+    Q_UNUSED(thiz);
 
-    QtAndroidPrivate::startActivity(intent, 1337, [](int receiverRequestCode, int resultCode, const QJniObject &data) {
-        // Currently this function just used in
-        // VPNService.kt::checkPermissions. So the result
-        // we're getting is if the User gave us the
-        // Vpn.bind permission. In case of NO we should
-        // abort.
-        Q_UNUSED(receiverRequestCode);
-        Q_UNUSED(data);
+    emit AndroidController::instance()->status(isVpnConnected);
+}
 
-        AndroidController *controller = AndroidController::instance();
-        if (!controller) {
-            return;
-        }
+// static
+void AndroidController::onServiceDisconnected(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
 
-        if (resultCode == ACTIVITY_RESULT_OK) {
-            qDebug() << "VPN PROMPT RESULT - Accepted";
-            controller->resumeStart();
-            return;
-        }
-        // If the request got rejected abort the current
-        // connection.
-        qWarning() << "VPN PROMPT RESULT - Rejected";
-        emit controller->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
-    return;
+    emit AndroidController::instance()->serviceDisconnected();
+}
+
+// static
+void AndroidController::onServiceError(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->serviceError();
+}
+
+// static
+void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->vpnPermissionRejected();
+}
+
+// static
+void AndroidController::onVpnConnected(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->vpnConnected();
+}
+
+// static
+void AndroidController::onVpnDisconnected(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->vpnDisconnected();
+}
+
+// static
+void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->statisticsUpdated((quint64) rxBytes, (quint64) txBytes);
+}
+
+void AndroidController::onConfigImported(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->configImported();
 }

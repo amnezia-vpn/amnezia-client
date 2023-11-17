@@ -1,11 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 #ifndef ANDROID_CONTROLLER_H
 #define ANDROID_CONTROLLER_H
 
-#include <QJniEnvironment>
 #include <QJniObject>
 
 #include "protocols/vpnprotocol.h"
@@ -20,57 +15,47 @@ public:
     explicit AndroidController();
     static AndroidController *instance();
 
-    virtual ~AndroidController() override = default;
-
     bool initialize();
 
-    ErrorCode start();
+    ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
-    void resumeStart();
-
-    void checkStatus();
     void setNotificationText(const QString &title, const QString &message, int timerSec);
-    void shareConfig(const QString &data, const QString &suggestedName);
-    void setFallbackConnectedNotification();
-    void getBackendLogs(std::function<void(const QString &)> &&callback);
-    void cleanupBackendLogs();
-
-    const QJsonObject &vpnConfig() const;
-    void setVpnConfig(const QJsonObject &newVpnConfig);
-
+    void saveFile(const QString& fileName, const QString &data);
     void startQrReaderActivity();
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-
-    // This signal is emitted when the controller is initialized. Note that the
-    // VPN tunnel can be already active. In this case, "connected" should be set
-    // to true and the "connectionDate" should be set to the activation date if
-    // known.
-    // If "status" is set to false, the backend service is considered unavailable.
-    void initialized(bool status, bool connected, const QDateTime &connectionDate);
-
-    void statusUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
-    void scheduleStatusCheckSignal();
-
+    void status(bool isVpnConnected);
+    void serviceDisconnected();
+    void serviceError();
+    void vpnPermissionRejected();
+    void vpnConnected();
+    void vpnDisconnected();
+    void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
+    void configImported();
     void importConfigFromOutside(QString &data);
-
-protected slots:
-    void scheduleStatusCheckSlot();
+    void serviceIsAlive(bool connected);
 
 private:
-    bool m_init = false;
+    bool isWaitingInitStatus = true;
 
-    QJsonObject m_vpnConfig;
+    void qtAndroidControllerInitialized();
 
-    bool m_serviceConnected = false;
-    std::function<void(const QString &)> m_logCallback;
+    // JNI functions called by Android
+    static void onStatus(JNIEnv *env, jobject thiz, jboolean isVpnConnected);
+    static void onServiceDisconnected(JNIEnv *env, jobject thiz);
+    static void onServiceError(JNIEnv *env, jobject thiz);
+    static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
+    static void onVpnConnected(JNIEnv *env, jobject thiz);
+    static void onVpnDisconnected(JNIEnv *env, jobject thiz);
+    static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
+    static void onConfigImported(JNIEnv *env, jobject thiz);
 
-    static void startActivityForResult(JNIEnv *env, jobject /*thiz*/, jobject intent);
-
-    bool isConnected = false;
-
-    void scheduleStatusCheck();
+    template <typename Ret, typename ...Args>
+    static auto callActivityMethod(const char *methodName, const char *signature,
+                                   const std::function<Ret()> &defValue, Args &&...args);
+    template <typename ...Args>
+    static void callActivityMethod(const char *methodName, const char *signature, Args &&...args);
 };
 
 #endif // ANDROID_CONTROLLER_H

@@ -409,7 +409,7 @@ void VpnConnection::createAndroidConnections(DockerContainer container)
 
     connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol,
             &AndroidVpnProtocol::setConnectionState);
-    connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol,
+    connect(AndroidController::instance(), &AndroidController::statisticsUpdated, androidVpnProtocol,
             &AndroidVpnProtocol::connectionDataUpdated);
 }
 
