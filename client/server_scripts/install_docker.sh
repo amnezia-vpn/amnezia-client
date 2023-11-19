@@ -1,4 +1,4 @@
-if which apt-get > /dev/null 2>&1; then pm=$(which apt-get); silent_inst="-yq install"; check_pkgs="-yq update"; docker_pkg="docker.io"; dist="debian";\
+if which apt-get > /dev/null 2>&1; then pm=$(which apt-get); silent_inst="-qq install"; check_pkgs="-qq update"; docker_pkg="docker.io"; dist="debian";\
 elif which dnf > /dev/null 2>&1; then pm=$(which dnf); silent_inst="-yq install"; check_pkgs="-yq check-update"; docker_pkg="docker"; dist="fedora";\
 elif which yum > /dev/null 2>&1; then pm=$(which yum); silent_inst="-y -q install"; check_pkgs="-y -q check-update"; docker_pkg="docker"; dist="centos";\
 else echo "Packet manager not found"; exit 1; fi;\
@@ -8,17 +8,11 @@ if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst su
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  if ! [ "$dist" = "debian" ]; then sudo systemctl enable --now docker; fi;\
+  sleep 5 && sudo systemctl enable --now docker && sleep 5;\
 fi;\
-if ! [ "$dist" = "fedora" ]; then \
-  docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
-  if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg; fi;\
-  sleep 3 && sudo systemctl start docker && sleep 3;\
-fi;\
-if [ "$dist" = "fedora" ]; then \
-  docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
-  if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg; fi;\
-  sleep 3 && sudo systemctl start docker && sleep 3;\
+if [ "$(systemctl is-active docker)" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
+  sleep 5 && sudo systemctl restart docker && sleep 5;\
 fi;\
 if ! command -v docker > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
+if [ "$(systemctl is-active docker)" != "active" ]; then echo "Failed to start Docker"; exit 1; fi;\
 docker --version
