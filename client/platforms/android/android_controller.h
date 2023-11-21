@@ -50,6 +50,7 @@ private:
     static void onVpnDisconnected(JNIEnv *env, jobject thiz);
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz);
+    static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature,

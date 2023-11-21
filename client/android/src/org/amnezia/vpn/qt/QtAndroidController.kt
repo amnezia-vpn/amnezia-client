@@ -15,4 +15,6 @@ object QtAndroidController {
     external fun onStatisticsUpdate(rxBytes: Long, txBytes: Long)
 
     external fun onConfigImported()
+
+    external fun decodeQrCode(data: String): Boolean
 }

@@ -63,6 +63,9 @@
 
         <activity
             android:name=".CameraActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
             android:exported="false" />
 
         <activity

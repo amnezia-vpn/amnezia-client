@@ -4,167 +4,151 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import android.view.MotionEvent
-import android.view.View
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_UP
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.FocusMeteringAction
+import androidx.camera.core.FocusMeteringAction.FLAG_AE
+import androidx.camera.core.FocusMeteringAction.FLAG_AF
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions.Builder
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import org.amnezia.vpn.R
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import org.amnezia.vpn.databinding.CameraPreviewBinding
+import org.amnezia.vpn.qt.QtAndroidController
 
+private const val TAG = "CameraActivity"
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : ComponentActivity() {
 
-    private val CAMERA_REQUEST = 100
+    private lateinit var viewBinding: CameraPreviewBinding
+    private lateinit var cameraProvider: ProcessCameraProvider
 
-    private lateinit var cameraExecutor: ExecutorService
-    private lateinit var analyzerExecutor: ExecutorService
-
-    private lateinit var viewFinder: PreviewView
-
-    companion object {
-        private lateinit var instance: CameraActivity
-
-        @JvmStatic fun getInstance(): CameraActivity {
-            return instance
-        }
-
-        @JvmStatic fun stopQrCodeReader() {
-            CameraActivity.getInstance().finish()
-        }
-    }
-
-    external fun passDataToDecoder(data: String)
-
+    @ExperimentalGetImage
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+        viewBinding = CameraPreviewBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
 
-        viewFinder = findViewById(R.id.viewFinder)
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        analyzerExecutor = Executors.newSingleThreadExecutor()
-
-        instance = this
-
-        checkPermissions()
-
-        configureVideoPreview()
+        checkPermissions(onSuccess = ::startCamera, onFail = ::finish)
     }
 
-    private fun checkPermissions() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+    private fun checkPermissions(onSuccess: () -> Unit, onFail: () -> Unit) {
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            onSuccess()
+        } else {
+            val requestPermissionLauncher =
+                registerForActivityResult(RequestPermission()) { isGranted ->
+                    if (isGranted) {
+                        Toast.makeText(this, "Camera permission granted", Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    } else {
+                        Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
+                        onFail()
+                    }
+                }
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_REQUEST) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "CameraX permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "CameraX permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @SuppressLint("UnsafeOptInUsageError", "ClickableViewAccessibility")
-    private fun configureVideoPreview() {
+    @ExperimentalGetImage
+    private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        val imageCapture = ImageCapture.Builder().build()
 
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build()
-
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            val imageAnalyzer = BarCodeAnalyzer()
-
-            val analysisUseCase = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-
-            analysisUseCase.setAnalyzer(analyzerExecutor, imageAnalyzer)
-
-            try {
-                preview.setSurfaceProvider(viewFinder.surfaceProvider)
-                cameraProvider.unbindAll()
-                val camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, analysisUseCase)
-                viewFinder.setOnTouchListener(View.OnTouchListener { view: View, motionEvent: MotionEvent ->
-                    when (motionEvent.action) {
-                        MotionEvent.ACTION_DOWN -> return@OnTouchListener true
-                        MotionEvent.ACTION_UP -> {
-                            val factory = viewFinder.meteringPointFactory
-                            val point = factory.createPoint(motionEvent.x, motionEvent.y)
-                            val action = FocusMeteringAction.Builder(point).build()
-                            camera.cameraControl.startFocusAndMetering(action)
-                            return@OnTouchListener true
-                        }
-                        else -> return@OnTouchListener false
-                    }
-                })
-            } catch(exc: Exception) {
-                Log.e("WUTT", "Use case binding failed", exc)
-            }
+            cameraProvider = cameraProviderFuture.get()
+            bindPreview()
+            bindImageAnalysis()
         }, ContextCompat.getMainExecutor(this))
     }
 
-    override fun onDestroy() {
-        cameraExecutor.shutdown()
-        analyzerExecutor.shutdown()
+    @SuppressLint("ClickableViewAccessibility")
+    private fun bindPreview() {
+        val viewFinder = viewBinding.viewFinder
+        val preview = Preview.Builder().build().also {
+            it.setSurfaceProvider(viewFinder.surfaceProvider)
+        }
 
-        super.onDestroy()
+        val camera = cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview)
+
+        viewFinder.setOnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                ACTION_DOWN -> true
+                ACTION_UP -> {
+                    val point = viewFinder
+                        .meteringPointFactory.createPoint(motionEvent.x, motionEvent.x)
+
+                    val action = FocusMeteringAction
+                        .Builder(point, FLAG_AF or FLAG_AE).build()
+
+                    camera.cameraControl.startFocusAndMetering(action)
+                    true
+                }
+
+                else -> false
+            }
+        }
     }
 
-    val barcodesSet = mutableSetOf<String>()
+    @ExperimentalGetImage
+    private fun bindImageAnalysis() {
+        val imageAnalysis = ImageAnalysis.Builder().build()
 
-    private inner class BarCodeAnalyzer(): ImageAnalysis.Analyzer {
+        val camera = cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, imageAnalysis)
 
-        private val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .build()
+        val barcodeScanner = BarcodeScanning.getClient(
+            Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .setZoomSuggestionOptions(
+                    ZoomSuggestionOptions.Builder { zoomLevel ->
+                        camera.cameraControl.setZoomRatio(zoomLevel)
+                        true
+                    }.apply {
+                        camera.cameraInfo.zoomState.value?.maxZoomRatio?.let { maxZoomRation ->
+                            setMaxSupportedZoomRatio(maxZoomRation)
+                        }
+                    }.build()
+                ).build()
+        )
 
-        private val scanner = BarcodeScanning.getClient(options)
+        // optimization
+        val checkedBarcodes = hashSetOf<String>()
 
-        @SuppressLint("UnsafeOptInUsageError")
-        override fun analyze(imageProxy: ImageProxy) {
-            val mediaImage = imageProxy.image
-
-            if (mediaImage != null) {
-                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-
-                scanner.process(image)
-                    .addOnSuccessListener { barcodes ->
-                        if (barcodes.isNotEmpty()) {
-                            val barcode = barcodes[0]
-                            if (barcode != null) {
-                                val str = barcode?.displayValue ?: ""
-                                if (str.isNotEmpty()) {
-                                    val isAdded = barcodesSet.add(str)
-                                    if (isAdded) {
-                                        passDataToDecoder(str)
+        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
+            imageProxy.image?.let { InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees) }
+                ?.let { image ->
+                    barcodeScanner.process(image).addOnSuccessListener { barcodes ->
+                        barcodes.firstOrNull()?.let { barcode ->
+                            barcode.displayValue?.let { code ->
+                                if (code.isNotEmpty() && code !in checkedBarcodes) {
+                                    if (QtAndroidController.decodeQrCode(code)) {
+                                        barcodeScanner.close()
+                                        stopCamera()
                                     }
+                                    checkedBarcodes.add(code)
                                 }
                             }
                         }
+                    }.addOnFailureListener {
+                        Log.e(TAG, "Processing QR-code image failed: ${it.message}")
+                    }.addOnCompleteListener {
                         imageProxy.close()
                     }
-                    .addOnFailureListener {
-                        imageProxy.close()
-                    }
-            }
+                }
         }
+    }
+
+    private fun stopCamera() {
+        cameraProvider.unbindAll()
+        finish()
     }
 }

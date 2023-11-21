@@ -9,17 +9,11 @@ import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"
 
-private const val CAMERA_ACTION_CODE = 101
 private const val CREATE_FILE_ACTION_CODE = 102
 
 class AmneziaActivity : QtActivity() {
 
     private var tmpFileContentToSave: String = ""
-
-    private fun startQrCodeActivity() {
-        val intent = Intent(this, CameraActivity::class.java)
-        startActivityForResult(intent, CAMERA_ACTION_CODE)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CREATE_FILE_ACTION_CODE && resultCode == RESULT_OK) {
@@ -97,6 +91,8 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun startQrCodeReader() {
         Log.v(TAG, "Start camera")
-        startQrCodeActivity()
+        Intent(this, CameraActivity::class.java).also {
+            startActivity(it)
+        }
     }
 }

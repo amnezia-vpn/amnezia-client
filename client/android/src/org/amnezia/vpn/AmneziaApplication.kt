@@ -1,22 +1,16 @@
 package org.amnezia.vpn
 
-import android.content.res.Configuration
-// import org.amnezia.vpn.shadowsocks.core.Core
-// import org.amnezia.vpn.shadowsocks.core.VpnManager
-import org.qtproject.qt.android.bindings.QtActivity
+import androidx.camera.camera2.Camera2Config
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraXConfig
 import org.qtproject.qt.android.bindings.QtApplication
-import android.app.Application
 
-class AmneziaApplication: org.qtproject.qt.android.bindings.QtApplication() {
+class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
 
-    override fun onCreate() {
-        super.onCreate()
-        /* Core.init(this, QtActivity::class)
-        VpnManager.getInstance().init(this) */
-    }
+    override fun getCameraXConfig(): CameraXConfig = CameraXConfig.Builder
+        .fromConfig(Camera2Config.defaultConfig())
+        .setMinimumLoggingLevel(android.util.Log.ERROR)
+        .setAvailableCamerasLimiter(CameraSelector.DEFAULT_BACK_CAMERA)
+        .build()
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        // Core.updateNotificationChannels()
-    }
 }

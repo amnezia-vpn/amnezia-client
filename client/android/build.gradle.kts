@@ -75,6 +75,10 @@ android {
             isUniversalApk = false
         }
     }
+
+    lint {
+        disable += "InvalidFragmentVersionForActivityResult"
+    }
 }
 
 dependencies {
@@ -82,11 +86,9 @@ dependencies {
     implementation(project(":qt"))
     implementation(project(":utils"))
     implementation(libs.androidx.core)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
-    // todo: remove after finish refactoring
-    implementation(libs.androidx.constraintlayout)
 }

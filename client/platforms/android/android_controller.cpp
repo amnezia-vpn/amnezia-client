@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 
 #include "android_controller.h"
+#include "ui/controllers/importController.h"
 
 namespace
 {
@@ -101,6 +102,7 @@ bool AndroidController::initialize()
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onConfigImported", "()V", reinterpret_cast<void *>(onConfigImported)},
+        {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
 
     QJniEnvironment env;
@@ -240,10 +242,26 @@ void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBy
     emit AndroidController::instance()->statisticsUpdated((quint64) rxBytes, (quint64) txBytes);
 }
 
+// static
 void AndroidController::onConfigImported(JNIEnv *env, jobject thiz)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->configImported();
+}
+
+// static
+bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
+{
+    Q_UNUSED(thiz);
+
+    const char *buffer = env->GetStringUTFChars(data, nullptr);
+    if (!buffer) {
+        return false;
+    }
+
+    QString code(buffer);
+    env->ReleaseStringUTFChars(data, buffer);
+    return ImportController::decodeQrCode(code);
 }

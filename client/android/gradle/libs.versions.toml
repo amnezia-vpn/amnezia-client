@@ -2,15 +2,15 @@
 agp = "8.1.3"
 kotlin = "1.9.20"
 androidx-core = "1.12.0"
-androidx-appcompat = "1.6.1"
-androidx-camera = "1.2.3"
+androidx-activity = "1.8.1"
+androidx-camera = "1.3.0"
 androidx-security-crypto = "1.1.0-alpha06"
 kotlinx-coroutines = "1.7.3"
 google-mlkit = "17.2.0"
 
 [libraries]
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "androidx-camera" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidx-camera" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "androidx-camera" }
@@ -18,8 +18,6 @@ androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "
 androidx-security-crypto = { module = "androidx.security:security-crypto-ktx", version.ref = "androidx-security-crypto" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 google-mlkit = { module = "com.google.mlkit:barcode-scanning", version.ref = "google-mlkit" }
-# todo: remove after finish refactoring
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version = "2.1.4" }
 
 [bundles]
 androidx-camera = [
