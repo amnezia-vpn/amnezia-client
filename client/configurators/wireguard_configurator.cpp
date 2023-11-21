@@ -177,7 +177,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 }
 
 QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                                  const QJsonObject &containerConfig, ErrorCode *errorCode)
+                                                  const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
 {
     ServerController serverController(m_settings);
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
@@ -204,6 +204,8 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     jConfig[config_key::client_pub_key] = connData.clientPubKey;
     jConfig[config_key::psk_key] = connData.pskKey;
     jConfig[config_key::server_pub_key] = connData.serverPubKey;
+
+    clientId = connData.clientPubKey;
 
     return QJsonDocument(jConfig).toJson();
 }

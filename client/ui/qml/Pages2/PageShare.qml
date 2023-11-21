@@ -23,10 +23,22 @@ PageType {
         WireGuard
     }
 
+    signal revokeConfig(int index)
+    onRevokeConfig: function(index) {
+        PageController.showBusyIndicator(true)
+        ExportController.revokeConfig(index,
+                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                      ServersModel.getCurrentlyProcessedServerCredentials())
+        PageController.showBusyIndicator(false)
+    }
+
     Connections {
         target: ExportController
 
         function onGenerateConfig(type) {
+            shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
+            shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+
             shareConnectionDrawer.needCloseButton = false
 
             shareConnectionDrawer.open()
@@ -34,7 +46,7 @@ PageType {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(); break;
+            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(userNameTextField.textFieldText); break;
             case PageShare.ConfigType.AmneziaFullAccess: {
                 if (Qt.platform.os === "android") {
                     ExportController.generateFullAccessConfigAndroid();
@@ -44,14 +56,14 @@ PageType {
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig();
+                ExportController.generateOpenVpnConfig(userNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
                 shareConnectionDrawer.configExtension = ".ovpn"
                 shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
                 break;
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig();
+                ExportController.generateWireGuardConfig(userNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
@@ -73,8 +85,6 @@ PageType {
         }
     }
 
-    property string fullConfigServerSelectorText
-    property string connectionServerSelectorText
     property bool showContent: false
     property bool shareButtonEnabled: true
     property list<QtObject> connectionTypesModel: [
@@ -147,20 +157,21 @@ PageType {
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
-                            serverSelector.text = root.connectionServerSelectorText
                         }
                     }
 
                     HorizontalRadioButton {
-                        checked: root.currentIndex === 1
+                        checked: accessTypeSelector.currentIndex === 1
 
                         implicitWidth: (root.width - 32) / 2
-                        text: qsTr("Full access")
+                        text: qsTr("Users")
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
-                            serverSelector.text = root.fullConfigServerSelectorText
-                            root.shareButtonEnabled = true
+                            PageController.showBusyIndicator(true)
+                            ClientManagementModel.updateModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                              ServersModel.getCurrentlyProcessedServerCredentials())
+                            PageController.showBusyIndicator(false)
                         }
                     }
                 }
@@ -171,9 +182,23 @@ PageType {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
 
-                text: accessTypeSelector.currentIndex === 0 ? qsTr("Share VPN access without the ability to manage the server") :
-                                                              qsTr("Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.")
+                visible: accessTypeSelector.currentIndex === 0
+
+                text: qsTr("Share VPN access without the ability to manage the server")
                 color: "#878B91"
+            }
+
+            TextFieldWithHeaderType {
+                id: userNameTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+
+                visible: accessTypeSelector.currentIndex === 0
+
+                headerText: qsTr("User name")
+                textFieldText: "New client"
+
+                checkEmptyText: true
             }
 
             DropDownType {
@@ -217,10 +242,11 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        if (accessTypeSelector.currentIndex !== 0) {
-                            shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-                            shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        }
+                        //full access label
+//                        if (accessTypeSelector.currentIndex !== 0) {
+//                            shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
+//                            shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+//                        }
                         serverSelector.menuVisible = false
                     }
 
@@ -231,8 +257,6 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        root.fullConfigServerSelectorText = selectedText
-                        root.connectionServerSelectorText = selectedText
                         ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
@@ -240,8 +264,6 @@ PageType {
 
             DropDownType {
                 id: protocolSelector
-
-                visible: accessTypeSelector.currentIndex === 0
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -280,12 +302,6 @@ PageType {
                         protocolSelector.menuVisible = false
                     }
 
-                    Component.onCompleted: {
-                        if (accessTypeSelector.currentIndex === 0) {
-                            handler()
-                        }
-                    }
-
                     Connections {
                         target: serverSelector
 
@@ -304,13 +320,17 @@ PageType {
                         }
 
                         protocolSelector.text = selectedText
-                        root.connectionServerSelectorText = serverSelector.text
 
-                        shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                        shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
-                        fillConnectionTypeModel()
+                        if (accessTypeSelector.currentIndex === 0) {
+                            fillConnectionTypeModel()
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            ClientManagementModel.updateModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                              ServersModel.getCurrentlyProcessedServerCredentials())
+                            PageController.showBusyIndicator(false)
+                        }
                     }
 
                     function fillConnectionTypeModel() {
@@ -378,17 +398,195 @@ PageType {
                 Layout.topMargin: 40
 
                 enabled: shareButtonEnabled
+                visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
                 onClicked: {
-                    if (accessTypeSelector.currentIndex === 0) {
-                        ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
-                    } else {
-                        ExportController.generateConfig(PageShare.ConfigType.AmneziaFullAccess)
+                    ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                }
+            }
+
+            Header2Type {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 16
+
+                visible: accessTypeSelector.currentIndex === 1
+
+                headerText: qsTr("Users")
+            }
+
+            ListView {
+                id: usersListView
+                Layout.fillWidth: true
+                Layout.preferredHeight: childrenRect.height
+
+                visible: accessTypeSelector.currentIndex === 1
+
+                model: ClientManagementModel
+
+                clip: true
+                interactive: false
+
+                delegate: Item {
+                    implicitWidth: usersListView.width
+                    implicitHeight: delegateContent.implicitHeight
+
+                    ColumnLayout {
+                        id: delegateContent
+
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+
+                        anchors.rightMargin: -16
+                        anchors.leftMargin: -16
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+
+                            text: userName
+                            descriptionText: containerName
+                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                            clickedFunction: function() {
+                                userInfoDrower.open()
+                            }
+                        }
+
+                        DividerType {}
+
+                        DrawerType {
+                            id: userInfoDrower
+
+                            width: root.width
+                            height: root.height * 0.45
+
+                            ColumnLayout {
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.topMargin: 16
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 16
+
+                                spacing: 8
+
+                                Header2Type {
+                                    Layout.fillWidth: true
+                                    Layout.bottomMargin: 24
+
+                                    headerText: userName
+                                    descriptionText: serverSelector.text + ", " + containerName
+                                }
+
+                                BasicButtonType {
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 24
+
+                                    defaultColor: "transparent"
+                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                                    disabledColor: "#878B91"
+                                    textColor: "#D7D8DB"
+                                    borderWidth: 1
+
+                                    text: qsTr("Rename")
+
+                                    onClicked: function() {
+                                        clientNameEditDrawer.open()
+                                    }
+
+                                    DrawerType {
+                                        id: clientNameEditDrawer
+
+                                        width: root.width
+                                        height: root.height * 0.35
+
+                                        onVisibleChanged: {
+                                            if (clientNameEditDrawer.visible) {
+                                                clientName.textField.forceActiveFocus()
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            anchors.top: parent.top
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.topMargin: 16
+                                            anchors.leftMargin: 16
+                                            anchors.rightMargin: 16
+
+                                            TextFieldWithHeaderType {
+                                                id: clientName
+
+                                                Layout.fillWidth: true
+                                                headerText: qsTr("Client name")
+                                                textFieldText: userName
+                                            }
+
+                                            BasicButtonType {
+                                                Layout.fillWidth: true
+
+                                                text: qsTr("Save")
+
+                                                onClicked: {
+                                                    if (clientName.textFieldText !== userName) {
+                                                        PageController.showBusyIndicator(true)
+                                                        ExportController.renameClient(index,
+                                                                                      clientName.textFieldText,
+                                                                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                                        PageController.showBusyIndicator(false)
+                                                        clientNameEditDrawer.close()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                BasicButtonType {
+                                    Layout.fillWidth: true
+
+                                    defaultColor: "transparent"
+                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                                    disabledColor: "#878B91"
+                                    textColor: "#D7D8DB"
+                                    borderWidth: 1
+
+                                    text: qsTr("Revoke")
+
+                                    onClicked: function() {
+                                        questionDrawer.headerText = qsTr("Revoke the config for a user - ") + userName + "?"
+                                        questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
+                                        questionDrawer.yesButtonText = qsTr("Continue")
+                                        questionDrawer.noButtonText = qsTr("Cancel")
+
+                                        questionDrawer.yesButtonFunction = function() {
+                                            questionDrawer.close()
+                                            userInfoDrower.close()
+                                            root.revokeConfig(index)
+                                        }
+                                        questionDrawer.noButtonFunction = function() {
+                                            questionDrawer.close()
+                                        }
+                                        questionDrawer.open()
+
+
+
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            QuestionDrawer {
+                id: questionDrawer
             }
         }
     }
