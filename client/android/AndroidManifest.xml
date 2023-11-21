@@ -33,7 +33,7 @@
         android:allowNativeHeapPointerTagging="false"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/NoActionBar">
 
         <activity
             android:name=".AmneziaActivity"
