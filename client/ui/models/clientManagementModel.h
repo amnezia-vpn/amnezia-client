@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 
-#include "protocols/protocols_defs.h"
+#include "core/servercontroller.h"
 #include "settings.h"
 
 class ClientManagementModel : public QAbstractListModel
@@ -29,7 +29,7 @@ class ClientManagementModel : public QAbstractListModel
 
 public:
     enum Roles {
-        UserNameRole = Qt::UserRole + 1,
+        ClientNameRole = Qt::UserRole + 1,
         ContainerNameRole,
     };
 
@@ -54,6 +54,9 @@ private:
 
     ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials);
+
+    ErrorCode getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
+    ErrorCode getWireGuardClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
 
     QJsonArray m_clientsTable;
 

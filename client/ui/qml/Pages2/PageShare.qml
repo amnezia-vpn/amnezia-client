@@ -18,7 +18,6 @@ PageType {
 
     enum ConfigType {
         AmneziaConnection,
-        AmneziaFullAccess,
         OpenVpn,
         WireGuard
     }
@@ -46,24 +45,16 @@ PageType {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(userNameTextField.textFieldText); break;
-            case PageShare.ConfigType.AmneziaFullAccess: {
-                if (Qt.platform.os === "android") {
-                    ExportController.generateFullAccessConfigAndroid();
-                } else {
-                    ExportController.generateFullAccessConfig();
-                }
-                break;
-            }
+            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(clientNameTextField.textFieldText); break;
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(userNameTextField.textFieldText)
+                ExportController.generateOpenVpnConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
                 shareConnectionDrawer.configExtension = ".ovpn"
                 shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
                 break;
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(userNameTextField.textFieldText)
+                ExportController.generateWireGuardConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
@@ -129,6 +120,51 @@ PageType {
                 Layout.topMargin: 24
 
                 headerText: qsTr("Share VPN Access")
+
+                actionButtonImage: "qrc:/images/controls/more-vertical.svg"
+                actionButtonFunction: function() {
+                    shareFullAccessDrawer.open()
+                }
+
+                DrawerType {
+                    id: shareFullAccessDrawer
+
+                    width: root.width
+                    height: root.height * 0.45
+
+
+                    ColumnLayout {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 16
+
+                        spacing: 0
+
+                        Header2Type {
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: 16
+                            Layout.leftMargin: 16
+                            Layout.rightMargin: 16
+
+                            headerText: qsTr("Share full access to the server and VPN")
+                            descriptionText: qsTr("Use for your own devices, or share with those you trust to manage the server.")
+                        }
+
+
+                        LabelWithButtonType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("Share")
+                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                            clickedFunction: function() {
+                                PageController.goToPage(PageEnum.PageShareFullAccess)
+                                shareFullAccessDrawer.close()
+                            }
+                        }
+                    }
+                }
             }
 
             Rectangle {
@@ -189,7 +225,7 @@ PageType {
             }
 
             TextFieldWithHeaderType {
-                id: userNameTextField
+                id: clientNameTextField
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -242,11 +278,6 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        //full access label
-//                        if (accessTypeSelector.currentIndex !== 0) {
-//                            shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-//                            shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-//                        }
                         serverSelector.menuVisible = false
                     }
 
@@ -419,7 +450,7 @@ PageType {
             }
 
             ListView {
-                id: usersListView
+                id: clientsListView
                 Layout.fillWidth: true
                 Layout.preferredHeight: childrenRect.height
 
@@ -431,7 +462,7 @@ PageType {
                 interactive: false
 
                 delegate: Item {
-                    implicitWidth: usersListView.width
+                    implicitWidth: clientsListView.width
                     implicitHeight: delegateContent.implicitHeight
 
                     ColumnLayout {
@@ -447,19 +478,19 @@ PageType {
                         LabelWithButtonType {
                             Layout.fillWidth: true
 
-                            text: userName
+                            text: clientName
                             descriptionText: containerName
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                userInfoDrower.open()
+                                clientInfoDrawer.open()
                             }
                         }
 
                         DividerType {}
 
                         DrawerType {
-                            id: userInfoDrower
+                            id: clientInfoDrawer
 
                             width: root.width
                             height: root.height * 0.45
@@ -478,7 +509,7 @@ PageType {
                                     Layout.fillWidth: true
                                     Layout.bottomMargin: 24
 
-                                    headerText: userName
+                                    headerText: clientName
                                     descriptionText: serverSelector.text + ", " + containerName
                                 }
 
@@ -507,7 +538,7 @@ PageType {
 
                                         onVisibleChanged: {
                                             if (clientNameEditDrawer.visible) {
-                                                clientName.textField.forceActiveFocus()
+                                                clientNameEditor.textField.forceActiveFocus()
                                             }
                                         }
 
@@ -520,11 +551,10 @@ PageType {
                                             anchors.rightMargin: 16
 
                                             TextFieldWithHeaderType {
-                                                id: clientName
-
+                                                id: clientNameEditor
                                                 Layout.fillWidth: true
                                                 headerText: qsTr("Client name")
-                                                textFieldText: userName
+                                                textFieldText: clientName
                                             }
 
                                             BasicButtonType {
@@ -533,10 +563,10 @@ PageType {
                                                 text: qsTr("Save")
 
                                                 onClicked: {
-                                                    if (clientName.textFieldText !== userName) {
+                                                    if (clientNameEditor.textFieldText !== clientName) {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
-                                                                                      clientName.textFieldText,
+                                                                                      clientNameEditor.textFieldText,
                                                                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
                                                                                       ServersModel.getCurrentlyProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
@@ -561,14 +591,14 @@ PageType {
                                     text: qsTr("Revoke")
 
                                     onClicked: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - ") + userName + "?"
+                                        questionDrawer.headerText = qsTr("Revoke the config for a user - ") + clientName + "?"
                                         questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
                                         questionDrawer.yesButtonText = qsTr("Continue")
                                         questionDrawer.noButtonText = qsTr("Cancel")
 
                                         questionDrawer.yesButtonFunction = function() {
                                             questionDrawer.close()
-                                            userInfoDrower.close()
+                                            clientInfoDrawer.close()
                                             root.revokeConfig(index)
                                         }
                                         questionDrawer.noButtonFunction = function() {
