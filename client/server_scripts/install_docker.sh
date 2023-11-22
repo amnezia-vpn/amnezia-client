@@ -4,21 +4,14 @@ elif which yum > /dev/null 2>&1; then pm=$(which yum); silent_inst="-y -q instal
 else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, Docker pkg: $docker_pkg";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
-if ! command -v sudo > /dev/null 2>&1; then \
-  if $pm $check_pkgs; $pm $silent_inst sudo; ! command -v sudo > /dev/null 2>&1; then echo "Failed to install sudo"; exit 1; fi;\
-fi;\
-if ! command -v fuser > /dev/null 2>&1; then \
-  if sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; ! command -v fuser > /dev/null 2>&1; then echo "Failed to install psmisc"; exit 1; fi;\
-fi;\
-if ! command -v lsof > /dev/null 2>&1; then \
-  if sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; ! command -v lsof > /dev/null 2>&1; then echo "Failed to install lsof"; exit 1; fi;\
-fi;\
-if ! command -v docker > /dev/null 2>&1; then \
-  if sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg; ! command -v docker > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
+if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo; fi;\
+if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
+if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
+if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl enable --now docker && sleep 5;\
 fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl start docker && sleep 5;\
 fi;\
-if [ "$(systemctl is-active docker)" != "active" ]; then echo "Failed to start Docker."; exit 1; fi;\
+if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 docker --version
