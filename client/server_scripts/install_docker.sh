@@ -13,5 +13,4 @@ fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl start docker && sleep 5;\
 fi;\
-if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 docker --version
