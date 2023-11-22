@@ -10,8 +10,10 @@ if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $sile
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl enable --now docker && sleep 5;\
 fi;\
+sleep 1;\
 if [ "$(systemctl is-active docker)" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl start docker && sleep 5;\
 fi;\
+sleep 1;\
 if ! command -v docker > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 docker --version
