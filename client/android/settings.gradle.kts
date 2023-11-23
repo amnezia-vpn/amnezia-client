@@ -32,6 +32,7 @@ rootProject.buildFileName = "build.gradle.kts"
 include(":qt")
 include(":utils")
 include(":protocolApi")
+include(":wireguard")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties
