@@ -85,6 +85,7 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(project(":qt"))
     implementation(project(":utils"))
+    implementation(project(":protocolApi"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.security.crypto)
