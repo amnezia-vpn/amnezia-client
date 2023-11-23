@@ -14,8 +14,6 @@ docker_service=$(systemctl is-active docker);\
 if [ "$docker_service" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl start docker && sleep 5;\
 fi;\
-if ! command -v sudo > /dev/null 2>&1; then
+if ! command -v sudo > /dev/null 2>&1; then \
   echo "Failed to install Docker, command not found"; exit 1;\
-else
-  docker --version;\
-fi;\
+else docker --version; fi;\
