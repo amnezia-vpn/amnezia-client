@@ -37,7 +37,7 @@ signals:
     void serviceIsAlive(bool connected);
 
 private:
-    bool isWaitingInitStatus = true;
+    bool isWaitingStatus = true;
 
     void qtAndroidControllerInitialized();
 

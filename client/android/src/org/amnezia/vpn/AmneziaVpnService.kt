@@ -45,6 +45,7 @@ import java.io.IOException
 import java.lang.Exception
 import android.net.VpnService as BaseVpnService
 
+const val VPN_CONFIG = "VPN_CONFIG"
 
 class AmneziaVpnService : BaseVpnService()/* , LocalDnsService.Interface */ {
 

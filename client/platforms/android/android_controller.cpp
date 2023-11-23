@@ -17,9 +17,9 @@ AndroidController::AndroidController() : QObject()
     connect(this, &AndroidController::status, this,
             [this](bool isVpnConnected) {
                 qDebug() << "Android event: status; connected:" << isVpnConnected;
-                if (isWaitingInitStatus) {
+                if (isWaitingStatus) {
                     qDebug() << "Android VPN service is alive, initialization by service status";
-                    isWaitingInitStatus = false;
+                    isWaitingStatus = false;
                     emit serviceIsAlive(isVpnConnected);
                 }
             },
@@ -29,6 +29,7 @@ AndroidController::AndroidController() : QObject()
         this, &AndroidController::serviceDisconnected, this,
         [this]() {
             qDebug() << "Android event: service disconnected";
+            isWaitingStatus = true;
             emit connectionStateChanged(Vpn::ConnectionState::Unknown);
         },
         Qt::QueuedConnection);
@@ -140,7 +141,7 @@ void AndroidController::callActivityMethod(const char *methodName, const char *s
 
 ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
 {
-    isWaitingInitStatus = false;
+    isWaitingStatus = false;
     auto config = QJsonDocument(vpnConfig).toJson();
     callActivityMethod("start", "(Ljava/lang/String;)V",
                        QJniObject::fromString(config).object<jstring>());
