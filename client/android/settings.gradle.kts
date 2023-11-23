@@ -5,8 +5,6 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        // for jsocks todo: remove after finish refactoring
-        maven("https://jitpack.io")
     }
 
     includeBuild("./gradle/plugins")
@@ -18,8 +16,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // for jsocks todo: remove after finish refactoring
-        maven("https://jitpack.io")
     }
 }
 
