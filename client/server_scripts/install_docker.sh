@@ -15,5 +15,5 @@ if [ "$dist" = "debian" ]; then \
   if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst curl $docker_pkg; fi;\
   sleep 3 && sudo systemctl start docker && sleep 3;\
 fi;\
-if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
+if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker, command not found"; exit 1; fi;\
 docker --version
