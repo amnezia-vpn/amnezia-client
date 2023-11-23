@@ -11,26 +11,9 @@ class ClientManagementModel : public QAbstractListModel
 {
     Q_OBJECT
 
-    struct ClientManagementData
-    {
-        QString userId;
-        QJsonObject userData;
-
-        bool operator==(const ClientManagementData &r) const
-        {
-            return userId == r.userId;
-        }
-
-        bool operator==(const QString &otherUserId) const
-        {
-            return userId == otherUserId;
-        }
-    };
-
 public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
-        ContainerNameRole,
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);

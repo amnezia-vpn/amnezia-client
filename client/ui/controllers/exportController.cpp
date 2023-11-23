@@ -232,6 +232,14 @@ void ExportController::exportConfig(const QString &fileName)
     SystemController::saveFile(fileName, m_config);
 }
 
+void ExportController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)
+{
+    ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials);
+    if (errorCode != ErrorCode::NoError) {
+        emit exportErrorOccurred(errorString(errorCode));
+    }
+}
+
 void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
     ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials);

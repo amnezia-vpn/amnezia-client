@@ -76,6 +76,7 @@ PageType {
         }
     }
 
+    property bool isSearchBarVisible: false
     property bool showContent: false
     property bool shareButtonEnabled: true
     property list<QtObject> connectionTypesModel: [
@@ -205,8 +206,8 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ClientManagementModel.updateModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                              ServersModel.getCurrentlyProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -354,12 +355,12 @@ PageType {
 
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
-                        if (accessTypeSelector.currentIndex === 0) {
-                            fillConnectionTypeModel()
-                        } else {
+                        fillConnectionTypeModel()
+
+                        if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ClientManagementModel.updateModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                              ServersModel.getCurrentlyProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -444,9 +445,36 @@ PageType {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
 
-                visible: accessTypeSelector.currentIndex === 1
+                visible: accessTypeSelector.currentIndex === 1 && !root.isSearchBarVisible
 
                 headerText: qsTr("Users")
+                actionButtonImage: "qrc:/images/controls/search.svg"
+                actionButtonFunction: function() {
+                    root.isSearchBarVisible = true
+                }
+            }
+
+            RowLayout {
+                Layout.topMargin: 24
+                Layout.bottomMargin: 16
+                visible: accessTypeSelector.currentIndex === 1 && root.isSearchBarVisible
+
+                TextFieldWithHeaderType {
+                    id: searchTextField
+                    Layout.fillWidth: true
+
+                    textFieldPlaceholderText: qsTr("Search")
+                }
+
+                ImageButtonType {
+                    image: "qrc:/images/controls/close.svg"
+                    imageColor: "#D7D8DB"
+
+                    onClicked: function() {
+                        root.isSearchBarVisible = false
+                        searchTextField.textFieldText = ""
+                    }
+                }
             }
 
             ListView {
@@ -456,7 +484,15 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
-                model: ClientManagementModel
+                model: SortFilterProxyModel {
+                    id: proxyClientManagementModel
+                    sourceModel: ClientManagementModel
+                    filters: RegExpFilter {
+                        roleName: "clientName"
+                        pattern: ".*" + searchTextField.textFieldText + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
 
                 clip: true
                 interactive: false
@@ -479,7 +515,6 @@ PageType {
                             Layout.fillWidth: true
 
                             text: clientName
-                            descriptionText: containerName
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
@@ -510,7 +545,7 @@ PageType {
                                     Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: serverSelector.text + ", " + containerName
+                                    descriptionText: serverSelector.text
                                 }
 
                                 BasicButtonType {
@@ -618,6 +653,13 @@ PageType {
             QuestionDrawer {
                 id: questionDrawer
             }
+        }
+    }
+    MouseArea {
+        anchors.fill: parent
+        onPressed: function(mouse) {
+            forceActiveFocus()
+            mouse.accepted = false
         }
     }
 }

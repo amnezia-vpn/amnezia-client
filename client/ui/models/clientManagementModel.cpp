@@ -40,9 +40,6 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case ClientNameRole: return userData.value(configKey::clientName).toString();
-    case ContainerNameRole:
-        return ContainerProps::containerHumanNames().value(
-                static_cast<DockerContainer>(userData.value(configKey::container).toInt()));
     }
 
     return QVariant();
@@ -50,6 +47,9 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
 
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
 {
+    beginResetModel();
+    m_clientsTable = QJsonArray();
+
     ServerController serverController(m_settings);
 
     ErrorCode error = ErrorCode::NoError;
@@ -60,10 +60,10 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
             serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the clientsTable file from the server";
+        endResetModel();
         return error;
     }
 
-    beginResetModel();
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (m_clientsTable.isEmpty()) {
@@ -76,6 +76,7 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
             error = getWireGuardClients(serverController, container, credentials, count);
         }
         if (error != ErrorCode::NoError) {
+            endResetModel();
             return error;
         }
 
@@ -124,7 +125,6 @@ ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverContr
 
                 QJsonObject userData;
                 userData[configKey::clientName] = QString("Client %1").arg(count);
-                userData[configKey::container] = container;
                 client[configKey::userData] = userData;
 
                 m_clientsTable.push_back(client);
@@ -165,7 +165,6 @@ ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverCon
 
             QJsonObject userData;
             userData[configKey::clientName] = QString("Client %1").arg(count);
-            userData[configKey::container] = container;
             client[configKey::userData] = userData;
 
             m_clientsTable.push_back(client);
@@ -211,7 +210,6 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 
     QJsonObject userData;
     userData[configKey::clientName] = clientName;
-    userData[configKey::container] = container;
     client[configKey::userData] = userData;
     m_clientsTable.push_back(client);
     endResetModel();
@@ -371,6 +369,5 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[ClientNameRole] = "clientName";
-    roles[ContainerNameRole] = "containerName";
     return roles;
 }
