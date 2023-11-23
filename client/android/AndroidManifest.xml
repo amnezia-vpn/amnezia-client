@@ -138,15 +138,6 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
         </service>
 
-        <service
-            android:name=".VPNPermissionHelper"
-            android:permission="android.permission.BIND_VPN_SERVICE"
-            android:foregroundServiceType="specialUse"
-            android:exported="true">
-
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
-        </service>
-
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <provider
             android:name="androidx.core.content.FileProvider"
