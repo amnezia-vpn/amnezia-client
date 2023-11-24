@@ -6,13 +6,11 @@ import android.content.ServiceConnection
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
-import android.os.DeadObjectException
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
-import android.os.RemoteException
 import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
@@ -76,6 +74,9 @@ class AmneziaActivity : QtActivity() {
                     }
 
                     ServiceEvent.ERROR -> {
+                        msg.data?.getString(ERROR_MSG)?.let { error ->
+                            Log.e(TAG, "From VpnService: $error")
+                        }
                         // todo: add error reporting to Qt
                         QtAndroidController.onServiceError()
                     }

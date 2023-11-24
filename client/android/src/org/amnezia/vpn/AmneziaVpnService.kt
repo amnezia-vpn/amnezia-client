@@ -1,983 +1,350 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.amnezia.vpn
 
-import android.content.Context
+import android.app.Notification
+import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.LocalSocket
-import android.net.LocalSocketAddress
-import android.net.Network
-import android.net.ProxyInfo
-import android.os.*
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
-import android.text.TextUtils
-import androidx.core.content.FileProvider
-import com.wireguard.android.util.SharedLibraryLoader
-import com.wireguard.config.*
-import com.wireguard.crypto.Key
-import com.wireguard.android.backend.GoBackend
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+import android.net.VpnService
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.Message
+import android.os.Messenger
+import androidx.annotation.MainThread
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import kotlin.LazyThreadSafetyMode.NONE
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-// import org.amnezia.vpn.shadowsocks.core.Core
-// import org.amnezia.vpn.shadowsocks.core.R
-// import org.amnezia.vpn.shadowsocks.core.VpnRequestActivity
-// import org.amnezia.vpn.shadowsocks.core.acl.Acl
-// import org.amnezia.vpn.shadowsocks.core.bg.*
-// import org.amnezia.vpn.shadowsocks.core.database.Profile
-// import org.amnezia.vpn.shadowsocks.core.database.ProfileManager
-// import org.amnezia.vpn.shadowsocks.core.net.ConcurrentLocalSocketListener
-// import org.amnezia.vpn.shadowsocks.core.net.DefaultNetworkListener
-// import org.amnezia.vpn.shadowsocks.core.net.Subnet
-// import org.amnezia.vpn.shadowsocks.core.preference.DataStore
-// import org.amnezia.vpn.shadowsocks.core.utils.Key.modeVpn
-// import org.amnezia.vpn.shadowsocks.core.utils.printLog
+import org.amnezia.vpn.protocol.BadConfigException
+import org.amnezia.vpn.protocol.LoadLibraryException
+import org.amnezia.vpn.protocol.Protocol
+import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
+import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
+import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
+import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
+import org.amnezia.vpn.protocol.Statistics
+import org.amnezia.vpn.protocol.Status
+import org.amnezia.vpn.protocol.VpnStartException
+import org.amnezia.vpn.protocol.putStatistics
+import org.amnezia.vpn.protocol.putStatus
+import org.amnezia.vpn.protocol.wireguard.Wireguard
+import org.json.JSONException
 import org.json.JSONObject
-import java.io.Closeable
-import java.io.File
-import java.io.FileDescriptor
-import java.io.IOException
-import java.lang.Exception
-import android.net.VpnService as BaseVpnService
+
+private const val TAG = "AmneziaVpnService"
 
 const val VPN_CONFIG = "VPN_CONFIG"
+const val ERROR_MSG = "ERROR_MSG"
+const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
+private const val PREFS_CONFIG_KEY = "LAST_CONF"
+private const val NOTIFICATION_ID = 1337
 
-class AmneziaVpnService : BaseVpnService()/* , LocalDnsService.Interface */ {
+class AmneziaVpnService : VpnService() {
 
-    // override val data = BaseService.Data(this)
-    
-    /* override */ val tag: String get() = "AmneziaVpnService"
-//    override fun createNotification(profileName: String): ServiceNotification =
-//        ServiceNotification(this, profileName, "service-vpn")
+    private lateinit var mainScope: CoroutineScope
+    private var isServiceBound = false
+    private var protocol: Protocol? = null
+    private var protocolState = MutableStateFlow(DISCONNECTED)
 
-    private var conn: ParcelFileDescriptor? = null
-    // private var worker: ProtectWorker? = null
-    private var active = false
-    private var metered = false
-    private var mNetworkState = NetworkState(this)
-    private var underlyingNetwork: Network? = null
-        set(value) {
-            field = value
-            if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
+    private val isConnected
+        get() = protocolState.value == CONNECTED
+
+    private val isDisconnected
+        get() = protocolState.value == DISCONNECTED
+
+    private var connectionJob: Job? = null
+    private var disconnectionJob: Job? = null
+    private lateinit var clientMessenger: IpcMessenger
+
+    private val connectionExceptionHandler = CoroutineExceptionHandler { _, e ->
+        protocolState.value = DISCONNECTED
+        protocol = null
+        when (e) {
+            is IllegalArgumentException,
+            is VpnStartException -> onError(e.message ?: e.toString())
+
+            is JSONException,
+            is BadConfigException -> onError("VPN config format error: ${e.message}")
+
+            is LoadLibraryException -> onError("${e.message}. Caused: ${e.cause?.message}")
+
+            else -> throw e
         }
-    private val underlyingNetworks
-        get() =
-            // clearing underlyingNetworks makes Android 9+ consider the network to be metered
-            if (Build.VERSION.SDK_INT >= 28 && metered) null else underlyingNetwork?.let {
-                arrayOf(
-                    it
+    }
+
+    private val actionMessageHandler: Handler by lazy(NONE) {
+        object : Handler(Looper.getMainLooper()) {
+            override fun handleMessage(msg: Message) {
+                val action = msg.extractIpcMessage<Action>()
+                Log.d(TAG, "Handle action: $action")
+                when (action) {
+                    Action.REGISTER_CLIENT -> {
+                        clientMessenger.set(msg.replyTo)
+                    }
+
+                    Action.CONNECT -> {
+                        val vpnConfig = msg.data.getString(VPN_CONFIG)
+                        saveConfigToPrefs(vpnConfig)
+                        connect(vpnConfig)
+                    }
+
+                    Action.DISCONNECT -> {
+                        disconnect()
+                    }
+
+                    Action.REQUEST_STATUS -> {
+                        clientMessenger.send {
+                            ServiceEvent.STATUS.packToMessage {
+                                putStatus(Status.build {
+                                    setConnected(this@AmneziaVpnService.isConnected)
+                                })
+                            }
+                        }
+                    }
+
+                    Action.REQUEST_STATISTICS -> {
+                        clientMessenger.send {
+                            ServiceEvent.STATISTICS_UPDATE.packToMessage {
+                                putStatistics(protocol?.statistics ?: Statistics.EMPTY_STATISTICS)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private val vpnServiceMessenger: Messenger by lazy(NONE) {
+        Messenger(actionMessageHandler)
+    }
+
+    /**
+     * Notification setup
+     */
+    private val foregroundServiceTypeCompat
+        get() = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> FOREGROUND_SERVICE_TYPE_MANIFEST
+            else -> 0
+        }
+
+    private val notification: Notification by lazy(NONE) {
+        NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_amnezia_round)
+            .setShowWhen(false)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    Intent(this, AmneziaActivity::class.java),
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
-            }
-
-    val handler = Handler(Looper.getMainLooper())
-    var runnable: Runnable = object : Runnable {
-        override fun run() {
-            if (mProtocol.equals("shadowsocks", true)) {
-                /* Log.e(tag, "run:  -----------------: ${data.state}")
-                when (data.state) {
-                    BaseService.State.Connected -> {
-                        currentTunnelHandle = 1
-                        isUp = true
-                    }
-                    BaseService.State.Stopped -> {
-                        currentTunnelHandle = -1
-                        isUp = false
-                    }
-                    else -> {
-
-                    }
-                } */
-            }
-            handler.postDelayed(this, 1000L) //wait 4 sec and run again
-        }
+            )
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
     }
 
-    fun stopTest() {
-        handler.removeCallbacks(runnable)
-    }
-
-    fun startTest() {
-        handler.postDelayed(runnable, 0) //wait 0 ms and run
-    }
-
-    companion object {
-        private const val VPN_MTU = 1500
-        private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
-        private const val PRIVATE_VLAN4_ROUTER = "172.19.0.2"
-        private const val PRIVATE_VLAN6_CLIENT = "fdfe:dcba:9876::1"
-        private const val PRIVATE_VLAN6_ROUTER = "fdfe:dcba:9876::2"
-
-        /**
-         * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
-         */
-        private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
-
-        @JvmStatic
-        fun startService(c: Context) {
-            c.applicationContext.startService(
-                Intent(c.applicationContext, AmneziaVpnService::class.java).apply {
-                    putExtra("startOnly", true)
-                })
-        }
-
-    }
-
-    private var mBinder: VPNServiceBinder = VPNServiceBinder(this)
-    private var mConfig: JSONObject? = null
-    private var mProtocol: String? = null
-    private var mConnectionTime: Long = 0
-    private var mAlreadyInitialised = false
-    private var mbuilder: Builder = Builder()
-
-    private var mOpenVPNThreadv3: OpenVPNThreadv3? = null
-    var currentTunnelHandle = -1
-
-    private var intent: Intent? = null
-    private var flags = 0
-    private var startId = 0
-
-    fun init() {
-        if (mAlreadyInitialised) {
-            return
-        }
-        // Log.init(this)
-        SharedLibraryLoader.loadSharedLibrary(this, "wg-go")
-        SharedLibraryLoader.loadSharedLibrary(this, "ovpn3")
-        Log.i(tag, "Loaded libs")
-        Log.e(tag, "Wireguard Version ${GoBackend.wgVersion()}")
-        mOpenVPNThreadv3 = OpenVPNThreadv3(this)
-        mAlreadyInitialised = true
-    }
-
+    /**
+     * Service overloaded methods
+     */
     override fun onCreate() {
-        super.onCreate()        
-        NotificationUtil.show(this) // Go foreground
+        super.onCreate()
+        Log.v(TAG, "Create Amnezia VPN service")
+        mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate + connectionExceptionHandler)
+        clientMessenger = IpcMessenger(messengerName = "Client")
+        launchProtocolStateHandler()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val isAlwaysOnCompat =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isAlwaysOn
+            else intent?.component?.packageName != packageName
+
+        if (isAlwaysOnCompat) {
+            Log.v(TAG, "Start service via Always-on")
+            connect(loadConfigFromPrefs())
+        } else if (intent?.getBooleanExtra(AFTER_PERMISSION_CHECK, false) == true) {
+            Log.v(TAG, "Start service after permission check")
+            connect(loadConfigFromPrefs())
+        } else {
+            Log.v(TAG, "Start service")
+            val vpnConfig = intent?.getStringExtra(VPN_CONFIG)
+            saveConfigToPrefs(vpnConfig)
+            connect(vpnConfig)
+        }
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, foregroundServiceTypeCompat)
+        return START_REDELIVER_INTENT
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.d(TAG, "onBind by $intent")
+        if (intent?.action == "android.net.VpnService") return super.onBind(intent)
+        isServiceBound = true
+        return vpnServiceMessenger.binder
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        if (!isUp) {
-            // If the Qt Client got closed while we were not connected
-            // we do not need to stay as a foreground service.
-            stopForeground(true)
+        Log.d(TAG, "onUnbind by $intent")
+        if (intent?.action != "android.net.VpnService") {
+            isServiceBound = false
+            clientMessenger.reset()
+            if (isDisconnected) stopSelf()
         }
         return super.onUnbind(intent)
     }
 
-    override fun onDestroy() {
-        turnOff()
+    override fun onRevoke() {
+        Log.v(TAG, "onRevoke")
+        mainScope.launch {
+            disconnect()
+        }
+    }
 
+    override fun onDestroy() {
+        Log.v(TAG, "Destroy service")
+        if (!isDisconnected) {
+            protocol?.stopVpn()
+            protocolState.value = DISCONNECTED
+        }
+        mainScope.cancel()
         super.onDestroy()
     }
 
     /**
-     * EntryPoint for the Service, gets Called when AndroidController.cpp
-     * calles bindService. Returns the [VPNServiceBinder] so QT can send Requests to it.
+     * Methods responsible for processing VPN connection
      */
-    override fun onBind(intent: Intent): IBinder {
-
-        when (mProtocol) {
-            "shadowsocks" -> {
-                /* when (intent.action) {
-                    SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
-                    else -> super<LocalDnsService.Interface>.onBind(intent)
-                }
-                startTest() */
-            }
-            else -> {
-                init()
-            }
-        }
-
-        return mBinder
-    }
-
-    /**
-     * Might be the entryPoint if the Service gets Started via an
-     * Service Intent: Might be from Always-On-Vpn from Settings
-     * or from Booting the device and having "connect on boot" enabled.
-     */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        this.intent = intent
-        this.flags = flags
-        this.startId = startId
-        init()
-        intent?.let {
-            if (!isUp && intent.getBooleanExtra("startOnly", false)) {
-                Log.i(tag, "Start only!")
-                return START_REDELIVER_INTENT
-//                return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
-            }
-        }
-        // This start is from always-on
-        if (this.mConfig == null) {
-            // We don't have tunnel to turn on - Try to create one with last config the service got
-            val prefs = Prefs.get(this)
-            val lastConfString = prefs.getString("lastConf", "")
-            if (lastConfString.isNullOrEmpty()) {
-                // We have nothing to connect to -> Exit
-                Log.e(tag, "VPN service was triggered without defining a Server or having a tunnel")
-                return super<android.net.VpnService>.onStartCommand(intent, flags, startId)
-            }
-            this.mConfig = JSONObject(lastConfString)
-        }
-
-        mProtocol = mConfig!!.getString("protocol")
-        Log.e(tag, "mProtocol: $mProtocol")
-        if (mProtocol.equals("cloak", true) || (mProtocol.equals("openvpn", true))) {
-            startOpenVpn()
-            mNetworkState.bindNetworkListener()
-        }
-        /* if (mProtocol.equals("shadowsocks", true)) {
-            if (DataStore.serviceMode == modeVpn) {
-                if (prepare(this) != null) {
-                    startActivity(
-                        Intent(
-                            this,
-                            VpnRequestActivity::class.java
-                        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
-                } else {
-                    Log.e(tag, "Else part enter")
-//                    service?.startListeningForBandwidth(serviceCallback, 1000)
-                    Log.e(tag, "test")
-                    return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
-                }
-            }
-            stopRunner()
-        } */
-        return START_REDELIVER_INTENT
-    }
-
-    // Invoked when the application is revoked.
-    // At this moment, the VPN interface is already deactivated by the system.
-    override fun onRevoke() {
-        Log.v(tag, "Aman: onRevoke....................")
-        //this.turnOff()
-        super.onRevoke()
-    }
-
-    var connectionTime: Long = 0
-        get() {
-            return mConnectionTime
-        }
-
-    var isUp: Boolean = false
-        get() {
-            return when (mProtocol) {
-                "cloak",
-                "openvpn" -> {
-                    field
-                }
-                else -> {
-                    currentTunnelHandle >= 0
-                }
-            }
-        }
-        set(value) {
-            field = value
-
-            if (value) {
-                mBinder.dispatchEvent(VPNServiceBinder.EVENTS.connected, "")
-                mConnectionTime = System.currentTimeMillis()
-                return
-            }
-            mBinder.dispatchEvent(VPNServiceBinder.EVENTS.disconnected, "")
-            mConnectionTime = 0
-        }
-
-    val status: JSONObject
-        get() {
-            val deviceIpv4: String = ""
-
-            val status = when (mProtocol) {
-                "cloak",
-                "openvpn" -> {
-                    if (mOpenVPNThreadv3 == null) {
-                        Status(null, null, null, null)
-                    } else {
-                        val rx = mOpenVPNThreadv3?.getTotalRxBytes() ?: ""
-                        val tx = mOpenVPNThreadv3?.getTotalTxBytes() ?: ""
-
-                        Status(
-                            rx.toString(),
-                            tx.toString(),
-                            if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
-                            if (mConfig!!.has("device")) { mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
-                        )
+    private fun launchProtocolStateHandler() {
+        mainScope.launch {
+            protocolState.collect { protocolState ->
+                Log.d(TAG, "Protocol state: $protocolState")
+                when (protocolState) {
+                    CONNECTED -> {
+                        clientMessenger.send(ServiceEvent.CONNECTED)
                     }
-                }
-                else -> {
-                    Status(
-                        getConfigValue("rx_bytes"),
-                        getConfigValue("tx_bytes"),
-                        if (mConfig!!.has("server")) { mConfig?.getJSONObject("server")?.getString("ipv4Gateway") } else {""},
-                        if (mConfig!!.has("server")) {mConfig?.getJSONObject("device")?.getString("ipv4Address") } else {""}
-                    )
-                }
-            }
 
-            return JSONObject().apply {
-                putOpt("rx_bytes", status.rxBytes)
-                putOpt("tx_bytes", status.txBytes)
-                putOpt("endpoint", status.endpoint)
-                putOpt("deviceIpv4", status.device)
-            }
-        }
-
-    data class Status(
-        var rxBytes: String?,
-        var txBytes: String?,
-        var endpoint: String?,
-        var device: String?
-    )
-
-    /*
-    * Checks if the VPN Permission is given.
-    * If the permission is given, returns true
-    * Requests permission and returns false if not.
-    */
-    fun checkPermissions(): Boolean {
-        // See https://developer.android.com/guide/topics/connectivity/vpn#connect_a_service
-        // Call Prepare, if we get an Intent back, we dont have the VPN Permission
-        // from the user. So we need to pass this to our main Activity and exit here.
-        val intent = prepare(this)
-        if (intent == null) {
-            Log.e(tag, "VPN Permission Already Present")
-            return true
-        }
-        Log.e(tag, "Requesting VPN Permission")
-        return false
-    }
-
-    fun turnOn(json: JSONObject?): Int {
-        Log.v(tag, "Aman: turnOn....................")
-        if (!checkPermissions()) {
-            Log.e(tag, "turn on was called without no permissions present!")
-            isUp = false
-            return 0
-        }
-        Log.i(tag, "Permission okay")
-        mConfig = json!!
-        Log.i(tag, "Config: $mConfig")
-        mProtocol = mConfig!!.getString("protocol")
-        Log.i(tag, "Protocol: $mProtocol")
-
-        when (mProtocol) {
-            "cloak",
-            "openvpn" -> {
-                startOpenVpn()                
-                // Store the config in case the service gets
-                // asked boot vpn from the OS
-                val prefs = Prefs.get(this)
-                prefs.edit()
-                    .putString("lastConf", mConfig.toString())
-                    .apply()
-
-                mNetworkState.bindNetworkListener()
-            }
-            "wireguard" -> {
-                startWireGuard("wireguard")
-            }
-            "awg" -> {
-                startWireGuard("awg")
-            }
-            /* "shadowsocks" -> {
-                startShadowsocks()
-                startTest()
-            } */
-            else -> {
-                Log.e(tag, "No protocol")
-                return 0
-            }
-        }
-        NotificationUtil.show(this)
-        return 1
-    }
-
-    fun establish(): ParcelFileDescriptor? {
-        Log.v(tag, "Aman: establish....................")
-        mbuilder.allowFamily(OsConstants.AF_INET)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mbuilder.setMetered(false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
-
-        return mbuilder.establish()
-    }
-
-    fun setMtu(mtu: Int) {
-        mbuilder.setMtu(mtu)
-    }
-
-    fun addAddress(ip: String, len: Int) {
-        Log.v(tag, "mbuilder.addAddress($ip, $len)")
-        mbuilder.addAddress(ip, len)
-    }
-
-    fun addRoute(ip: String, len: Int) {
-        Log.v(tag, "mbuilder.addRoute($ip, $len)")
-        mbuilder.addRoute(ip, len)
-    }
-
-    fun addDNS(ip: String) {
-        Log.v(tag, "mbuilder.addDnsServer($ip)")
-        mbuilder.addDnsServer(ip)
-        if ("samsung".equals(Build.BRAND) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mbuilder.addRoute(ip, 32)
-        }
-    }
-    
-    fun networkChange() {
-        Log.i(tag, "mProtocol $mProtocol")
-        if (isUp){
-           mbuilder = Builder()
-           mOpenVPNThreadv3?.reconnect(0)
-        }
-    }
-
-    fun setSessionName(name: String) {
-        Log.v(tag, "mbuilder.setSession($name)")
-        mbuilder.setSession(name)
-    }
-
-    fun addHttpProxy(host: String, port: Int): Boolean {
-        val proxyInfo = ProxyInfo.buildDirectProxy(host, port)
-        Log.v(tag, "mbuilder.addHttpProxy($host, $port)")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            mbuilder.setHttpProxy(proxyInfo)
-        }
-        return true
-    }
-
-    fun setDomain(domain: String) {
-        Log.v(tag, "mbuilder.setDomain($domain)")
-        mbuilder.addSearchDomain(domain)
-    }
-
-    fun turnOff() {
-        Log.v(tag, "Aman: turnOff....................")
-        when (mProtocol) {
-            "wireguard",
-            "awg" -> {
-                GoBackend.wgTurnOff(currentTunnelHandle)
-            }
-            "cloak",
-            "openvpn" -> {
-                ovpnTurnOff()
-                mNetworkState.unBindNetworkListener()
-            }
-            /* "shadowsocks" -> {
-                stopRunner(false)
-                stopTest()
-            } */
-            else -> {
-                Log.e(tag, "No protocol")
-            }
-        }
-
-        currentTunnelHandle = -1
-        stopForeground(true)
-        isUp = false
-        stopSelf()
-    }
-
-
-    private fun ovpnTurnOff() {
-        mOpenVPNThreadv3?.stop()
-        mOpenVPNThreadv3 = null
-        Log.e(tag, "mOpenVPNThreadv3 stop!")
-    }
-
-    /**
-     * Configures an Android VPN Service Tunnel
-     * with a given Wireguard Config
-     */
-    private fun setupBuilder(config: Config, builder: Builder) {
-        // Setup Split tunnel
-        for (excludedApplication in config.`interface`.excludedApplications)
-            builder.addDisallowedApplication(excludedApplication)
-
-        // Device IP
-        for (addr in config.`interface`.addresses) builder.addAddress(addr.address, addr.mask)
-        // DNS
-        for (addr in config.`interface`.dnsServers) builder.addDnsServer(addr.hostAddress)
-        // Add All routes the VPN may route tos
-        for (peer in config.peers) {
-            for (addr in peer.allowedIps) {
-                builder.addRoute(addr.address, addr.mask)
-            }
-        }
-        builder.allowFamily(OsConstants.AF_INET)
-        builder.allowFamily(OsConstants.AF_INET6)
-        builder.setMtu(config.`interface`.mtu.orElse(1280))
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
-
-        builder.setBlocking(true)
-    }
-
-    /**
-     * Gets config value for {key} from the Current
-     * running Wireguard tunnel
-     */
-    private fun getConfigValue(key: String): String? {
-        if (!isUp) {
-            return null
-        }
-        val config = GoBackend.wgGetConfig(currentTunnelHandle) ?: return null
-        val lines = config.split("\n")
-        for (line in lines) {
-            val parts = line.split("=")
-            val k = parts.first()
-            val value = parts.last()
-            if (key == k) {
-                return value
-            }
-        }
-        return null
-    }
-
-    private fun parseConfigData(data: String): Map<String, Map<String, String>> {
-        val parseData = mutableMapOf<String, Map<String, String>>()
-        var currentSection: Pair<String, MutableMap<String, String>>? = null
-        data.lines().forEach { line ->
-            if (line.isNotEmpty()) {
-                if (line.startsWith('[')) {
-                    currentSection?.let {
-                        parseData.put(it.first, it.second)
+                    DISCONNECTED -> {
+                        clientMessenger.send(ServiceEvent.DISCONNECTED)
+                        if (!isServiceBound) stopSelf()
                     }
-                    currentSection =
-                        line.substring(1, line.indexOfLast { it == ']' }) to mutableMapOf()
-                } else {
-                    val parameter = line.split("=", limit = 2)
-                    currentSection!!.second.put(parameter.first().trim(), parameter.last().trim())
+
+                    CONNECTING, DISCONNECTING -> {}
                 }
             }
         }
-        currentSection?.let {
-            parseData.put(it.first, it.second)
-        }
-        return parseData
-    }
-    
-    
-    /**
-     * Create a Wireguard [Config]  from a [json] string -
-     * The [json] will be created in AndroidVpnProtocol.cpp
-     */
-    private fun buildWireguardConfig(obj: JSONObject, type: String): Config {
-        val confBuilder = Config.Builder()
-        val wireguardConfigData = obj.getJSONObject(type)
-        val splitTunnelType = obj.getInt("splitTunnelType")
-        val splitTunnelSites = obj.getJSONArray("splitTunnelSites")
-
-        val config = parseConfigData(wireguardConfigData.getString("config"))
-        val peerBuilder = Peer.Builder()
-        val peerConfig = config["Peer"]!!
-        peerBuilder.setPublicKey(Key.fromBase64(peerConfig["PublicKey"]))
-        peerConfig["PresharedKey"]?.let { peerBuilder.setPreSharedKey(Key.fromBase64(it)) }
-
-        val allIpString = peerConfig["AllowedIPs"]
-
-        var allowedIPList = peerConfig["AllowedIPs"]?.split(",") ?: emptyList()
-
-        /* default value in template */
-        if (allIpString == "0.0.0.0/0, ::/0") {
-            allowedIPList = emptyList()
-        }
-
-        if (allowedIPList.isEmpty() && (splitTunnelType == 0)) {
-            /* AllowedIP is empty and splitTunnel is turnoff */
-            /* use VPN for whole Internet */
-            val internetV4 = InetNetwork.parse("0.0.0.0/0") // aka The whole internet.
-            peerBuilder.addAllowedIp(internetV4)
-            val internetV6 = InetNetwork.parse("::/0") // aka The whole internet.
-            peerBuilder.addAllowedIp(internetV6)
-        } else {
-            if (!allowedIPList.isEmpty()) {
-                /* We have predefined AllowedIP in WG config */
-                /* It's have higher priority than system SplitTunnel */
-                allowedIPList.forEach {
-                    val network = InetNetwork.parse(it.trim())
-                    peerBuilder.addAllowedIp(network)
-                }
-            } else {
-                if (splitTunnelType == 1) {
-                    /* Use system SplitTunnel */
-                    /* VPN connection used only for defined IPs */
-                    for (i in 0 until splitTunnelSites.length()) {
-                        val site = splitTunnelSites.getString(i)
-                        val internet = InetNetwork.parse(site)
-                        peerBuilder.addAllowedIp(internet)
-                    }
-                }
-                if (splitTunnelType == 2) {
-                    /* Use system SplitTunnel */
-                    /* VPN connection used for all Internet exclude defined IPs */
-                    val ipRangeSet = IPRangeSet.fromString("0.0.0.0/0")
-                    ipRangeSet.remove(IPRange("127.0.0.0/8"))
-                    for (i in 0 until splitTunnelSites.length()) {
-                        val site = splitTunnelSites.getString(i)
-                        ipRangeSet.remove(IPRange(site))
-                    }
-                    val allowedIps = ipRangeSet.subnets().joinToString(", ") + ", 2000::/3"
-                    peerBuilder.parseAllowedIPs(allowedIps)
-                }
-            }
-        }
-        val endpointConfig = peerConfig["Endpoint"]
-        val endpoint = InetEndpoint.parse(endpointConfig)
-        peerBuilder.setEndpoint(endpoint)
-        peerConfig["PersistentKeepalive"]?.let { peerBuilder.setPersistentKeepalive(it.toInt()) }
-        confBuilder.addPeer(peerBuilder.build())
-
-        val ifaceBuilder = Interface.Builder()
-        val ifaceConfig = config["Interface"]!!
-        ifaceBuilder.parsePrivateKey(ifaceConfig["PrivateKey"])
-        ifaceBuilder.addAddress(InetNetwork.parse(ifaceConfig["Address"]))
-        ifaceConfig["DNS"]!!.split(",").forEach {
-            ifaceBuilder.addDnsServer(InetNetwork.parse(it.trim()).address)
-        }
-
-        ifaceBuilder.parsePrivateKey(ifaceConfig["PrivateKey"])
-        if (type == "awg_config_data") {
-            ifaceBuilder.parseJc(ifaceConfig["Jc"])
-            ifaceBuilder.parseJmin(ifaceConfig["Jmin"])
-            ifaceBuilder.parseJmax(ifaceConfig["Jmax"])
-            ifaceBuilder.parseS1(ifaceConfig["S1"])
-            ifaceBuilder.parseS2(ifaceConfig["S2"])
-            ifaceBuilder.parseH1(ifaceConfig["H1"])
-            ifaceBuilder.parseH2(ifaceConfig["H2"])
-            ifaceBuilder.parseH3(ifaceConfig["H3"])
-            ifaceBuilder.parseH4(ifaceConfig["H4"])
-        } else {
-            ifaceBuilder.parseJc("0")
-            ifaceBuilder.parseJmin("0")
-            ifaceBuilder.parseJmax("0")
-            ifaceBuilder.parseS1("0")
-            ifaceBuilder.parseS2("0")
-            ifaceBuilder.parseH1("0")
-            ifaceBuilder.parseH2("0")
-            ifaceBuilder.parseH3("0")
-            ifaceBuilder.parseH4("0")
-        }
-        /*val jExcludedApplication = obj.getJSONArray("excludedApps")
-        (0 until jExcludedApplication.length()).toList().forEach {
-        val appName = jExcludedApplication.get(it).toString()
-        ifaceBuilder.excludeApplication(appName)
-        }*/
-        confBuilder.setInterface(ifaceBuilder.build())
-
-        return confBuilder.build()
     }
 
-    fun getVpnConfig(): JSONObject {
-        return mConfig!!
-    }
+    @MainThread
+    private fun connect(vpnConfig: String?) {
+        Log.v(TAG, "Start VPN connection")
 
-   /*  private fun startShadowsocks() {
-        Log.e(tag, "startShadowsocks method enters")
-        if (mConfig != null) {
-            try {
-                Log.e(tag, "Config: $mConfig")
+        if (isConnected || protocolState.value == CONNECTING) return
 
-                ProfileManager.clear()
-                val profile = Profile()
-//                val iter: Iterator<String> = mConfig!!.keys()
-//                while (iter.hasNext()) {
-//                    val key = iter.next()
-//                    try {
-//                        val value: Any = mConfig!!.get(key)
-//                        Log.i(tag, "startShadowsocks: $key : $value")
-//                    } catch (e: JSONException) {
-//                        // Something went wrong!
-//                    }
-//                }
+        protocolState.value = CONNECTING
 
-                val shadowsocksConfig = mConfig?.getJSONObject("shadowsocks_config_data")
-
-                if (shadowsocksConfig?.has("name") == true) {
-                    profile.name = shadowsocksConfig.getString("name")
-                } else {
-                    profile.name = "amnezia"
-                }
-                if (shadowsocksConfig?.has("method") == true) {
-                    profile.method = shadowsocksConfig.getString("method").toString()
-                }
-                if (shadowsocksConfig?.has("server") == true) {
-                    profile.host = shadowsocksConfig.getString("server").toString()
-                }
-                if (shadowsocksConfig?.has("password") == true) {
-                    profile.password = shadowsocksConfig.getString("password").toString()
-                }
-                if (shadowsocksConfig?.has("server_port") == true) {
-                    profile.remotePort = shadowsocksConfig.getInt("server_port")
-                }
-//               if(mConfig?.has("local_port") == true) {
-//                   profile. = mConfig?.getInt("local_port")
-//               }
-//                profile.name = "amnezia"
-//                profile.method = "chacha20-ietf-poly1305"
-//                profile.host = "de01-ss.sshocean.net"
-//                profile.password = "ZTZhN"
-//                profile.remotePort = 8388
-
-                profile.proxyApps = false
-                profile.bypass = false
-                profile.metered = false
-                profile.dirty = false
-                profile.ipv6 = true
-
-                DataStore.profileId = ProfileManager.createProfile(profile).id
-                val switchProfile = Core.switchProfile(DataStore.profileId)
-                Log.i(tag, "startShadowsocks: SwitchProfile: $switchProfile")
-                intent?.putExtra("startOnly", false)
-                onStartCommand(
-                    intent,
-                    flags,
-                    startId
-                )
-//                startRunner()
-//                VpnManager.getInstance().run()
-//                VpnManager.getInstance()
-//                    .setOnStatusChangeListener(object : VpnManager.OnStatusChangeListener {
-//                        override fun onStatusChanged(state: BaseService.State) {
-//                            when (state) {
-//                                BaseService.State.Connected -> {
-//                                    isUp = true
-//                                }
-//                                BaseService.State.Stopped -> {
-//                                    isUp = false
-//                                }
-//                                else -> {}
-//                            }
-//                        }
-//
-//                        override fun onTrafficUpdated(profileId: Long, stats: TrafficStats) {
-//
-//                        }
-//                    })
-////                Core.startService()
-            } catch (e: Exception) {
-                Log.e(tag, "Error in startShadowsocks: $e")
-            }
-        } else {
-            Log.e(tag, "Invalid config file!!")
-        }
-    } */
-
-    private fun startOpenVpn() {
-        if (isUp || mOpenVPNThreadv3 != null) {
-            ovpnTurnOff()
-        }
-
-        mOpenVPNThreadv3 = OpenVPNThreadv3(this)
-
-        Thread({
-            mOpenVPNThreadv3?.run()
-        }).start()
-    }
-
-    private fun startWireGuard(type: String) {
-        val wireguard_conf = buildWireguardConfig(mConfig!!, type + "_config_data")
-        if (currentTunnelHandle != -1) {
-            Log.e(tag, "Tunnel already up")
-            // Turn the tunnel down because this might be a switch
-            GoBackend.wgTurnOff(currentTunnelHandle)
-        }
-        val wgConfig: String = wireguard_conf.toWgUserspaceString()
-        
-        val builder = Builder()
-        setupBuilder(wireguard_conf, builder)
-        builder.setSession("Amnezia")
-        
-        
-        builder.establish().use { tun ->
-        if (tun == null) return
-            if (type == "awg"){
-      	        currentTunnelHandle = GoBackend.wgTurnOn("awg0", tun.detachFd(), wgConfig)
-            } else {
-                currentTunnelHandle = GoBackend.wgTurnOn("amn0", tun.detachFd(), wgConfig)
-            }
-        }
-        if (currentTunnelHandle < 0) {
-            Log.e(tag, "Activation Error Code -> $currentTunnelHandle")
-            isUp = false
+        val config = parseConfigToJson(vpnConfig)
+        if (config == null) {
+            onError("Invalid VPN config")
+            protocolState.value = DISCONNECTED
             return
         }
-        protect(GoBackend.wgGetSocketV4(currentTunnelHandle))
-        protect(GoBackend.wgGetSocketV6(currentTunnelHandle))
-        isUp = true
 
-        // Store the config in case the service gets
-        // asked boot vpn from the OS
-        val prefs = Prefs.get(this)
-        prefs.edit()
-            .putString("lastConf", mConfig.toString())
-            .apply()
+        if (!checkPermission()) {
+            protocolState.value = DISCONNECTED
+            return
+        }
+
+        connectionJob = mainScope.launch {
+            disconnectionJob?.join()
+            disconnectionJob = null
+
+            protocol = getProtocol(config.getString("protocol"))
+            protocol?.let { protocol ->
+                protocol.initialize()
+                protocol.parseConfig(config)
+                protocol.startVpn(Builder(), ::protect)
+            }
+            protocolState.value = CONNECTED
+        }
     }
 
-   /*  override suspend fun startProcesses() {
-        worker = ProtectWorker().apply { start() }
+    @MainThread
+    private fun disconnect() {
+        Log.v(TAG, "Stop VPN connection")
+
+        if (isDisconnected || protocolState.value == DISCONNECTING) return
+
+        protocolState.value = DISCONNECTING
+
+        disconnectionJob = mainScope.launch {
+            connectionJob?.let {
+                if (it.isActive) it.cancelAndJoin()
+            }
+            connectionJob = null
+
+            protocol?.stopVpn()
+            protocol = null
+            protocolState.value = DISCONNECTED
+        }
+    }
+
+    private fun getProtocol(protocolName: String): Protocol =
+        when (protocolName) {
+            "wireguard" -> Wireguard(applicationContext)
+            else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
+        }
+
+    /**
+     * Utils methods
+     */
+    @MainThread
+    private fun onError(msg: String) {
+        Log.e(TAG, msg)
+        clientMessenger.send {
+            ServiceEvent.ERROR.packToMessage {
+                putString(ERROR_MSG, msg)
+            }
+        }
+    }
+
+    private fun parseConfigToJson(vpnConfig: String?): JSONObject? =
         try {
-            Log.i(tag, "startProcesses: ------------------1")
-            super.startProcesses()
-            Log.i(tag, "startProcesses: ------------------2")
-            sendFd(startVpn())
-            Log.i(tag, "startProcesses: ------------------3")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    } */
-
-   /*  override fun killProcesses(scope: CoroutineScope) {
-        super.killProcesses(scope)
-        active = false
-        scope.launch { DefaultNetworkListener.stop(this) }
-        worker?.shutdown(scope)
-        worker = null
-        conn?.close()
-        conn = null
-    } */
-
-    /* private suspend fun startVpn(): FileDescriptor {
-        val profile = data.proxy!!.profile
-        Log.i(tag, "startVpn: -----------------------1")
-        val builder = Builder()
-            .setConfigureIntent(Core.configureIntent(this))
-            .setSession(profile.formattedName)
-            .setMtu(VPN_MTU)
-            .addAddress(PRIVATE_VLAN4_CLIENT, 30)
-            .addDnsServer(PRIVATE_VLAN4_ROUTER)
-        Log.i(tag, "startVpn: -----------------------2")
-        if (profile.ipv6) {
-            builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
-            builder.addRoute("::", 0)
-        }
-        Log.i(tag, "startVpn: -----------------------3")
-        val me = packageName
-        if (profile.proxyApps) {
-            profile.individual.split('\n')
-                .filter { it != me }
-                .forEach {
-                    try {
-                        if (profile.bypass) builder.addDisallowedApplication(it)
-                        else builder.addAllowedApplication(it)
-                    } catch (ex: PackageManager.NameNotFoundException) {
-                        printLog(ex)
-                    }
-                }
-            if (profile.bypass) {
-                builder.addDisallowedApplication(me)
+            vpnConfig?.let {
+                JSONObject(it)
             }
+        } catch (e: JSONException) {
+            onError("Invalid VPN config json format: ${e.message}")
+            null
+        }
+
+    private fun checkPermission(): Boolean =
+        if (prepare(applicationContext) != null) {
+            Intent(this, VpnRequestActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.also {
+                startActivity(it)
+            }
+            false
         } else {
-            builder.addDisallowedApplication(me)
+            true
         }
-        Log.i(tag, "startVpn: -----------------------4")
-        when (profile.route) {
-            Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
-            else -> {
-                resources.getStringArray(R.array.bypass_private_route).forEach {
-                    val subnet = Subnet.fromString(it)!!
-                    builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
-                }
-                builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
-            }
-        }
-        Log.i(tag, "startVpn: -----------------------5")
-        metered = profile.metered
-        active = true   // possible race condition here?
-        Log.i(tag, "startVpn: -----------------------6")
-        builder.setUnderlyingNetworks(underlyingNetworks)
-        Log.i(tag, "startVpn: -----------------------7")
-        val conn = builder.establish() ?: throw NullConnectionException()
-        Log.i(tag, "startVpn: -----------------------8")
-        this.conn = conn
-        Log.i(tag, "startVpn: -----------------------9")
-        val cmd = arrayListOf(
-            File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
-            "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
-            "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
-            "--tunmtu", VPN_MTU.toString(),
-            "--sock-path", "sock_path",
-            "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
-            "--loglevel", "warning"
-        )
-        Log.i(tag, "startVpn: -----------------------10")
-        if (profile.ipv6) {
-            cmd += "--netif-ip6addr"
-            cmd += PRIVATE_VLAN6_ROUTER
-        }
-        Log.i(tag, "startVpn: -----------------------11")
-        cmd += "--enable-udprelay"
-        Log.i(tag, "startVpn: -----------------------12")
-        data.processes!!.start(cmd, onRestartCallback = {
-            try {
-                sendFd(conn.fileDescriptor)
-            } catch (e: ErrnoException) {
-                e.printStackTrace()
-                stopRunner(false, e.message)
-            }
-        })
-        Log.i(tag, "startVpn: -----------------------13")
-        return conn.fileDescriptor
-    } */
 
-   /*  private suspend fun sendFd(fd: FileDescriptor) {
-        var tries = 0
-        val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
-        while (true) try {
-            delay(50L shl tries)
-            LocalSocket().use { localSocket ->
-                localSocket.connect(
-                    LocalSocketAddress(
-                        path,
-                        LocalSocketAddress.Namespace.FILESYSTEM
-                    )
-                )
-                localSocket.setFileDescriptorsForSend(arrayOf(fd))
-                localSocket.outputStream.write(42)
-            }
-            return
-        } catch (e: IOException) {
-            if (tries > 5) throw e
-            tries += 1
-        }
-    } */
+    private fun loadConfigFromPrefs(): String? =
+        Prefs.get(this).getString(PREFS_CONFIG_KEY, null)
 
-
-    /* private inner class ProtectWorker : ConcurrentLocalSocketListener(
-        "ShadowsocksVpnThread",
-        File(Core.deviceStorage.noBackupFilesDir, "protect_path")
-    ) {
-        override fun acceptInternal(socket: LocalSocket) {
-            socket.inputStream.read()
-            val fd = socket.ancillaryFileDescriptors!!.single()!!
-            CloseableFd(fd).use {
-                socket.outputStream.write(if (underlyingNetwork.let { network ->
-                        if (network != null && Build.VERSION.SDK_INT >= 23) try {
-                            network.bindSocket(fd)
-                            true
-                        } catch (e: IOException) {
-                            // suppress ENONET (Machine is not on the network)
-                            if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
-                            false
-                        } else protect(getInt.invoke(fd) as Int)
-                    }) 0 else 1)
-            }
-        }
-    } */
-
-   /*  inner class NullConnectionException : NullPointerException() {
-        override fun getLocalizedMessage() = getString(R.string.reboot_required)
-    } */
-
-    class CloseableFd(val fd: FileDescriptor) : Closeable {
-        override fun close() = Os.close(fd)
-    }
+    private fun saveConfigToPrefs(config: String?) =
+        Prefs.get(this).edit().putString(PREFS_CONFIG_KEY, config).apply()
 }

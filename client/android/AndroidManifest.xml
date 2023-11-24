@@ -69,6 +69,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".VpnRequestActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity
             android:name=".ImportConfigActivity"
             android:exported="true">
 

@@ -153,7 +153,7 @@ class NetworkState(var service: AmneziaVpnService)  {
                 defaultNetwork = NetworkTransports(network, newTransports)
             }
             if (capabilitiesChanged) {
-               mService.networkChange()
+               // mService.networkChange()
                
                Log.i(tag, "onCapabilitiesChanged capabilitiesChanged $network $networkCapabilities")
                 defaultNetworkCapabilities = newCapabilities
