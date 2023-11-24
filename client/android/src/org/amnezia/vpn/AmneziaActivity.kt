@@ -43,7 +43,7 @@ class AmneziaActivity : QtActivity() {
     private var isWaitingStatus = true
     private var isServiceConnected = false
     private var isInBoundState = false
-    private var vpnServiceMessenger: Messenger? = null
+    private lateinit var vpnServiceMessenger: IpcMessenger
     private var tmpFileContentToSave: String = ""
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
@@ -93,23 +93,23 @@ class AmneziaActivity : QtActivity() {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 Log.d(TAG, "Service ${name?.flattenToString()} was connected")
                 // get a messenger from the service to send actions to the service
-                vpnServiceMessenger = Messenger(service)
+                vpnServiceMessenger.set(Messenger(service))
                 // send a messenger to the service to process service events
-                sendToService {
+                vpnServiceMessenger.send {
                     Action.REGISTER_CLIENT.packToMessage().apply {
                         replyTo = activityMessenger
                     }
                 }
                 isServiceConnected = true
                 if (isWaitingStatus) {
-                    sendToService(Action.REQUEST_STATUS)
+                    vpnServiceMessenger.send(Action.REQUEST_STATUS)
                 }
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 Log.w(TAG, "Service ${name?.flattenToString()} was unexpectedly disconnected")
                 isServiceConnected = false
-                vpnServiceMessenger = null
+                vpnServiceMessenger.reset()
                 isWaitingStatus = true
                 QtAndroidController.onServiceDisconnected()
             }
@@ -133,6 +133,10 @@ class AmneziaActivity : QtActivity() {
         super.onCreate(savedInstanceState)
         Log.v(TAG, "Create Amnezia activity")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        vpnServiceMessenger = IpcMessenger(
+            onDeadObjectException = ::doUnbindService,
+            messengerName = "VpnService"
+        )
     }
 
     override fun onStart() {
@@ -190,35 +194,6 @@ class AmneziaActivity : QtActivity() {
     }
 
     /**
-     * Methods of communication with the service
-     */
-    private fun sendToService(messenger: Messenger, msg: Message) {
-        try {
-            messenger.send(msg)
-        } catch (e: DeadObjectException) {
-            Log.w(TAG, "Service messenger is dead")
-            doUnbindService()
-        } catch (e: RemoteException) {
-            Log.w(TAG, "Sending a message to the service failed: ${e.message}")
-            doUnbindService()
-        }
-    }
-
-    @MainThread
-    private fun sendToService(msg: () -> Message) {
-        vpnServiceMessenger?.let {
-            sendToService(it, msg())
-        }
-    }
-
-    @MainThread
-    private fun sendToService(msg: Action) {
-        vpnServiceMessenger?.let {
-            sendToService(it, msg.packToMessage())
-        }
-    }
-
-    /**
      * Methods for service binding
      */
     @MainThread
@@ -236,7 +211,7 @@ class AmneziaActivity : QtActivity() {
             Log.v(TAG, "Unbind service")
             isWaitingStatus = true
             QtAndroidController.onServiceDisconnected()
-            vpnServiceMessenger = null
+            vpnServiceMessenger.reset()
             isServiceConnected = false
             isInBoundState = false
             unbindService(serviceConnection)
@@ -277,7 +252,7 @@ class AmneziaActivity : QtActivity() {
 
     private fun connectToVpn(vpnConfig: String) {
         Log.v(TAG, "Connect to VPN")
-        sendToService {
+        vpnServiceMessenger.send {
             Action.CONNECT.packToMessage {
                 putString(VPN_CONFIG, vpnConfig)
             }
@@ -295,7 +270,7 @@ class AmneziaActivity : QtActivity() {
 
     private fun disconnectFromVpn() {
         Log.v(TAG, "Disconnect from VPN")
-        sendToService(Action.DISCONNECT)
+        vpnServiceMessenger.send(Action.DISCONNECT)
     }
 
     // saving file
