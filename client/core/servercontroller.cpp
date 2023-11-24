@@ -366,7 +366,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
-    if (stdOut.contains("command not found") || stdOut.contains("sudo: not found") || stdOut.contains("docker: not found"))
+    if (stdOut.contains("command not found"))
         return ErrorCode::ServerDockerFailedError;
 
     return error;
