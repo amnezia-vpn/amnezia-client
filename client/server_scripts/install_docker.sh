@@ -10,8 +10,10 @@ if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $sile
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5 && sudo systemctl enable --now docker && sleep 5;\
 fi;\
-docker_service=$(systemctl is-active docker);\
-if [ "$docker_service" != "active" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  sleep 5 && sudo systemctl start docker && sleep 5;\
+if [ "$dist" != "fedora" ] && [ "$(systemctl is-active docker)" != "active" ]; then \
+  sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg; sleep 5 && sudo systemctl start docker && sleep 5;\
+fi;\
+if [ "$dist" = "fedora" ] && [ "$(systemctl is-active docker)" != "active" ]; then \
+  echo "Failed to start Docker"; exit 1;\
 fi;\
 docker --version
