@@ -275,7 +275,7 @@ jobs:
 
     env:
       ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.6.0
+      QT_VERSION: 6.6.1
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
 
     steps:

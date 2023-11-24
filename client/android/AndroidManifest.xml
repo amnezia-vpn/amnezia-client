@@ -30,7 +30,6 @@
     <application
         android:name=".AmneziaApplication"
         android:label="-- %%INSERT_APP_NAME%% --"
-        android:allowNativeHeapPointerTagging="false"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
         android:theme="@style/NoActionBar">
