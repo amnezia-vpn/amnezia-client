@@ -10,13 +10,13 @@ import android.os.Build
 import android.os.IBinder
 import android.system.OsConstants
 import java.io.File
-import com.wireguard.android.util.SharedLibraryLoader
-import com.wireguard.config.*
-import com.wireguard.crypto.Key
+// import com.wireguard.android.util.SharedLibraryLoader
+// import com.wireguard.config.*
+// import com.wireguard.crypto.Key
 import org.json.JSONObject
 import java.util.Base64
 
-import com.wireguard.config.*
+// import com.wireguard.config.*
 
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
@@ -32,8 +32,8 @@ import net.openvpn.ovpn3.ClientAPI_TransportStats
 
 import java.lang.StringBuilder
 
-class OpenVPNThreadv3(var service: AmneziaVpnService): ClientAPI_OpenVPNClient(), Runnable {
-    private val tag = "OpenVPNThreadv3"
+class OpenVPNThreadv3(var service: AmneziaVpnService): ClientAPI_OpenVPNClient()/* , Runnable */ {
+    /* private val tag = "OpenVPNThreadv3"
     private var mAlreadyInitialised = false
     private var mService: AmneziaVpnService = service
 
@@ -255,5 +255,5 @@ class OpenVPNThreadv3(var service: AmneziaVpnService): ClientAPI_OpenVPNClient()
 
     override fun stop() {
         super.stop()
-    }
+    } */
 }
