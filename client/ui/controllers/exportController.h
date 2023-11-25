@@ -22,6 +22,7 @@ public:
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
     Q_PROPERTY(QString config READ getConfig NOTIFY exportConfigChanged)
+    Q_PROPERTY(QString nativeConfigString READ getNativeConfigString NOTIFY exportConfigChanged)
 
 public slots:
     void generateFullAccessConfig();
@@ -35,6 +36,7 @@ public slots:
     void generateCloakConfig();
 
     QString getConfig();
+    QString getNativeConfigString();
     QList<QString> getQrCodes();
 
     void exportConfig(const QString &fileName);
@@ -61,6 +63,7 @@ private:
     std::shared_ptr<VpnConfigurator> m_configurator;
 
     QString m_config;
+    QString m_nativeConfigString;
     QList<QString> m_qrCodes;
 
 #ifdef Q_OS_ANDROID

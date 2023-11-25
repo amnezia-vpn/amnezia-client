@@ -8,10 +8,10 @@
 #include <QImage>
 #include <QStandardPaths>
 
-#include "configurators/openvpn_configurator.h"
-#include "configurators/wireguard_configurator.h"
-#include "configurators/shadowsocks_configurator.h"
 #include "configurators/cloak_configurator.h"
+#include "configurators/openvpn_configurator.h"
+#include "configurators/shadowsocks_configurator.h"
+#include "configurators/wireguard_configurator.h"
 #include "core/errorstrings.h"
 #include "systemController.h"
 #ifdef Q_OS_ANDROID
@@ -157,8 +157,6 @@ void ExportController::generateOpenVpnConfig()
         m_config.append(line + "\n");
     }
 
-    m_qrCodes = generateQrCodeImageSeries(m_config.toUtf8());
-
     emit exportConfigChanged();
 }
 
@@ -191,7 +189,8 @@ void ExportController::generateWireGuardConfig()
         m_config.append(line + "\n");
     }
 
-    m_qrCodes = generateQrCodeImageSeries(m_config.toUtf8());
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_config.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
+    m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
 
     emit exportConfigChanged();
 }
@@ -211,7 +210,8 @@ void ExportController::generateShadowSocksConfig()
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
-    QString config = m_configurator->shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, &errorCode);
+    QString config = m_configurator->shadowSocksConfigurator->genShadowSocksConfig(credentials, container,
+                                                                                   containerConfig, &errorCode);
 
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
@@ -220,15 +220,20 @@ void ExportController::generateShadowSocksConfig()
     config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::ShadowSocks, config);
     QJsonObject configJson = QJsonDocument::fromJson(config.toUtf8()).object();
 
-    m_config = QString("%1:%2@%3:%4")
-                               .arg(configJson.value("method").toString(),
-                                    configJson.value("password").toString(),
-                                    configJson.value("server").toString(),
-                                    configJson.value("server_port").toString());
+    QStringList lines = QString(QJsonDocument(configJson).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
 
-    m_config = "ss://" + m_config.toUtf8().toBase64();
+    m_nativeConfigString =
+            QString("%1:%2@%3:%4")
+                    .arg(configJson.value("method").toString(), configJson.value("password").toString(),
+                         configJson.value("server").toString(), configJson.value("server_port").toString());
 
-    m_qrCodes = generateQrCodeImageSeries(m_config.toUtf8());
+    m_nativeConfigString = "ss://" + m_config.toUtf8().toBase64();
+
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_nativeConfigString.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
+    m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
 
     emit exportConfigChanged();
 }
@@ -248,7 +253,8 @@ void ExportController::generateCloakConfig()
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
-    QString config = m_configurator->cloakConfigurator->genCloakConfig(credentials, container, containerConfig, &errorCode);
+    QString config =
+            m_configurator->cloakConfigurator->genCloakConfig(credentials, container, containerConfig, &errorCode);
 
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
@@ -265,14 +271,17 @@ void ExportController::generateCloakConfig()
         m_config.append(line + "\n");
     }
 
-    m_qrCodes = generateQrCodeImageSeries(m_config.toUtf8());
-
     emit exportConfigChanged();
 }
 
 QString ExportController::getConfig()
 {
     return m_config;
+}
+
+QString ExportController::getNativeConfigString()
+{
+    return m_nativeConfigString;
 }
 
 QList<QString> ExportController::getQrCodes()
@@ -299,7 +308,7 @@ QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &dat
         QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
         qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(ba, qrcodegen::QrCode::Ecc::LOW);
-        QString svg = QString::fromStdString(toSvgString(qr, 0));
+        QString svg = QString::fromStdString(toSvgString(qr, 1));
         chunks.append(svgToBase64(svg));
     }
 
@@ -319,5 +328,6 @@ int ExportController::getQrCodesCount()
 void ExportController::clearPreviousConfig()
 {
     m_config.clear();
+    m_nativeConfigString.clear();
     m_qrCodes.clear();
 }
