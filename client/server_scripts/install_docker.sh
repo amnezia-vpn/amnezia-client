@@ -16,6 +16,6 @@ if [ "$dist" = "debian" ]; then \
   sleep 3 && sudo systemctl start docker && sleep 3;\
 fi;\
 if [ "$dist" = "fedora" ]; then \
-  if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
+  if ! command -v docker > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 fi;\
 docker --version
