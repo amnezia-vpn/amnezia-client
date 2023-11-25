@@ -8,7 +8,7 @@ if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst su
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  sleep 5 && sudo systemctl enable --now docker && sleep 5;\
+  if [ "$dist" != "fedora" ]; then sleep 5 && sudo systemctl enable --now docker && sleep 5; fi;\
 fi;\
 if [ "$dist" != "fedora" ] && [ "$(systemctl is-active docker)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg; sleep 5 && sudo systemctl start docker && sleep 5;\
