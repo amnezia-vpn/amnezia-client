@@ -15,7 +15,5 @@ if [ "$dist" = "debian" ]; then \
   if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst curl $docker_pkg; fi;\
   sleep 3 && sudo systemctl start docker && sleep 3;\
 fi;\
-if [ "$dist" = "fedora" ]; then \
-  if ! command -v docker > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
-fi;\
 docker --version
+if [ "$(systemctl is-active docker)" != "active" ]; then echo "Docker status not active, command not found"; exit 1; fi;\
