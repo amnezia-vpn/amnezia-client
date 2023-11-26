@@ -242,7 +242,7 @@ PageType {
                 id: serverSelector
 
                 signal severSelectorIndexChanged
-                property int currentIndex: 0
+                property int currentIndex: -1
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -269,8 +269,6 @@ PageType {
                         ]
                     }
 
-                    currentIndex: 0
-
                     clickedFunction: function() {
                         handler()
 
@@ -283,8 +281,9 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        handler()
-                        serverSelector.severSelectorIndexChanged()
+                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
+                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
@@ -329,6 +328,8 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
+                        protocolSelectorListView.currentItem.y
+
                         handler()
 
                         protocolSelector.menuVisible = false
@@ -338,7 +339,7 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = 0
+                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ContainersModel.getDefaultContainer())
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }

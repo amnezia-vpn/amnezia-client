@@ -113,6 +113,8 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
+    clientId = connData.clientId;
+
     return QJsonDocument(jConfig).toJson();
 }
 
