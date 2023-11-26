@@ -9,17 +9,51 @@ import org.amnezia.vpn.protocol.InetEndpoint
 import org.amnezia.vpn.protocol.InetNetwork
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.Statistics
-import org.amnezia.vpn.protocol.VPN_SESSION_NAME
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.parseInetAddress
 import org.json.JSONObject
 
+/**
+ *    Config example:
+ *    {
+ *        "protocol": "wireguard",
+ *        "description": "Server 1",
+ *        "dns1": "1.1.1.1",
+ *        "dns2": "1.0.0.1",
+ *        "hostName": "100.100.100.0",
+ *        "splitTunnelSites": [
+ *        ],
+ *        "splitTunnelType": 0,
+ *        "wireguard_config_data": {
+ *            "client_ip": "10.8.1.1",
+ *            "hostName": "100.100.100.0",
+ *            "port": 12345,
+ *            "client_pub_key": "clientPublicKeyBase64",
+ *            "client_priv_key": "privateKeyBase64",
+ *            "psk_key": "presharedKeyBase64",
+ *            "server_pub_key": "publicKeyBase64",
+ *            "config": "[Interface]
+ *                       Address = 10.8.1.1/32
+ *                       DNS = 1.1.1.1, 1.0.0.1
+ *                       PrivateKey = privateKeyBase64
+ *
+ *                       [Peer]
+ *                       PublicKey = publicKeyBase64
+ *                       PresharedKey = presharedKeyBase64
+ *                       AllowedIPs = 0.0.0.0/0, ::/0
+ *                       Endpoint = 100.100.100.0:12345
+ *                       PersistentKeepalive = 25
+ *                       "
+ *        }
+ *    }
+ */
+
 private const val TAG = "Wireguard"
 
-class Wireguard(context: Context) : Protocol(context) {
+open class Wireguard : Protocol() {
 
     private var tunnelHandle: Int = -1
-    private lateinit var wireguardConfig: WireguardConfig
+    protected open val ifName: String = "amn0"
 
     override val statistics: Statistics
         get() {
@@ -40,14 +74,23 @@ class Wireguard(context: Context) : Protocol(context) {
             }
         }
 
-    override fun initialize() {
+    override fun initialize(context: Context) {
         loadSharedLibrary(context, "wg-go")
     }
 
-    override fun parseConfig(config: JSONObject) {
+    override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
+        val wireguardConfig = parseConfig(config)
+        start(wireguardConfig, vpnBuilder, protect)
+    }
+
+    protected open fun parseConfig(config: JSONObject): WireguardConfig {
         val configDataJson = config.getJSONObject("wireguard_config_data")
         val configData = parseConfigData(configDataJson.getString("config"))
-        wireguardConfig = WireguardConfig.build {
+        return WireguardConfig.build(wireguardConfigBuilder(configData))
+    }
+
+    protected fun wireguardConfigBuilder(configData: Map<String, String>): WireguardConfig.Builder.() -> Unit =
+        {
             configureBaseProtocol(true) {
                 configData["Address"]?.let { addAddress(InetNetwork.parse(it)) }
                 configData["DNS"]?.split(",")?.map { dns ->
@@ -64,10 +107,8 @@ class Wireguard(context: Context) : Protocol(context) {
             configData["PublicKey"]?.let { setPublicKeyHex(it.base64ToHex()) }
             configData["PresharedKey"]?.let { setPreSharedKeyHex(it.base64ToHex()) }
         }
-        this.config = wireguardConfig.baseProtocolConfig
-    }
 
-    private fun parseConfigData(data: String): Map<String, String> {
+    protected fun parseConfigData(data: String): Map<String, String> {
         val parsedData = TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
         data.lineSequence()
             .filter { it.isNotEmpty() && !it.startsWith('[') }
@@ -78,20 +119,20 @@ class Wireguard(context: Context) : Protocol(context) {
         return parsedData
     }
 
-    override fun startVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
+    private fun start(config: WireguardConfig, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         if (tunnelHandle != -1) {
             Log.w(TAG, "Tunnel already up")
             return
         }
 
-        buildVpnInterface(vpnBuilder)
+        buildVpnInterface(config, vpnBuilder)
 
         vpnBuilder.establish().use { tunFd ->
             if (tunFd == null) {
                 throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
             Log.v(TAG, "Wg-go backend ${GoBackend.wgVersion()}")
-            tunnelHandle = GoBackend.wgTurnOn(VPN_SESSION_NAME, tunFd.detachFd(), wireguardConfig.toWgUserspaceString())
+            tunnelHandle = GoBackend.wgTurnOn(ifName, tunFd.detachFd(), config.toWgUserspaceString())
         }
 
         if (tunnelHandle < 0) {

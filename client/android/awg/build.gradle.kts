@@ -8,10 +8,11 @@ kotlin {
 }
 
 android {
-    namespace = "org.amnezia.vpn.protocol"
+    namespace = "org.amnezia.vpn.protocol.awg"
 }
 
 dependencies {
     compileOnly(project(":utils"))
-    implementation(libs.androidx.annotation)
+    compileOnly(project(":protocolApi"))
+    implementation(project(":wireguard"))
 }

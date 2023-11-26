@@ -35,6 +35,7 @@ import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.Status
 import org.amnezia.vpn.protocol.VpnStartException
+import org.amnezia.vpn.protocol.awg.Awg
 import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
@@ -54,6 +55,7 @@ class AmneziaVpnService : VpnService() {
     private lateinit var mainScope: CoroutineScope
     private var isServiceBound = false
     private var protocol: Protocol? = null
+    private val protocolCache = mutableMapOf<String, Protocol>()
     private var protocolState = MutableStateFlow(DISCONNECTED)
 
     private val isConnected
@@ -272,11 +274,7 @@ class AmneziaVpnService : VpnService() {
             disconnectionJob = null
 
             protocol = getProtocol(config.getString("protocol"))
-            protocol?.let { protocol ->
-                protocol.initialize()
-                protocol.parseConfig(config)
-                protocol.startVpn(Builder(), ::protect)
-            }
+            protocol?.startVpn(config, Builder(), ::protect)
             protocolState.value = CONNECTED
         }
     }
@@ -302,10 +300,12 @@ class AmneziaVpnService : VpnService() {
     }
 
     private fun getProtocol(protocolName: String): Protocol =
-        when (protocolName) {
-            "wireguard" -> Wireguard(applicationContext)
-            else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
-        }
+        protocolCache[protocolName]
+            ?: when (protocolName) {
+                "wireguard" -> Wireguard()
+                "awg" -> Awg()
+                else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
+            }.apply { initialize(applicationContext) }
 
     /**
      * Utils methods

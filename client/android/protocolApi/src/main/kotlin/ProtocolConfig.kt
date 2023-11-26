@@ -5,7 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.net.InetAddress
 
-data class ProtocolConfig(
+open class ProtocolConfig protected constructor(
     val addresses: Set<InetNetwork>,
     val dnsServers: Set<InetAddress>,
     val routes: Set<InetNetwork>,
@@ -15,7 +15,7 @@ data class ProtocolConfig(
     val mtu: Int
 ) {
 
-    private constructor(builder: Builder) : this(
+    protected constructor(builder: Builder) : this(
         builder.addresses,
         builder.dnsServers,
         builder.routes,
@@ -49,6 +49,7 @@ data class ProtocolConfig(
 
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoute(route: InetNetwork) = apply { this.excludedRoutes += route }
+
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoutes(routes: List<InetNetwork>) = apply { this.excludedRoutes += routes }
 

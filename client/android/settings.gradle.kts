@@ -33,6 +33,7 @@ include(":qt")
 include(":utils")
 include(":protocolApi")
 include(":wireguard")
+include(":awg")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties

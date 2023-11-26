@@ -18,17 +18,17 @@ private const val TAG = "Protocol"
 
 const val VPN_SESSION_NAME = "AmneziaVPN"
 
-abstract class Protocol(protected val context: Context) {
-
-    open lateinit var config: ProtocolConfig
+abstract class Protocol {
 
     abstract val statistics: Statistics
 
-    abstract fun initialize()
+    abstract fun initialize(context: Context)
 
-    abstract fun parseConfig(config: JSONObject)
+    abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
-    protected open fun buildVpnInterface(vpnBuilder: Builder) {
+    abstract fun stopVpn()
+
+    protected open fun buildVpnInterface(config: ProtocolConfig, vpnBuilder: Builder) {
         vpnBuilder.setSession(VPN_SESSION_NAME)
         vpnBuilder.allowFamily(OsConstants.AF_INET)
         vpnBuilder.allowFamily(OsConstants.AF_INET6)
@@ -48,10 +48,6 @@ abstract class Protocol(protected val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             vpnBuilder.setMetered(false)
     }
-
-    abstract fun startVpn(vpnBuilder: Builder, protect: (Int) -> Boolean)
-
-    abstract fun stopVpn()
 
     companion object {
         private fun extractLibrary(context: Context, libraryName: String, destination: File): Boolean {

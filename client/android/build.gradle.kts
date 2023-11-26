@@ -87,6 +87,7 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":protocolApi"))
     implementation(project(":wireguard"))
+    implementation(project(":awg"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.security.crypto)

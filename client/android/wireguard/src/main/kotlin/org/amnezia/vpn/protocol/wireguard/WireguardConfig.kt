@@ -6,17 +6,17 @@ import org.amnezia.vpn.protocol.ProtocolConfig
 
 internal const val WIREGUARD_DEFAULT_MTU = 1280
 
-data class WireguardConfig(
-    val baseProtocolConfig: ProtocolConfig,
+open class WireguardConfig protected constructor(
+    protocolConfigBuilder: ProtocolConfig.Builder,
     val endpoint: InetEndpoint,
     val persistentKeepalive: Int,
     val publicKeyHex: String,
     val preSharedKeyHex: String,
     val privateKeyHex: String
-) {
+) : ProtocolConfig(protocolConfigBuilder) {
 
-    private constructor(builder: Builder) : this(
-        builder.baseProtocolConfig,
+    protected constructor(builder: Builder) : this(
+        builder.protocolConfigBuilder,
         builder.endpoint,
         builder.persistentKeepalive,
         builder.publicKeyHex,
@@ -24,11 +24,11 @@ data class WireguardConfig(
         builder.privateKeyHex
     )
 
-    fun toWgUserspaceString(): String = with(StringBuilder()) {
+    open fun toWgUserspaceString(): String = with(StringBuilder()) {
         appendLine("private_key=$privateKeyHex")
         appendLine("replace_peers=true")
         appendLine("public_key=$publicKeyHex")
-        baseProtocolConfig.routes.forEach { route ->
+        routes.forEach { route ->
             appendLine("allowed_ip=$route")
         }
         appendLine("endpoint=$endpoint")
@@ -39,7 +39,7 @@ data class WireguardConfig(
     }
 
     class Builder {
-        internal lateinit var baseProtocolConfig: ProtocolConfig
+        internal lateinit var protocolConfigBuilder: ProtocolConfig.Builder
             private set
 
         internal lateinit var endpoint: InetEndpoint
@@ -58,7 +58,7 @@ data class WireguardConfig(
             private set
 
         fun configureBaseProtocol(blockingMode: Boolean, block: ProtocolConfig.Builder.() -> Unit) = apply {
-            baseProtocolConfig = ProtocolConfig.Builder(blockingMode).apply(block).build()
+            protocolConfigBuilder = ProtocolConfig.Builder(blockingMode).apply(block)
         }
 
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
