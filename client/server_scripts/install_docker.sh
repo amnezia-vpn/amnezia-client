@@ -4,8 +4,8 @@ elif which yum > /dev/null 2>&1; then pm=$(which yum); silent_inst="-y -q instal
 else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, Docker pkg: $docker_pkg";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
-if ! command -v sudo > /dev/null 2>&1; then\
-  if $pm $check_pkgs; $pm $silent_inst sudo; ! command -v sudo > /dev/null 2>&1; then\
+if ! command -v sudo > /dev/null 2>&1; then \
+  if $pm $check_pkgs; $pm $silent_inst sudo; ! command -v sudo > /dev/null 2>&1; then \
   echo "Failed to install sudo, command not found"; exit 1;\
   fi;\
 fi;\
