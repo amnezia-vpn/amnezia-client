@@ -76,7 +76,7 @@ function raiseInstallerWindow()
 function appProcessIsRunning()
 {
     if (runningOnWindows()) {
-        var cmdArgs = ["/FI", "WINDOWTITLE eq " + appName()];
+        var cmdArgs = ["| findstr " + appExecutableFileName()];
         var result = installer.execute("tasklist", cmdArgs);
 
         if ( Number(result[1]) === 0 ) {
