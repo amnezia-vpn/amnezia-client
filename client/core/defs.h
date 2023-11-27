@@ -47,7 +47,6 @@ enum ErrorCode
     SshSftpNoMediaError,
 
     // Local errors
-    FailedToSaveConfigData,
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
     ConfigMissing,
@@ -67,7 +66,6 @@ enum ErrorCode
 
     // 3rd party utils errors
     OpenSslFailed,
-    OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
     CloakExecutableCrashed,
 

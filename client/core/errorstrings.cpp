@@ -42,7 +42,6 @@ QString errorString(ErrorCode code){
     case(SshSftpNoMediaError): return QObject::tr("Sftp error: No media was in remote drive");
 
     // Local errors
-    case (FailedToSaveConfigData): return QObject::tr("Failed to save config to disk");
     case (OpenVpnConfigMissing): return QObject::tr("OpenVPN config missing");
     case (OpenVpnManagementServerError): return QObject::tr("OpenVPN management server error");
 
