@@ -6,7 +6,7 @@ echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkg
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
 if ! command -v sudo > /dev/null 2>&1; then \
   if $pm $check_pkgs; $pm $silent_inst sudo; ! command -v sudo > /dev/null 2>&1; then \
-  echo "Failed to install sudo, command not found"; exit 1;\
+    echo "Failed to install sudo, command not found"; exit 1;\
   fi;\
 fi;\
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
