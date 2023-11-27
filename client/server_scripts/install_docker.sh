@@ -16,4 +16,4 @@ if [ "$dist" = "debian" ]; then \
   sleep 3 && sudo systemctl start docker && sleep 3;\
 fi;\
 docker --version;\
-if [ "$(systemctl is-active docker)" != "active" ]; then echo "Docker status not active, command not found"; exit 1; fi
+if [ "$(sudo systemctl is-active docker)" != "active" ]; then echo "Docker status not active, command not found"; exit 1; fi
