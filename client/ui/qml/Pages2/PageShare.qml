@@ -529,7 +529,7 @@ PageType {
                             id: clientInfoDrawer
 
                             width: root.width
-                            height: root.height * 0.45
+                            height: root.height * 0.5
 
                             ColumnLayout {
                                 anchors.top: parent.top
@@ -591,6 +591,7 @@ PageType {
                                                 Layout.fillWidth: true
                                                 headerText: qsTr("Client name")
                                                 textFieldText: clientName
+                                                textField.maximumLength: 30
                                             }
 
                                             BasicButtonType {
@@ -641,9 +642,6 @@ PageType {
                                             questionDrawer.close()
                                         }
                                         questionDrawer.open()
-
-
-
                                     }
                                 }
                             }
@@ -651,6 +649,7 @@ PageType {
                     }
                 }
             }
+
             QuestionDrawer {
                 id: questionDrawer
             }
