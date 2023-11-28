@@ -21,13 +21,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.LoadLibraryException
 import org.amnezia.vpn.protocol.Protocol
@@ -38,8 +35,10 @@ import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.Status
+import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.awg.Awg
+import org.amnezia.vpn.protocol.cloak.Cloak
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
@@ -83,7 +82,8 @@ class AmneziaVpnService : VpnService() {
         protocol = null
         when (e) {
             is IllegalArgumentException,
-            is VpnStartException -> onError(e.message ?: e.toString())
+            is VpnStartException,
+            is VpnException -> onError(e.message ?: e.toString())
 
             is JSONException,
             is BadConfigException -> onError("VPN config format error: ${e.message}")
@@ -314,6 +314,7 @@ class AmneziaVpnService : VpnService() {
                 "wireguard" -> Wireguard()
                 "awg" -> Awg()
                 "openvpn" -> OpenVpn()
+                "cloak" -> Cloak()
                 else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
             }.apply { initialize(applicationContext, protocolState) }
 

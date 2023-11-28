@@ -8,6 +8,7 @@ import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.Statistics
+import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.util.NetworkUtils
 import org.json.JSONObject
@@ -29,10 +30,10 @@ import org.json.JSONObject
  * }
  */
 
-class OpenVpn : Protocol() {
+open class OpenVpn : Protocol() {
 
     private lateinit var context: Context
-    private var openVpnClient: OpenVpnClient? = null
+    protected var openVpnClient: OpenVpnClient? = null
 
     override val statistics: Statistics
         get() {
@@ -54,6 +55,7 @@ class OpenVpn : Protocol() {
 
     override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val configBuilder = OpenVpnConfig.Builder()
+
         openVpnClient = OpenVpnClient(
             configBuilder,
             state,
@@ -61,12 +63,18 @@ class OpenVpn : Protocol() {
             makeEstablish(configBuilder, vpnBuilder),
             protect
         )
+
         try {
-            parseConfig(config)
             openVpnClient?.let { client ->
+                val openVpnConfig = parseConfig(config)
+                val evalConfig = client.eval_config(openVpnConfig)
+                if (evalConfig.error) {
+                    throw BadConfigException("OpenVPN config parse error: ${evalConfig.message}")
+                }
+
                 val status = client.connect()
                 if (status.error) {
-                    throw VpnStartException("OpenVpn connect() error: ${status.status}: ${status.message}")
+                    throw VpnException("OpenVpn connect() error: ${status.status}: ${status.message}")
                 }
             }
         } catch (e: Exception) {
@@ -80,15 +88,10 @@ class OpenVpn : Protocol() {
         openVpnClient = null
     }
 
-    private fun parseConfig(config: JSONObject) {
+    protected open fun parseConfig(config: JSONObject): ClientAPI_Config {
         val openVpnConfig = ClientAPI_Config()
         openVpnConfig.content = config.getJSONObject("openvpn_config_data").getString("config")
-        openVpnClient?.let { client ->
-            val evalConfig = client.eval_config(openVpnConfig)
-            if (evalConfig.error) {
-                throw BadConfigException("OpenVPN config parse error: ${evalConfig.message}")
-            }
-        }
+        return openVpnConfig
     }
 
     private fun makeEstablish(configBuilder: OpenVpnConfig.Builder, vpnBuilder: Builder): () -> Int =

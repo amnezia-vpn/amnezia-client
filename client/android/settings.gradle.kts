@@ -35,6 +35,7 @@ include(":protocolApi")
 include(":wireguard")
 include(":awg")
 include(":openvpn")
+include(":cloak")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties
