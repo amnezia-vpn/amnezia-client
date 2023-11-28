@@ -46,6 +46,7 @@ import androidx.core.content.ContextCompat
 import java.io.FileDescriptor
 import java.io.IOException
 import java.lang.Exception
+import org.amnezia.vpn.util.Log
 
 class NetworkState(var service: AmneziaVpnService)  {
     private var mService: AmneziaVpnService = service

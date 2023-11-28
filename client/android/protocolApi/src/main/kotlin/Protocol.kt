@@ -11,7 +11,7 @@ import androidx.annotation.RequiresApi
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
-import org.amnezia.vpn.Log
+import org.amnezia.vpn.util.Log
 import org.json.JSONObject
 
 private const val TAG = "Protocol"

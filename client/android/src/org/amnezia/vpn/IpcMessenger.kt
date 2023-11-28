@@ -4,6 +4,7 @@ import android.os.DeadObjectException
 import android.os.Message
 import android.os.Messenger
 import android.os.RemoteException
+import org.amnezia.vpn.util.Log
 
 private const val TAG = "IpcMessenger"
 

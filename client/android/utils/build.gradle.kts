@@ -8,7 +8,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.amnezia.vpn"
+    namespace = "org.amnezia.vpn.util"
 
     buildFeatures {
         // add BuildConfig class

@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
+import org.amnezia.vpn.util.Log
 import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"

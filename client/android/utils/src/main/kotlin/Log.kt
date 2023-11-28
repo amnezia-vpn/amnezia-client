@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package org.amnezia.vpn.util
 
 import android.util.Log as NativeLog
 

@@ -39,6 +39,7 @@ import org.amnezia.vpn.protocol.awg.Awg
 import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
+import org.amnezia.vpn.util.Log
 import org.json.JSONException
 import org.json.JSONObject
 

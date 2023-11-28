@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import org.amnezia.vpn.util.Log
 
 private const val TAG = "VpnRequestActivity"
 

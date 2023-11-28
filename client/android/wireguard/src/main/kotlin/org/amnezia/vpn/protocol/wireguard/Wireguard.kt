@@ -4,13 +4,13 @@ import android.content.Context
 import android.net.VpnService.Builder
 import java.util.TreeMap
 import com.wireguard.android.backend.GoBackend
-import org.amnezia.vpn.Log
 import org.amnezia.vpn.protocol.InetEndpoint
 import org.amnezia.vpn.protocol.InetNetwork
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.parseInetAddress
+import org.amnezia.vpn.util.Log
 import org.json.JSONObject
 
 /**
