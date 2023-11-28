@@ -11,6 +11,8 @@ import androidx.annotation.RequiresApi
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.amnezia.vpn.util.InetNetwork
 import org.amnezia.vpn.util.Log
 import org.json.JSONObject
 
@@ -21,8 +23,11 @@ const val VPN_SESSION_NAME = "AmneziaVPN"
 abstract class Protocol {
 
     abstract val statistics: Statistics
+    protected lateinit var state: MutableStateFlow<ProtocolState>
 
-    abstract fun initialize(context: Context)
+    open fun initialize(context: Context, state: MutableStateFlow<ProtocolState>) {
+        this.state = state
+    }
 
     abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
@@ -30,11 +35,17 @@ abstract class Protocol {
 
     protected open fun buildVpnInterface(config: ProtocolConfig, vpnBuilder: Builder) {
         vpnBuilder.setSession(VPN_SESSION_NAME)
-        vpnBuilder.allowFamily(OsConstants.AF_INET)
-        vpnBuilder.allowFamily(OsConstants.AF_INET6)
 
         for (addr in config.addresses) vpnBuilder.addAddress(addr)
+
         for (addr in config.dnsServers) vpnBuilder.addDnsServer(addr)
+        // fix for Samsung android ignoring DNS servers outside the VPN route range
+        if (Build.BRAND == "samsung") {
+            for (addr in config.dnsServers) vpnBuilder.addRoute(InetNetwork(addr))
+        }
+
+        config.searchDomain?.let { vpnBuilder.addSearchDomain(it) }
+
         for (addr in config.routes) vpnBuilder.addRoute(addr)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -43,6 +54,15 @@ abstract class Protocol {
         for (app in config.excludedApplications) vpnBuilder.addDisallowedApplication(app)
 
         vpnBuilder.setMtu(config.mtu)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            config.httpProxy?.let { vpnBuilder.setHttpProxy(it) }
+
+        if (config.allowAllAF) {
+            vpnBuilder.allowFamily(OsConstants.AF_INET)
+            vpnBuilder.allowFamily(OsConstants.AF_INET6)
+        }
+
         vpnBuilder.setBlocking(config.blockingMode)
         vpnBuilder.setUnderlyingNetworks(null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)

@@ -14,4 +14,5 @@ android {
 dependencies {
     compileOnly(project(":utils"))
     implementation(libs.androidx.annotation)
+    implementation(libs.kotlinx.coroutines)
 }

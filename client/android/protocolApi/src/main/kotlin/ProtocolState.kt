@@ -4,5 +4,6 @@ enum class ProtocolState {
     CONNECTED,
     CONNECTING,
     DISCONNECTED,
-    DISCONNECTING
+    DISCONNECTING,
+    UNKNOWN
 }

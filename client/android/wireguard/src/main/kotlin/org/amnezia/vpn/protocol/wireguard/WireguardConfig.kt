@@ -1,10 +1,10 @@
 package org.amnezia.vpn.protocol.wireguard
 
 import android.util.Base64
-import org.amnezia.vpn.protocol.InetEndpoint
 import org.amnezia.vpn.protocol.ProtocolConfig
+import org.amnezia.vpn.util.InetEndpoint
 
-internal const val WIREGUARD_DEFAULT_MTU = 1280
+private const val WIREGUARD_DEFAULT_MTU = 1280
 
 open class WireguardConfig protected constructor(
     protocolConfigBuilder: ProtocolConfig.Builder,
@@ -16,7 +16,7 @@ open class WireguardConfig protected constructor(
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
-        builder.protocolConfigBuilder,
+        builder,
         builder.endpoint,
         builder.persistentKeepalive,
         builder.publicKeyHex,
@@ -38,10 +38,7 @@ open class WireguardConfig protected constructor(
         return this.toString()
     }
 
-    class Builder {
-        internal lateinit var protocolConfigBuilder: ProtocolConfig.Builder
-            private set
-
+    open class Builder : ProtocolConfig.Builder(true) {
         internal lateinit var endpoint: InetEndpoint
             private set
 
@@ -57,9 +54,7 @@ open class WireguardConfig protected constructor(
         internal lateinit var privateKeyHex: String
             private set
 
-        fun configureBaseProtocol(blockingMode: Boolean, block: ProtocolConfig.Builder.() -> Unit) = apply {
-            protocolConfigBuilder = ProtocolConfig.Builder(blockingMode).apply(block)
-        }
+        override var mtu: Int = WIREGUARD_DEFAULT_MTU
 
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
 
@@ -71,7 +66,7 @@ open class WireguardConfig protected constructor(
 
         fun setPrivateKeyHex(privateKeyHex: String) = apply { this.privateKeyHex = privateKeyHex }
 
-        fun build(): WireguardConfig = WireguardConfig(this)
+        override fun build(): WireguardConfig = WireguardConfig(this)
     }
 
     companion object {

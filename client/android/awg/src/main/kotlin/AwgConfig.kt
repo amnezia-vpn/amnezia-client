@@ -17,7 +17,7 @@ class AwgConfig private constructor(
 ) : WireguardConfig(wireguardConfigBuilder) {
 
     private constructor(builder: Builder) : this(
-        builder.wireguardConfigBuilder,
+        builder,
         builder.jc,
         builder.jmin,
         builder.jmax,
@@ -43,58 +43,52 @@ class AwgConfig private constructor(
         return this.toString()
     }
 
-    class Builder {
-        internal lateinit var wireguardConfigBuilder: WireguardConfig.Builder
-            private set
+    class Builder : WireguardConfig.Builder() {
 
         private var _jc: Int? = null
         internal var jc: Int
             get() = _jc ?: throw BadConfigException("AWG: parameter jc is undefined")
-            private set(value) { _jc = value}
+            private set(value) { _jc = value }
 
         private var _jmin: Int? = null
         internal var jmin: Int
             get() = _jmin ?: throw BadConfigException("AWG: parameter jmin is undefined")
-            private set(value) { _jmin = value}
+            private set(value) { _jmin = value }
 
         private var _jmax: Int? = null
         internal var jmax: Int
             get() = _jmax ?: throw BadConfigException("AWG: parameter jmax is undefined")
-            private set(value) { _jmax = value}
+            private set(value) { _jmax = value }
 
         private var _s1: Int? = null
         internal var s1: Int
             get() = _s1 ?: throw BadConfigException("AWG: parameter s1 is undefined")
-            private set(value) { _s1 = value}
+            private set(value) { _s1 = value }
 
         private var _s2: Int? = null
         internal var s2: Int
             get() = _s2 ?: throw BadConfigException("AWG: parameter s2 is undefined")
-            private set(value) { _s2 = value}
+            private set(value) { _s2 = value }
 
         private var _h1: Long? = null
         internal var h1: Long
             get() = _h1 ?: throw BadConfigException("AWG: parameter h1 is undefined")
-            private set(value) { _h1 = value}
+            private set(value) { _h1 = value }
 
         private var _h2: Long? = null
         internal var h2: Long
             get() = _h2 ?: throw BadConfigException("AWG: parameter h2 is undefined")
-            private set(value) { _h2 = value}
+            private set(value) { _h2 = value }
 
         private var _h3: Long? = null
         internal var h3: Long
             get() = _h3 ?: throw BadConfigException("AWG: parameter h3 is undefined")
-            private set(value) { _h3 = value}
+            private set(value) { _h3 = value }
 
         private var _h4: Long? = null
         internal var h4: Long
             get() = _h4 ?: throw BadConfigException("AWG: parameter h4 is undefined")
-            private set(value) { _h4 = value}
-
-        fun configureWireguard(block: WireguardConfig.Builder.() -> Unit) = apply {
-            wireguardConfigBuilder = WireguardConfig.Builder().apply(block)
-        }
+            private set(value) { _h4 = value }
 
         fun setJc(jc: Int) = apply { this.jc = jc }
         fun setJmin(jmin: Int) = apply { this.jmin = jmin }
@@ -106,7 +100,7 @@ class AwgConfig private constructor(
         fun setH3(h3: Long) = apply { this.h3 = h3 }
         fun setH4(h4: Long) = apply { this.h4 = h4 }
 
-        fun build(): AwgConfig = AwgConfig(this)
+        override fun build(): AwgConfig = AwgConfig(this)
     }
 
     companion object {

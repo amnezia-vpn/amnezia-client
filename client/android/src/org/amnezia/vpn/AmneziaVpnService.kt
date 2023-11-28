@@ -21,10 +21,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.LoadLibraryException
 import org.amnezia.vpn.protocol.Protocol
@@ -32,10 +35,12 @@ import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
+import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.Status
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.awg.Awg
+import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
@@ -54,16 +59,20 @@ private const val NOTIFICATION_ID = 1337
 class AmneziaVpnService : VpnService() {
 
     private lateinit var mainScope: CoroutineScope
+    private lateinit var connectionScope: CoroutineScope
     private var isServiceBound = false
     private var protocol: Protocol? = null
     private val protocolCache = mutableMapOf<String, Protocol>()
-    private var protocolState = MutableStateFlow(DISCONNECTED)
+    private var protocolState = MutableStateFlow(UNKNOWN)
 
     private val isConnected
         get() = protocolState.value == CONNECTED
 
     private val isDisconnected
         get() = protocolState.value == DISCONNECTED
+
+    private val isUnknown
+        get() = protocolState.value == UNKNOWN
 
     private var connectionJob: Job? = null
     private var disconnectionJob: Job? = null
@@ -167,7 +176,8 @@ class AmneziaVpnService : VpnService() {
     override fun onCreate() {
         super.onCreate()
         Log.v(TAG, "Create Amnezia VPN service")
-        mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate + connectionExceptionHandler)
+        mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        connectionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + connectionExceptionHandler)
         clientMessenger = IpcMessenger(messengerName = "Client")
         launchProtocolStateHandler()
     }
@@ -205,13 +215,14 @@ class AmneziaVpnService : VpnService() {
         if (intent?.action != "android.net.VpnService") {
             isServiceBound = false
             clientMessenger.reset()
-            if (isDisconnected) stopSelf()
+            if (isUnknown || isDisconnected) stopSelf()
         }
         return super.onUnbind(intent)
     }
 
     override fun onRevoke() {
         Log.v(TAG, "onRevoke")
+        // Calls to onRevoke() method may not happen on the main thread of the process
         mainScope.launch {
             disconnect()
         }
@@ -219,10 +230,9 @@ class AmneziaVpnService : VpnService() {
 
     override fun onDestroy() {
         Log.v(TAG, "Destroy service")
-        if (!isDisconnected) {
-            protocol?.stopVpn()
-            protocolState.value = DISCONNECTED
-        }
+        // todo: add sync disconnect
+        disconnect()
+        connectionScope.cancel()
         mainScope.cancel()
         super.onDestroy()
     }
@@ -244,7 +254,7 @@ class AmneziaVpnService : VpnService() {
                         if (!isServiceBound) stopSelf()
                     }
 
-                    CONNECTING, DISCONNECTING -> {}
+                    CONNECTING, DISCONNECTING, UNKNOWN -> {}
                 }
             }
         }
@@ -270,13 +280,12 @@ class AmneziaVpnService : VpnService() {
             return
         }
 
-        connectionJob = mainScope.launch {
+        connectionJob = connectionScope.launch {
             disconnectionJob?.join()
             disconnectionJob = null
 
             protocol = getProtocol(config.getString("protocol"))
             protocol?.startVpn(config, Builder(), ::protect)
-            protocolState.value = CONNECTED
         }
     }
 
@@ -284,11 +293,11 @@ class AmneziaVpnService : VpnService() {
     private fun disconnect() {
         Log.v(TAG, "Stop VPN connection")
 
-        if (isDisconnected || protocolState.value == DISCONNECTING) return
+        if (isUnknown || isDisconnected || protocolState.value == DISCONNECTING) return
 
         protocolState.value = DISCONNECTING
 
-        disconnectionJob = mainScope.launch {
+        disconnectionJob = connectionScope.launch {
             connectionJob?.let {
                 if (it.isActive) it.cancelAndJoin()
             }
@@ -296,7 +305,6 @@ class AmneziaVpnService : VpnService() {
 
             protocol?.stopVpn()
             protocol = null
-            protocolState.value = DISCONNECTED
         }
     }
 
@@ -306,7 +314,7 @@ class AmneziaVpnService : VpnService() {
                 "wireguard" -> Wireguard()
                 "awg" -> Awg()
                 else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
-            }.apply { initialize(applicationContext) }
+            }.apply { initialize(applicationContext, protocolState) }
 
     /**
      * Utils methods

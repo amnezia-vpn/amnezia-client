@@ -4,13 +4,17 @@ import android.content.Context
 import android.net.VpnService.Builder
 import java.util.TreeMap
 import com.wireguard.android.backend.GoBackend
-import org.amnezia.vpn.protocol.InetEndpoint
-import org.amnezia.vpn.protocol.InetNetwork
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.protocol.Protocol
+import org.amnezia.vpn.protocol.ProtocolState
+import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
+import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.protocol.parseInetAddress
+import org.amnezia.vpn.util.InetEndpoint
+import org.amnezia.vpn.util.InetNetwork
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.parseInetAddress
 import org.json.JSONObject
 
 /**
@@ -74,39 +78,38 @@ open class Wireguard : Protocol() {
             }
         }
 
-    override fun initialize(context: Context) {
+    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>) {
+        super.initialize(context, state)
         loadSharedLibrary(context, "wg-go")
     }
 
     override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val wireguardConfig = parseConfig(config)
         start(wireguardConfig, vpnBuilder, protect)
+        state.value = CONNECTED
     }
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
         val configDataJson = config.getJSONObject("wireguard_config_data")
         val configData = parseConfigData(configDataJson.getString("config"))
-        return WireguardConfig.build(wireguardConfigBuilder(configData))
+        return WireguardConfig.build { configWireguard(configData) }
     }
 
-    protected fun wireguardConfigBuilder(configData: Map<String, String>): WireguardConfig.Builder.() -> Unit =
-        {
-            configureBaseProtocol(true) {
-                configData["Address"]?.let { addAddress(InetNetwork.parse(it)) }
-                configData["DNS"]?.split(",")?.map { dns ->
-                    parseInetAddress(dns.trim())
-                }?.forEach(::addDnsServer)
-                configData["AllowedIPs"]?.split(",")?.map { route ->
-                    InetNetwork.parse(route.trim())
-                }?.forEach(::addRoute)
-                setMtu(configData["MTU"]?.toInt() ?: WIREGUARD_DEFAULT_MTU)
-            }
-            configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
-            configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }
-            configData["PrivateKey"]?.let { setPrivateKeyHex(it.base64ToHex()) }
-            configData["PublicKey"]?.let { setPublicKeyHex(it.base64ToHex()) }
-            configData["PresharedKey"]?.let { setPreSharedKeyHex(it.base64ToHex()) }
-        }
+    protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>) {
+        configData["Address"]?.let { addAddress(InetNetwork.parse(it)) }
+        configData["DNS"]?.split(",")?.map { dns ->
+            parseInetAddress(dns.trim())
+        }?.forEach(::addDnsServer)
+        configData["AllowedIPs"]?.split(",")?.map { route ->
+            InetNetwork.parse(route.trim())
+        }?.forEach(::addRoute)
+        configData["MTU"]?.let { setMtu(it.toInt()) }
+        configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
+        configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }
+        configData["PrivateKey"]?.let { setPrivateKeyHex(it.base64ToHex()) }
+        configData["PublicKey"]?.let { setPublicKeyHex(it.base64ToHex()) }
+        configData["PresharedKey"]?.let { setPreSharedKeyHex(it.base64ToHex()) }
+    }
 
     protected fun parseConfigData(data: String): Map<String, String> {
         val parsedData = TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
@@ -155,5 +158,6 @@ open class Wireguard : Protocol() {
         val handleToClose = tunnelHandle
         tunnelHandle = -1
         GoBackend.wgTurnOff(handleToClose)
+        state.value = DISCONNECTED
     }
 }
