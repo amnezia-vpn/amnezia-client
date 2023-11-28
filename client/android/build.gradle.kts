@@ -88,6 +88,7 @@ dependencies {
     implementation(project(":protocolApi"))
     implementation(project(":wireguard"))
     implementation(project(":awg"))
+    implementation(project(":openvpn"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.security.crypto)

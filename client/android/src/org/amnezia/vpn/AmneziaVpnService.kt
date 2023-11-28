@@ -313,6 +313,7 @@ class AmneziaVpnService : VpnService() {
             ?: when (protocolName) {
                 "wireguard" -> Wireguard()
                 "awg" -> Awg()
+                "openvpn" -> OpenVpn()
                 else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
             }.apply { initialize(applicationContext, protocolState) }
 
