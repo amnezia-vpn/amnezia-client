@@ -230,7 +230,7 @@ void ExportController::generateShadowSocksConfig()
                     .arg(configJson.value("method").toString(), configJson.value("password").toString(),
                          configJson.value("server").toString(), configJson.value("server_port").toString());
 
-    m_nativeConfigString = "ss://" + m_config.toUtf8().toBase64();
+    m_nativeConfigString = "ss://" + m_nativeConfigString.toUtf8().toBase64();
 
     qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_nativeConfigString.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
     m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
