@@ -4,7 +4,7 @@ elif which yum > /dev/null 2>&1; then pm=$(which yum); silent_inst="-y -q instal
 else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, Docker pkg: $docker_pkg";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
-if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo;\
+if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudо;\
   if ! command -v sudo > /dev/null 2>&1; then sudo; fi;\
 fi;\
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc;\
@@ -19,7 +19,7 @@ if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $si
 fi;\
 if [ "$dist" = "debian" ]; then \
   docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
-  if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst curl $docker_pkg; fi;\
-  sleep 3 && sudo systemctl start docker && sleep 3;\
+  if [ -z "$docker_service" ]; then $pm $check_pkgs; $pm $silent_inst $docker_pkg; fi;\
+  sleep 3 && systemctl start docker && sleep 3;\
 fi;\
 docker --version
