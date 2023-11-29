@@ -308,6 +308,7 @@ class AmneziaVpnService : VpnService() {
         }
     }
 
+    @MainThread
     private fun getProtocol(protocolName: String): Protocol =
         protocolCache[protocolName]
             ?: when (protocolName) {
@@ -315,7 +316,7 @@ class AmneziaVpnService : VpnService() {
                 "awg" -> Awg()
                 "openvpn" -> OpenVpn()
                 "cloak" -> Cloak()
-                else -> throw IllegalArgumentException("Failed to load $protocolName protocol")
+                else -> throw IllegalArgumentException("Protocol '$protocolName' not found")
             }.apply { initialize(applicationContext, protocolState) }
 
     /**
