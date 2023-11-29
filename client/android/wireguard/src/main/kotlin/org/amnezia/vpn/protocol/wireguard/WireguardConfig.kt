@@ -24,9 +24,18 @@ open class WireguardConfig protected constructor(
         builder.privateKeyHex
     )
 
-    open fun toWgUserspaceString(): String = with(StringBuilder()) {
-        appendLine("private_key=$privateKeyHex")
+    fun toWgUserspaceString(): String = with(StringBuilder()) {
+        appendDeviceLine(this)
         appendLine("replace_peers=true")
+        appendPeerLine(this)
+        return this.toString()
+    }
+
+    open fun appendDeviceLine(sb: StringBuilder) = with(sb) {
+        appendLine("private_key=$privateKeyHex")
+    }
+
+    open fun appendPeerLine(sb: StringBuilder) = with(sb) {
         appendLine("public_key=$publicKeyHex")
         routes.forEach { route ->
             appendLine("allowed_ip=$route")
@@ -35,7 +44,6 @@ open class WireguardConfig protected constructor(
         if (persistentKeepalive != 0)
             appendLine("persistent_keepalive_interval=$persistentKeepalive")
         appendLine("preshared_key=$preSharedKeyHex")
-        return this.toString()
     }
 
     open class Builder : ProtocolConfig.Builder(true) {

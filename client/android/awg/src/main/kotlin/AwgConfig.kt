@@ -29,8 +29,8 @@ class AwgConfig private constructor(
         builder.h4
     )
 
-    override fun toWgUserspaceString(): String = with(StringBuilder()) {
-        append(super.toWgUserspaceString())
+    override fun appendDeviceLine(sb: StringBuilder) = with(sb) {
+        super.appendDeviceLine(this)
         appendLine("jc=$jc")
         appendLine("jmin=$jmin")
         appendLine("jmax=$jmax")
@@ -40,7 +40,6 @@ class AwgConfig private constructor(
         appendLine("h2=$h2")
         appendLine("h3=$h3")
         appendLine("h4=$h4")
-        return this.toString()
     }
 
     class Builder : WireguardConfig.Builder() {

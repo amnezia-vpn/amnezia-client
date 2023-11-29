@@ -65,7 +65,7 @@ open class Wireguard : Protocol() {
             val config = GoBackend.wgGetConfig(tunnelHandle) ?: return Statistics.EMPTY_STATISTICS
             return Statistics.build {
                 var optsCount = 0
-                config.splitToSequence("\\n").forEach { line ->
+                config.splitToSequence("\n").forEach { line ->
                     with(line) {
                         when {
                             startsWith("rx_bytes=") -> setRxBytes(substring(9).toLong()).also { ++optsCount }
