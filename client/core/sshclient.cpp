@@ -333,7 +333,7 @@ namespace libssh {
 
         switch (errorCode) {
         case(SSH_NO_ERROR): return ErrorCode::NoError;
-        case(SSH_REQUEST_DENIED): return ErrorCode::SshRequsetDeniedError;
+        case(SSH_REQUEST_DENIED): return ErrorCode::SshRequestDeniedError;
         case(SSH_EINTR): return ErrorCode::SshInterruptedError;
         case(SSH_FATAL): return ErrorCode::SshInternalError;
         default: return ErrorCode::SshInternalError;

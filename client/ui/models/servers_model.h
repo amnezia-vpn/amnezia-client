@@ -60,6 +60,8 @@ public slots:
 
     bool isDefaultServerConfigContainsAmneziaDns();
 
+    void updateContainersConfig();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

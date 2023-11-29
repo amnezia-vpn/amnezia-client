@@ -24,7 +24,7 @@ PageType {
         }
 
         function onImportFinished() {
-            if (ConnectionController.isConnected) {
+            if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
             }
 
