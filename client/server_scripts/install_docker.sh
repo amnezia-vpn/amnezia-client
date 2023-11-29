@@ -5,16 +5,16 @@ else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, Docker pkg: $docker_pkg";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
 if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo;\
-  if ! command -v sudo > /dev/null 2>&1; then sudo; exit 1; fi;\
+  if ! command -v sudo > /dev/null 2>&1; then sudo; fi;\
 fi;\
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc;\
-  if ! command -v fuser > /dev/null 2>&1; then fuser; exit 1; fi;\
+  if ! command -v fuser > /dev/null 2>&1; then fuser; fi;\
 fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof;\
-  if ! command -v lsof > /dev/null 2>&1; then lsof; exit 1; fi;\
+  if ! command -v lsof > /dev/null 2>&1; then lsof; fi;\
 fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  if ! command -v docker > /dev/null 2>&1; then docker; exit 1; fi;\
+  if ! command -v docker > /dev/null 2>&1; then docker; fi;\
   if [ "$dist" = "fedora" ] || [ "$dist" = "centos" ] || [ "$dist" = "debian" ]; then sudo systemctl enable docker && sudo systemctl start docker; fi;\
 fi;\
 if [ "$dist" = "debian" ]; then \
