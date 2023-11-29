@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.amnezia.vpn.protocol.BadConfigException
@@ -54,6 +55,7 @@ const val ERROR_MSG = "ERROR_MSG"
 const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val NOTIFICATION_ID = 1337
+private const val STATISTICS_SENDING_TIMEOUT = 1000L
 
 class AmneziaVpnService : VpnService() {
 
@@ -75,6 +77,7 @@ class AmneziaVpnService : VpnService() {
 
     private var connectionJob: Job? = null
     private var disconnectionJob: Job? = null
+    private var statisticsSendingJob: Job? = null
     private lateinit var clientMessenger: IpcMessenger
 
     private val connectionExceptionHandler = CoroutineExceptionHandler { _, e ->
@@ -120,14 +123,6 @@ class AmneziaVpnService : VpnService() {
                                 putStatus(Status.build {
                                     setConnected(this@AmneziaVpnService.isConnected)
                                 })
-                            }
-                        }
-                    }
-
-                    Action.REQUEST_STATISTICS -> {
-                        clientMessenger.send {
-                            ServiceEvent.STATISTICS_UPDATE.packToMessage {
-                                putStatistics(protocol?.statistics ?: Statistics.EMPTY_STATISTICS)
                             }
                         }
                     }
@@ -207,6 +202,7 @@ class AmneziaVpnService : VpnService() {
         Log.d(TAG, "onBind by $intent")
         if (intent?.action == "android.net.VpnService") return super.onBind(intent)
         isServiceBound = true
+        if (isConnected) launchSendingStatistics()
         return vpnServiceMessenger.binder
     }
 
@@ -214,6 +210,7 @@ class AmneziaVpnService : VpnService() {
         Log.d(TAG, "onUnbind by $intent")
         if (intent?.action != "android.net.VpnService") {
             isServiceBound = false
+            stopSendingStatistics()
             clientMessenger.reset()
             if (isUnknown || isDisconnected) stopSelf()
         }
@@ -247,17 +244,44 @@ class AmneziaVpnService : VpnService() {
                 when (protocolState) {
                     CONNECTED -> {
                         clientMessenger.send(ServiceEvent.CONNECTED)
+                        if (isServiceBound) launchSendingStatistics()
                     }
 
                     DISCONNECTED -> {
                         clientMessenger.send(ServiceEvent.DISCONNECTED)
+                        stopSendingStatistics()
                         if (!isServiceBound) stopSelf()
                     }
 
-                    CONNECTING, DISCONNECTING, UNKNOWN -> {}
+                    DISCONNECTING -> {
+                        stopSendingStatistics()
+                    }
+
+                    CONNECTING, UNKNOWN -> {}
                 }
             }
         }
+    }
+
+    @MainThread
+    private fun launchSendingStatistics() {
+        if (isServiceBound && isConnected) {
+            statisticsSendingJob = mainScope.launch {
+                while (true) {
+                    clientMessenger.send {
+                        ServiceEvent.STATISTICS_UPDATE.packToMessage {
+                            putStatistics(protocol?.statistics ?: Statistics.EMPTY_STATISTICS)
+                        }
+                    }
+                    delay(STATISTICS_SENDING_TIMEOUT)
+                }
+            }
+        }
+    }
+
+    @MainThread
+    private fun stopSendingStatistics() {
+        statisticsSendingJob?.cancel()
     }
 
     @MainThread
