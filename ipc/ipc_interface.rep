@@ -1,5 +1,7 @@
 #include <QtCore>
 #include <QString>
+#include <QJsonObject>
+#include "../client/daemon/interfaceconfig.h"
 
 class IpcInterface
 {
@@ -22,5 +24,8 @@ class IpcInterface
     SLOT( bool copyWireguardConfig(const QString &sourcePath) );
     SLOT( bool isWireguardRunning() );
     SLOT( bool isWireguardConfigExists(const QString &configPath) );
+    SLOT( bool enableKillSwitch(int vpnAdapterIndex) );
+    SLOT( bool disableKillSwitch() );
+    SLOT( bool enablePeerTraffic(const QJsonObject &configStr));
 };
 

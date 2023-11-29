@@ -4,6 +4,8 @@
 #include <QLocalServer>
 #include <QObject>
 #include <QRemoteObjectNode>
+#include <QJsonObject>
+#include "../client/daemon/interfaceconfig.h"
 
 #include "ipc.h"
 #include "ipcserverprocess.h"
@@ -28,6 +30,9 @@ public:
     virtual bool copyWireguardConfig(const QString &sourcePath) override;
     virtual bool isWireguardRunning() override;
     virtual bool isWireguardConfigExists(const QString &configPath) override;
+    virtual bool enableKillSwitch(int vpnAdapterIndex) override;
+    virtual bool disableKillSwitch() override;
+    virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
 
 private:
     int m_localpid = 0;

@@ -4,6 +4,7 @@
 #include <QRandomGenerator>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QNetworkInterface>
 
 #include "logger.h"
 #include "openvpnprotocol.h"
@@ -53,6 +54,11 @@ void OpenVpnProtocol::stop()
         QThread::msleep(10);
         m_managementServer.stop();
     }
+
+#ifdef Q_OS_WIN
+    IpcClient::Interface()->disableKillSwitch();
+#endif
+
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
@@ -85,13 +91,13 @@ void OpenVpnProtocol::killOpenVpnProcess()
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
     if (configuration.contains(ProtocolProps::key_proto_config_data(Proto::OpenVpn))) {
+        m_configData = configuration;
         QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::OpenVpn)).toObject();
 
         m_configFile.open();
         m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
         m_configFile.close();
         m_configFileName = m_configFile.fileName();
-
         qDebug().noquote() << QString("Set config data") << m_configFileName;
     }
 }
@@ -320,14 +326,25 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
     // line looks like
     // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart
     // 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
-
     QStringList params = line.split(",");
     for (const QString &l : params) {
         if (l.contains("ifconfig")) {
             if (l.split(" ").size() == 3) {
                 m_vpnLocalAddress = l.split(" ").at(1);
                 m_vpnGateway = l.split(" ").at(2);
-
+#ifdef Q_OS_WIN
+                QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+                for (int i = 0; i < netInterfaces.size(); i++) {
+                    for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
+                    {
+                        if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
+                            IpcClient::Interface()->enableKillSwitch(netInterfaces.at(i).index());
+                            m_configData.insert("vpnGateway", m_vpnGateway);
+                            IpcClient::Interface()->enablePeerTraffic(m_configData);
+                        }
+                    }
+                }
+#endif
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }
         }

@@ -8,8 +8,11 @@
 #include "router.h"
 #include "logger.h"
 
+#include "../client/protocols/protocols_defs.h"
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
+#include "../client/platforms/windows/daemon/windowsfirewall.h"
+
 #endif
 
 IpcServer::IpcServer(QObject *parent):
@@ -22,15 +25,14 @@ int IpcServer::createPrivilegedProcess()
     qDebug() << "IpcServer::createPrivilegedProcess";
 #endif
 
+#ifdef Q_OS_WIN
+    WindowsFirewall::instance()->init();
+#endif
+
     m_localpid++;
 
     ProcessDescriptor pd(this);
-//    pd.serverNode->setHostUrl(QUrl(amnezia::getIpcProcessUrl(m_localpid)));
-//    pd.serverNode->enableRemoting(pd.ipcProcess.data());
 
-
-
-    //pd.localServer = QSharedPointer<QLocalServer>(new QLocalServer(this));
     pd.localServer->setSocketOptions(QLocalServer::WorldAccessOption);
 
     if (!pd.localServer->listen(amnezia::getIpcProcessUrl(m_localpid))) {
@@ -222,4 +224,71 @@ bool IpcServer::isWireguardConfigExists(const QString &configPath)
 #endif
 
     return QFileInfo::exists(configPath);
+}
+
+bool IpcServer::enableKillSwitch(int vpnAdapterIndex)
+{
+#ifdef Q_OS_WIN
+    return WindowsFirewall::instance()->enableKillSwitch(vpnAdapterIndex);
+#endif
+    return true;
+}
+
+bool IpcServer::disableKillSwitch()
+{
+#ifdef Q_OS_WIN
+    return WindowsFirewall::instance()->disableKillSwitch();
+#endif
+    return true;
+}
+
+bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
+{
+#ifdef Q_OS_WIN
+    InterfaceConfig config;
+    config.m_dnsServer = configStr.value(amnezia::config_key::dns1).toString();
+    config.m_serverPublicKey = "openvpn";
+    config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
+
+    int splitTunnelType = configStr.value("splitTunnelType").toInt();
+    QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
+
+    qDebug() << "splitTunnelType " << splitTunnelType << "splitTunnelSites " << splitTunnelSites;
+
+    QStringList AllowedIPAddesses;
+
+    // Use APP split tunnel
+    if (splitTunnelType == 0 || splitTunnelType == 2) {
+            config.m_allowedIPAddressRanges.append(
+                    IPAddress(QHostAddress("0.0.0.0"), 0));
+            config.m_allowedIPAddressRanges.append(
+                IPAddress(QHostAddress("::"), 0));
+    }
+
+    if (splitTunnelType == 1) {
+        for (auto v : splitTunnelSites) {
+            QString ipRange = v.toString();
+            qDebug() << "ipRange " << ipRange;
+            if (ipRange.split('/').size() > 1){
+                config.m_allowedIPAddressRanges.append(
+                    IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
+            } else {
+                 config.m_allowedIPAddressRanges.append(
+                    IPAddress(QHostAddress(ipRange), 32));
+
+            }
+        }
+    }
+
+    config.m_excludedAddresses.append(configStr.value(amnezia::config_key::hostName).toString());
+    if (splitTunnelType == 2) {
+        for (auto v : splitTunnelSites) {
+            QString ipRange = v.toString();
+            config.m_excludedAddresses.append(ipRange);
+        }
+    }
+
+    return WindowsFirewall::instance()->enablePeerTraffic(config);
+#endif
+    return true;
 }
