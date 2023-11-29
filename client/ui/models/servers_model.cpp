@@ -145,6 +145,11 @@ QString ServersModel::getCurrentlyProcessedServerHostName()
     return qvariant_cast<QString>(data(m_currentlyProcessedServerIndex, HostNameRole));
 }
 
+const ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
+{
+    return serverCredentials(m_currentlyProcessedServerIndex);
+}
+
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currentlyProcessedServerIndex;

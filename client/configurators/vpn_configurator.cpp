@@ -28,11 +28,11 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *pa
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, Proto proto, ErrorCode *errorCode)
+                                              const QJsonObject &containerConfig, Proto proto, QString &clientId, ErrorCode *errorCode)
 {
     switch (proto) {
     case Proto::OpenVpn:
-        return openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, errorCode);
+        return openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, clientId, errorCode);
 
     case Proto::ShadowSocks:
         return shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, errorCode);
@@ -40,10 +40,10 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     case Proto::Cloak: return cloakConfigurator->genCloakConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::WireGuard:
-        return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, errorCode);
+        return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, clientId, errorCode);
 
     case Proto::Awg:
-        return awgConfigurator->genAwgConfig(credentials, container, containerConfig, errorCode);
+        return awgConfigurator->genAwgConfig(credentials, container, containerConfig, clientId, errorCode);
 
     case Proto::Ikev2: return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
 

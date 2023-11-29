@@ -87,6 +87,7 @@ Switch {
         id: content
 
         anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
 
         ListItemTitleType {
             Layout.fillWidth: true
