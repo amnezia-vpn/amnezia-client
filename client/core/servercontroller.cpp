@@ -364,8 +364,6 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
                       cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
-    if (stdOut.contains("Packet manager not found"))
-        return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("command not found"))
