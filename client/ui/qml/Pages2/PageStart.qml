@@ -82,6 +82,7 @@ PageType {
         target: InstallController
 
         function onInstallationErrorOccurred(errorMessage) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(errorMessage)
 
             var needCloseCurrentPage = false

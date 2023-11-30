@@ -634,9 +634,9 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     return stdOut;
 }
 
-void ServerController::setCancelInstallation(const bool cancel)
+void ServerController::cancelInstallation()
 {
-    m_cancelInstallation = cancel;
+    m_cancelInstallation = true;
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
@@ -737,6 +737,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
 
 ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container)
 {
+    m_cancelInstallation = false;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -784,7 +785,6 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     watcher.setFuture(future);
     wait.exec();
 
-    m_cancelInstallation = false;
     emit serverIsBusy(false);
 
     return future.result();
