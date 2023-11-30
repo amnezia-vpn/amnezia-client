@@ -83,7 +83,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 }
 
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, ErrorCode *errorCode)
+                                              const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
 {
     ServerController serverController(m_settings);
     QString config =
@@ -113,6 +113,8 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
+    clientId = connData.clientId;
+
     return QJsonDocument(jConfig).toJson();
 }
 
@@ -131,13 +133,13 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
         config.append("block-ipv6\n");
     }
     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-        
+
         // no redirect-gateway
     }
     if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-#ifndef Q_OS_ANDROID    
+#ifndef Q_OS_ANDROID
         config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-#endif       
+#endif
         // Prevent ipv6 leak
         config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
         config.append("block-ipv6\n");

@@ -39,6 +39,7 @@
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/sites_model.h"
+#include "ui/models/clientManagementModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -94,6 +95,7 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;

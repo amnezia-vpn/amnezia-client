@@ -227,11 +227,14 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
         configData = lastVpnConfig.value(proto);
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
     } else {
-        configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, errorCode);
+        QString clientId;
+        configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, clientId, errorCode);
 
         if (errorCode && *errorCode) {
             return "";
         }
+
+        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
 
         QString configDataBeforeLocalProcessing = configData;
 
@@ -323,7 +326,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     ErrorCode e = ErrorCode::NoError;
 
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
-    emit newVpnConfigurationCreated();
+
     if (e) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
@@ -377,7 +380,8 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     // Allow traffic to Amezia DNS
     if (routeMode == Settings::VpnOnlyForwardSites){
-        sitesJsonArray.append(amnezia::protocols::dns::amneziaDnsIp);
+        sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+        sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
     }
 
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);

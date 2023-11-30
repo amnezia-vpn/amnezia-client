@@ -279,7 +279,7 @@ void AmneziaApplication::initModels()
 {
     m_containersModel.reset(new ContainersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
-    connect(m_vpnConnection.get(), &VpnConnection::newVpnConfigurationCreated, m_containersModel.get(),
+    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, m_containersModel.get(),
             &ContainersModel::updateContainersConfig);
 
     m_serversModel.reset(new ServersModel(m_settings, this));
@@ -288,6 +288,8 @@ void AmneziaApplication::initModels()
             &ContainersModel::setCurrentlyProcessedServerIndex);
     connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
             &ContainersModel::setCurrentlyProcessedServerIndex);
+    connect(m_containersModel.get(), &ContainersModel::containersModelUpdated, m_serversModel.get(),
+            &ServersModel::updateContainersConfig);
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -322,6 +324,11 @@ void AmneziaApplication::initModels()
 
     m_sftpConfigModel.reset(new SftpConfigModel(this));
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
+
+    m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
+    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, m_clientManagementModel.get(),
+            &ClientManagementModel::appendClient);
 }
 
 void AmneziaApplication::initControllers()
@@ -347,12 +354,12 @@ void AmneziaApplication::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
-    if (m_settingsController->isAutoStartEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
 

@@ -114,6 +114,30 @@ DrawerType {
 
                 BasicButtonType {
                     Layout.fillWidth: true
+                    Layout.topMargin: 8
+
+                    visible: nativeConfigString.text !== ""
+
+                    defaultColor: "transparent"
+                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                    disabledColor: "#878B91"
+                    textColor: "#D7D8DB"
+                    borderWidth: 1
+
+                    text: qsTr("Copy config string")
+                    imageSource: "qrc:/images/controls/copy.svg"
+
+                    onClicked: {
+                        nativeConfigString.selectAll()
+                        nativeConfigString.copy()
+                        nativeConfigString.select(0, 0)
+                        PageController.showNotificationMessage(qsTr("Copied"))
+                    }
+                }
+
+                BasicButtonType {
+                    Layout.fillWidth: true
                     Layout.topMargin: 24
 
                     defaultColor: "transparent"
@@ -170,6 +194,12 @@ DrawerType {
                             }
 
                             TextField {
+                                id: nativeConfigString
+                                visible: false
+                                text: ExportController.nativeConfigString
+                            }
+
+                            TextArea {
                                 id: configText
 
                                 Layout.fillWidth: true
@@ -213,7 +243,6 @@ DrawerType {
 
                     Image {
                         anchors.fill: parent
-                        anchors.margins: 2
                         smooth: false
 
                         source: ExportController.qrCodesCount ? ExportController.qrCodes[0] : ""

@@ -145,6 +145,11 @@ QString ServersModel::getCurrentlyProcessedServerHostName()
     return qvariant_cast<QString>(data(m_currentlyProcessedServerIndex, HostNameRole));
 }
 
+const ServerCredentials ServersModel::getCurrentlyProcessedServerCredentials()
+{
+    return serverCredentials(m_currentlyProcessedServerIndex);
+}
+
 bool ServersModel::isDefaultServerCurrentlyProcessed()
 {
     return m_defaultServerIndex == m_currentlyProcessedServerIndex;
@@ -191,6 +196,12 @@ bool ServersModel::isDefaultServerConfigContainsAmneziaDns()
     const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
     QString primaryDns = server.value(config_key::dns1).toString();
     return primaryDns == protocols::dns::amneziaDnsIp;
+}
+
+void ServersModel::updateContainersConfig()
+{
+    auto server = m_settings->server(m_currentlyProcessedServerIndex);
+    m_servers.replace(m_currentlyProcessedServerIndex, server);
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const

@@ -53,11 +53,14 @@ public slots:
     int getCurrentlyProcessedServerIndex();
 
     QString getCurrentlyProcessedServerHostName();
+    const ServerCredentials getCurrentlyProcessedServerCredentials();
 
     void addServer(const QJsonObject &server);
     void removeServer();
 
     bool isDefaultServerConfigContainsAmneziaDns();
+
+    void updateContainersConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
