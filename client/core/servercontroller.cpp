@@ -763,6 +763,8 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
 
             if (stdOut.contains("Packet manager not found"))
                 return ErrorCode::ServerPacketManagerError;
+            if (stdOut.contains("sudo not installed"))
+                return ErrorCode::NoError;
             if (stdOut.contains("fuser not installed"))
                 return ErrorCode::NoError;
 
