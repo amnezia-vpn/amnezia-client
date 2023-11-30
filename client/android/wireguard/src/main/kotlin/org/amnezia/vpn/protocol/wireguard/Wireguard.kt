@@ -11,10 +11,10 @@ import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.util.InetEndpoint
-import org.amnezia.vpn.util.InetNetwork
 import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.parseInetAddress
+import org.amnezia.vpn.util.net.InetEndpoint
+import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
 /**
@@ -92,7 +92,20 @@ open class Wireguard : Protocol() {
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
         val configDataJson = config.getJSONObject("wireguard_config_data")
         val configData = parseConfigData(configDataJson.getString("config"))
-        return WireguardConfig.build { configWireguard(configData) }
+        return WireguardConfig.build {
+            configWireguard(configData)
+            // Default Wireguard routes (0.0.0.0/0, ::/0) will be removed,
+            // allowed routes from the Wireguard configuration will be merged
+            // with allowed routes from the split tunneling configuration.
+            //
+            // Excluded routes from the split tunneling configuration can overwrite
+            // allowed routes from the Wireguard configuration (two routes are equal
+            // if they have the same address and prefix).
+            //
+            // If multiple routes match the packet destination,
+            // route with the longest prefix takes precedence
+            configSplitTunnel(config)
+        }
     }
 
     protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>) {

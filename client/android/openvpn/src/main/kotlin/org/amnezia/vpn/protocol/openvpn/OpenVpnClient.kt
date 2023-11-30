@@ -1,6 +1,7 @@
 package org.amnezia.vpn.protocol.openvpn
 
 import android.net.ProxyInfo
+import android.os.Build
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
@@ -14,9 +15,9 @@ import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.util.InetNetwork
 import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.parseInetAddress
+import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.parseInetAddress
 
 private const val TAG = "OpenVpnClient"
 private const val EMULATED_EXCLUDE_ROUTES = (1 shl 16)
@@ -87,7 +88,9 @@ class OpenVpnClient(
     // metric is optional and should be ignored if < 0
     override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
         Log.v(TAG, "tun_builder_exclude_route: $address, $prefix_length, $metric, $ipv6")
-        configBuilder.excludeRoute(InetNetwork(address, prefix_length))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            configBuilder.excludeRoute(InetNetwork(address, prefix_length))
+        }
         return true
     }
 
@@ -179,11 +182,13 @@ class OpenVpnClient(
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_proxy_http(host: String, port: Int): Boolean {
         Log.v(TAG, "tun_builder_set_proxy_http: $host, $port")
-        try {
-            configBuilder.setHttpProxy(ProxyInfo.buildDirectProxy(host, port))
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not set proxy: ${e.message}")
-            return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                configBuilder.setHttpProxy(ProxyInfo.buildDirectProxy(host, port))
+            } catch (e: Exception) {
+                Log.e(TAG, "Could not set proxy: ${e.message}")
+                return false
+            }
         }
         return true
     }

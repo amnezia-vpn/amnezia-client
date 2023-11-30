@@ -65,6 +65,7 @@ class Awg : Wireguard() {
         val configData = parseConfigData(configDataJson.getString("config"))
         return AwgConfig.build {
             configWireguard(configData)
+            configSplitTunnel(config)
             configData["Jc"]?.let { setJc(it.toInt()) }
             configData["Jmin"]?.let { setJmin(it.toInt()) }
             configData["Jmax"]?.let { setJmax(it.toInt()) }

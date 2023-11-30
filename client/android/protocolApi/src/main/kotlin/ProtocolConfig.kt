@@ -1,8 +1,10 @@
 package org.amnezia.vpn.protocol
 
 import android.net.ProxyInfo
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.net.InetAddress
-import org.amnezia.vpn.util.InetNetwork
+import org.amnezia.vpn.util.net.InetNetwork
 
 open class ProtocolConfig protected constructor(
     val addresses: Set<InetNetwork>,
@@ -62,13 +64,19 @@ open class ProtocolConfig protected constructor(
 
         fun addRoute(route: InetNetwork) = apply { this.routes += route }
         fun addRoutes(routes: List<InetNetwork>) = apply { this.routes += routes }
+        fun removeRoute(route: InetNetwork) = apply { this.routes.remove(route) }
+        fun clearRoutes() = apply { this.routes.clear() }
 
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoute(route: InetNetwork) = apply { this.excludedRoutes += route }
+
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoutes(routes: List<InetNetwork>) = apply { this.excludedRoutes += routes }
 
         fun excludeApplication(application: String) = apply { this.excludedApplications += application }
         fun excludeApplications(applications: List<String>) = apply { this.excludedApplications += applications }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         fun setHttpProxy(httpProxy: ProxyInfo) = apply { this.httpProxy = httpProxy }
 
         fun setAllowAllAF(allowAllAF: Boolean) = apply { this.allowAllAF = allowAllAF }
