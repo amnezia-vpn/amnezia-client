@@ -110,6 +110,8 @@ void ConnectionController::onCurrentContainerUpdated()
     if (m_isConnected || m_isConnectionInProgress) {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully, Reconnnection..."));
         openConnection();
+    } else {
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
     }
 }
 

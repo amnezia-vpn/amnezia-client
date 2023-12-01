@@ -100,6 +100,7 @@ PageType {
 
         function onUpdateContainerFinished(message) {
             PageController.showNotificationMessage(message)
+            PageController.closePage()
         }
     }
 
@@ -108,6 +109,7 @@ PageType {
 
         function onReconnectWithUpdatedContainer(message) {
             PageController.showNotificationMessage(message)
+            PageController.closePage()
         }
     }
 
