@@ -368,7 +368,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("command not found"))
         return ErrorCode::ServerDockerFailedError;
-    if (stdOut.contains("Failed to"))
+    if (stdOut.contains("Docker status is not active"))
         return ErrorCode::ServerDockerFailedError;
 
     return error;
