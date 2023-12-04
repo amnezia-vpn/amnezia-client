@@ -3,7 +3,10 @@ package org.amnezia.vpn.protocol.openvpn
 import android.content.Context
 import android.net.VpnService.Builder
 import android.os.Build
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
@@ -35,7 +38,8 @@ import org.json.JSONObject
 open class OpenVpn : Protocol() {
 
     private lateinit var context: Context
-    protected var openVpnClient: OpenVpnClient? = null
+    private var openVpnClient: OpenVpnClient? = null
+    private lateinit var scope: CoroutineScope
 
     override val statistics: Statistics
         get() {
@@ -53,6 +57,7 @@ open class OpenVpn : Protocol() {
         super.initialize(context, state)
         loadSharedLibrary(context, "ovpn3")
         this.context = context
+        scope = CoroutineScope(Dispatchers.IO)
     }
 
     override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
@@ -84,9 +89,11 @@ open class OpenVpn : Protocol() {
                     configSplitTunnel(config)
                 }
 
-                val status = client.connect()
-                if (status.error) {
-                    throw VpnException("OpenVpn connect() error: ${status.status}: ${status.message}")
+                scope.launch {
+                    val status = client.connect()
+                    if (status.error) {
+                        throw VpnException("OpenVpn connect() error: ${status.status}: ${status.message}")
+                    }
                 }
             }
         } catch (e: Exception) {

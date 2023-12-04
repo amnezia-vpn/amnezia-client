@@ -3,7 +3,7 @@
 #include "platforms/android/android_controller.h"
 
 
-AndroidVpnProtocol::AndroidVpnProtocol(Proto protocol, const QJsonObject &configuration, QObject* parent)
+AndroidVpnProtocol::AndroidVpnProtocol(const QJsonObject &configuration, QObject* parent)
     : VpnProtocol(configuration, parent)
 { }
 
@@ -16,11 +16,6 @@ ErrorCode AndroidVpnProtocol::start()
 void AndroidVpnProtocol::stop()
 {
     qDebug() << "AndroidVpnProtocol::stop()";
+    setConnectionState(Vpn::ConnectionState::Disconnecting);
     AndroidController::instance()->stop();
 }
-
-void AndroidVpnProtocol::connectionDataUpdated(quint64 rxBytes, quint64 txBytes)
-{
-    setBytesChanged(rxBytes, txBytes);
-}
-

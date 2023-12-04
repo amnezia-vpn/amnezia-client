@@ -22,10 +22,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.LoadLibraryException
 import org.amnezia.vpn.protocol.Protocol
@@ -56,6 +57,7 @@ const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val NOTIFICATION_ID = 1337
 private const val STATISTICS_SENDING_TIMEOUT = 1000L
+private const val DISCONNECT_TIMEOUT = 1500L
 
 class AmneziaVpnService : VpnService() {
 
@@ -227,8 +229,12 @@ class AmneziaVpnService : VpnService() {
 
     override fun onDestroy() {
         Log.v(TAG, "Destroy service")
-        // todo: add sync disconnect
-        disconnect()
+        runBlocking {
+            withTimeoutOrNull(DISCONNECT_TIMEOUT) {
+                disconnect()
+                disconnectionJob?.join()
+            }
+        }
         connectionScope.cancel()
         mainScope.cancel()
         super.onDestroy()
@@ -322,9 +328,7 @@ class AmneziaVpnService : VpnService() {
         protocolState.value = DISCONNECTING
 
         disconnectionJob = connectionScope.launch {
-            connectionJob?.let {
-                if (it.isActive) it.cancelAndJoin()
-            }
+            connectionJob?.join()
             connectionJob = null
 
             protocol?.stopVpn()
@@ -342,6 +346,7 @@ class AmneziaVpnService : VpnService() {
                 "cloak" -> Cloak()
                 else -> throw IllegalArgumentException("Protocol '$protocolName' not found")
             }.apply { initialize(applicationContext, protocolState) }
+                .also { protocolCache[protocolName] = it }
 
     /**
      * Utils methods
