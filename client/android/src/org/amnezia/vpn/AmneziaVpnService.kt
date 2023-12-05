@@ -216,7 +216,16 @@ class AmneziaVpnService : VpnService() {
             clientMessenger.reset()
             if (isUnknown || isDisconnected) stopSelf()
         }
-        return super.onUnbind(intent)
+        return true
+    }
+
+    override fun onRebind(intent: Intent?) {
+        Log.d(TAG, "onRebind by $intent")
+        if (intent?.action != "android.net.VpnService") {
+            isServiceBound = true
+            if (isConnected) launchSendingStatistics()
+        }
+        super.onRebind(intent)
     }
 
     override fun onRevoke() {
