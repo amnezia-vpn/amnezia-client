@@ -132,10 +132,10 @@
 
         <service
             android:name=".AmneziaVpnService"
-            android:process=":QtOnlyProcess"
+            android:process=":amneziaVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="specialUse"
-            android:exported="true">
+            android:exported="false">
 
             <intent-filter>
                 <action android:name="android.net.VpnService" />
