@@ -80,11 +80,6 @@ namespace amnezia
         constexpr char awg[] = "awg";
 
         constexpr char configVersion[] = "config_version";
-        constexpr char apiEdnpoint[] = "api_endpoint";
-        constexpr char serviceTypeId[] = "service_type_id";
-        constexpr char accessToken[] = "access_token";
-        constexpr char certificate[] = "certificate";
-        constexpr char publicKey[] = "public_key";
 
         constexpr char splitTunnelSites[] = "splitTunnelSites";
         constexpr char splitTunnelType[] = "splitTunnelType";

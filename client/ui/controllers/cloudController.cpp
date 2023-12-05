@@ -6,56 +6,49 @@
 
 #include "configurators/openvpn_configurator.h"
 
+namespace {
+    namespace configKey {
+        constexpr char cloak[] = "cloak";
+
+        constexpr char apiEdnpoint[] = "api_endpoint";
+        constexpr char accessToken[] = "api_key";
+        constexpr char certificate[] = "certificate";
+        constexpr char publicKey[] = "public_key";
+        constexpr char protocol[] = "protocol";
+    }
+}
+
 CloudController::CloudController(const QSharedPointer<ServersModel> &serversModel,
                                  const QSharedPointer<ContainersModel> &containersModel, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel)
 {
 }
 
-QString CloudController::genPublicKey(ServiceTypeId serviceTypeId)
+QString CloudController::genPublicKey(const QString &protocol)
 {
-    switch (serviceTypeId)
-    {
-        case ServiceTypeId::AmneziaFreeRuWG: return ".";
-        case ServiceTypeId::AmneziaFreeRuCloak: return ".";
-        case ServiceTypeId::AmneziaFreeRuAWG: return ".";
-        case ServiceTypeId::AmneziaFreeRuReverseWG: return ".";
-        case ServiceTypeId::AmneziaFreeRuReverseCloak: return ".";
-        case ServiceTypeId::AmneziaFreeRuReverseAWG: return ".";
+    if (protocol == configKey::cloak) {
+        return ".";
     }
+    return QString();
 }
 
-QString CloudController::genCertificateRequest(ServiceTypeId serviceTypeId)
+QString CloudController::genCertificateRequest(const QString &protocol)
 {
-    switch (serviceTypeId)
-    {
-        case ServiceTypeId::AmneziaFreeRuWG: return "";
-        case ServiceTypeId::AmneziaFreeRuCloak: {
-            m_certRequest = OpenVpnConfigurator::createCertRequest();
-            return m_certRequest.request;
-        }
-        case ServiceTypeId::AmneziaFreeRuAWG: return "";
-        case ServiceTypeId::AmneziaFreeRuReverseWG: return "";
-        case ServiceTypeId::AmneziaFreeRuReverseCloak: return "";
-        case ServiceTypeId::AmneziaFreeRuReverseAWG: return "";
+    if (protocol == configKey::cloak) {
+        m_certRequest = OpenVpnConfigurator::createCertRequest();
+        return m_certRequest.request;
     }
+    return QString();
 }
 
-void CloudController::processCloudConfig(ServiceTypeId serviceTypeId, QString &config)
+void CloudController::processCloudConfig(const QString &protocol, QString &config)
 {
-    switch (serviceTypeId)
-    {
-    case ServiceTypeId::AmneziaFreeRuWG: return;
-    case ServiceTypeId::AmneziaFreeRuCloak: {
+    if (protocol == configKey::cloak) {
         config.replace("<key>", "<key>\n");
         config.replace("$OPENVPN_PRIV_KEY", m_certRequest.privKey);
         return;
     }
-    case ServiceTypeId::AmneziaFreeRuAWG: return;
-    case ServiceTypeId::AmneziaFreeRuReverseWG: return;
-    case ServiceTypeId::AmneziaFreeRuReverseCloak: return;
-    case ServiceTypeId::AmneziaFreeRuReverseAWG: return;
-    }
+    return;
 }
 
 bool CloudController::updateServerConfigFromCloud()
@@ -69,19 +62,19 @@ bool CloudController::updateServerConfigFromCloud()
 
         QNetworkRequest request;
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        QString endpoint = serverConfig.value(config_key::apiEdnpoint).toString();
+        request.setRawHeader("Authorization", "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
+        QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
         request.setUrl(endpoint.replace("https", "http")); // todo remove
 
-        ServiceTypeId serviceTypeId = static_cast<ServiceTypeId>(serverConfig.value(config_key::serviceTypeId).toInt());
+        QString protocol = serverConfig.value(configKey::protocol).toString();
 
         QJsonObject obj;
-        obj[config_key::serviceTypeId] = serviceTypeId;
-        obj[config_key::accessToken] =  serverConfig.value(config_key::accessToken);
 
-        obj[config_key::publicKey] = genPublicKey(serviceTypeId);
-        obj[config_key::certificate] = genCertificateRequest(serviceTypeId);
+        obj[configKey::publicKey] = genPublicKey(protocol);
+        obj[configKey::certificate] = genCertificateRequest(protocol);
 
         QByteArray requestBody = QJsonDocument(obj).toJson();
+        qDebug() << requestBody;
 
         QScopedPointer<QNetworkReply> reply;
         reply.reset(manager.post(request, requestBody));
@@ -103,7 +96,7 @@ bool CloudController::updateServerConfigFromCloud()
             }
 
             QString configStr = ba;
-            processCloudConfig(serviceTypeId, configStr);
+            processCloudConfig(protocol, configStr);
 
             QJsonObject cloudConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
 
@@ -117,6 +110,7 @@ bool CloudController::updateServerConfigFromCloud()
             emit serverConfigUpdated();
         } else{
             QString err = reply->errorString();
+            qDebug() << QString::fromUtf8(reply->readAll());;
             qDebug() << reply->error();
             qDebug() << err;
             qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);

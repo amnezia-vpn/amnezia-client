@@ -34,10 +34,10 @@ signals:
     void serverConfigUpdated();
 
 private:
-    QString genPublicKey(ServiceTypeId serviceTypeId);
-    QString genCertificateRequest(ServiceTypeId serviceTypeId);
+    QString genPublicKey(const QString &protocol);
+    QString genCertificateRequest(const QString &protocol);
 
-    void processCloudConfig(ServiceTypeId serviceTypeId, QString &config);
+    void processCloudConfig(const QString &protocol, QString &config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
