@@ -15,12 +15,12 @@ namespace
 AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
-            [this](bool isVpnConnected) {
-                qDebug() << "Android event: status; connected:" << isVpnConnected;
+            [this](AndroidController::ConnectionState state) {
+                qDebug() << "Android event: status; state:" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Android VPN service is alive, initialization by service status";
                     isWaitingStatus = false;
-                    emit serviceIsAlive(isVpnConnected);
+                    emit serviceIsAlive(convertState(state));
                 }
             },
             Qt::QueuedConnection);
@@ -30,7 +30,7 @@ AndroidController::AndroidController() : QObject()
         [this]() {
             qDebug() << "Android event: service disconnected";
             isWaitingStatus = true;
-            emit connectionStateChanged(Vpn::ConnectionState::Unknown);
+            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
         },
         Qt::QueuedConnection);
 
@@ -95,7 +95,7 @@ bool AndroidController::initialize()
     qDebug() << "Initialize AndroidController";
 
     const JNINativeMethod methods[] = {
-        {"onStatus", "(Z)V", reinterpret_cast<void *>(onStatus)},
+        {"onStatus", "(I)V", reinterpret_cast<void *>(onStatus)},
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
@@ -179,14 +179,40 @@ void AndroidController::qtAndroidControllerInitialized()
     callActivityMethod("qtAndroidControllerInitialized", "()V");
 }
 
+// static
+Vpn::ConnectionState AndroidController::convertState(AndroidController::ConnectionState state)
+{
+    switch (state) {
+        case AndroidController::ConnectionState::CONNECTED: return Vpn::ConnectionState::Connected;
+        case AndroidController::ConnectionState::CONNECTING: return Vpn::ConnectionState::Connecting;
+        case AndroidController::ConnectionState::DISCONNECTED: return Vpn::ConnectionState::Disconnected;
+        case AndroidController::ConnectionState::DISCONNECTING: return Vpn::ConnectionState::Disconnecting;
+        case AndroidController::ConnectionState::UNKNOWN: return Vpn::ConnectionState::Unknown;
+    }
+}
+
+// static
+QString AndroidController::textConnectionState(AndroidController::ConnectionState state)
+{
+    switch (state) {
+        case AndroidController::ConnectionState::CONNECTED: return "CONNECTED";
+        case AndroidController::ConnectionState::CONNECTING: return "CONNECTING";
+        case AndroidController::ConnectionState::DISCONNECTED: return "DISCONNECTED";
+        case AndroidController::ConnectionState::DISCONNECTING: return "DISCONNECTING";
+        case AndroidController::ConnectionState::UNKNOWN: return "UNKNOWN";
+    }
+}
+
 // JNI functions called by Android
 // static
-void AndroidController::onStatus(JNIEnv *env, jobject thiz, jboolean isVpnConnected)
+void AndroidController::onStatus(JNIEnv *env, jobject thiz, jint stateCode)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->status(isVpnConnected);
+    auto state = ConnectionState(stateCode);
+
+    emit AndroidController::instance()->status(state);
 }
 
 // static

@@ -5,7 +5,7 @@ package org.amnezia.vpn.qt
  * called by events in the Android part of the client
  */
 object QtAndroidController {
-    external fun onStatus(isVpnConnected: Boolean)
+    external fun onStatus(stateCode: Int)
     external fun onServiceDisconnected()
     external fun onServiceError()
 

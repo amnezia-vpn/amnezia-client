@@ -123,7 +123,7 @@ class AmneziaVpnService : VpnService() {
                         clientMessenger.send {
                             ServiceEvent.STATUS.packToMessage {
                                 putStatus(Status.build {
-                                    setConnected(this@AmneziaVpnService.isConnected)
+                                    setState(this@AmneziaVpnService.protocolState.value)
                                 })
                             }
                         }

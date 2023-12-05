@@ -62,8 +62,8 @@ class AmneziaActivity : QtActivity() {
                     ServiceEvent.STATUS -> {
                         if (isWaitingStatus) {
                             isWaitingStatus = false
-                            msg.data?.getStatus()?.let { (isConnected) ->
-                                QtAndroidController.onStatus(isConnected)
+                            msg.data?.getStatus()?.let { (state) ->
+                                QtAndroidController.onStatus(state.ordinal)
                             }
                         }
                     }

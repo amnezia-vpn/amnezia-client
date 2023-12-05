@@ -17,6 +17,15 @@ public:
 
     bool initialize();
 
+    // keep synchronized with org.amnezia.vpn.protocol.ProtocolState
+    enum class ConnectionState {
+        CONNECTED,
+        CONNECTING,
+        DISCONNECTED,
+        DISCONNECTING,
+        UNKNOWN
+    };
+
     ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
     void setNotificationText(const QString &title, const QString &message, int timerSec);
@@ -25,7 +34,7 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-    void status(bool isVpnConnected);
+    void status(ConnectionState state);
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
@@ -34,15 +43,18 @@ signals:
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void configImported();
     void importConfigFromOutside(QString &data);
-    void serviceIsAlive(bool connected);
+    void serviceIsAlive(Vpn::ConnectionState state);
 
 private:
     bool isWaitingStatus = true;
 
     void qtAndroidControllerInitialized();
 
+    static Vpn::ConnectionState convertState(ConnectionState state);
+    static QString textConnectionState(ConnectionState state);
+
     // JNI functions called by Android
-    static void onStatus(JNIEnv *env, jobject thiz, jboolean isVpnConnected);
+    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode);
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
