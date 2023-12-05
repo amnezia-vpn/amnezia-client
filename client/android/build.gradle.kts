@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,6 +13,7 @@ kotlin {
 // get values from gradle or local properties
 val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
+val outputBaseName: String by gradleProperties
 
 android {
     namespace = "org.amnezia.vpn"
@@ -73,6 +76,17 @@ android {
             reset()
             include(*qtTargetAbiList.split(',').toTypedArray())
             isUniversalApk = false
+        }
+    }
+
+    // fix for Qt Creator to allow deploying the application to a device
+    // to enable this fix, add the line outputBaseName=android-build to local.properties
+    if (outputBaseName.isNotEmpty()) {
+        applicationVariants.all {
+            outputs.map { it as BaseVariantOutputImpl }
+                .forEach { output ->
+                    output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                }
         }
     }
 

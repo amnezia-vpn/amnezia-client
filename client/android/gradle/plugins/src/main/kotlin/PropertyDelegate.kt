@@ -24,7 +24,7 @@ private class PropertyDelegate(
     private val localProperties: Properties = localProperties(rootDir)
 ) : ReadOnlyProperty<Any?, String> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): String =
-        providers.gradleProperty(property.name).orNull ?: localProperties.getProperty(property.name)
+        providers.gradleProperty(property.name).orNull ?: localProperties.getProperty(property.name).orEmpty()
 }
 
 private lateinit var settingsPropertyDelegate: ReadOnlyProperty<Any?, String>
