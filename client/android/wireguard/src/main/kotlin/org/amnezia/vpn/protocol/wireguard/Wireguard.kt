@@ -78,8 +78,8 @@ open class Wireguard : Protocol() {
             }
         }
 
-    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>) {
-        super.initialize(context, state)
+    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+        super.initialize(context, state, onError)
         loadSharedLibrary(context, "wg-go")
     }
 

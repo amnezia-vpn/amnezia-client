@@ -30,9 +30,11 @@ abstract class Protocol {
 
     abstract val statistics: Statistics
     protected lateinit var state: MutableStateFlow<ProtocolState>
+    protected lateinit var onError: (String) -> Unit
 
-    open fun initialize(context: Context, state: MutableStateFlow<ProtocolState>) {
+    open fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
         this.state = state
+        this.onError = onError
     }
 
     abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)

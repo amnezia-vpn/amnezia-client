@@ -345,18 +345,19 @@ class AmneziaVpnService : VpnService() {
                 "openvpn" -> OpenVpn()
                 "cloak" -> Cloak()
                 else -> throw IllegalArgumentException("Protocol '$protocolName' not found")
-            }.apply { initialize(applicationContext, protocolState) }
+            }.apply { initialize(applicationContext, protocolState, ::onError) }
                 .also { protocolCache[protocolName] = it }
 
     /**
      * Utils methods
      */
-    @MainThread
     private fun onError(msg: String) {
         Log.e(TAG, msg)
-        clientMessenger.send {
-            ServiceEvent.ERROR.packToMessage {
-                putString(ERROR_MSG, msg)
+        mainScope.launch {
+            clientMessenger.send {
+                ServiceEvent.ERROR.packToMessage {
+                    putString(ERROR_MSG, msg)
+                }
             }
         }
     }

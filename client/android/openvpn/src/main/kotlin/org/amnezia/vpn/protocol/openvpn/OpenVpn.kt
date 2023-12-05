@@ -11,8 +11,8 @@ import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState
+import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
-import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.getLocalNetworks
@@ -53,8 +53,8 @@ open class OpenVpn : Protocol() {
             return Statistics.EMPTY_STATISTICS
         }
 
-    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>) {
-        super.initialize(context, state)
+    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+        super.initialize(context, state, onError)
         loadSharedLibrary(context, "ovpn3")
         this.context = context
         scope = CoroutineScope(Dispatchers.IO)
@@ -64,11 +64,12 @@ open class OpenVpn : Protocol() {
         val configBuilder = OpenVpnConfig.Builder()
 
         openVpnClient = OpenVpnClient(
-            configBuilder,
-            state,
-            { ipv6 -> getLocalNetworks(context, ipv6) },
-            makeEstablish(configBuilder, vpnBuilder),
-            protect
+            configBuilder = configBuilder,
+            state = state,
+            getLocalNetworks = { ipv6 -> getLocalNetworks(context, ipv6) },
+            establish = makeEstablish(configBuilder, vpnBuilder),
+            protect = protect,
+            onError = onError
         )
 
         try {
@@ -92,7 +93,8 @@ open class OpenVpn : Protocol() {
                 scope.launch {
                     val status = client.connect()
                     if (status.error) {
-                        throw VpnException("OpenVpn connect() error: ${status.status}: ${status.message}")
+                        state.value = DISCONNECTED
+                        onError("OpenVpn connect() error: ${status.status}: ${status.message}")
                     }
                 }
             }

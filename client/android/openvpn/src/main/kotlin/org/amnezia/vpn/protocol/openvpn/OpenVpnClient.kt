@@ -14,7 +14,6 @@ import net.openvpn.ovpn3.ClientAPI_TransportStats
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.parseInetAddress
@@ -27,7 +26,8 @@ class OpenVpnClient(
     private val state: MutableStateFlow<ProtocolState>,
     private val getLocalNetworks: (Boolean) -> List<InetNetwork>,
     private val establish: () -> Int,
-    private val protect: (Int) -> Boolean
+    private val protect: (Int) -> Boolean,
+    private val onError: (String) -> Unit
 ) : ClientAPI_OpenVPNClient() {
 
     /**************************************************************************
@@ -368,15 +368,11 @@ class OpenVpnClient(
             "COMPRESSION_ENABLED", "WARN" -> Log.w(TAG, "$name: $info")
             "CONNECTED" -> state.value = CONNECTED
             "DISCONNECTED" -> state.value = DISCONNECTED
-            "CONNECTION_TIMEOUT" -> {
-                Log.w(TAG, "$name: $info")
-                state.value = DISCONNECTED
-                // todo: test it
-                throw VpnStartException("Connection timeout")
-            }
         }
-        if (event.error) Log.e(TAG, "OpenVpn ERROR: $name: $info")
-        if (event.fatal) Log.e(TAG, "OpenVpn FATAL: $name: $info")
+        if (event.error || event.fatal) {
+            state.value = DISCONNECTED
+            onError("OpenVpn ${if (event.error) "ERROR" else "FATAL"}: $name: $info")
+        }
     }
 
     // Callback for logging.
