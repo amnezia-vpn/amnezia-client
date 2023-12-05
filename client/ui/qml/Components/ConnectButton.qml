@@ -138,7 +138,7 @@ Button {
     }
 
     onClicked: {
-        if (!CloudController.updateServerConfigFromCloud()) {
+        if (!ApiController.updateServerConfigFromApi()) {
             return
         }
 

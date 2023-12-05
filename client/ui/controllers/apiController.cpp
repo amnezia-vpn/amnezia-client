@@ -1,13 +1,15 @@
-#include "cloudController.h"
+#include "apiController.h"
 
+#include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QEventLoop>
 
 #include "configurators/openvpn_configurator.h"
 
-namespace {
-    namespace configKey {
+namespace
+{
+    namespace configKey
+    {
         constexpr char cloak[] = "cloak";
 
         constexpr char apiEdnpoint[] = "api_endpoint";
@@ -18,13 +20,13 @@ namespace {
     }
 }
 
-CloudController::CloudController(const QSharedPointer<ServersModel> &serversModel,
-                                 const QSharedPointer<ContainersModel> &containersModel, QObject *parent)
+ApiController::ApiController(const QSharedPointer<ServersModel> &serversModel,
+                             const QSharedPointer<ContainersModel> &containersModel, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel)
 {
 }
 
-QString CloudController::genPublicKey(const QString &protocol)
+QString ApiController::genPublicKey(const QString &protocol)
 {
     if (protocol == configKey::cloak) {
         return ".";
@@ -32,7 +34,7 @@ QString CloudController::genPublicKey(const QString &protocol)
     return QString();
 }
 
-QString CloudController::genCertificateRequest(const QString &protocol)
+QString ApiController::genCertificateRequest(const QString &protocol)
 {
     if (protocol == configKey::cloak) {
         m_certRequest = OpenVpnConfigurator::createCertRequest();
@@ -41,7 +43,7 @@ QString CloudController::genCertificateRequest(const QString &protocol)
     return QString();
 }
 
-void CloudController::processCloudConfig(const QString &protocol, QString &config)
+void ApiController::processCloudConfig(const QString &protocol, QString &config)
 {
     if (protocol == configKey::cloak) {
         config.replace("<key>", "<key>\n");
@@ -51,7 +53,7 @@ void CloudController::processCloudConfig(const QString &protocol, QString &confi
     return;
 }
 
-bool CloudController::updateServerConfigFromCloud()
+bool ApiController::updateServerConfigFromApi()
 {
     auto serverConfig = m_serversModel->getDefaultServerConfig();
 
@@ -62,7 +64,8 @@ bool CloudController::updateServerConfigFromCloud()
 
         QNetworkRequest request;
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        request.setRawHeader("Authorization", "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
+        request.setRawHeader("Authorization",
+                             "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
         QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
         request.setUrl(endpoint.replace("https", "http")); // todo remove
 
@@ -83,12 +86,13 @@ bool CloudController::updateServerConfigFromCloud()
         QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
         wait.exec();
 
-        if(reply->error() == QNetworkReply::NoError){
+        if (reply->error() == QNetworkReply::NoError) {
             QString contents = QString::fromUtf8(reply->readAll());
             auto data = QJsonDocument::fromJson(contents.toUtf8()).object().value(config_key::config).toString();
 
             data.replace("vpn://", "");
-            QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+            QByteArray ba = QByteArray::fromBase64(data.toUtf8(),
+                                                   QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
             QByteArray ba_uncompressed = qUncompress(ba);
             if (!ba_uncompressed.isEmpty()) {
@@ -108,16 +112,15 @@ bool CloudController::updateServerConfigFromCloud()
             serverConfig.insert(config_key::defaultContainer, cloudConfig.value(config_key::defaultContainer));
             m_serversModel->editServer(serverConfig);
             emit serverConfigUpdated();
-        } else{
+        } else {
             QString err = reply->errorString();
-            qDebug() << QString::fromUtf8(reply->readAll());;
+            qDebug() << QString::fromUtf8(reply->readAll()); //todo remove debug output
             qDebug() << reply->error();
             qDebug() << err;
             qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
             emit errorOccurred(tr("Error when retrieving configuration from cloud server"));
             return false;
         }
-
     }
 
     return true;
