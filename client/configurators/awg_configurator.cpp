@@ -10,11 +10,10 @@ AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, QObject *pa
 {
 }
 
-QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials,
-                                                                DockerContainer container,
-                                                                const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials, DockerContainer container,
+                                      const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
 {
-    QString config = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, errorCode);
+    QString config = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, clientId, errorCode);
 
     QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
     QString awgConfig = jsonConfig.value(config_key::config).toString();
