@@ -449,10 +449,12 @@ void VpnConnection::disconnectFromVpn()
         return;
     }
 
+#ifndef Q_OS_ANDROID
     if (m_vpnProtocol) {
         m_vpnProtocol->deleteLater();
     }
     m_vpnProtocol = nullptr;
+#endif
 }
 
 Vpn::ConnectionState VpnConnection::connectionState()
