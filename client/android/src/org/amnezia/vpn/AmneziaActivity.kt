@@ -23,7 +23,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -34,6 +36,7 @@ private const val TAG = "AmneziaActivity"
 
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
+private const val BIND_SERVICE_TIMEOUT = 1000L
 
 class AmneziaActivity : QtActivity() {
 
@@ -205,6 +208,7 @@ class AmneziaActivity : QtActivity() {
             bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
         }
         isInBoundState = true
+        handleBindTimeout()
     }
 
     @MainThread
@@ -217,6 +221,19 @@ class AmneziaActivity : QtActivity() {
             isServiceConnected = false
             isInBoundState = false
             unbindService(serviceConnection)
+        }
+    }
+
+    private fun handleBindTimeout() {
+        mainScope.launch {
+            if (isWaitingStatus) {
+                delay(BIND_SERVICE_TIMEOUT)
+                if (isWaitingStatus && !isServiceConnected) {
+                    Log.d(TAG, "Bind timeout, reset connection status")
+                    isWaitingStatus = false
+                    QtAndroidController.onStatus(ProtocolState.DISCONNECTED.ordinal)
+                }
+            }
         }
     }
 

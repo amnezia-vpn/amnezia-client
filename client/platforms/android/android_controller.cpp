@@ -18,9 +18,9 @@ AndroidController::AndroidController() : QObject()
             [this](AndroidController::ConnectionState state) {
                 qDebug() << "Android event: status; state:" << textConnectionState(state);
                 if (isWaitingStatus) {
-                    qDebug() << "Android VPN service is alive, initialization by service status";
+                    qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
-                    emit serviceIsAlive(convertState(state));
+                    emit initConnectionState(convertState(state));
                 }
             },
             Qt::QueuedConnection);

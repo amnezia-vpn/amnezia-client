@@ -43,7 +43,7 @@ signals:
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void configImported();
     void importConfigFromOutside(QString &data);
-    void serviceIsAlive(Vpn::ConnectionState state);
+    void initConnectionState(Vpn::ConnectionState state);
 
 private:
     bool isWaitingStatus = true;
