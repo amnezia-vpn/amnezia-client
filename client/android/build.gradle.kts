@@ -85,7 +85,9 @@ android {
         applicationVariants.all {
             outputs.map { it as BaseVariantOutputImpl }
                 .forEach { output ->
-                    output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                    if (output.outputFileName.endsWith(".apk")) {
+                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                    }
                 }
         }
     }
