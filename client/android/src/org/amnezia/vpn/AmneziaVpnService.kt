@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.os.Process
 import androidx.annotation.MainThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -21,12 +22,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.LoadLibraryException
 import org.amnezia.vpn.protocol.Protocol
@@ -57,7 +60,8 @@ const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val NOTIFICATION_ID = 1337
 private const val STATISTICS_SENDING_TIMEOUT = 1000L
-private const val DISCONNECT_TIMEOUT = 1500L
+private const val DISCONNECT_TIMEOUT = 5000L
+private const val STOP_SERVICE_TIMEOUT = 5000L
 
 class AmneziaVpnService : VpnService() {
 
@@ -214,7 +218,7 @@ class AmneziaVpnService : VpnService() {
             isServiceBound = false
             stopSendingStatistics()
             clientMessenger.reset()
-            if (isUnknown || isDisconnected) stopSelf()
+            if (isUnknown || isDisconnected) stopService()
         }
         return true
     }
@@ -239,14 +243,23 @@ class AmneziaVpnService : VpnService() {
     override fun onDestroy() {
         Log.v(TAG, "Destroy service")
         runBlocking {
-            withTimeoutOrNull(DISCONNECT_TIMEOUT) {
-                disconnect()
-                disconnectionJob?.join()
-            }
+            disconnect()
+            disconnectionJob?.join()
         }
         connectionScope.cancel()
         mainScope.cancel()
         super.onDestroy()
+    }
+
+    private fun stopService() {
+        Log.v(TAG, "Stop service")
+        // the coroutine below will be canceled during the onDestroy call
+        mainScope.launch {
+            delay(STOP_SERVICE_TIMEOUT)
+            Log.w(TAG, "Stop service timeout, kill process")
+            Process.killProcess(Process.myPid())
+        }
+        stopSelf()
     }
 
     /**
@@ -265,7 +278,7 @@ class AmneziaVpnService : VpnService() {
                     DISCONNECTED -> {
                         clientMessenger.send(ServiceEvent.DISCONNECTED)
                         stopSendingStatistics()
-                        if (!isServiceBound) stopSelf()
+                        if (!isServiceBound) stopService()
                     }
 
                     DISCONNECTING -> {
@@ -301,9 +314,9 @@ class AmneziaVpnService : VpnService() {
 
     @MainThread
     private fun connect(vpnConfig: String?) {
-        Log.v(TAG, "Start VPN connection")
-
         if (isConnected || protocolState.value == CONNECTING) return
+
+        Log.v(TAG, "Start VPN connection")
 
         protocolState.value = CONNECTING
 
@@ -330,9 +343,9 @@ class AmneziaVpnService : VpnService() {
 
     @MainThread
     private fun disconnect() {
-        Log.v(TAG, "Stop VPN connection")
-
         if (isUnknown || isDisconnected || protocolState.value == DISCONNECTING) return
+
+        Log.v(TAG, "Stop VPN connection")
 
         protocolState.value = DISCONNECTING
 
@@ -342,6 +355,15 @@ class AmneziaVpnService : VpnService() {
 
             protocol?.stopVpn()
             protocol = null
+            try {
+                withTimeout(DISCONNECT_TIMEOUT) {
+                    // waiting for disconnect state
+                    protocolState.first { it == DISCONNECTED }
+                }
+            } catch (e: TimeoutCancellationException) {
+                Log.w(TAG, "Disconnect timeout")
+                stopService()
+            }
         }
     }
 
