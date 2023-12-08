@@ -234,8 +234,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             return "";
         }
 
-        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
-
         QString configDataBeforeLocalProcessing = configData;
 
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
@@ -247,6 +245,8 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
+
+        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
     }
 
     return configData;

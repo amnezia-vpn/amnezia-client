@@ -84,12 +84,10 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials = m_serversModel->getCurrentlyProcessedServerCredentials();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
@@ -142,12 +140,10 @@ void ExportController::generateOpenVpnConfig(const QString &clientName)
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials = m_serversModel->getCurrentlyProcessedServerCredentials();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
@@ -182,12 +178,10 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials = m_serversModel->getCurrentlyProcessedServerCredentials();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     QString clientId;
@@ -223,13 +217,10 @@ void ExportController::generateShadowSocksConfig()
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
@@ -262,13 +253,10 @@ void ExportController::generateCloakConfig()
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
