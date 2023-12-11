@@ -56,6 +56,7 @@ open class ProtocolConfig protected constructor(
 
         fun addAddress(addr: InetNetwork) = apply { this.addresses += addr }
         fun addAddresses(addresses: List<InetNetwork>) = apply { this.addresses += addresses }
+        fun clearAddresses() = apply { this.addresses.clear() }
 
         fun addDnsServer(dnsServer: InetAddress) = apply { this.dnsServers += dnsServer }
         fun addDnsServers(dnsServers: List<InetAddress>) = apply { this.dnsServers += dnsServers }

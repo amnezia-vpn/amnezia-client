@@ -62,6 +62,10 @@ class AmneziaActivity : QtActivity() {
                         QtAndroidController.onVpnDisconnected()
                     }
 
+                    ServiceEvent.RECONNECTING -> {
+                        QtAndroidController.onVpnReconnecting()
+                    }
+
                     ServiceEvent.STATUS -> {
                         if (isWaitingStatus) {
                             isWaitingStatus = false

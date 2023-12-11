@@ -173,4 +173,8 @@ open class Wireguard : Protocol() {
         GoBackend.wgTurnOff(handleToClose)
         state.value = DISCONNECTED
     }
+
+    override fun reconnectVpn(vpnBuilder: Builder) {
+        state.value = CONNECTED
+    }
 }

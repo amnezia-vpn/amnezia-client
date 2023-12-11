@@ -3,6 +3,7 @@ package org.amnezia.vpn.protocol.openvpn
 import android.net.ProxyInfo
 import android.os.Build
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
 import net.openvpn.ovpn3.ClientAPI_Event
@@ -14,6 +15,7 @@ import net.openvpn.ovpn3.ClientAPI_TransportStats
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
+import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.parseInetAddress
@@ -25,7 +27,7 @@ class OpenVpnClient(
     private val configBuilder: OpenVpnConfig.Builder,
     private val state: MutableStateFlow<ProtocolState>,
     private val getLocalNetworks: (Boolean) -> List<InetNetwork>,
-    private val establish: () -> Int,
+    internal var establish: (OpenVpnConfig.Builder) -> Int,
     private val protect: (Int) -> Boolean,
     private val onError: (String) -> Unit
 ) : ClientAPI_OpenVPNClient() {
@@ -51,6 +53,7 @@ class OpenVpnClient(
     // Should be called first.
     override fun tun_builder_new(): Boolean {
         Log.v(TAG, "tun_builder_new")
+        configBuilder.clearAddresses()
         return true
     }
 
@@ -147,7 +150,7 @@ class OpenVpnClient(
     // Always called last after tun_builder session has been configured.
     override fun tun_builder_establish(): Int {
         Log.v(TAG, "tun_builder_establish")
-        return establish()
+        return establish(configBuilder)
     }
 
     // Callback to reroute default gateway to VPN interface.
@@ -368,6 +371,12 @@ class OpenVpnClient(
             "COMPRESSION_ENABLED", "WARN" -> Log.w(TAG, "$name: $info")
             "CONNECTED" -> state.value = CONNECTED
             "DISCONNECTED" -> state.value = DISCONNECTED
+            "RECONNECTING" -> {
+                state.getAndUpdate { state ->
+                    if (state == DISCONNECTED || state == CONNECTED) RECONNECTING
+                    else state
+                }
+            }
         }
         if (event.error || event.fatal) {
             state.value = DISCONNECTED

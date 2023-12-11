@@ -37,6 +37,7 @@ import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
+import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.Status
@@ -49,6 +50,7 @@ import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.net.NetworkState
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -85,6 +87,7 @@ class AmneziaVpnService : VpnService() {
     private var disconnectionJob: Job? = null
     private var statisticsSendingJob: Job? = null
     private lateinit var clientMessenger: IpcMessenger
+    private lateinit var networkState: NetworkState
 
     private val connectionExceptionHandler = CoroutineExceptionHandler { _, e ->
         protocolState.value = DISCONNECTED
@@ -181,6 +184,7 @@ class AmneziaVpnService : VpnService() {
         connectionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + connectionExceptionHandler)
         clientMessenger = IpcMessenger(messengerName = "Client")
         launchProtocolStateHandler()
+        networkState = NetworkState(this, ::reconnect)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -206,7 +210,7 @@ class AmneziaVpnService : VpnService() {
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d(TAG, "onBind by $intent")
-        if (intent?.action == "android.net.VpnService") return super.onBind(intent)
+        if (intent?.action == SERVICE_INTERFACE) return super.onBind(intent)
         isServiceBound = true
         if (isConnected) launchSendingStatistics()
         return vpnServiceMessenger.binder
@@ -214,7 +218,7 @@ class AmneziaVpnService : VpnService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d(TAG, "onUnbind by $intent")
-        if (intent?.action != "android.net.VpnService") {
+        if (intent?.action != SERVICE_INTERFACE) {
             isServiceBound = false
             stopSendingStatistics()
             clientMessenger.reset()
@@ -225,7 +229,7 @@ class AmneziaVpnService : VpnService() {
 
     override fun onRebind(intent: Intent?) {
         Log.d(TAG, "onRebind by $intent")
-        if (intent?.action != "android.net.VpnService") {
+        if (intent?.action != SERVICE_INTERFACE) {
             isServiceBound = true
             if (isConnected) launchSendingStatistics()
         }
@@ -272,16 +276,24 @@ class AmneziaVpnService : VpnService() {
                 when (protocolState) {
                     CONNECTED -> {
                         clientMessenger.send(ServiceEvent.CONNECTED)
+                        networkState.bindNetworkListener()
                         if (isServiceBound) launchSendingStatistics()
                     }
 
                     DISCONNECTED -> {
                         clientMessenger.send(ServiceEvent.DISCONNECTED)
+                        networkState.unbindNetworkListener()
                         stopSendingStatistics()
                         if (!isServiceBound) stopService()
                     }
 
                     DISCONNECTING -> {
+                        networkState.unbindNetworkListener()
+                        stopSendingStatistics()
+                    }
+
+                    RECONNECTING -> {
+                        clientMessenger.send(ServiceEvent.RECONNECTING)
                         stopSendingStatistics()
                     }
 
@@ -364,6 +376,19 @@ class AmneziaVpnService : VpnService() {
                 Log.w(TAG, "Disconnect timeout")
                 stopService()
             }
+        }
+    }
+
+    @MainThread
+    private fun reconnect() {
+        if (!isConnected) return
+
+        Log.v(TAG, "Reconnect VPN")
+
+        protocolState.value = RECONNECTING
+
+        connectionJob = connectionScope.launch {
+            protocol?.reconnectVpn(Builder())
         }
     }
 

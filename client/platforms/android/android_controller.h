@@ -23,6 +23,7 @@ public:
         CONNECTING,
         DISCONNECTED,
         DISCONNECTING,
+        RECONNECTING,
         UNKNOWN
     };
 
@@ -40,6 +41,7 @@ signals:
     void vpnPermissionRejected();
     void vpnConnected();
     void vpnDisconnected();
+    void vpnReconnecting();
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void configImported();
     void importConfigFromOutside(QString &data);
@@ -60,6 +62,7 @@ private:
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
     static void onVpnConnected(JNIEnv *env, jobject thiz);
     static void onVpnDisconnected(JNIEnv *env, jobject thiz);
+    static void onVpnReconnecting(JNIEnv *env, jobject thiz);
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);

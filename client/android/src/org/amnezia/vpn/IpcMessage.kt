@@ -22,6 +22,7 @@ sealed interface IpcMessage {
 enum class ServiceEvent : IpcMessage {
     CONNECTED,
     DISCONNECTED,
+    RECONNECTING,
     STATUS,
     STATISTICS_UPDATE,
     ERROR

@@ -67,7 +67,7 @@ open class OpenVpn : Protocol() {
             configBuilder = configBuilder,
             state = state,
             getLocalNetworks = { ipv6 -> getLocalNetworks(context, ipv6) },
-            establish = makeEstablish(configBuilder, vpnBuilder),
+            establish = makeEstablish(vpnBuilder),
             protect = protect,
             onError = onError
         )
@@ -109,22 +109,28 @@ open class OpenVpn : Protocol() {
         openVpnClient = null
     }
 
+    override fun reconnectVpn(vpnBuilder: Builder) {
+        openVpnClient?.let {
+            it.establish = makeEstablish(vpnBuilder)
+            it.reconnect(0)
+        }
+    }
+
     protected open fun parseConfig(config: JSONObject): ClientAPI_Config {
         val openVpnConfig = ClientAPI_Config()
         openVpnConfig.content = config.getJSONObject("openvpn_config_data").getString("config")
         return openVpnConfig
     }
 
-    private fun makeEstablish(configBuilder: OpenVpnConfig.Builder, vpnBuilder: Builder): () -> Int =
-        {
-            val openVpnConfig = configBuilder.build()
-            buildVpnInterface(openVpnConfig, vpnBuilder)
+    private fun makeEstablish(vpnBuilder: Builder): (OpenVpnConfig.Builder) -> Int = { configBuilder ->
+        val openVpnConfig = configBuilder.build()
+        buildVpnInterface(openVpnConfig, vpnBuilder)
 
-            vpnBuilder.establish().use { tunFd ->
-                if (tunFd == null) {
-                    throw VpnStartException("Create VPN interface: permission not granted or revoked")
-                }
-                return@use tunFd.detachFd()
+        vpnBuilder.establish().use { tunFd ->
+            if (tunFd == null) {
+                throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
+            return@use tunFd.detachFd()
         }
+    }
 }

@@ -41,6 +41,8 @@ abstract class Protocol {
 
     abstract fun stopVpn()
 
+    abstract fun reconnectVpn(vpnBuilder: Builder)
+
     protected fun ProtocolConfig.Builder.configSplitTunnel(config: JSONObject) {
         val splitTunnelType = config.optInt("splitTunnelType")
         if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
@@ -85,33 +87,62 @@ abstract class Protocol {
     protected open fun buildVpnInterface(config: ProtocolConfig, vpnBuilder: Builder) {
         vpnBuilder.setSession(VPN_SESSION_NAME)
 
-        for (addr in config.addresses) vpnBuilder.addAddress(addr)
-
-        for (addr in config.dnsServers) vpnBuilder.addDnsServer(addr)
-        // fix for Samsung android ignoring DNS servers outside the VPN route range
-        if (Build.BRAND == "samsung") {
-            for (addr in config.dnsServers) vpnBuilder.addRoute(InetNetwork(addr))
+        for (addr in config.addresses) {
+            Log.d(TAG, "addAddress: $addr")
+            vpnBuilder.addAddress(addr)
         }
 
-        config.searchDomain?.let { vpnBuilder.addSearchDomain(it) }
+        for (addr in config.dnsServers) {
+            Log.d(TAG, "addDnsServer: $addr")
+            vpnBuilder.addDnsServer(addr)
+        }
+        // fix for Samsung android ignoring DNS servers outside the VPN route range
+        if (Build.BRAND == "samsung") {
+            for (addr in config.dnsServers) {
+                Log.d(TAG, "addRoute: $addr")
+                vpnBuilder.addRoute(InetNetwork(addr))
+            }
+        }
 
-        for (addr in config.routes) vpnBuilder.addRoute(addr)
+        config.searchDomain?.let {
+            Log.d(TAG, "addSearchDomain: $it")
+            vpnBuilder.addSearchDomain(it)
+        }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            for (addr in config.excludedRoutes) vpnBuilder.excludeRoute(addr)
+        for (addr in config.routes) {
+            Log.d(TAG, "addRoute: $addr")
+            vpnBuilder.addRoute(addr)
+        }
 
-        for (app in config.excludedApplications) vpnBuilder.addDisallowedApplication(app)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            for (addr in config.excludedRoutes) {
+                Log.d(TAG, "excludeRoute: $addr")
+                vpnBuilder.excludeRoute(addr)
+            }
+        }
 
+        for (app in config.excludedApplications) {
+            Log.d(TAG, "addDisallowedApplication: $app")
+            vpnBuilder.addDisallowedApplication(app)
+        }
+
+        Log.d(TAG, "setMtu: ${config.mtu}")
         vpnBuilder.setMtu(config.mtu)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            config.httpProxy?.let { vpnBuilder.setHttpProxy(it) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            config.httpProxy?.let {
+                Log.d(TAG, "setHttpProxy: $it")
+                vpnBuilder.setHttpProxy(it)
+            }
+        }
 
         if (config.allowAllAF) {
+            Log.d(TAG, "allowFamily")
             vpnBuilder.allowFamily(OsConstants.AF_INET)
             vpnBuilder.allowFamily(OsConstants.AF_INET6)
         }
 
+        Log.d(TAG, "setBlocking: ${config.blockingMode}")
         vpnBuilder.setBlocking(config.blockingMode)
         vpnBuilder.setUnderlyingNetworks(null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)

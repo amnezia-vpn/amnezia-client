@@ -68,6 +68,14 @@ AndroidController::AndroidController() : QObject()
         Qt::QueuedConnection);
 
     connect(
+        this, &AndroidController::vpnReconnecting, this,
+        [this]() {
+            qDebug() << "Android event: VPN reconnecting";
+            emit connectionStateChanged(Vpn::ConnectionState::Reconnecting);
+        },
+        Qt::QueuedConnection);
+
+    connect(
         this, &AndroidController::configImported, this,
         []() {
             // todo: not yet implemented
@@ -101,6 +109,7 @@ bool AndroidController::initialize()
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
         {"onVpnConnected", "()V", reinterpret_cast<void *>(onVpnConnected)},
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
+        {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onConfigImported", "()V", reinterpret_cast<void *>(onConfigImported)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
@@ -187,6 +196,7 @@ Vpn::ConnectionState AndroidController::convertState(AndroidController::Connecti
         case AndroidController::ConnectionState::CONNECTING: return Vpn::ConnectionState::Connecting;
         case AndroidController::ConnectionState::DISCONNECTED: return Vpn::ConnectionState::Disconnected;
         case AndroidController::ConnectionState::DISCONNECTING: return Vpn::ConnectionState::Disconnecting;
+        case AndroidController::ConnectionState::RECONNECTING: return Vpn::ConnectionState::Reconnecting;
         case AndroidController::ConnectionState::UNKNOWN: return Vpn::ConnectionState::Unknown;
     }
 }
@@ -199,6 +209,7 @@ QString AndroidController::textConnectionState(AndroidController::ConnectionStat
         case AndroidController::ConnectionState::CONNECTING: return "CONNECTING";
         case AndroidController::ConnectionState::DISCONNECTED: return "DISCONNECTED";
         case AndroidController::ConnectionState::DISCONNECTING: return "DISCONNECTING";
+        case AndroidController::ConnectionState::RECONNECTING: return "RECONNECTING";
         case AndroidController::ConnectionState::UNKNOWN: return "UNKNOWN";
     }
 }
@@ -258,6 +269,15 @@ void AndroidController::onVpnDisconnected(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->vpnDisconnected();
+}
+
+// static
+void AndroidController::onVpnReconnecting(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->vpnReconnecting();
 }
 
 // static
