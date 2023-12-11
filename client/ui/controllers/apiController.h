@@ -20,7 +20,6 @@ public slots:
 
 signals:
     void errorOccurred(const QString &errorMessage);
-    void serverConfigUpdated();
 
 private:
     QString genPublicKey(const QString &protocol);

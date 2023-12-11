@@ -109,9 +109,11 @@ bool ApiController::updateServerConfigFromApi()
             serverConfig.insert(config_key::dns2, cloudConfig.value(config_key::dns2));
             serverConfig.insert(config_key::containers, cloudConfig.value(config_key::containers));
             serverConfig.insert(config_key::hostName, cloudConfig.value(config_key::hostName));
-            serverConfig.insert(config_key::defaultContainer, cloudConfig.value(config_key::defaultContainer));
+
+            auto defaultContainer = cloudConfig.value(config_key::defaultContainer).toString();
+            serverConfig.insert(config_key::defaultContainer, defaultContainer);
             m_serversModel->editServer(serverConfig);
-            emit serverConfigUpdated();
+            emit m_serversModel->defaultContainerChanged(ContainerProps::containerFromString(defaultContainer));
         } else {
             QString err = reply->errorString();
             qDebug() << QString::fromUtf8(reply->readAll()); //todo remove debug output

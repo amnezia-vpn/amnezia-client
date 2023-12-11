@@ -376,7 +376,4 @@ void AmneziaApplication::initControllers()
 
     m_cloudController.reset(new ApiController(m_serversModel, m_containersModel));
     m_engine->rootContext()->setContextProperty("ApiController", m_cloudController.get());
-
-    //    connect(m_cloudController.get(), &ApiController::serverConfigUpdated, this,
-    //            [this]() { m_containersModel->setCurrentlyProcessedServerIndex(m_serversModel->getDefaultServerIndex()); });
 }
