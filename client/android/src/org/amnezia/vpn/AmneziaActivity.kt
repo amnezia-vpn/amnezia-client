@@ -2,6 +2,7 @@ package org.amnezia.vpn
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.net.Uri
 import android.net.VpnService
@@ -140,12 +141,33 @@ class AmneziaActivity : QtActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.v(TAG, "Create Amnezia activity")
+        Log.v(TAG, "Create Amnezia activity: $intent")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         vpnServiceMessenger = IpcMessenger(
             onDeadObjectException = ::doUnbindService,
             messengerName = "VpnService"
         )
+        intent?.let(::processIntent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.v(TAG, "onNewIntent: $intent")
+        intent?.let(::processIntent)
+    }
+
+    private fun processIntent(intent: Intent) {
+        // disable config import when starting activity from history
+        if (intent.flags and FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0) {
+            if (intent.action == ACTION_IMPORT_CONFIG) {
+                intent.getStringExtra(EXTRA_CONFIG)?.let {
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onConfigImported(it)
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {

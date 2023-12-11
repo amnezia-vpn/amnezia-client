@@ -17,8 +17,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- To request network state for android < 31 -->
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
@@ -78,57 +76,26 @@
 
         <activity
             android:name=".ImportConfigActivity"
-            android:exported="true">
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="true"
+            android:theme="@style/Translucent">
 
-            <intent-filter android:label="AmneziaVPN">
+            <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.vpn" />
-                <data android:pathPattern=".*\\..*\\.vpn" />
-                <data android:pathPattern=".*\\..*\\..*\\.vpn" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.vpn" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.vpn" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <intent-filter android:label="AmneziaVPN">
-                <action android:name="android.intent.action.SEND" />
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.cfg" />
-                <data android:pathPattern=".*\\..*\\.cfg" />
-                <data android:pathPattern=".*\\..*\\..*\\.cfg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cfg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cfg" />
-            </intent-filter>
-
-            <intent-filter android:label="AmneziaVPN">
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.conf" />
-                <data android:pathPattern=".*\\..*\\.conf" />
-                <data android:pathPattern=".*\\..*\\..*\\.conf" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.conf" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.conf" />
+                <data android:scheme="vpn" android:host="*" />
             </intent-filter>
         </activity>
 

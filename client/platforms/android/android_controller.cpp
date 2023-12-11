@@ -77,14 +77,9 @@ AndroidController::AndroidController() : QObject()
 
     connect(
         this, &AndroidController::configImported, this,
-        []() {
-            // todo: not yet implemented
-            qDebug() << "Transact: config import";
-            /*auto doc = QJsonDocument::fromJson(parcelBody.toUtf8());
-
-            QString buffer = doc.object()["config"].toString();
-            qDebug() << "Transact: config string" << buffer;
-            importConfigFromOutside(buffer);*/
+        [this](const QString& config) {
+            qDebug() << "Android event: config import";
+            emit importConfigFromOutside(config);
         },
         Qt::QueuedConnection);
 }
@@ -111,7 +106,7 @@ bool AndroidController::initialize()
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
         {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
-        {"onConfigImported", "()V", reinterpret_cast<void *>(onConfigImported)},
+        {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
 
@@ -290,12 +285,20 @@ void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBy
 }
 
 // static
-void AndroidController::onConfigImported(JNIEnv *env, jobject thiz)
+void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->configImported();
+    const char *buffer = env->GetStringUTFChars(data, nullptr);
+    if (!buffer) {
+        return;
+    }
+
+    QString config(buffer);
+    env->ReleaseStringUTFChars(data, buffer);
+
+    emit AndroidController::instance()->configImported(config);
 }
 
 // static

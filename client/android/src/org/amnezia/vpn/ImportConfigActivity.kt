@@ -1,137 +1,88 @@
 package org.amnezia.vpn
 
-import android.Manifest
-import android.app.Activity
-import android.content.pm.PackageManager
-import android.content.ContentResolver
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.ACTION_VIEW
+import android.content.Intent.CATEGORY_DEFAULT
+import android.content.Intent.EXTRA_TEXT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.activity.ComponentActivity
+import java.io.BufferedReader
+import org.amnezia.vpn.util.Log
 
-import java.io.*
+private const val TAG = "ImportConfigActivity"
 
-const val INTENT_ACTION_IMPORT_CONFIG = "org.amnezia.vpn.IMPORT_CONFIG"
+const val ACTION_IMPORT_CONFIG = "org.amnezia.vpn.IMPORT_CONFIG"
+const val EXTRA_CONFIG = "CONFIG"
 
-class ImportConfigActivity : Activity() {
-
-    private val STORAGE_PERMISSION_CODE = 42
+class ImportConfigActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_import_config)
-        startReadConfig(intent)
+        Log.v(TAG, "Create Import Config Activity: $intent")
+        intent?.let(::readConfig)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        startReadConfig(intent)
+        Log.v(TAG, "onNewIntent: $intent")
+        intent?.let(::readConfig)
     }
 
-    private fun startMainActivity(config: String?) {
+    private fun readConfig(intent: Intent) {
+        when (intent.action) {
+            ACTION_SEND -> {
+                Log.v(TAG, "Process SEND action, type: ${intent.type}")
+                when (intent.type) {
+                    "application/octet-stream" ->
+                        processStream(intent)
 
-        if (config == null || config.length == 0)  {
-            return
+                    "text/plain" -> {
+                        intent.getStringExtra(EXTRA_TEXT)?.let(::startMainActivity)
+                    }
+                }
+            }
+
+            ACTION_VIEW -> {
+                Log.v(TAG, "Process VIEW action")
+                intent.data?.toString()?.let(::startMainActivity)
+            }
         }
-
-        val activityIntent = Intent(applicationContext, AmneziaActivity::class.java)
-        activityIntent.action = INTENT_ACTION_IMPORT_CONFIG
-        activityIntent.addCategory("android.intent.category.DEFAULT")
-        activityIntent.putExtra("CONFIG", config)
-
-        startActivity(activityIntent)
         finish()
     }
 
-    private fun startReadConfig(intent: Intent?) {
-        val newIntent = intent
-        val newIntentAction: String = newIntent?.action ?: ""
-
-        if (newIntent != null && newIntentAction == Intent.ACTION_VIEW) {
-            readConfig(newIntent, newIntentAction)
+    private fun processStream(intent: Intent) {
+        getUriCompat(intent)?.let { uri ->
+            contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().use(BufferedReader::readText).let(::startMainActivity)
+            }
         }
     }
 
-    private fun readConfig(newIntent: Intent, newIntentAction: String) {
-        if (isReadStorageAllowed()) {
-            val configString = processIntent(newIntent, newIntentAction)
-            startMainActivity(configString)
+    private fun getUriCompat(intent: Intent): Uri? =
+        if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
-            requestStoragePermission()
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(Intent.EXTRA_STREAM)
         }
-    }
 
-    private fun requestStoragePermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
-        if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                val configString = processIntent(intent, intent.action!!)
-
-                if (configString != null) {
-                    startMainActivity(configString)
-                }
-            } else {
-                Toast.makeText(this, "Oops you just denied the permission", Toast.LENGTH_LONG).show()
+    private fun startMainActivity(config: String) {
+        if (config.isNotBlank()) {
+            Log.v(TAG, "startMainActivity")
+            Intent(applicationContext, AmneziaActivity::class.java).apply {
+                action = ACTION_IMPORT_CONFIG
+                addCategory(CATEGORY_DEFAULT)
+                putExtra(EXTRA_CONFIG, config)
+                flags = FLAG_ACTIVITY_NEW_TASK
+            }.also {
+                startActivity(it)
             }
         }
-    }
-
-    private fun processIntent(intent: Intent, action: String): String? {
-        val scheme = intent.scheme
-
-        if (scheme == null) {
-            return null
-        }
-
-        if (action.compareTo(Intent.ACTION_VIEW) == 0) {
-            val resolver = contentResolver
-
-            if (scheme.compareTo(ContentResolver.SCHEME_CONTENT) == 0) {
-                val uri = intent.data
-                val name: String? = getContentName(resolver, uri)
-
-                println("Content intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
-
-                val input = resolver.openInputStream(uri!!)
-
-                return input?.bufferedReader()?.use(BufferedReader::readText)
-            } else if (scheme.compareTo(ContentResolver.SCHEME_FILE) == 0) {
-                val uri = intent.data
-                val name = uri!!.lastPathSegment
-
-                println("File intent detected: " + action + " : " + intent.dataString + " : " + intent.type + " : " + name)
-
-                val input = resolver.openInputStream(uri)
-
-                return input?.bufferedReader()?.use(BufferedReader::readText)
-            }
-        }
-
-        return null
-    }
-
-    private fun isReadStorageAllowed(): Boolean {
-        val permissionStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        return permissionStatus == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun getContentName(resolver: ContentResolver?, uri: Uri?): String? {
-        val cursor = resolver!!.query(uri!!, null, null, null, null)
-
-        cursor.use {
-            cursor!!.moveToFirst()
-            val nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-            return if (nameIndex >= 0) {
-                return cursor.getString(nameIndex)
-            } else {
-                null
-            }
-        }
+        finish()
     }
 }

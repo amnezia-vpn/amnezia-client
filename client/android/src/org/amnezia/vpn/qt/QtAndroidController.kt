@@ -15,7 +15,7 @@ object QtAndroidController {
     external fun onVpnReconnecting()
     external fun onStatisticsUpdate(rxBytes: Long, txBytes: Long)
 
-    external fun onConfigImported()
+    external fun onConfigImported(data: String)
 
     external fun decodeQrCode(data: String): Boolean
 }
