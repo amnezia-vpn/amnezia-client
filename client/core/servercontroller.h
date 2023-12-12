@@ -56,7 +56,7 @@ public:
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
-    void setCancelInstallation(const bool cancel);
+    void cancelInstallation();
 
     ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
                                      const std::function<QString()> &callback);

@@ -390,9 +390,8 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
-                                PageController.showBusyIndicator(true)
+                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
-                                PageController.showBusyIndicator(false)
                             }
                         }
                     }
