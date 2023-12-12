@@ -94,17 +94,7 @@ open class Wireguard : Protocol() {
         val configData = parseConfigData(configDataJson.getString("config"))
         return WireguardConfig.build {
             configWireguard(configData)
-            // Default Wireguard routes (0.0.0.0/0, ::/0) will be removed,
-            // allowed routes from the Wireguard configuration will be merged
-            // with allowed routes from the split tunneling configuration.
-            //
-            // Excluded routes from the split tunneling configuration can overwrite
-            // allowed routes from the Wireguard configuration (two routes are equal
-            // if they have the same address and prefix).
-            //
-            // If multiple routes match the packet destination,
-            // route with the longest prefix takes precedence
-            configSplitTunnel(config)
+            configSplitTunneling(config)
         }
     }
 
@@ -113,9 +103,19 @@ open class Wireguard : Protocol() {
         configData["DNS"]?.split(",")?.map { dns ->
             parseInetAddress(dns.trim())
         }?.forEach(::addDnsServer)
+
+        val defRoutes = listOf(
+            InetNetwork("0.0.0.0", 0),
+            InetNetwork("::", 0)
+        )
+        val routes = hashSetOf<InetNetwork>()
         configData["AllowedIPs"]?.split(",")?.map { route ->
             InetNetwork.parse(route.trim())
-        }?.forEach(::addRoute)
+        }?.forEach(routes::add)
+        // if the allowed IPs list contains at least one non-default route, disable global split tunneling
+        if (!routes.all { defRoutes.contains(it) }) disableSplitTunneling()
+        addRoutes(routes)
+
         configData["MTU"]?.let { setMtu(it.toInt()) }
         configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
         configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }

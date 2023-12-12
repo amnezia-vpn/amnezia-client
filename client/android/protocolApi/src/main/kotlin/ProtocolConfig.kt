@@ -51,20 +51,23 @@ open class ProtocolConfig protected constructor(
         internal var blockingMode: Boolean = blockingMode
             private set
 
+        internal var allowSplitTunneling: Boolean = true
+            private set
+
         open var mtu: Int = 0
             protected set
 
         fun addAddress(addr: InetNetwork) = apply { this.addresses += addr }
-        fun addAddresses(addresses: List<InetNetwork>) = apply { this.addresses += addresses }
+        fun addAddresses(addresses: Collection<InetNetwork>) = apply { this.addresses += addresses }
         fun clearAddresses() = apply { this.addresses.clear() }
 
         fun addDnsServer(dnsServer: InetAddress) = apply { this.dnsServers += dnsServer }
-        fun addDnsServers(dnsServers: List<InetAddress>) = apply { this.dnsServers += dnsServers }
+        fun addDnsServers(dnsServers: Collection<InetAddress>) = apply { this.dnsServers += dnsServers }
 
         fun setSearchDomain(domain: String) = apply { this.searchDomain = domain }
 
         fun addRoute(route: InetNetwork) = apply { this.routes += route }
-        fun addRoutes(routes: List<InetNetwork>) = apply { this.routes += routes }
+        fun addRoutes(routes: Collection<InetNetwork>) = apply { this.routes += routes }
         fun removeRoute(route: InetNetwork) = apply { this.routes.remove(route) }
         fun clearRoutes() = apply { this.routes.clear() }
 
@@ -72,10 +75,10 @@ open class ProtocolConfig protected constructor(
         fun excludeRoute(route: InetNetwork) = apply { this.excludedRoutes += route }
 
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-        fun excludeRoutes(routes: List<InetNetwork>) = apply { this.excludedRoutes += routes }
+        fun excludeRoutes(routes: Collection<InetNetwork>) = apply { this.excludedRoutes += routes }
 
         fun excludeApplication(application: String) = apply { this.excludedApplications += application }
-        fun excludeApplications(applications: List<String>) = apply { this.excludedApplications += applications }
+        fun excludeApplications(applications: Collection<String>) = apply { this.excludedApplications += applications }
 
         @RequiresApi(Build.VERSION_CODES.Q)
         fun setHttpProxy(httpProxy: ProxyInfo) = apply { this.httpProxy = httpProxy }
@@ -83,6 +86,8 @@ open class ProtocolConfig protected constructor(
         fun setAllowAllAF(allowAllAF: Boolean) = apply { this.allowAllAF = allowAllAF }
 
         fun setBlockingMode(blockingMode: Boolean) = apply { this.blockingMode = blockingMode }
+
+        fun disableSplitTunneling() = apply { this.allowSplitTunneling = false }
 
         fun setMtu(mtu: Int) = apply { this.mtu = mtu }
 

@@ -43,7 +43,13 @@ abstract class Protocol {
 
     abstract fun reconnectVpn(vpnBuilder: Builder)
 
-    protected fun ProtocolConfig.Builder.configSplitTunnel(config: JSONObject) {
+    protected fun ProtocolConfig.Builder.configSplitTunneling(config: JSONObject) {
+        if (!allowSplitTunneling) {
+            Log.i(TAG, "Global address split tunneling is prohibited, " +
+                "only tunneling from the protocol config is used")
+            return
+        }
+
         val splitTunnelType = config.optInt("splitTunnelType")
         if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
         val splitTunnelSites = config.getJSONArray("splitTunnelSites")

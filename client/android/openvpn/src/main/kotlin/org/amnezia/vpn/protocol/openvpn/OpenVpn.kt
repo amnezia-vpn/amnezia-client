@@ -87,7 +87,7 @@ open class OpenVpn : Protocol() {
                         addRoute(InetNetwork("0.0.0.0", 0))
                         addRoute(InetNetwork("::", 0))
                     }
-                    configSplitTunnel(config)
+                    configSplitTunneling(config)
                 }
 
                 scope.launch {
