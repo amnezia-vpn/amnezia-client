@@ -10,7 +10,7 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
     m_currentlyProcessedServerIndex = m_defaultServerIndex;
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
-    connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerDescriptionChanged);
+    connect(this, &ServersModel::defaultContainerChanged, this, &ServersModel::defaultServerDescriptionChanged);
     connect(this, &ServersModel::defaultServerIndexChanged, this, [this](const int serverIndex) {
         auto defaultContainer = ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
         emit ServersModel::defaultContainerChanged(defaultContainer);

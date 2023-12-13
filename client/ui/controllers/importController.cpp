@@ -169,8 +169,6 @@ QJsonObject ImportController::extractAmneziaConfig(QString &data)
 
     QJsonObject config = QJsonDocument::fromJson(ba).object();
 
-    qDebug() << config;
-
     return config;
 }
 
