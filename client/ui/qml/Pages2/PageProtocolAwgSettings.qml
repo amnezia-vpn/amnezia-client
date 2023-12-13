@@ -312,9 +312,8 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
-                                PageController.showBusyIndicator(true)
+                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())
-                                PageController.showBusyIndicator(false)
                             }
                         }
                     }
