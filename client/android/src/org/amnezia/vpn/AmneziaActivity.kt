@@ -321,13 +321,9 @@ class AmneziaActivity : QtActivity() {
     // saving file
     private fun alterDocument(uri: Uri) {
         try {
-            applicationContext.contentResolver.openFileDescriptor(uri, "w")?.use { fd ->
-                FileOutputStream(fd.fileDescriptor).use { fos ->
-                    fos.write(tmpFileContentToSave.toByteArray())
-                }
+            contentResolver.openOutputStream(uri)?.use { os ->
+                os.bufferedWriter().use { it.write(tmpFileContentToSave) }
             }
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -363,16 +359,17 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
         Log.v(TAG, "Save file $fileName")
-        // todo: refactor
-        tmpFileContentToSave = data
+        mainScope.launch {
+            tmpFileContentToSave = data
 
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/*"
-            putExtra(Intent.EXTRA_TITLE, fileName)
+            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "text/*"
+                putExtra(Intent.EXTRA_TITLE, fileName)
+            }.also {
+                startActivityForResult(it, CREATE_FILE_ACTION_CODE)
+            }
         }
-
-        startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
     }
 
     @Suppress("unused")

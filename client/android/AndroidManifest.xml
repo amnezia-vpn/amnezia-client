@@ -15,8 +15,9 @@
     <!-- %%INSERT_FEATURES -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- To request network state for android < 31 -->
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- To request network state -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />

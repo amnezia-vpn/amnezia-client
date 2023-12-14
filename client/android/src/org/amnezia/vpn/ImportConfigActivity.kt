@@ -1,17 +1,23 @@
 package org.amnezia.vpn
 
+import android.Manifest
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.CATEGORY_DEFAULT
 import android.content.Intent.EXTRA_TEXT
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.Process
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import java.io.BufferedReader
+import java.io.IOException
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "ImportConfigActivity"
@@ -38,8 +44,16 @@ class ImportConfigActivity : ComponentActivity() {
             ACTION_SEND -> {
                 Log.v(TAG, "Process SEND action, type: ${intent.type}")
                 when (intent.type) {
-                    "application/octet-stream" ->
-                        processStream(intent)
+                    "application/octet-stream" -> {
+                        intent.getUriCompat()?.let { uri ->
+                            checkPermissions(
+                                uri,
+                                onSuccess = ::processUri,
+                                onFail = ::finish
+                            )
+                        }
+                        return
+                    }
 
                     "text/plain" -> {
                         intent.getStringExtra(EXTRA_TEXT)?.let(::startMainActivity)
@@ -55,20 +69,49 @@ class ImportConfigActivity : ComponentActivity() {
         finish()
     }
 
-    private fun processStream(intent: Intent) {
-        getUriCompat(intent)?.let { uri ->
-            contentResolver.openInputStream(uri)?.use {
-                it.bufferedReader().use(BufferedReader::readText).let(::startMainActivity)
-            }
+    private fun checkPermissions(uri: Uri, onSuccess: (Uri) -> Unit, onFail: () -> Unit) {
+        if (checkUriReadPermission(uri) == PackageManager.PERMISSION_GRANTED) {
+            onSuccess(uri)
+        } else {
+            val requestPermissionLauncher =
+                registerForActivityResult(RequestPermission()) { isGranted ->
+                    if (isGranted) onSuccess(uri)
+                    else {
+                        Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                        onFail()
+                    }
+                }
+            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }
 
-    private fun getUriCompat(intent: Intent): Uri? =
+    private fun checkUriReadPermission(uri: Uri) = checkUriPermission(
+        uri,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        null,
+        Process.myPid(),
+        Process.myUid(),
+        Intent.FLAG_GRANT_READ_URI_PERMISSION
+    )
+
+    private fun processUri(uri: Uri) {
+        try {
+            contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().use(BufferedReader::readText).let(::startMainActivity)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            finish()
+        }
+    }
+
+    private fun Intent.getUriCompat(): Uri? =
         if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getParcelableExtra(Intent.EXTRA_STREAM)
+            getParcelableExtra(Intent.EXTRA_STREAM)
         }
 
     private fun startMainActivity(config: String) {
@@ -83,6 +126,5 @@ class ImportConfigActivity : ComponentActivity() {
                 startActivity(it)
             }
         }
-        finish()
     }
 }
