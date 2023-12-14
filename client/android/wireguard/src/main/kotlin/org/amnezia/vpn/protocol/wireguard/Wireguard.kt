@@ -104,7 +104,7 @@ open class Wireguard : Protocol() {
             parseInetAddress(dns.trim())
         }?.forEach(::addDnsServer)
 
-        val defRoutes = listOf(
+        val defRoutes = hashSetOf(
             InetNetwork("0.0.0.0", 0),
             InetNetwork("::", 0)
         )
@@ -113,7 +113,7 @@ open class Wireguard : Protocol() {
             InetNetwork.parse(route.trim())
         }?.forEach(routes::add)
         // if the allowed IPs list contains at least one non-default route, disable global split tunneling
-        if (!routes.all { defRoutes.contains(it) }) disableSplitTunneling()
+        if (routes.any { it !in defRoutes }) disableSplitTunneling()
         addRoutes(routes)
 
         configData["MTU"]?.let { setMtu(it.toInt()) }

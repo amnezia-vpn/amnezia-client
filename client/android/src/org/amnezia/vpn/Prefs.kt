@@ -8,7 +8,7 @@ import org.amnezia.vpn.util.Log
 
 private const val TAG = "Prefs"
 private const val PREFS_FILE = "org.amnezia.vpn.prefs"
-private const val SECURE_PREFS_FILE = PREFS_FILE + ".secure"
+private const val SECURE_PREFS_FILE = "$PREFS_FILE.secure"
 
 object Prefs {
     fun get(context: Context, appContext: Context = context.applicationContext): SharedPreferences =
@@ -19,7 +19,7 @@ object Prefs {
                 MasterKey(appContext)
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Getting Encryption Storage failed, plaintext fallback")
+            Log.e(TAG, "Getting Encryption Storage failed: ${e.message}, plaintext fallback")
             appContext.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         }
 }
