@@ -31,6 +31,7 @@ PageType {
                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
                                       ServersModel.getCurrentlyProcessedServerCredentials())
         PageController.showBusyIndicator(false)
+        PageController.showNotificationMessage(qsTr("Config revoked"))
     }
 
     Connections {
@@ -354,8 +355,6 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
-                        protocolSelectorListView.currentItem.y
-
                         handler()
 
                         protocolSelector.menuVisible = false
@@ -365,7 +364,7 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ContainersModel.getDefaultContainer())
+                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer())
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }

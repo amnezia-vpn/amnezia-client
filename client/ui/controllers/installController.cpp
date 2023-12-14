@@ -8,7 +8,7 @@
 #include <QRandomGenerator>
 
 #include "core/errorstrings.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "utilities.h"
 
 namespace
@@ -201,12 +201,9 @@ void InstallController::installContainer(DockerContainer container, QJsonObject 
 
     if (errorCode == ErrorCode::NoError) {
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-            auto modelIndex = m_containersModel->index(iterator.key());
-            QJsonObject containerConfig =
-                    qvariant_cast<QJsonObject>(m_containersModel->data(modelIndex, ContainersModel::Roles::ConfigRole));
+            QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());
             if (containerConfig.isEmpty()) {
-                m_containersModel->setData(m_containersModel->index(iterator.key()), iterator.value(),
-                                           ContainersModel::Roles::ConfigRole);
+                m_serversModel->addContainerConfig(iterator.key(), iterator.value());
                 if (container != iterator.key()) { // skip the newly installed container
                     isInstalledContainerAddedToGui = true;
                 }
@@ -254,12 +251,9 @@ void InstallController::scanServerForInstalledContainers()
         bool isInstalledContainerAddedToGui = false;
 
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-            auto modelIndex = m_containersModel->index(iterator.key());
-            QJsonObject containerConfig =
-                    qvariant_cast<QJsonObject>(m_containersModel->data(modelIndex, ContainersModel::Roles::ConfigRole));
+            QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());
             if (containerConfig.isEmpty()) {
-                m_containersModel->setData(m_containersModel->index(iterator.key()), iterator.value(),
-                                           ContainersModel::Roles::ConfigRole);
+                m_serversModel->addContainerConfig(iterator.key(), iterator.value());
                 isInstalledContainerAddedToGui = true;
             }
         }
@@ -278,9 +272,7 @@ void InstallController::updateContainer(QJsonObject config)
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
     const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-    auto modelIndex = m_containersModel->index(container);
-    QJsonObject oldContainerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(modelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject oldContainerConfig = m_containersModel->getContainerConfig(container);
 
     ServerController serverController(m_settings);
     connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
@@ -288,7 +280,7 @@ void InstallController::updateContainer(QJsonObject config)
 
     auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
     if (errorCode == ErrorCode::NoError) {
-        m_containersModel->setData(modelIndex, config, ContainersModel::Roles::ConfigRole);
+        m_serversModel->updateContainerConfig(container, config);
         m_protocolModel->updateModel(config);
 
         if ((serverIndex == m_serversModel->getDefaultServerIndex())
@@ -318,7 +310,7 @@ void InstallController::removeAllContainers()
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    ErrorCode errorCode = m_containersModel->removeAllContainers();
+    ErrorCode errorCode = m_serversModel->removeAllContainers();
     if (errorCode == ErrorCode::NoError) {
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
@@ -332,12 +324,12 @@ void InstallController::removeCurrentlyProcessedContainer()
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     int container = m_containersModel->getCurrentlyProcessedContainerIndex();
-    QString containerName = m_containersModel->data(container, ContainersModel::Roles::NameRole).toString();
+    QString containerName = m_containersModel->getCurrentlyProcessedContainerName();
 
-    ErrorCode errorCode = m_containersModel->removeCurrentlyProcessedContainer();
+    ErrorCode errorCode = m_serversModel->removeContainer(container);
     if (errorCode == ErrorCode::NoError) {
 
-        emit removeCurrentlyProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName).arg(serverName));
+        emit removeCurrentlyProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));

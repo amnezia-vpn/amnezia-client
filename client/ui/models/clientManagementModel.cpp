@@ -3,7 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "logger.h"
 
 namespace

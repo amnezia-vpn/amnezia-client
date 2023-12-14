@@ -1,4 +1,4 @@
-#include "servercontroller.h"
+#include "serverController.h"
 
 #include <QCryptographicHash>
 #include <QDir>
@@ -24,8 +24,8 @@
 
 #include "containers/containers_defs.h"
 #include "logger.h"
-#include "scripts_registry.h"
-#include "server_defs.h"
+#include "core/scripts_registry.h"
+#include "core/server_defs.h"
 #include "settings.h"
 #include "utilities.h"
 

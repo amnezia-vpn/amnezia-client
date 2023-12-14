@@ -277,19 +277,16 @@ QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 
 void AmneziaApplication::initModels()
 {
-    m_containersModel.reset(new ContainersModel(m_settings, this));
+    m_containersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
-    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, m_containersModel.get(),
-            &ContainersModel::updateContainersConfig);
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
-    connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
-            &ContainersModel::setCurrentlyProcessedServerIndex);
-    connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
-            &ContainersModel::setCurrentlyProcessedServerIndex);
-    connect(m_containersModel.get(), &ContainersModel::containersModelUpdated, m_serversModel.get(),
-            &ServersModel::updateContainersConfig);
+    connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(),
+            &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::defaultContainerChanged, m_containersModel.get(),
+            &ContainersModel::setDefaultContainer);
+    m_containersModel->setDefaultContainer(m_serversModel->getDefaultContainer()); // make better?
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -298,7 +295,7 @@ void AmneziaApplication::initModels()
 
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
-    
+
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
@@ -327,8 +324,13 @@ void AmneziaApplication::initModels()
 
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
-    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, m_clientManagementModel.get(),
-            &ClientManagementModel::appendClient);
+
+    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
+            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
+                   ServerCredentials credentials) {
+                m_serversModel->reloadContainerConfig();
+                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+            });
 }
 
 void AmneziaApplication::initControllers()
@@ -354,7 +356,8 @@ void AmneziaApplication::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel,
+                                                  m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
@@ -362,10 +365,15 @@ void AmneziaApplication::initControllers()
     if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
+    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled , m_serversModel.get(),
+            &ServersModel::toggleAmneziaDns);
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    m_cloudController.reset(new ApiController(m_serversModel, m_containersModel));
+    m_engine->rootContext()->setContextProperty("ApiController", m_cloudController.get());
 }

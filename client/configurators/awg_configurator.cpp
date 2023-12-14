@@ -3,7 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 
 AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
     : WireguardConfigurator(settings, true, parent)

@@ -28,8 +28,25 @@
     </message>
 </context>
 <context>
+    <name>CloudController</name>
+    <message>
+        <location filename="../ui/controllers/cloudController.cpp" line="102"/>
+        <source>Error when retrieving configuration from cloud server</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CloudController</name>
+    <message>
+        <location filename="../ui/controllers/cloudController.cpp" line="102"/>
+        <source>Error when retrieving configuration from cloud server</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConnectionController</name>
     <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="38"/>
         <location filename="../ui/controllers/connectionController.cpp" line="38"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
@@ -37,35 +54,35 @@
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="61"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="62"/>
         <source>Connection...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="66"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="128"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>Настройки успешно обновлены. Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="75"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Reconnection...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="80"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="94"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="100"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="85"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="102"/>
         <source>Disconnection...</source>
         <translation>Отключение...</translation>
     </message>
@@ -139,7 +156,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="427"/>
+        <location filename="../ui/controllers/importController.cpp" line="384"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -147,58 +164,52 @@
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="143"/>
-        <location filename="../ui/controllers/installController.cpp" line="193"/>
+        <location filename="../ui/controllers/installController.cpp" line="110"/>
+        <location filename="../ui/controllers/installController.cpp" line="162"/>
         <source>%1 installed successfully. </source>
         <translation>%1 успешно установлен. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="145"/>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="112"/>
+        <location filename="../ui/controllers/installController.cpp" line="164"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 уже установлен на сервер. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="148"/>
-        <source>
-Added containers that were already installed on the server</source>
-        <translation>
-В приложение добавлены обнаруженные на сервере протоклы и сервисы</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/installController.cpp" line="214"/>
+        <location filename="../ui/controllers/installController.cpp" line="115"/>
+        <location filename="../ui/controllers/installController.cpp" line="183"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервере обнаружены установленные протоколы и сервисы, все они добавлены в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="295"/>
+        <location filename="../ui/controllers/installController.cpp" line="264"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="310"/>
+        <location filename="../ui/controllers/installController.cpp" line="279"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; был удален</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="320"/>
+        <location filename="../ui/controllers/installController.cpp" line="289"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="337"/>
+        <location filename="../ui/controllers/installController.cpp" line="306"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 был удален с сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="483"/>
+        <location filename="../ui/controllers/installController.cpp" line="452"/>
         <source>Please login as the user</source>
         <translation>Пожалуйста, войдите в систему от имени пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="511"/>
+        <location filename="../ui/controllers/installController.cpp" line="479"/>
         <source>Server added successfully</source>
         <translation>Сервер успешно добавлен</translation>
     </message>
@@ -266,12 +277,12 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="354"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="193"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="398"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="238"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
@@ -1000,18 +1011,18 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
-        <source>Allow application screenshots</source>
-        <translation>Разрешить скриншоты</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
         <source>Auto start</source>
-        <translation>Авто-запуск</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
-        <source>Launch the application every time the device is starts</source>
-        <translation>Запускать приложение при каждом включении</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <source>Launch the application every time </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="53"/>
+        <source> starts</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
@@ -1932,12 +1943,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Доступ </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="222"/>
-        <source>File with accessing settings to </source>
-        <translation>Файл с настройками доступа к </translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="306"/>
         <source>Connection to </source>
         <translation>Подключение к </translation>
     </message>
@@ -1977,13 +1983,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Поделиться доступом к VPN, без возможности управления сервером</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="175"/>
-        <source>Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.</source>
-        <translation>Поделиться доступом к управлению сервером. Пользователь, с которым вы делитесь полным доступом к серверу, сможет добавлять и удалять любые протоколы и службы на сервере, а также изменять настройки.</translation>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="248"/>
+        <source>Protocols</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="251"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="249"/>
         <source>Protocol</source>
         <translation>Протокол</translation>
     </message>
@@ -2442,7 +2447,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="61"/>
         <source>The config does not contain any containers and credentiaks for connecting to the server</source>
-        <translation>The config does not contain any containers and credentiaks for connecting to the server</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="65"/>
@@ -2742,6 +2747,16 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <source>&amp;Randomize colors</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>
@@ -2813,8 +2828,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="126"/>
-        <source>Show connection settings</source>
-        <translation>Показать настройки подключения</translation>
+        <source>Show content</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="251"/>
@@ -2909,7 +2924,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="406"/>
+        <location filename="../vpnconnection.cpp" line="405"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

@@ -42,6 +42,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_settings->setUseAmneziaDns(enable);
+    emit amneziaDnsToggled(enable);
 }
 
 bool SettingsController::isAmneziaDnsEnabled()
@@ -138,7 +139,7 @@ void SettingsController::clearSettings()
 
 void SettingsController::clearCachedProfiles()
 {
-    m_containersModel->clearCachedProfiles();
+    m_serversModel->clearCachedProfiles();
     emit changeSettingsFinished(tr("Cached profiles cleared"));
 }
 
