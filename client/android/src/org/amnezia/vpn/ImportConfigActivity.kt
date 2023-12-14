@@ -55,15 +55,27 @@ class ImportConfigActivity : ComponentActivity() {
                         return
                     }
 
-                    "text/plain" -> {
-                        intent.getStringExtra(EXTRA_TEXT)?.let(::startMainActivity)
-                    }
+                    "text/plain" -> intent.getStringExtra(EXTRA_TEXT)?.let(::startMainActivity)
                 }
             }
 
             ACTION_VIEW -> {
-                Log.v(TAG, "Process VIEW action")
-                intent.data?.toString()?.let(::startMainActivity)
+                Log.v(TAG, "Process VIEW action, scheme: ${intent.scheme}")
+                when (intent.scheme) {
+                    "file", "content" -> {
+                        intent.data?.let { uri ->
+                            checkPermissions(
+                                uri,
+                                onSuccess = ::processUri,
+                                onFail = ::finish
+                            )
+                        }
+                        return
+                    }
+
+                    "vpn" -> intent.data?.toString()?.let(::startMainActivity)
+                }
+
             }
         }
         finish()
