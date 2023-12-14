@@ -58,7 +58,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
-    case DockerContainer::Dns: return {};
+    case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
 
