@@ -31,6 +31,7 @@ PageType {
                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
                                       ServersModel.getCurrentlyProcessedServerCredentials())
         PageController.showBusyIndicator(false)
+        PageController.showNotificationMessage(qsTr("Config revoked"))
     }
 
     Connections {
