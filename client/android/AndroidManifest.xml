@@ -113,14 +113,12 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
         </service>
 
-        <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="org.amnezia.vpn.fileprovider"
+            android:authorities="org.amnezia.vpn.qtprovider"
             android:exported="false"
             android:grantUriPermissions="true">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/fileprovider" />
+        <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
         </provider>
     </application>
-
 </manifest>
