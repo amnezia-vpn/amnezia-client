@@ -8,13 +8,13 @@ if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst su
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
 if ! command -v docker > /dev/null 2>&1; then \
-  if [ "$dist" = "centos" ]; then \
-    CHECK_FILE=/etc/yum/pluginconf.d/subscription-manager.conf;\
-    if [ -f "$CHECK_FILE" ]; then CHANGE_NEED=0; else CHANGE_NEED=1; fi;\
+  if [ "$dist" = "centos" ]; then CHECK_FILE="/etc/yum/pluginconf.d/subscription-manager.conf";\
+    if [ -f "$CHECK_FILE" ]; then FILE_Ex=1; else FILE_Ex=0; fi;\
   fi;\
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  if [ "$dist" = "centos" ] && [ "$CHANGE_NEED" = "1" ];\
-  then echo -e "[main]\nenabled=0" > $CHECK_FILE; fi;
+  if [ "$dist" = "centos" ] && [ "$FILE_Ex" = "0" ]; then \
+    if [ -f "$CHECK_FILE" ]; then echo "$(sed '2 s/enabled=1/enabled=0/' $CHECK_FILE)" > $CHECK_FILE; fi;\
+  fi;\
   sleep 5; sudo systemctl enable --now docker; sleep 5;\
 fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then \
