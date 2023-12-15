@@ -14,11 +14,14 @@ if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $sile
   if ! command -v lsof > /dev/null 2>&1; then lsof; fi;\
 fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  if [ "$dist" = "fedora" ] || [ "$dist" = "centos" ] || [ "$dist" = "debian" ]; then sudo systemctl enable docker && sudo systemctl start docker; fi;\
+  if ! command -v docker > /dev/null 2>&1; then docker; else \
+    if [ "$dist" = "fedora" ] || [ "$dist" = "centos" ] || [ "$dist" = "debian" ]; then sudo systemctl enable docker && sudo systemctl start docker; fi;\
+  fi;\
 fi;\
 if [ "$dist" = "debian" ]; then \
   docker_service=$(systemctl list-units --full --all | grep docker.service | grep -v inactive | grep -v dead | grep -v failed);\
   if [ -z "$docker_service" ]; then sudo $pm $check_pkgs; sudo $pm $silent_inst curl $docker_pkg; fi;\
   sleep 3 && sudo systemctl start docker && sleep 3;\
 fi;\
+if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install Docker"; exit 1; fi;\
 docker --version
