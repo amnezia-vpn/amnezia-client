@@ -21,9 +21,6 @@ class IpcInterface
     SLOT( void cleanUp() );
     SLOT( void setLogsEnabled(bool enabled) );
 
-    SLOT( bool copyWireguardConfig(const QString &sourcePath) );
-    SLOT( bool isWireguardRunning() );
-    SLOT( bool isWireguardConfigExists(const QString &configPath) );
     SLOT( bool disableKillSwitch() );
     SLOT( bool enablePeerTraffic( const QJsonObject &configStr) );
     SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );

@@ -170,55 +170,6 @@ void IpcServer::setLogsEnabled(bool enabled)
     }
 }
 
-bool IpcServer::copyWireguardConfig(const QString &sourcePath)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::copyWireguardConfig";
-#endif
-
-#ifdef Q_OS_LINUX
-    const QString wireguardConfigPath = "/etc/wireguard/wg99.conf";
-    if (QFile::exists(wireguardConfigPath))
-    {
-        QFile::remove(wireguardConfigPath);
-    }
-
-    if (!QFile::copy(sourcePath, wireguardConfigPath)) {
-        qDebug() << "WireguardProtocol::WireguardProtocol error occurred while copying wireguard config:";
-        return false;
-    }
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool IpcServer::isWireguardRunning()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::isWireguardRunning";
-#endif
-
-#ifdef Q_OS_LINUX
-    QProcess checkWireguardStatusProcess;
-
-    connect(&checkWireguardStatusProcess, &QProcess::errorOccurred, this, [](QProcess::ProcessError error) {
-        qDebug() << "WireguardProtocol::WireguardProtocol error occurred while checking wireguard status: " << error;
-    });
-
-    checkWireguardStatusProcess.setProgram("/bin/wg");
-    checkWireguardStatusProcess.setArguments(QStringList{"show"});
-    checkWireguardStatusProcess.start();
-    checkWireguardStatusProcess.waitForFinished(10000);
-    QString output = checkWireguardStatusProcess.readAllStandardOutput();
-    if (!output.isEmpty()) {
-        return true;
-    }
-    return false;
-#else
-    return false;
-#endif
-}
 
 bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
 {
@@ -226,6 +177,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     return WindowsFirewall::instance()->enableKillSwitch(vpnAdapterIndex);
 #endif
 
+#ifdef Q_OS_LINUX
     // double-check + ensure our firewall is installed and enabled
     if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
 
@@ -255,9 +207,8 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
    //                                 QStringLiteral("100.vpnTunOnly"),
    //                                 true,
    //                                 LinuxFirewall::kRawTable);
+#endif
     return true;
-
-
 }
 
 bool IpcServer::disableKillSwitch()
@@ -266,7 +217,9 @@ bool IpcServer::disableKillSwitch()
     return WindowsFirewall::instance()->disableKillSwitch();
 #endif
 
+#ifdef Q_OS_LINUX
     LinuxFirewall::uninstall();
+#endif
     return true;
 }
 
