@@ -141,7 +141,9 @@ void ImportController::importConfig()
     credentials.userName = m_config.value(config_key::userName).toString();
     credentials.secretData = m_config.value(config_key::password).toString();
 
-    if (credentials.isValid() || m_config.contains(config_key::containers)) {
+    if (credentials.isValid()
+        || m_config.contains(config_key::containers)
+        || m_config.contains(config_key::configVersion)) { // todo
         m_serversModel->addServer(m_config);
 
         emit importFinished();
@@ -165,7 +167,9 @@ QJsonObject ImportController::extractAmneziaConfig(QString &data)
         ba = ba_uncompressed;
     }
 
-    return QJsonDocument::fromJson(ba).object();
+    QJsonObject config = QJsonDocument::fromJson(ba).object();
+
+    return config;
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)

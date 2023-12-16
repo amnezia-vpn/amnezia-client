@@ -28,6 +28,14 @@
     </message>
 </context>
 <context>
+    <name>CloudController</name>
+    <message>
+        <location filename="../ui/controllers/cloudController.cpp" line="102"/>
+        <source>Error when retrieving configuration from cloud server</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConnectionController</name>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
@@ -2568,6 +2576,10 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="61"/>
+        <source>The config does not contain any containers and credentials for connecting to the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>The config does not contain any containers and credentiaks for connecting to the server</source>
         <translation>该配置不包含任何用于连接到服务器的容器和凭据。</translation>
     </message>
@@ -2870,6 +2882,16 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>错误 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>

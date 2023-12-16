@@ -57,7 +57,7 @@ QString errorString(ErrorCode code){
     case (OpenVpnTapAdapterError): return QObject::tr("Can't setup OpenVPN TAP network adapter");
     case (AddressPoolError): return QObject::tr("VPN pool error: no available addresses");
 
-    case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentiaks for connecting to the server");
+    case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentials for connecting to the server");
 
     case(InternalError):
     default:

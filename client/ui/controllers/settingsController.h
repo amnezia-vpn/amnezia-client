@@ -70,6 +70,8 @@ signals:
 
     void importBackupFromOutside(QString filePath);
 
+    void amneziaDnsToggled(bool enable);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
