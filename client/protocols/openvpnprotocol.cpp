@@ -55,7 +55,7 @@ void OpenVpnProtocol::stop()
         m_managementServer.stop();
     }
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     IpcClient::Interface()->disableKillSwitch();
 #endif
 
@@ -338,12 +338,15 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                     for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                     {
                         if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                            IpcClient::Interface()->enableKillSwitch(netInterfaces.at(i).index());
+                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);
                             IpcClient::Interface()->enablePeerTraffic(m_configData);
                         }
                     }
                 }
+#endif
+#ifdef Q_OS_LINUX
+                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }

@@ -11,7 +11,9 @@
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
+#include <QThread>
 
+#include "linuxfirewall.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -117,6 +119,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
     }
+
+    FirewallParams params {};
+    params.dnsServers.append(config.m_dnsServer);
+    params.excludeAddrs.append(config.m_serverIpv4AddrIn);
+    applyFirewallRules(params);
+
     return (err == 0);
 }
 
@@ -140,6 +148,9 @@ bool WireguardUtilsLinux::deleteInterface() {
     // Garbage collect.
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
+
+    // double-check + ensure our firewall is installed and enabled
+    LinuxFirewall::uninstall();
     return true;
 }
 
@@ -250,6 +261,34 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsLinux::getPeerStatus() {
     }
 
     return peerList;
+}
+
+
+void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
+{
+    // double-check + ensure our firewall is installed and enabled
+    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
+
+    // Note: rule precedence is handled inside IpTablesFirewall
+    LinuxFirewall::ensureRootAnchorPriority();
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("310.blockDNS"), true);
+    LinuxFirewall::updateDNSServers(params.dnsServers);
+    LinuxFirewall::updateExcludeAddrs(params.excludeAddrs);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4,
+                                       QStringLiteral("100.vpnTunOnly"),
+                                       true,
+                                       LinuxFirewall::kRawTable);
+
 }
 
 bool WireguardUtilsLinux::updateRoutePrefix(const IPAddress& prefix) {

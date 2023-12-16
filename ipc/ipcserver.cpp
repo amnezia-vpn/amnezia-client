@@ -12,7 +12,10 @@
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #include "../client/platforms/windows/daemon/windowsfirewall.h"
+#endif
 
+#ifdef Q_OS_LINUX
+#include "../client/platforms/linux/daemon/linuxfirewall.h"
 #endif
 
 IpcServer::IpcServer(QObject *parent):
@@ -217,21 +220,44 @@ bool IpcServer::isWireguardRunning()
 #endif
 }
 
-bool IpcServer::isWireguardConfigExists(const QString &configPath)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::isWireguardConfigExists";
-#endif
-
-    return QFileInfo::exists(configPath);
-}
-
-bool IpcServer::enableKillSwitch(int vpnAdapterIndex)
+bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
 {
 #ifdef Q_OS_WIN
     return WindowsFirewall::instance()->enableKillSwitch(vpnAdapterIndex);
 #endif
+
+    // double-check + ensure our firewall is installed and enabled
+    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
+
+    // Note: rule precedence is handled inside IpTablesFirewall
+    LinuxFirewall::ensureRootAnchorPriority();
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+   // LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("310.blockDNS"), true);
+    QStringList serverAddr;
+    serverAddr.append(configStr.value(amnezia::config_key::hostName).toString());
+    LinuxFirewall::updateExcludeAddrs(serverAddr);
+    QStringList dnsServers;
+    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    dnsServers.append("127.0.0.1");
+    dnsServers.append("127.0.0.53");
+    LinuxFirewall::updateDNSServers(dnsServers);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
+
+   // LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4,
+   //                                 QStringLiteral("100.vpnTunOnly"),
+   //                                 true,
+   //                                 LinuxFirewall::kRawTable);
     return true;
+
+
 }
 
 bool IpcServer::disableKillSwitch()
@@ -239,6 +265,8 @@ bool IpcServer::disableKillSwitch()
 #ifdef Q_OS_WIN
     return WindowsFirewall::instance()->disableKillSwitch();
 #endif
+
+    LinuxFirewall::uninstall();
     return true;
 }
 
