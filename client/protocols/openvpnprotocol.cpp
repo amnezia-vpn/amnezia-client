@@ -115,37 +115,10 @@ bool OpenVpnProtocol::openVpnProcessIsRunning() const
     return Utils::processIsRunning("ovpncli");
 }
 
-void OpenVpnProtocol::disconnectFromManagementServer()
-{
-    m_managementServer.stop();
-}
 
 QString OpenVpnProtocol::configPath() const
 {
     return m_configFileName;
-}
-
-void OpenVpnProtocol::sendManagementCommand(const QString &command)
-{
-    QIODevice *device = dynamic_cast<QIODevice *>(m_managementServer.socket().data());
-    if (device) {
-        QTextStream stream(device);
-        stream << command << Qt::endl;
-    }
-}
-
-uint OpenVpnProtocol::selectMgmtPort()
-{
-    for (int i = 0; i < 100; ++i) {
-        quint32 port = QRandomGenerator::global()->generate();
-        port = (double)(65000 - 15001) * port / UINT32_MAX + 15001;
-
-        QTcpServer s;
-        bool ok = s.listen(QHostAddress::LocalHost, port);
-        if (ok)
-            return port;
-    }
-    return m_managementPort;
 }
 
 void OpenVpnProtocol::updateRouteGateway(QString line)
