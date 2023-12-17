@@ -56,6 +56,7 @@ set(CMAKE_AUTORCC ON)
 set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
