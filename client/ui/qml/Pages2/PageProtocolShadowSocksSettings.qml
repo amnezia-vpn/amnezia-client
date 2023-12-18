@@ -140,6 +140,12 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
                             }

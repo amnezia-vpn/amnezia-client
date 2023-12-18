@@ -67,8 +67,6 @@ signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 
-    void currentContainerUpdated();
-
 private:
     void installServer(DockerContainer container, QJsonObject &config);
     void installContainer(DockerContainer container, QJsonObject &config);

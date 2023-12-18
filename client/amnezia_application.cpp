@@ -350,8 +350,6 @@ void AmneziaApplication::initControllers()
             &PageController::showPassphraseRequestDrawer);
     connect(m_pageController.get(), &PageController::passphraseRequestDrawerClosed, m_installController.get(),
             &InstallController::setEncryptedPassphrase);
-    connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
-            &ConnectionController::onCurrentContainerUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
