@@ -48,6 +48,19 @@ void ExportController::generateFullAccessConfig()
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     QJsonObject config = m_settings->server(serverIndex);
 
+    QJsonArray containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto container = containers.at(i).toObject();
+        auto containerType = ContainerProps::containerFromString(container.value(config_key::container).toString());
+        auto containerConfig = container.value(ContainerProps::containerTypeToString(containerType)).toObject();
+
+        containerConfig.remove(config_key::last_config);
+
+        container[ContainerProps::containerTypeToString(containerType)] = containerConfig;
+        containers.replace(i, container);
+    }
+    config[config_key::containers] = containers;
+
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     m_config = QString("vpn://%1")
