@@ -1978,7 +1978,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="68"/>
         <source>Save ShadowSocks config</source>
-        <translation type="unfinished">Сохраните конфигурацию ShadowSocks</translation>
+        <translation type="unfinished">Сохранить конфигурацию ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="75"/>
@@ -1993,12 +1993,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
         <source>ShadowSocks native format</source>
-        <translation type="unfinished">Нативный формат ShadowSocks</translation>
+        <translation type="unfinished">ShadowSocks нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
         <source>Cloak native format</source>
-        <translation type="unfinished">Нативный формат Cloak</translation>
+        <translation type="unfinished">Cloak нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="150"/>
