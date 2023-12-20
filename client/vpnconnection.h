@@ -79,8 +79,6 @@ signals:
 
     void serviceIsNotReady();
 
-    void newVpnConfigurationCreated();
-
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);

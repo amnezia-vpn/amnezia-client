@@ -10,7 +10,7 @@
 #include <configurators/shadowsocks_configurator.h>
 #include <configurators/vpn_configurator.h>
 #include <configurators/wireguard_configurator.h>
-#include <core/servercontroller.h>
+#include "core/controllers/serverController.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
@@ -227,7 +227,8 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
         configData = lastVpnConfig.value(proto);
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
     } else {
-        configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, errorCode);
+        QString clientId;
+        configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, clientId, errorCode);
 
         if (errorCode && *errorCode) {
             return "";
@@ -244,6 +245,8 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
+
+        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
     }
 
     return configData;
@@ -258,9 +261,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         QJsonObject vpnConfigData =
                 QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
-                                                                       containerConfig, proto, errorCode)
-                                                .toUtf8())
-                        .object();
+                                                                       containerConfig, proto, errorCode).toUtf8()).object();
 
         if (errorCode && *errorCode) {
             return {};
@@ -323,7 +324,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     ErrorCode e = ErrorCode::NoError;
 
     m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
-    emit newVpnConfigurationCreated();
+
     if (e) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;

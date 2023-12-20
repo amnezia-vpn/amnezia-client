@@ -1,4 +1,4 @@
-#include "servercontroller.h"
+#include "serverController.h"
 
 #include <QCryptographicHash>
 #include <QDir>
@@ -24,12 +24,17 @@
 
 #include "containers/containers_defs.h"
 #include "logger.h"
-#include "scripts_registry.h"
-#include "server_defs.h"
+#include "core/scripts_registry.h"
+#include "core/server_defs.h"
 #include "settings.h"
 #include "utilities.h"
 
 #include <configurators/vpn_configurator.h>
+
+namespace
+{
+    Logger logger("ServerController");
+}
 
 ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings)
 {
@@ -634,9 +639,9 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     return stdOut;
 }
 
-void ServerController::setCancelInstallation(const bool cancel)
+void ServerController::cancelInstallation()
 {
-    m_cancelInstallation = cancel;
+    m_cancelInstallation = true;
 }
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
@@ -737,6 +742,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
 
 ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container)
 {
+    m_cancelInstallation = false;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -784,7 +790,6 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     watcher.setFuture(future);
     wait.exec();
 
-    m_cancelInstallation = false;
     emit serverIsBusy(false);
 
     return future.result();
@@ -857,6 +862,67 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
                         containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
                         containerConfig[config_key::underloadPacketMagicHeader] = serverConfigMap.value(config_key::underloadPacketMagicHeader);
                         containerConfig[config_key::transportPacketMagicHeader] = serverConfigMap.value(config_key::transportPacketMagicHeader);
+                    } else if (protocol == Proto::Sftp) {
+                        stdOut.clear();
+                        script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);
+
+                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+                        if (errorCode != ErrorCode::NoError) {
+                            return errorCode;
+                        }
+
+                        auto sftpInfo = stdOut.split(":");
+                        if (sftpInfo.size() < 2) {
+                            logger.error() << "Key parameters for the sftp container are missing";
+                            continue;
+                        }
+                        auto userName = sftpInfo.at(0);
+                        userName = userName.remove(0, 1);
+                        auto password = sftpInfo.at(1);
+
+                        containerConfig.insert(config_key::userName, userName);
+                        containerConfig.insert(config_key::password, password);
+                    }
+
+                    config.insert(config_key::container, ContainerProps::containerToString(container));
+                }
+                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+            }
+            installedContainers.insert(container, config);
+        }
+        const static QRegularExpression torOrDnsRegExp("(amnezia-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
+        QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
+        if (torOrDnsRegMatch.hasMatch()) {
+            QString name = torOrDnsRegMatch.captured(1);
+            QString port = torOrDnsRegMatch.captured(2);
+            QString transportProto = torOrDnsRegMatch.captured(3);
+            DockerContainer container = ContainerProps::containerFromString(name);
+
+            QJsonObject config;
+            Proto mainProto = ContainerProps::defaultProtocol(container);
+            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
+                QJsonObject containerConfig;
+                if (protocol == mainProto) {
+                    containerConfig.insert(config_key::port, port);
+                    containerConfig.insert(config_key::transport_proto, transportProto);
+
+                    if (protocol == Proto::TorWebSite) {
+                        stdOut.clear();
+                        script = QString("sudo docker exec -i %1 sh -c 'cat /var/lib/tor/hidden_service/hostname'").arg(name);
+
+                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+                        if (errorCode != ErrorCode::NoError) {
+                            return errorCode;
+                        }
+
+                        if (stdOut.isEmpty()) {
+                            logger.error() << "Key parameters for the tor container are missing";
+                            continue;
+                        }
+
+                        QString onion = stdOut;
+                        onion.replace("\n", "");
+                        containerConfig.insert(config_key::site, onion);
                     }
 
                     config.insert(config_key::container, ContainerProps::containerToString(container));

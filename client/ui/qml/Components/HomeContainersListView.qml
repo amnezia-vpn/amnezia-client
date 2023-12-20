@@ -60,9 +60,8 @@ ListView {
                     }
 
                     if (checked) {
-                        isDefault = true
+                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
 
-                        menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
                     } else {
                         if (!isSupported && isInstalled) {

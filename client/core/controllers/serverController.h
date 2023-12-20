@@ -5,8 +5,8 @@
 #include <QObject>
 
 #include "containers/containers_defs.h"
-#include "defs.h"
-#include "sshclient.h"
+#include "core/defs.h"
+#include "core/sshclient.h"
 
 class Settings;
 class VpnConfigurator;
@@ -56,7 +56,7 @@ public:
 
     QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
 
-    void setCancelInstallation(const bool cancel);
+    void cancelInstallation();
 
     ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
                                      const std::function<QString()> &callback);

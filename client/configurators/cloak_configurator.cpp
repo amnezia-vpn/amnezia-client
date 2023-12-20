@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "containers/containers_defs.h"
 
 CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, QObject *parent):

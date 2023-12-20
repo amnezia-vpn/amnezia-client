@@ -66,8 +66,8 @@ PageType {
 
                 text: qsTr("Website address")
                 descriptionText: {
-                    var config = ContainersModel.getCurrentlyProcessedContainerConfig()
                     var containerIndex = ContainersModel.getCurrentlyProcessedContainerIndex()
+                    var config = ContainersModel.getContainerConfig(containerIndex)
                     return config[ContainerProps.containerTypeToString(containerIndex)]["site"]
                 }
 
