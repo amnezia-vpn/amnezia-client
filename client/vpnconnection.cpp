@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QHostInfo>
 #include <QJsonObject>
+#include <QEventLoop>
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
@@ -246,7 +247,10 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
 
-        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
+        QEventLoop wait;
+        emit m_configurator->newVpnConfigCreated(clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
+        QObject::connect(m_configurator.get(), &VpnConfigurator::clientModelUpdated, &wait, &QEventLoop::quit);
+        wait.exec();
     }
 
     return configData;

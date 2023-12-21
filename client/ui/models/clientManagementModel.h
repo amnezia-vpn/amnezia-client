@@ -14,6 +14,7 @@ class ClientManagementModel : public QAbstractListModel
 public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
+        CreationDateRole
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -26,7 +27,7 @@ public slots:
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                            ServerCredentials credentials);
     ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           ServerCredentials credentials);
+                           ServerCredentials credentials, bool addTimeStamp = false);
     ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials);
 
 protected:
