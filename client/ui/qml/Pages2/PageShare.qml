@@ -261,6 +261,7 @@ PageType {
 
                 headerText: qsTr("User name")
                 textFieldText: "New client"
+                textField.maximumLength: 20
 
                 checkEmptyText: true
             }
@@ -469,7 +470,9 @@ PageType {
                 imageSource: "qrc:/images/controls/share-2.svg"
 
                 onClicked: {
-                    ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                    if (clientNameTextField.textFieldText !== "") {
+                        ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                    }
                 }
             }
 
@@ -623,7 +626,8 @@ PageType {
                                                 Layout.fillWidth: true
                                                 headerText: qsTr("Client name")
                                                 textFieldText: clientName
-                                                textField.maximumLength: 30
+                                                textField.maximumLength: 20
+                                                checkEmptyText: true
                                             }
 
                                             BasicButtonType {
@@ -632,6 +636,10 @@ PageType {
                                                 text: qsTr("Save")
 
                                                 onClicked: {
+                                                    if (clientNameEditor.textFieldText === "") {
+                                                        return
+                                                    }
+
                                                     if (clientNameEditor.textFieldText !== clientName) {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
@@ -660,7 +668,7 @@ PageType {
                                     text: qsTr("Revoke")
 
                                     onClicked: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - ") + clientName + "?"
+                                        questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
                                         questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
                                         questionDrawer.yesButtonText = qsTr("Continue")
                                         questionDrawer.noButtonText = qsTr("Cancel")
