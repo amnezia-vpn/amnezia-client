@@ -84,6 +84,7 @@ public slots:
     void addContainerConfig(const int containerIndex, const QJsonObject config);
 
     void clearCachedProfiles();
+    void clearCachedProfile(const DockerContainer container);
 
     ErrorCode removeContainer(const int containerIndex);
     ErrorCode removeAllContainers();

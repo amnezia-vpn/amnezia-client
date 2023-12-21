@@ -50,14 +50,17 @@ void ExportController::generateFullAccessConfig()
 
     QJsonArray containers = config.value(config_key::containers).toArray();
     for (auto i = 0; i < containers.size(); i++) {
-        auto container = containers.at(i).toObject();
-        auto containerType = ContainerProps::containerFromString(container.value(config_key::container).toString());
-        auto containerConfig = container.value(ContainerProps::containerTypeToString(containerType)).toObject();
+        auto containerConfig = containers.at(i).toObject();
+        auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
 
-        containerConfig.remove(config_key::last_config);
+        for (auto protocol : ContainerProps::protocolsForContainer(containerType)) {
+            auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-        container[ContainerProps::containerTypeToString(containerType)] = containerConfig;
-        containers.replace(i, container);
+            protocolConfig.remove(config_key::last_config);
+            containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
+        }
+
+        containers.replace(i, containerConfig);
     }
     config[config_key::containers] = containers;
 

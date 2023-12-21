@@ -32,6 +32,9 @@ public slots:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+signals:
+    void adminConfigRevoked(const DockerContainer container);
+
 private:
     bool isClientExists(const QString &clientId);
 
