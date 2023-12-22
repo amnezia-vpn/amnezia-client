@@ -54,7 +54,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::ShadowSocks: return { Proto::OpenVpn, Proto::ShadowSocks };
 
-    case DockerContainer::Cloak: return { Proto::OpenVpn, /*Proto::ShadowSocks,*/ Proto::Cloak };
+    case DockerContainer::Cloak: return { Proto::OpenVpn, Proto::ShadowSocks, Proto::Cloak };
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
