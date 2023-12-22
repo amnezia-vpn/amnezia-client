@@ -259,6 +259,12 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
     QJsonObject vpnConfiguration;
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
+        auto s = m_settings->server(serverIndex);
+        if (m_settings->server(serverIndex).value(config_key::configVersion).toInt() &&
+            container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
+            continue;
+        }
+
         QJsonObject vpnConfigData =
                 QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
                                                                        containerConfig, proto, errorCode).toUtf8()).object();
