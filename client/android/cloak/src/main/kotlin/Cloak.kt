@@ -52,9 +52,8 @@ class Cloak : OpenVpn() {
     }
 
     private fun checkCloakJson(cloakConfigJson: JSONObject): JSONObject {
-        // todo: strange method
-        if (!cloakConfigJson.has("NumConn")) cloakConfigJson.put("NumConn", 1)
-        if (!cloakConfigJson.has("ProxyMethod")) cloakConfigJson.put("ProxyMethod", "openvpn")
+        cloakConfigJson.put("NumConn", 1)
+        cloakConfigJson.put("ProxyMethod", "openvpn")
         if (cloakConfigJson.has("port")) {
             val port = cloakConfigJson["port"]
             cloakConfigJson.remove("port")
