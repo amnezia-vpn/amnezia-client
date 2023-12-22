@@ -90,8 +90,6 @@ PageType {
                         ]
                     }
 
-                    currentIndex: 0
-
                     clickedFunction: function() {
                         handler()
 
@@ -105,7 +103,9 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        handler()
+                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
+                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
