@@ -193,6 +193,10 @@ void VpnConnection::flushDns()
 
 ErrorCode VpnConnection::lastError() const
 {
+#ifdef Q_OS_ANDROID
+    return ErrorCode::AndroidError;
+#endif
+
     if (!m_vpnProtocol.data()) {
         return ErrorCode::InternalError;
     }

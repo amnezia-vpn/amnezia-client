@@ -15,8 +15,6 @@ import android.os.Messenger
 import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.CompletableDeferred
