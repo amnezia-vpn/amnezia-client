@@ -214,33 +214,55 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
 #endif
 
 #ifdef Q_OS_MACOS
+    int splitTunnelType = configStr.value("splitTunnelType").toInt();
+    QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
+    bool blockAll = 0;
+    bool allowNets = 0;
+    bool blockNets = 0;
+    QStringList allownets;
+    QStringList blocknets;
 
-    if (configStr.value(amnezia::config_key::splitTunnelType) == 0) {
-        // double-check + ensure our firewall is installed and enabled. This is necessary as
-        // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-        if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
-
-        MacOSFirewall::ensureRootAnchorPriority();
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), true);
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), false);
-        MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), false,
-                                      QStringLiteral("allownets"), QStringList());
-
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), false);
-        MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), false,
-                                      QStringLiteral("blocknets"), QStringList());
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
-
-        QStringList dnsServers;
-        dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
-        MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
-        MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
+    if (splitTunnelType == 0)
+    {
+        blockAll = true;
+    } else if (splitTunnelType == 1)
+    {
+        blockNets = true;
+        for (auto v : splitTunnelSites) {
+            blocknets.append(v.toString());
+        }
+    } else if (splitTunnelType == 2) {
+        blockAll = true;
+        allowNets = true;
+        for (auto v : splitTunnelSites) {
+            allownets.append(v.toString());
+        }
     }
+
+    // double-check + ensure our firewall is installed and enabled. This is necessary as
+    // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
+    if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
+
+    MacOSFirewall::ensureRootAnchorPriority();
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), blockAll);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), allowNets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), allowNets,
+                                  QStringLiteral("allownets"), allownets);
+
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), blockNets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets,
+                                  QStringLiteral("blocknets"), blocknets);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
+
+    QStringList dnsServers;
+    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
+    MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
 #endif
 
     return true;
