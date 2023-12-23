@@ -11,8 +11,8 @@ namespace {
 
 #include "macosfirewall.h"
 
-#define ResourceDir "./pf"
-#define DaemonDataDir "./pf"
+#define ResourceDir qApp->applicationDirPath() + "/pf"
+#define DaemonDataDir qApp->applicationDirPath() + "/pf"
 
 #include <QProcess>
 
