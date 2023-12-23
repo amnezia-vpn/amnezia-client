@@ -266,7 +266,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
-    case DockerContainer::ShadowSocks: return true;
+    case DockerContainer::ShadowSocks: return false;
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     default: return false;

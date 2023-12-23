@@ -91,13 +91,11 @@ void AmneziaApplication::init()
     initControllers();
 
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::initialized, this,
-            [this](bool status, bool connected, const QDateTime &connectionDate) {
-                if (connected) {
-                    m_connectionController->onConnectionStateChanged(Vpn::ConnectionState::Connected);
-                    if (m_vpnConnection)
-                        m_vpnConnection->restoreConnection();
-                }
+    connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
+            [this](Vpn::ConnectionState state) {
+                m_connectionController->onConnectionStateChanged(state);
+                if (m_vpnConnection)
+                    m_vpnConnection->restoreConnection();
             });
     if (!AndroidController::instance()->initialize()) {
         qCritical() << QString("Init failed");

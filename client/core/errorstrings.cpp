@@ -59,6 +59,9 @@ QString errorString(ErrorCode code){
 
     case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentials for connecting to the server");
 
+    // Android errors
+    case (AndroidError): return QObject::tr("VPN connection error");
+
     case(InternalError):
     default:
         return QObject::tr("Internal error");
