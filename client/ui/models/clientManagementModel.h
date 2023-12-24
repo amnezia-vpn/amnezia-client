@@ -35,6 +35,8 @@ protected:
 private:
     bool isClientExists(const QString &clientId);
 
+    void migration(const QByteArray &clientsTableString);
+
     ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials);
 

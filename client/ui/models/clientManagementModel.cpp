@@ -45,6 +45,23 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+void ClientManagementModel::migration(const QByteArray &clientsTableString)
+{
+    QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
+
+    for (auto &clientId : clientsTable.keys()) {
+        QJsonObject client;
+        client[configKey::clientId] = clientId;
+
+        QJsonObject userData;
+        userData[configKey::clientName] = clientsTable.value(clientId).toObject().value(configKey::clientName);
+        client[configKey::userData] = userData;
+
+        m_clientsTable.push_back(client);
+    }
+
+}
+
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
 {
     beginResetModel();
@@ -67,6 +84,8 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (m_clientsTable.isEmpty()) {
+        migration(clientsTableString);
+
         int count = 0;
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
