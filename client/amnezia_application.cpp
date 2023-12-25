@@ -330,6 +330,7 @@ void AmneziaApplication::initModels()
                    ServerCredentials credentials) {
                 m_serversModel->reloadContainerConfig();
                 m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+                emit m_configurator->clientModelUpdated();
             });
 }
 
