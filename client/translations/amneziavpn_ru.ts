@@ -196,7 +196,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="315"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
+        <translation>Все протоколы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="332"/>
@@ -1703,7 +1703,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
         <source>What is the level of internet control in your region?</source>
-        <translation>Какой уровень контроля интеренета в вашем регионе?</translation>
+        <translation>Какой уровень контроля интернета в вашем регионе?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
