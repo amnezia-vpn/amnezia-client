@@ -71,8 +71,14 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
 
     ErrorCode error = ErrorCode::NoError;
 
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
+
     const QByteArray clientsTableString =
             serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
