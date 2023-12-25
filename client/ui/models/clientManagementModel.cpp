@@ -257,13 +257,33 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
 ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
                                               ServerCredentials credentials)
 {
+    ErrorCode errorCode = ErrorCode::NoError;
+
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
         || container == DockerContainer::Cloak) {
-        return revokeOpenVpn(row, container, credentials);
+        errorCode = revokeOpenVpn(row, container, credentials);
     } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
-        return revokeWireGuard(row, container, credentials);
+        errorCode = revokeWireGuard(row, container, credentials);
     }
-    return ErrorCode::NoError;
+
+    if (errorCode == ErrorCode::NoError) {
+        auto client = m_clientsTable.at(row).toObject();
+        QString clientId = client.value(configKey::clientId).toString();
+
+        const auto server = m_settings->defaultServer();
+        QJsonArray containers = server.value(config_key::containers).toArray();
+        for (auto i = 0; i < containers.size(); i++) {
+            auto containerConfig = containers.at(i).toObject();
+            auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
+            auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
+
+            if (protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
+                emit adminConfigRevoked(container);
+            }
+        }
+    }
+
+    return errorCode;
 }
 
 ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container,
