@@ -9,6 +9,8 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- for TV -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <!-- The following comment will be replaced upon deployment with default features based on the dependencies
     of the application. Remove the comment if you do not require these default features. -->
