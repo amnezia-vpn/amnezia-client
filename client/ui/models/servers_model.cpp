@@ -479,6 +479,14 @@ void ServersModel::clearCachedProfiles()
     updateContainersModel();
 }
 
+void ServersModel::clearCachedProfile(const DockerContainer container)
+{
+    m_settings->clearLastConnectionConfig(m_currentlyProcessedServerIndex, container);
+
+    m_servers.replace(m_currentlyProcessedServerIndex, m_settings->server(m_currentlyProcessedServerIndex));
+    updateContainersModel();
+}
+
 bool ServersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
 {
     QJsonObject server = m_servers.at(serverIndex).toObject();

@@ -15,6 +15,7 @@ namespace
         constexpr char clientName[] = "clientName";
         constexpr char container[] = "container";
         constexpr char userData[] = "userData";
+        constexpr char creationDate[] = "creationDate";
     }
 }
 
@@ -40,9 +41,27 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case ClientNameRole: return userData.value(configKey::clientName).toString();
+    case CreationDateRole: return userData.value(configKey::creationDate).toString();
     }
 
     return QVariant();
+}
+
+void ClientManagementModel::migration(const QByteArray &clientsTableString)
+{
+    QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
+
+    for (auto &clientId : clientsTable.keys()) {
+        QJsonObject client;
+        client[configKey::clientId] = clientId;
+
+        QJsonObject userData;
+        userData[configKey::clientName] = clientsTable.value(clientId).toObject().value(configKey::clientName);
+        client[configKey::userData] = userData;
+
+        m_clientsTable.push_back(client);
+    }
+
 }
 
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
@@ -54,8 +73,14 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
 
     ErrorCode error = ErrorCode::NoError;
 
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
+
     const QByteArray clientsTableString =
             serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
@@ -67,6 +92,8 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (m_clientsTable.isEmpty()) {
+        migration(clientsTableString);
+
         int count = 0;
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
@@ -200,19 +227,20 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 
     for (int i = 0; i < m_clientsTable.size(); i++) {
         if (m_clientsTable.at(i).toObject().value(configKey::clientId) == clientId) {
-            return renameClient(i, clientName, container, credentials);
+            return renameClient(i, clientName, container, credentials, true);
         }
     }
 
-    beginResetModel();
+    beginInsertRows(QModelIndex(), rowCount(), 1);
     QJsonObject client;
     client[configKey::clientId] = clientId;
 
     QJsonObject userData;
     userData[configKey::clientName] = clientName;
+    userData[configKey::creationDate] = QDateTime::currentDateTime().toString();
     client[configKey::userData] = userData;
     m_clientsTable.push_back(client);
-    endResetModel();
+    endInsertRows();
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
@@ -229,11 +257,14 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 }
 
 ErrorCode ClientManagementModel::renameClient(const int row, const QString &clientName, const DockerContainer container,
-                                              ServerCredentials credentials)
+                                              ServerCredentials credentials, bool addTimeStamp)
 {
     auto client = m_clientsTable.at(row).toObject();
     auto userData = client[configKey::userData].toObject();
     userData[configKey::clientName] = clientName;
+    if (addTimeStamp) {
+        userData[configKey::creationDate] = QDateTime::currentDateTime().toString();
+    }
     client[configKey::userData] = userData;
 
     m_clientsTable.replace(row, client);
@@ -257,13 +288,33 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
 ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
                                               ServerCredentials credentials)
 {
+    ErrorCode errorCode = ErrorCode::NoError;
+
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
         || container == DockerContainer::Cloak) {
-        return revokeOpenVpn(row, container, credentials);
+        errorCode = revokeOpenVpn(row, container, credentials);
     } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
-        return revokeWireGuard(row, container, credentials);
+        errorCode = revokeWireGuard(row, container, credentials);
     }
-    return ErrorCode::NoError;
+
+    if (errorCode == ErrorCode::NoError) {
+        auto client = m_clientsTable.at(row).toObject();
+        QString clientId = client.value(configKey::clientId).toString();
+
+        const auto server = m_settings->defaultServer();
+        QJsonArray containers = server.value(config_key::containers).toArray();
+        for (auto i = 0; i < containers.size(); i++) {
+            auto containerConfig = containers.at(i).toObject();
+            auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
+            auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
+
+            if (protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
+                emit adminConfigRevoked(container);
+            }
+        }
+    }
+
+    return errorCode;
 }
 
 ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container,
@@ -369,5 +420,6 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[ClientNameRole] = "clientName";
+    roles[CreationDateRole] = "creationDate";
     return roles;
 }
