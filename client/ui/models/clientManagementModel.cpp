@@ -47,6 +47,23 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+void ClientManagementModel::migration(const QByteArray &clientsTableString)
+{
+    QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
+
+    for (auto &clientId : clientsTable.keys()) {
+        QJsonObject client;
+        client[configKey::clientId] = clientId;
+
+        QJsonObject userData;
+        userData[configKey::clientName] = clientsTable.value(clientId).toObject().value(configKey::clientName);
+        client[configKey::userData] = userData;
+
+        m_clientsTable.push_back(client);
+    }
+
+}
+
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
 {
     beginResetModel();
@@ -56,8 +73,14 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
 
     ErrorCode error = ErrorCode::NoError;
 
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
+
     const QByteArray clientsTableString =
             serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
     if (error != ErrorCode::NoError) {
@@ -69,6 +92,8 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (m_clientsTable.isEmpty()) {
+        migration(clientsTableString);
+
         int count = 0;
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
