@@ -15,7 +15,7 @@
 #include "core/errorstrings.h"
 #include "systemController.h"
 #ifdef Q_OS_ANDROID
-    #include "platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
 #endif
 #include "qrcodegen.hpp"
 

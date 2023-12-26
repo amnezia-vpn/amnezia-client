@@ -18,7 +18,8 @@ public:
     bool initialize();
 
     // keep synchronized with org.amnezia.vpn.protocol.ProtocolState
-    enum class ConnectionState {
+    enum class ConnectionState
+    {
         CONNECTED,
         CONNECTING,
         DISCONNECTED,
@@ -30,7 +31,7 @@ public:
     ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
     void setNotificationText(const QString &title, const QString &message, int timerSec);
-    void saveFile(const QString& fileName, const QString &data);
+    void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     void startQrReaderActivity();
 

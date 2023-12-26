@@ -1,9 +1,10 @@
-#include <QCoreApplication>
 #include <QJniEnvironment>
 #include <QJsonDocument>
 #include <QQmlFile>
+#include <QEventLoop>
 
 #include "android_controller.h"
+#include "android_utils.h"
 #include "ui/controllers/importController.h"
 
 namespace
@@ -129,7 +130,7 @@ auto AndroidController::callActivityMethod(const char *methodName, const char *s
                                            const std::function<Ret()> &defValue, Args &&...args)
 {
     qDebug() << "Call activity method:" << methodName;
-    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    QJniObject activity = AndroidUtils::getActivity();
     if (activity.isValid()) {
         return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
     } else {
@@ -309,32 +310,15 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
 {
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(uri, nullptr);
-    if (!buffer) {
-        return;
-    }
-
-    QString lUri(buffer);
-    env->ReleaseStringUTFChars(uri, buffer);
-
-    emit AndroidController::instance()->fileOpened(lUri);
+    emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
 }
 
 // static
 void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
 {
-    Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return;
-    }
-
-    QString config(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
-
-    emit AndroidController::instance()->configImported(config);
+    emit AndroidController::instance()->configImported(AndroidUtils::convertJString(env, data));
 }
 
 // static
@@ -342,12 +326,5 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return false;
-    }
-
-    QString code(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
-    return ImportController::decodeQrCode(code);
+    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }
