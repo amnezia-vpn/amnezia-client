@@ -2,6 +2,7 @@ package org.amnezia.vpn
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.net.Uri
@@ -12,11 +13,13 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.text.RegexOption.IGNORE_CASE
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +38,7 @@ private const val TAG = "AmneziaActivity"
 
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
+private const val OPEN_FILE_ACTION_CODE = 3
 private const val BIND_SERVICE_TIMEOUT = 1000L
 
 class AmneziaActivity : QtActivity() {
@@ -198,6 +202,15 @@ class AmneziaActivity : QtActivity() {
                             alterDocument(uri)
                         }
                     }
+                }
+            }
+
+            OPEN_FILE_ACTION_CODE -> {
+                when (resultCode) {
+                    RESULT_OK -> data?.data?.toString() ?: ""
+                    else -> ""
+                }.let { uri ->
+                    QtAndroidController.onFileOpened(uri)
                 }
             }
 
@@ -367,6 +380,36 @@ class AmneziaActivity : QtActivity() {
             }.also {
                 startActivityForResult(it, CREATE_FILE_ACTION_CODE)
             }
+        }
+    }
+
+    @Suppress("unused")
+    fun openFile(filter: String?) {
+        Log.v(TAG, "Open file with filter: $filter")
+
+        val mimeTypes = if (!filter.isNullOrEmpty()) {
+            val extensionRegex = "\\*\\.[a-z .]+".toRegex(IGNORE_CASE)
+            val mime = MimeTypeMap.getSingleton()
+            extensionRegex.findAll(filter).map {
+                mime.getMimeTypeFromExtension(it.value.drop(2))
+            }.filterNotNull().toSet()
+        } else emptySet()
+
+        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            Log.d(TAG, "File mimyType filter: $mimeTypes")
+            when (mimeTypes.size) {
+                1 -> type = mimeTypes.first()
+
+                in 2..Int.MAX_VALUE -> {
+                    type = "*/*"
+                    putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                }
+
+                else -> type = "*/*"
+            }
+        }.also {
+            startActivityForResult(it, OPEN_FILE_ACTION_CODE)
         }
     }
 

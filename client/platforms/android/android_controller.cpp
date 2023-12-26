@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QJniEnvironment>
 #include <QJsonDocument>
+#include <QQmlFile>
 
 #include "android_controller.h"
 #include "ui/controllers/importController.h"
@@ -106,6 +107,7 @@ bool AndroidController::initialize()
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
         {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
+        {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
@@ -163,6 +165,24 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
     callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",
                        QJniObject::fromString(fileName).object<jstring>(),
                        QJniObject::fromString(data).object<jstring>());
+}
+
+QString AndroidController::openFile(const QString &filter)
+{
+    QEventLoop wait;
+    QString fileName;
+    connect(this, &AndroidController::fileOpened, this,
+            [&fileName, &wait](const QString &uri) {
+                qDebug() << "Android event: file opened; uri:" << uri;
+                fileName = QQmlFile::urlToLocalFileOrQrc(uri);
+                qDebug() << "Android opened filename:" << fileName;
+                wait.quit();
+            },
+            static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    callActivityMethod("openFile", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(filter).object<jstring>());
+    wait.exec();
+    return fileName;
 }
 
 void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
@@ -282,6 +302,22 @@ void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBy
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->statisticsUpdated((quint64) rxBytes, (quint64) txBytes);
+}
+
+// static
+void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
+{
+    Q_UNUSED(thiz);
+
+    const char *buffer = env->GetStringUTFChars(uri, nullptr);
+    if (!buffer) {
+        return;
+    }
+
+    QString lUri(buffer);
+    env->ReleaseStringUTFChars(uri, buffer);
+
+    emit AndroidController::instance()->fileOpened(lUri);
 }
 
 // static
