@@ -22,10 +22,6 @@ PageType {
 
     property string borderColor: "#2C2D30"
 
-    property string defaultServerName: ServersModel.defaultServerName
-    property string defaultServerHostName: ServersModel.defaultServerHostName
-    property string defaultContainerName: ContainersModel.defaultContainerName
-
     Connections {
         target: PageController
 
@@ -39,41 +35,6 @@ PageType {
             buttonContent.state = "collapsed"
         }
     }
-
-    Connections {
-        target: ServersModel
-
-        function onDefaultServerIndexChanged() {
-            updateDescriptions()
-        }
-    }
-
-    Connections {
-        target: ContainersModel
-
-        function onDefaultContainerChanged() {
-            updateDescriptions()
-        }
-    }
-
-    function updateDescriptions() {
-        var description = ""
-        if (ServersModel.isDefaultServerHasWriteAccess()) {
-            if (SettingsController.isAmneziaDnsEnabled()
-                    && ContainersModel.isAmneziaDnsContainerInstalled(ServersModel.getDefaultServerIndex())) {
-                description += "Amnezia DNS | "
-            }
-        } else {
-            if (ServersModel.isDefaultServerConfigContainsAmneziaDns()) {
-                description += "Amnezia DNS | "
-            }
-        }
-
-        collapsedServerMenuDescription.text = description + root.defaultContainerName + " | " + root.defaultServerHostName
-        expandedServersMenuDescription.text = description + root.defaultServerHostName
-    }
-
-    Component.onCompleted: updateDescriptions()
 
     MouseArea {
         anchors.fill: parent
@@ -267,7 +228,7 @@ PageType {
                 maximumLineCount: 2
                 elide: Qt.ElideRight
 
-                text: root.defaultServerName
+                text: ServersModel.defaultServerName
                 horizontalAlignment: Qt.AlignHCenter
 
                 Behavior on opacity {
@@ -304,6 +265,7 @@ PageType {
             Layout.bottomMargin: 44
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             visible: buttonContent.collapsedVisibility
+            text: ServersModel.defaultServerDescriptionCollapsed
         }
 
         ColumnLayout {
@@ -319,7 +281,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: root.defaultServerName
+                text: ServersModel.defaultServerName
                 horizontalAlignment: Qt.AlignHCenter
                 maximumLineCount: 2
                 elide: Qt.ElideRight
@@ -331,6 +293,7 @@ PageType {
                 Layout.fillWidth: true
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
+                text: ServersModel.defaultServerDescriptionExpanded
             }
 
             RowLayout {
@@ -349,7 +312,7 @@ PageType {
                     rootButtonTextTopMargin: 8
                     rootButtonTextBottomMargin: 8
 
-                    text: root.defaultContainerName
+                    text: ServersModel.defaultContainerName
                     textColor: "#0E0E11"
                     headerText: qsTr("VPN protocol")
                     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
@@ -468,7 +431,7 @@ PageType {
                                         var description = ""
                                         if (hasWriteAccess) {
                                             if (SettingsController.isAmneziaDnsEnabled()
-                                                    && ContainersModel.isAmneziaDnsContainerInstalled(index)) {
+                                                    && ServersModel.isAmneziaDnsContainerInstalled(index)) {
                                                 description += "Amnezia DNS | "
                                             }
                                         } else {
