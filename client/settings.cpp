@@ -1,4 +1,8 @@
 #include "settings.h"
+
+#include "QThread"
+#include "QApplication"
+
 #include "utilities.h"
 #include "version.h"
 
@@ -12,10 +16,10 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
 {
     // Import old settings
     if (serversCount() == 0) {
-        QString user = m_settings.value("Server/userName").toString();
-        QString password = m_settings.value("Server/password").toString();
-        QString serverName = m_settings.value("Server/serverName").toString();
-        int port = m_settings.value("Server/serverPort").toInt();
+        QString user = value("Server/userName").toString();
+        QString password = value("Server/password").toString();
+        QString serverName = value("Server/serverName").toString();
+        int port = value("Server/serverPort").toInt();
 
         if (!user.isEmpty() && !password.isEmpty() && !serverName.isEmpty()) {
             QJsonObject server;
@@ -35,12 +39,12 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
     }
 }
 
-int Settings::serversCount() const
+int Settings::serversCount()
 {
     return serversArray().size();
 }
 
-QJsonObject Settings::server(int index) const
+QJsonObject Settings::server(int index)
 {
     const QJsonArray &servers = serversArray();
     if (index >= servers.size())
@@ -84,12 +88,12 @@ void Settings::setDefaultContainer(int serverIndex, DockerContainer container)
     editServer(serverIndex, s);
 }
 
-DockerContainer Settings::defaultContainer(int serverIndex) const
+DockerContainer Settings::defaultContainer(int serverIndex)
 {
     return ContainerProps::containerFromString(defaultContainerName(serverIndex));
 }
 
-QString Settings::defaultContainerName(int serverIndex) const
+QString Settings::defaultContainerName(int serverIndex)
 {
     QString name = server(serverIndex).value(config_key::defaultContainer).toString();
     if (name.isEmpty()) {
@@ -98,7 +102,7 @@ QString Settings::defaultContainerName(int serverIndex) const
         return name;
 }
 
-QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const
+QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex)
 {
     const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
 
@@ -182,7 +186,7 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     setProtocolConfig(serverIndex, container, proto, c);
 }
 
-bool Settings::haveAuthData(int serverIndex) const
+bool Settings::haveAuthData(int serverIndex)
 {
     if (serverIndex < 0)
         return false;
@@ -190,7 +194,7 @@ bool Settings::haveAuthData(int serverIndex) const
     return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.secretData.isEmpty());
 }
 
-QString Settings::nextAvailableServerName() const
+QString Settings::nextAvailableServerName()
 {
     int i = 0;
     bool nameExist = false;
@@ -211,7 +215,7 @@ QString Settings::nextAvailableServerName() const
 
 void Settings::setSaveLogs(bool enabled)
 {
-    m_settings.setValue("Conf/saveLogs", enabled);
+    setValue("Conf/saveLogs", enabled);
     if (!isSaveLogs()) {
         Logger::deInit();
     } else {
@@ -222,7 +226,7 @@ void Settings::setSaveLogs(bool enabled)
     emit saveLogsChanged();
 }
 
-QString Settings::routeModeString(RouteMode mode) const
+QString Settings::routeModeString(RouteMode mode)
 {
     switch (mode) {
     case VpnAllSites: return "AllSites";
@@ -231,9 +235,9 @@ QString Settings::routeModeString(RouteMode mode) const
     }
 }
 
-Settings::RouteMode Settings::routeMode() const
+Settings::RouteMode Settings::routeMode()
 {
-    return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt());
+    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
@@ -263,7 +267,7 @@ void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
     setVpnSites(mode, allSites);
 }
 
-QStringList Settings::getVpnIps(RouteMode mode) const
+QStringList Settings::getVpnIps(RouteMode mode)
 {
     QStringList ips;
     const QVariantMap &m = vpnSites(mode);
@@ -319,14 +323,14 @@ void Settings::removeAllVpnSites(RouteMode mode)
     setVpnSites(mode, QVariantMap());
 }
 
-QString Settings::primaryDns() const
+QString Settings::primaryDns()
 {
-    return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString();
+    return value("Conf/primaryDns", cloudFlareNs1).toString();
 }
 
-QString Settings::secondaryDns() const
+QString Settings::secondaryDns()
 {
-    return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString();
+    return value("Conf/secondaryDns", cloudFlareNs2).toString();
 }
 
 void Settings::clearSettings()
@@ -334,12 +338,12 @@ void Settings::clearSettings()
     m_settings.clearSettings();
 }
 
-ServerCredentials Settings::defaultServerCredentials() const
+ServerCredentials Settings::defaultServerCredentials()
 {
     return serverCredentials(defaultServerIndex());
 }
 
-ServerCredentials Settings::serverCredentials(int index) const
+ServerCredentials Settings::serverCredentials(int index)
 {
     const QJsonObject &s = server(index);
 
@@ -350,4 +354,39 @@ ServerCredentials Settings::serverCredentials(int index) const
     credentials.port = s.value(config_key::port).toInt();
 
     return credentials;
+}
+
+QVariant Settings::value(const QString &key, const QVariant &defaultValue)
+{
+    QVariant returnValue;
+//    if (defaultValue.isNull() || !defaultValue.isValid()) {
+//        QMetaObject::invokeMethod(&m_settings, "value",
+//                                  Qt::QueuedConnection,
+//                                  Q_ARG(const QString&, key),
+//                                  Q_ARG(QVariant, returnValue));
+//    } else {
+
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        m_settings.value(key, returnValue, defaultValue);
+    } else {
+        QMetaObject::invokeMethod(&m_settings, "value",
+                                  Qt::BlockingQueuedConnection,
+                                  Q_ARG(const QString&, key),
+                                  Q_ARG(QVariant&, returnValue),
+                                  Q_ARG(const QVariant&, defaultValue));
+    }
+//    }
+    return returnValue;
+}
+
+void Settings::setValue(const QString &key, const QVariant &value)
+{
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        m_settings.setValue(key, value);
+    } else {
+        QMetaObject::invokeMethod(&m_settings, "setValue",
+                                  Qt::BlockingQueuedConnection,
+                                  Q_ARG(const QString&, key),
+                                  Q_ARG(const QVariant&, value));
+    }
 }

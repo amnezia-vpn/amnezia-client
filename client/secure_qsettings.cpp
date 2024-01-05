@@ -25,7 +25,8 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
     if (encryptionRequired() && !encrypted) {
         for (const QString &key : m_settings.allKeys()) {
             if (encryptedKeys.contains(key)) {
-                const QVariant &val = value(key);
+                QVariant val;
+                value(key, val);
                 setValue(key, val);
             }
         }
@@ -34,16 +35,20 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
     }
 }
 
-QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue) const
+void SecureQSettings::value(const QString &key, QVariant &returnValue, const QVariant &defaultValue) const
 {
-    QMutexLocker locker(&mutex);
+//    QMutexLocker locker(&mutex);
 
     if (m_cache.contains(key)) {
-        return m_cache.value(key);
+        returnValue = m_cache.value(key);
+        return;
     }
 
-    if (!m_settings.contains(key))
-        return defaultValue;
+    if (!m_settings.contains(key)) {
+        returnValue = defaultValue;
+        return;
+    }
+
 
     QVariant retVal;
 
@@ -54,7 +59,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 
             if (getEncKey().isEmpty() || getEncIv().isEmpty()) {
                 qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";
-                return {};
+                return;
             }
 
             QByteArray encryptedValue = retVal.toByteArray().mid(magicString.size());
@@ -75,12 +80,12 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     }
 
     m_cache.insert(key, retVal);
-    return retVal;
+    returnValue = retVal;
 }
 
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
-    QMutexLocker locker(&mutex);
+//    QMutexLocker locker(&mutex);
 
     if (encryptionRequired() && encryptedKeys.contains(key)) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
@@ -125,7 +130,9 @@ QByteArray SecureQSettings::backupAppConfig() const
     QJsonObject cfg;
 
     for (const QString &key : m_settings.allKeys()) {
-        cfg.insert(key, QJsonValue::fromVariant(value(key)));
+        QVariant v;
+        value(key, v);
+        cfg.insert(key, QJsonValue::fromVariant(v));
     }
 
     return QJsonDocument(cfg).toJson();

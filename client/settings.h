@@ -24,43 +24,43 @@ class Settings : public QObject
 public:
     explicit Settings(QObject *parent = nullptr);
 
-    ServerCredentials defaultServerCredentials() const;
-    ServerCredentials serverCredentials(int index) const;
+    ServerCredentials defaultServerCredentials();
+    ServerCredentials serverCredentials(int index);
 
-    QJsonArray serversArray() const
+    QJsonArray serversArray()
     {
-        return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array();
+        return QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
     }
     void setServersArray(const QJsonArray &servers)
     {
-        m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson());
+        setValue("Servers/serversList", QJsonDocument(servers).toJson());
     }
 
     // Servers section
-    int serversCount() const;
-    QJsonObject server(int index) const;
+    int serversCount();
+    QJsonObject server(int index);
     void addServer(const QJsonObject &server);
     void removeServer(int index);
     bool editServer(int index, const QJsonObject &server);
 
-    int defaultServerIndex() const
+    int defaultServerIndex()
     {
-        return m_settings.value("Servers/defaultServerIndex", 0).toInt();
+        return value("Servers/defaultServerIndex", 0).toInt();
     }
     void setDefaultServer(int index)
     {
-        m_settings.setValue("Servers/defaultServerIndex", index);
+        setValue("Servers/defaultServerIndex", index);
     }
-    QJsonObject defaultServer() const
+    QJsonObject defaultServer()
     {
         return server(defaultServerIndex());
     }
 
     void setDefaultContainer(int serverIndex, DockerContainer container);
-    DockerContainer defaultContainer(int serverIndex) const;
-    QString defaultContainerName(int serverIndex) const;
+    DockerContainer defaultContainer(int serverIndex);
+    QString defaultContainerName(int serverIndex);
 
-    QMap<DockerContainer, QJsonObject> containers(int serverIndex) const;
+    QMap<DockerContainer, QJsonObject> containers(int serverIndex);
     void setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers);
 
     QJsonObject containerConfig(int serverIndex, DockerContainer container);
@@ -72,31 +72,31 @@ public:
 
     void clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto = Proto::Any);
 
-    bool haveAuthData(int serverIndex) const;
-    QString nextAvailableServerName() const;
+    bool haveAuthData(int serverIndex);
+    QString nextAvailableServerName();
 
     // App settings section
-    bool isAutoConnect() const
+    bool isAutoConnect()
     {
-        return m_settings.value("Conf/autoConnect", false).toBool();
+        return value("Conf/autoConnect", false).toBool();
     }
     void setAutoConnect(bool enabled)
     {
-        m_settings.setValue("Conf/autoConnect", enabled);
+        setValue("Conf/autoConnect", enabled);
     }
 
-    bool isStartMinimized() const
+    bool isStartMinimized()
     {
-        return m_settings.value("Conf/startMinimized", false).toBool();
+        return value("Conf/startMinimized", false).toBool();
     }
     void setStartMinimized(bool enabled)
     {
-        m_settings.setValue("Conf/startMinimized", enabled);
+        setValue("Conf/startMinimized", enabled);
     }
 
-    bool isSaveLogs() const
+    bool isSaveLogs()
     {
-        return m_settings.value("Conf/saveLogs", false).toBool();
+        return value("Conf/saveLogs", false).toBool();
     }
     void setSaveLogs(bool enabled);
 
@@ -107,51 +107,51 @@ public:
     };
     Q_ENUM(RouteMode)
 
-    QString routeModeString(RouteMode mode) const;
+    QString routeModeString(RouteMode mode);
 
-    RouteMode routeMode() const;
-    void setRouteMode(RouteMode mode) { m_settings.setValue("Conf/routeMode", mode); }
+    RouteMode routeMode();
+    void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
 
-    QVariantMap vpnSites(RouteMode mode) const
+    QVariantMap vpnSites(RouteMode mode)
     {
-        return m_settings.value("Conf/" + routeModeString(mode)).toMap();
+        return value("Conf/" + routeModeString(mode)).toMap();
     }
     void setVpnSites(RouteMode mode, const QVariantMap &sites)
     {
-        m_settings.setValue("Conf/" + routeModeString(mode), sites);
+        setValue("Conf/" + routeModeString(mode), sites);
         m_settings.sync();
     }
     bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
     void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites); // map <site, ip>
-    QStringList getVpnIps(RouteMode mode) const;
+    QStringList getVpnIps(RouteMode mode);
     void removeVpnSite(RouteMode mode, const QString &site);
 
     void addVpnIps(RouteMode mode, const QStringList &ip);
     void removeVpnSites(RouteMode mode, const QStringList &sites);
     void removeAllVpnSites(RouteMode mode);
 
-    bool useAmneziaDns() const
+    bool useAmneziaDns()
     {
-        return m_settings.value("Conf/useAmneziaDns", true).toBool();
+        return value("Conf/useAmneziaDns", true).toBool();
     }
     void setUseAmneziaDns(bool enabled)
     {
-        m_settings.setValue("Conf/useAmneziaDns", enabled);
+        setValue("Conf/useAmneziaDns", enabled);
     }
 
-    QString primaryDns() const;
-    QString secondaryDns() const;
+    QString primaryDns();
+    QString secondaryDns();
 
-    // QString primaryDns() const { return m_primaryDns; }
+    // QString primaryDns() { return m_primaryDns; }
     void setPrimaryDns(const QString &primaryDns)
     {
-        m_settings.setValue("Conf/primaryDns", primaryDns);
+        setValue("Conf/primaryDns", primaryDns);
     }
 
-    // QString secondaryDns() const { return m_secondaryDns; }
+    // QString secondaryDns() { return m_secondaryDns; }
     void setSecondaryDns(const QString &secondaryDns)
     {
-        m_settings.setValue("Conf/secondaryDns", secondaryDns);
+        setValue("Conf/secondaryDns", secondaryDns);
     }
 
     static const char cloudFlareNs1[];
@@ -160,7 +160,7 @@ public:
     //    static constexpr char openNicNs5[] = "94.103.153.176";
     //    static constexpr char openNicNs13[] = "144.76.103.143";
 
-    QByteArray backupAppConfig() const
+    QByteArray backupAppConfig()
     {
         return m_settings.backupAppConfig();
     }
@@ -171,20 +171,20 @@ public:
 
     QLocale getAppLanguage()
     {
-        return m_settings.value("Conf/appLanguage", QLocale()).toLocale();
+        return value("Conf/appLanguage", QLocale()).toLocale();
     };
     void setAppLanguage(QLocale locale)
     {
-        m_settings.setValue("Conf/appLanguage", locale);
+        setValue("Conf/appLanguage", locale);
     };
 
-    bool isScreenshotsEnabled() const
+    bool isScreenshotsEnabled()
     {
-        return m_settings.value("Conf/screenshotsEnabled", false).toBool();
+        return value("Conf/screenshotsEnabled", false).toBool();
     }
     void setScreenshotsEnabled(bool enabled)
     {
-        m_settings.setValue("Conf/screenshotsEnabled", enabled);
+        setValue("Conf/screenshotsEnabled", enabled);
     }
 
     void clearSettings();
@@ -194,6 +194,9 @@ signals:
 
 private:
     SecureQSettings m_settings;
+
+    QVariant value(const QString &key, const QVariant &defaultValue = QVariant());
+    void setValue(const QString &key, const QVariant &value);
 };
 
 #endif // SETTINGS_H
