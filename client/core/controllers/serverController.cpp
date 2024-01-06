@@ -168,7 +168,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     } else
         return ErrorCode::NotImplementedError;
 
-    if (stdOut.contains("Error: No such container:")) {
+    if (stdOut.contains("Error") && stdOut.contains("No such container")) {
         return ErrorCode::ServerContainerMissingError;
     }
 
