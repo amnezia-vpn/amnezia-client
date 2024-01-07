@@ -435,7 +435,6 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
         process->write((password + "\n").toUtf8());
     }
 
-    // qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
 
 #endif
 }

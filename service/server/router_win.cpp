@@ -443,3 +443,47 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
     return ok;
 }
 
+void RouterWin::StopRoutingIpv6()
+{
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route fc00::/7 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route 2000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route 3000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+}
+
+void RouterWin::StartRoutingIpv6()
+{
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route fc00::/7 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route 2000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route 3000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
+}
+

@@ -55,6 +55,8 @@ enum ErrorCode
     OpenVpnExecutableMissing,
     ShadowSocksExecutableMissing,
     CloakExecutableMissing,
+    XrayExecutableMissing,
+    Tun2SockExecutableMissing,
     AmneziaServiceConnectionFailed,
     ExecutableMissing,
 
@@ -67,6 +69,8 @@ enum ErrorCode
     // 3rd party utils errors
     OpenSslFailed,
     ShadowSocksExecutableCrashed,
+    XrayExecutableCrashed,
+    Tun2SockExecutableCrashed,
     CloakExecutableCrashed,
 
     // import and install errors

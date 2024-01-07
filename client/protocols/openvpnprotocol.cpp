@@ -25,7 +25,6 @@ OpenVpnProtocol::~OpenVpnProtocol()
 
 QString OpenVpnProtocol::defaultConfigFileName()
 {
-    // qDebug() << "OpenVpnProtocol::defaultConfigFileName" << defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
     return defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
 }
 
@@ -149,7 +148,6 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
 
 ErrorCode OpenVpnProtocol::start()
 {
-    // qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
     if (!QFileInfo::exists(Utils::openVpnExecPath())) {
@@ -184,9 +182,6 @@ ErrorCode OpenVpnProtocol::start()
     }
 #endif
 
-    //    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
-    //    Utils::createEmptyFile(vpnLogFileNamePath);
-
     uint mgmtPort = selectMgmtPort();
     qDebug() << "OpenVpnProtocol::start mgmt port selected:" << mgmtPort;
 
@@ -200,7 +195,6 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_openVpnProcess) {
-        // qWarning() << "IpcProcess replica is not created!";
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
@@ -229,8 +223,6 @@ ErrorCode OpenVpnProtocol::start()
             [&]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
 
     m_openVpnProcess->start();
-
-    // startTimeoutTimer();
 
     return ErrorCode::NoError;
 }

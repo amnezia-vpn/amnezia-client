@@ -26,6 +26,7 @@ public:
     static QString getStringBetween(const QString &s, const QString &a, const QString &b);
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
+    static QString getgatewayandiface();
     static QRegularExpression ipAddressRegExp()
     {
         return QRegularExpression("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$");

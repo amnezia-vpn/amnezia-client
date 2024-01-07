@@ -400,9 +400,6 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    //    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //        stdOut += data + "\n";
-    //    };
 
     e = runScript(credentials,
                   replaceVars(amnezia::scriptData(SharedScriptType::build_container),
@@ -422,9 +419,6 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    // auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //     stdOut += data + "\n";
-    // };
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),

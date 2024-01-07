@@ -64,3 +64,44 @@ void Router::resetIpStack()
 #endif
 }
 
+bool Router::createTun(const QString &dev, const QString &subnet)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().createTun(dev, subnet);
+#endif
+
+    return true;
+};
+
+bool Router::deleteTun(const QString &dev)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().deleteTun(dev);
+#endif
+
+    return true;
+};
+
+
+void Router::StopRoutingIpv6()
+{
+#ifdef Q_OS_WIN
+    RouterWin::Instance().StopRoutingIpv6();
+#elif defined (Q_OS_MAC)
+    // todo fixme
+#elif defined Q_OS_LINUX
+    RouterLinux::Instance().StopRoutingIpv6();
+#endif
+}
+
+void Router::StartRoutingIpv6()
+{
+#ifdef Q_OS_WIN
+    RouterWin::Instance().StartRoutingIpv6();
+#elif defined (Q_OS_MAC)
+    // todo fixme
+#elif defined Q_OS_LINUX
+    RouterLinux::Instance().StartRoutingIpv6();
+#endif
+}
+

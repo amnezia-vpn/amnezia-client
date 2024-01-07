@@ -151,6 +151,25 @@ void IpcServer::cleanUp()
     Logger::cleanUp();
 }
 
+bool IpcServer::createTun(const QString &dev, const QString &subnet)
+{
+    return Router::createTun(dev, subnet);
+}
+
+bool IpcServer::deleteTun(const QString &dev)
+{
+    return Router::deleteTun(dev);
+}
+
+void IpcServer::StartRoutingIpv6()
+{
+    Router::StartRoutingIpv6();
+}
+void IpcServer::StopRoutingIpv6()
+{
+    Router::StopRoutingIpv6();
+}
+
 void IpcServer::setLogsEnabled(bool enabled)
 {
 #ifdef MZ_DEBUG

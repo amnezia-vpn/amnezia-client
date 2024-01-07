@@ -5,16 +5,21 @@
 #include <utilities.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <net/route.h>
+#include <linux/if.h>
+#include <linux/if_tun.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/ioctl.h>
 #include <paths.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <QFileInfo>
+
 
 RouterLinux &RouterLinux::Instance()
 {
@@ -102,10 +107,10 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
         return false;
     }
 
-    if (ip == "0.0.0.0") {
-        qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
-        return true;
-    }
+ //   if (ip == "0.0.0.0") {
+ //       qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
+ //       return true;
+ //   }
 
     struct rtentry route;
     memset(&route, 0, sizeof( route ));
@@ -169,4 +174,118 @@ void RouterLinux::flushDns()
         qDebug().noquote() << "Flush dns completed";
     else
         qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+}
+
+bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
+    qDebug().noquote() << "createTun start";
+
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "ip tuntap add mode tun dev %s", dev.toStdString().c_str());
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "ip addr add %s/24 dev %s", subnet.toStdString().c_str(), dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "ip link set dev %s up", dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool RouterLinux::deleteTun(const QString &dev)
+{
+    struct {
+        struct nlmsghdr  nh;
+        struct ifinfomsg ifm;
+        unsigned char    data[64];
+    } req;
+    struct rtattr *rta;
+    int ret, rtnl;
+
+    rtnl = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+    if (rtnl < 0) {
+        qDebug().noquote() << "can't open rtnl: " << errno;
+        return 1;
+    }
+
+    memset(&req, 0, sizeof(req));
+    req.nh.nlmsg_len = NLMSG_ALIGN(NLMSG_LENGTH(sizeof(req.ifm)));
+    req.nh.nlmsg_flags = NLM_F_REQUEST;
+    req.nh.nlmsg_type = RTM_DELLINK;
+
+    req.ifm.ifi_family = AF_UNSPEC;
+
+    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.nh.nlmsg_len));
+    rta->rta_type = IFLA_IFNAME;
+    rta->rta_len = RTA_LENGTH(IFNAMSIZ);
+    req.nh.nlmsg_len += rta->rta_len;
+    memcpy(RTA_DATA(rta), dev.toStdString().c_str(), IFNAMSIZ);
+
+    ret = send(rtnl, &req, req.nh.nlmsg_len, 0);
+    if (ret < 0)
+        qDebug().noquote() << "can't send: errno";
+    ret = (unsigned int)ret != req.nh.nlmsg_len;
+
+    close(rtnl);
+    qDebug().noquote() << "deleteTun ret" << ret;
+    return ret;
+}
+
+void RouterLinux::StartRoutingIpv6()
+{
+
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "sysctl -w net.ipv6.conf.all.disable_ipv6=0");
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate ipv6\n";
+        return;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "sysctl -w net.ipv6.conf.default.disable_ipv6=0");
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate ipv6\n";
+        return;
+    }
+
+    qDebug().noquote() << "StartRoutingIpv6 OK";
+}
+
+void RouterLinux::StopRoutingIpv6()
+{
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "sysctl -w net.ipv6.conf.all.disable_ipv6=1");
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not disable ipv6\n";
+        return;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "sysctl -w net.ipv6.conf.default.disable_ipv6=1");
+    sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not disable ipv6\n";
+        return;
+    }
+    qDebug().noquote() << "StopRoutingIpv6 OK";
 }

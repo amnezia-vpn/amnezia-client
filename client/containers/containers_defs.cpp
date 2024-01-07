@@ -58,6 +58,8 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
+    case DockerContainer::Xray: return { Proto::Xray };
+
     case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
@@ -85,6 +87,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
+             { DockerContainer::Xray, "Xray" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
@@ -111,6 +114,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("AmneziaWG - Special protocol from Amnezia, based on WireGuard. It's fast like WireGuard, "
                            "but very resistant to blockages. "
                            "Recommended for regions with high levels of censorship.") },
+             { DockerContainer::Xray,
+               QObject::tr("Xray with REALITY - Description") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -199,6 +204,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Minimum number of settings\n"
                       "* Not recognised by DPI analysis systems, resistant to blocking\n"
                       "* Works over UDP network protocol.") },
+        { DockerContainer::Xray,
+          QObject::tr("Xray with REALITY - full description ")
+        },
         { DockerContainer::Ipsec,
           QObject::tr("IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.\n"
                       "One of its distinguishing features is its ability to swiftly switch between networks and devices, "
@@ -231,6 +239,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::ShadowSocks: return Proto::ShadowSocks;
     case DockerContainer::WireGuard: return Proto::WireGuard;
     case DockerContainer::Awg: return Proto::Awg;
+    case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
@@ -274,7 +283,6 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 
 #elif defined(Q_OS_LINUX)
     switch (c) {
-    case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
     default: return true;
     }
@@ -298,6 +306,7 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
+    case DockerContainer::Xray: return true;
     default: return false;
     }
 }

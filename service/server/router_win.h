@@ -53,7 +53,8 @@ private:
     BOOL EnableDebugPrivilege();
     BOOL InitNtFunctions();
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
-
+    void StartRoutingIpv6();
+    void StopRoutingIpv6();
 
 private:
     QMultiMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;

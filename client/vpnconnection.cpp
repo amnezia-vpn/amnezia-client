@@ -59,14 +59,24 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
+    
+    
     if (IpcClient::Interface()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
-
+            
+            if (m_settings->routeMode() == Settings::VpnAllSites) {
+                if (proto == "amnezia-xray") {
+                    IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
+                    IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+                    IpcClient::Interface()->StopRoutingIpv6();
+                }
+            }
+            
             if (m_settings->routeMode() != Settings::VpnAllSites) {
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-                // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
             QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
             QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
@@ -87,7 +97,23 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         } else if (state == Vpn::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
+            if (proto == "amnezia-xray") {
+                IpcClient::Interface()->deleteTun("tun2");
+                IpcClient::Interface()->StartRoutingIpv6();
+            }
+
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+                IpcClient::Interface()->clearSavedRoutes();
+            }
+        } else if (state == Vpn::ConnectionState::Connecting) {
+            if (proto == "amnezia-xray") {
+                IpcClient::Interface()->deleteTun("tun2");
+                IpcClient::Interface()->createTun("tun2", "10.33.0.1");
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << m_vpnConfiguration.value(config_key::hostName).toString());
+            }
+
+        } else if (state == Vpn::ConnectionState::Disconnected) {
+            if (proto == "amnezia-xray") {
                 IpcClient::Interface()->clearSavedRoutes();
             }
         }
@@ -245,7 +271,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
 
         if (serverIndex >= 0) {
             qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container
-                     << proto;
             QJsonObject protoObject = m_settings->protocolConfig(serverIndex, container, proto);
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
@@ -435,8 +460,15 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
+
+
+        if (proto == "amnezia-xray"){
+            IpcClient::Interface()->deleteTun("tun2");
+            IpcClient::Interface()->StartRoutingIpv6();
+        }
 
         // delete cached routes
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
