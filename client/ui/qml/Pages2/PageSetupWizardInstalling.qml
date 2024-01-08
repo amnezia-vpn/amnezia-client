@@ -42,6 +42,7 @@ PageType {
         function onInstallServerFinished(finishedMessage) {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()

@@ -26,6 +26,7 @@ PageType {
         function onImportFinished() {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()
