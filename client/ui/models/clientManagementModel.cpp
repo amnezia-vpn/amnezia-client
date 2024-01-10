@@ -231,7 +231,7 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
         }
     }
 
-    beginInsertRows(QModelIndex(), rowCount(), 1);
+    beginInsertRows(QModelIndex(), rowCount(), rowCount() + 1);
     QJsonObject client;
     client[configKey::clientId] = clientId;
 
