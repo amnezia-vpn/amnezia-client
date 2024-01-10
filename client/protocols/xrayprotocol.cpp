@@ -36,8 +36,8 @@ ErrorCode XrayProtocol::start()
     }
 
 #ifndef Q_OS_IOS
-    if (Utils::processIsRunning(Utils::executable("xray", false))) {
-        Utils::killProcessByName(Utils::executable("xray", false));
+    if (Utils::processIsRunning(Utils::executable(xrayExecPath(), true))) {
+        Utils::killProcessByName(Utils::executable(xrayExecPath(), true));
     }
 
 #ifdef QT_DEBUG
@@ -80,6 +80,7 @@ ErrorCode XrayProtocol::start()
     if (m_xrayProcess.state() == QProcess::ProcessState::Running) {
         setConnectionState(Vpn::ConnectionState::Connecting);
         QThread::msleep(1000);
+
         return startTun2Sock();
     }
     else return ErrorCode::XrayExecutableMissing;
@@ -138,8 +139,11 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     m_t2sProcess->start();
 
+#ifdef Q_OS_WIN
     QThread::msleep(15000);
-
+#else
+    QThread::msleep(1500);
+#endif
     setConnectionState(Vpn::ConnectionState::Connected);
 
     return ErrorCode::NoError;

@@ -32,6 +32,10 @@ QString XrayConfigurator::genXrayConfig(const ServerCredentials &credentials,
                                                                        amnezia::protocols::xray::uuidPath, &e);
     xrayUuid.replace("\n", "");
 
+    QString xrayShortId = serverController.getTextFileFromContainer(container, credentials,
+                                                                 amnezia::protocols::xray::shortidPath, &e);
+    xrayShortId.replace("\n", "");
+
     if (e) {
         if (errorCode) *errorCode = e;
         return "";
@@ -39,6 +43,7 @@ QString XrayConfigurator::genXrayConfig(const ServerCredentials &credentials,
 
     config.replace("$XRAY_CLIENT_ID", xrayUuid);
     config.replace("$XRAY_PUBLIC_KEY", xrayPublicKey);
+    config.replace("$XRAY_SHORT_ID", xrayShortId);
 
     return config;
 }

@@ -99,7 +99,7 @@
                     "fingerprint": "chrome",
                     "serverName": "www.microsoft.com",
                     "publicKey": "$XRAY_PUBLIC_KEY",
-                    "shortId": "b1",
+                    "shortId": "$XRAY_SHORT_ID",
                     "spiderX": "/"
                 }
             },

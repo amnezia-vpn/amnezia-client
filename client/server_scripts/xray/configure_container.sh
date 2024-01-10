@@ -1,5 +1,6 @@
 cd /opt/amnezia/xray
 XRAY_CLIENT_ID=$(xray uuid) && echo $XRAY_CLIENT_ID > /opt/amnezia/xray/xray_uuid.key
+XRAY_SHORT_ID=$(openssl rand -hex 8) && echo $XRAY_SHORT_ID > /opt/amnezia/xray/xray_short_id.key
 
 KEYPAIR=$(xray x25519)
 LINE_NUM=1
@@ -15,6 +16,7 @@ done <<< "$KEYPAIR"
 
 XRAY_PRIVATE_KEY=$(echo $XRAY_PRIVATE_KEY | tr -d ' ')
 XRAY_PUBLIC_KEY=$(echo $XRAY_PUBLIC_KEY | tr -d ' ')
+
 
 echo $XRAY_PUBLIC_KEY > /opt/amnezia/xray/xray_public.key
 echo $XRAY_PRIVATE_KEY > /opt/amnezia/xray/xray_private.key
@@ -73,7 +75,7 @@ cat > /opt/amnezia/xray/server.json <<EOF
                     "maxClientVer": "",
                     "maxTimeDiff": 0,
                     "shortIds": [
-                        "b1"
+                        "$XRAY_SHORT_ID"
                     ]
                 }
             },
