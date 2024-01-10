@@ -1,7 +1,7 @@
 #include "settings.h"
 
 #include "QThread"
-#include "QApplication"
+#include "QCoreApplication"
 
 #include "utilities.h"
 #include "version.h"
