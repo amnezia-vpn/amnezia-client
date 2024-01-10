@@ -4,13 +4,14 @@
 #include <QFile>
 #include <QHostInfo>
 #include <QJsonObject>
+#include <QEventLoop>
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
 #include <configurators/shadowsocks_configurator.h>
 #include <configurators/vpn_configurator.h>
 #include <configurators/wireguard_configurator.h>
-#include <core/servercontroller.h>
+#include "core/controllers/serverController.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
@@ -19,7 +20,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/android_controller.h"
+    #include "platforms/android/android_controller.h"
 #endif
 
 #ifdef Q_OS_IOS
@@ -193,6 +194,10 @@ void VpnConnection::flushDns()
 
 ErrorCode VpnConnection::lastError() const
 {
+#ifdef Q_OS_ANDROID
+    return ErrorCode::AndroidError;
+#endif
+
     if (!m_vpnProtocol.data()) {
         return ErrorCode::InternalError;
     }
@@ -234,8 +239,6 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             return "";
         }
 
-        emit m_configurator->newVpnConfigCreated(clientId, "unnamed client", container, credentials);
-
         QString configDataBeforeLocalProcessing = configData;
 
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
@@ -247,6 +250,11 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
+
+        QEventLoop wait;
+        emit m_configurator->newVpnConfigCreated(clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
+        QObject::connect(m_configurator.get(), &VpnConfigurator::clientModelUpdated, &wait, &QEventLoop::quit);
+        wait.exec();
     }
 
     return configData;
@@ -259,11 +267,15 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
     QJsonObject vpnConfiguration;
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
+        auto s = m_settings->server(serverIndex);
+        if (m_settings->server(serverIndex).value(config_key::configVersion).toInt() &&
+            container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
+            continue;
+        }
+
         QJsonObject vpnConfigData =
                 QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
-                                                                       containerConfig, proto, errorCode)
-                                                .toUtf8())
-                        .object();
+                                                                       containerConfig, proto, errorCode).toUtf8()).object();
 
         if (errorCode && *errorCode) {
             return {};
@@ -342,8 +354,8 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     }
     m_vpnProtocol->prepare();
 #elif defined Q_OS_ANDROID
-    androidVpnProtocol = createDefaultAndroidVpnProtocol(container);
-    createAndroidConnections(container);
+    androidVpnProtocol = createDefaultAndroidVpnProtocol();
+    createAndroidConnections();
 
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS
@@ -400,28 +412,17 @@ void VpnConnection::restoreConnection()
 
 void VpnConnection::createAndroidConnections()
 {
-    int serverIndex = m_settings->defaultServerIndex();
-    DockerContainer container = m_settings->defaultContainer(serverIndex);
-
-    createAndroidConnections(container);
-}
-
-void VpnConnection::createAndroidConnections(DockerContainer container)
-{
-    androidVpnProtocol = createDefaultAndroidVpnProtocol(container);
+    androidVpnProtocol = createDefaultAndroidVpnProtocol();
 
     connect(AndroidController::instance(), &AndroidController::connectionStateChanged, androidVpnProtocol,
             &AndroidVpnProtocol::setConnectionState);
-    connect(AndroidController::instance(), &AndroidController::statusUpdated, androidVpnProtocol,
-            &AndroidVpnProtocol::connectionDataUpdated);
+    connect(AndroidController::instance(), &AndroidController::statisticsUpdated, androidVpnProtocol,
+            &AndroidVpnProtocol::setBytesChanged);
 }
 
-AndroidVpnProtocol *VpnConnection::createDefaultAndroidVpnProtocol(DockerContainer container)
+AndroidVpnProtocol *VpnConnection::createDefaultAndroidVpnProtocol()
 {
-    Proto proto = ContainerProps::defaultProtocol(container);
-    AndroidVpnProtocol *androidVpnProtocol = new AndroidVpnProtocol(proto, m_vpnConfiguration);
-
-    return androidVpnProtocol;
+    return new AndroidVpnProtocol(m_vpnConfiguration);
 }
 #endif
 
@@ -444,7 +445,13 @@ void VpnConnection::disconnectFromVpn()
 #endif
 
 #ifdef Q_OS_ANDROID
-    AndroidController::instance()->stop();
+    if (m_vpnProtocol && m_vpnProtocol.data()) {
+        connect(AndroidController::instance(), &AndroidController::vpnDisconnected, this,
+                [this]() {
+                    onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+                }, Qt::SingleShotConnection);
+        m_vpnProtocol.data()->stop();
+    }
 #endif
 
 #ifdef Q_OS_IOS
@@ -457,10 +464,12 @@ void VpnConnection::disconnectFromVpn()
         return;
     }
 
+#ifndef Q_OS_ANDROID
     if (m_vpnProtocol) {
         m_vpnProtocol->deleteLater();
     }
     m_vpnProtocol = nullptr;
+#endif
 }
 
 Vpn::ConnectionState VpnConnection::connectionState()

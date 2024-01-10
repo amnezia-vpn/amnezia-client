@@ -11,7 +11,7 @@
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "utilities.h"
 
 Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, QObject *parent)

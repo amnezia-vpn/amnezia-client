@@ -15,7 +15,7 @@
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "settings.h"
 #include "utilities.h"
 

@@ -77,7 +77,7 @@ PageType {
                             text: name
                             descriptionText: {
                                 var servicesNameString = ""
-                                var servicesName = ContainersModel.getAllInstalledServicesName(index)
+                                var servicesName = ServersModel.getAllInstalledServicesName(index)
                                 for (var i = 0; i < servicesName.length; i++) {
                                     servicesNameString += servicesName[i] + " · "
                                 }
