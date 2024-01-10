@@ -1,14 +1,13 @@
 #include "xrayprotocol.h"
 
-#include "logger.h"
 #include "utilities.h"
 #include "containers/containers_defs.h"
-
-
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkInterface>
+
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
     VpnProtocol(configuration, parent)
@@ -24,7 +23,6 @@ XrayProtocol::~XrayProtocol()
     QThread::msleep(200);
 #ifndef Q_OS_IOS
     m_xrayProcess.close();
-    m_t2sProcess.close();
 #endif
 }
 
@@ -60,9 +58,7 @@ ErrorCode XrayProtocol::start()
     m_xrayProcess.setArguments(args);
 
     connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this](){
-#ifdef QT_DEBUG
         qDebug().noquote() << "xray:" << m_xrayProcess.readAllStandardOutput();
-#endif
     });
 
     connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
@@ -95,65 +91,58 @@ ErrorCode XrayProtocol::start()
 
 ErrorCode XrayProtocol::startTun2Sock()
 {
-    if (!QFileInfo::exists(tun2SocksExecPath())) {
+    if (!QFileInfo::exists(Utils::tun2socksPath())) {
         setLastError(ErrorCode::Tun2SockExecutableMissing);
         return lastError();
     }
 
-
 #ifndef Q_OS_IOS
-    if (Utils::processIsRunning(Utils::executable("tun2socks", false))) {
-        Utils::killProcessByName(Utils::executable("tun2socks", false));
+
+    m_t2sProcess = IpcClient::CreatePrivilegedProcess();
+
+    if (!m_t2sProcess) {
+        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
+        return ErrorCode::AmneziaServiceConnectionFailed;
     }
+
+    m_t2sProcess->waitForSource(1000);
+    if (!m_t2sProcess->isInitialized()) {
+        qWarning() << "IpcProcess replica is not connected!";
+        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+
 
     QString SSConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
 
+    m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
+
 #ifdef Q_OS_WIN
-    QStringList args = QStringList() << "-device" << "tun://tun2" <<
-                       "-proxy" << SSConStr <<
-                       "-tun-post-up" <<
-                       "netsh interface ip set address name=\"tun2\" static 10.33.0.1 255.255.255.0 10.33.0.1";
+    QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr, "-tun-post-up",
+            "netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255"
+    });
 #else
-    QStringList args = QStringList() << "-device" << "tun://tun2" <<
-                       "-proxy" << SSConStr;
+    QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr});
 #endif
+    m_t2sProcess->setArguments(arguments);
 
-    qDebug().noquote() << "XrayProtocol::startTun2Sock()"
-                       << tun2SocksExecPath() << args.join(" ");
+    qDebug() << arguments.join(" ");
+    connect(m_t2sProcess.data(), &PrivilegedProcess::errorOccurred,
+            [&](QProcess::ProcessError error) { qDebug() << "PrivilegedProcess errorOccurred" << error; });
 
-    m_t2sProcess.setProcessChannelMode(QProcess::MergedChannels);
+    connect(m_t2sProcess.data(), &PrivilegedProcess::stateChanged,
+            [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
 
-    m_t2sProcess.setProgram(tun2SocksExecPath());
-    m_t2sProcess.setArguments(args);
+    connect(m_t2sProcess.data(), &PrivilegedProcess::finished, this,
+            [&]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
 
-    connect(&m_t2sProcess, &QProcess::readyReadStandardOutput, this, [this](){
-#ifdef QT_DEBUG
-        qDebug().noquote() << "tun2socks:" << m_t2sProcess.readAllStandardOutput();
-#endif
-    });
+    m_t2sProcess->start();
 
-    connect(&m_t2sProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug().noquote() << "XrayProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
-        setConnectionState(Vpn::ConnectionState::Disconnected);
-        if (exitStatus != QProcess::NormalExit){
-            emit protocolError(amnezia::ErrorCode::Tun2SockExecutableCrashed);
-            stop();
-        }
-        if (exitCode !=0){
-            emit protocolError(amnezia::ErrorCode::InternalError);
-            stop();
-        }
-    });
+    QThread::msleep(15000);
 
-    m_t2sProcess.start();
-    m_t2sProcess.waitForStarted();
+    setConnectionState(Vpn::ConnectionState::Connected);
 
-    if (m_t2sProcess.state() == QProcess::ProcessState::Running) {
-
-        setConnectionState(Vpn::ConnectionState::Connected);
-        return ErrorCode::NoError;
-    }
-    else return ErrorCode::Tun2SockExecutableMissing;
+    return ErrorCode::NoError;
 #else
     return ErrorCode::NotImplementedError;
 #endif
@@ -164,20 +153,13 @@ void XrayProtocol::stop()
     qDebug() << "XrayProtocol::stop()";
 #ifndef Q_OS_IOS
     m_xrayProcess.terminate();
-    m_t2sProcess.terminate();
+    if (m_t2sProcess) {
+        m_t2sProcess->close();
+    }
 #endif
 
 #ifdef Q_OS_WIN
-    Utils::signalCtrl(m_ssProcess.processId(), CTRL_C_EVENT);
-#endif
-}
-
-QString XrayProtocol::tun2SocksExecPath()
-{
-#ifdef Q_OS_WIN
-    return Utils::executable(QString("xray/tun2socks"), true);
-#else
-    return Utils::executable(QString("tun2socks"), true);
+    Utils::signalCtrl(m_xrayProcess.processId(), CTRL_C_EVENT);
 #endif
 }
 

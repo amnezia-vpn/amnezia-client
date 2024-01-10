@@ -29,7 +29,7 @@ private:
 
 #ifndef Q_OS_IOS
     QProcess m_xrayProcess;
-    QProcess m_t2sProcess;
+    QSharedPointer<PrivilegedProcess> m_t2sProcess;
 #endif
     QTemporaryFile m_xrayCfgFile;
 };

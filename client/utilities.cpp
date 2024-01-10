@@ -9,14 +9,27 @@
 #include <QStandardPaths>
 #include <QUrl>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <Ipexport.h>
+#include <Ws2tcpip.h>
+#include <ws2ipdef.h>
+#include <stdint.h>
+#include <Iphlpapi.h>
+#include <Iptypes.h>
+#include <WinSock2.h>
+#include <winsock.h>
+#endif
+
+#ifdef Q_OS_LINUX
 #include <arpa/inet.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-
 #include <unistd.h>
+#endif
 
 #include "utilities.h"
 #include "version.h"
@@ -181,10 +194,364 @@ bool Utils::checkIpSubnetFormat(const QString &ip)
         return false;
 }
 
-#define BUFFER_SIZE 4096
+#ifdef Q_OS_WIN
+DWORD GetAdaptersAddressesWrapper(const ULONG Family,
+                                  const ULONG Flags,
+                                  const PVOID Reserved,
+                                  _Out_ PIP_ADAPTER_ADDRESSES& pAdapterAddresses) {
+    DWORD dwRetVal = 0;
+    int iter = 0;
+    constexpr int max_iter = 3;
+    ULONG AdapterAddressesLen = 15000;
+    do {
+        // xassert2(pAdapterAddresses == nullptr);
+        pAdapterAddresses = (IP_ADAPTER_ADDRESSES*)malloc(AdapterAddressesLen);
+        if (pAdapterAddresses == nullptr) {
+            qDebug() << "can not malloc" << AdapterAddressesLen << "bytes";
+            return ERROR_OUTOFMEMORY;
+        }
+
+        dwRetVal = GetAdaptersAddresses(Family, Flags, NULL, pAdapterAddresses, &AdapterAddressesLen);
+
+        if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
+            free(pAdapterAddresses);
+            pAdapterAddresses = nullptr;
+        } else {
+            break;
+        }
+
+        iter++;
+    } while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (iter < max_iter));
+
+    if (dwRetVal != NO_ERROR) {
+        qDebug() << "Family: " << Family << ", Flags: " << Flags << " AdapterAddressesLen: " << AdapterAddressesLen <<
+            ", dwRetVal:" << dwRetVal << ", iter: " << iter;
+        if (pAdapterAddresses) {
+            free(pAdapterAddresses);
+            pAdapterAddresses = nullptr;
+        }
+    }
+
+    return dwRetVal;
+}
+
+static const char* inet_ntop_v4(const void* src, char* dst, socklen_t size) {
+    const char digits[] = "0123456789";
+    int i;
+    struct in_addr* addr = (struct in_addr*)src;
+    u_long a = ntohl(addr->s_addr);
+    const char* orig_dst = dst;
+
+    if (size < 16) {
+        // xerror("ENOSPC: size = %0", size);
+        return NULL;
+    }
+    for (i = 0; i < 4; ++i) {
+        int n = (a >> (24 - i * 8)) & 0xFF;
+        int non_zerop = 0;
+
+        if (non_zerop || n / 100 > 0) {
+            *dst++ = digits[n / 100];
+            n %= 100;
+            non_zerop = 1;
+        }
+        if (non_zerop || n / 10 > 0) {
+            *dst++ = digits[n / 10];
+            n %= 10;
+            non_zerop = 1;
+        }
+        *dst++ = digits[n];
+        if (i != 3)
+            *dst++ = '.';
+    }
+    *dst++ = '\0';
+    return orig_dst;
+}
+
+// Helper function for inet_ntop for IPv6 addresses.
+static const char* inet_ntop_v6(const void* src, char* dst, socklen_t size) {
+    if (size < INET6_ADDRSTRLEN) {
+        return NULL;
+    }
+    const uint16_t* as_shorts = reinterpret_cast<const uint16_t*>(src);
+    int runpos[8] = {0};
+    int current = 1;
+    int max = 1;
+    int maxpos = -1;
+    int run_array_size = sizeof(runpos) / sizeof(runpos[0]);
+    // Run over the address marking runs of 0s.
+    for (int i = 0; i < run_array_size; ++i) {
+        if (as_shorts[i] == 0) {
+            runpos[i] = current;
+            if (current > max) {
+                maxpos = i;
+                max = current;
+            }
+            ++current;
+        } else {
+            runpos[i] = -1;
+            current = 1;
+        }
+    }
+    if (max > 1) {
+        int tmpmax = maxpos;
+        // Run back through, setting -1 for all but the longest run.
+        for (int i = run_array_size - 1; i >= 0; i--) {
+            if (i > tmpmax) {
+                runpos[i] = -1;
+            } else if (runpos[i] == -1) {
+                // We're less than maxpos, we hit a -1, so the 'good' run is done.
+                // Setting tmpmax -1 means all remaining positions get set to -1.
+                tmpmax = -1;
+            }
+        }
+    }
+    char* cursor = dst;
+    // Print IPv4 compatible and IPv4 mapped addresses using the IPv4 helper.
+    // These addresses have an initial run of either eight zero-bytes followed
+    // by 0xFFFF, or an initial run of ten zero-bytes.
+    if (runpos[0] == 1 && (maxpos == 5 || (maxpos == 4 && as_shorts[5] == 0xFFFF))) {
+        *cursor++ = ':';
+        *cursor++ = ':';
+        if (maxpos == 4) {
+            cursor += snprintf(cursor, INET6_ADDRSTRLEN - 2, "ffff:");
+        }
+        const struct in_addr* as_v4 = reinterpret_cast<const struct in_addr*>(&(as_shorts[6]));
+        inet_ntop_v4(as_v4, cursor, static_cast<socklen_t>(INET6_ADDRSTRLEN - (cursor - dst)));
+    } else {
+        for (int i = 0; i < run_array_size; ++i) {
+            if (runpos[i] == -1) {
+                cursor += snprintf(cursor, INET6_ADDRSTRLEN - (cursor - dst), "%x", ntohs(as_shorts[i]));
+                if (i != 7 && runpos[i + 1] != 1) {
+                    *cursor++ = ':';
+                }
+            } else if (runpos[i] == 1) {
+                // Entered the run; print the colons and skip the run.
+                *cursor++ = ':';
+                *cursor++ = ':';
+                i += (max - 1);
+            }
+        }
+    }
+    return dst;
+}
+
+const char* socket_inet_ntop(int af, const void* src, char* dst, unsigned int size) {
+    // if (IsWindows7OrGreater()){
+    //   return inet_ntop(af, (PVOID)src, dst, size);
+    // }
+
+    // for OS below WINDOWS 7
+    switch (af) {
+    case AF_INET:
+        return inet_ntop_v4(src, dst, size);
+    case AF_INET6:
+        return inet_ntop_v6(src, dst, size);
+    default:
+        // xerror("EAFNOSUPPORT");
+        return NULL;
+    }
+}
+
+#define NS_INADDRSZ 4
+
+static int socket_inet_pton4(const char* src, void* dst) {
+    static const char digits[] = "0123456789";
+    int saw_digit, octets, ch;
+    unsigned char tmp[NS_INADDRSZ], *tp;
+
+    saw_digit = 0;
+    octets = 0;
+    *(tp = tmp) = 0;
+    while ((ch = *src++) != '\0') {
+        const char* pch;
+
+        if ((pch = strchr(digits, ch)) != NULL) {
+            size_t newNum = *tp * 10 + (pch - digits);
+
+            if (newNum > 255)
+                return (0);
+            *tp = (unsigned char)newNum;
+            if (!saw_digit) {
+                if (++octets > 4)
+                    return (0);
+                saw_digit = 1;
+            }
+        } else if (ch == '.' && saw_digit) {
+            if (octets == 4)
+                return (0);
+            *++tp = 0;
+            saw_digit = 0;
+        } else
+            return (0);
+    }
+    if (octets < 4)
+        return (0);
+    memcpy(dst, tmp, NS_INADDRSZ);
+    return (1);
+}
+// https://chromium.googlesource.com/external/webrtc/+/edc6e57a92d2b366871f4c2d2e926748326017b9/webrtc/base/win32.cc
+// Helper function for inet_pton for IPv6 addresses.
+static int socket_inet_pton6(const char* src, void* dst) {
+    // sscanf will pick any other invalid chars up, but it parses 0xnnnn as hex.
+    // Check for literal x in the input string.
+    const char* readcursor = src;
+    char c = *readcursor++;
+    while (c) {
+        if (c == 'x') {
+            return 0;
+        }
+        c = *readcursor++;
+    }
+    readcursor = src;
+    struct in6_addr an_addr;
+    memset(&an_addr, 0, sizeof(an_addr));
+    uint16_t* addr_cursor = (uint16_t*)(&an_addr.s6_addr[0]);
+    uint16_t* addr_end = (uint16_t*)(&an_addr.s6_addr[16]);
+    int seencompressed = 0;  // false c89 not define bool type
+    // Addresses that start with "::" (i.e., a run of initial zeros) or
+    // "::ffff:" can potentially be IPv4 mapped or compatibility addresses.
+    // These have dotted-style IPv4 addresses on the end (e.g. "::192.168.7.1").
+    if (*readcursor == ':' && *(readcursor + 1) == ':' && *(readcursor + 2) != 0) {
+        // Check for periods, which we'll take as a sign of v4 addresses.
+        const char* addrstart = readcursor + 2;
+        if (strchr(addrstart, '.')) {
+            const char* colon = strchr(addrstart, ':');
+            if (colon) {
+                uint16_t a_short;
+                int bytesread = 0;
+                if (sscanf(addrstart, "%hx%n", &a_short, &bytesread) != 1 || a_short != 0xFFFF || bytesread != 4) {
+                    // Colons + periods means has to be ::ffff:a.b.c.d. But it wasn't.
+                    return 0;
+                } else {
+                    an_addr.s6_addr[10] = 0xFF;
+                    an_addr.s6_addr[11] = 0xFF;
+                    addrstart = colon + 1;
+                }
+            }
+            struct in_addr v4;
+            if (socket_inet_pton4(addrstart, &v4.s_addr)) {
+                memcpy(&an_addr.s6_addr[12], &v4, sizeof(v4));
+                memcpy(dst, &an_addr, sizeof(an_addr));
+                return 1;
+            } else {
+                // Invalid v4 address.
+                return 0;
+            }
+        }
+    }
+    // For addresses without a trailing IPv4 component ('normal' IPv6 addresses).
+    while (*readcursor != 0 && addr_cursor < addr_end) {
+        if (*readcursor == ':') {
+            if (*(readcursor + 1) == ':') {
+                if (seencompressed) {
+                    // Can only have one compressed run of zeroes ("::") per address.
+                    return 0;
+                }
+                // Hit a compressed run. Count colons to figure out how much of the
+                // address is skipped.
+                readcursor += 2;
+                const char* coloncounter = readcursor;
+                int coloncount = 0;
+                if (*coloncounter == 0) {
+                    // Special case - trailing ::.
+                    addr_cursor = addr_end;
+                } else {
+                    while (*coloncounter) {
+                        if (*coloncounter == ':') {
+                            ++coloncount;
+                        }
+                        ++coloncounter;
+                    }
+                    // (coloncount + 1) is the number of shorts left in the address.
+                    addr_cursor = addr_end - (coloncount + 1);
+                    seencompressed = 1;
+                }
+            } else {
+                ++readcursor;
+            }
+        } else {
+            uint16_t word;
+            int bytesread = 0;
+            if (sscanf(readcursor, "%hx%n", &word, &bytesread) != 1) {
+                return 0;
+            } else {
+                *addr_cursor = htons(word);
+                ++addr_cursor;
+                readcursor += bytesread;
+                if (*readcursor != ':' && *readcursor != '\0') {
+                    return 0;
+                }
+            }
+        }
+    }
+    if (*readcursor != '\0' || addr_cursor < addr_end) {
+        // Catches addresses too short or too long.
+        return 0;
+    }
+    memcpy(dst, &an_addr, sizeof(an_addr));
+    return 1;
+}
+
+int socket_inet_pton(int af, const char* src, void* dst) {
+    // if (IsWindows7OrGreater()){
+    //   return inet_pton(af, src, dst);
+    // }
+
+    // for OS below WINDOWS 7
+    switch (af) {
+    case AF_INET:
+        return socket_inet_pton4(src, dst);
+    case AF_INET6:
+        return socket_inet_pton6(src, dst);
+    default:
+        // xerror("EAFNOSUPPORT");
+        return 0;
+    }
+}
+#endif
+
 
 QString Utils::getgatewayandiface()
 {
+#ifdef Q_OS_WIN
+    constexpr int BUFF_LEN = 100;
+    char buff[BUFF_LEN] = {'\0'};
+    QString result;
+
+    PIP_ADAPTER_ADDRESSES pAdapterAddresses = nullptr;
+    DWORD dwRetVal =
+        GetAdaptersAddressesWrapper(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS, NULL, pAdapterAddresses);
+
+    if (dwRetVal != NO_ERROR) {
+        qDebug() << "ipv4 stack detect GetAdaptersAddresses failed.";
+        return "";
+    }
+
+    PIP_ADAPTER_ADDRESSES pCurAddress = pAdapterAddresses;
+    while (pCurAddress) {
+        PIP_ADAPTER_GATEWAY_ADDRESS_LH gateway = pCurAddress->FirstGatewayAddress;
+        if (gateway) {
+            SOCKET_ADDRESS gateway_address = gateway->Address;
+            if (gateway->Address.lpSockaddr->sa_family == AF_INET) {
+                sockaddr_in* sa_in = (sockaddr_in*)gateway->Address.lpSockaddr;
+                QString gw = socket_inet_ntop(AF_INET, &(sa_in->sin_addr), buff, BUFF_LEN);
+                qDebug() <<  "gateway IPV4:" << gw;
+                struct sockaddr_in addr;
+                if (socket_inet_pton(AF_INET, buff, &addr.sin_addr) == 1) {
+                    qDebug() <<  "this is true v4 !";
+                    result = gw;
+                }
+            }
+        }
+        pCurAddress = pCurAddress->Next;
+    }
+
+    free(pAdapterAddresses);
+    return result;
+#endif
+#ifdef Q_OS_LINUX
+    constexpr int BUFFER_SIZE = 100;
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
     struct  nlmsghdr *nlh, *nlmsg;
@@ -295,6 +662,7 @@ QString Utils::getgatewayandiface()
     }
     close(sock);
     return gateway_address;
+#endif
 }
 
 void Utils::killProcessByName(const QString &name)
@@ -381,6 +749,19 @@ QString Utils::certUtilPath()
     return winPath + "\\system32\\certutil.exe";
 #else
     return "";
+#endif
+}
+
+QString Utils::tun2socksPath()
+{
+#ifdef Q_OS_WIN
+    return Utils::executable("xray/tun2socks", true);
+#elif defined Q_OS_LINUX
+    // We have service that runs OpenVPN on Linux. We need to make same
+    // path for client and service.
+    return Utils::executable("../../client/bin/tun2socks", true);
+#else
+    return Utils::executable("/tun2socks", true);
 #endif
 }
 

@@ -70,6 +70,7 @@ public:
     static QString openVpnExecPath();
     static QString wireguardExecPath();
     static QString certUtilPath();
+    static QString tun2socksPath();
 
 #ifdef Q_OS_WIN
     static bool signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent);

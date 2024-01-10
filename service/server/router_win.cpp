@@ -58,14 +58,12 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
         dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
 
-
     if (dwStatus != ERROR_SUCCESS) {
         qDebug() << "getIpForwardTable failed.";
         if (pIpForwardTable)
             free(pIpForwardTable);
         return 0;
     }
-
 
     int success_count = 0;
     MIB_IPFORWARDROW ipfrow;
@@ -76,7 +74,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     ipfrow.dwForwardNextHop = inet_addr(gw.toStdString().c_str());
     ipfrow.dwForwardType = MIB_IPROUTE_TYPE_INDIRECT;	/* XXX - next hop != final dest */
     ipfrow.dwForwardProto = MIB_IPPROTO_NETMGMT;	/* XXX - MIB_PROTO_NETMGMT */
-
 
     // Set iface for route
     IPAddr dwGwAddr = inet_addr(gw.toStdString().c_str());
@@ -136,7 +133,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
             qDebug() << "Router::routeAdd: failed CreateIpForwardEntry(), Error:" << ip << gw << dwStatus;
         }
     }
-
 
     // Free resources
     if (pIpForwardTable)
@@ -215,8 +211,7 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     DWORD dwSize = 0;
     BOOL bOrder = FALSE;
     DWORD dwStatus = 0;
-    ULONG gw_addr= inet_addr(gw.toStdString().c_str());
-
+    ULONG gw_addr = inet_addr(gw.toStdString().c_str());
 
     // Find out how big our buffer needs to be.
     dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
@@ -229,7 +224,6 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
         // Now get the table.
         dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
-
 
     if (dwStatus != ERROR_SUCCESS) {
         qDebug() << "getIpForwardTable failed.";

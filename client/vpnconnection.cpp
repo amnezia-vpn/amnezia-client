@@ -71,6 +71,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 if (proto == "amnezia-xray") {
                     IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+                    IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
                     IpcClient::Interface()->StopRoutingIpv6();
                 }
             }
@@ -109,8 +110,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             if (proto == "amnezia-xray") {
                 IpcClient::Interface()->deleteTun("tun2");
                 IpcClient::Interface()->createTun("tun2", "10.33.0.1");
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << m_vpnConfiguration.value(config_key::hostName).toString());
-            }
+             }
 
         } else if (state == Vpn::ConnectionState::Disconnected) {
             if (proto == "amnezia-xray") {
@@ -270,7 +270,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
         if (serverIndex >= 0) {
-            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container
+            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container;
             QJsonObject protoObject = m_settings->protocolConfig(serverIndex, container, proto);
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
