@@ -261,7 +261,7 @@ QString TapController::getTapInstallPath()
 
 QString TapController::getOpenVpnPath()
 {
-    return qApp->applicationDirPath() + "\\openvpn\\openvpn.exe";
+    return qApp->applicationDirPath() + "\\openvpn\\ovpncli.exe";
 }
 
 QString TapController::getTapDriverDir()

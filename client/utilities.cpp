@@ -226,13 +226,13 @@ QStringList Utils::summarizeRoutes(const QStringList &ips, const QString cidr)
 QString Utils::openVpnExecPath()
 {
 #ifdef Q_OS_WIN
-    return Utils::executable("openvpn/openvpn", true);
+    return Utils::executable("openvpn/ovpncli", true);
 #elif defined Q_OS_LINUX
     // We have service that runs OpenVPN on Linux. We need to make same
     // path for client and service.
-    return Utils::executable("../../client/bin/openvpn", true);
+    return Utils::executable("../../client/bin/ovpncli", true);
 #else
-    return Utils::executable("/openvpn", true);
+    return Utils::executable("/ovpncli", true);
 #endif
 }
 

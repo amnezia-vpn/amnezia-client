@@ -5,7 +5,6 @@
 #include <QString>
 #include <QTimer>
 
-#include "managementserver.h"
 #include "vpnprotocol.h"
 
 #include "core/ipcclient.h"
@@ -25,28 +24,21 @@ public:
     static QString defaultConfigFileName();
     static QString defaultConfigPath();
 
-protected slots:
-    void onReadyReadDataFromManagementServer();
 
 private:
     QString configPath() const;
     bool openVpnProcessIsRunning() const;
     bool sendTermSignal();
     void readOpenVpnConfiguration(const QJsonObject &configuration);
-    void disconnectFromManagementServer();
+    void handle_cli_message(QString message);
     void killOpenVpnProcess();
     void sendByteCount();
     void sendInitialData();
-    void sendManagementCommand(const QString& command);
 
-    const QString m_managementHost = "127.0.0.1";
-    const unsigned int m_managementPort = 57775;
-
-    ManagementServer m_managementServer;
+    QHash<QRemoteObjectPendingCallWatcher*, QTimer*> m_watchers;
     QString m_configFileName;
     QTemporaryFile m_configFile;
 
-    uint selectMgmtPort();
 
 private:
     void updateRouteGateway(QString line);

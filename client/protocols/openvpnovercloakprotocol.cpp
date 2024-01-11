@@ -22,6 +22,8 @@ OpenVpnOverCloakProtocol::~OpenVpnOverCloakProtocol()
 
 ErrorCode OpenVpnOverCloakProtocol::start()
 {
+
+#if 0
     if (!QFileInfo::exists(cloakExecPath())) {
         setLastError(ErrorCode::CloakExecutableMissing);
         return lastError();
@@ -77,10 +79,12 @@ ErrorCode OpenVpnOverCloakProtocol::start()
 
     if (m_ckProcess.state() == QProcess::ProcessState::Running) {
         setConnectionState(Vpn::ConnectionState::Connecting);
-
+#endif
         return OpenVpnProtocol::start();
+#if 0
     }
     else return ErrorCode::CloakExecutableMissing;
+#endif
 }
 
 void OpenVpnOverCloakProtocol::stop()
@@ -90,16 +94,6 @@ void OpenVpnOverCloakProtocol::stop()
 
     qDebug() << "OpenVpnOverCloakProtocol::stop()";
 
-#ifdef Q_OS_WIN
-    Utils::signalCtrl(m_ckProcess.processId(), CTRL_C_EVENT);
-#endif
-
-    m_ckProcess.terminate();
-
-    if (Utils::processIsRunning(Utils::executable("ck-client", false))) {
-        QThread::msleep(1000);
-        Utils::killProcessByName(Utils::executable("ck-client", false));
-    }
 }
 
 QString OpenVpnOverCloakProtocol::cloakExecPath()
