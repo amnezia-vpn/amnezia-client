@@ -113,7 +113,6 @@ ErrorCode XrayProtocol::startTun2Sock()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-
     QString SSConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
 
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
@@ -122,8 +121,12 @@ ErrorCode XrayProtocol::startTun2Sock()
     QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr, "-tun-post-up",
             "netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255"
     });
-#else
+#endif
+#ifdef Q_OS_LINUX
     QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr});
+#endif
+#ifdef Q_OS_MAC
+    QStringList arguments({"-device", "utun22", "-proxy", SSConStr});
 #endif
     m_t2sProcess->setArguments(arguments);
 
@@ -132,19 +135,42 @@ ErrorCode XrayProtocol::startTun2Sock()
             [&](QProcess::ProcessError error) { qDebug() << "PrivilegedProcess errorOccurred" << error; });
 
     connect(m_t2sProcess.data(), &PrivilegedProcess::stateChanged,
-            [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
+            [&](QProcess::ProcessState newState) {
+                qDebug() << "PrivilegedProcess stateChanged" << newState;
+        if (newState == QProcess::Running)
+        {
+
+#ifdef Q_OS_MAC
+            QThread::msleep(5000);
+            IpcClient::Interface()->createTun("utun22", "10.33.0.2");
+#endif
+#ifdef Q_OS_WINDOWS
+            QThread::msleep(15000);
+#endif
+#ifdef Q_OS_LINUX
+            QThread::msleep(1000);
+            IpcClient::Interface()->createTun("tun2", "10.33.0.2");
+#endif
+            if (m_routeMode == 0) {
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
+                IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+            }
+            IpcClient::Interface()->StopRoutingIpv6();
+        }
+    });
 
     connect(m_t2sProcess.data(), &PrivilegedProcess::finished, this,
-            [&]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
+            [&]() {
+                setConnectionState(Vpn::ConnectionState::Disconnected);
+                IpcClient::Interface()->deleteTun("tun2");
+                IpcClient::Interface()->StartRoutingIpv6();
+                IpcClient::Interface()->clearSavedRoutes();
+    });
 
     m_t2sProcess->start();
-
-#ifdef Q_OS_WIN
-    QThread::msleep(15000);
-#else
-    QThread::msleep(1500);
-#endif
     setConnectionState(Vpn::ConnectionState::Connected);
+
 
     return ErrorCode::NoError;
 #else
@@ -182,4 +208,6 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     int localPort = 10808;
     m_xrayConfig = xrayConfiguration;
     m_localPort = localPort;
+    m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
+    m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
 }

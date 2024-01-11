@@ -31,6 +31,15 @@
 #include <unistd.h>
 #endif
 
+#ifdef Q_OS_MAC
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/route.h>
+#endif
+
 #include "utilities.h"
 #include "version.h"
 
@@ -662,6 +671,90 @@ QString Utils::getgatewayandiface()
     }
     close(sock);
     return gateway_address;
+#endif
+#ifdef Q_OS_MAC
+    QString gateway;
+    int mib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_FLAGS, RTF_GATEWAY};
+    int afinet_type[] = {AF_INET, AF_INET6};
+
+    for (int ip_type = 0; ip_type <= 1; ip_type++)
+    {
+        mib[3] = afinet_type[ip_type];
+
+        size_t needed = 0;
+        if (sysctl(mib, sizeof(mib) / sizeof(int), nullptr, &needed, nullptr, 0) < 0)
+            return "";
+
+        char* buf;
+        if ((buf = new char[needed]) == 0)
+            return "";
+
+        if (sysctl(mib, sizeof(mib) / sizeof(int), buf, &needed, nullptr, 0) < 0)
+        {
+            qDebug() << "sysctl: net.route.0.0.dump";
+            delete[] buf;
+            return gateway;
+        }
+
+        struct rt_msghdr* rt;
+        for (char* p = buf; p < buf + needed; p += rt->rtm_msglen)
+        {
+            rt = reinterpret_cast<struct rt_msghdr*>(p);
+            struct sockaddr* sa = reinterpret_cast<struct sockaddr*>(rt + 1);
+            struct sockaddr* sa_tab[RTAX_MAX];
+            for (int i = 0; i < RTAX_MAX; i++)
+            {
+                if (rt->rtm_addrs & (1 << i))
+                {
+                    sa_tab[i] = sa;
+                    sa = reinterpret_cast<struct sockaddr*>(
+                        reinterpret_cast<char*>(sa) +
+                        ((sa->sa_len) > 0 ? (1 + (((sa->sa_len) - 1) | (sizeof(long) - 1))) : sizeof(long)));
+                }
+                else
+                {
+                    sa_tab[i] = nullptr;
+                }
+            }
+
+            if (((rt->rtm_addrs & (RTA_DST | RTA_GATEWAY)) == (RTA_DST | RTA_GATEWAY)) &&
+                sa_tab[RTAX_DST]->sa_family == afinet_type[ip_type] &&
+                sa_tab[RTAX_GATEWAY]->sa_family == afinet_type[ip_type])
+            {
+                if (afinet_type[ip_type] == AF_INET)
+                {
+                    if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
+                    {
+                        char dstStr4[INET_ADDRSTRLEN];
+                        char srcStr4[INET_ADDRSTRLEN];
+                        memcpy(srcStr4,
+                               &(reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_GATEWAY]))->sin_addr,
+                               sizeof(struct in_addr));
+                        if (inet_ntop(AF_INET, srcStr4, dstStr4, INET_ADDRSTRLEN) != nullptr)
+                            gateway = dstStr4;
+                        break;
+                    }
+                }
+                else if (afinet_type[ip_type] == AF_INET6)
+                {
+                    if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
+                    {
+                        char dstStr6[INET6_ADDRSTRLEN];
+                        char srcStr6[INET6_ADDRSTRLEN];
+                        memcpy(srcStr6,
+                               &(reinterpret_cast<struct sockaddr_in6*>(sa_tab[RTAX_GATEWAY]))->sin6_addr,
+                               sizeof(struct in6_addr));
+                        if (inet_ntop(AF_INET6, srcStr6, dstStr6, INET6_ADDRSTRLEN) != nullptr)
+                            gateway = dstStr6;
+                        break;
+                    }
+                }
+            }
+        }
+        free(buf);
+    }
+
+    return gateway;
 #endif
 }
 

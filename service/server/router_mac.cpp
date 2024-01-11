@@ -88,10 +88,10 @@ bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
         return false;
     }
 
-    if (ip == "0.0.0.0") {
-        qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
-        return true;
-    }
+ //   if (ip == "0.0.0.0") {
+ //       qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
+ //       return true;
+ //   }
 
     QString cmd;
     if (mask == "255.255.255.255") {
@@ -127,6 +127,40 @@ bool RouterMac::routeDeleteList(const QString &gw, const QStringList &ips)
         if (routeDelete(ip, gw)) cnt++;
     }
     return cnt;
+}
+
+bool RouterMac::createTun(const QString &dev, const QString &subnet) {
+    qDebug().noquote() << "createTun start";
+
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "ifconfig %s inet %s %s up", dev.toStdString().c_str(), subnet.toStdString().c_str(), subnet.toStdString().c_str());
+
+    qDebug().noquote() << cmd;
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool RouterMac::deleteTun(const QString &dev)
+{
+    qDebug().noquote() << "deleteTun start";
+
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "ip tuntap delete $s mode", dev.toStdString().c_str());
+    int sys = system(cmd);
+    if(sys < 0)
+    {
+        qDebug().noquote() << "Could not delete tun device!\n";
+        return false;
+    }
+    memset(&cmd, 0, sizeof(cmd));
+
+    return true;
 }
 
 void RouterMac::flushDns()

@@ -29,6 +29,8 @@ public:
     bool routeDelete(const QString &ip, const QString &gw);
     bool routeDeleteList(const QString &gw, const QStringList &ips);
     void flushDns();
+    bool createTun(const QString &dev, const QString &subnet);
+    bool deleteTun(const QString &dev);
 
 public slots:
 

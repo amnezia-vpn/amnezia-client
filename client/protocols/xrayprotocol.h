@@ -26,7 +26,8 @@ private:
     static QString tun2SocksExecPath();
 private:
     int m_localPort;
-
+    QString m_remoteAddress;
+    int m_routeMode;
 #ifndef Q_OS_IOS
     QProcess m_xrayProcess;
     QSharedPointer<PrivilegedProcess> m_t2sProcess;
