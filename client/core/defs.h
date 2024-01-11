@@ -70,7 +70,10 @@ enum ErrorCode
     CloakExecutableCrashed,
 
     // import and install errors
-    ImportInvalidConfigError
+    ImportInvalidConfigError,
+
+    // Android errors
+    AndroidError
 };
 
 } // namespace amnezia

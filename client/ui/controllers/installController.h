@@ -65,6 +65,7 @@ signals:
     void passphraseRequestFinished();
 
     void serverIsBusy(const bool isBusy);
+    void cancelInstallation();
 
     void currentContainerUpdated();
 

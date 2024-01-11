@@ -1,35 +1,25 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.amnezia.vpn
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import org.amnezia.vpn.util.Log
+
+private const val TAG = "Prefs"
+private const val PREFS_FILE = "org.amnezia.vpn.prefs"
+private const val SECURE_PREFS_FILE = "$PREFS_FILE.secure"
 
 object Prefs {
-    // Opens and returns an instance of EncryptedSharedPreferences
-    fun get(context: Context): SharedPreferences {
+    fun get(context: Context, appContext: Context = context.applicationContext): SharedPreferences =
         try {
-            val mainKey = MasterKey.Builder(context.applicationContext)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-
-            val sharedPrefsFile = "com.amnezia.vpn.secure.prefs"
-            val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
-                context.applicationContext,
-                sharedPrefsFile,
-                mainKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            EncryptedSharedPreferences(
+                appContext,
+                SECURE_PREFS_FILE,
+                MasterKey(appContext)
             )
-            return sharedPreferences
         } catch (e: Exception) {
-            Log.e("Android-Prefs", "Getting Encryption Storage failed, plaintext fallback")
-            return context.getSharedPreferences("com.amnezia.vpn.preferences", Context.MODE_PRIVATE)
+            Log.e(TAG, "Getting Encryption Storage failed: ${e.message}, plaintext fallback")
+            appContext.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         }
-    }
 }

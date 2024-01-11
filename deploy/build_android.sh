@@ -12,13 +12,14 @@ Usage:
 Build AmneziaVPN android client. By default, a signed Android App Bundle (AAB) is built.
 
 Options:
- -d, --debug                Build debug version
- -a, --apk <abi>            Build APK for the specified ABI
-                            Available ABIs: 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
- -p, --platform <platform>  The SDK platform used for building the Java code of the application
-                            By default, the latest available platform is used
- -m, --move                 Move the build result to the root of the build directory
- -h, --help                 Display this help
+ -d, --debug                      Build debug version
+ -a, --apk (<abi_list> | all)     Build APKs for the specified ABIs or for all available ABIs
+                                  Available ABIs: 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+                                  <abi_list> - list of ABIs delimited by ';'
+ -b, --build-platform <platform>  The SDK platform used for building the Java code of the application
+                                  By default, the latest available platform is used
+ -m, --move                       Move the build result to the root of the build directory
+ -h, --help                       Display this help
 
 EOT
 }
@@ -26,21 +27,25 @@ EOT
 BUILD_TYPE="release"
 AAB=1
 
-opts=$(getopt -l debug,apk:,platform:,move,help -o "da:p:mh" -- "$@")
+opts=$(getopt -l debug,apk:,build-platform:,move,help -o "da:b:mh" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
     -d | --debug) BUILD_TYPE="debug"; shift;;
-    -a | --apk) ABI=$2; unset AAB; shift 2;;
-    -p | --platform) ANDROID_PLATFORM=$2; shift 2;;
+    -a | --apk) ABIS=$2; unset AAB; shift 2;;
+    -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
     -h | --help) usage; exit 0;;
     --) shift; break;;
   esac
 done
 
-if [[ -v ABI && ! "$ABI" =~ ^(x86|x86_64|armeabi-v7a|arm64-v8a)$ ]]; then
-  echo "The 'abi' option must be one of ['x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'], but is '$ABI'"
+# Validate ABIS parameter
+if [[ -v ABIS && \
+    ! "$ABIS" = "all" && \
+    ! "$ABIS" =~ ^((x86|x86_64|armeabi-v7a|arm64-v8a);)*(x86|x86_64|armeabi-v7a|arm64-v8a)$ ]]; then
+  echo "The 'apk' option must be a list of ['x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a']" \
+       "delimited by ';' or 'all', but is '$ABIS'"
   exit 1
 fi
 
@@ -56,13 +61,19 @@ OUT_APP_DIR=$BUILD_DIR/client
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
-if [ -v AAB ]; then
+# Determine path to qt bin folder with qt-cmake
+if [[ -v AAB || "$ABIS" = "all" ]]; then
   qt_bin_dir_suffix="x86_64"
 else
-  case $ABI in
+  if [[ $ABIS = *";"* ]]; then
+    oneOf=$(echo $ABIS | cut -d';' -f 1)
+  else
+    oneOf=$ABIS
+  fi
+  case $oneOf in
     "armeabi-v7a") qt_bin_dir_suffix="armv7";;
     "arm64-v8a") qt_bin_dir_suffix="arm64_v8a";;
-    *) qt_bin_dir_suffix=$ABI;;
+    *) qt_bin_dir_suffix=$oneOf;;
   esac
 fi
 # get real path
@@ -79,10 +90,10 @@ echo "Using Android NDK in $ANDROID_NDK_ROOT"
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
-if [ -v AAB ]; then
+if [[ -v AAB || "$ABIS" = "all" ]]; then
   qt_cmake_opts+=(-DQT_ANDROID_BUILD_ALL_ABIS=ON)
 else
-  qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABI")
+  qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
 fi
 
 # QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON - Skip building apks as part of the default 'ALL' target
@@ -95,7 +106,7 @@ $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR \
 # Build app
 cmake --build $BUILD_DIR --config $BUILD_TYPE
 
-# Build and package APK or AAB. If this is a release, then additionally sign the result.
+# Build and package APK or AAB
 echo "Building APK/AAB..."
 
 deployqt_opts=()
@@ -104,32 +115,52 @@ if [ -v AAB ]; then
   deployqt_opts+=(--aab)
 fi
 
-if [ -v ANDROID_PLATFORM ]; then
-  deployqt_opts+=(--android-platform "$ANDROID_PLATFORM")
+if [ -v ANDROID_BUILD_PLATFORM ]; then
+  deployqt_opts+=(--android-platform "$ANDROID_BUILD_PLATFORM")
 fi
 
 if [ "$BUILD_TYPE" = "release" ]; then
-  deployqt_opts+=(--release --sign)
+  deployqt_opts+=(--release)
 fi
+
+# for gradle to skip all tasks when it is executed by androiddeployqt
+# gradle is started later explicitly
+export ANDROIDDEPLOYQT_RUN=1
 
 $QT_HOST_PATH/bin/androiddeployqt \
   --input $OUT_APP_DIR/android-AmneziaVPN-deployment-settings.json \
   --output $OUT_APP_DIR/android-build \
-  --gradle \
   "${deployqt_opts[@]}"
+
+# run gradle
+gradle_opts=()
+
+if [ -v AAB ]; then
+  gradle_opts+=(bundle"${BUILD_TYPE^}")
+else
+  gradle_opts+=(assemble"${BUILD_TYPE^}")
+fi
+
+$OUT_APP_DIR/android-build/gradlew \
+  --project-dir $OUT_APP_DIR/android-build \
+  -DexplicitRun=1 \
+  "${gradle_opts[@]}"
 
 if [[ -v CI || -v MOVE_RESULT ]]; then
   echo "Moving APK/AAB..."
   if [ -v AAB ]; then
-    mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/android-build-$BUILD_TYPE.aab \
-       $PROJECT_DIR/deploy/build/AmneziaVPN-$BUILD_TYPE.aab
+    mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab \
+       $PROJECT_DIR/deploy/build/
   else
-    if [ "$BUILD_TYPE" = "release" ]; then
-      build_suffix="release-signed"
-    else
-      build_suffix=$BUILD_TYPE
+    if [ "$ABIS" = "all" ]; then
+      ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
     fi
-    mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/android-build-$build_suffix.apk \
-       $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$build_suffix.apk
+
+    IFS=';' read -r -a abi_array <<< "$ABIS"
+    for ABI in "${abi_array[@]}"
+    do
+      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/AmneziaVPN-$ABI-$BUILD_TYPE.apk \
+       $PROJECT_DIR/deploy/build/
+    done
   fi
 fi

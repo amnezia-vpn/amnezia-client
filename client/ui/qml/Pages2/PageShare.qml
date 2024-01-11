@@ -31,6 +31,7 @@ PageType {
                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
                                       ServersModel.getCurrentlyProcessedServerCredentials())
         PageController.showBusyIndicator(false)
+        PageController.showNotificationMessage(qsTr("Config revoked"))
     }
 
     Connections {
@@ -260,6 +261,7 @@ PageType {
 
                 headerText: qsTr("User name")
                 textFieldText: "New client"
+                textField.maximumLength: 20
 
                 checkEmptyText: true
             }
@@ -354,8 +356,6 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
-                        protocolSelectorListView.currentItem.y
-
                         handler()
 
                         protocolSelector.menuVisible = false
@@ -365,7 +365,7 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ContainersModel.getDefaultContainer())
+                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer())
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -470,7 +470,9 @@ PageType {
                 imageSource: "qrc:/images/controls/share-2.svg"
 
                 onClicked: {
-                    ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                    if (clientNameTextField.textFieldText !== "") {
+                        ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                    }
                 }
             }
 
@@ -579,7 +581,7 @@ PageType {
                                     Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: serverSelector.text
+                                    descriptionText: qsTr("Creation date: ") + creationDate
                                 }
 
                                 BasicButtonType {
@@ -624,7 +626,8 @@ PageType {
                                                 Layout.fillWidth: true
                                                 headerText: qsTr("Client name")
                                                 textFieldText: clientName
-                                                textField.maximumLength: 30
+                                                textField.maximumLength: 20
+                                                checkEmptyText: true
                                             }
 
                                             BasicButtonType {
@@ -633,6 +636,10 @@ PageType {
                                                 text: qsTr("Save")
 
                                                 onClicked: {
+                                                    if (clientNameEditor.textFieldText === "") {
+                                                        return
+                                                    }
+
                                                     if (clientNameEditor.textFieldText !== clientName) {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
@@ -661,7 +668,7 @@ PageType {
                                     text: qsTr("Revoke")
 
                                     onClicked: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - ") + clientName + "?"
+                                        questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
                                         questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
                                         questionDrawer.yesButtonText = qsTr("Continue")
                                         questionDrawer.noButtonText = qsTr("Cancel")
