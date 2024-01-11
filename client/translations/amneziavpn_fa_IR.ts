@@ -15,15 +15,13 @@
 <context>
     <name>AndroidController</name>
     <message>
-        <location filename="../platforms/android/android_controller.cpp" line="236"/>
         <source>AmneziaVPN</source>
-        <translation>AmneziaVPN</translation>
+        <translation type="vanished">AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../platforms/android/android_controller.cpp" line="239"/>
         <source>VPN Connected</source>
         <extracomment>Refers to the app - which is currently running the background and waiting</extracomment>
-        <translation>وی‎پی‎ان متصل است</translation>
+        <translation type="vanished">وی‎پی‎ان متصل است</translation>
     </message>
 </context>
 <context>
@@ -31,7 +29,7 @@
     <message>
         <location filename="../ui/controllers/apiController.cpp" line="123"/>
         <source>Error when retrieving configuration from cloud server</source>
-        <translation type="unfinished"></translation>
+        <translation>خطا در حین دریافت پیکربندی از سمت سرور</translation>
     </message>
 </context>
 <context>
@@ -46,7 +44,7 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="59"/>
         <source>Connection...</source>
-        <translation>ارتباط</translation>
+        <translation>در حال ارتباط...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="64"/>
@@ -62,12 +60,12 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="112"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="73"/>
         <source>Reconnection...</source>
-        <translation>در حال اتصال دوباره...</translation>
+        <translation>اتصال دوباره...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="58"/>
@@ -152,7 +150,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="435"/>
+        <location filename="../ui/controllers/importController.cpp" line="411"/>
         <source>Scanned %1 of %2.</source>
         <translation>ارزیابی %1 از %2.</translation>
     </message>
@@ -245,12 +243,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/notificationhandler.cpp" line="69"/>
         <source>VPN Connected</source>
-        <translation>وی‎پی‎ان متصل است</translation>
+        <translation>وی‎پی‎ان وصل شد</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="76"/>
         <source>VPN Disconnected</source>
-        <translation>وی‎پی‎ان قطع است</translation>
+        <translation>وی‎پی‎ان قطع شد</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="99"/>
@@ -1430,22 +1428,22 @@ Already installed containers were found on the server. All installed containers 
         <translation>نام سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="111"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="142"/>
         <source>Protocols</source>
         <translation>پروتکل‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="148"/>
         <source>Services</source>
         <translation>سرویس‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="152"/>
         <source>Data</source>
         <translation>داده</translation>
     </message>
@@ -1682,7 +1680,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="120"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="unfinished"></translation>
+        <translation>تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="129"/>
@@ -1766,7 +1764,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="165"/>
         <source>Cancel installation</source>
-        <translation type="unfinished"></translation>
+        <translation>لغو عملیات نصب</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
@@ -1918,12 +1916,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="110"/>
         <source>OpenVpn native format</source>
-        <translation>فرمت محلی OpenVPN</translation>
+        <translation>فرمت OpenVPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="115"/>
         <source>WireGuard native format</source>
-        <translation>فرمت محلی WireGuard</translation>
+        <translation>فرمت WireGuard</translation>
     </message>
     <message>
         <source>VPN Access</source>
@@ -1943,8 +1941,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Доступ к управлению сервером. Пользователь, с которым вы делитесь полным доступом к соединению, сможет добавлять и удалять ваши протоколы и службы на сервере, а также изменять настройки.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="279"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="280"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="281"/>
         <source>Server</source>
         <translation>سرور</translation>
     </message>
@@ -1959,7 +1957,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="34"/>
         <source>Config revoked</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات ابطال‎شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="41"/>
@@ -1984,12 +1982,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="68"/>
         <source>Save ShadowSocks config</source>
-        <translation type="unfinished"></translation>
+        <translation>ذخیره تنظیمات ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="75"/>
         <source>Save Cloak config</source>
-        <translation type="unfinished"></translation>
+        <translation>ذخیره تنظیمات Cloak</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="105"/>
@@ -1999,12 +1997,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
         <source>ShadowSocks native format</source>
-        <translation type="unfinished"></translation>
+        <translation>فرمت ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
         <source>Cloak native format</source>
-        <translation type="unfinished"></translation>
+        <translation>فرمت Cloak</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="150"/>
@@ -2014,68 +2012,77 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="178"/>
         <source>Share full access to the server and VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>به اشتراک گذاشتن دسترسی کامل به سرور و وی‎پی‎ان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="179"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
-        <translation type="unfinished"></translation>
+        <translation>برای دستگاه‎های خودتان استفاده کنید یا با آنهایی که برای مدیریت سرور به آن‎ها اعتماد دارید به اشتراک بگذارید.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="231"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="483"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="486"/>
         <source>Users</source>
-        <translation type="unfinished"></translation>
+        <translation>کاربران</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="262"/>
         <source>User name</source>
-        <translation type="unfinished"></translation>
+        <translation>نام کاربری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="499"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="502"/>
         <source>Search</source>
+        <translation>جستجو</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="584"/>
+        <source>Creation date: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="595"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="598"/>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation>تغییر نام</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="624"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
         <source>Client name</source>
-        <translation type="unfinished"></translation>
+        <translation>نام کلاینت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="632"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="636"/>
         <source>Save</source>
-        <translation type="unfinished">ذخیره</translation>
+        <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="660"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="668"/>
         <source>Revoke</source>
+        <translation>ابطال</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="671"/>
+        <source>Revoke the config for a user - %1?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="663"/>
         <source>Revoke the config for a user - </source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">ابطال تنظیمات برای کاربر </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="664"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>
         <source>The user will no longer be able to connect to your server.</source>
-        <translation type="unfinished"></translation>
+        <translation>کاربر دیگر نمی‎تواند به سرور وصل شود.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="665"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="673"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="666"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="674"/>
         <source>Cancel</source>
-        <translation type="unfinished">کنسل</translation>
+        <translation>کنسل</translation>
     </message>
     <message>
         <source>Full access</source>
@@ -2091,20 +2098,20 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">به اشتراک گذاری دسترسی به مدیریت سرور. کاربری که دسترسی کامل سرور با او به اشتراک گذاشته می‎شود می‎تواند پروتکل‌‎ها و سرویس‎ها را در سرور حذف یا اضافه کند و یا تنظیمات سرور را تغییر دهد.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="331"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="333"/>
         <source>Protocol</source>
         <translation>پروتکل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="428"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="430"/>
         <source>Connection format</source>
         <translation>فرمت ارتباط</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="186"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="468"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="469"/>
         <source>Share</source>
         <translation>اشتراک‎گذاری</translation>
     </message>
@@ -2114,49 +2121,50 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="49"/>
         <source>Full access to the server and VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>دسترسی کامل به سرور و وی‎پی‎ان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>ما پیشنهاد میکنیم که ازحالت دسترسی کامل به سرور فقط برای دستگاه‎های دیگر خودتان استفاده کنید
+</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="58"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation type="unfinished"></translation>
+        <translation>اگر دسترسی کامل را با دیگران به اشتراک بگذارید، آن‎ها می‎توانند پروتکل‎ها و سرویس‎ها را حذف یا اضافه کنند که باعث می‎شود که وی‎پی‎ان دیگر برای سایر کاربران کار نکند.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="73"/>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="74"/>
         <source>Server</source>
-        <translation type="unfinished"></translation>
+        <translation>سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="100"/>
         <source>Accessing </source>
-        <translation type="unfinished">در حال دسترسی به </translation>
+        <translation>در حال دسترسی به </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="101"/>
         <source>File with accessing settings to </source>
-        <translation type="unfinished">فایل شامل تنظیمات دسترسی به </translation>
+        <translation>فایل شامل تنظیمات دسترسی به </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="122"/>
         <source>Share</source>
-        <translation type="unfinished">اشتراک‎گذاری</translation>
+        <translation>اشتراک‎گذاری</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="126"/>
         <source>Connection to </source>
-        <translation type="unfinished">ارتباط با </translation>
+        <translation>ارتباط با </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="127"/>
         <source>File with connection settings to </source>
-        <translation type="unfinished">فایل شامل تنظیمات ارتباط با </translation>
+        <translation>فایل شامل تنظیمات ارتباط با </translation>
     </message>
 </context>
 <context>
@@ -2547,6 +2555,11 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="60"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
+        <translation>تنظیمات شامل هیچ کانتینر یا اعتبارنامه‎ای برای اتصال به سرور نیست</translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="63"/>
+        <source>VPN connection error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2608,7 +2621,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">The config does not contain any containers and credentiaks for connecting to the server</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="64"/>
+        <location filename="../core/errorstrings.cpp" line="67"/>
         <source>Internal error</source>
         <translation>Internal error</translation>
     </message>
@@ -2628,31 +2641,31 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation>IKEv2 в сочетании с уровнем шифрования IPSec это современный и стабильный протокол VPN.
-Он может быстро переключаться между сетями и устройствами, что делает его особенно адаптивным в динамичных сетевых средах. 
-Несмотря на сочетание безопасности, стабильности и скорости, необходимо отметить, что IKEv2 легко обнаруживается и подвержен блокировке.
+        <translation>پروتکل IKEv2 به همراه لایه رمزنگاری IPSec به عنوان پروتکل وی‎پی‎ان مدرن و پایدار است.
+یکی از قابلیت‎‎های متمایز این پروتکل قابلیت سوییچ بین شبکه‎ها و دستگاه‎هاست که قابلیت انطباق بالایی در محیط شبکه‎های دینامیک را دارد
+در حالیکه ترکیبی از امنیت، پایداری و سرعت را ارائه میدهد اما مهم است که اشاره کنیم IKEv2 به راحتی قابل تشخیص در شبکه و بلاک شدن میباشد.
 
-* Доступно в AmneziaVPN только для Windows.
-* Низкое энергопотребление, на мобильных устройствах
-* Минимальная конфигурация
-* Распознается системами DPI-анализа
-* Работает по сетевому протоколу UDP, порты 500 и 4500.</translation>
+* در AmneziaVPN فقط بر روی ویندوز در دسترس است
+* مصرف باتری کم روی دستگاه‎های موبایل
+* تنظیمات ساده
+* امکان شناسایی شدن در شبکه‎های تحلیل DPI
+* روی پروتکل شبکه UDP، پورت‎های 500 و 4500 کار می‎کند.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="215"/>
         <source>DNS Service</source>
-        <translation>DNS Сервис</translation>
+        <translation>سرویس DNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
         <source>Sftp file sharing service</source>
-        <translation>Сервис обмена файлами Sftp</translation>
+        <translation>سرویس اشتراک گذاری فایل Sftp</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
         <location filename="../containers/containers_defs.cpp" line="214"/>
         <source>Website in Tor network</source>
-        <translation>Веб-сайт в сети Tor</translation>
+        <translation>وب سایت در شبکه Tor</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="91"/>
@@ -2662,47 +2675,47 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../containers/containers_defs.cpp" line="98"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
-        <translation>OpenVPN - популярный VPN-протокол, с гибкой настройкой. Имеет собственный протокол безопасности с SSL/TLS для обмена ключами.</translation>
+        <translation>پروتکل OpenVPN یکی از پروتکل‎های وی‎پی‎ان محبوب می‎باشد با تنظیمات و پیکربندی‎های قابل تغییر. از پروتکل امنیتی داخلی خود با تبادل کلید SSL/TLS استفاده می‎کند.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
-        <translation>ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
+        <translation>پروتکل ShadowSocks ترافیک وی‎پی‎ان را پنهان و آن را شبیه ترافیک عادی وب می‎کند، اما در مناطقی که سانسور شدیدی اعمال می‎شود با سیستم‎های تحلیلی قابل شناسایی است.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation>OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
+        <translation>پروتکل OpenVPN over Cloak که همان پروتکل OpenVPN با قابلیت پنهان کردن ترافیک از سیستم‎های تحلیل فعال برروی شبکه. ایده‎آل برای گذر از ممنوعیت در مناطقی که سانسور شدیدی اعمال می‎کنند.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
-        <translation>WireGuard - Популярный VPN-протокол с высокой производительностью, высокой скоростью и низким энергопотреблением. Для регионов с низким уровнем цензуры.</translation>
+        <translation>پروتکل WireGuard یک پروتکل وی‎پی‎ان جدید با عملکرد بسیار خوب، سرعت بالا و مصرف انرژی پایین. برای مناطقی که سطح سانسور پایینی دارند پیشنهاد می‎شود.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="111"/>
         <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
-        <translation>AmneziaWG - Специальный протокол от Amnezia, основанный на протоколе WireGuard. Он такой же быстрый, как WireGuard, но очень устойчив к блокировкам. Рекомендуется для регионов с высоким уровнем цензуры.</translation>
+        <translation>پروتکل AmneziaWG یک پروتکل اختصاصی Amnezia که بر اساس WireGaurd کار میکند. به اندازه WireGaurd پرسرعت است و در عین حال بسیار مقاوم به بلاک شدن توسط شبکه ست. مناسب برای مناطق با سطح سانسور بالاست.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 Современный стабильный протокол, немного быстрее других восстанавливает соединение после потери сигнала. Имеет нативную поддержку последних версиий Android и iOS.</translation>
+        <translation>پروتکل IKEv2 پروتکلی پایدار و مدرن که مقداری سریعتر از سایر پروتکل‎هاست. بعد از قطع سیگنال دوباره اتصال را بازیابی می‎کند. به صورت پیش‎فرض بر روی آخرین نسخه دستگاه‎های اندروید و iOS پیشتیبانی می‎شود.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
-        <translation>Разверните сайт на WordPress в сети Tor в два клика.</translation>
+        <translation>با دو کلیک یک سایت وردپرس در شبکه Tor راه‎اندازی کنید.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
-        <translation>Замените DNS-сервер на Amnezia DNS. Это повысит уровень конфиденциальности.</translation>
+        <translation>سرور DNS را با مال خودتان جایگزین کنید. این کار سطح حریم خصوصی شما را افزایش می‎دهد.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
-        <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
+        <translation>یک محفظه ایمن بر روی سرور خودتان ایجاد کنید که به طور امن بتوانید فایل‎ها را ذخیره و جابجا کنید.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="129"/>
@@ -2714,14 +2727,18 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
-        <translation>OpenVPN однин из самых популярных и проверенных временем VPN-протоколов.
-В нем используется уникальный протокол безопасности, опирающийся на протокол SSL/TLS для шифрования и обмена ключами. Кроме того, поддержка OpenVPN множества методов аутентификации делает его универсальным и адаптируемым к широкому спектру устройств и операционных систем. Благодаря открытому исходному коду OpenVPN подвергается тщательному анализу со стороны мирового сообщества, что постоянно повышает его безопасность. Благодаря оптимальному соотношению производительности, безопасности и совместимости OpenVPN остается лучшим выбором как для частных лиц, так и для компаний, заботящихся о конфиденциальности.
+        <translation>پروتکل OpenVPN یکی از پروتکل‎های محبوب و تست شده در دسترس می‎باشد که از پروتکل امنیتی مخصوص خودش استفاده میکند.
+از امتیازات SSL/TLS برای رمزنگاری و تبادل کلید استفاده میکند.
+همچنین OpenVPN از روش‎های چندگانه‎ای برای احراز هویت پشتیبانی می‎کند که آن را قابل انطباق و منعطف میکند.
+از طیف وسیعی از دستگاه‎ها و سیستم عامل‎ها نیز پشتیبانی می‎کند.
+به دلیل طبیعت متن-باز آن، OpenVPN از بررسی گسترده توسط یک جامعه جهانی سود می‎برد که باعث بهتر شدن وضعیت امنیتی آن می‎شود.
+به دلیل تعادل قوی بین عملکرد، امنیت و سازگاری OpenVPN تبدیل به یکی از انتخاب‎های اصلی برای اشخاص آگاه بر حریم خصوصی و تجارت‎های مشابه شده است.
 
-* Доступность AmneziaVPN для всех платформ
-* Нормальное энергопотребление на мобильных устройствах
-* Гибкая настройка под нужды пользователя для работы с различными операционными системами и устройствами
-* Распознается системами DPI-анализа и поэтому подвержен блокировке
-* Может работать по сетевым протоколам TCP и UDP.</translation>
+* بر روی تمام سیستم‎عامل‎ها در AmneziaVPN در دسترس است.
+* مصرف انرژی عادی بر روی دستگاه‎های موبایل
+* قابلیت شخصی‎سازی منعطف مطابق با نیاز شما که امکان کار بر روی دستگاه‎ها و سیستم عامل‎های مختلف را می‎دهد.
+* قابل شناسایی توسط سیستم‎های تحلیل عمیق DPI در شبکه و در نتیجه امکان بلاک شدن
+* امکان کار بر روی دو پروتکل TCP و UDP</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="145"/>
@@ -2733,12 +2750,13 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation>Shadowsocks, создан на основе протокола SOCKS5, защищает соединение с помощью шифра AEAD. Несмотря на то, что протокол Shadowsocks разработан таким образом, чтобы быть незаметным и сложным для идентификации, он не идентичен стандартному HTTPS-соединению. Однако некоторые системы анализа трафика все же могут обнаружить соединение Shadowsocks. В связи с ограниченной поддержкой в Amnezia рекомендуется использовать протокол AmneziaWG, или OpenVPN over Cloak.
+        <translation>پروتکل Shadowsocks، الهام گرفته از پروتکل Socks5، اتصال را با استفاده از رمزگذاری AEAD امن میکند. اگرچه Shadowsocks طوری طراحی شده که برای شناسایی در شبکه چالش‎برانگیز باشد و محتاط عمل کند اما این پروتکل مانند یک اتصال استاندارد HTTPS نیست و برخی از سیستم‎های تحلیل ترافیک مشخص ممکن است بتوانند اتصال Shadowsocks را شناسایی کنند. به دلیل محدودیت پشتیبانی در Amnezia پیشنهاد می‎شود که از َAmneziaWG استفاده شود.
 
-* Доступен в AmneziaVPN только на ПК ноутбуках.
-* Настраиваемый протокол шифрования
-* Обнаруживается некоторыми DPI-системами
-* Работает по сетевому протоколу TCP.</translation>
+* فقط بر روی پلتفرم دسکتاپ بر روی Amnezia قابل دسترس است
+* مصرف انرژی عادی در دستگاه‎های موبایل
+* پروتکل رمزنگاری قابل پیکربندی
+* قابل شناسایی توسط برخی سیستم‎های تحلیل عمیق DPI
+* عملکرد بر روی پروتکل شبکه TCP</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="155"/>
@@ -2760,23 +2778,24 @@ If there is a extreme level of Internet censorship in your region, we advise you
 * Not recognised by DPI analysis systems
 * Works over TCP network protocol, 443 port.
 </source>
-        <translation>OpenVPN over Cloak - это комбинация протокола OpenVPN и плагина Cloak, разработанного специально для защиты от блокировок.
+        <translation>این یک ترکیب از پروتکل OpenVPN و افزونه Cloak می‎باشد که به طور خاص برای محافظت از بلاک شدن طراحی شده است.
 
-OpenVPN обеспечивает безопасное VPN-соединение за счет шифрования всего интернет-трафика между клиентом и сервером.
+پروتکل OpenVPN با رمزنگاری تمام ترافیک اینترنت بین دستگاه و سرور یک اتصال وی‎پی‎ان امن را فراهم می‎کند.
 
-Cloak защищает OpenVPN от обнаружения и блокировок. 
+افزونه Cloak از OpenVPN در مقابل شناسایی و بلاک شدن محافظت می‎کند
 
-Cloak может изменять метаданные пакетов. Он полностью маскирует VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью Active Probing. Это делает его очень устойчивым к обнаружению
+افزونه Cloak می‎تواند داده‎های بسته ترافیکی را تغییر دهد و در نتیجه ترافیک وی‎پی‎ان شبیه ترافیک عادی وب می‎شود و همچنین از وی‎پی‎ان در مقابل شناسایی شدن توسط DPI محافظت می‎کند. این باعث می‎شود که این پروتکل به شناسایی‎شدن بسیار مقاوم باشد
 
-Сразу же после получения первого пакета данных Cloak проверяет подлинность входящего соединения. Если аутентификация не проходит, плагин маскирует сервер под поддельный сайт, и ваш VPN становится невидимым для аналитических систем.
+درست بعد از دریافت اولین بسته داده،افزونه Cloak اتصال ورودی را احراز هویت می‎کند و اگر عملیات احراز هویت انجام نشود Cloak سرور را به عنوان یک وب سایت جعلی در‎ می‎آورد و وی‎پی‎ان شما را از تحلیل شبکه پنهان می‎کند.
 
-Если в вашем регионе существует экстремальный уровень цензуры в Интернете, мы советуем вам при первом подключении использовать только OpenVPN через Cloak
+اگر در منطقه شما سطح بالایی از سانسور وجود دارد ما به شما پیشنهاد می‎کنیم از اولین ارتباط تنها از OpenVPN over Cloak استفاده کنید.
 
-* Доступность AmneziaVPN на всех платформах
-* Высокое энергопотребление на мобильных устройствах
-* Гибкие настройки
-* Не распознается системами DPI-анализа
-* Работает по сетевому протоколу TCP, 443 порт.
+
+* بر روی تمام پلتفرم‎ها در AmneziaVPN در دسترس است
+* مصرف بالای انرژی در دستگاه‎های موبایل
+* تنظیمات منطعف
+* غیرقابل تشخیص و شناسایی توسط سیستم‎های تحلیل عمیق DPI
+* کار کردن روی پروتکل شبکه TCP، پورت 443
 </translation>
     </message>
     <message>
@@ -2790,15 +2809,15 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation>WireGuard - относительно новый популярный VPN-протокол с упрощенной архитектурой.
-Обеспечивает стабильное VPN-соединение, высокую производительность на всех устройствах. Использует жестко заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
-WireGuard очень восприимчив к блокированию из-за особенностей сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче выявляются и, соответственно, блокируются современными системами глубокой проверки пакетов (DPI) и другими средствами сетевого мониторинга.
+        <translation>یک پروتکل نسبتا محبوب وی‎پی‎ان با معماری ساده
+اتصال وی‎پی‎‎ان پایدار با عملکرد بالا بر روی تمام دستگاه‎‌ها فراهم می‎کند. از تنظیمات ثابت برای رمزنگاری استفاده می‎کند و در مقایسه با OpenVPN سرعت بهتری در انتقال اطلاعات دارد.
+پروتکل WireGaurd به دلیل امضای بسته داده مخصوص، احتمال بسیار بالایی برای شناسایی و بلاک شدن دارد.برعکس سایر پروتکل‎های وی‎پی‎ان که از روش‎های مخفی کردن استفاده می‎کنند، امضای ثابت WireGuard به راحتی می‎تواند توسط سیستم‎های تحلیل عمیق DPI یا سایر روش‎های بررسی شبکه شناسایی و بلاک شود.
 
-* Доступность AmneziaVPN для всех платформ
-* Низкое энергопотребление
-* Минимальное количество настроек
-* Легко распознается системами DPI-анализа, подвержен блокировке
-* Работает по сетевому протоколу UDP.</translation>
+* بر روی تمام پلتفرم‌ها در AmneziaVPN قابل دسترسی است.
+* مصرف انرژی پایین
+* کمترین میزان تنظیمات
+* امکان شناسایی شدن توسط سیستم‎های تحلیل عمیق DPI به آسانی و بلاک شدن
+* کار بر روی پروتکل شبکه UDP</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="187"/>
@@ -2811,15 +2830,15 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
 * Works over UDP network protocol.</source>
-        <translation>AmneziaWG - усовершенствованная версия популярного VPN-протокола Wireguard. AmneziaWG опирается на фундамент, заложенный WireGuard, сохраняя упрощенную архитектуру и высокопроизводительные возможности работы на разных устройствах.
-Хотя WireGuard известен своей эффективностью, у него были проблемы с обнаружением из-за характерных сигнатур пакетов. AmneziaWG решает эту проблему за счет использования более совершенных методов обфускации, благодаря чему его трафик сливается с обычным интернет-трафиком.
-Таким образом, AmneziaWG сохраняет высокую производительность оригинала, добавляя при этом дополнительный уровень скрытности, что делает его отличным выбором для тех, кому нужно быстрое и незаметное VPN-соединение.
+        <translation>یک نسخه مدرن از پروتکل وی‎پی‎ان محبوب، AmneziaWG بر روی پایه‎های WireGuard ساخته شده و معماری ساده و عملکرد بالای آن را بر روی تمام دستگاه‎ها حفظ کرده است.
+در حالی‎که WireGuard به دلیل بازدهی آن شناخته می‎شود اما امکان شناسایی شدن بالا به دلیل امضای ثابت بسته داده‎های آن یکی از مشکلات آن است. AmneziaWG این مشکل را با استفاده از متدهای مخفی سازی حل کرده و در نتیجه ترافیک آن همانند با ترافیک عادی اینترنت است.
+این بدین معنی است که AmneziaWG عملکرد سریع اصلی را حفظ کرده و یک لایه پنهان سازی به آن اضافه کرده که باعث می‎شود که به انتخابی عالی برای آنها که وی‎پی‎ان امن و سریع می‎خواهند تبدیل شود.
 
-* Доступность AmneziaVPN на всех платформах
-* Низкое энергопотребление
-* Минимальное количество настроек
-* Не распознается системами DPI-анализа, устойчив к блокировке
-* Работает по сетевому протоколу UDP.</translation>
+* بر روی تمام پلتفرم‌ها در AmneziaVPN قابل دسترسی است.
+* مصرف انرژی پایین
+* کمترین میزان تنظیمات
+* غیرقابل تشخیص توسط سیستم‎های تحلیل عمیق DPI و مقاوم به بلاک شدن
+* کار بر روی پروتکل شبکه UDP</translation>
     </message>
     <message>
         <source>AmneziaWG container</source>
@@ -2828,12 +2847,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>Sftp file sharing service - is secure FTP service</source>
-        <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
+        <translation>سرویس اشتراک فایل Sftp یک سرویس امن FTP می‎باشد</translation>
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
         <source>Sftp service</source>
-        <translation>Сервис SFTP</translation>
+        <translation>سرویس Sftp</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/libsecret.cpp" line="119"/>
@@ -2894,6 +2913,16 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
+        <source>WireGuard Configuration Highlighter</source>
+        <translation>هایلایتر پیکربندی WireGuard</translation>
+    </message>
+    <message>
+        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
+        <source>&amp;Randomize colors</source>
+        <translation>رنگ‎های تصادفی</translation>
     </message>
 </context>
 <context>
@@ -2968,7 +2997,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="128"/>
         <source>Copy config string</source>
-        <translation type="unfinished"></translation>
+        <translation>کپی‎کردن متن تنظیمات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="150"/>
@@ -3048,7 +3077,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <location filename="../ui/systemtray_notificationhandler.cpp" line="37"/>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="63"/>
         <source>Visit Website</source>
-        <translation>بازدید وب‎سایت</translation>
+        <translation>بازدید وب سایت</translation>
     </message>
     <message>
         <location filename="../ui/systemtray_notificationhandler.cpp" line="41"/>
@@ -3068,7 +3097,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="429"/>
+        <location filename="../vpnconnection.cpp" line="432"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

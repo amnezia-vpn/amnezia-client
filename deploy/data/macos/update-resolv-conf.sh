@@ -2,13 +2,15 @@
 
 # Mac name-resolution updater based on @cl's script here:
 # https://blog.netnerds.net/2011/10/openvpn-update-client-dns-on-mac-os-x-using-from-the-command-line/
-# Openvpn envvar parsing taken from the script in debian's openvpn package.
+# Openvpn envar parsing taken from the script in debian's openvpn package.
 # Smushed together and improved by @andrewgdotcom.
 
 # Parses DHCP options from openvpn to update resolv.conf
 # To use set as 'up' and 'down' script in your openvpn *.conf:
 # up /etc/openvpn/update-resolv-conf
 # down /etc/openvpn/update-resolv-conf
+
+echo "*** starting update-resolv-config script ***"
 
 [ "$script_type" ] || exit 0
 [ "$dev" ] || exit 0
@@ -34,11 +36,11 @@ update_all_dns()
         echo updating dns for $adapter
         # set dns server to the vpn dns server
         if [[ "${SRCHS[@]}" ]]; then
-			networksetup -setsearchdomains "$adapter" "${SRCHS[@]}"
+            networksetup -setsearchdomains "$adapter" "${SRCHS[@]}"
         fi
         if [[ "${NMSRVRS[@]}" ]]; then
-			networksetup -setdnsservers "$adapter" "${NMSRVRS[@]}"
-		fi
+            networksetup -setdnsservers "$adapter" "${NMSRVRS[@]}"
+        fi
         done
 }
 
@@ -61,7 +63,7 @@ case "$script_type" in
                 if [ "$part1" = "dhcp-option" ] ; then
                         if [ "$part2" = "DNS" ] ; then
                                 NMSRVRS=(${NMSRVRS[@]} $part3)
-                        elif [ "$part2" = "DOMAIN" ] ; then
+                        elif [ "$part2" = "DOMAIN" ] || [ "$part2" = "DOMAIN-SEARCH" ]; then
                                 SRCHS=(${SRCHS[@]} $part3)
                         fi
                 fi
@@ -72,3 +74,5 @@ case "$script_type" in
         clear_all_dns
         ;;
 esac
+
+echo "*** finished update-resolv-config script ***"
