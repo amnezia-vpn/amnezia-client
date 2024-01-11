@@ -8,7 +8,9 @@
 #include <QImage>
 #include <QStandardPaths>
 
+#include "configurators/cloak_configurator.h"
 #include "configurators/openvpn_configurator.h"
+#include "configurators/shadowsocks_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/errorstrings.h"
 #include "systemController.h"
@@ -19,11 +21,13 @@
 
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
+                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                    const std::shared_ptr<Settings> &settings,
                                    const std::shared_ptr<VpnConfigurator> &configurator, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
+      m_clientManagementModel(clientManagementModel),
       m_settings(settings),
       m_configurator(configurator)
 {
@@ -43,6 +47,22 @@ void ExportController::generateFullAccessConfig()
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     QJsonObject config = m_settings->server(serverIndex);
+
+    QJsonArray containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto containerConfig = containers.at(i).toObject();
+        auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
+
+        for (auto protocol : ContainerProps::protocolsForContainer(containerType)) {
+            auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+
+            protocolConfig.remove(config_key::last_config);
+            containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
+        }
+
+        containers.replace(i, containerConfig);
+    }
+    config[config_key::containers] = containers;
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
@@ -75,35 +95,40 @@ void ExportController::generateFullAccessConfigAndroid()
 }
 #endif
 
-void ExportController::generateConnectionConfig()
+void ExportController::generateConnectionConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
         QJsonObject protocolConfig = m_settings->protocolConfig(serverIndex, container, protocol);
 
-        QString vpnConfig =
-                m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, protocol, &errorCode);
+        QString clientId;
+        QString vpnConfig = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, protocol,
+                                                                 clientId, &errorCode);
         if (errorCode) {
             emit exportErrorOccurred(errorString(errorCode));
             return;
         }
         protocolConfig.insert(config_key::last_config, vpnConfig);
         containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        if (protocol == Proto::OpenVpn || protocol == Proto::Awg || protocol == Proto::WireGuard) {
+            errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+            if (errorCode) {
+                emit exportErrorOccurred(errorString(errorCode));
+                return;
+            }
+        }
     }
 
-    QJsonObject config = m_settings->server(serverIndex);
+    QJsonObject config = m_settings->server(serverIndex); // todo change to servers_model
     if (!errorCode) {
         config.remove(config_key::userName);
         config.remove(config_key::password);
@@ -126,23 +151,21 @@ void ExportController::generateConnectionConfig()
     emit exportConfigChanged();
 }
 
-void ExportController::generateOpenVpnConfig()
+void ExportController::generateOpenVpnConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     ErrorCode errorCode = ErrorCode::NoError;
-    QString config =
-            m_configurator->openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, &errorCode);
+    QString clientId;
+    QString config = m_configurator->openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig,
+                                                                           clientId, &errorCode);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -155,26 +178,32 @@ void ExportController::generateOpenVpnConfig()
         m_config.append(line + "\n");
     }
 
+    m_qrCodes = generateQrCodeImageSeries(m_config.toUtf8());
+
+    errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+
     emit exportConfigChanged();
 }
 
-void ExportController::generateWireGuardConfig()
+void ExportController::generateWireGuardConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    QJsonObject containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
+    QString clientId;
     ErrorCode errorCode = ErrorCode::NoError;
     QString config = m_configurator->wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig,
-                                                                               &errorCode);
+                                                                               clientId, &errorCode);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -187,12 +216,95 @@ void ExportController::generateWireGuardConfig()
         m_config.append(line + "\n");
     }
 
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_config.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
+    m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
+
+    errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateShadowSocksConfig()
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString config = m_configurator->shadowSocksConfigurator->genShadowSocksConfig(credentials, container,
+                                                                                   containerConfig, &errorCode);
+
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::ShadowSocks, config);
+    QJsonObject configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+
+    QStringList lines = QString(QJsonDocument(configJson).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
+
+    m_nativeConfigString =
+            QString("%1:%2@%3:%4")
+                    .arg(configJson.value("method").toString(), configJson.value("password").toString(),
+                         configJson.value("server").toString(), configJson.value("server_port").toString());
+
+    m_nativeConfigString = "ss://" + m_nativeConfigString.toUtf8().toBase64();
+
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_nativeConfigString.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
+    m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateCloakConfig()
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString config =
+            m_configurator->cloakConfigurator->genCloakConfig(credentials, container, containerConfig, &errorCode);
+
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::Cloak, config);
+    QJsonObject configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+
+    configJson.remove(config_key::transport_proto);
+    configJson.insert("ProxyMethod", "shadowsocks");
+
+    QStringList lines = QString(QJsonDocument(configJson).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
+
     emit exportConfigChanged();
 }
 
 QString ExportController::getConfig()
 {
     return m_config;
+}
+
+QString ExportController::getNativeConfigString()
+{
+    return m_nativeConfigString;
 }
 
 QList<QString> ExportController::getQrCodes()
@@ -203,6 +315,30 @@ QList<QString> ExportController::getQrCodes()
 void ExportController::exportConfig(const QString &fileName)
 {
     SystemController::saveFile(fileName, m_config);
+}
+
+void ExportController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)
+{
+    ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials);
+    if (errorCode != ErrorCode::NoError) {
+        emit exportErrorOccurred(errorString(errorCode));
+    }
+}
+
+void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
+{
+    ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials);
+    if (errorCode != ErrorCode::NoError) {
+        emit exportErrorOccurred(errorString(errorCode));
+    }
+}
+
+void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)
+{
+    ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials);
+    if (errorCode != ErrorCode::NoError) {
+        emit exportErrorOccurred(errorString(errorCode));
+    }
 }
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)
@@ -219,7 +355,7 @@ QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &dat
         QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
         qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(ba, qrcodegen::QrCode::Ecc::LOW);
-        QString svg = QString::fromStdString(toSvgString(qr, 0));
+        QString svg = QString::fromStdString(toSvgString(qr, 1));
         chunks.append(svgToBase64(svg));
     }
 
@@ -239,5 +375,6 @@ int ExportController::getQrCodesCount()
 void ExportController::clearPreviousConfig()
 {
     m_config.clear();
+    m_nativeConfigString.clear();
     m_qrCodes.clear();
 }

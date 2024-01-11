@@ -79,8 +79,6 @@ signals:
 
     void serviceIsNotReady();
 
-    void newVpnConfigurationCreated();
-
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
@@ -106,9 +104,8 @@ private:
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
 
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol(DockerContainer container);
+   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
    void createAndroidConnections();
-   void createAndroidConnections(DockerContainer container);
 #endif
 
    void createProtocolConnections();

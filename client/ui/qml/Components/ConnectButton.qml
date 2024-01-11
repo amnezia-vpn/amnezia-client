@@ -138,6 +138,10 @@ Button {
     }
 
     onClicked: {
+        if (!ApiController.updateServerConfigFromApi()) {
+            return
+        }
+
         if (!ContainersModel.isAnyContainerInstalled()) {
             PageController.setTriggeredBtConnectButton(true)
 

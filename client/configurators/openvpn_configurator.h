@@ -24,7 +24,7 @@ public:
     };
 
     QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+        const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode = nullptr);
 
     QString processConfigWithLocalSettings(QString jsonConfig);
     QString processConfigWithExportSettings(QString jsonConfig);
@@ -32,9 +32,9 @@ public:
     ErrorCode signCert(DockerContainer container,
         const ServerCredentials &credentials, QString clientId);
 
-private:
-    ConnectionData createCertRequest();
+    static ConnectionData createCertRequest();
 
+private:
     ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode *errorCode = nullptr);
 

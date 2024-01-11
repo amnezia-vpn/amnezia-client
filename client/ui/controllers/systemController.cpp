@@ -27,7 +27,7 @@ SystemController::SystemController(const std::shared_ptr<Settings> &settings, QO
 void SystemController::saveFile(QString fileName, const QString &data)
 {
 #if defined Q_OS_ANDROID
-    AndroidController::instance()->shareConfig(data, fileName);
+    AndroidController::instance()->saveFile(fileName, data);
     return;
 #endif
 

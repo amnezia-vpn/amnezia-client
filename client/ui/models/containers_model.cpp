@@ -1,9 +1,9 @@
 #include "containers_model.h"
 
-#include "core/servercontroller.h"
+#include <QJsonArray>
 
-ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+ContainersModel::ContainersModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
 }
 
@@ -11,37 +11,6 @@ int ContainersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return ContainerProps::allContainers().size();
-}
-
-bool ContainersModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
-        return false;
-    }
-
-    DockerContainer container = ContainerProps::allContainers().at(index.row());
-
-    switch (role) {
-    case ConfigRole: {
-        m_settings->setContainerConfig(m_currentlyProcessedServerIndex, container, value.toJsonObject());
-        m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
-        if (m_defaultContainerIndex != DockerContainer::None) {
-            break;
-        } else if (ContainerProps::containerService(container) == ServiceType::Other) {
-            break;
-        }
-    }
-    case IsDefaultRole: { //todo remove
-        m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
-        m_defaultContainerIndex = container;
-        emit defaultContainerChanged();
-    }
-    default: break;
-    }
-
-    emit containersModelUpdated();
-    emit dataChanged(index, index);
-    return true;
 }
 
 QVariant ContainersModel::data(const QModelIndex &index, int role) const
@@ -84,37 +53,32 @@ QVariant ContainersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
-void ContainersModel::setCurrentlyProcessedServerIndex(const int index)
+void ContainersModel::updateModel(QJsonArray &containers)
 {
     beginResetModel();
-    m_currentlyProcessedServerIndex = index;
-    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
-    m_defaultContainerIndex = m_settings->defaultContainer(m_currentlyProcessedServerIndex);
+    m_containers.clear();
+    for (const QJsonValue &val : containers) {
+        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
+                             val.toObject());
+    }
     endResetModel();
-    emit defaultContainerChanged();
 }
 
-void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
+void ContainersModel::setDefaultContainer(const int containerIndex)
 {
-    m_currentlyProcessedContainerIndex = index;
+    m_defaultContainerIndex = static_cast<DockerContainer>(containerIndex);
+    emit dataChanged(index(containerIndex, 0), index(containerIndex, 0));
 }
+
 
 DockerContainer ContainersModel::getDefaultContainer()
 {
     return m_defaultContainerIndex;
 }
 
-QString ContainersModel::getDefaultContainerName()
+void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
 {
-    return ContainerProps::containerHumanNames().value(m_defaultContainerIndex);
-}
-
-void ContainersModel::setDefaultContainer(int index)
-{
-    auto container = static_cast<DockerContainer>(index);
-    m_settings->setDefaultContainer(m_currentlyProcessedServerIndex, container);
-    m_defaultContainerIndex = container;
-    emit defaultContainerChanged();
+    m_currentlyProcessedContainerIndex = index;
 }
 
 int ContainersModel::getCurrentlyProcessedContainerIndex()
@@ -127,91 +91,9 @@ QString ContainersModel::getCurrentlyProcessedContainerName()
     return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_currentlyProcessedContainerIndex));
 }
 
-QJsonObject ContainersModel::getCurrentlyProcessedContainerConfig()
+QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
 {
-    return qvariant_cast<QJsonObject>(data(index(m_currentlyProcessedContainerIndex), ConfigRole));
-}
-
-QStringList ContainersModel::getAllInstalledServicesName(const int serverIndex)
-{
-    QStringList servicesName;
-    const auto &containers = m_settings->containers(serverIndex);
-    for (const DockerContainer &container : containers.keys()) {
-        if (ContainerProps::containerService(container) == ServiceType::Other && m_containers.contains(container)) {
-            if (container == DockerContainer::Dns) {
-                servicesName.append("DNS");
-            } else if (container == DockerContainer::Sftp) {
-                servicesName.append("SFTP");
-            } else if (container == DockerContainer::TorWebSite) {
-                servicesName.append("TOR");
-            }
-        }
-    }
-    servicesName.sort();
-    return servicesName;
-}
-
-ErrorCode ContainersModel::removeAllContainers()
-{
-
-    ServerController serverController(m_settings);
-    ErrorCode errorCode =
-            serverController.removeAllContainers(m_settings->serverCredentials(m_currentlyProcessedServerIndex));
-
-    if (errorCode == ErrorCode::NoError) {
-        beginResetModel();
-
-        m_settings->setContainers(m_currentlyProcessedServerIndex, {});
-        m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
-
-        setData(index(DockerContainer::None, 0), true, IsDefaultRole);
-        endResetModel();
-    }
-    return errorCode;
-}
-
-ErrorCode ContainersModel::removeCurrentlyProcessedContainer()
-{
-    ServerController serverController(m_settings);
-    auto credentials = m_settings->serverCredentials(m_currentlyProcessedServerIndex);
-    auto dockerContainer = static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
-
-    ErrorCode errorCode = serverController.removeContainer(credentials, dockerContainer);
-
-    if (errorCode == ErrorCode::NoError) {
-        beginResetModel();
-        m_settings->removeContainerConfig(m_currentlyProcessedServerIndex, dockerContainer);
-        m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
-
-        if (m_defaultContainerIndex == m_currentlyProcessedContainerIndex) {
-            if (m_containers.isEmpty()) {
-                setData(index(DockerContainer::None, 0), true, IsDefaultRole);
-            } else {
-                setData(index(m_containers.begin().key(), 0), true, IsDefaultRole);
-            }
-        }
-        endResetModel();
-    }
-    return errorCode;
-}
-
-void ContainersModel::clearCachedProfiles()
-{
-    const auto &containers = m_settings->containers(m_currentlyProcessedServerIndex);
-    for (DockerContainer container : containers.keys()) {
-        m_settings->clearLastConnectionConfig(m_currentlyProcessedServerIndex, container);
-    }
-}
-
-bool ContainersModel::isAmneziaDnsContainerInstalled()
-{
-    return m_containers.contains(DockerContainer::Dns);
-}
-
-bool ContainersModel::isAmneziaDnsContainerInstalled(const int serverIndex)
-{
-    QMap<DockerContainer, QJsonObject> containers = m_settings->containers(serverIndex);
-    return containers.contains(DockerContainer::Dns);
+    return qvariant_cast<QJsonObject>(data(index(containerIndex), ConfigRole));
 }
 
 bool ContainersModel::isAnyContainerInstalled()
@@ -226,11 +108,6 @@ bool ContainersModel::isAnyContainerInstalled()
     }
 
     return false;
-}
-
-void ContainersModel::updateContainersConfig()
-{
-    m_containers = m_settings->containers(m_currentlyProcessedServerIndex);
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const
