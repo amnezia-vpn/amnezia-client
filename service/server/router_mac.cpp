@@ -150,16 +150,6 @@ bool RouterMac::deleteTun(const QString &dev)
 {
     qDebug().noquote() << "deleteTun start";
 
-    char cmd [1000] = {0x0};
-    sprintf(cmd, "ip tuntap delete $s mode", dev.toStdString().c_str());
-    int sys = system(cmd);
-    if(sys < 0)
-    {
-        qDebug().noquote() << "Could not delete tun device!\n";
-        return false;
-    }
-    memset(&cmd, 0, sizeof(cmd));
-
     return true;
 }
 
