@@ -6,6 +6,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/sites_model.h"
 
 class SettingsController : public QObject
 {
@@ -14,6 +15,7 @@ public:
     explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                 const QSharedPointer<ContainersModel> &containersModel,
                                 const QSharedPointer<LanguageModel> &languageModel,
+                                const QSharedPointer<SitesModel> &sitesModel,
                                 const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
@@ -70,10 +72,13 @@ signals:
 
     void importBackupFromOutside(QString filePath);
 
+    void amneziaDnsToggled(bool enable);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<LanguageModel> m_languageModel;
+    QSharedPointer<SitesModel> m_sitesModel;
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;

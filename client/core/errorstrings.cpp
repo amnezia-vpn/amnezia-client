@@ -19,7 +19,7 @@ QString errorString(ErrorCode code){
     case(ServerUserNotInSudo): return QObject::tr("The user does not have permission to use sudo");
 
     // Libssh errors
-    case(SshRequsetDeniedError): return QObject::tr("Ssh request was denied");
+    case(SshRequestDeniedError): return QObject::tr("Ssh request was denied");
     case(SshInterruptedError): return QObject::tr("Ssh request was interrupted");
     case(SshInternalError): return QObject::tr("Ssh internal error");
     case(SshPrivateKeyError): return QObject::tr("Invalid private key or invalid passphrase entered");
@@ -42,7 +42,6 @@ QString errorString(ErrorCode code){
     case(SshSftpNoMediaError): return QObject::tr("Sftp error: No media was in remote drive");
 
     // Local errors
-    case (FailedToSaveConfigData): return QObject::tr("Failed to save config to disk");
     case (OpenVpnConfigMissing): return QObject::tr("OpenVPN config missing");
     case (OpenVpnManagementServerError): return QObject::tr("OpenVPN management server error");
 
@@ -58,7 +57,10 @@ QString errorString(ErrorCode code){
     case (OpenVpnTapAdapterError): return QObject::tr("Can't setup OpenVPN TAP network adapter");
     case (AddressPoolError): return QObject::tr("VPN pool error: no available addresses");
 
-    case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentiaks for connecting to the server");
+    case (ImportInvalidConfigError): return QObject::tr("The config does not contain any containers and credentials for connecting to the server");
+
+    // Android errors
+    case (AndroidError): return QObject::tr("VPN connection error");
 
     case(InternalError):
     default:

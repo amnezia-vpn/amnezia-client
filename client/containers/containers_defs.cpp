@@ -58,7 +58,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
-    case DockerContainer::Dns: return {};
+    case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
 
@@ -266,7 +266,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
-    case DockerContainer::ShadowSocks: return true;
+    case DockerContainer::ShadowSocks: return false;
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     default: return false;

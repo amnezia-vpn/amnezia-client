@@ -36,7 +36,7 @@ enum ErrorCode
     ServerPacketManagerError,
 
     // Ssh connection errors
-    SshRequsetDeniedError, SshInterruptedError, SshInternalError,
+    SshRequestDeniedError, SshInterruptedError, SshInternalError,
     SshPrivateKeyError, SshPrivateKeyFormatError, SshTimeoutError,
 
     // Ssh sftp errors
@@ -47,7 +47,6 @@ enum ErrorCode
     SshSftpNoMediaError,
 
     // Local errors
-    FailedToSaveConfigData,
     OpenVpnConfigMissing,
     OpenVpnManagementServerError,
     ConfigMissing,
@@ -67,12 +66,14 @@ enum ErrorCode
 
     // 3rd party utils errors
     OpenSslFailed,
-    OpenVpnExecutableCrashed,
     ShadowSocksExecutableCrashed,
     CloakExecutableCrashed,
 
     // import and install errors
-    ImportInvalidConfigError
+    ImportInvalidConfigError,
+
+    // Android errors
+    AndroidError
 };
 
 } // namespace amnezia

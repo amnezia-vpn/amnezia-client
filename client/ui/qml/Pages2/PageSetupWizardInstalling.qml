@@ -19,26 +19,21 @@ PageType {
 
     property bool isTimerRunning: true
     property string progressBarText: qsTr("Usually it takes no more than 5 minutes")
+    property bool isCancelButtonVisible: false
 
     Connections {
         target: InstallController
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
             if (!ConnectionController.isConnected && !isServiceInstall) {
-                ContainersModel.setDefaultContainer(ContainersModel.getCurrentlyProcessedContainerIndex())
+                ServersModel.setDefaultContainer(ContainersModel.getCurrentlyProcessedContainerIndex())
             }
 
-            PageController.goToStartPage()
+            PageController.closePage() // close installing page
+            PageController.closePage() // close protocol settings page
+
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
-            } else if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSettings)) {
-                PageController.goToPage(PageEnum.PageSettingsServersList, false)
-                PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
-                if (isServiceInstall) {
-                    PageController.goToPageSettingsServerServices()
-                }
-            } else {
-                PageController.goToPage(PageEnum.PageHome)
             }
 
             PageController.showNotificationMessage(finishedMessage)
@@ -67,11 +62,13 @@ PageType {
 
         function onServerIsBusy(isBusy) {
             if (isBusy) {
+                root.isCancelButtonVisible = true
                 root.progressBarText = qsTr("Amnezia has detected that your server is currently ") +
                                        qsTr("busy installing other software. Amnezia installation ") +
                                        qsTr("will pause until the server finishes installing other software")
                 root.isTimerRunning = false
             } else {
+                root.isCancelButtonVisible = false
                 root.progressBarText = qsTr("Usually it takes no more than 5 minutes")
                 root.isTimerRunning = true
             }
@@ -155,6 +152,22 @@ PageType {
                             Layout.topMargin: 8
 
                             text: root.progressBarText
+                        }
+
+                        BasicButtonType {
+                            id: cancelIntallationButton
+
+                            Layout.fillWidth: true
+                            Layout.topMargin: 24
+
+                            visible: root.isCancelButtonVisible
+
+                            text: qsTr("Cancel installation")
+
+                            onClicked: {
+                                InstallController.cancelInstallation()
+                                PageController.showBusyIndicator(true)
+                            }
                         }
                     }
                 }

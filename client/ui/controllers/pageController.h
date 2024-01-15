@@ -51,7 +51,9 @@ namespace PageLoader
         PageProtocolWireGuardSettings,
         PageProtocolAwgSettings,
         PageProtocolIKev2Settings,
-        PageProtocolRaw
+        PageProtocolRaw,
+
+        PageShareFullAccess
     };
     Q_ENUM_NS(PageEnum)
 

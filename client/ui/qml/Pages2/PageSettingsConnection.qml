@@ -94,7 +94,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: GC.isDesktop()
+                visible: true
 
                 Layout.fillWidth: true
 

@@ -14,12 +14,14 @@ constexpr const char *keyChainName = "AmneziaVPN-Keychain";
 
 class SecureQSettings : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit SecureQSettings(const QString &organization, const QString &application = QString(),
                              QObject *parent = nullptr);
 
-    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
-    void setValue(const QString &key, const QVariant &value);
+    Q_INVOKABLE QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
     void sync();
 
