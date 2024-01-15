@@ -65,6 +65,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             IpcClient::Interface()->flushDns();
 
             if (m_settings->routeMode() != Settings::VpnAllSites) {
+                qDebug() << "1";
                 IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                 // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
             }
@@ -74,9 +75,11 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+                qDebug() << "2";
                 QTimer::singleShot(1000, m_vpnProtocol.data(),
                                    [this]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode()); });
             } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+                qDebug() << "3";
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
