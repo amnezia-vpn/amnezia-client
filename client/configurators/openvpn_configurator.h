@@ -26,7 +26,7 @@ public:
     QString genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
         const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode = nullptr);
 
-    QString processConfigWithLocalSettings(QString jsonConfig);
+    QString processConfigWithLocalSettings(QString jsonConfig, const int serverIndex);
     QString processConfigWithExportSettings(QString jsonConfig);
 
     ErrorCode signCert(DockerContainer container,
