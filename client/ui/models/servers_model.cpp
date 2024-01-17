@@ -15,6 +15,10 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
         auto defaultContainer = ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
         emit ServersModel::defaultContainerChanged(defaultContainer);
     });
+    connect(this, &ServersModel::currentlyProcessedServerIndexChanged, this, [this](const int serverIndex) {
+        auto defaultContainer = ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
+        emit ServersModel::defaultContainerChanged(defaultContainer);
+    });
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -269,6 +273,7 @@ void ServersModel::removeServer()
     if (m_settings->serversCount() == 0) {
         setDefaultServerIndex(-1);
     }
+    setCurrentlyProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
 }
 

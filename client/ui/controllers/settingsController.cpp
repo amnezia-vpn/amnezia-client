@@ -7,19 +7,20 @@
 #include "ui/qautostart.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/android_controller.h"
-    #include "../../platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
+                                       const QSharedPointer<SitesModel> &sitesModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
+      m_sitesModel(sitesModel),
       m_settings(settings)
 {
     m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_VERSION), __DATE__);
@@ -134,6 +135,7 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 }
 

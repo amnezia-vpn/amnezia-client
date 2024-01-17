@@ -26,6 +26,22 @@ ListView {
         id: containersRadioButtonGroup
     }
 
+    Connections {
+        target: ServersModel
+
+        function onCurrentlyProcessedServerIndexChanged() {
+            menuContent.checkCurrentItem()
+        }
+    }
+
+    function checkCurrentItem() {
+        var item = menuContent.itemAtIndex(currentIndex)
+        if (item !== null) {
+            var radioButton = item.children[0].children[0]
+            radioButton.checked = true
+        }
+    }
+
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
