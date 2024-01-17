@@ -167,6 +167,23 @@ void AmneziaApplication::init()
         });
     }
 #endif
+
+// Android TextArea clipboard workaround
+// Text from TextArea always has "text/html" mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1865
+// Next, html is created for this mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1885
+// And this html goes to the Androids clipboard, i.e. text from TextArea is always copied as richText:
+// /qt/6.6.1/Src/qtbase/src/plugins/platforms/android/androidjniclipboard.cpp:46
+// So we catch all the copies to the clipboard and clear them from "text/html"
+#ifdef Q_OS_ANDROID
+    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, []() {
+        auto clipboard = QGuiApplication::clipboard();
+        if (clipboard->mimeData()->hasHtml()) {
+            clipboard->setText(clipboard->text());
+        }
+    });
+#endif
 }
 
 void AmneziaApplication::registerTypes()
