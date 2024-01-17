@@ -26,7 +26,7 @@ PageType {
 
     Component.onCompleted: {
         if (ServersModel.isDefaultServerFromApi()) {
-            PageController.showNotificationMessage(qsTr("This server does not support split tunneling function"))
+            PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
         }
     }
 
