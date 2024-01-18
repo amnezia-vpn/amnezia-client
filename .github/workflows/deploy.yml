@@ -48,12 +48,16 @@ jobs:
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
 
+    - name: 'Pack installer'
+      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin
+
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Linux_installer
-        path: deploy/AmneziaVPN_Linux_Installer
+        name: AmneziaVPN_Linux_installer.tar
+        path: deploy/AmneziaVPN_Linux_Installer.tar
         retention-days: 7
+
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
@@ -115,6 +119,7 @@ jobs:
         name: AmneziaVPN_Windows_installer
         path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
         retention-days: 7
+
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
@@ -260,6 +265,7 @@ jobs:
         name: AmneziaVPN_MacOS_installer
         path: AmneziaVPN.dmg
         retention-days: 7
+
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
