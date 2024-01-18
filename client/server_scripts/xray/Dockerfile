@@ -10,8 +10,8 @@ RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray
 
-RUN XRAY_VERSION=$(curl -I https://github.com/XTLS/Xray-core/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}');\
-  curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_VERSION}/Xray-linux-64.zip > /root/xray.zip;\
+RUN XRAY_RELEASE=$(curl -I https://github.com/XTLS/Xray-core/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}');\
+  curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip > /root/xray.zip;\
   unzip /root/xray.zip -d /usr/bin/;\
   chmod a+x /usr/bin/xray;
 
