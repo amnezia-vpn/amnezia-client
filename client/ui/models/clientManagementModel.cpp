@@ -245,8 +245,13 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     ServerController serverController(m_settings);
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
 
     error = serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
@@ -273,8 +278,13 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     ServerController serverController(m_settings);
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
 
     ErrorCode error =
             serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -345,8 +355,13 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
     error = serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
@@ -395,8 +410,13 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    const QString clientsTableFile =
-            QString("/opt/amnezia/%1/clientsTable").arg(ContainerProps::containerTypeToString(container));
+    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
+        || container == DockerContainer::Cloak) {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+    } else {
+        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
+    }
     error = serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
