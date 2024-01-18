@@ -92,7 +92,7 @@ QString &VpnConfigurator::processConfigWithLocalSettings(int serverIndex, Docker
     processConfigWithDnsSettings(serverIndex, container, proto, config);
 
     if (proto == Proto::OpenVpn) {
-        config = openVpnConfigurator->processConfigWithLocalSettings(config);
+        config = openVpnConfigurator->processConfigWithLocalSettings(config, serverIndex);
     }
     return config;
 }

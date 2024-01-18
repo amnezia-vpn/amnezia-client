@@ -21,7 +21,13 @@ PageType {
     id: root
 
     property bool pageEnabled: {
-        return !ConnectionController.isConnected
+        return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
+    }
+
+    Component.onCompleted: {
+        if (ServersModel.isDefaultServerFromApi()) {
+            PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
+        }
     }
 
     Connections {
