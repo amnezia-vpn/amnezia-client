@@ -105,7 +105,6 @@ PageType {
                             textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                console.log("1")
                                 if (textFieldText === "") {
                                     textFieldText = "0"
                                 }
@@ -312,6 +311,12 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())
                             }

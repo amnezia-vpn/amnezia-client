@@ -32,8 +32,6 @@ public slots:
     QString getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
-    void onCurrentContainerUpdated();
-
     void onTranslationsUpdated();
 
 signals:
