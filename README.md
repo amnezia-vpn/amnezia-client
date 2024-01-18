@@ -36,7 +36,7 @@ AmneziaVPN uses a number of open source projects to work:
 Make sure to pull all submodules after checking out the repo.
 
 ```bash
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 ## Development
@@ -50,7 +50,15 @@ Look deploy folder for build scripts.
 
 1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, at least version 14 or higher.
 
-2. We use QT to generate the XCode project. we need QT version 6.4. Install QT for macos in [here](https://doc.qt.io/qt-6/macos.html)
+2. We use QT to generate the XCode project. we need QT version 6.6.1. Install QT for macos in [here](https://doc.qt.io/qt-6/macos.html) or [QT Online Installer](https://www.qt.io/download-open-source). Required modules:
+   - macOS
+   - iOS
+   - Qt 5 Compatibility Module
+   - Qt Shader Tools
+   - Additional Libraries:
+     - Qt Image Formats
+     - Qt Multimedia
+     - Qt Remote Objects 
 
 3. Install cmake is require. We recommend cmake version 3.25. You can install cmake in [here](https://cmake.org/download/)
 
@@ -66,10 +74,11 @@ gomobile init
 5. Build project
 ```bash
 export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
+export QT_MACOS_ROOT_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/macos"
 export QT_IOS_BIN=$QT_BIN_DIR
 export PATH=$PATH:~/go/bin
 mkdir build-ios
-$QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_BIN_DIR
+$QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 ```
 Replace PATH-TO-QT-FOLDER and QT-VERSION to your environment
 
