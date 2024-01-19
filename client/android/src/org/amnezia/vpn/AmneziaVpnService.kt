@@ -59,6 +59,8 @@ private const val TAG = "AmneziaVpnService"
 
 const val VPN_CONFIG = "VPN_CONFIG"
 const val ERROR_MSG = "ERROR_MSG"
+const val SAVE_LOGS = "SAVE_LOGS"
+
 const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val NOTIFICATION_ID = 1337
@@ -135,6 +137,10 @@ class AmneziaVpnService : VpnService() {
                                 })
                             }
                         }
+                    }
+
+                    Action.SET_SAVE_LOGS -> {
+                        Log.saveLogs = msg.data.getBoolean(SAVE_LOGS)
                     }
                 }
             }

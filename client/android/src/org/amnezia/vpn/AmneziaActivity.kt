@@ -420,16 +420,35 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
-    fun cleanupLogs() {
-        Log.v(TAG, "Cleanup logs")
-        Log.w(TAG, "Not yet implemented")
-    }
-
-    @Suppress("unused")
     fun startQrCodeReader() {
         Log.v(TAG, "Start camera")
         Intent(this, CameraActivity::class.java).also {
             startActivity(it)
         }
+    }
+
+    @Suppress("unused")
+    fun setSaveLogs(enabled: Boolean) {
+        Log.v(TAG, "Set save logs: $enabled")
+        mainScope.launch {
+            Log.saveLogs = enabled
+            vpnServiceMessenger.send {
+                Action.SET_SAVE_LOGS.packToMessage {
+                    putBoolean(SAVE_LOGS, enabled)
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
+    fun exportLogsFile(fileName: String) {
+        Log.v(TAG, "Export logs file")
+        saveFile(fileName, Log.getLogs())
+    }
+
+    @Suppress("unused")
+    fun clearLogs() {
+        Log.v(TAG, "Clear logs")
+        Log.clearLogs()
     }
 }
