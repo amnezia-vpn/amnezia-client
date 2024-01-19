@@ -5,6 +5,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraXConfig
 import androidx.core.app.NotificationChannelCompat.Builder
 import androidx.core.app.NotificationManagerCompat
+import org.amnezia.vpn.util.Prefs
 import org.qtproject.qt.android.bindings.QtApplication
 
 const val NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notification"
@@ -13,6 +14,7 @@ class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        Prefs.init(this)
         createNotificationChannel()
     }
 

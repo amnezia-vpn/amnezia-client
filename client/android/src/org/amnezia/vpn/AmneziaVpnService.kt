@@ -119,7 +119,7 @@ class AmneziaVpnService : VpnService() {
 
                     Action.CONNECT -> {
                         val vpnConfig = msg.data.getString(VPN_CONFIG)
-                        saveConfigToPrefs(vpnConfig)
+                        Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
                         connect(vpnConfig)
                     }
 
@@ -195,14 +195,14 @@ class AmneziaVpnService : VpnService() {
 
         if (isAlwaysOnCompat) {
             Log.v(TAG, "Start service via Always-on")
-            connect(loadConfigFromPrefs())
+            connect(Prefs.load(PREFS_CONFIG_KEY))
         } else if (intent?.getBooleanExtra(AFTER_PERMISSION_CHECK, false) == true) {
             Log.v(TAG, "Start service after permission check")
-            connect(loadConfigFromPrefs())
+            connect(Prefs.load(PREFS_CONFIG_KEY))
         } else {
             Log.v(TAG, "Start service")
             val vpnConfig = intent?.getStringExtra(VPN_CONFIG)
-            saveConfigToPrefs(vpnConfig)
+            Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
             connect(vpnConfig)
         }
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, foregroundServiceTypeCompat)
@@ -440,10 +440,4 @@ class AmneziaVpnService : VpnService() {
         } else {
             true
         }
-
-    private fun loadConfigFromPrefs(): String? =
-        Prefs.get(this).getString(PREFS_CONFIG_KEY, null)
-
-    private fun saveConfigToPrefs(config: String?) =
-        Prefs.get(this).edit().putString(PREFS_CONFIG_KEY, config).apply()
 }
