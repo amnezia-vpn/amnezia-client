@@ -57,6 +57,12 @@ ListView {
                             PageController.goToPage(PageEnum.PageProtocolOpenVpnSettings)
                             break
                         }
+                        case ContainerEnum.Xray: {
+                            XrayConfigModel.updateModel(config)
+                            PageController.goToPage(PageEnum.PageProtocolXraySettings)
+                            break
+                        }
+
                         case ContainerEnum.WireGuard: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)

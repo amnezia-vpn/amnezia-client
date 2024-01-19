@@ -57,7 +57,7 @@ ErrorCode XrayProtocol::start()
     m_xrayProcess.setProgram(xrayExecPath());
     m_xrayProcess.setArguments(args);
 
-    connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this](){
+    connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
         qDebug().noquote() << "xray:" << m_xrayProcess.readAllStandardOutput();
     });
 
@@ -98,7 +98,6 @@ ErrorCode XrayProtocol::startTun2Sock()
     }
 
 #ifndef Q_OS_IOS
-
     m_t2sProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_t2sProcess) {
@@ -113,17 +112,16 @@ ErrorCode XrayProtocol::startTun2Sock()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    QString SSConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
+    QString XrayConStr = "socks5://127.0.0.1:" + QString::number(m_localPort);
 
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
-
 #ifdef Q_OS_WIN
     QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr, "-tun-post-up",
             "netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255"
     });
 #endif
 #ifdef Q_OS_LINUX
-    QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr});
+    QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr});
 #endif
 #ifdef Q_OS_MAC
     QStringList arguments({"-device", "utun22", "-proxy", SSConStr});

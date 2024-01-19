@@ -79,7 +79,8 @@ PageLoader::PageEnum ProtocolsModel::protocolPage(Proto protocol) const
     case Proto::WireGuard: return PageLoader::PageEnum::PageProtocolWireGuardSettings;
     case Proto::Ikev2: return PageLoader::PageEnum::PageProtocolIKev2Settings;
     case Proto::L2tp: return PageLoader::PageEnum::PageProtocolIKev2Settings;
-
+    case Proto::Xray: return PageLoader::PageEnum::PageProtocolXraySettings;
+    
     // non-vpn
     case Proto::TorWebSite: return PageLoader::PageEnum::PageServiceTorWebsiteSettings;
     case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;

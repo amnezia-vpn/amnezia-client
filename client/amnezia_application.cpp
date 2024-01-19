@@ -309,6 +309,9 @@ void AmneziaApplication::initModels()
     m_cloakConfigModel.reset(new CloakConfigModel(this));
     m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel.get());
 
+    m_xrayConfigModel.reset(new XrayConfigModel(this));
+    m_engine->rootContext()->setContextProperty("XrayConfigModel", m_xrayConfigModel.get());
+
     m_wireGuardConfigModel.reset(new WireGuardConfigModel(this));
     m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel.get());
 

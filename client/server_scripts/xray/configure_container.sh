@@ -65,10 +65,10 @@ cat > /opt/amnezia/xray/server.json <<EOF
                 "security": "reality",
                 "realitySettings": {
                     "show": false,
-                    "dest": "www.microsoft.com:443",
+                    "dest": "$XRAY_SITE_NAME:443",
                     "xver": 0,
                     "serverNames": [
-                        "www.microsoft.com"
+                        "$XRAY_SITE_NAME"
                     ],
                     "privateKey": "$XRAY_PRIVATE_KEY",
                     "minClientVer": "",

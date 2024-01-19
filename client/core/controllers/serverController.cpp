@@ -550,6 +550,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$FAKE_WEB_SITE_ADDRESS",
                     cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
 
+    // Xray vars
+    vars.append({ { "$XRAY_SITE_NAME",
+                  cloakConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
+
     // Wireguard vars
     vars.append(
             { { "$WIREGUARD_SUBNET_IP",
