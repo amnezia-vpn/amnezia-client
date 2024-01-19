@@ -297,6 +297,40 @@ void ExportController::generateCloakConfig()
     emit exportConfigChanged();
 }
 
+void ExportController::generateXrayConfig()
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    QString clientId;
+    QString config =
+        m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, Proto::Xray, clientId, &errorCode);
+
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::Xray, config);
+    QJsonObject configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+
+    QStringList lines = QString(QJsonDocument(configJson).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
+
+    qDebug() << "config->" << config;
+
+    emit exportConfigChanged();
+}
+
 QString ExportController::getConfig()
 {
     return m_config;

@@ -36,6 +36,7 @@ public slots:
     void generateWireGuardConfig(const QString &clientName);
     void generateShadowSocksConfig();
     void generateCloakConfig();
+    void generateXrayConfig();
 
     QString getConfig();
     QString getNativeConfigString();
