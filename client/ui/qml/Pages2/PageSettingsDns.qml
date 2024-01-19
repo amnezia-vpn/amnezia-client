@@ -28,6 +28,14 @@ PageType {
         anchors.bottom: parent.bottom
         contentHeight: content.height
 
+        enabled: !ServersModel.isDefaultServerFromApi()
+
+        Component.onCompleted: {
+            if (ServersModel.isDefaultServerFromApi()) {
+                PageController.showNotificationMessage(qsTr("Default server does not support custom dns"))
+            }
+        }
+
         ColumnLayout {
             id: content
 

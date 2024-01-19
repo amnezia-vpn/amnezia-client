@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "3rd/awg-apple/Sources/WireGuardKitC/WireGuardKitC.h"
+#include "3rd/amneziawg-apple/Sources/WireGuardKitC/WireGuardKitC.h"
 
 #include <stdbool.h>
 #include <stdint.h>

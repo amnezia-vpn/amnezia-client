@@ -1,8 +1,10 @@
-#include <QCoreApplication>
 #include <QJniEnvironment>
 #include <QJsonDocument>
+#include <QQmlFile>
+#include <QEventLoop>
 
 #include "android_controller.h"
+#include "android_utils.h"
 #include "ui/controllers/importController.h"
 
 namespace
@@ -106,6 +108,7 @@ bool AndroidController::initialize()
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
         {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
+        {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
@@ -127,7 +130,7 @@ auto AndroidController::callActivityMethod(const char *methodName, const char *s
                                            const std::function<Ret()> &defValue, Args &&...args)
 {
     qDebug() << "Call activity method:" << methodName;
-    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    QJniObject activity = AndroidUtils::getActivity();
     if (activity.isValid()) {
         return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
     } else {
@@ -163,6 +166,24 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
     callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",
                        QJniObject::fromString(fileName).object<jstring>(),
                        QJniObject::fromString(data).object<jstring>());
+}
+
+QString AndroidController::openFile(const QString &filter)
+{
+    QEventLoop wait;
+    QString fileName;
+    connect(this, &AndroidController::fileOpened, this,
+            [&fileName, &wait](const QString &uri) {
+                qDebug() << "Android event: file opened; uri:" << uri;
+                fileName = QQmlFile::urlToLocalFileOrQrc(uri);
+                qDebug() << "Android opened filename:" << fileName;
+                wait.quit();
+            },
+            static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    callActivityMethod("openFile", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(filter).object<jstring>());
+    wait.exec();
+    return fileName;
 }
 
 void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
@@ -285,20 +306,19 @@ void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBy
 }
 
 // static
-void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
+void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
 {
-    Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return;
-    }
+    emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
+}
 
-    QString config(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
+// static
+void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
+{
+    Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->configImported(config);
+    emit AndroidController::instance()->configImported(AndroidUtils::convertJString(env, data));
 }
 
 // static
@@ -306,12 +326,5 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return false;
-    }
-
-    QString code(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
-    return ImportController::decodeQrCode(code);
+    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }

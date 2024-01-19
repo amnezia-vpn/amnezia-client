@@ -90,7 +90,7 @@ include_directories(
     ${LIBSSH_ROOT_DIR}/include
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/include
-    ${CLIENT_ROOT_DIR}/3rd/qtkeychain
+    ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
 )

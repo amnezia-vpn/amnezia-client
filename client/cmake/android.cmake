@@ -27,7 +27,7 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
 )
@@ -35,7 +35,7 @@ set(HEADERS ${HEADERS}
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
 )

@@ -947,6 +947,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>نمایش متد‎های دیگر در گیت هاب</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="104"/>
+        <source>https://github.com/amnezia-vpn/amnezia-client#donate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
         <source>Contacts</source>
         <translation>مخاطب</translation>
@@ -1854,6 +1859,11 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <source>I have nothing</source>
         <translation>من هیچی ندارم</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="138"/>
+        <source>https://amnezia.org/instructions/0_starter-guide</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PageSetupWizardTextKey</name>
@@ -2178,38 +2188,38 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::DeletePasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="104"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="104"/>
         <source>Password entry not found</source>
         <translation>Password entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="108"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="108"/>
         <source>Could not decrypt data</source>
         <translation>Could not decrypt data</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="552"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="560"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="585"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="593"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="578"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="614"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="177"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="177"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="173"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="173"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="179"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="179"/>
         <source>Could not remove private key from keystore</source>
         <translation>Could not remove private key from keystore</translation>
     </message>
@@ -2217,12 +2227,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::JobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="265"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="295"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="509"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="542"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
@@ -2230,27 +2240,27 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::PlainTextStore</name>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="65"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="65"/>
         <source>Could not store data in settings: access error</source>
         <translation>Could not store data in settings: access error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="67"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="67"/>
         <source>Could not store data in settings: format error</source>
         <translation>Could not store data in settings: format error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="85"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="85"/>
         <source>Could not delete data from settings: access error</source>
         <translation>Could not delete data from settings: access error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="87"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="87"/>
         <source>Could not delete data from settings: format error</source>
         <translation>Could not delete data from settings: format error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="104"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="104"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
@@ -2258,80 +2268,80 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::ReadPasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="32"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="32"/>
         <source>Password entry not found</source>
         <translation>Password entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="36"/>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="139"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="36"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="139"/>
         <source>Could not decrypt data</source>
         <translation>Could not decrypt data</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="178"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="205"/>
         <source>D-Bus is not running</source>
         <translation>D-Bus is not running</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="187"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="197"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="214"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="224"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="286"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="316"/>
         <source>No keychain service available</source>
         <translation>No keychain service available</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="288"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="318"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="333"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="363"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="354"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="384"/>
         <source>Could not determine data type: %1; %2</source>
         <translation>Could not determine data type: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="363"/>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="372"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="402"/>
         <source>Unsupported entry type &apos;Map&apos;</source>
         <translation>Unsupported entry type &apos;Map&apos;</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="375"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="405"/>
         <source>Unknown kwallet entry type &apos;%1&apos;</source>
         <translation>Unknown kwallet entry type &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="96"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="96"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="60"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="60"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="68"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="68"/>
         <source>Could not retrieve private key from keystore</source>
         <translation>Could not retrieve private key from keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="75"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="75"/>
         <source>Could not create decryption cipher</source>
         <translation>Could not create decryption cipher</translation>
     </message>
@@ -2339,73 +2349,73 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::WritePasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="78"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="78"/>
         <source>Credential size exceeds maximum size of %1</source>
         <translation>Credential size exceeds maximum size of %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="87"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="87"/>
         <source>Credential key exceeds maximum size of %1</source>
         <translation>Credential key exceeds maximum size of %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="92"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="92"/>
         <source>Writing credentials failed: Win32 error code %1</source>
         <translation>Writing credentials failed: Win32 error code %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="162"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="162"/>
         <source>Encryption failed</source>
         <translation>Encryption failed</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="415"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="445"/>
         <source>D-Bus is not running</source>
         <translation>D-Bus is not running</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="425"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="452"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="455"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="482"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="468"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="501"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="144"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="144"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="95"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="95"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="124"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="124"/>
         <source>Could not create private key generator</source>
         <translation>Could not create private key generator</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="131"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="131"/>
         <source>Could not generate new private key</source>
         <translation>Could not generate new private key</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="139"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="139"/>
         <source>Could not retrieve private key from keystore</source>
         <translation>Could not retrieve private key from keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="147"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="147"/>
         <source>Could not create encryption cipher</source>
         <translation>Could not create encryption cipher</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="155"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="155"/>
         <source>Could not encrypt data</source>
         <translation>Could not encrypt data</translation>
     </message>
@@ -2855,74 +2865,72 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>سرویس Sftp</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/libsecret.cpp" line="119"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="225"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="255"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="227"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="257"/>
         <source>No keyring daemon</source>
         <translation>No keyring daemon</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="229"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="259"/>
         <source>Already unlocked</source>
         <translation>Already unlocked</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="231"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="261"/>
         <source>No such keyring</source>
         <translation>No such keyring</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="233"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="263"/>
         <source>Bad arguments</source>
         <translation>Bad arguments</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="235"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="265"/>
         <source>I/O error</source>
         <translation>I/O error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="237"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="267"/>
         <source>Cancelled</source>
         <translation>Cancelled</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="239"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="269"/>
         <source>Keyring already exists</source>
         <translation>Keyring already exists</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="241"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="271"/>
         <source>No match</source>
         <translation>No match</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="246"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
     </message>
     <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="39"/>
         <source>WireGuard Configuration Highlighter</source>
-        <translation>هایلایتر پیکربندی WireGuard</translation>
+        <translation type="vanished">هایلایتر پیکربندی WireGuard</translation>
     </message>
     <message>
-        <location filename="../3rd/wireguard-tools/contrib/highlighter/gui/highlight.cpp" line="82"/>
         <source>&amp;Randomize colors</source>
-        <translation>رنگ‎های تصادفی</translation>
+        <translation type="vanished">رنگ‎های تصادفی</translation>
     </message>
 </context>
 <context>
@@ -2936,13 +2944,13 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../settings.cpp" line="26"/>
+        <location filename="../settings.cpp" line="30"/>
         <source>Server #1</source>
         <translation>Server #1</translation>
     </message>
     <message>
-        <location filename="../settings.cpp" line="202"/>
-        <location filename="../settings.cpp" line="209"/>
+        <location filename="../settings.cpp" line="206"/>
+        <location filename="../settings.cpp" line="213"/>
         <source>Server</source>
         <translation>Server</translation>
     </message>
@@ -2950,22 +2958,22 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="25"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="26"/>
         <source>Software version</source>
         <translation>نسخه نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="137"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="139"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام تنظیمات به مقادیر پیش فرض ریست شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="143"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
         <source>Cached profiles cleared</source>
         <translation>پروفایل ذخیره شده پاک شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="122"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
         <source>Backup file is corrupted</source>
         <translation>فایل بک‎آپ خراب شده است</translation>
     </message>

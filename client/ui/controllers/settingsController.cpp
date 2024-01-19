@@ -7,8 +7,7 @@
 #include "ui/qautostart.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/android_controller.h"
-    #include "../../platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
 
