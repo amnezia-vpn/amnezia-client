@@ -50,6 +50,7 @@ import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.Prefs
 import org.amnezia.vpn.util.net.NetworkState
 import org.json.JSONException
 import org.json.JSONObject

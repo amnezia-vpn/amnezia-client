@@ -1,10 +1,9 @@
-package org.amnezia.vpn
+package org.amnezia.vpn.util
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import org.amnezia.vpn.util.Log
 
 private const val TAG = "Prefs"
 private const val PREFS_FILE = "org.amnezia.vpn.prefs"
