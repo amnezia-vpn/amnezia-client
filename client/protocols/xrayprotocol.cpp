@@ -116,7 +116,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
 #ifdef Q_OS_WIN
-    QStringList arguments({"-device", "tun://tun2", "-proxy", SSConStr, "-tun-post-up",
+    QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
             "netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255"
     });
 #endif
@@ -124,7 +124,7 @@ ErrorCode XrayProtocol::startTun2Sock()
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr});
 #endif
 #ifdef Q_OS_MAC
-    QStringList arguments({"-device", "utun22", "-proxy", SSConStr});
+    QStringList arguments({"-device", "utun22", "-proxy", XrayConStr});
 #endif
     m_t2sProcess->setArguments(arguments);
 
