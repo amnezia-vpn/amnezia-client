@@ -243,10 +243,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
             lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
         } else if (!configMap.value("PreSharedKey").isEmpty()) {
             lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
-        } else {
-            qDebug() << "Failed to import profile";
-            emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
-            return QJsonObject();
         }
 
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
