@@ -190,7 +190,7 @@ public:
     void clearSettings();
 
 signals:
-    void saveLogsChanged();
+    void saveLogsChanged(bool enabled);
 
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;

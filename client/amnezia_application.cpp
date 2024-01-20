@@ -91,6 +91,13 @@ void AmneziaApplication::init()
     initControllers();
 
 #ifdef Q_OS_ANDROID
+    if(!AndroidController::initLogging()) {
+        qFatal("Android logging initialization failed");
+    }
+    AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
+    connect(m_settings.get(), &Settings::saveLogsChanged,
+            AndroidController::instance(), &AndroidController::setSaveLogs);
+
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
                 m_connectionController->onConnectionStateChanged(state);
@@ -98,10 +105,7 @@ void AmneziaApplication::init()
                     m_vpnConnection->restoreConnection();
             });
     if (!AndroidController::instance()->initialize()) {
-        qCritical() << QString("Init failed");
-        if (m_vpnConnection)
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
-        return;
+        qFatal("Android controller initialization failed");
     }
 
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
@@ -143,11 +147,13 @@ void AmneziaApplication::init()
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
+#ifndef Q_OS_ANDROID
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
+#endif
 
 #ifdef Q_OS_WIN
     if (m_parser.isSet("a"))

@@ -34,6 +34,12 @@ public:
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     void startQrReaderActivity();
+    void setSaveLogs(bool enabled);
+    void exportLogsFile(const QString &fileName);
+    void clearLogs();
+
+    static bool initLogging();
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -52,6 +58,13 @@ signals:
 
 private:
     bool isWaitingStatus = true;
+
+    static jclass log;
+    static jmethodID logDebug;
+    static jmethodID logInfo;
+    static jmethodID logWarning;
+    static jmethodID logError;
+    static jmethodID logFatal;
 
     void qtAndroidControllerInitialized();
 
@@ -72,8 +85,7 @@ private:
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
 
     template <typename Ret, typename ...Args>
-    static auto callActivityMethod(const char *methodName, const char *signature,
-                                   const std::function<Ret()> &defValue, Args &&...args);
+    static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);
     template <typename ...Args>
     static void callActivityMethod(const char *methodName, const char *signature, Args &&...args);
 };
