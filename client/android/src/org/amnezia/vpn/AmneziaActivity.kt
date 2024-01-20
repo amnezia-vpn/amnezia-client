@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
@@ -417,6 +418,9 @@ class AmneziaActivity : QtActivity() {
     fun setNotificationText(title: String, message: String, timerSec: Int) {
         Log.v(TAG, "Set notification text")
     }
+
+    @Suppress("unused")
+    fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
 
     @Suppress("unused")
     fun startQrCodeReader() {

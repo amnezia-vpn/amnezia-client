@@ -33,6 +33,7 @@ public:
     void setNotificationText(const QString &title, const QString &message, int timerSec);
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
+    bool isCameraPresent();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);

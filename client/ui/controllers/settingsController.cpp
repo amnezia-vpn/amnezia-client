@@ -206,3 +206,14 @@ void SettingsController::toggleScreenshotsEnabled(bool enable)
     });
 #endif
 }
+
+bool SettingsController::isCameraPresent()
+{
+#if defined Q_OS_IOS
+    return true;
+#elif defined Q_OS_ANDROID
+    return AndroidController::instance()->isCameraPresent();
+#else
+    return false;
+#endif
+}
