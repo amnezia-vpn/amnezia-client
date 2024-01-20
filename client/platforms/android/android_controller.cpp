@@ -191,6 +191,11 @@ void AndroidController::setNotificationText(const QString &title, const QString 
                        (jint) timerSec);
 }
 
+bool AndroidController::isCameraPresent()
+{
+    return callActivityMethod<jboolean>("isCameraPresent", "()Z");
+}
+
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
