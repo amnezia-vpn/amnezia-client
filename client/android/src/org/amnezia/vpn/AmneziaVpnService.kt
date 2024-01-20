@@ -186,7 +186,7 @@ class AmneziaVpnService : VpnService() {
      */
     override fun onCreate() {
         super.onCreate()
-        Log.v(TAG, "Create Amnezia VPN service")
+        Log.d(TAG, "Create Amnezia VPN service")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         connectionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + connectionExceptionHandler)
         clientMessenger = IpcMessenger(messengerName = "Client")
@@ -200,13 +200,13 @@ class AmneziaVpnService : VpnService() {
             else intent?.component?.packageName != packageName
 
         if (isAlwaysOnCompat) {
-            Log.v(TAG, "Start service via Always-on")
+            Log.d(TAG, "Start service via Always-on")
             connect(Prefs.load(PREFS_CONFIG_KEY))
         } else if (intent?.getBooleanExtra(AFTER_PERMISSION_CHECK, false) == true) {
-            Log.v(TAG, "Start service after permission check")
+            Log.d(TAG, "Start service after permission check")
             connect(Prefs.load(PREFS_CONFIG_KEY))
         } else {
-            Log.v(TAG, "Start service")
+            Log.d(TAG, "Start service")
             val vpnConfig = intent?.getStringExtra(VPN_CONFIG)
             Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
             connect(vpnConfig)
@@ -244,7 +244,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     override fun onRevoke() {
-        Log.v(TAG, "onRevoke")
+        Log.d(TAG, "onRevoke")
         // Calls to onRevoke() method may not happen on the main thread of the process
         mainScope.launch {
             disconnect()
@@ -252,7 +252,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     override fun onDestroy() {
-        Log.v(TAG, "Destroy service")
+        Log.d(TAG, "Destroy service")
         runBlocking {
             disconnect()
             disconnectionJob?.join()
@@ -263,7 +263,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     private fun stopService() {
-        Log.v(TAG, "Stop service")
+        Log.d(TAG, "Stop service")
         // the coroutine below will be canceled during the onDestroy call
         mainScope.launch {
             delay(STOP_SERVICE_TIMEOUT)
@@ -279,7 +279,7 @@ class AmneziaVpnService : VpnService() {
     private fun launchProtocolStateHandler() {
         mainScope.launch {
             protocolState.collect { protocolState ->
-                Log.d(TAG, "Protocol state: $protocolState")
+                Log.d(TAG, "Protocol state changed: $protocolState")
                 when (protocolState) {
                     CONNECTED -> {
                         clientMessenger.send(ServiceEvent.CONNECTED)
@@ -335,7 +335,7 @@ class AmneziaVpnService : VpnService() {
     private fun connect(vpnConfig: String?) {
         if (isConnected || protocolState.value == CONNECTING) return
 
-        Log.v(TAG, "Start VPN connection")
+        Log.d(TAG, "Start VPN connection")
 
         protocolState.value = CONNECTING
 
@@ -364,7 +364,7 @@ class AmneziaVpnService : VpnService() {
     private fun disconnect() {
         if (isUnknown || isDisconnected || protocolState.value == DISCONNECTING) return
 
-        Log.v(TAG, "Stop VPN connection")
+        Log.d(TAG, "Stop VPN connection")
 
         protocolState.value = DISCONNECTING
 
@@ -390,7 +390,7 @@ class AmneziaVpnService : VpnService() {
     private fun reconnect() {
         if (!isConnected) return
 
-        Log.v(TAG, "Reconnect VPN")
+        Log.d(TAG, "Reconnect VPN")
 
         protocolState.value = RECONNECTING
 

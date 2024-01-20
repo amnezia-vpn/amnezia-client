@@ -18,7 +18,7 @@ class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
         super.onCreate()
         Prefs.init(this)
         Log.init(this)
-        Log.v(TAG, "Create Amnezia application")
+        Log.d(TAG, "Create Amnezia application")
         createNotificationChannel()
     }
 

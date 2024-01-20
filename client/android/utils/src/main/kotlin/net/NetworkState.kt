@@ -82,7 +82,7 @@ class NetworkState(
 
     fun bindNetworkListener() {
         if (isListenerBound) return
-        Log.v(TAG, "Bind network listener")
+        Log.d(TAG, "Bind network listener")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectivityManager.registerBestMatchingNetworkCallback(networkRequest, networkCallback, handler)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -95,7 +95,7 @@ class NetworkState(
 
     fun unbindNetworkListener() {
         if (!isListenerBound) return
-        Log.v(TAG, "Unbind network listener")
+        Log.d(TAG, "Unbind network listener")
         connectivityManager.unregisterNetworkCallback(networkCallback)
         isListenerBound = false
         currentNetwork = null

@@ -25,7 +25,7 @@ class VpnRequestActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.v(TAG, "Start request activity")
+        Log.d(TAG, "Start request activity")
         val requestIntent = VpnService.prepare(applicationContext)
         if (requestIntent != null) {
             if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {

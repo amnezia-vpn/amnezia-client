@@ -20,7 +20,7 @@ AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
             [this](AndroidController::ConnectionState state) {
-                qDebug() << "Android event: status; state:" << textConnectionState(state);
+                qDebug() << "Android event: status =" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
