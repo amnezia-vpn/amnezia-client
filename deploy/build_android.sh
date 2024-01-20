@@ -7,15 +7,18 @@ usage() {
   cat <<EOT
 
 Usage:
-  build_android [options]
+  build_android [options] <artifact_types>
 
-Build AmneziaVPN android client. By default, a signed Android App Bundle (AAB) is built.
+Build AmneziaVPN android client.
 
-Options:
- -d, --debug                      Build debug version
+Artifact types:
+ -u, --aab                        Build Android App Bundle (AAB)
  -a, --apk (<abi_list> | all)     Build APKs for the specified ABIs or for all available ABIs
                                   Available ABIs: 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
                                   <abi_list> - list of ABIs delimited by ';'
+
+Options:
+ -d, --debug                      Build debug version
  -b, --build-platform <platform>  The SDK platform used for building the Java code of the application
                                   By default, the latest available platform is used
  -m, --move                       Move the build result to the root of the build directory
@@ -25,14 +28,14 @@ EOT
 }
 
 BUILD_TYPE="release"
-AAB=1
 
-opts=$(getopt -l debug,apk:,build-platform:,move,help -o "da:b:mh" -- "$@")
+opts=$(getopt -l debug,aab,apk:,build-platform:,move,help -o "dua:b:mh" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
     -d | --debug) BUILD_TYPE="debug"; shift;;
-    -a | --apk) ABIS=$2; unset AAB; shift 2;;
+    -u | --aab) AAB=1; shift;;
+    -a | --apk) ABIS=$2; shift 2;;
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
     -h | --help) usage; exit 0;;
@@ -47,6 +50,11 @@ if [[ -v ABIS && \
   echo "The 'apk' option must be a list of ['x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a']" \
        "delimited by ';' or 'all', but is '$ABIS'"
   exit 1
+fi
+
+# At least one artifact type must be specified
+if [[ ! (-v AAB || -v ABIS) ]]; then
+  usage; exit 0
 fi
 
 echo "Build script started..."
@@ -137,7 +145,8 @@ gradle_opts=()
 
 if [ -v AAB ]; then
   gradle_opts+=(bundle"${BUILD_TYPE^}")
-else
+fi
+if [ -v ABIS ]; then
   gradle_opts+=(assemble"${BUILD_TYPE^}")
 fi
 
@@ -151,7 +160,9 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
   if [ -v AAB ]; then
     mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab \
        $PROJECT_DIR/deploy/build/
-  else
+  fi
+
+  if [ -v ABIS ]; then
     if [ "$ABIS" = "all" ]; then
       ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
     fi

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
@@ -143,7 +144,7 @@ class AmneziaActivity : QtActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.v(TAG, "Create Amnezia activity: $intent")
+        Log.d(TAG, "Create Amnezia activity: $intent")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         vpnServiceMessenger = IpcMessenger(
             onDeadObjectException = ::doUnbindService,
@@ -154,7 +155,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.v(TAG, "onNewIntent: $intent")
+        Log.d(TAG, "onNewIntent: $intent")
         intent?.let(::processIntent)
     }
 
@@ -174,7 +175,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.v(TAG, "Start Amnezia activity")
+        Log.d(TAG, "Start Amnezia activity")
         mainScope.launch {
             qtInitialized.await()
             doBindService()
@@ -182,13 +183,13 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onStop() {
-        Log.v(TAG, "Stop Amnezia activity")
+        Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
         super.onStop()
     }
 
     override fun onDestroy() {
-        Log.v(TAG, "Destroy Amnezia activity")
+        Log.d(TAG, "Destroy Amnezia activity")
         mainScope.cancel()
         super.onDestroy()
     }
@@ -217,7 +218,7 @@ class AmneziaActivity : QtActivity() {
             CHECK_VPN_PERMISSION_ACTION_CODE -> {
                 when (resultCode) {
                     RESULT_OK -> {
-                        Log.v(TAG, "Vpn permission granted")
+                        Log.d(TAG, "Vpn permission granted")
                         Toast.makeText(this, "Vpn permission granted", Toast.LENGTH_LONG).show()
                         checkVpnPermissionCallbacks?.run { onSuccess() }
                     }
@@ -240,7 +241,7 @@ class AmneziaActivity : QtActivity() {
      */
     @MainThread
     private fun doBindService() {
-        Log.v(TAG, "Bind service")
+        Log.d(TAG, "Bind service")
         Intent(this, AmneziaVpnService::class.java).also {
             bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
         }
@@ -251,7 +252,7 @@ class AmneziaActivity : QtActivity() {
     @MainThread
     private fun doUnbindService() {
         if (isInBoundState) {
-            Log.v(TAG, "Unbind service")
+            Log.d(TAG, "Unbind service")
             isWaitingStatus = true
             QtAndroidController.onServiceDisconnected()
             vpnServiceMessenger.reset()
@@ -286,7 +287,7 @@ class AmneziaActivity : QtActivity() {
 
     @MainThread
     private fun checkVpnPermission(onSuccess: () -> Unit, onFail: () -> Unit) {
-        Log.v(TAG, "Check VPN permission")
+        Log.d(TAG, "Check VPN permission")
         VpnService.prepare(applicationContext)?.let {
             checkVpnPermissionCallbacks = CheckVpnPermissionCallbacks(onSuccess, onFail)
             startActivityForResult(it, CHECK_VPN_PERMISSION_ACTION_CODE)
@@ -307,7 +308,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     private fun connectToVpn(vpnConfig: String) {
-        Log.v(TAG, "Connect to VPN")
+        Log.d(TAG, "Connect to VPN")
         vpnServiceMessenger.send {
             Action.CONNECT.packToMessage {
                 putString(VPN_CONFIG, vpnConfig)
@@ -316,7 +317,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     private fun startVpnService(vpnConfig: String) {
-        Log.v(TAG, "Start VPN service")
+        Log.d(TAG, "Start VPN service")
         Intent(this, AmneziaVpnService::class.java).apply {
             putExtra(VPN_CONFIG, vpnConfig)
         }.also {
@@ -325,7 +326,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     private fun disconnectFromVpn() {
-        Log.v(TAG, "Disconnect from VPN")
+        Log.d(TAG, "Disconnect from VPN")
         vpnServiceMessenger.send(Action.DISCONNECT)
     }
 
@@ -369,7 +370,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
-        Log.v(TAG, "Save file $fileName")
+        Log.d(TAG, "Save file $fileName")
         mainScope.launch {
             tmpFileContentToSave = data
 
@@ -397,7 +398,7 @@ class AmneziaActivity : QtActivity() {
 
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            Log.d(TAG, "File mimyType filter: $mimeTypes")
+            Log.v(TAG, "File mimyType filter: $mimeTypes")
             when (mimeTypes.size) {
                 1 -> type = mimeTypes.first()
 
@@ -416,14 +417,10 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun setNotificationText(title: String, message: String, timerSec: Int) {
         Log.v(TAG, "Set notification text")
-        Log.w(TAG, "Not yet implemented")
     }
 
     @Suppress("unused")
-    fun cleanupLogs() {
-        Log.v(TAG, "Cleanup logs")
-        Log.w(TAG, "Not yet implemented")
-    }
+    fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
 
     @Suppress("unused")
     fun startQrCodeReader() {
@@ -431,5 +428,30 @@ class AmneziaActivity : QtActivity() {
         Intent(this, CameraActivity::class.java).also {
             startActivity(it)
         }
+    }
+
+    @Suppress("unused")
+    fun setSaveLogs(enabled: Boolean) {
+        Log.d(TAG, "Set save logs: $enabled")
+        mainScope.launch {
+            Log.saveLogs = enabled
+            vpnServiceMessenger.send {
+                Action.SET_SAVE_LOGS.packToMessage {
+                    putBoolean(SAVE_LOGS, enabled)
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
+    fun exportLogsFile(fileName: String) {
+        Log.v(TAG, "Export logs file")
+        saveFile(fileName, Log.getLogs())
+    }
+
+    @Suppress("unused")
+    fun clearLogs() {
+        Log.v(TAG, "Clear logs")
+        Log.clearLogs()
     }
 }

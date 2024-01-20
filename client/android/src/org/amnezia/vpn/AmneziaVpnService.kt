@@ -50,6 +50,7 @@ import org.amnezia.vpn.protocol.putStatistics
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.Prefs
 import org.amnezia.vpn.util.net.NetworkState
 import org.json.JSONException
 import org.json.JSONObject
@@ -58,6 +59,8 @@ private const val TAG = "AmneziaVpnService"
 
 const val VPN_CONFIG = "VPN_CONFIG"
 const val ERROR_MSG = "ERROR_MSG"
+const val SAVE_LOGS = "SAVE_LOGS"
+
 const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val NOTIFICATION_ID = 1337
@@ -118,7 +121,7 @@ class AmneziaVpnService : VpnService() {
 
                     Action.CONNECT -> {
                         val vpnConfig = msg.data.getString(VPN_CONFIG)
-                        saveConfigToPrefs(vpnConfig)
+                        Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
                         connect(vpnConfig)
                     }
 
@@ -134,6 +137,10 @@ class AmneziaVpnService : VpnService() {
                                 })
                             }
                         }
+                    }
+
+                    Action.SET_SAVE_LOGS -> {
+                        Log.saveLogs = msg.data.getBoolean(SAVE_LOGS)
                     }
                 }
             }
@@ -179,7 +186,7 @@ class AmneziaVpnService : VpnService() {
      */
     override fun onCreate() {
         super.onCreate()
-        Log.v(TAG, "Create Amnezia VPN service")
+        Log.d(TAG, "Create Amnezia VPN service")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         connectionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + connectionExceptionHandler)
         clientMessenger = IpcMessenger(messengerName = "Client")
@@ -193,15 +200,15 @@ class AmneziaVpnService : VpnService() {
             else intent?.component?.packageName != packageName
 
         if (isAlwaysOnCompat) {
-            Log.v(TAG, "Start service via Always-on")
-            connect(loadConfigFromPrefs())
+            Log.d(TAG, "Start service via Always-on")
+            connect(Prefs.load(PREFS_CONFIG_KEY))
         } else if (intent?.getBooleanExtra(AFTER_PERMISSION_CHECK, false) == true) {
-            Log.v(TAG, "Start service after permission check")
-            connect(loadConfigFromPrefs())
+            Log.d(TAG, "Start service after permission check")
+            connect(Prefs.load(PREFS_CONFIG_KEY))
         } else {
-            Log.v(TAG, "Start service")
+            Log.d(TAG, "Start service")
             val vpnConfig = intent?.getStringExtra(VPN_CONFIG)
-            saveConfigToPrefs(vpnConfig)
+            Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
             connect(vpnConfig)
         }
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, foregroundServiceTypeCompat)
@@ -237,7 +244,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     override fun onRevoke() {
-        Log.v(TAG, "onRevoke")
+        Log.d(TAG, "onRevoke")
         // Calls to onRevoke() method may not happen on the main thread of the process
         mainScope.launch {
             disconnect()
@@ -245,7 +252,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     override fun onDestroy() {
-        Log.v(TAG, "Destroy service")
+        Log.d(TAG, "Destroy service")
         runBlocking {
             disconnect()
             disconnectionJob?.join()
@@ -256,7 +263,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     private fun stopService() {
-        Log.v(TAG, "Stop service")
+        Log.d(TAG, "Stop service")
         // the coroutine below will be canceled during the onDestroy call
         mainScope.launch {
             delay(STOP_SERVICE_TIMEOUT)
@@ -272,7 +279,7 @@ class AmneziaVpnService : VpnService() {
     private fun launchProtocolStateHandler() {
         mainScope.launch {
             protocolState.collect { protocolState ->
-                Log.d(TAG, "Protocol state: $protocolState")
+                Log.d(TAG, "Protocol state changed: $protocolState")
                 when (protocolState) {
                     CONNECTED -> {
                         clientMessenger.send(ServiceEvent.CONNECTED)
@@ -305,7 +312,7 @@ class AmneziaVpnService : VpnService() {
 
     @MainThread
     private fun launchSendingStatistics() {
-        if (isServiceBound && isConnected) {
+        /* if (isServiceBound && isConnected) {
             statisticsSendingJob = mainScope.launch {
                 while (true) {
                     clientMessenger.send {
@@ -316,7 +323,7 @@ class AmneziaVpnService : VpnService() {
                     delay(STATISTICS_SENDING_TIMEOUT)
                 }
             }
-        }
+        } */
     }
 
     @MainThread
@@ -328,7 +335,7 @@ class AmneziaVpnService : VpnService() {
     private fun connect(vpnConfig: String?) {
         if (isConnected || protocolState.value == CONNECTING) return
 
-        Log.v(TAG, "Start VPN connection")
+        Log.d(TAG, "Start VPN connection")
 
         protocolState.value = CONNECTING
 
@@ -357,7 +364,7 @@ class AmneziaVpnService : VpnService() {
     private fun disconnect() {
         if (isUnknown || isDisconnected || protocolState.value == DISCONNECTING) return
 
-        Log.v(TAG, "Stop VPN connection")
+        Log.d(TAG, "Stop VPN connection")
 
         protocolState.value = DISCONNECTING
 
@@ -383,7 +390,7 @@ class AmneziaVpnService : VpnService() {
     private fun reconnect() {
         if (!isConnected) return
 
-        Log.v(TAG, "Reconnect VPN")
+        Log.d(TAG, "Reconnect VPN")
 
         protocolState.value = RECONNECTING
 
@@ -439,10 +446,4 @@ class AmneziaVpnService : VpnService() {
         } else {
             true
         }
-
-    private fun loadConfigFromPrefs(): String? =
-        Prefs.get(this).getString(PREFS_CONFIG_KEY, null)
-
-    private fun saveConfigToPrefs(config: String?) =
-        Prefs.get(this).edit().putString(PREFS_CONFIG_KEY, config).apply()
 }

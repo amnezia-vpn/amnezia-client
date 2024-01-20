@@ -22,6 +22,6 @@
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
 	url = https://github.com/amnezia-vpn/3rd-prebuilt
-[submodule "client/3rd/awg-apple"]
-	path = client/3rd/awg-apple
-	url = https://github.com/amnezia-vpn/awg-apple
+[submodule "client/3rd/amneziawg-apple"]
+	path = client/3rd/amneziawg-apple
+	url = https://github.com/amnezia-vpn/amneziawg-apple

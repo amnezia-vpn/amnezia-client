@@ -59,6 +59,8 @@ public slots:
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
+    bool isCameraPresent();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();

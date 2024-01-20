@@ -52,7 +52,7 @@ class OpenVpnClient(
     // Callback to construct a new tun builder
     // Should be called first.
     override fun tun_builder_new(): Boolean {
-        Log.v(TAG, "tun_builder_new")
+        Log.d(TAG, "tun_builder_new")
         configBuilder.clearAddresses()
         return true
     }
@@ -60,7 +60,7 @@ class OpenVpnClient(
     // Callback to set MTU of the VPN interface
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_mtu(mtu: Int): Boolean {
-        Log.v(TAG, "tun_builder_set_mtu: $mtu")
+        Log.d(TAG, "tun_builder_set_mtu: $mtu")
         configBuilder.setMtu(mtu)
         return true
     }
@@ -71,7 +71,7 @@ class OpenVpnClient(
         address: String, prefix_length: Int,
         gateway: String, ipv6: Boolean, net30: Boolean
     ): Boolean {
-        Log.v(TAG, "tun_builder_add_address: $address, $prefix_length, $gateway, $ipv6, $net30")
+        Log.d(TAG, "tun_builder_add_address: $address, $prefix_length, $gateway, $ipv6, $net30")
         configBuilder.addAddress(InetNetwork(address, prefix_length))
         return true
     }
@@ -80,7 +80,7 @@ class OpenVpnClient(
     // May be called more than once per tun_builder session
     // metric is optional and should be ignored if < 0
     override fun tun_builder_add_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
-        Log.v(TAG, "tun_builder_add_route: $address, $prefix_length, $metric, $ipv6")
+        Log.d(TAG, "tun_builder_add_route: $address, $prefix_length, $metric, $ipv6")
         if (address == "remote_host") return false
         configBuilder.addRoute(InetNetwork(address, prefix_length))
         return true
@@ -90,7 +90,7 @@ class OpenVpnClient(
     // May be called more than once per tun_builder session
     // metric is optional and should be ignored if < 0
     override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
-        Log.v(TAG, "tun_builder_exclude_route: $address, $prefix_length, $metric, $ipv6")
+        Log.d(TAG, "tun_builder_exclude_route: $address, $prefix_length, $metric, $ipv6")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             configBuilder.excludeRoute(InetNetwork(address, prefix_length))
         }
@@ -104,7 +104,7 @@ class OpenVpnClient(
     // domain should be routed.
     // Guaranteed to be called after tun_builder_reroute_gw.
     override fun tun_builder_add_dns_server(address: String, ipv6: Boolean): Boolean {
-        Log.v(TAG, "tun_builder_add_dns_server: $address, $ipv6")
+        Log.d(TAG, "tun_builder_add_dns_server: $address, $ipv6")
         configBuilder.addDnsServer(parseInetAddress(address))
         return true
     }
@@ -119,28 +119,28 @@ class OpenVpnClient(
     // ignored for that family
     // See also Android's VPNService.Builder.allowFamily method
     /* override fun tun_builder_set_allow_family(af: Int, allow: Boolean): Boolean {
-        Log.v(TAG, "tun_builder_set_allow_family: $af, $allow")
+        Log.d(TAG, "tun_builder_set_allow_family: $af, $allow")
         return true
     } */
 
     // Callback to set address of remote server
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_remote_address(address: String, ipv6: Boolean): Boolean {
-        Log.v(TAG, "tun_builder_set_remote_address: $address, $ipv6")
+        Log.d(TAG, "tun_builder_set_remote_address: $address, $ipv6")
         return true
     }
 
     // Optional callback that indicates OSI layer, should be 2 or 3.
     // Defaults to 3.
     override fun tun_builder_set_layer(layer: Int): Boolean {
-        Log.v(TAG, "tun_builder_set_layer: $layer")
+        Log.d(TAG, "tun_builder_set_layer: $layer")
         return layer == 3
     }
 
     // Callback to set the session name
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_session_name(name: String): Boolean {
-        Log.v(TAG, "tun_builder_set_session_name: $name")
+        Log.d(TAG, "tun_builder_set_session_name: $name")
         return true
     }
 
@@ -149,7 +149,7 @@ class OpenVpnClient(
     // if the tunnel could not be established.
     // Always called last after tun_builder session has been configured.
     override fun tun_builder_establish(): Int {
-        Log.v(TAG, "tun_builder_establish")
+        Log.d(TAG, "tun_builder_establish")
         return establish(configBuilder)
     }
 
@@ -159,7 +159,7 @@ class OpenVpnClient(
     // flags are defined in RGWFlags (rgwflags.hpp).
     // Never called more than once per tun_builder session.
     override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean, flags: Long): Boolean {
-        Log.v(TAG, "tun_builder_reroute_gw: $ipv4, $ipv6, $flags")
+        Log.d(TAG, "tun_builder_reroute_gw: $ipv4, $ipv6, $flags")
         if ((flags and EMULATED_EXCLUDE_ROUTES.toLong()) != 0L) return true
         if (ipv4) {
             configBuilder.addRoute(InetNetwork("0.0.0.0", 0))
@@ -176,7 +176,7 @@ class OpenVpnClient(
     // reroute_dns parameter.
     // Guaranteed to be called after tun_builder_reroute_gw.
     override fun tun_builder_add_search_domain(domain: String): Boolean {
-        Log.v(TAG, "tun_builder_add_search_domain: $domain")
+        Log.d(TAG, "tun_builder_add_search_domain: $domain")
         configBuilder.setSearchDomain(domain)
         return true
     }
@@ -184,7 +184,7 @@ class OpenVpnClient(
     // Callback to set the HTTP proxy
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_proxy_http(host: String, port: Int): Boolean {
-        Log.v(TAG, "tun_builder_set_proxy_http: $host, $port")
+        Log.d(TAG, "tun_builder_set_proxy_http: $host, $port")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 configBuilder.setHttpProxy(ProxyInfo.buildDirectProxy(host, port))
@@ -199,7 +199,7 @@ class OpenVpnClient(
     // Callback to set the HTTPS proxy
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_proxy_https(host: String, port: Int): Boolean {
-        Log.v(TAG, "tun_builder_set_proxy_https: $host, $port")
+        Log.d(TAG, "tun_builder_set_proxy_https: $host, $port")
         return false
     }
 
@@ -208,7 +208,7 @@ class OpenVpnClient(
     // to exclude them from the VPN network are generated
     // This should be a list of CIDR networks (e.g. 192.168.0.0/24)
     override fun tun_builder_get_local_networks(ipv6: Boolean): ClientAPI_StringVec {
-        Log.v(TAG, "tun_builder_get_local_networks: $ipv6")
+        Log.d(TAG, "tun_builder_get_local_networks: $ipv6")
         val networks = ClientAPI_StringVec()
         for (address in getLocalNetworks(ipv6)) {
             networks.add(address.toString())
@@ -222,21 +222,21 @@ class OpenVpnClient(
     // tun_builder_reroute_gw.  Route metric is ignored
     // if < 0.
     /* override fun tun_builder_set_route_metric_default(metric: Int): Boolean {
-        Log.v(TAG, "tun_builder_set_route_metric_default: $metric")
+        Log.d(TAG, "tun_builder_set_route_metric_default: $metric")
         return super.tun_builder_set_route_metric_default(metric)
     } */
 
     // Callback to add a host which should bypass the proxy
     // May be called more than once per tun_builder session
     /* override fun tun_builder_add_proxy_bypass(bypass_host: String): Boolean {
-        Log.v(TAG, "tun_builder_add_proxy_bypass: $bypass_host")
+        Log.d(TAG, "tun_builder_add_proxy_bypass: $bypass_host")
         return super.tun_builder_add_proxy_bypass(bypass_host)
     } */
 
     // Callback to set the proxy "Auto Config URL"
     // Never called more than once per tun_builder session.
     /* override fun tun_builder_set_proxy_auto_config_url(url: String): Boolean {
-        Log.v(TAG, "tun_builder_set_proxy_auto_config_url: $url")
+        Log.d(TAG, "tun_builder_set_proxy_auto_config_url: $url")
         return super.tun_builder_set_proxy_auto_config_url(url)
     } */
 
@@ -245,7 +245,7 @@ class OpenVpnClient(
     // May be called more than once per tun_builder session.
     // Guaranteed to be called after tun_builder_reroute_gw.
     /* override fun tun_builder_add_wins_server(address: String): Boolean {
-        Log.v(TAG, "tun_builder_add_wins_server: $address")
+        Log.d(TAG, "tun_builder_add_wins_server: $address")
         return super.tun_builder_add_wins_server(address)
     } */
 
@@ -254,7 +254,7 @@ class OpenVpnClient(
     // set the "Connection-specific DNS Suffix" property on
     // the TAP driver.
     /* override fun tun_builder_set_adapter_domain_suffix(name: String): Boolean {
-        Log.v(TAG, "tun_builder_set_adapter_domain_suffix: $name")
+        Log.d(TAG, "tun_builder_set_adapter_domain_suffix: $name")
         return super.tun_builder_set_adapter_domain_suffix(name)
     } */
 
@@ -266,13 +266,13 @@ class OpenVpnClient(
     // tun_builder_establish_lite() will be called.  Otherwise,
     // tun_builder_establish() will be called.
     /* override fun tun_builder_persist(): Boolean {
-        Log.v(TAG, "tun_builder_persist")
+        Log.d(TAG, "tun_builder_persist")
         return super.tun_builder_persist()
     } */
 
     // Indicates a reconnection with persisted tun state.
     /* override fun tun_builder_establish_lite() {
-        Log.v(TAG, "tun_builder_establish_lite")
+        Log.d(TAG, "tun_builder_establish_lite")
         super.tun_builder_establish_lite()
     } */
 
@@ -280,7 +280,7 @@ class OpenVpnClient(
     // If disconnect == true, then the teardown is occurring
     // prior to final disconnect.
     /* override fun tun_builder_teardown(disconnect: Boolean) {
-        Log.v(TAG, "tun_builder_teardown: $disconnect")
+        Log.d(TAG, "tun_builder_teardown: $disconnect")
         super.tun_builder_teardown(disconnect)
     } */
 
@@ -290,7 +290,7 @@ class OpenVpnClient(
 
     // Parse OpenVPN configuration file.
     override fun eval_config(arg0: ClientAPI_Config): ClientAPI_EvalConfig {
-        Log.v(TAG, "eval_config")
+        Log.d(TAG, "eval_config")
         return super.eval_config(arg0)
     }
 
@@ -299,7 +299,7 @@ class OpenVpnClient(
     // to event() and log() functions.  Make sure to call eval_config()
     // and possibly provide_creds() as well before this function.
     override fun connect(): ClientAPI_Status {
-        Log.v(TAG, "connect")
+        Log.d(TAG, "connect")
         return super.connect()
     }
 
@@ -307,7 +307,7 @@ class OpenVpnClient(
     // Will be called from the thread executing connect().
     // The remote and ipv6 are the remote host this socket will connect to
     override fun socket_protect(socket: Int, remote: String, ipv6: Boolean): Boolean {
-        Log.v(TAG, "socket_protect: $socket, $remote, $ipv6")
+        Log.d(TAG, "socket_protect: $socket, $remote, $ipv6")
         return protect(socket)
     }
 
@@ -315,7 +315,7 @@ class OpenVpnClient(
     // May be called asynchronously from a different thread
     // when connect() is running.
     override fun stop() {
-        Log.v(TAG, "stop")
+        Log.d(TAG, "stop")
         super.stop()
     }
 
@@ -323,21 +323,21 @@ class OpenVpnClient(
     // when network is down.  May be called from a different thread
     // when connect() is running.
     override fun pause(reason: String) {
-        Log.v(TAG, "pause: $reason")
+        Log.d(TAG, "pause: $reason")
         super.pause(reason)
     }
 
     // Resume the client after it has been paused.  May be called from a
     // different thread when connect() is running.
     override fun resume() {
-        Log.v(TAG, "resume")
+        Log.d(TAG, "resume")
         super.resume()
     }
 
     // Do a disconnect/reconnect cycle n seconds from now.  May be called
     // from a different thread when connect() is running.
     override fun reconnect(seconds: Int) {
-        Log.v(TAG, "reconnect")
+        Log.d(TAG, "reconnect: $seconds")
         super.reconnect(seconds)
     }
 
@@ -346,14 +346,14 @@ class OpenVpnClient(
     // CONNECTION_TIMEOUT event.  If true, the core will enter a PAUSE
     // state.
     override fun pause_on_connection_timeout(): Boolean {
-        Log.v(TAG, "pause_on_connection_timeout")
+        Log.d(TAG, "pause_on_connection_timeout")
         return false
     }
 
     // Return information about the most recent connection.  Should be called
     // after an event of type "CONNECTED".
     /* override fun connection_info(): ClientAPI_ConnectionInfo {
-        Log.v(TAG, "connection_info")
+        Log.d(TAG, "connection_info")
         return super.connection_info()
     } */
 
@@ -366,7 +366,7 @@ class OpenVpnClient(
     override fun event(event: ClientAPI_Event) {
         val name = event.name
         val info = event.info
-        Log.v(TAG, "OpenVpn event: $name: $info")
+        Log.d(TAG, "OpenVpn event: $name: $info")
         when (name) {
             "COMPRESSION_ENABLED", "WARN" -> Log.w(TAG, "$name: $info")
             "CONNECTED" -> state.value = CONNECTED
@@ -398,31 +398,31 @@ class OpenVpnClient(
 
     // return transport stats only
     override fun transport_stats(): ClientAPI_TransportStats {
-        Log.v(TAG, "transport_stats")
+        Log.d(TAG, "transport_stats")
         return super.transport_stats()
     }
 
     // return a stats value, index should be >= 0 and < stats_n()
     /* override fun stats_value(index: Int): Long {
-        Log.v(TAG, "stats_value: $index")
+        Log.d(TAG, "stats_value: $index")
         return super.stats_value(index)
     } */
 
     // return all stats in a bundle
     /* override fun stats_bundle(): ClientAPI_LLVector {
-        Log.v(TAG, "stats_bundle")
+        Log.d(TAG, "stats_bundle")
         return super.stats_bundle()
     } */
 
     // return tun stats only
     /* override fun tun_stats(): ClientAPI_InterfaceStats {
-        Log.v(TAG, "tun_stats")
+        Log.d(TAG, "tun_stats")
         return super.tun_stats()
     } */
 
     // post control channel message
     /* override fun post_cc_msg(msg: String) {
-        Log.v(TAG, "post_cc_msg: $msg")
+        Log.d(TAG, "post_cc_msg: $msg")
         super.post_cc_msg(msg)
     } */
 }

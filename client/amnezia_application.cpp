@@ -91,6 +91,13 @@ void AmneziaApplication::init()
     initControllers();
 
 #ifdef Q_OS_ANDROID
+    if(!AndroidController::initLogging()) {
+        qFatal("Android logging initialization failed");
+    }
+    AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
+    connect(m_settings.get(), &Settings::saveLogsChanged,
+            AndroidController::instance(), &AndroidController::setSaveLogs);
+
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
                 m_connectionController->onConnectionStateChanged(state);
@@ -98,10 +105,7 @@ void AmneziaApplication::init()
                     m_vpnConnection->restoreConnection();
             });
     if (!AndroidController::instance()->initialize()) {
-        qCritical() << QString("Init failed");
-        if (m_vpnConnection)
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
-        return;
+        qFatal("Android controller initialization failed");
     }
 
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
@@ -143,11 +147,13 @@ void AmneziaApplication::init()
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
+#ifndef Q_OS_ANDROID
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
+#endif
 
 #ifdef Q_OS_WIN
     if (m_parser.isSet("a"))
@@ -168,16 +174,19 @@ void AmneziaApplication::init()
     }
 #endif
 
-// Android TextField clipboard workaround
-// https://bugreports.qt.io/browse/QTBUG-113461
+// Android TextArea clipboard workaround
+// Text from TextArea always has "text/html" mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1865
+// Next, html is created for this mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1885
+// And this html goes to the Androids clipboard, i.e. text from TextArea is always copied as richText:
+// /qt/6.6.1/Src/qtbase/src/plugins/platforms/android/androidjniclipboard.cpp:46
+// So we catch all the copies to the clipboard and clear them from "text/html"
 #ifdef Q_OS_ANDROID
-    QObject::connect(qApp, &QGuiApplication::applicationStateChanged, [](Qt::ApplicationState state) {
-        if (state == Qt::ApplicationActive) {
-            if (qApp->clipboard()->mimeData()->formats().contains("text/html")) {
-                QTextDocument doc;
-                doc.setHtml(qApp->clipboard()->mimeData()->html());
-                qApp->clipboard()->setText(doc.toPlainText());
-            }
+    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, []() {
+        auto clipboard = QGuiApplication::clipboard();
+        if (clipboard->mimeData()->hasHtml()) {
+            clipboard->setText(clipboard->text());
         }
     });
 #endif

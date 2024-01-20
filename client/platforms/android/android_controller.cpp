@@ -12,13 +12,15 @@ namespace
     AndroidController *s_instance = nullptr;
 
     constexpr auto QT_ANDROID_CONTROLLER_CLASS = "org/amnezia/vpn/qt/QtAndroidController";
+    constexpr auto ANDROID_LOG_CLASS = "org/amnezia/vpn/util/Log";
+    constexpr auto TAG = "AmneziaQt";
 } // namespace
 
 AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
             [this](AndroidController::ConnectionState state) {
-                qDebug() << "Android event: status; state:" << textConnectionState(state);
+                qDebug() << "Android event: status =" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
@@ -126,24 +128,19 @@ bool AndroidController::initialize()
 
 // static
 template <typename Ret, typename ...Args>
-auto AndroidController::callActivityMethod(const char *methodName, const char *signature,
-                                           const std::function<Ret()> &defValue, Args &&...args)
+auto AndroidController::callActivityMethod(const char *methodName, const char *signature, Args &&...args)
 {
     qDebug() << "Call activity method:" << methodName;
     QJniObject activity = AndroidUtils::getActivity();
-    if (activity.isValid()) {
-        return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
-    } else {
-        qCritical() << "Activity is not valid";
-        return defValue();
-    }
+    Q_ASSERT(activity.isValid());
+    return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
 }
 
 // static
 template <typename ...Args>
 void AndroidController::callActivityMethod(const char *methodName, const char *signature, Args &&...args)
 {
-    callActivityMethod<void>(methodName, signature, [] {}, std::forward<Args>(args)...);
+    callActivityMethod<void>(methodName, signature, std::forward<Args>(args)...);
 }
 
 ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
@@ -194,9 +191,112 @@ void AndroidController::setNotificationText(const QString &title, const QString 
                        (jint) timerSec);
 }
 
+bool AndroidController::isCameraPresent()
+{
+    return callActivityMethod<jboolean>("isCameraPresent", "()Z");
+}
+
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
+}
+
+void AndroidController::setSaveLogs(bool enabled)
+{
+    callActivityMethod("setSaveLogs", "(Z)V", enabled);
+}
+
+void AndroidController::exportLogsFile(const QString &fileName)
+{
+    callActivityMethod("exportLogsFile", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(fileName).object<jstring>());
+}
+
+void AndroidController::clearLogs()
+{
+    callActivityMethod("clearLogs", "()V");
+}
+
+// Moving log processing to the Android side
+jclass AndroidController::log;
+jmethodID AndroidController::logDebug;
+jmethodID AndroidController::logInfo;
+jmethodID AndroidController::logWarning;
+jmethodID AndroidController::logError;
+jmethodID AndroidController::logFatal;
+
+// static
+bool AndroidController::initLogging()
+{
+    QJniEnvironment env;
+
+    log = env.findClass(ANDROID_LOG_CLASS);
+    if (log == nullptr) {
+        qCritical() << "Android log class" << ANDROID_LOG_CLASS << "not found";
+        return false;
+    }
+
+    auto logMethodSignature = "(Ljava/lang/String;Ljava/lang/String;)V";
+
+    logDebug = env.findStaticMethod(log, "d", logMethodSignature);
+    if (logDebug == nullptr) {
+        qCritical() << "Android debug log method not found";
+        return false;
+    }
+
+    logInfo = env.findStaticMethod(log, "i", logMethodSignature);
+    if (logInfo == nullptr) {
+        qCritical() << "Android info log method not found";
+        return false;
+    }
+
+    logWarning = env.findStaticMethod(log, "w", logMethodSignature);
+    if (logWarning == nullptr) {
+        qCritical() << "Android warning log method not found";
+        return false;
+    }
+
+    logError = env.findStaticMethod(log, "e", logMethodSignature);
+    if (logError == nullptr) {
+        qCritical() << "Android error log method not found";
+        return false;
+    }
+
+    logFatal = env.findStaticMethod(log, "f", logMethodSignature);
+    if (logFatal == nullptr) {
+        qCritical() << "Android fatal log method not found";
+        return false;
+    }
+
+    qInstallMessageHandler(messageHandler);
+    return true;
+}
+
+// static
+void AndroidController::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    jmethodID logMethod = logDebug;
+    switch (type) {
+        case QtDebugMsg:
+            logMethod = logDebug;
+            break;
+        case QtInfoMsg:
+            logMethod = logInfo;
+            break;
+        case QtWarningMsg:
+            logMethod = logWarning;
+            break;
+        case QtCriticalMsg:
+            logMethod = logError;
+            break;
+        case QtFatalMsg:
+            logMethod = logFatal;
+            break;
+    }
+    QString formattedMessage = qFormatLogMessage(type, context, message);
+    QJniObject::callStaticMethod<void>(log, logMethod,
+                                       QJniObject::fromString(TAG).object<jstring>(),
+                                       QJniObject::fromString(formattedMessage).object<jstring>());
 }
 
 void AndroidController::qtAndroidControllerInitialized()

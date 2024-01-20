@@ -97,6 +97,8 @@ public slots:
 
     void toggleAmneziaDns(bool enabled);
 
+    bool isDefaultServerFromApi();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
