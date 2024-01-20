@@ -283,7 +283,6 @@ jobs:
       ANDROID_BUILD_PLATFORM: android-34
       QT_VERSION: 6.6.1
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-      BUILD_AAB: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
 
     steps:
     - name: 'Install desktop Qt'
@@ -382,7 +381,7 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh ${{ env.BUILD_AAB == 'true' && '--aab' || '' }} --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Upload x86_64 apk'
       uses: actions/upload-artifact@v4
@@ -417,7 +416,6 @@ jobs:
         retention-days: 7
 
     - name: 'Upload aab'
-      if: ${{ env.BUILD_AAB == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android
