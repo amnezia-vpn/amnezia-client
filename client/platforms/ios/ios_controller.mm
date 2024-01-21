@@ -249,8 +249,51 @@ void IosController::vpnStatusDidChange(void *pNotification)
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
     if (session /* && session == TunnelManager.session */ ) {
-       qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
-       emit connectionStateChanged(iosStatusToState(session.status));
+        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+       
+        if (session.status == NEVPNStatusDisconnected) {
+            if (@available(iOS 16.0, *)) {
+                [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
+                    if (error != nil) {
+                        qDebug() << "Disconnect error" << error.domain << error.localizedDescription;
+                        
+                        if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
+                            switch (error.code) {
+                                case 1:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        
+                        NSError *underlyingError = error.userInfo[@"NSUnderlyingError"];
+                        if (underlyingError != nil) {
+                            qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.localizedDescription;
+                            
+                            if ([underlyingError.domain isEqualToString:@"NEAgentErrorDomain"]) {
+                                switch (underlyingError.code) {
+                                    case 1:
+                                        qDebug() << "Disconnect underlying error" << "General. Use sysdiagnose.";
+                                        break;
+                                    case 2:
+                                        qDebug() << "Disconnect underlying error" << "Plug-in unavailable. Use sysdiagnose.";
+                                        break;
+                                    default:
+                                        qDebug() << "Disconnect underlying error" << "Unknown code. Use sysdiagnose.";
+                                        break;
+                                }
+                            }
+                        }
+                    } else {
+                        qDebug() << "Disconnect error is absent";
+                    }
+                }];
+            } else {
+                qDebug() << "Disconnect error is unavailable on iOS < 16.0";
+            }
+        }
+        
+        emit connectionStateChanged(iosStatusToState(session.status));
     }
 }
 
