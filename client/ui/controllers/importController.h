@@ -47,6 +47,7 @@ private:
     QJsonObject extractAmneziaConfig(QString &data);
     QJsonObject extractOpenVpnConfig(const QString &data);
     QJsonObject extractWireGuardConfig(const QString &data);
+    QJsonObject extractXrayConfig(const QString &data);
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();

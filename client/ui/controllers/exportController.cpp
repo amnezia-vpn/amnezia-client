@@ -326,8 +326,6 @@ void ExportController::generateXrayConfig()
         m_config.append(line + "\n");
     }
 
-    qDebug() << "config->" << config;
-
     emit exportConfigChanged();
 }
 
