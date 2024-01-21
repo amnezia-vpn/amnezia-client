@@ -216,6 +216,7 @@ QString Settings::nextAvailableServerName() const
 void Settings::setSaveLogs(bool enabled)
 {
     setValue("Conf/saveLogs", enabled);
+#ifndef Q_OS_ANDROID
     if (!isSaveLogs()) {
         Logger::deInit();
     } else {
@@ -223,7 +224,8 @@ void Settings::setSaveLogs(bool enabled)
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
-    emit saveLogsChanged();
+#endif
+    emit saveLogsChanged(enabled);
 }
 
 QString Settings::routeModeString(RouteMode mode) const

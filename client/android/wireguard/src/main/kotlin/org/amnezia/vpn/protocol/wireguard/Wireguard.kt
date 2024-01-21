@@ -99,7 +99,10 @@ open class Wireguard : Protocol() {
     }
 
     protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>) {
-        configData["Address"]?.let { addAddress(InetNetwork.parse(it)) }
+        configData["Address"]?.split(",")?.map { address ->
+            InetNetwork.parse(address.trim())
+        }?.forEach(::addAddress)
+
         configData["DNS"]?.split(",")?.map { dns ->
             parseInetAddress(dns.trim())
         }?.forEach(::addDnsServer)

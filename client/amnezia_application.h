@@ -36,7 +36,6 @@
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
-#include "ui/models/protocols/xrayConfigModel.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
@@ -102,7 +101,7 @@ private:
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
     QScopedPointer<CloakConfigModel> m_cloakConfigModel;
-    QScopedPointer<XrayConfigModel> m_xrayConfigModel;
+    QScopedPointer<XrayConfigModel> m_xrayConfigModel;    
     QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
     QScopedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS

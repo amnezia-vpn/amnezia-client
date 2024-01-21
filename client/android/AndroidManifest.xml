@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <!-- Leave package attribute for androiddeployqt -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.amnezia.vpn"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
@@ -31,7 +33,10 @@
         android:label="-- %%INSERT_APP_NAME%% --"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
-        android:theme="@style/NoActionBar">
+        android:theme="@style/NoActionBar"
+        android:fullBackupContent="@xml/backup_content"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s">
 
         <activity
             android:name=".AmneziaActivity"
@@ -147,7 +152,7 @@
             android:authorities="org.amnezia.vpn.qtprovider"
             android:exported="false"
             android:grantUriPermissions="true">
-        <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
         </provider>
     </application>
 </manifest>

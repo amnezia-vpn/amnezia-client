@@ -15,3 +15,7 @@ android {
         buildConfig = true
     }
 }
+
+dependencies {
+    implementation(libs.androidx.security.crypto)
+}
