@@ -352,6 +352,15 @@ bool IosController::startWireGuard(const QString &config)
 
 void IosController::startTunnel()
 {
+    NSString *protocolName = @"Unknown";
+    
+    NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
+    if (tunnelProtocol.providerConfiguration[@"wireguard"] != nil) {
+        protocolName = @"WireGuard";
+    } else if (tunnelProtocol.providerConfiguration[@"ovpn"] != nil) {
+        protocolName = @"OpenVPN";
+    }
+    
     m_rxBytes = 0;
     m_txBytes = 0;
     
@@ -373,7 +382,7 @@ void IosController::startTunnel()
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     if (loadError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Load Error" << loadError.localizedDescription.UTF8String;
+                        qDebug().nospace() << "IosController::start" << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                         return;
                     }
@@ -401,11 +410,11 @@ void IosController::startTunnel()
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                     if (!started || startError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Start Error"
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
                             << (startError ? startError.localizedDescription.UTF8String : "");
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                     } else {
-                        qDebug() << "IosController::startOpenVPN : Starting the tunnel succeeded";
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Starting the tunnel succeeded";
                     }
             }];
         });
