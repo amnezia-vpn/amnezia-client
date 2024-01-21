@@ -29,7 +29,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
     }
 
     // Skip annoying messages from Qt
-    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font")) {
+    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font") || msg.startsWith("stale focus object")) {
         return;
     }
 
