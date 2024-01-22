@@ -225,6 +225,8 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     if (splitTunnelType == 0)
     {
         blockAll = true;
+        allowNets = true;
+        allownets.append(configStr.value(amnezia::config_key::hostName).toString());
     } else if (splitTunnelType == 1)
     {
         blockNets = true;
@@ -234,6 +236,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     } else if (splitTunnelType == 2) {
         blockAll = true;
         allowNets = true;
+        allownets.append(configStr.value(amnezia::config_key::hostName).toString());
         for (auto v : splitTunnelSites) {
             allownets.append(v.toString());
         }
