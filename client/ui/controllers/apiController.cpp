@@ -5,12 +5,14 @@
 #include <QNetworkReply>
 
 #include "configurators/openvpn_configurator.h"
+#include "configurators/wireguard_configurator.h"
 
 namespace
 {
     namespace configKey
     {
         constexpr char cloak[] = "cloak";
+        constexpr char awg[] = "awg";
 
         constexpr char apiEdnpoint[] = "api_endpoint";
         constexpr char accessToken[] = "api_key";
@@ -26,31 +28,40 @@ ApiController::ApiController(const QSharedPointer<ServersModel> &serversModel,
 {
 }
 
-QString ApiController::genPublicKey(const QString &protocol)
-{
-    if (protocol == configKey::cloak) {
-        return ".";
-    }
-    return QString();
-}
-
-QString ApiController::genCertificateRequest(const QString &protocol)
-{
-    if (protocol == configKey::cloak) {
-        m_certRequest = OpenVpnConfigurator::createCertRequest();
-        return m_certRequest.request;
-    }
-    return QString();
-}
-
-void ApiController::processCloudConfig(const QString &protocol, QString &config)
+void ApiController::processCloudConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config)
 {
     if (protocol == configKey::cloak) {
         config.replace("<key>", "<key>\n");
-        config.replace("$OPENVPN_PRIV_KEY", m_certRequest.privKey);
+        config.replace("$OPENVPN_PRIV_KEY", apiPayloadData.certRequest.privKey);
         return;
+    } else if (protocol == configKey::awg) {
+        config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGUardClientPubKey);
     }
     return;
+}
+
+ApiController::ApiPayloadData ApiController::generateApiPayloadData(const QString &protocol)
+{
+    ApiController::ApiPayloadData apiPayload;
+    if (protocol == configKey::cloak) {
+        apiPayload.certRequest = OpenVpnConfigurator::createCertRequest();
+    } else if (protocol == configKey::awg) {
+        auto connData = WireguardConfigurator::genClientKeys();
+        apiPayload.wireGUardClientPubKey = connData.clientPubKey;
+        apiPayload.wireGuardClientPrivKey = connData.clientPrivKey;
+    }
+    return apiPayload;
+}
+
+QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData)
+{
+    QJsonObject obj;
+    if (protocol == configKey::cloak) {
+        obj[configKey::certificate] = apiPayloadData.certRequest.request;
+    } else if (protocol == configKey::awg) {
+        obj[configKey::publicKey] = apiPayloadData.wireGUardClientPubKey;
+    }
+    return obj;
 }
 
 bool ApiController::updateServerConfigFromApi()
@@ -71,13 +82,9 @@ bool ApiController::updateServerConfigFromApi()
 
         QString protocol = serverConfig.value(configKey::protocol).toString();
 
-        QJsonObject obj;
+        auto apiPayloadData = generateApiPayloadData(protocol);
 
-        obj[configKey::publicKey] = genPublicKey(protocol);
-        obj[configKey::certificate] = genCertificateRequest(protocol);
-
-        QByteArray requestBody = QJsonDocument(obj).toJson();
-        qDebug() << requestBody;
+        QByteArray requestBody = QJsonDocument(fillApiPayload(protocol, apiPayloadData)).toJson();
 
         QScopedPointer<QNetworkReply> reply;
         reply.reset(manager.post(request, requestBody));
@@ -100,7 +107,7 @@ bool ApiController::updateServerConfigFromApi()
             }
 
             QString configStr = ba;
-            processCloudConfig(protocol, configStr);
+            processCloudConfig(protocol, apiPayloadData, configStr);
 
             QJsonObject cloudConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
 
