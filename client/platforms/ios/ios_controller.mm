@@ -255,20 +255,76 @@ void IosController::vpnStatusDidChange(void *pNotification)
             if (@available(iOS 16.0, *)) {
                 [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
                     if (error != nil) {
-                        qDebug() << "Disconnect error" << error.domain << error.localizedDescription;
+                        qDebug() << "Disconnect error" << error.domain << error.code << error.localizedDescription;
                         
                         if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
                             switch (error.code) {
-                                case 1:
+                                case NEVPNConnectionErrorOverslept:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the system slept for an extended period of time.";
+                                    break;
+                                case NEVPNConnectionErrorNoNetworkAvailable:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the system is not connected to a network.";
+                                    break;
+                                case NEVPNConnectionErrorUnrecoverableNetworkChange:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the network conditions changed in such a way that the VPN connection could not be maintained.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the configuration is invalid. ";
+                                    break;
+                                case NEVPNConnectionErrorServerAddressResolutionFailed:
+                                    qDebug() << "Disconnect error info" << "The address of the VPN server could not be determined.";
+                                    break;
+                                case NEVPNConnectionErrorServerNotResponding:
+                                    qDebug() << "Disconnect error info" << "Network communication with the VPN server has failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDead:
+                                    qDebug() << "Disconnect error info" << "The VPN server is no longer functioning.";
+                                    break;
+                                case NEVPNConnectionErrorAuthenticationFailed:
+                                    qDebug() << "Disconnect error info" << "The user credentials were rejected by the VPN server.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The client certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The client certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the client certificate has passed.";
+                                    break;
+                                case NEVPNConnectionErrorPluginFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin died unexpectedly.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationNotFound:
+                                    qDebug() << "Disconnect error info" << "The VPN configuration could not be found.";
+                                    break;
+                                case NEVPNConnectionErrorPluginDisabled:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin could not be found or needed to be updated.";
+                                    break;
+                                case NEVPNConnectionErrorNegotiationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN protocol negotiation failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDisconnected:
+                                    qDebug() << "Disconnect error info" << "The VPN server terminated the connection.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The server certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The server certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the server certificate has passed.";
                                     break;
                                 default:
+                                    qDebug() << "Disconnect error info" << "Unknown code.";
                                     break;
                             }
                         }
                         
                         NSError *underlyingError = error.userInfo[@"NSUnderlyingError"];
                         if (underlyingError != nil) {
-                            qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.localizedDescription;
+                            qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.code << underlyingError.localizedDescription;
                             
                             if ([underlyingError.domain isEqualToString:@"NEAgentErrorDomain"]) {
                                 switch (underlyingError.code) {
