@@ -14,6 +14,8 @@ public:
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
+    Q_PROPERTY(quint64 rxBytes READ rxBytes NOTIFY bytesChanged)
+    Q_PROPERTY(quint64 txBytes READ txBytes NOTIFY bytesChanged)
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
@@ -24,6 +26,8 @@ public:
     bool isConnected() const;
     bool isConnectionInProgress() const;
     QString connectionStateText() const;
+    quint64 rxBytes() const;
+    quint64 txBytes() const;
 
 public slots:
     void openConnection();
@@ -44,6 +48,7 @@ signals:
 
     void connectionErrorOccurred(const QString &errorMessage);
     void reconnectWithUpdatedContainer(const QString &message);
+    void bytesChanged();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
@@ -56,6 +61,8 @@ private:
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Connect");
+    quint64 m_rxBytes = 0;
+    quint64 m_txBytes = 0;
 
     Vpn::ConnectionState m_state;
 };

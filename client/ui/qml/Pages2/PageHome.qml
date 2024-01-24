@@ -263,10 +263,25 @@ PageType {
 
         LabelTextType {
             id: collapsedServerMenuDescription
-            Layout.bottomMargin: 44
+            Layout.bottomMargin: 10
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             visible: buttonContent.collapsedVisibility
             text: ServersModel.defaultServerDescriptionCollapsed
+        }
+
+        GraphViewType {
+            id: graph1
+            Layout.preferredHeight: 50
+            Layout.fillWidth: true
+            visible: buttonContent.collapsedVisibility
+
+            Connections {
+                target: ConnectionController
+                function onBytesChanged()
+                {
+                    graph1.addValues(ConnectionController.rxBytes, ConnectionController.txBytes)
+                }
+            }
         }
 
         ColumnLayout {
@@ -295,6 +310,21 @@ PageType {
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
                 text: ServersModel.defaultServerDescriptionExpanded
+            }
+
+            GraphViewType {
+                id: graph2
+                Layout.preferredHeight: 50
+                Layout.fillWidth: true
+                visible: buttonContent.expandedVisibility
+
+                Connections {
+                    target: ConnectionController
+                    function onBytesChanged()
+                    {
+                        graph2.addValues(ConnectionController.rxBytes, ConnectionController.txBytes)
+                    }
+                }
             }
 
             RowLayout {

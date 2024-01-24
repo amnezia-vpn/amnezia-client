@@ -35,48 +35,48 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="35"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="41"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>پروتکل وی‎پی‎ان نصب نشده است
 لطفا کانتینر وی‎پی‎ان را نصب کنید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="59"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="65"/>
         <source>Connection...</source>
         <translation>در حال ارتباط...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="64"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="70"/>
         <source>Connected</source>
         <translation>متصل</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="109"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>تنظیمات به روز رسانی شد
 در حال اتصال دوباره...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="112"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="73"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
         <source>Reconnection...</source>
         <translation>اتصال دوباره...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="58"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
+        <location filename="../ui/controllers/connectionController.h" line="63"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="84"/>
         <location filename="../ui/controllers/connectionController.cpp" line="98"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
         <source>Disconnection...</source>
         <translation>قطع ارتباط...</translation>
     </message>
@@ -133,12 +133,12 @@
 <context>
     <name>HomeContainersListView</name>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="58"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="74"/>
         <source>Unable change protocol while there is an active connection</source>
         <translation>امکان تغییر پروتکل در هنگام متصل بودن وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="68"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="84"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>پروتکل انتخاب شده بر روی این پلتفرم پشتیبانی نمی‎‎شود</translation>
     </message>
@@ -277,17 +277,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="358"/>
         <source>VPN protocol</source>
         <translation>پروتکل وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="402"/>
         <source>Servers</source>
         <translation>سرورها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="453"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="494"/>
         <source>Unable change server while there is an active connection</source>
         <translation>امکان تغییر سرور در هنگام متصل بودن وجود ندارد</translation>
     </message>
@@ -1220,57 +1220,62 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsDns</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="35"/>
+        <source>Default server does not support custom dns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="53"/>
         <source>DNS servers</source>
         <translation>سرورهای DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="58"/>
         <source>If AmneziaDNS is not used or installed</source>
         <translation>اگر AmneziaDNS نصب نباشد یا استفاده نشود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="65"/>
         <source>Primary DNS</source>
         <translation>DNS اصلی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="77"/>
         <source>Secondary DNS</source>
         <translation>DNS ثانویه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="95"/>
         <source>Restore default</source>
         <translation>بازگشت به پیش‎فرض</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="98"/>
         <source>Restore default DNS settings?</source>
         <translation>بازگشت به تنظیمات پیش‎فرض DNS؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="99"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="92"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="100"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="108"/>
         <source>Settings have been reset</source>
         <translation>تنظیمات ریست شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="120"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="129"/>
         <source>Settings saved</source>
         <translation>ذخیره تنظیمات</translation>
     </message>
@@ -1501,90 +1506,95 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsSplitTunneling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="29"/>
+        <source>Default server does not support split tunneling function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
         <source>Addresses from the list should be accessed via VPN</source>
         <translation>دسترسی به آدرس‎های لیست از طریق وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="64"/>
         <source>Addresses from the list should not be accessed via VPN</source>
         <translation>دسترسی به آدرس‎های لیست بدون وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="96"/>
         <source>Split tunneling</source>
         <translation>جداسازی ترافیک</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="127"/>
         <source>Mode</source>
         <translation>حالت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="205"/>
         <source>Remove </source>
         <translation>حذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="206"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="207"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="248"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
         <source>Site or IP</source>
         <translation>سایت یا آی‎پی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="292"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
         <source>Import/Export Sites</source>
         <translation>بارگذاری / خروجی‎گرفتن از سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="304"/>
         <source>Import</source>
         <translation>بارگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="310"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="316"/>
         <source>Save site list</source>
         <translation>ذخیره لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="323"/>
         <source>Save sites</source>
         <translation>ذخیره سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="318"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="385"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="400"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="391"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="406"/>
         <source>Sites files (*.json)</source>
         <translation>Sites files (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="375"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="381"/>
         <source>Import a list of sites</source>
         <translation>بارگذاری لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="381"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="387"/>
         <source>Replace site list</source>
         <translation>جایگزین کردن لیست سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="384"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="399"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="390"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="405"/>
         <source>Open sites file</source>
         <translation>باز کردن فایل سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="402"/>
         <source>Add imported sites to existing ones</source>
         <translation>اضافه کردن سایت‎های بارگذاری شده به سایت‎های موجود</translation>
     </message>
@@ -1734,7 +1744,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardInstalling</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="61"/>
         <source>The server has already been added to the application</source>
         <translation>سرور در حال حاضر به نرم‎افزار اضافه شده است</translation>
     </message>
@@ -1747,33 +1757,33 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">занят установкой других протоколов или сервисов. Установка Amnesia </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
         <source>Amnezia has detected that your server is currently </source>
         <translation>برنامه Amnezia تشخیص داده است که سرور در حال حاضر </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="68"/>
         <source>busy installing other software. Amnezia installation </source>
         <translation>مشغول نصب نرم‎افزار دیگری است. نصب Amnezia </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
         <source>will pause until the server finishes installing other software</source>
         <translation>متوقف شده تا زمانی که سرور نصب نرم‎افزار دیگر را تمام کند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="127"/>
         <source>Installing</source>
         <translation>در حال نصب</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="166"/>
         <source>Cancel installation</source>
         <translation>لغو عملیات نصب</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="73"/>
         <source>Usually it takes no more than 5 minutes</source>
         <translation>معمولا بیش از 5 دقیقه طول نمی‎کشد</translation>
     </message>
@@ -1896,27 +1906,27 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="64"/>
         <source>New connection</source>
         <translation>ارتباط جدید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="91"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
         <translation>از کد اتصالی که در منابع عمومی هست استفاده نکنید. ممکن است برای شنود اطلاعات شما ایجاد شده باشد.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="106"/>
         <source>Collapse content</source>
         <translation>جمع کردن محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="106"/>
         <source>Show content</source>
         <translation>نمایش محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="149"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
@@ -3105,7 +3115,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="432"/>
+        <location filename="../vpnconnection.cpp" line="435"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

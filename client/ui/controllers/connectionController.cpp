@@ -15,6 +15,12 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 {
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
             &ConnectionController::onConnectionStateChanged);
+    connect(m_vpnConnection.get(), &VpnConnection::bytesChanged, this, [this](quint64 rx, quint64 tx)
+            {
+                m_rxBytes = rx;
+                m_txBytes = tx;
+                emit bytesChanged();
+            });
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn,
             Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
@@ -127,6 +133,16 @@ Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
 QString ConnectionController::connectionStateText() const
 {
     return m_connectionStateText;
+}
+
+quint64 ConnectionController::rxBytes() const
+{
+    return m_rxBytes;
+}
+
+quint64 ConnectionController::txBytes() const
+{
+    return m_txBytes;
 }
 
 bool ConnectionController::isConnectionInProgress() const
