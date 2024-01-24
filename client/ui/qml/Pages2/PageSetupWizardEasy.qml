@@ -112,7 +112,7 @@ PageType {
                                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                                 containers.dockerContainer = dockerContainer
-                                containers.containerDefaultPort = ProtocolProps.defaultPort(defaultContainerProto)
+                                containers.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
                                 containers.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
                             }
                         }
