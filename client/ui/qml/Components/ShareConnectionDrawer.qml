@@ -25,7 +25,7 @@ DrawerType {
 
     property string configExtension: ".vpn"
     property string configCaption: qsTr("Save AmneziaVPN config")
-    property string configFileName: "amnezia_config.vpn"
+    property string configFileName: "amnezia_config"
 
     width: parent.width
     height: parent.height * 0.9
