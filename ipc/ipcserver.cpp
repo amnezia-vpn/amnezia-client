@@ -181,39 +181,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     return WindowsFirewall::instance()->enableKillSwitch(vpnAdapterIndex);
 #endif
 
-#ifdef Q_OS_LINUX
-    // double-check + ensure our firewall is installed and enabled
-    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
-
-    // Note: rule precedence is handled inside IpTablesFirewall
-    LinuxFirewall::ensureRootAnchorPriority();
-
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("200.allowVPN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
-   // LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("310.blockDNS"), true);
-    QStringList serverAddr;
-    serverAddr.append(configStr.value(amnezia::config_key::hostName).toString());
-    LinuxFirewall::updateExcludeAddrs(serverAddr);
-    QStringList dnsServers;
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
-    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
-    dnsServers.append("127.0.0.1");
-    dnsServers.append("127.0.0.53");
-    LinuxFirewall::updateDNSServers(dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
-
-   // LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4,
-   //                                 QStringLiteral("100.vpnTunOnly"),
-   //                                 true,
-   //                                 LinuxFirewall::kRawTable);
-#endif
-
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
     QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
     bool blockAll = 0;
@@ -241,6 +209,31 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
             allownets.append(v.toString());
         }
     }
+#endif
+
+#ifdef Q_OS_LINUX
+    // double-check + ensure our firewall is installed and enabled
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);
+    LinuxFirewall::updateAllowNets(allownets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockAll);
+    LinuxFirewall::updateBlockNets(blocknets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+    QStringList dnsServers;
+    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    dnsServers.append("127.0.0.1");
+    dnsServers.append("127.0.0.53");
+    LinuxFirewall::updateDNSServers(dnsServers);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
+#endif
+
+#ifdef Q_OS_MACOS
 
     // double-check + ensure our firewall is installed and enabled. This is necessary as
     // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)

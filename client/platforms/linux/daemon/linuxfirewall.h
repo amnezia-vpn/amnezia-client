@@ -12,8 +12,8 @@ struct FirewallParams
     QStringList dnsServers;
     //    QSharedPointer<NetworkAdapter> adapter;
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
-
-    QStringList excludeAddrs;
+    QStringList allowAddrs;
+    QStringList blockAddrs;
     // The follow flags indicate which general rulesets are needed. Note that
     // this is after some sanity filtering, i.e. an allow rule may be listed
     // as not needed if there were no block rules preceding it. The rulesets
@@ -29,6 +29,8 @@ struct FirewallParams
     bool allowLoopback; // Exempt loopback traffic
     bool allowHnsd;     // Exempt Handshake DNS traffic
     bool allowVpnExemptions; // Exempt specified traffic from the tunnel (route it over the physical uplink instead)
+    bool allowNets;
+    bool blockNets;
 };
 
 class LinuxFirewall
@@ -47,7 +49,8 @@ private:
     static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const FilterCallbackFunc& enableFunc = {}, const FilterCallbackFunc& disableFunc = {});
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static QStringList getDNSRules(const QStringList& servers);
-    static QStringList getExcludeRule(const QStringList& servers);
+    static QStringList getAllowRule(const QStringList& servers);
+    static QStringList getBlockRule(const QStringList& servers);
     static void setupTrafficSplitting();
     static void teardownTrafficSplitting();
     static int execute(const QString& command, bool ignoreErrors = false);
@@ -66,7 +69,8 @@ public:
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
     static void replaceAnchor(LinuxFirewall::IPVersion ip, const QString &anchor, const QString &newRule, const QString& tableName);
     static void updateDNSServers(const QStringList& servers);
-    static void updateExcludeAddrs(const QStringList& servers);
+    static void updateAllowNets(const QStringList& servers);
+    static void updateBlockNets(const QStringList& servers);
 };
 
 

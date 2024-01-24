@@ -144,12 +144,18 @@ uint OpenVpnProtocol::selectMgmtPort()
 
 void OpenVpnProtocol::updateRouteGateway(QString line)
 {
-    // TODO: fix for macos
-    line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
-    if (!line.contains("/"))
-        return;
-    m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
-    m_routeGateway.replace(" ", "");
+    if (line.contains("net_route_v4_best_gw")) {
+        QStringList params = line.split(" ");
+        if (params.size() == 6) {
+            m_routeGateway = params.at(3);
+        }
+    } else {
+        line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
+        if (!line.contains("/"))
+            return;
+        m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
+        m_routeGateway.replace(" ", "");
+    }
     qDebug() << "Set VPN route gateway" << m_routeGateway;
 }
 
@@ -288,7 +294,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             }
         }
 
-        if (line.contains("ROUTE_GATEWAY")) {
+        if (line.contains("ROUTE_GATEWAY") || line.contains("net_route_v4_best_gw")) {
             updateRouteGateway(line);
         }
 

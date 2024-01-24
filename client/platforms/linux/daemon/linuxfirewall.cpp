@@ -168,12 +168,22 @@ QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
     return result;
 }
 
-QStringList LinuxFirewall::getExcludeRule(const QStringList& servers)
+QStringList LinuxFirewall::getAllowRule(const QStringList& servers)
 {
     QStringList result;
     for (const QString& server : servers)
     {
         result << QStringLiteral("-d %1 -j ACCEPT").arg(server);
+    }
+    return result;
+}
+
+QStringList LinuxFirewall::getBlockRule(const QStringList& servers)
+{
+    QStringList result;
+    for (const QString& server : servers)
+    {
+        result << QStringLiteral("-d %1 -j REJECT").arg(server);
     }
     return result;
 }
@@ -237,10 +247,13 @@ void LinuxFirewall::install()
                                                             QStringLiteral("-o tun0+ -j ACCEPT"),
                                                         });
 
+    installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
+
+    installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
+
     installAnchor(Both, QStringLiteral("100.blockAll"), {
                                                             QStringLiteral("-j REJECT"),
                                                         });
-
     // NAT rules
     installAnchor(Both, QStringLiteral("100.transIp"), {
 
@@ -309,6 +322,8 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
+    uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));
+    uninstallAnchor(IPv4, QStringLiteral("110.allowNets"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
 
     // Remove Nat anchors
@@ -403,16 +418,25 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
         execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
 }
 
-void LinuxFirewall::updateExcludeAddrs(const QStringList& servers)
+void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
     static QStringList existingServers {};
 
     existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.100.blockAll").arg(kAnchorName));
-    for (const QString& rule : getExcludeRule(servers))
-        execute(QStringLiteral("iptables -A %1.100.blockAll %2").arg(kAnchorName, rule));
+    execute(QStringLiteral("iptables -F %1.110.allowNets").arg(kAnchorName));
+    for (const QString& rule : getAllowRule(servers))
+        execute(QStringLiteral("iptables -A %1.110.allowNets %2").arg(kAnchorName, rule));
 }
 
+void LinuxFirewall::updateBlockNets(const QStringList& servers)
+{
+    static QStringList existingServers {};
+
+    existingServers = servers;
+    execute(QStringLiteral("iptables -F %1.120.blockNets").arg(kAnchorName));
+    for (const QString& rule : getBlockRule(servers))
+        execute(QStringLiteral("iptables -A %1.120.blockNets %2").arg(kAnchorName, rule));
+}
 
 int waitForExitCode(QProcess& process)
 {
