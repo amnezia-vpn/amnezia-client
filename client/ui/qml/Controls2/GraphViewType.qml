@@ -10,7 +10,6 @@ ChartView {
     function addValues(rx, tx)
     {
         let currentTime = new Date().getTime()
-        console.log("VICTOR: ", currentTime, rx, tx)
         rxLine.append(currentTime, rx)
         txLine.append(currentTime, tx)
         if (rx > yAxis.max)
@@ -69,7 +68,6 @@ ChartView {
     SplineSeries {
         id: rxLine
         name: "Received Bytes"
-        //useOpenGL: true
         axisX: xAxis
         axisY: yAxis
         capStyle: Qt.RoundCap
@@ -81,7 +79,6 @@ ChartView {
     SplineSeries {
         id: txLine
         name: "Transmitted Bytes"
-        //useOpenGL: true
         axisX: xAxis
         axisY: yAxis
         capStyle: Qt.RoundCap
@@ -91,7 +88,6 @@ ChartView {
     }
 
     onWidthChanged: {
-        console.log("WIDTH: ", width)
         chartView.plotArea = Qt.rect(0, 0, width, 50)
     }
 }
