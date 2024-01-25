@@ -25,7 +25,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtcharts'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -93,7 +93,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtcharts'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -148,7 +148,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qtcharts'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
@@ -160,7 +160,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qtcharts'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -237,7 +237,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtcharts'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -282,7 +282,7 @@ jobs:
     env:
       ANDROID_BUILD_PLATFORM: android-34
       QT_VERSION: 6.6.1
-      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools qtcharts'
 
     steps:
     - name: 'Install desktop Qt'
