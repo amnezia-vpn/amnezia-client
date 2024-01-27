@@ -1,3 +1,17 @@
+// Copyright (c) 2024 AmneziaVPN
+// This file has been modified for AmneziaVPN
+//
+// This file is based on the work of the Private Internet Access Desktop Client.
+// The original code of the Private Internet Access Desktop Client is copyrighted (c) 2023 Private Internet Access, Inc. and licensed under GPL3.
+//
+// The modified version of this file is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this file. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef LINUXFIREWALL_H
 #define LINUXFIREWALL_H
 
@@ -10,7 +24,6 @@
 struct FirewallParams
 {
     QStringList dnsServers;
-    //    QSharedPointer<NetworkAdapter> adapter;
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
     QStringList allowAddrs;
     QStringList blockAddrs;
@@ -72,6 +85,5 @@ public:
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
 };
-
 
 #endif // LINUXFIREWALL_H

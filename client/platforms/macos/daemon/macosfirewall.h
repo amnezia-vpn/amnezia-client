@@ -1,3 +1,17 @@
+// Copyright (c) 2024 AmneziaVPN
+// This file has been modified for AmneziaVPN
+//
+// This file is based on the work of the Private Internet Access Desktop Client.
+// The original code of the Private Internet Access Desktop Client is copyrighted (c) 2023 Private Internet Access, Inc. and licensed under GPL3.
+//
+// The modified version of this file is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this file. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef MACOSFIREWALL_H
 #define MACOSFIREWALL_H
 
@@ -9,7 +23,6 @@
 struct FirewallParams
 {
     QStringList dnsServers;
-    //    QSharedPointer<NetworkAdapter> adapter;
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
 
     QStringList allowAddrs;
@@ -34,9 +47,6 @@ struct FirewallParams
     bool allowVpnExemptions; // Exempt specified traffic from the tunnel (route it over the physical uplink instead)
 };
 
-// TODO: Break out firewall handling to a base class that can be used directly
-// by the base daemon class, for some common functionality.
-
 class MacOSFirewall
 {
 
@@ -58,6 +68,5 @@ public:
     static void ensureRootAnchorPriority();
     static void installRootAnchors();
 };
-
 
 #endif // MACOSFIREWALL_H
