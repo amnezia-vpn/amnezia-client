@@ -77,6 +77,7 @@ open class OpenVpn : Protocol() {
                 if (evalConfig.error) {
                     throw BadConfigException("OpenVPN config parse error: ${evalConfig.message}")
                 }
+                configPluggableTransport(configBuilder, config)
                 configBuilder.configSplitTunneling(config)
 
                 scope.launch {
@@ -110,6 +111,8 @@ open class OpenVpn : Protocol() {
         openVpnConfig.content = config.getJSONObject("openvpn_config_data").getString("config")
         return openVpnConfig
     }
+
+    protected open fun configPluggableTransport(configBuilder: OpenVpnConfig.Builder, config: JSONObject) {}
 
     private fun makeEstablish(vpnBuilder: Builder): (OpenVpnConfig.Builder) -> Int = { configBuilder ->
         val openVpnConfig = configBuilder.build()
