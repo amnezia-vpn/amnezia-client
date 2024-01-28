@@ -14,8 +14,6 @@ import java.util.zip.ZipFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
-import org.amnezia.vpn.util.net.IpRange
-import org.amnezia.vpn.util.net.IpRangeSet
 import org.json.JSONObject
 
 private const val TAG = "Protocol"
@@ -53,40 +51,16 @@ abstract class Protocol {
         val splitTunnelType = config.optInt("splitTunnelType")
         if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
         val splitTunnelSites = config.getJSONArray("splitTunnelSites")
-        when (splitTunnelType) {
-            SPLIT_TUNNEL_INCLUDE -> {
-                // remove default routes, if any
-                removeRoute(InetNetwork("0.0.0.0", 0))
-                removeRoute(InetNetwork("::", 0))
-                // add routes from config
-                for (i in 0 until splitTunnelSites.length()) {
-                    val address = InetNetwork.parse(splitTunnelSites.getString(i))
-                    addRoute(address)
-                }
-            }
+        val addressHandlerFunc = when (splitTunnelType) {
+            SPLIT_TUNNEL_INCLUDE -> ::includeAddress
+            SPLIT_TUNNEL_EXCLUDE -> ::excludeAddress
 
-            SPLIT_TUNNEL_EXCLUDE -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // exclude routes from config
-                    for (i in 0 until splitTunnelSites.length()) {
-                        val address = InetNetwork.parse(splitTunnelSites.getString(i))
-                        excludeRoute(address)
-                    }
-                } else {
-                    // For older versions of Android, build a list of subnets without excluded addresses
-                    val ipRangeSet = IpRangeSet()
-                    ipRangeSet.remove(IpRange("127.0.0.0", 8))
-                    for (i in 0 until splitTunnelSites.length()) {
-                        val address = InetNetwork.parse(splitTunnelSites.getString(i))
-                        ipRangeSet.remove(IpRange(address))
-                    }
-                    // remove default routes, if any
-                    removeRoute(InetNetwork("0.0.0.0", 0))
-                    removeRoute(InetNetwork("::", 0))
-                    ipRangeSet.subnets().forEach(::addRoute)
-                    addRoute(InetNetwork("2000::", 3))
-                }
-            }
+            else -> throw BadConfigException("Unexpected value of the 'splitTunnelType' parameter: $splitTunnelType")
+        }
+
+        for (i in 0 until splitTunnelSites.length()) {
+            val address = InetNetwork.parse(splitTunnelSites.getString(i))
+            addressHandlerFunc(address)
         }
     }
 
