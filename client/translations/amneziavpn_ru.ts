@@ -15,15 +15,13 @@
 <context>
     <name>AndroidController</name>
     <message>
-        <location filename="../platforms/android/android_controller.cpp" line="236"/>
         <source>AmneziaVPN</source>
-        <translation>AmneziaVPN</translation>
+        <translation type="vanished">AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../platforms/android/android_controller.cpp" line="239"/>
         <source>VPN Connected</source>
         <extracomment>Refers to the app - which is currently running the background and waiting</extracomment>
-        <translation>VPN Подключен</translation>
+        <translation type="vanished">VPN Подключен</translation>
     </message>
 </context>
 <context>
@@ -92,7 +90,7 @@
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="38"/>
         <source>Configure your server</source>
-        <translation>Настроить ваш сервер</translation>
+        <translation>Настроить свой сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="52"/>
@@ -151,7 +149,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="435"/>
+        <location filename="../ui/controllers/importController.cpp" line="411"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -174,7 +172,7 @@
         <location filename="../ui/controllers/installController.cpp" line="149"/>
         <source>
 Added containers that were already installed on the server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Добавлены сервисы и протоколы, которые были ранее установлены на сервер</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="213"/>
@@ -196,7 +194,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="315"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation>Все протоклы и сервисы были удалены с сервера &apos;%1&apos;</translation>
+        <translation>Все протоколы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="332"/>
@@ -418,7 +416,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="77"/>
         <source>OpenVPN settings</source>
-        <translation>Настройки OpenVPN</translation>
+        <translation>OpenVPN настройки</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
@@ -947,6 +945,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>Показать другие способы на Github</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="104"/>
+        <source>https://github.com/amnezia-vpn/amnezia-client#donate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
         <source>Contacts</source>
         <translation>Контакты</translation>
@@ -1012,17 +1015,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
         <source>Allow application screenshots</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Разрешить скриншоты приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
         <source>Auto start</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Автозапуск</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Launch the application every time the device is starts</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Открывать приложение при запуске устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
@@ -1189,7 +1192,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>Эти серверы будут использоваться, если не включен AmneziaDNS</translation>
+        <translation>Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
@@ -1353,7 +1356,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="91"/>
         <source>Clear cached profiles?</source>
-        <translation>Удалить кэш Amnezia с сервера?</translation>
+        <translation>Удалить кэш Amnezia?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="25"/>
@@ -1428,22 +1431,22 @@ Already installed containers were found on the server. All installed containers 
         <translation>Имя сервера</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="111"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="142"/>
         <source>Protocols</source>
         <translation>Протоколы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="148"/>
         <source>Services</source>
         <translation>Сервисы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="152"/>
         <source>Data</source>
         <translation>Данные</translation>
     </message>
@@ -1680,7 +1683,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="120"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Все введенные вами данные останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или третьим лицам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="129"/>
@@ -1703,7 +1706,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
         <source>What is the level of internet control in your region?</source>
-        <translation>Какой уровень контроля интеренета в вашем регионе?</translation>
+        <translation>Какой уровень контроля интернета в вашем регионе?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
@@ -1854,6 +1857,11 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <source>I have nothing</source>
         <translation>У меня ничего нет</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="138"/>
+        <source>https://amnezia.org/instructions/0_starter-guide</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PageSetupWizardTextKey</name>
@@ -1941,8 +1949,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Доступ к управлению сервером. Пользователь, с которым вы делитесь полным доступом к соединению, сможет добавлять и удалять ваши протоколы и службы на сервере, а также изменять настройки.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="279"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="280"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="281"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
@@ -1978,12 +1986,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="68"/>
         <source>Save ShadowSocks config</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить конфигурацию ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="75"/>
         <source>Save Cloak config</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить конфигурацию Cloak</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="105"/>
@@ -1993,12 +2001,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
         <source>ShadowSocks native format</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ShadowSocks нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
         <source>Cloak native format</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cloak нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="150"/>
@@ -2008,66 +2016,71 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="178"/>
         <source>Share full access to the server and VPN</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Поделиться полным доступом к серверу</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="179"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Используйте для собственных устройств или передайте управление сервером тем, кому вы доверяете.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="231"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="483"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="486"/>
         <source>Users</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пользователи</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="262"/>
         <source>User name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="499"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="502"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="595"/>
-        <source>Rename</source>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="584"/>
+        <source>Creation date: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="624"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="598"/>
+        <source>Rename</source>
+        <translation type="unfinished">Переименовать</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
         <source>Client name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="632"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="636"/>
         <source>Save</source>
         <translation type="unfinished">Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="660"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="668"/>
         <source>Revoke</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отозвать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="663"/>
-        <source>Revoke the config for a user - </source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="671"/>
+        <source>Revoke the config for a user - %1?</source>
+        <translation type="unfinished">Отозвать доступ для пользователя - %1?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="664"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>
         <source>The user will no longer be able to connect to your server.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пользователь больше не сможет подключаться к вашему серверу</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="665"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="673"/>
         <source>Continue</source>
         <translation type="unfinished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="666"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="674"/>
         <source>Cancel</source>
         <translation type="unfinished">Отменить</translation>
     </message>
@@ -2081,20 +2094,20 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Поделиться доступом к VPN, без возможности управления сервером</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="331"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="333"/>
         <source>Protocol</source>
         <translation>Протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="428"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="430"/>
         <source>Connection format</source>
         <translation>Формат подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="186"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="468"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="469"/>
         <source>Share</source>
         <translation>Поделиться</translation>
     </message>
@@ -2104,32 +2117,32 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="49"/>
         <source>Full access to the server and VPN</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Полный доступ к серверу и VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Мы рекомендуем использовать полный доступ к серверу только для собственных устройств.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="58"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Если вы поделитесь полным доступом с другими людьми, то они смогут удалять и добавлять протоколы и сервисы на сервер, что приведет к некорректной работе VPN для всех пользователей.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="73"/>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="74"/>
         <source>Server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сервер</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="100"/>
         <source>Accessing </source>
         <translation type="unfinished">Доступ </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="101"/>
         <source>File with accessing settings to </source>
         <translation type="unfinished"></translation>
     </message>
@@ -2160,38 +2173,38 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::DeletePasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="104"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="104"/>
         <source>Password entry not found</source>
         <translation>Password entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="108"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="108"/>
         <source>Could not decrypt data</source>
         <translation>Could not decrypt data</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="552"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="560"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="585"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="593"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="578"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="614"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="177"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="177"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="173"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="173"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="179"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="179"/>
         <source>Could not remove private key from keystore</source>
         <translation>Could not remove private key from keystore</translation>
     </message>
@@ -2199,12 +2212,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::JobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="265"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="295"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="509"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="542"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
@@ -2212,27 +2225,27 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::PlainTextStore</name>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="65"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="65"/>
         <source>Could not store data in settings: access error</source>
         <translation>Could not store data in settings: access error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="67"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="67"/>
         <source>Could not store data in settings: format error</source>
         <translation>Could not store data in settings: format error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="85"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="85"/>
         <source>Could not delete data from settings: access error</source>
         <translation>Could not delete data from settings: access error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="87"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="87"/>
         <source>Could not delete data from settings: format error</source>
         <translation>Could not delete data from settings: format error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/plaintextstore.cpp" line="104"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/plaintextstore.cpp" line="104"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
@@ -2240,80 +2253,80 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::ReadPasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="32"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="32"/>
         <source>Password entry not found</source>
         <translation>Password entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="36"/>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="139"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="36"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="139"/>
         <source>Could not decrypt data</source>
         <translation>Could not decrypt data</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="178"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="205"/>
         <source>D-Bus is not running</source>
         <translation>D-Bus is not running</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="187"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="197"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="214"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="224"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="286"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="316"/>
         <source>No keychain service available</source>
         <translation>No keychain service available</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="288"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="318"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="333"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="363"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="354"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="384"/>
         <source>Could not determine data type: %1; %2</source>
         <translation>Could not determine data type: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="363"/>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="372"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="402"/>
         <source>Unsupported entry type &apos;Map&apos;</source>
         <translation>Unsupported entry type &apos;Map&apos;</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="375"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="405"/>
         <source>Unknown kwallet entry type &apos;%1&apos;</source>
         <translation>Unknown kwallet entry type &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="96"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="96"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="60"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="60"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="68"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="68"/>
         <source>Could not retrieve private key from keystore</source>
         <translation>Could not retrieve private key from keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="75"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="75"/>
         <source>Could not create decryption cipher</source>
         <translation>Could not create decryption cipher</translation>
     </message>
@@ -2321,73 +2334,73 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QKeychain::WritePasswordJobPrivate</name>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="78"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="78"/>
         <source>Credential size exceeds maximum size of %1</source>
         <translation>Credential size exceeds maximum size of %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="87"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="87"/>
         <source>Credential key exceeds maximum size of %1</source>
         <translation>Credential key exceeds maximum size of %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="92"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="92"/>
         <source>Writing credentials failed: Win32 error code %1</source>
         <translation>Writing credentials failed: Win32 error code %1</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_win.cpp" line="162"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="162"/>
         <source>Encryption failed</source>
         <translation>Encryption failed</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="415"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="445"/>
         <source>D-Bus is not running</source>
         <translation>D-Bus is not running</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="425"/>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="452"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="455"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="482"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="468"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="501"/>
         <source>Could not open wallet: %1; %2</source>
         <translation>Could not open wallet: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="144"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="144"/>
         <source>Password not found</source>
         <translation>Password not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="95"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="95"/>
         <source>Could not open keystore</source>
         <translation>Could not open keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="124"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="124"/>
         <source>Could not create private key generator</source>
         <translation>Could not create private key generator</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="131"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="131"/>
         <source>Could not generate new private key</source>
         <translation>Could not generate new private key</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="139"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="139"/>
         <source>Could not retrieve private key from keystore</source>
         <translation>Could not retrieve private key from keystore</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="147"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="147"/>
         <source>Could not create encryption cipher</source>
         <translation>Could not create encryption cipher</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_android.cpp" line="155"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="155"/>
         <source>Could not encrypt data</source>
         <translation>Could not encrypt data</translation>
     </message>
@@ -2537,7 +2550,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="60"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Конфиг не содержит контейнеров и учетных данных для подключения к серверу</translation>
     </message>
     <message>
         <source>Failed to save config to disk</source>
@@ -2594,7 +2607,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>VPN pool error: no available addresses</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="64"/>
+        <location filename="../core/errorstrings.cpp" line="63"/>
+        <source>VPN connection error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="67"/>
         <source>Internal error</source>
         <translation>Internal error</translation>
     </message>
@@ -2814,7 +2832,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>Sftp file sharing service - is secure FTP service</source>
-        <translation>Сервис обмена файлами Sftp - безопасный FTP-сервис</translation>
+        <translation>Файловое хранилище для безопасного хранения данных</translation>
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
@@ -2822,62 +2840,62 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>Сервис SFTP</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/libsecret.cpp" line="119"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="225"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="255"/>
         <source>Access to keychain denied</source>
         <translation>Access to keychain denied</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="227"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="257"/>
         <source>No keyring daemon</source>
         <translation>No keyring daemon</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="229"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="259"/>
         <source>Already unlocked</source>
         <translation>Already unlocked</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="231"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="261"/>
         <source>No such keyring</source>
         <translation>No such keyring</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="233"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="263"/>
         <source>Bad arguments</source>
         <translation>Bad arguments</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="235"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="265"/>
         <source>I/O error</source>
         <translation>I/O error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="237"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="267"/>
         <source>Cancelled</source>
         <translation>Cancelled</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="239"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="269"/>
         <source>Keyring already exists</source>
         <translation>Keyring already exists</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="241"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="271"/>
         <source>No match</source>
         <translation>No match</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_unix.cpp" line="246"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/keychain_haiku.cpp" line="72"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="72"/>
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
     </message>
@@ -2893,13 +2911,13 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../settings.cpp" line="26"/>
+        <location filename="../settings.cpp" line="30"/>
         <source>Server #1</source>
         <translation>Server #1</translation>
     </message>
     <message>
-        <location filename="../settings.cpp" line="202"/>
-        <location filename="../settings.cpp" line="209"/>
+        <location filename="../settings.cpp" line="206"/>
+        <location filename="../settings.cpp" line="213"/>
         <source>Server</source>
         <translation>Server</translation>
     </message>
@@ -2907,22 +2925,22 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="25"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="26"/>
         <source>Software version</source>
         <translation>Версия ПО</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="137"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="139"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки были сброшены к значению &quot;По умолчанию&quot;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="143"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
         <source>Cached profiles cleared</source>
         <translation>Кэш профиля очищен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="122"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
         <source>Backup file is corrupted</source>
         <translation>Backup файл поврежден</translation>
     </message>
@@ -2959,7 +2977,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="150"/>
         <source>Show connection settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Показать настройки подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="280"/>
@@ -3054,7 +3072,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="429"/>
+        <location filename="../vpnconnection.cpp" line="432"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

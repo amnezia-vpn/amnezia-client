@@ -83,6 +83,4 @@ ldd $CQTDEPLOYER_DIR/bin/binarycreator
 
 cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
-
-
+$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin

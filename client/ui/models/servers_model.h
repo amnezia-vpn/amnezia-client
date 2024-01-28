@@ -84,6 +84,7 @@ public slots:
     void addContainerConfig(const int containerIndex, const QJsonObject config);
 
     void clearCachedProfiles();
+    void clearCachedProfile(const DockerContainer container);
 
     ErrorCode removeContainer(const int containerIndex);
     ErrorCode removeAllContainers();
@@ -95,6 +96,8 @@ public slots:
     QStringList getAllInstalledServicesName(const int serverIndex);
 
     void toggleAmneziaDns(bool enabled);
+
+    bool isDefaultServerFromApi();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

@@ -581,7 +581,7 @@ PageType {
                                     Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: serverSelector.text
+                                    descriptionText: qsTr("Creation date: ") + creationDate
                                 }
 
                                 BasicButtonType {

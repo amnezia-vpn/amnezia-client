@@ -11,7 +11,7 @@ open class WireguardConfig protected constructor(
     val endpoint: InetEndpoint,
     val persistentKeepalive: Int,
     val publicKeyHex: String,
-    val preSharedKeyHex: String,
+    val preSharedKeyHex: String?,
     val privateKeyHex: String
 ) : ProtocolConfig(protocolConfigBuilder) {
 
@@ -43,7 +43,8 @@ open class WireguardConfig protected constructor(
         appendLine("endpoint=$endpoint")
         if (persistentKeepalive != 0)
             appendLine("persistent_keepalive_interval=$persistentKeepalive")
-        appendLine("preshared_key=$preSharedKeyHex")
+        if (preSharedKeyHex != null)
+            appendLine("preshared_key=$preSharedKeyHex")
     }
 
     open class Builder : ProtocolConfig.Builder(true) {
@@ -56,7 +57,7 @@ open class WireguardConfig protected constructor(
         internal lateinit var publicKeyHex: String
             private set
 
-        internal lateinit var preSharedKeyHex: String
+        internal var preSharedKeyHex: String? = null
             private set
 
         internal lateinit var privateKeyHex: String
@@ -74,7 +75,7 @@ open class WireguardConfig protected constructor(
 
         fun setPrivateKeyHex(privateKeyHex: String) = apply { this.privateKeyHex = privateKeyHex }
 
-        override fun build(): WireguardConfig = WireguardConfig(this)
+        override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }
 
     companion object {

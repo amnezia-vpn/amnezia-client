@@ -26,6 +26,24 @@ ListView {
         id: containersRadioButtonGroup
     }
 
+    Connections {
+        target: ServersModel
+
+        function onCurrentlyProcessedServerIndexChanged() {
+            if (ContainersModel.getDefaultContainer()) {
+                menuContent.checkCurrentItem()
+            }
+        }
+    }
+
+    function checkCurrentItem() {
+        var item = menuContent.itemAtIndex(currentIndex)
+        if (item !== null) {
+            var radioButton = item.children[0].children[0]
+            radioButton.checked = true
+        }
+    }
+
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
@@ -60,9 +78,8 @@ ListView {
                     }
 
                     if (checked) {
-                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
-
                         containersDropDown.menuVisible = false
+                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))

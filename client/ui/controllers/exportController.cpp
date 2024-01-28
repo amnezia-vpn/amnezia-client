@@ -15,7 +15,7 @@
 #include "core/errorstrings.h"
 #include "systemController.h"
 #ifdef Q_OS_ANDROID
-    #include "platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
 #endif
 #include "qrcodegen.hpp"
 
@@ -47,6 +47,22 @@ void ExportController::generateFullAccessConfig()
 
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
     QJsonObject config = m_settings->server(serverIndex);
+
+    QJsonArray containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto containerConfig = containers.at(i).toObject();
+        auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
+
+        for (auto protocol : ContainerProps::protocolsForContainer(containerType)) {
+            auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+
+            protocolConfig.remove(config_key::last_config);
+            containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
+        }
+
+        containers.replace(i, containerConfig);
+    }
+    config[config_key::containers] = containers;
 
     QByteArray compressedConfig = QJsonDocument(config).toJson();
     compressedConfig = qCompress(compressedConfig, 8);

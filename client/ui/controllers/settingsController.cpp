@@ -7,19 +7,21 @@
 #include "ui/qautostart.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/android_controller.h"
-    #include "../../platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
+    #include "platforms/android/android_controller.h"
     #include <QJniObject>
 #endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
+                                       const QSharedPointer<SitesModel> &sitesModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
+      m_sitesModel(sitesModel),
       m_settings(settings)
 {
     m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_VERSION), __DATE__);
@@ -90,13 +92,21 @@ void SettingsController::openLogsFolder()
 
 void SettingsController::exportLogsFile(const QString &fileName)
 {
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->exportLogsFile(fileName);
+#else
     SystemController::saveFile(fileName, Logger::getLogFile());
+#endif
 }
 
 void SettingsController::clearLogs()
 {
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->clearLogs();
+#else
     Logger::clearLogs();
     Logger::clearServiceLogs();
+#endif
 }
 
 void SettingsController::backupAppConfig(const QString &fileName)
@@ -134,6 +144,7 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 }
 
@@ -193,5 +204,16 @@ void SettingsController::toggleScreenshotsEnabled(bool enable)
             window.callMethod<void>(command.c_str(), "(I)V", FLAG_SECURE);
         }
     });
+#endif
+}
+
+bool SettingsController::isCameraPresent()
+{
+#if defined Q_OS_IOS
+    return true;
+#elif defined Q_OS_ANDROID
+    return AndroidController::instance()->isCameraPresent();
+#else
+    return false;
 #endif
 }

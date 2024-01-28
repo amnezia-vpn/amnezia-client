@@ -1,8 +1,10 @@
-#include <QCoreApplication>
 #include <QJniEnvironment>
 #include <QJsonDocument>
+#include <QQmlFile>
+#include <QEventLoop>
 
 #include "android_controller.h"
+#include "android_utils.h"
 #include "ui/controllers/importController.h"
 
 namespace
@@ -10,13 +12,15 @@ namespace
     AndroidController *s_instance = nullptr;
 
     constexpr auto QT_ANDROID_CONTROLLER_CLASS = "org/amnezia/vpn/qt/QtAndroidController";
+    constexpr auto ANDROID_LOG_CLASS = "org/amnezia/vpn/util/Log";
+    constexpr auto TAG = "AmneziaQt";
 } // namespace
 
 AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
             [this](AndroidController::ConnectionState state) {
-                qDebug() << "Android event: status; state:" << textConnectionState(state);
+                qDebug() << "Android event: status =" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
@@ -106,6 +110,7 @@ bool AndroidController::initialize()
         {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
         {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
+        {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
@@ -123,24 +128,19 @@ bool AndroidController::initialize()
 
 // static
 template <typename Ret, typename ...Args>
-auto AndroidController::callActivityMethod(const char *methodName, const char *signature,
-                                           const std::function<Ret()> &defValue, Args &&...args)
+auto AndroidController::callActivityMethod(const char *methodName, const char *signature, Args &&...args)
 {
     qDebug() << "Call activity method:" << methodName;
-    QJniObject activity = QNativeInterface::QAndroidApplication::context();
-    if (activity.isValid()) {
-        return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
-    } else {
-        qCritical() << "Activity is not valid";
-        return defValue();
-    }
+    QJniObject activity = AndroidUtils::getActivity();
+    Q_ASSERT(activity.isValid());
+    return activity.callMethod<Ret>(methodName, signature, std::forward<Args>(args)...);
 }
 
 // static
 template <typename ...Args>
 void AndroidController::callActivityMethod(const char *methodName, const char *signature, Args &&...args)
 {
-    callActivityMethod<void>(methodName, signature, [] {}, std::forward<Args>(args)...);
+    callActivityMethod<void>(methodName, signature, std::forward<Args>(args)...);
 }
 
 ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
@@ -165,6 +165,24 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
+QString AndroidController::openFile(const QString &filter)
+{
+    QEventLoop wait;
+    QString fileName;
+    connect(this, &AndroidController::fileOpened, this,
+            [&fileName, &wait](const QString &uri) {
+                qDebug() << "Android event: file opened; uri:" << uri;
+                fileName = QQmlFile::urlToLocalFileOrQrc(uri);
+                qDebug() << "Android opened filename:" << fileName;
+                wait.quit();
+            },
+            static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    callActivityMethod("openFile", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(filter).object<jstring>());
+    wait.exec();
+    return fileName;
+}
+
 void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
 {
     callActivityMethod("setNotificationText", "(Ljava/lang/String;Ljava/lang/String;I)V",
@@ -173,9 +191,112 @@ void AndroidController::setNotificationText(const QString &title, const QString 
                        (jint) timerSec);
 }
 
+bool AndroidController::isCameraPresent()
+{
+    return callActivityMethod<jboolean>("isCameraPresent", "()Z");
+}
+
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
+}
+
+void AndroidController::setSaveLogs(bool enabled)
+{
+    callActivityMethod("setSaveLogs", "(Z)V", enabled);
+}
+
+void AndroidController::exportLogsFile(const QString &fileName)
+{
+    callActivityMethod("exportLogsFile", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(fileName).object<jstring>());
+}
+
+void AndroidController::clearLogs()
+{
+    callActivityMethod("clearLogs", "()V");
+}
+
+// Moving log processing to the Android side
+jclass AndroidController::log;
+jmethodID AndroidController::logDebug;
+jmethodID AndroidController::logInfo;
+jmethodID AndroidController::logWarning;
+jmethodID AndroidController::logError;
+jmethodID AndroidController::logFatal;
+
+// static
+bool AndroidController::initLogging()
+{
+    QJniEnvironment env;
+
+    log = env.findClass(ANDROID_LOG_CLASS);
+    if (log == nullptr) {
+        qCritical() << "Android log class" << ANDROID_LOG_CLASS << "not found";
+        return false;
+    }
+
+    auto logMethodSignature = "(Ljava/lang/String;Ljava/lang/String;)V";
+
+    logDebug = env.findStaticMethod(log, "d", logMethodSignature);
+    if (logDebug == nullptr) {
+        qCritical() << "Android debug log method not found";
+        return false;
+    }
+
+    logInfo = env.findStaticMethod(log, "i", logMethodSignature);
+    if (logInfo == nullptr) {
+        qCritical() << "Android info log method not found";
+        return false;
+    }
+
+    logWarning = env.findStaticMethod(log, "w", logMethodSignature);
+    if (logWarning == nullptr) {
+        qCritical() << "Android warning log method not found";
+        return false;
+    }
+
+    logError = env.findStaticMethod(log, "e", logMethodSignature);
+    if (logError == nullptr) {
+        qCritical() << "Android error log method not found";
+        return false;
+    }
+
+    logFatal = env.findStaticMethod(log, "f", logMethodSignature);
+    if (logFatal == nullptr) {
+        qCritical() << "Android fatal log method not found";
+        return false;
+    }
+
+    qInstallMessageHandler(messageHandler);
+    return true;
+}
+
+// static
+void AndroidController::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    jmethodID logMethod = logDebug;
+    switch (type) {
+        case QtDebugMsg:
+            logMethod = logDebug;
+            break;
+        case QtInfoMsg:
+            logMethod = logInfo;
+            break;
+        case QtWarningMsg:
+            logMethod = logWarning;
+            break;
+        case QtCriticalMsg:
+            logMethod = logError;
+            break;
+        case QtFatalMsg:
+            logMethod = logFatal;
+            break;
+    }
+    QString formattedMessage = qFormatLogMessage(type, context, message);
+    QJniObject::callStaticMethod<void>(log, logMethod,
+                                       QJniObject::fromString(TAG).object<jstring>(),
+                                       QJniObject::fromString(formattedMessage).object<jstring>());
 }
 
 void AndroidController::qtAndroidControllerInitialized()
@@ -285,20 +406,19 @@ void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBy
 }
 
 // static
-void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
+void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
 {
-    Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return;
-    }
+    emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
+}
 
-    QString config(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
+// static
+void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
+{
+    Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->configImported(config);
+    emit AndroidController::instance()->configImported(AndroidUtils::convertJString(env, data));
 }
 
 // static
@@ -306,12 +426,5 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return false;
-    }
-
-    QString code(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
-    return ImportController::decodeQrCode(code);
+    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }

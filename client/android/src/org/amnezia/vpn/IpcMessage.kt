@@ -32,7 +32,8 @@ enum class Action : IpcMessage {
     REGISTER_CLIENT,
     CONNECT,
     DISCONNECT,
-    REQUEST_STATUS
+    REQUEST_STATUS,
+    SET_SAVE_LOGS
 }
 
 fun <T> T.packToMessage(): Message

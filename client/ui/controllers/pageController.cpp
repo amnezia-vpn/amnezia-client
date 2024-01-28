@@ -7,7 +7,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/androidutils.h"
+    #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
 #if defined Q_OS_MAC

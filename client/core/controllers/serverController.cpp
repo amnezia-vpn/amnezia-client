@@ -168,7 +168,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     } else
         return ErrorCode::NotImplementedError;
 
-    if (stdOut.contains("Error: No such container:")) {
+    if (stdOut.contains("Error") && stdOut.contains("No such container")) {
         return ErrorCode::ServerContainerMissingError;
     }
 
@@ -211,8 +211,14 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
+#ifdef Q_OS_WINDOWS
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toLocal8Bit().toStdString(), remotePath.toStdString(),
+                                     "non_desc");
+#else
     error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
                                      "non_desc");
+#endif
+
     if (error != ErrorCode::NoError) {
         return error;
     }

@@ -46,6 +46,7 @@ public:
 signals:
     void newVpnConfigCreated(const QString &clientId, const QString &clientName, const DockerContainer container,
                              ServerCredentials credentials);
+    void clientModelUpdated();
 };
 
 #endif // VPN_CONFIGURATOR_H
