@@ -533,6 +533,5 @@ void ServersModel::toggleAmneziaDns(bool enabled)
 
 bool ServersModel::isDefaultServerFromApi()
 {
-    return m_settings->server(m_defaultServerIndex).value(config_key::configVersion).toInt();
+    return m_servers.at(m_defaultServerIndex).toObject().value(config_key::configVersion).toInt();
 }
-

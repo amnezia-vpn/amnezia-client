@@ -19,6 +19,7 @@ Button {
     property int borderWidth: 0
 
     property string imageSource
+    property string rightImageSource
 
     property bool squareLeftSide: false
 
@@ -96,12 +97,12 @@ Button {
                 source: root.imageSource
                 visible: root.imageSource === "" ? false : true
 
-                layer {
-                    enabled: true
-                    effect: ColorOverlay {
-                        color: textColor
-                    }
-                }
+//                layer {
+//                    enabled: true
+//                    effect: ColorOverlay {
+//                        color: textColor
+//                    }
+//                }
             }
 
             ButtonTextType {
@@ -111,6 +112,21 @@ Button {
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
+            }
+
+            Image {
+                Layout.preferredHeight: 20
+                Layout.preferredWidth: 20
+
+                source: root.rightImageSource
+                visible: root.rightImageSource === "" ? false : true
+
+                layer {
+                    enabled: true
+                    effect: ColorOverlay {
+                        color: textColor
+                    }
+                }
             }
         }
     }

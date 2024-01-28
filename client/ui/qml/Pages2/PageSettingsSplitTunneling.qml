@@ -104,7 +104,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.isSplitTunnelingEnabled()
+                checked: SitesModel.isTunnelingEnabled
                 onToggled: {                    
                     SitesModel.toggleSplitTunneling(checked)
                     selector.text = root.routeModesModel[getRouteModesModelIndex()].name

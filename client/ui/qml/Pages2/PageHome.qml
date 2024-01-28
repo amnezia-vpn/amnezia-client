@@ -50,7 +50,41 @@ PageType {
         anchors.bottomMargin: buttonContent.collapsedHeight
 
         ConnectButton {
+            id: connectButton
             anchors.centerIn: parent
+        }
+
+        BasicButtonType {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 34
+            leftPadding: 16
+            rightPadding: 16
+
+            implicitHeight: 36
+
+            defaultColor: "transparent"
+            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+            disabledColor: "#878B91"
+            textColor: "#878B91"
+            borderWidth: 0
+
+            property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                                                   (ContainersModel.isDefaultContainerHasGlobalSiteSplitTunneling && ServersModel.isDefaultServerFromApi())
+
+            text: isSplitTunnelingEnabled ? qsTr("Tunneling enabled") : qsTr("Tunneling disabled")
+
+            imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+            rightImageSource: "qrc:/images/controls/chevron-down.svg"
+
+            onClicked: {
+                homeSplitTunnelingDrawer.open()
+            }
+
+            HomeSplitTunnelingDrawer {
+                id: homeSplitTunnelingDrawer
+            }
         }
     }
 

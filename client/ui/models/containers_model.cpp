@@ -68,8 +68,8 @@ void ContainersModel::setDefaultContainer(const int containerIndex)
 {
     m_defaultContainerIndex = static_cast<DockerContainer>(containerIndex);
     emit dataChanged(index(containerIndex, 0), index(containerIndex, 0));
+    emit defaultContainerChanged();
 }
-
 
 DockerContainer ContainersModel::getDefaultContainer()
 {
@@ -131,4 +131,19 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
     return roles;
+}
+
+bool ContainersModel::isDefaultContainerHasGlobalSiteSplitTunneling()
+{
+    auto defaultContainer = getDefaultContainer();
+    auto containerConfig = getContainerConfig(defaultContainer);
+    auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+
+    if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
+        return !(protocolConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
+    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn || defaultContainer == DockerContainer::ShadowSocks) {
+        return !(protocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+    }
+
+    return false;
 }
