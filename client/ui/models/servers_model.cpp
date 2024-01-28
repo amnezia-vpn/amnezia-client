@@ -251,10 +251,9 @@ void ServersModel::addServer(const QJsonObject &server)
 
 void ServersModel::editServer(const QJsonObject &server)
 {
-    beginResetModel();
     m_settings->editServer(m_currentlyProcessedServerIndex, server);
-    m_servers = m_settings->serversArray();
-    endResetModel();
+    m_servers.replace(m_currentlyProcessedServerIndex, m_settings->serversArray().at(m_currentlyProcessedServerIndex));
+    emit dataChanged(index(m_currentlyProcessedServerIndex, 0), index(m_currentlyProcessedServerIndex, 0));
     updateContainersModel();
 }
 
