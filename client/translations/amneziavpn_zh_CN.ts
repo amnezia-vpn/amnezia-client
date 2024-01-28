@@ -27,46 +27,46 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="63"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="84"/>
+        <location filename="../ui/controllers/connectionController.h" line="67"/>
         <location filename="../ui/controllers/connectionController.cpp" line="98"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="113"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="119"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="41"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="54"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>请先安装VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="65"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
         <source>Connection...</source>
         <translation>连接中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="70"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
         <source>Connected</source>
         <translation>已连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="93"/>
         <source>Reconnection...</source>
         <translation>重连中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="103"/>
         <source>Disconnection...</source>
         <translation>断开中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>配置已更新，重连中</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="133"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished">配置更新成功</translation>
     </message>
@@ -152,7 +152,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="411"/>
+        <location filename="../ui/controllers/importController.cpp" line="416"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
@@ -302,17 +302,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="358"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="332"/>
         <source>VPN protocol</source>
         <translation>VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="376"/>
         <source>Servers</source>
         <translation>服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="494"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="468"/>
         <source>Unable change server while there is an active connection</source>
         <translation>已建立连接时无法更改服务器配置</translation>
     </message>
@@ -1370,52 +1370,52 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>记录日志</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="87"/>
         <source>Open folder with logs</source>
         <translation>打开日志文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="110"/>
         <source>Logs files (*.log)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="119"/>
         <source>Logs file saved</source>
         <translation>日志文件已保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save logs to file</source>
         <translation>保存日志到文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
         <source>Clear logs?</source>
         <translation>清理日志？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="148"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
         <source>Logs have been cleaned up</source>
         <translation>日志已清理</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="168"/>
         <source>Clear logs</source>
         <translation>清理日志</translation>
     </message>
@@ -1818,22 +1818,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>您所在地区的互联网管控力度如何？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
         <source>Set up a VPN yourself</source>
         <translation>自己架设VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="140"/>
         <source>I want to choose a VPN protocol</source>
         <translation>我想选择VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="159"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="199"/>
         <source>Set up later</source>
         <translation>稍后设置</translation>
     </message>
@@ -3079,22 +3079,22 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="26"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="27"/>
         <source>Software version</source>
         <translation>软件版本</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>备份文件已损坏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="139"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="148"/>
         <source>All settings have been reset to default values</source>
         <translation>所配置恢复为默认值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="154"/>
         <source>Cached profiles cleared</source>
         <translation>缓存的配置文件已清除</translation>
     </message>
@@ -3334,12 +3334,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="172"/>
+        <location filename="../ui/qml/main2.qml" line="176"/>
         <source>Private key passphrase</source>
         <translation>私钥密码</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="191"/>
+        <location filename="../ui/qml/main2.qml" line="195"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>

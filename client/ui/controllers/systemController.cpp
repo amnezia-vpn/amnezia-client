@@ -24,6 +24,20 @@ SystemController::SystemController(const std::shared_ptr<Settings> &settings, QO
 {
 }
 
+void SystemController::setHasFocus(bool hasFocus)
+{
+    if (m_hasFocus != hasFocus)
+    {
+        m_hasFocus = hasFocus;
+        emit hasFocusChanged();
+    }
+}
+
+bool SystemController::hasFocus() const
+{
+    return m_hasFocus;
+}
+
 void SystemController::saveFile(QString fileName, const QString &data)
 {
 #if defined Q_OS_ANDROID

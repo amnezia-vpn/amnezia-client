@@ -274,14 +274,6 @@ PageType {
             Layout.preferredHeight: 50
             Layout.fillWidth: true
             visible: buttonContent.collapsedVisibility
-
-            Connections {
-                target: ConnectionController
-                function onBytesChanged()
-                {
-                    graph1.addValues(ConnectionController.rxBytes, ConnectionController.txBytes)
-                }
-            }
         }
 
         ColumnLayout {
@@ -317,14 +309,6 @@ PageType {
                 Layout.preferredHeight: 50
                 Layout.fillWidth: true
                 visible: buttonContent.expandedVisibility
-
-                Connections {
-                    target: ConnectionController
-                    function onBytesChanged()
-                    {
-                        graph2.addValues(ConnectionController.rxBytes, ConnectionController.txBytes)
-                    }
-                }
             }
 
             RowLayout {

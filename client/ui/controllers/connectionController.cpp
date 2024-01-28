@@ -19,12 +19,25 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
             {
                 m_rxBytes = rx;
                 m_txBytes = tx;
-                emit bytesChanged();
             });
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn,
             Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
             Qt::QueuedConnection);
+    connect(&m_tick, &QTimer::timeout, this, [this]()
+            {
+                quint64 time = QDateTime::currentSecsSinceEpoch();
+                if (m_times.length() > viewSize)
+                {
+                    m_times.removeFirst();
+                    m_rxView.removeFirst();
+                    m_txView.removeFirst();
+                }
+                m_times.append(time);
+                m_rxView.append(m_rxBytes);
+                m_txView.append(m_txBytes);
+                emit bytesChanged();
+            });
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
@@ -68,6 +81,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
         m_isConnectionInProgress = false;
         m_isConnected = true;
         m_connectionStateText = tr("Connected");
+        m_tick.start(1000);
         break;
     }
     case Vpn::ConnectionState::Connecting: {
@@ -87,6 +101,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     case Vpn::ConnectionState::Disconnecting: {
         m_isConnectionInProgress = true;
         m_connectionStateText = tr("Disconnection...");
+        m_tick.stop();
         break;
     }
     case Vpn::ConnectionState::Preparing: {
@@ -143,6 +158,21 @@ quint64 ConnectionController::rxBytes() const
 quint64 ConnectionController::txBytes() const
 {
     return m_txBytes;
+}
+
+QVector<quint64> ConnectionController::getRxView() const
+{
+    return m_rxView;
+}
+
+QVector<quint64> ConnectionController::getTxView() const
+{
+    return m_txView;
+}
+
+QVector<quint64> ConnectionController::getTimes() const
+{
+    return m_times;
 }
 
 bool ConnectionController::isConnectionInProgress() const

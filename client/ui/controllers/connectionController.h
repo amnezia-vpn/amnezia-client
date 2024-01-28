@@ -29,6 +29,10 @@ public:
     quint64 rxBytes() const;
     quint64 txBytes() const;
 
+    Q_INVOKABLE QVector<quint64> getRxView() const;
+    Q_INVOKABLE QVector<quint64> getTxView() const;
+    Q_INVOKABLE QVector<quint64> getTimes() const;
+
 public slots:
     void openConnection();
     void closeConnection();
@@ -63,8 +67,15 @@ private:
     QString m_connectionStateText = tr("Connect");
     quint64 m_rxBytes = 0;
     quint64 m_txBytes = 0;
+    QVector<quint64> m_rxView{};
+    QVector<quint64> m_txView{};
+    QVector<quint64> m_times{};
+
+    QTimer m_tick{};
 
     Vpn::ConnectionState m_state;
+
+    const static quint8 viewSize{60};
 };
 
 #endif // CONNECTIONCONTROLLER_H

@@ -35,47 +35,47 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="41"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="54"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN протоколы не установлены.
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="65"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
         <source>Connection...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="70"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>Настройки успешно обновлены. Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="133"/>
         <source>Settings updated successfully</source>
         <translation type="unfinished">Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="93"/>
         <source>Reconnection...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="63"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="84"/>
+        <location filename="../ui/controllers/connectionController.h" line="67"/>
         <location filename="../ui/controllers/connectionController.cpp" line="98"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="113"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="119"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="103"/>
         <source>Disconnection...</source>
         <translation>Отключение...</translation>
     </message>
@@ -149,7 +149,7 @@
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="411"/>
+        <location filename="../ui/controllers/importController.cpp" line="416"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -275,17 +275,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="358"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="332"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="376"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="494"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="468"/>
         <source>Unable change server while there is an active connection</source>
         <translation>Невозможно изменить сервер при активном соединении</translation>
     </message>
@@ -1291,52 +1291,52 @@ Already installed containers were found on the server. All installed containers 
         <translation>Сохранять логи</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="87"/>
         <source>Open folder with logs</source>
         <translation>Открыть папку с логами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="110"/>
         <source>Logs files (*.log)</source>
         <translation>Logs files (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="119"/>
         <source>Logs file saved</source>
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save logs to file</source>
         <translation>Сохранить логи в файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
         <source>Clear logs?</source>
         <translation>Очистить логи?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="148"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
         <source>Logs have been cleaned up</source>
         <translation>Логи удалены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="168"/>
         <source>Clear logs</source>
         <translation>Удалить логи</translation>
     </message>
@@ -1719,22 +1719,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Какой уровень контроля интернета в вашем регионе?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
         <source>Set up a VPN yourself</source>
         <translation>Настроить VPN самостоятельно</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="140"/>
         <source>I want to choose a VPN protocol</source>
         <translation>Выбрать VPN-протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="159"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="199"/>
         <source>Set up later</source>
         <translation>Настроить позднее</translation>
     </message>
@@ -2935,22 +2935,22 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="26"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="27"/>
         <source>Software version</source>
         <translation>Версия ПО</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="139"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="148"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки были сброшены к значению &quot;По умолчанию&quot;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="154"/>
         <source>Cached profiles cleared</source>
         <translation>Кэш профиля очищен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>Backup файл поврежден</translation>
     </message>
@@ -3186,12 +3186,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="172"/>
+        <location filename="../ui/qml/main2.qml" line="176"/>
         <source>Private key passphrase</source>
         <translation>Кодовая фраза для закрытого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="191"/>
+        <location filename="../ui/qml/main2.qml" line="195"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>

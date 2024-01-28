@@ -7,11 +7,18 @@ ChartView {
     theme: ChartView.ChartThemeDark
     plotArea: Qt.rect(0, 0, 400, 50)
 
-    function addValues(rx, tx)
-    {
-        let currentTime = new Date().getTime()
-        rxLine.append(currentTime, rx)
-        txLine.append(currentTime, tx)
+    property bool shouldUpdate: SystemController.hasFocus
+
+    function getUTCSeconds() {
+        return new Date().setMilliseconds(0) / 1000
+    }
+
+    function addValues(rx, tx) {
+        let currentTime = getUTCSeconds()
+
+        xAxis.min = currentTime - 60
+        xAxis.max = currentTime
+
         if (rx > yAxis.max)
         {
             yAxis.max = rx
@@ -20,18 +27,46 @@ ChartView {
         {
             yAxis.max = tx
         }
+
+        rxLine.append(currentTime, rx)
+        txLine.append(currentTime, tx)
     }
 
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            let currentTime = new Date().getTime()
-            maxAnimation.to = currentTime
-            maxAnimation.running = true
-            minAnimation.to = currentTime - 60000
-            minAnimation.running = true
+    function printAll() {
+        var rxValues = ConnectionController.getRxView()
+        var txValues = ConnectionController.getTxView()
+        var times = ConnectionController.getTimes()
+
+        rxLine.clear()
+        txLine.clear()
+
+        xAxis.min = times[0]
+        xAxis.max = times[times.length - 1]
+
+        for (let i = 0; i < times.length; i++)
+        {
+            rxLine.append(times[i], rxValues[i])
+            txLine.append(times[i], txValues[i])
+        }
+    }
+
+    Component.onCompleted: {
+        printAll()
+    }
+
+    Connections {
+        target: ConnectionController
+        function onBytesChanged() {
+            if (shouldUpdate) {
+                addValues(ConnectionController.rxBytes, ConnectionController.txBytes)
+            }
+        }
+    }
+
+    Connections {
+        target: SystemController
+        function onHasFocusChanged() {
+            if (shouldUpdate) { printAll() }
         }
     }
 
@@ -51,20 +86,6 @@ ChartView {
         gridLineColor: "transparent"
     }
 
-    PropertyAnimation {
-        id: maxAnimation
-        target: xAxis
-        properties: "max"
-        duration: 1500
-    }
-
-    PropertyAnimation {
-        id: minAnimation
-        target: xAxis
-        properties: "min"
-        duration: 1500
-    }
-
     SplineSeries {
         id: rxLine
         name: "Received Bytes"
@@ -73,7 +94,7 @@ ChartView {
         capStyle: Qt.RoundCap
         color: "orange"
 
-        XYPoint { x: new Date().getTime(); y: 0 }
+        XYPoint { x: getUTCSeconds(); y: 0 }
     }
 
     SplineSeries {
@@ -84,7 +105,7 @@ ChartView {
         capStyle: Qt.RoundCap
         color: "grey"
 
-        XYPoint { x: new Date().getTime(); y: 0 }
+        XYPoint { x: getUTCSeconds(); y: 0 }
     }
 
     onWidthChanged: {
