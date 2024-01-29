@@ -25,70 +25,70 @@ namespace amnezia
     enum ErrorCode {
         // General error codes
         NoError = 0,
-        UnknownError = 1,
-        InternalError = 2,
-        NotImplementedError = 3,
+        UnknownError = 100,
+        InternalError = 101,
+        NotImplementedError = 102,
 
         // Server errors
-        ServerCheckFailed = 4,
-        ServerPortAlreadyAllocatedError = 5,
-        ServerContainerMissingError = 6,
-        ServerDockerFailedError = 7,
-        ServerCancelInstallation = 8,
-        ServerUserNotInSudo = 9,
-        ServerPacketManagerError = 10,
+        ServerCheckFailed = 200,
+        ServerPortAlreadyAllocatedError = 201,
+        ServerContainerMissingError = 202,
+        ServerDockerFailedError = 203,
+        ServerCancelInstallation = 204,
+        ServerUserNotInSudo = 205,
+        ServerPacketManagerError = 206,
 
         // Ssh connection errors
-        SshRequestDeniedError = 11,
-        SshInterruptedError = 12,
-        SshInternalError = 13,
-        SshPrivateKeyError = 14,
-        SshPrivateKeyFormatError = 15,
-        SshTimeoutError = 16,
+        SshRequestDeniedError = 300,
+        SshInterruptedError = 301,
+        SshInternalError = 302,
+        SshPrivateKeyError = 303,
+        SshPrivateKeyFormatError = 304,
+        SshTimeoutError = 305,
 
         // Ssh sftp errors
-        SshSftpEofError = 17,
-        SshSftpNoSuchFileError = 18,
-        SshSftpPermissionDeniedError = 19,
-        SshSftpFailureError = 20,
-        SshSftpBadMessageError = 21,
-        SshSftpNoConnectionError = 22,
-        SshSftpConnectionLostError = 23,
-        SshSftpOpUnsupportedError = 24,
-        SshSftpInvalidHandleError = 25,
-        SshSftpNoSuchPathError = 26,
-        SshSftpFileAlreadyExistsError = 27,
-        SshSftpWriteProtectError = 28,
-        SshSftpNoMediaError = 29,
+        SshSftpEofError = 400,
+        SshSftpNoSuchFileError = 401,
+        SshSftpPermissionDeniedError = 402,
+        SshSftpFailureError = 403,
+        SshSftpBadMessageError = 404,
+        SshSftpNoConnectionError = 405,
+        SshSftpConnectionLostError = 406,
+        SshSftpOpUnsupportedError = 407,
+        SshSftpInvalidHandleError = 408,
+        SshSftpNoSuchPathError = 409,
+        SshSftpFileAlreadyExistsError = 410,
+        SshSftpWriteProtectError = 411,
+        SshSftpNoMediaError = 412,
 
         // Local errors
-        OpenVpnConfigMissing = 30,
-        OpenVpnManagementServerError = 31,
-        ConfigMissing = 32,
+        OpenVpnConfigMissing = 500,
+        OpenVpnManagementServerError = 501,
+        ConfigMissing = 502,
 
         // Distro errors
-        OpenVpnExecutableMissing = 33,
-        ShadowSocksExecutableMissing = 34,
-        CloakExecutableMissing = 35,
-        AmneziaServiceConnectionFailed = 36,
-        ExecutableMissing = 37,
+        OpenVpnExecutableMissing = 600,
+        ShadowSocksExecutableMissing = 601,
+        CloakExecutableMissing = 602,
+        AmneziaServiceConnectionFailed = 603,
+        ExecutableMissing = 604,
 
         // VPN errors
-        OpenVpnAdaptersInUseError = 38,
-        OpenVpnUnknownError = 39,
-        OpenVpnTapAdapterError = 40,
-        AddressPoolError = 41,
+        OpenVpnAdaptersInUseError = 700,
+        OpenVpnUnknownError = 701,
+        OpenVpnTapAdapterError = 702,
+        AddressPoolError = 703,
 
         // 3rd party utils errors
-        OpenSslFailed = 42,
-        ShadowSocksExecutableCrashed = 43,
-        CloakExecutableCrashed = 44,
+        OpenSslFailed = 800,
+        ShadowSocksExecutableCrashed = 801,
+        CloakExecutableCrashed = 802,
 
         // import and install errors
-        ImportInvalidConfigError = 45,
+        ImportInvalidConfigError = 900,
 
         // Android errors
-        AndroidError = 46
+        AndroidError = 1000
     };
 
 } // namespace amnezia
