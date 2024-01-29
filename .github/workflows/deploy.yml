@@ -129,63 +129,55 @@ jobs:
 
 # ------------------------------------------------------
 
-    Build-Windows-x32:
-      runs-on: windows-latest
-
-      env:
-        BUILD_ARCH: 32
-
-      steps:
-      - name: 'Get sources'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-          fetch-depth: 10
-
-      - name: 'Setup ccache'
-        uses: hendrikmuhs/ccache-action@v1.2
-
-      - name: 'Install Qt'
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win32_msvc2019_32'
-          modules: 'qtremoteobjects qt5compat qtshadertools'
-          dir: ${{ runner.temp }}
-          setup-python: 'true'
-          tools: 'tools_ifw'
-          set-env: 'true'
-          extra: '--external 7z --base ${{ env.QT_MIRROR }}'
-
-      - name: 'Setup mvsc'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: 'x86'
-
-      - name: 'Build project'
-        shell: cmd
-        run: |
-          set BUILD_ARCH=${{ env.BUILD_ARCH }}
-          set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_32\\bin"
-          set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-          call deploy\\build_windows.bat
-
-      - name: 'Upload installer artifact'
-        uses: actions/upload-artifact@v3
-        with:
-          name: AmneziaVPN_Windows_installer
-          path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
-          retention-days: 7
-      - name: 'Upload unpacked artifact'
-        uses: actions/upload-artifact@v3
-        with:
-          name: AmneziaVPN_Windows_unpacked
-          path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-          retention-days: 7
-
-# ------------------------------------------------------
+  Build-Windows-x32:
+    runs-on: windows-latest
+    env:
+      BUILD_ARCH: 32
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win32_msvc2019_32'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+    - name: 'Setup mvsc'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'x86'
+    - name: 'Build project'
+      shell: cmd
+      run: |
+        set BUILD_ARCH=${{ env.BUILD_ARCH }}
+        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_32\\bin"
+        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
+        call deploy\\build_windows.bat
+    - name: 'Upload installer artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN_Windows_installer
+        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+        retention-days: 7
+    - name: 'Upload unpacked artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AmneziaVPN_Windows_unpacked
+        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+        retention-days: 7
+ ------------------------------------------------------
 
   Build-iOS:
     name: 'Build-iOS'
