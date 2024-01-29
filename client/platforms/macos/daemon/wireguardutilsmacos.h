@@ -10,6 +10,7 @@
 
 #include "daemon/wireguardutils.h"
 #include "macosroutemonitor.h"
+#include "macosfirewall.h"
 
 class WireguardUtilsMacos final : public WireguardUtils {
   Q_OBJECT
@@ -34,6 +35,7 @@ class WireguardUtilsMacos final : public WireguardUtils {
 
   bool addExclusionRoute(const IPAddress& prefix) override;
   bool deleteExclusionRoute(const IPAddress& prefix) override;
+  void applyFirewallRules(FirewallParams& params);
 
  signals:
   void backendFailure();

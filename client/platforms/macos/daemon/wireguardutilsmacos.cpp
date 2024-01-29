@@ -114,9 +114,30 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   }
 
   int err = uapiErrno(uapiCommand(message));
+
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
+  } else {
+      FirewallParams params { };
+      params.dnsServers.append(config.m_dnsServer);
+      if (config.m_allowedIPAddressRanges.at(0).toString() == "0.0.0.0/0"){
+        params.blockAll = true;
+        if (config.m_excludedAddresses.size()) {
+            params.allowNets = true;
+            foreach (auto net, config.m_excludedAddresses) {
+                params.allowAddrs.append(net.toUtf8());
+            }
+        }
+      } else {
+        params.blockNets = true;
+        foreach (auto net, config.m_allowedIPAddressRanges) {
+            params.blockAddrs.append(net.toString());
+        }
+      }
+
+      applyFirewallRules(params);
   }
+
   return (err == 0);
 }
 
@@ -140,6 +161,10 @@ bool WireguardUtilsMacos::deleteInterface() {
   // Garbage collect.
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
+
+  // double-check + ensure our firewall is installed and enabled
+  MacOSFirewall::uninstall();
+
   return true;
 }
 
@@ -300,6 +325,31 @@ bool WireguardUtilsMacos::addExclusionRoute(const IPAddress& prefix) {
     return false;
   }
   return m_rtmonitor->addExclusionRoute(prefix);
+}
+
+void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
+{
+  // double-check + ensure our firewall is installed and enabled. This is necessary as
+  // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
+  if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
+
+  MacOSFirewall::ensureRootAnchorPriority();
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), params.blockAll);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), params.allowNets);
+  MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), params.allowNets,
+                                QStringLiteral("allownets"), params.allowAddrs);
+
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), params.blockNets);
+  MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), params.blockNets,
+                                QStringLiteral("blocknets"), params.blockAddrs);
+
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
+  MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);
 }
 
 bool WireguardUtilsMacos::deleteExclusionRoute(const IPAddress& prefix) {
