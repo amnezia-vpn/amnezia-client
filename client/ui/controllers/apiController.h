@@ -26,7 +26,7 @@ private:
         OpenVpnConfigurator::ConnectionData certRequest;
 
         QString wireGuardClientPrivKey;
-        QString wireGUardClientPubKey;
+        QString wireGuardClientPubKey;
     };
 
     ApiPayloadData generateApiPayloadData(const QString &protocol);

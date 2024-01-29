@@ -35,7 +35,7 @@ void ApiController::processCloudConfig(const QString &protocol, const ApiControl
         config.replace("$OPENVPN_PRIV_KEY", apiPayloadData.certRequest.privKey);
         return;
     } else if (protocol == configKey::awg) {
-        config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGUardClientPubKey);
+        config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
     }
     return;
 }
@@ -47,7 +47,7 @@ ApiController::ApiPayloadData ApiController::generateApiPayloadData(const QStrin
         apiPayload.certRequest = OpenVpnConfigurator::createCertRequest();
     } else if (protocol == configKey::awg) {
         auto connData = WireguardConfigurator::genClientKeys();
-        apiPayload.wireGUardClientPubKey = connData.clientPubKey;
+        apiPayload.wireGuardClientPubKey = connData.clientPubKey;
         apiPayload.wireGuardClientPrivKey = connData.clientPrivKey;
     }
     return apiPayload;
@@ -59,7 +59,7 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
     if (protocol == configKey::cloak) {
         obj[configKey::certificate] = apiPayloadData.certRequest.request;
     } else if (protocol == configKey::awg) {
-        obj[configKey::publicKey] = apiPayloadData.wireGUardClientPubKey;
+        obj[configKey::publicKey] = apiPayloadData.wireGuardClientPubKey;
     }
     return obj;
 }
