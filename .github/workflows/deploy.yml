@@ -177,7 +177,7 @@ jobs:
         name: AmneziaVPN_Windows_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
         retention-days: 7
- ------------------------------------------------------
+# ------------------------------------------------------
 
   Build-iOS:
     name: 'Build-iOS'
