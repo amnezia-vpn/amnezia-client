@@ -28,7 +28,7 @@ public slots:
                            ServerCredentials credentials);
     ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
                            ServerCredentials credentials, bool addTimeStamp = false);
-    ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials);
+    ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -41,7 +41,7 @@ private:
 
     void migration(const QByteArray &clientsTableString);
 
-    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials);
+    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials);
 
     ErrorCode getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
