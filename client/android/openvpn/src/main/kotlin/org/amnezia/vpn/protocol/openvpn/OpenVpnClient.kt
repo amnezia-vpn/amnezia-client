@@ -91,9 +91,7 @@ class OpenVpnClient(
     // metric is optional and should be ignored if < 0
     override fun tun_builder_exclude_route(address: String, prefix_length: Int, metric: Int, ipv6: Boolean): Boolean {
         Log.d(TAG, "tun_builder_exclude_route: $address, $prefix_length, $metric, $ipv6")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            configBuilder.excludeRoute(InetNetwork(address, prefix_length))
-        }
+        configBuilder.excludeRoute(InetNetwork(address, prefix_length))
         return true
     }
 

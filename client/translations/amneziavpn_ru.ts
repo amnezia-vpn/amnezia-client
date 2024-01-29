@@ -379,7 +379,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="311"/>
         <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и пререзагрузить Amnezia</translation>
+        <translation>Сохранить и перезагрузить Amnezia</translation>
     </message>
 </context>
 <context>
@@ -416,7 +416,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="77"/>
         <source>OpenVPN settings</source>
-        <translation>Настройки OpenVPN</translation>
+        <translation>OpenVPN настройки</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
@@ -1192,7 +1192,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>Эти серверы будут использоваться, если не включен AmneziaDNS</translation>
+        <translation>Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
@@ -2047,7 +2047,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="598"/>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Переименовать</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
@@ -2062,12 +2062,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="668"/>
         <source>Revoke</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отозвать</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="671"/>
         <source>Revoke the config for a user - %1?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отозвать доступ для пользователя - %1?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>

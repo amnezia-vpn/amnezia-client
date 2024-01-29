@@ -4,6 +4,8 @@
 #include <QLocalServer>
 #include <QObject>
 #include <QRemoteObjectNode>
+#include <QJsonObject>
+#include "../client/daemon/interfaceconfig.h"
 
 #include "ipc.h"
 #include "ipcserverprocess.h"
@@ -25,13 +27,13 @@ public:
     virtual QStringList getTapList() override;
     virtual void cleanUp() override;
     virtual void setLogsEnabled(bool enabled) override;
-    virtual bool copyWireguardConfig(const QString &sourcePath) override;
-    virtual bool isWireguardRunning() override;
-    virtual bool isWireguardConfigExists(const QString &configPath) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
     virtual void StartRoutingIpv6() override;
     virtual void StopRoutingIpv6() override;
+    virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
+    virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
+    virtual bool disableKillSwitch() override;
 
 private:
     int m_localpid = 0;

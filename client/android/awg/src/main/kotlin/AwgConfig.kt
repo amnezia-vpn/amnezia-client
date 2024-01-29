@@ -99,7 +99,7 @@ class AwgConfig private constructor(
         fun setH3(h3: Long) = apply { this.h3 = h3 }
         fun setH4(h4: Long) = apply { this.h4 = h4 }
 
-        override fun build(): AwgConfig = AwgConfig(this)
+        override fun build(): AwgConfig = configBuild().run { AwgConfig(this@Builder) }
     }
 
     companion object {

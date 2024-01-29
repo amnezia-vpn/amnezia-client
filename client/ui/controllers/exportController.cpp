@@ -359,7 +359,8 @@ void ExportController::updateClientManagementModel(const DockerContainer contain
 
 void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
-    ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials);
+    ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials,
+                                                                m_serversModel->getCurrentlyProcessedServerIndex());
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
     }
