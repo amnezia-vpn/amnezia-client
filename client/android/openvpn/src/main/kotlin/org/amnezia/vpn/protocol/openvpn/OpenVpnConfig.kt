@@ -11,7 +11,7 @@ class OpenVpnConfig private constructor(
     class Builder : ProtocolConfig.Builder(false) {
         override var mtu: Int = OPENVPN_DEFAULT_MTU
 
-        override fun build(): OpenVpnConfig = OpenVpnConfig(this)
+        override fun build(): OpenVpnConfig = configBuild().run { OpenVpnConfig(this@Builder) }
     }
 
     companion object {

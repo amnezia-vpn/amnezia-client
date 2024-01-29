@@ -2,7 +2,6 @@ package org.amnezia.vpn.protocol.openvpn
 
 import android.content.Context
 import android.net.VpnService.Builder
-import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +13,6 @@ import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.getLocalNetworks
 import org.json.JSONObject
 
@@ -79,16 +77,8 @@ open class OpenVpn : Protocol() {
                 if (evalConfig.error) {
                     throw BadConfigException("OpenVPN config parse error: ${evalConfig.message}")
                 }
-                configBuilder.apply {
-                    // fix for split tunneling
-                    // The exclude split tunneling OpenVpn configuration does not contain a default route.
-                    // It is required for split tunneling in newer versions of Android.
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        addRoute(InetNetwork("0.0.0.0", 0))
-                        addRoute(InetNetwork("::", 0))
-                    }
-                    configSplitTunneling(config)
-                }
+                configPluggableTransport(configBuilder, config)
+                configBuilder.configSplitTunneling(config)
 
                 scope.launch {
                     val status = client.connect()
@@ -121,6 +111,8 @@ open class OpenVpn : Protocol() {
         openVpnConfig.content = config.getJSONObject("openvpn_config_data").getString("config")
         return openVpnConfig
     }
+
+    protected open fun configPluggableTransport(configBuilder: OpenVpnConfig.Builder, config: JSONObject) {}
 
     private fun makeEstablish(vpnBuilder: Builder): (OpenVpnConfig.Builder) -> Int = { configBuilder ->
         val openVpnConfig = configBuilder.build()

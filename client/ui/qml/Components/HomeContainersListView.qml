@@ -30,7 +30,9 @@ ListView {
         target: ServersModel
 
         function onCurrentlyProcessedServerIndexChanged() {
-            menuContent.checkCurrentItem()
+            if (ContainersModel.getDefaultContainer()) {
+                menuContent.checkCurrentItem()
+            }
         }
     }
 
@@ -76,9 +78,8 @@ ListView {
                     }
 
                     if (checked) {
-                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
-
                         containersDropDown.menuVisible = false
+                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))

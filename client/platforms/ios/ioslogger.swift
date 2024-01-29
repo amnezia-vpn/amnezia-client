@@ -17,41 +17,41 @@ public class Logger {
     deinit {}
 
     func log(message: String) {
-        let suiteName = "group.org.amnezia.AmneziaVPN"
-        let logKey = "logMessages"
-        let sharedDefaults = UserDefaults(suiteName: suiteName)
-        var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []
-        logs.append(message)
-        sharedDefaults?.set(logs, forKey: logKey)
+//        let suiteName = "group.org.amnezia.AmneziaVPN"
+//        let logKey = "logMessages"
+//        let sharedDefaults = UserDefaults(suiteName: suiteName)
+//        var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []
+//        logs.append(message)
+//        sharedDefaults?.set(logs, forKey: logKey)
     }
 
-    func writeLog(to targetFile: String) -> Bool {
+    private func writeLog(to targetFile: String) -> Bool {
         return true;
     }
 
     static func configureGlobal(tagged tag: String, withFilePath filePath: String?) {
-        if Logger.global != nil {
-            return
-        }
-
-        Logger.global = Logger(tagged: tag)
-
-        var appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown version"
-
-        if let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            appVersion += " (\(appBuild))"
-        }
-
-        Logger.global?.log(message: "App version: \(appVersion)")
+//        if Logger.global != nil {
+//            return
+//        }
+//
+//        Logger.global = Logger(tagged: tag)
+//
+//        var appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown version"
+//
+//        if let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+//            appVersion += " (\(appBuild))"
+//        }
+//
+//        Logger.global?.log(message: "App version: \(appVersion)")
     }
 }
 
 func wg_log(_ type: OSLogType, staticMessage msg: StaticString) {
-    os_log(msg, log: OSLog.default, type: type)
-    Logger.global?.log(message: "\(msg)")
+//    os_log(msg, log: OSLog.default, type: type)
+//    Logger.global?.log(message: "\(msg)")
 }
 
 func wg_log(_ type: OSLogType, message msg: String) {
-    os_log("%{AMNEZIA}s", log: OSLog.default, type: type, msg)
-    Logger.global?.log(message: msg)
+//    os_log("%{AMNEZIA}s", log: OSLog.default, type: type, msg)
+//    Logger.global?.log(message: msg)
 }

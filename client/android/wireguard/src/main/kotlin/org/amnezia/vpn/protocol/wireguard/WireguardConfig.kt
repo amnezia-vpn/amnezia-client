@@ -75,7 +75,7 @@ open class WireguardConfig protected constructor(
 
         fun setPrivateKeyHex(privateKeyHex: String) = apply { this.privateKeyHex = privateKeyHex }
 
-        override fun build(): WireguardConfig = WireguardConfig(this)
+        override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }
 
     companion object {

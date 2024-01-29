@@ -66,7 +66,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
             emit protocolError(amnezia::ErrorCode::CloakExecutableCrashed);
             stop();
         }
-        if (exitCode !=0 ){
+        if (exitCode !=0 ) {
             emit protocolError(amnezia::ErrorCode::InternalError);
             stop();
         }
