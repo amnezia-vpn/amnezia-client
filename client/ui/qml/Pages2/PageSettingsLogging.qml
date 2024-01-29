@@ -66,8 +66,8 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: Qt.platform.os === "ios"? 0 : root.width / 3
-                    visible: Qt.platform.os !== "ios"
+                    Layout.preferredWidth: GC.isMobile() ? 0 : root.width / 3
+                    visible: !GC.isMobile()
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter
@@ -91,7 +91,7 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / ( Qt.platform.os === "ios" ? 2 : 3 )
+                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter
@@ -132,7 +132,7 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / ( Qt.platform.os === "ios" ? 2 : 3 )
+                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter

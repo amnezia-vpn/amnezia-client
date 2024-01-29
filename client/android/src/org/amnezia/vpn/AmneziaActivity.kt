@@ -64,6 +64,7 @@ class AmneziaActivity : QtActivity() {
 
                     ServiceEvent.DISCONNECTED -> {
                         QtAndroidController.onVpnDisconnected()
+                        doUnbindService()
                     }
 
                     ServiceEvent.RECONNECTING -> {

@@ -43,6 +43,7 @@ bool MobileUtils::shareText(const QStringList& filesToSend) {
     UIPopoverPresentationController *popController = activityController.popoverPresentationController;
     if (popController) {
         popController.sourceView = qtController.view;
+        popController.sourceRect = CGRectMake(100, 100, 100, 100);
     }
     
     QEventLoop wait;
