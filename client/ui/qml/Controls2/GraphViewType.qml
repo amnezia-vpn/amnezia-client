@@ -4,8 +4,17 @@ import QtCharts
 ChartView {
     id: chartView
     legend.visible: false
-    theme: ChartView.ChartThemeDark
-    plotArea: Qt.rect(0, 0, 400, 50)
+    animationOptions: ChartView.AllAnimations
+    animationDuration: 2000.0
+
+    backgroundColor: "#1C1D21"
+    plotAreaColor: "#1C1D21"
+    margins.top: 0
+    margins.bottom: 0
+    margins.left: 0
+    margins.right: 0
+    antialiasing: true
+
 
     property bool shouldUpdate: SystemController.hasFocus
 
@@ -19,14 +28,8 @@ ChartView {
         xAxis.min = currentTime - 60
         xAxis.max = currentTime
 
-        if (rx > yAxis.max)
-        {
-            yAxis.max = rx
-        }
-        if (tx > yAxis.max)
-        {
-            yAxis.max = tx
-        }
+        if (rx > yAxis.max) yAxis.max = rx * 1.1
+        if (tx > yAxis.max) yAxis.max = tx * 1.1
 
         rxLine.append(currentTime, rx)
         txLine.append(currentTime, tx)
@@ -37,14 +40,24 @@ ChartView {
         var txValues = ConnectionController.getTxView()
         var times = ConnectionController.getTimes()
 
+        let currentTime = getUTCSeconds()
+        xAxis.min = currentTime - 60
+        xAxis.max = currentTime
+
+
         rxLine.clear()
         txLine.clear()
+
+        if (times.length === 0) return
 
         xAxis.min = times[0]
         xAxis.max = times[times.length - 1]
 
         for (let i = 0; i < times.length; i++)
         {
+            if (rxValues[i] > yAxis.max) yAxis.max = rxValues[i]
+            if (txValues[i] > yAxis.max) yAxis.max = txValues[i]
+
             rxLine.append(times[i], rxValues[i])
             txLine.append(times[i], txValues[i])
         }
@@ -72,8 +85,8 @@ ChartView {
 
     ValueAxis {
         id: yAxis
-        min: 0
-        max: 1000000
+        min: -100
+        max: 1000
         visible: false
         labelsVisible: false
         gridLineColor: "transparent"
@@ -89,26 +102,26 @@ ChartView {
     SplineSeries {
         id: rxLine
         name: "Received Bytes"
+        //width: 2
         axisX: xAxis
         axisY: yAxis
+        style: Qt.RoundCap
         capStyle: Qt.RoundCap
-        color: "orange"
-
+        useOpenGL: true
+        color: "#70553c"
         XYPoint { x: getUTCSeconds(); y: 0 }
     }
 
     SplineSeries {
         id: txLine
         name: "Transmitted Bytes"
+        //width: 2
         axisX: xAxis
         axisY: yAxis
+        style: Qt.RoundCap
         capStyle: Qt.RoundCap
-        color: "grey"
-
+        useOpenGL: true
+        color: "#737274"
         XYPoint { x: getUTCSeconds(); y: 0 }
-    }
-
-    onWidthChanged: {
-        chartView.plotArea = Qt.rect(0, 0, width, 50)
     }
 }
