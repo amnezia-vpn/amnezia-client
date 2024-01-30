@@ -119,7 +119,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Dns,
                QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
              { DockerContainer::Sftp,
-               QObject::tr("Creates a file vault on your server to securely store and transfer files.") } };
+               QObject::tr("Create a file vault on your server to securely store and transfer files.") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
