@@ -28,6 +28,9 @@ private:
     int m_localPort;
     QString m_remoteAddress;
     int m_routeMode;
+    QJsonObject m_configData;
+    QString m_primaryDNS;
+    QString m_secondaryDNS;
 #ifndef Q_OS_IOS
     QProcess m_xrayProcess;
     QSharedPointer<PrivilegedProcess> m_t2sProcess;
