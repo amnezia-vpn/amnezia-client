@@ -295,7 +295,7 @@ PageType {
                     Layout.fillWidth: true
                     Layout.margins: 16
 
-                    headerText: qsTr("Import/Export Sites")
+                    headerText: qsTr("Import / Export Sites")
                 }
 
                 LabelWithButtonType {
