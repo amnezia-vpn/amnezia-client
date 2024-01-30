@@ -56,7 +56,7 @@ PageType {
 
     QtObject {
         id: onlyForwardSites
-        property string name: qsTr("Addresses from the list should be accessed via VPN")
+        property string name: qsTr("Only the sites listed here will be accessed through the VPN")
         property int type: routeMode.onlyForwardSites
     }
     QtObject {
@@ -251,7 +251,7 @@ PageType {
         TextFieldWithHeaderType {
             Layout.fillWidth: true
 
-            textFieldPlaceholderText: qsTr("Site or IP")
+            textFieldPlaceholderText: qsTr("website or IP")
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
             clickedFunc: function() {
