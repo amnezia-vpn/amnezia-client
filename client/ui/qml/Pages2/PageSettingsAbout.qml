@@ -53,7 +53,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Support the project with a donation")
+                text: qsTr("Support Amnezia")
                 horizontalAlignment: Text.AlignHCenter
             }
 
