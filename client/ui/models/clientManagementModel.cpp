@@ -296,30 +296,36 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
 }
 
 ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
-                                              ServerCredentials credentials)
+                                              ServerCredentials credentials, const int serverIndex)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+    auto client = m_clientsTable.at(row).toObject();
+    QString clientId = client.value(configKey::clientId).toString();
 
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
         || container == DockerContainer::Cloak) {
-        errorCode = revokeOpenVpn(row, container, credentials);
+        errorCode = revokeOpenVpn(row, container, credentials, serverIndex);
     } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
         errorCode = revokeWireGuard(row, container, credentials);
     }
 
     if (errorCode == ErrorCode::NoError) {
-        auto client = m_clientsTable.at(row).toObject();
-        QString clientId = client.value(configKey::clientId).toString();
-
-        const auto server = m_settings->defaultServer();
+        const auto server = m_settings->server(serverIndex);
         QJsonArray containers = server.value(config_key::containers).toArray();
         for (auto i = 0; i < containers.size(); i++) {
             auto containerConfig = containers.at(i).toObject();
             auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
-            auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
+            if (containerType == container) {
+                QJsonObject protocolConfig;
+                if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+                } else {
+                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
+                }
 
-            if (protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
-                emit adminConfigRevoked(container);
+                if (protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
+                    emit adminConfigRevoked(container);
+                }
             }
         }
     }
@@ -328,7 +334,7 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
 }
 
 ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container,
-                                               ServerCredentials credentials)
+                                               ServerCredentials credentials, const int serverIndex)
 {
     auto client = m_clientsTable.at(row).toObject();
     QString clientId = client.value(configKey::clientId).toString();
@@ -337,6 +343,7 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
                                                "cd /opt/amnezia/openvpn ;\\"
                                                "easyrsa revoke %1 ;\\"
                                                "easyrsa gen-crl ;\\"
+                                               "chmod 666 pki/crl.pem ;\\"
                                                "cp pki/crl.pem .'")
                                                .arg(clientId);
 
@@ -356,12 +363,7 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
-        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
-    } else {
-        clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
-    }
+    clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     error = serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";

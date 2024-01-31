@@ -8,8 +8,11 @@
 #include <QObject>
 #include <QProcess>
 
+
 #include "daemon/wireguardutils.h"
 #include "linuxroutemonitor.h"
+#include "linuxfirewall.h"
+
 
 class WireguardUtilsLinux final : public WireguardUtils {
     Q_OBJECT
@@ -34,7 +37,7 @@ public:
 
     bool addExclusionRoute(const IPAddress& prefix) override;
     bool deleteExclusionRoute(const IPAddress& prefix) override;
-
+    void applyFirewallRules(FirewallParams& params);
 signals:
     void backendFailure();
 

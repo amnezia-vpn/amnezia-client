@@ -379,7 +379,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="311"/>
         <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и пререзагрузить Amnezia</translation>
+        <translation>Сохранить и перезагрузить Amnezia</translation>
     </message>
 </context>
 <context>
