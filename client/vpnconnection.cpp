@@ -392,11 +392,18 @@ void VpnConnection::appendSplitTunnelingConfig()
         auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
         if (protocolName == ProtocolProps::protoToString(Proto::Awg)) {
             auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
-            auto allowedIpsJsonArray = QJsonArray::fromStringList(configData.value("allowed_ips").toString().split(","));
+            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value("allowed_ips").toString().split(","));
+            QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
 
-            m_vpnConfiguration.insert(config_key::splitTunnelType, Settings::RouteMode::VpnOnlyForwardSites);
-            m_vpnConfiguration.insert(config_key::splitTunnelSites, allowedIpsJsonArray);
-            return;
+            if (allowedIpsJsonArray != defaultAllowedIP) {
+                allowedIpsJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+                allowedIpsJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+
+                m_vpnConfiguration.insert(config_key::splitTunnelType, Settings::RouteMode::VpnOnlyForwardSites);
+                m_vpnConfiguration.insert(config_key::splitTunnelSites, allowedIpsJsonArray);
+
+                return;
+            }
         }
     }
 
