@@ -385,6 +385,18 @@ void VpnConnection::createProtocolConnections()
 
 void VpnConnection::appendSplitTunnelingConfig()
 {
+    if (m_vpnConfiguration.value(config_key::configVersion).toInt()) {
+        auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
+        if (protocolName == ProtocolProps::protoToString(Proto::Awg)) {
+            auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
+            auto allowedIpsJsonArray = QJsonArray::fromStringList(configData.value("allowed_ips").toString().split(","));
+
+            m_vpnConfiguration.insert(config_key::splitTunnelType, Settings::RouteMode::VpnOnlyForwardSites);
+            m_vpnConfiguration.insert(config_key::splitTunnelSites, allowedIpsJsonArray);
+            return;
+        }
+    }
+
     auto routeMode = m_settings->routeMode();
     auto sites = m_settings->getVpnIps(routeMode);
 
@@ -394,7 +406,7 @@ void VpnConnection::appendSplitTunnelingConfig()
     }
 
     // Allow traffic to Amezia DNS
-    if (routeMode == Settings::VpnOnlyForwardSites){
+    if (routeMode == Settings::VpnOnlyForwardSites) {
         sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
         sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
     }
