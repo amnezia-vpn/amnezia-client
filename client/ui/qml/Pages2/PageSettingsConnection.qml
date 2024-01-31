@@ -83,7 +83,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
-                descriptionText: qsTr("If AmneziaDNS is not used or installed")
+                descriptionText: qsTr("When AmneziaDNS is not used or installed")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -117,7 +117,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("App-based split tunneling")
-                descriptionText: qsTr("Allows you to use the VPN only for certain applications")
+                descriptionText: qsTr("Allows you to use the VPN only for certain Apps")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

@@ -253,10 +253,13 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
         }
 
-        QEventLoop wait;
-        emit m_configurator->newVpnConfigCreated(clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
-        QObject::connect(m_configurator.get(), &VpnConfigurator::clientModelUpdated, &wait, &QEventLoop::quit);
-        wait.exec();
+        if ((container != DockerContainer::Cloak && container != DockerContainer::ShadowSocks) ||
+                ((container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks) && proto == Proto::OpenVpn)) {
+            QEventLoop wait;
+            emit m_configurator->newVpnConfigCreated(clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
+            QObject::connect(m_configurator.get(), &VpnConfigurator::clientModelUpdated, &wait, &QEventLoop::quit);
+            wait.exec();
+        }
     }
 
     return configData;
