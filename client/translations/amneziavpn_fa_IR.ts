@@ -190,6 +190,10 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="305"/>
+        <source>Server &apos;%1&apos; was rebooted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/installController.cpp" line="314"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 حذف شد</translation>

@@ -302,7 +302,7 @@ void InstallController::rebootCurrentlyProcessedServer()
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     m_serversModel->rebootServer();
-    emit rebootCurrentlyProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
+    emit rebootCurrentlyProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
 }
 
 void InstallController::removeCurrentlyProcessedServer()
