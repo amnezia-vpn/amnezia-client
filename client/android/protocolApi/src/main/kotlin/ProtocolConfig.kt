@@ -128,7 +128,8 @@ open class ProtocolConfig protected constructor(
         }
 
         private fun processExcludedRoutes() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && excludedRoutes.isNotEmpty()) {
+                // todo: rewrite, taking into account the current routes
                 // for older versions of Android, build a list of subnets without excluded routes
                 // and add them to routes
                 val ipRangeSet = IpRangeSet()
