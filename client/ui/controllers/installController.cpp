@@ -296,6 +296,15 @@ void InstallController::updateContainer(QJsonObject config)
     emit installationErrorOccurred(errorString(errorCode));
 }
 
+void InstallController::rebootCurrentlyProcessedServer()
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+
+    m_serversModel->rebootServer();
+    emit rebootCurrentlyProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
+}
+
 void InstallController::removeCurrentlyProcessedServer()
 {
     int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();

@@ -225,6 +225,11 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     return ErrorCode::NoError;
 }
 
+ErrorCode ServerController::rebootServer(const ServerCredentials &credentials)
+{
+    return runScript(credentials, amnezia::scriptData(SharedScriptType::reboot_server));
+}
+
 ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)
 {
     return runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));

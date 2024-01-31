@@ -33,6 +33,8 @@ QString amnezia::scriptName(SharedScriptType type)
     case SharedScriptType::check_connection: return QLatin1String("check_connection.sh");
     case SharedScriptType::check_server_is_busy: return QLatin1String("check_server_is_busy.sh");
     case SharedScriptType::check_user_in_sudo: return QLatin1String("check_user_in_sudo.sh");
+    case SharedScriptType::reboot_server: return QLatin1String("reboot_server.sh");
+    default: return QString();
     }
 }
 
@@ -46,6 +48,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
     case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
+    default: return QString();
     }
 }
 

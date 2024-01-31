@@ -88,6 +88,7 @@ public slots:
 
     ErrorCode removeContainer(const int containerIndex);
     ErrorCode removeAllContainers();
+    ErrorCode rebootServer();
 
     void setDefaultContainer(const int containerIndex);
     DockerContainer getDefaultContainer();

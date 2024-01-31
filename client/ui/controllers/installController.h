@@ -31,6 +31,7 @@ public slots:
     void updateContainer(QJsonObject config);
 
     void removeCurrentlyProcessedServer();
+    void rebootCurrentlyProcessedServer();
     void removeAllContainers();
     void removeCurrentlyProcessedContainer();
 
@@ -53,6 +54,7 @@ signals:
 
     void scanServerFinished(bool isInstalledContainerFound);
 
+    void rebootCurrentlyProcessedServerFinished(const QString &finishedMessage);
     void removeCurrentlyProcessedServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeCurrentlyProcessedContainerFinished(const QString &finishedMessage);
