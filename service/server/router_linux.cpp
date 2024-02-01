@@ -246,6 +246,11 @@ bool RouterLinux::deleteTun(const QString &dev)
     return ret;
 }
 
+bool RouterLinux::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return m_dnsUtil->updateResolvers(ifname, resolvers);
+}
+
 void RouterLinux::StartRoutingIpv6()
 {
 

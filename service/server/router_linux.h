@@ -7,6 +7,7 @@
 #include <QHash>
 #include <QDebug>
 #include <QObject>
+#include "../client/platforms/linux/daemon/dnsutilslinux.h"
 
 /**
  * @brief The Router class - General class for handling ip routing
@@ -33,15 +34,16 @@ public:
     bool deleteTun(const QString &dev);
     void StartRoutingIpv6();
     void StopRoutingIpv6();
-
+    bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 public slots:
 
 private:
-    RouterLinux() {}
+    RouterLinux() {m_dnsUtil = new DnsUtilsLinux(this);}
     RouterLinux(RouterLinux const &) = delete;
     RouterLinux& operator= (RouterLinux const&) = delete;
 
     QList<Route> m_addedRoutes;
+    DnsUtilsLinux *m_dnsUtil;
 };
 
 #endif // ROUTERLINUX_H

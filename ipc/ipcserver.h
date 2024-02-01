@@ -34,6 +34,7 @@ public:
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
+    virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
 
 private:
     int m_localpid = 0;

@@ -170,6 +170,11 @@ bool IpcServer::deleteTun(const QString &dev)
     return Router::deleteTun(dev);
 }
 
+bool IpcServer::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return Router::updateResolvers(ifname, resolvers);
+}
+
 void IpcServer::StartRoutingIpv6()
 {
     Router::StartRoutingIpv6();

@@ -151,6 +151,10 @@ ErrorCode XrayProtocol::startTun2Sock()
 #ifdef Q_OS_LINUX
             QThread::msleep(1000);
             IpcClient::Interface()->createTun("tun2", "10.33.0.2");
+            QList<QHostAddress> dnsAddr;
+            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
+            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
 #endif
             if (m_routeMode == 0) {
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");

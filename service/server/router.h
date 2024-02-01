@@ -7,6 +7,7 @@
 #include <QHash>
 #include <QDebug>
 #include <QObject>
+#include <QHostAddress>
 
 /**
  * @brief The Router class - General class for handling ip routing
@@ -24,6 +25,7 @@ public:
     static bool deleteTun(const QString &dev);
     static void StartRoutingIpv6();
     static void StopRoutingIpv6();
+    static bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 };
 
 #endif // ROUTER_H

@@ -86,6 +86,14 @@ bool Router::deleteTun(const QString &dev)
     return true;
 };
 
+bool Router::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().updateResolvers(ifname, resolvers);
+#endif
+    return true;
+}
+
 
 void Router::StopRoutingIpv6()
 {
