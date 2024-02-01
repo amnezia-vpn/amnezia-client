@@ -44,6 +44,7 @@ private:
 
     ManagementServer m_managementServer;
     QString m_configFileName;
+    QJsonObject m_configData;
     QTemporaryFile m_configFile;
 
     uint selectMgmtPort();
