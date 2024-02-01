@@ -13,16 +13,12 @@ if [ -f /opt/amnezia/awg/wg0.conf ]; then (wg-quick up /opt/amnezia/awg/wg0.conf
 
 # Allow traffic on the TUN interface.
 iptables -A INPUT -i wg0 -j ACCEPT
-iptables -A FORWARD -i wg0 -j ACCEPT
 iptables -A OUTPUT -o wg0 -j ACCEPT
 
-# Allow forwarding traffic only from the VPN.
-iptables -A FORWARD -i wg0 -o eth0 -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -j ACCEPT
-iptables -A FORWARD -i wg0 -o eth1 -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -j ACCEPT
+# Reject forwarding traffic between users via wg0 interface
+iptables -A FORWARD -s 10.8.1.0/24 -d 10.8.1.0/24 -j REJECT
 
-iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-iptables -t nat -A POSTROUTING -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth0 -j MASQUERADE
-iptables -t nat -A POSTROUTING -s $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth1 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 10.8.1.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 10.8.1.0/24 -o eth1 -j MASQUERADE
 
 tail -f /dev/null
