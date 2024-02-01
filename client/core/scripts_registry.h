@@ -17,8 +17,7 @@ enum SharedScriptType {
     setup_host_firewall,
     check_connection,
     check_server_is_busy,
-    check_user_in_sudo,
-    reboot_server
+    check_user_in_sudo
 };
 enum ProtocolScriptType {
     // Protocol scripts

@@ -227,7 +227,20 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
 
 ErrorCode ServerController::rebootServer(const ServerCredentials &credentials)
 {
-    return runScript(credentials, amnezia::scriptData(SharedScriptType::reboot_server));
+    QString script = QString("sudo reboot");
+
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    return runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
 ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)
