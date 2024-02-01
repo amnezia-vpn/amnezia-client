@@ -20,13 +20,17 @@ import "../Components"
 PageType {
     id: root
 
-    property bool pageEnabled: {
-        return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
-    }
+    property bool pageEnabled: false
 
     Component.onCompleted: {
-        if (ServersModel.isDefaultServerFromApi()) {
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+            root.pageEnabled = false
+        } else if (ContainersModel.isDefaultContainerHasGlobalSiteSplitTunneling && ServersModel.isDefaultServerFromApi()) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
+            root.pageEnabled = false
+        } else {
+            root.pageEnabled = true
         }
     }
 
