@@ -49,7 +49,6 @@ public:
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 
 private:
-    RouterWin() {}
     RouterWin(RouterWin const &) = delete;
     RouterWin& operator= (RouterWin const&) = delete;
 
