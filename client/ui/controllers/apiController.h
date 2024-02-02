@@ -22,15 +22,19 @@ signals:
     void errorOccurred(const QString &errorMessage);
 
 private:
-    QString genPublicKey(const QString &protocol);
-    QString genCertificateRequest(const QString &protocol);
+    struct ApiPayloadData {
+        OpenVpnConfigurator::ConnectionData certRequest;
 
-    void processCloudConfig(const QString &protocol, QString &config);
+        QString wireGuardClientPrivKey;
+        QString wireGuardClientPubKey;
+    };
+
+    ApiPayloadData generateApiPayloadData(const QString &protocol);
+    QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
+    void processCloudConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
-
-    OpenVpnConfigurator::ConnectionData m_certRequest;
 };
 
 #endif // APICONTROLLER_H
