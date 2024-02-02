@@ -8,13 +8,20 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType {
+DrawerType2 {
     id: root
 
-    width: parent.width
-    height: parent.height * 0.4375
+//    width: parent.width
+    anchors.fill: parent
+    expandedHeight: 0.4375
 
-    ColumnLayout {
+    collapsedContent: Item {
+        anchors.fill: parent
+        height: 1
+        visible: false
+    }
+
+    expandedContent: ColumnLayout {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -40,7 +47,7 @@ DrawerType {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardCredentials)
-                root.visible = false
+                root.close()
             }
         }
 
@@ -54,7 +61,7 @@ DrawerType {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-                root.visible = false
+                root.close()
             }
         }
 
