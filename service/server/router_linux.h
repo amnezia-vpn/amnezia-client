@@ -7,6 +7,7 @@
 #include <QHash>
 #include <QDebug>
 #include <QObject>
+
 #include "../client/platforms/linux/daemon/dnsutilslinux.h"
 
 /**

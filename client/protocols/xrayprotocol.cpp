@@ -81,7 +81,6 @@ ErrorCode XrayProtocol::start()
     if (m_xrayProcess.state() == QProcess::ProcessState::Running) {
         setConnectionState(Vpn::ConnectionState::Connecting);
         QThread::msleep(1000);
-
         return startTun2Sock();
     }
     else return ErrorCode::XrayExecutableMissing;
@@ -118,10 +117,7 @@ ErrorCode XrayProtocol::startTun2Sock()
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
 #ifdef Q_OS_WIN
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
-            QString("cmd /c netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255 &&\
-             netsh interface ipv4 set dnsservers name=\"tun2\" source=static %1 primary &&\
-                                   netsh interface ipv4 set dnsservers name=\"tun2\" source=static %2 secondary")
-                               .arg(m_primaryDNS, m_secondaryDNS)});
+                           QString("cmd /c netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255")});
 #endif
 #ifdef Q_OS_LINUX
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr});
@@ -141,9 +137,15 @@ ErrorCode XrayProtocol::startTun2Sock()
         if (newState == QProcess::Running)
         {
             setConnectionState(Vpn::ConnectionState::Connecting);
-#ifdef Q_OS_MAC
+            QList<QHostAddress> dnsAddr;
+            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
+            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+
+#ifdef Q_OS_MACOS
             QThread::msleep(5000);
             IpcClient::Interface()->createTun("utun22", "10.33.0.2");
+            IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
+            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
 #ifdef Q_OS_WINDOWS
             QThread::msleep(15000);
@@ -151,10 +153,8 @@ ErrorCode XrayProtocol::startTun2Sock()
 #ifdef Q_OS_LINUX
             QThread::msleep(1000);
             IpcClient::Interface()->createTun("tun2", "10.33.0.2");
-            QList<QHostAddress> dnsAddr;
-            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
-            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
+            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
             if (m_routeMode == 0) {
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
@@ -163,6 +163,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             }
             IpcClient::Interface()->StopRoutingIpv6();
 #ifdef Q_OS_WIN
+            IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
             QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
             for (int i = 0; i < netInterfaces.size(); i++) {
                 for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)

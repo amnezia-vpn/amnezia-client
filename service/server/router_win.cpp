@@ -437,6 +437,12 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
     return ok;
 }
 
+bool RouterWin::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return m_dnsUtil->updateResolvers(ifname, resolvers);
+}
+
+
 void RouterWin::StopRoutingIpv6()
 {
     {

@@ -146,6 +146,12 @@ bool RouterMac::createTun(const QString &dev, const QString &subnet) {
     return true;
 }
 
+bool RouterMac::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return m_dnsUtil->updateResolvers(ifname, resolvers);
+}
+
+
 bool RouterMac::deleteTun(const QString &dev)
 {
     qDebug().noquote() << "deleteTun start";

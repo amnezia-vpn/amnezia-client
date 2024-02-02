@@ -91,7 +91,12 @@ bool Router::updateResolvers(const QString& ifname, const QList<QHostAddress>& r
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().updateResolvers(ifname, resolvers);
 #endif
-    return true;
+#ifdef Q_OS_MACOS
+    return RouterMac::Instance().updateResolvers(ifname, resolvers);
+#endif
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().updateResolvers(ifname, resolvers);
+#endif
 }
 
 
